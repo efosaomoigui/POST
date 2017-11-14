@@ -9,12 +9,14 @@ using Microsoft.AspNet.Identity;
 using System;
 using GIGLS.CORE.Domain;
 using System.Security.Claims;
+using GIGLS.Core.IServices.ServiceCentres;
 
 namespace GIGLS.Services.Implementation.User
 {
     public class UserService : IUserService
     {
         private readonly IUnitOfWork _unitOfWork;
+
         public UserService(IUnitOfWork uow)
         {
             _unitOfWork = uow;
@@ -51,15 +53,29 @@ namespace GIGLS.Services.Implementation.User
         //Get a user by Id using Guid from identity implement of EF
         public async Task<UserDTO> GetUserById(string Id)
         {
+            string userActiveServiceCentre = null;
+
             var user = await _unitOfWork.User.GetUserById(Id);
 
-            if (user == null)
+            if (user != null)
+            {
+                var activeCentre = await _unitOfWork.UserServiceCentreMapping.GetAsync(x => x.IsActive == true && x.User.Id.Equals(Id));
+                if (activeCentre != null)
+                {
+                    var serviceCentre = await _unitOfWork.ServiceCentre.GetAsync(x => x.ServiceCentreId == activeCentre.ServiceCentreId);
+                    userActiveServiceCentre = serviceCentre.Name;
+                }
+            }
+            else
             {
                 throw new GenericException("User does not exist!");
             }
 
-            return Mapper.Map<UserDTO>(user);
+            var userDto = Mapper.Map<UserDTO>(user);
 
+            userDto.UserActiveServiceCentre = userActiveServiceCentre;
+
+            return userDto;
         }
 
         public async Task<UserDTO> GetUserByEmail(string email)

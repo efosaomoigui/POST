@@ -43,5 +43,6 @@ C:\projects\GIGDRIVE2\GIGLOS\GIGLS\GIGLS.Messaging\bin\Debug\System.Net.Http.Pri
 C:\projects\GIGDRIVE2\GIGLOS\GIGLS\GIGLS.Messaging\bin\Debug\System.Web.Http.xml
 C:\projects\GIGDRIVE2\GIGLOS\GIGLS\GIGLS.Messaging\bin\Debug\System.Web.Http.Owin.xml
 C:\projects\GIGDRIVE2\GIGLOS\GIGLS\GIGLS.Messaging\obj\Debug\GIGLS.Messaging.csproj.App.config
+C:\projects\GIGDRIVE2\GIGLOS\GIGLS\GIGLS.Messaging\obj\Debug\GIGLS.Messaging.csprojResolveAssemblyReference.cache
 C:\projects\GIGDRIVE2\GIGLOS\GIGLS\GIGLS.Messaging\obj\Debug\GIGLS.Messaging.dll
 C:\projects\GIGDRIVE2\GIGLOS\GIGLS\GIGLS.Messaging\obj\Debug\GIGLS.Messaging.pdb

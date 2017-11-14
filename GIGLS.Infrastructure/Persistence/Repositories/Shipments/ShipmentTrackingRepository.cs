@@ -1,5 +1,6 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.Shipments;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
@@ -71,6 +72,30 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 throw;
             }
 
+        }
+
+        public Task<List<ShipmentTrackingDTO>> GetShipmentWaitingForCollection()
+        {
+            try
+            {
+                var shipmentTrackings = Context.ShipmentTracking.Where(x => x.Status != ShipmentScanStatus.Collected.ToString() && x.Status.Equals(ShipmentScanStatus.Delivered.ToString()));
+
+                var shipmentTrackingDto = from shipmentTracking in shipmentTrackings
+                                          select new ShipmentTrackingDTO
+                                          {
+                                              DateTime = shipmentTracking.DateTime,
+                                              Location = shipmentTracking.Location,
+                                              Waybill = shipmentTracking.Waybill,
+                                              ShipmentTrackingId = shipmentTracking.ShipmentTrackingId,
+                                              TrackingType = shipmentTracking.TrackingType.ToString(),
+                                              Status = shipmentTracking.Status
+                                          };
+                return Task.FromResult(shipmentTrackingDto.ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

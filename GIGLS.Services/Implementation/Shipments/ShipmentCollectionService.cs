@@ -6,6 +6,9 @@ using GIGLS.Core;
 using GIGLS.Infrastructure;
 using GIGLS.CORE.Domain;
 using AutoMapper;
+using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.Enums;
+using System;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -28,8 +31,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"Waybill {shipmentCollection.Waybill} already exist");
             }
             
+            var updateShipmentTracking = new ShipmentTracking
+            {
+                Waybill = shipmentCollection.Waybill,
+                //Location = tracking.Location,
+                Status = ShipmentScanStatus.Collected.ToString(),
+                DateTime = DateTime.Now
+            };
+
             var data = Mapper.Map<ShipmentCollection>(shipmentCollection);            
             _uow.ShipmentCollection.Add(data);
+            _uow.ShipmentTracking.Add(updateShipmentTracking);
             await _uow.CompleteAsync();
         }
 

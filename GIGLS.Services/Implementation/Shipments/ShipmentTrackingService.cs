@@ -82,6 +82,11 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<IEnumerable<ShipmentTrackingDTO>> GetShipmentWaitingForCollection()
+        {
+            return await _uow.ShipmentTracking.GetShipmentWaitingForCollection();
+        }
+
         public async Task<IEnumerable<ShipmentTrackingDTO>> GetShipmentTrackings(string waybill)
         {
             try

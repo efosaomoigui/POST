@@ -45,7 +45,7 @@ namespace GIGLS.WebApi.Controllers.User
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Create")]
+        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("api/user")]
         public async Task<IServiceResponse<object>> AddUser(UserDTO userdto)
@@ -68,7 +68,7 @@ namespace GIGLS.WebApi.Controllers.User
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+       // [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user/{userId}")]
         public async Task<IServiceResponse<UserDTO>> GetUser(string userId)
@@ -83,7 +83,7 @@ namespace GIGLS.WebApi.Controllers.User
            });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Delete")]
+        [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("api/user/{userId}")]
         public async Task<IServiceResponse<bool>> Deleteuser(string userId)
@@ -105,7 +105,7 @@ namespace GIGLS.WebApi.Controllers.User
            });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Update")]
+        [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("api/user/{userId}")]
         public async Task<IServiceResponse<bool>> UpdateUser(string userId, UserDTO userdto)
@@ -126,7 +126,7 @@ namespace GIGLS.WebApi.Controllers.User
 
         }
         
-        //[GIGLSActivityAuthorize(Activity = "Update")]
+        [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("api/user/activate/{userId}")]
         public async Task<IServiceResponse<bool>> ActivateUser(string userId, bool val)
@@ -147,7 +147,7 @@ namespace GIGLS.WebApi.Controllers.User
 
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user/getuserrole/{userid}")]
         public async Task<IServiceResponse<IList<string>>> GetAllRoles(string userId)
@@ -163,7 +163,7 @@ namespace GIGLS.WebApi.Controllers.User
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user/getrolebyid/{Id}")]
         public async Task<IServiceResponse<AppRole>> GetRole(string Id)
@@ -178,7 +178,7 @@ namespace GIGLS.WebApi.Controllers.User
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user/getallroles")]
         public async Task<IServiceResponse<IEnumerable<AppRole>>> GetAllRoles()
@@ -194,7 +194,7 @@ namespace GIGLS.WebApi.Controllers.User
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Create")]
+        [GIGLSActivityAuthorize(Activity = "Create")]
         [Route("api/user/createrole")]
         public async Task<IServiceResponse<object>> CreateRole(RoleDTO roleDTO)  
         {
@@ -217,7 +217,7 @@ namespace GIGLS.WebApi.Controllers.User
 
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Update")]
+        [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("api/user/updaterole/{Id}")]
         public async Task<IServiceResponse<object>> UpdateRole(string Id, RoleDTO roleDTO)
@@ -241,7 +241,7 @@ namespace GIGLS.WebApi.Controllers.User
 
         }
         
-        //[GIGLSActivityAuthorize(Activity = "Delete")]
+        [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("api/user/deleterole/{roleId}")]
         public async Task<IServiceResponse<bool>> DeleteRole(string roleId)
@@ -262,7 +262,7 @@ namespace GIGLS.WebApi.Controllers.User
 
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Create")]
+        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("api/user/addusertorole/{userid}")]
         public async Task<IServiceResponse<bool>> addusertorole(string userid, RoleDTO role)   
@@ -291,7 +291,7 @@ namespace GIGLS.WebApi.Controllers.User
 
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Create")]
+        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("api/user/removeuserfromrole/{userid}")]
         public async Task<IServiceResponse<bool>> removeuserfromrole(string userid, RoleDTO role)   
@@ -319,7 +319,7 @@ namespace GIGLS.WebApi.Controllers.User
 
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Create")]
+        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("api/user/addclaimforuser")]
         public async Task<IServiceResponse<bool>> addclaimforuser(AddClaimDto claim) 
@@ -342,7 +342,7 @@ namespace GIGLS.WebApi.Controllers.User
 
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Create")]
+        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost] 
         [Route("api/user/removeclaimforuser")] 
         public async Task<IServiceResponse<bool>> removeclaimforuser(AddClaimDto claim) 
@@ -365,7 +365,7 @@ namespace GIGLS.WebApi.Controllers.User
 
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user/getclaims/{userid}")]
         public async Task<IServiceResponse<IList<Claim>>> getclaims(string userid)

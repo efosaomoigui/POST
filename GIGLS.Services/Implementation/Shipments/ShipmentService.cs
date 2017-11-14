@@ -99,7 +99,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (shipment == null)
                 {
-                    throw new GenericException("Shipment Information does not exist");
+                    throw new GenericException($"Shipment with waybill: {waybill} does Not Exist");
                 }
 
                 return await GetShipment(shipment.ShipmentId);

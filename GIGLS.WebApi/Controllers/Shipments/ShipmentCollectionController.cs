@@ -6,6 +6,8 @@ using System.Web.Http;
 using GIGLS.CORE.IServices.Shipments;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.WebApi.Filters;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -14,10 +16,28 @@ namespace GIGLS.WebApi.Controllers.Shipments
     public class ShipmentCollectionController : BaseWebApiController
     {
         private readonly IShipmentCollectionService _service;
+        private readonly IShipmentTrackingService _trackingService;
 
-        public ShipmentCollectionController(IShipmentCollectionService service) : base(nameof(ShipmentCollectionController))
+        public ShipmentCollectionController(IShipmentCollectionService service, IShipmentTrackingService trackingService) : base(nameof(ShipmentCollectionController))
         {
             _service = service;
+            _trackingService = trackingService;
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("waitingforcollection")]
+        public async Task<IServiceResponse<IEnumerable<ShipmentTrackingDTO>>> GetShipmentWaitingForCollection()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _trackingService.GetShipmentWaitingForCollection();
+
+                return new ServiceResponse<IEnumerable<ShipmentTrackingDTO>>
+                {
+                    Object = result
+                };
+            });
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]

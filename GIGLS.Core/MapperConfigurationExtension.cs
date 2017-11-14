@@ -15,6 +15,7 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Client;
 using GIGLS.CORE.Domain;
 using GIGLS.CORE.DTO.Nav;
+using GIGLS.CORE.DTO.Shipments;
 
 namespace GIGLS.Core
 {
@@ -128,6 +129,12 @@ namespace GIGLS.Core
 
                 config.CreateMap<ShipmentItem, ShipmentItemDTO>();
                 config.CreateMap<ShipmentItemDTO, ShipmentItem>();
+
+                config.CreateMap<ShipmentCollection, ShipmentCollectionDTO>();
+                config.CreateMap<ShipmentCollectionDTO, ShipmentCollection>();
+
+                config.CreateMap<ShipmentReturn, ShipmentReturnDTO>();
+                config.CreateMap<ShipmentReturnDTO, ShipmentReturn>();
 
                 config.CreateMap<MainNav, MainNavDTO>();
                 config.CreateMap<MainNavDTO, MainNav>();
