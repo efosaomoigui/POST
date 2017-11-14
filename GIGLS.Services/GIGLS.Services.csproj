@@ -1,0 +1,233 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{3E97DED8-8A27-4B97-B8A9-FC3511550D91}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>GIGLS.Services</RootNamespace>
+    <AssemblyName>GIGLS.Services</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Audit.EntityFramework, Version=9.0.1.0, Culture=neutral, PublicKeyToken=571d6b80b242c87e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Audit.EntityFramework.9.0.1\lib\net45\Audit.EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Audit.NET, Version=9.0.1.0, Culture=neutral, PublicKeyToken=571d6b80b242c87e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Audit.NET.9.0.1\lib\net45\Audit.NET.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Audit.WebApi, Version=7.0.9.0, Culture=neutral, PublicKeyToken=571d6b80b242c87e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Audit.WebApi.7.0.9\lib\net45\Audit.WebApi.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="AutoMapper, Version=6.2.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.6.2.0\lib\net45\AutoMapper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.EntityFramework, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.EntityFramework.2.2.1\lib\net45\Microsoft.AspNet.Identity.EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.3.1.0\lib\net45\Microsoft.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Host.SystemWeb, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Host.SystemWeb.3.1.0\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.16\lib\net45\Microsoft.Threading.Tasks.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.16\lib\net45\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Ninject, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.3.2.0.0\lib\net45-full\Ninject.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
+      <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SendGrid.SmtpApi, Version=1.1.3.0, Culture=neutral, PublicKeyToken=55aa52d3c3c0d2b2, processorArchitecture=MSIL">
+      <HintPath>..\packages\SendGrid.SmtpApi.1.1.3\lib\net40\SendGrid.SmtpApi.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SendGridMail, Version=3.0.0.0, Culture=neutral, PublicKeyToken=2ae73662c35d80e4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Sendgrid.3.0.0\lib\SendGridMail.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Net.Http.Extensions, Version=2.2.13.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Net.Http.2.2.13\lib\net45\System.Net.Http.Extensions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Net.Http.Primitives, Version=4.2.13.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Net.Http.2.2.13\lib\net45\System.Net.Http.Primitives.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Http.Owin, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Owin.5.2.3\lib\net45\System.Web.Http.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Implementation\Account\ExpenditureService.cs" />
+    <Compile Include="Implementation\Account\GeneralLedgerService.cs" />
+    <Compile Include="Implementation\Account\IncomeService.cs" />
+    <Compile Include="Implementation\Account\InvoiceService.cs" />
+    <Compile Include="Implementation\Account\InvoiceShipmentService.cs" />
+    <Compile Include="Implementation\Client\ClientNodeService.cs" />
+    <Compile Include="Implementation\Customers\CompanyContactPersonService.cs" />
+    <Compile Include="Implementation\Customers\CompanyService.cs" />
+    <Compile Include="Implementation\Customers\CustomerService.cs" />
+    <Compile Include="Implementation\Customers\IndividualCustomerService.cs" />
+    <Compile Include="Implementation\Fleets\FleetMakeService.cs" />
+    <Compile Include="Implementation\Fleets\FleetManagementService.cs" />
+    <Compile Include="Implementation\Fleets\FleetModelService.cs" />
+    <Compile Include="Implementation\Fleets\FleetPartInventoryHistoryService.cs" />
+    <Compile Include="Implementation\Fleets\FleetPartInventoryService.cs" />
+    <Compile Include="Implementation\Fleets\FleetPartService.cs" />
+    <Compile Include="Implementation\Fleets\FleetService.cs" />
+    <Compile Include="Implementation\Fleets\FleetTripService.cs" />
+    <Compile Include="Implementation\JobCards\JobCardManagementPartService.cs" />
+    <Compile Include="Implementation\JobCards\JobCardManagementService.cs" />
+    <Compile Include="Implementation\JobCards\JobCardService.cs" />
+    <Compile Include="Implementation\Messaging\EmailService.cs" />
+    <Compile Include="Implementation\Nav\MainNavService.cs" />
+    <Compile Include="Implementation\Nav\SubNavService.cs" />
+    <Compile Include="Implementation\Nav\SubSubNavService.cs" />
+    <Compile Include="Implementation\Partnership\PartnerApplicationService.cs" />
+    <Compile Include="Implementation\Partnership\PartnerService.cs" />
+    <Compile Include="Implementation\PaymentTransactions\PaymentTransactionService.cs" />
+    <Compile Include="Implementation\Report\AccountReportService.cs" />
+    <Compile Include="Implementation\Report\ShipmentReportService.cs" />
+    <Compile Include="Implementation\ServiceCentres\ServiceCentreService.cs" />
+    <Compile Include="Implementation\ServiceCentres\StationService.cs" />
+    <Compile Include="Implementation\ServiceCentres\UserServiceCentreMappingService.cs" />
+    <Compile Include="Implementation\ServiceResponse.cs" />
+    <Compile Include="Implementation\Shipments\GroupWaybillNumberMappingService.cs" />
+    <Compile Include="Implementation\Shipments\GroupWaybillNumberMonitorService.cs" />
+    <Compile Include="Implementation\Shipments\GroupWaybillNumberService.cs" />
+    <Compile Include="Implementation\Shipments\ManifestGroupWaybillNumberMappingService.cs" />
+    <Compile Include="Implementation\Shipments\ManifestMonitorService.cs" />
+    <Compile Include="Implementation\Shipments\ManifestService.cs" />
+    <Compile Include="Implementation\Shipments\ShipmentCollectionService.cs" />
+    <Compile Include="Implementation\Shipments\ShipmentPackageService.cs" />
+    <Compile Include="Implementation\Shipments\ShipmentReturnService.cs" />
+    <Compile Include="Implementation\Shipments\ShipmentService.cs" />
+    <Compile Include="Implementation\Shipments\ShipmentTrackingService.cs" />
+    <Compile Include="Implementation\Shipments\WaybillNumberMonitorService.cs" />
+    <Compile Include="Implementation\Shipments\WaybillNumberService.cs" />
+    <Compile Include="Implementation\StateService.cs" />
+    <Compile Include="Implementation\Stocks\StockRequestPartService.cs" />
+    <Compile Include="Implementation\Stocks\StockRequestService.cs" />
+    <Compile Include="Implementation\Stocks\StockSupplyDetailsService.cs" />
+    <Compile Include="Implementation\Stores\StoreService.cs" />
+    <Compile Include="Implementation\User\UserService.cs" />
+    <Compile Include="Implementation\Utility\NumberGeneratorMonitorService.cs" />
+    <Compile Include="Implementation\Vendors\VendorService.cs" />
+    <Compile Include="Implementation\Wallet\WalletService.cs" />
+    <Compile Include="Implementation\Wallet\WalletTransactionService.cs" />
+    <Compile Include="Implementation\Workshops\WorkshopService.cs" />
+    <Compile Include="Implementation\Zone\DeliveryOptionPriceService.cs" />
+    <Compile Include="Implementation\Zone\DeliveryOptionService.cs" />
+    <Compile Include="Implementation\Zone\DomesticRouteZoneMapService.cs" />
+    <Compile Include="Implementation\Zone\DomesticZonePriceService.cs" />
+    <Compile Include="Implementation\Zone\SpecialDomesticPackageService.cs" />
+    <Compile Include="Implementation\Zone\SpecialDomesticZonePriceService.cs" />
+    <Compile Include="Implementation\Zone\WeightLimitPriceService.cs" />
+    <Compile Include="Implementation\Zone\WeightLimitService.cs" />
+    <Compile Include="Implementation\Zone\ZoneService.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GIGLS.Core\GIGLS.Core.csproj">
+      <Project>{e09465db-8bc7-4f1c-81d8-4ea1daa77ad4}</Project>
+      <Name>GIGLS.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GIGLS.Infrastructure\GIGLS.Infrastructure.csproj">
+      <Project>{ca1b58fd-e1d5-48d3-a27d-d4e756cbf3e5}</Project>
+      <Name>GIGLS.Infrastructure</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
+    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
+    <Error Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
