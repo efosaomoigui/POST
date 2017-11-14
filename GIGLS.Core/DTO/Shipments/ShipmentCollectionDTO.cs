@@ -1,4 +1,6 @@
-﻿namespace GIGLS.CORE.DTO.Shipments
+﻿using GIGLS.Core.Enums;
+
+namespace GIGLS.CORE.DTO.Shipments
 {
     public class ShipmentCollectionDTO : BaseDomainDTO
     {
@@ -10,6 +12,7 @@
         public string City { get; set; }
         public string State { get; set; }
         public string IndentificationUrl { get; set; }
+        public ShipmentScanStatus ShipmentScanStatus { get; set; }
 
         //Who process the collection
         public string UserId { get; set; }

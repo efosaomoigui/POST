@@ -6,6 +6,7 @@ using GIGLS.Core;
 using GIGLS.Core.Enums;
 using GIGLS.Infrastructure;
 using System.Collections.Generic;
+using GIGLS.CORE.Domain;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -17,7 +18,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _uow = uow;
         }
 
-        public async Task<object> AddShipmentTracking(ShipmentTrackingDTO tracking)
+        public async Task<object> AddShipmentTracking(ShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus)
         {
             try
             {
@@ -30,6 +31,18 @@ namespace GIGLS.Services.Implementation.Shipments
                     DateTime = DateTime.Now
                 };
                 _uow.ShipmentTracking.Add(newShipmentTracking);
+
+                if (scanStatus.Equals(ShipmentScanStatus.Delivered))
+                {
+                    var newShipmentCollection = new ShipmentCollection
+                    {
+                        Waybill = tracking.Waybill,
+                        ShipmentScanStatus = scanStatus
+                    };
+
+                    _uow.ShipmentCollection.Add(newShipmentCollection);
+                }
+
                 await _uow.CompleteAsync();
                 return new { Id = newShipmentTracking.ShipmentTrackingId };
             }
@@ -82,10 +95,10 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<IEnumerable<ShipmentTrackingDTO>> GetShipmentWaitingForCollection()
-        {
-            return await _uow.ShipmentTracking.GetShipmentWaitingForCollection();
-        }
+        //public async Task<IEnumerable<ShipmentTrackingDTO>> GetShipmentWaitingForCollection()
+        //{
+        //    return await _uow.ShipmentTracking.GetShipmentWaitingForCollection();
+        //}
 
         public async Task<IEnumerable<ShipmentTrackingDTO>> GetShipmentTrackings(string waybill)
         {

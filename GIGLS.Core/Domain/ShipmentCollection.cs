@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.Domain;
+using GIGLS.Core.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -18,6 +19,7 @@ namespace GIGLS.CORE.Domain
         public string City { get; set; }
         public string State { get; set; }     
         public string IndentificationUrl { get; set; }
+        public ShipmentScanStatus ShipmentScanStatus { get; set; }
 
         //Who process the collection
         public string UserId { get; set; }

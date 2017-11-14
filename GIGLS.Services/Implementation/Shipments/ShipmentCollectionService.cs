@@ -30,7 +30,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException($"Waybill {shipmentCollection.Waybill} already exist");
             }
-            
+
             var updateShipmentTracking = new ShipmentTracking
             {
                 Waybill = shipmentCollection.Waybill,
@@ -39,7 +39,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 DateTime = DateTime.Now
             };
 
-            var data = Mapper.Map<ShipmentCollection>(shipmentCollection);            
+            var data = Mapper.Map<ShipmentCollection>(shipmentCollection);
             _uow.ShipmentCollection.Add(data);
             _uow.ShipmentTracking.Add(updateShipmentTracking);
             await _uow.CompleteAsync();
@@ -62,6 +62,13 @@ namespace GIGLS.Services.Implementation.Shipments
             var shipmentCollection = _uow.ShipmentCollection.GetAll();
             var shipmentCollectionDto = Mapper.Map<IEnumerable<ShipmentCollectionDTO>>(shipmentCollection);
             return Task.FromResult(shipmentCollectionDto);
+        }
+
+        public async Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentWaitingForCollection()
+        {
+            var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.Delivered);
+            var shipmentCollectionDto = Mapper.Map<IEnumerable<ShipmentCollectionDTO>>(shipmentCollection);
+            return await Task.FromResult(shipmentCollectionDto);
         }
 
         public async Task RemoveShipmentCollection(string waybill)
@@ -92,6 +99,7 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentCollection.City = shipmentCollectionDto.City;
             shipmentCollection.Address = shipmentCollectionDto.Address;
             shipmentCollection.IndentificationUrl = shipmentCollectionDto.IndentificationUrl;
+            shipmentCollection.ShipmentScanStatus = shipmentCollectionDto.ShipmentScanStatus;
             shipmentCollection.UserId = shipmentCollectionDto.UserId;
             await _uow.CompleteAsync();
         }

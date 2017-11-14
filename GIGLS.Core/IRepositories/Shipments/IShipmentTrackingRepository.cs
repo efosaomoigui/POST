@@ -10,6 +10,6 @@ namespace GIGLS.Core.IRepositories.Shipments
     {
         Task<List<ShipmentTrackingDTO>> GetShipmentTrackingsAsync();
         Task<List<ShipmentTrackingDTO>> GetShipmentTrackingsAsync(string waybill);
-        Task<List<ShipmentTrackingDTO>> GetShipmentWaitingForCollection();
+        //Task<List<ShipmentTrackingDTO>> GetShipmentWaitingForCollection();
     }
 }
