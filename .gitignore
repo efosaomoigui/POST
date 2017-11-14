@@ -3,3 +3,10 @@
 ################################################################################
 
 /GIGLS.Core/obj/Debug
+/GIGLS.Core/bin/Debug
+/GIGLS.Infrastructure/bin/Debug
+/GIGLS.Infrastructure/obj/Debug
+/GIGLS.WebApi/bin
+/GIGLS.WebApi/obj/Debug
+/GIGLS.Services/bin/Debug
+/GIGLS.Services/obj/Debug
