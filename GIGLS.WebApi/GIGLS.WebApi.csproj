@@ -16,7 +16,7 @@
     <RootNamespace>GIGLS.WebApi</RootNamespace>
     <AssemblyName>GIGLS.WebApi</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <UseIISExpress>true</UseIISExpress>
+    <UseIISExpress>false</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
@@ -255,7 +255,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\GiglsCustomJwtFormat.cs" />
@@ -264,10 +266,46 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\Account\ExpenditureController.cs" />
+    <Compile Include="Controllers\Account\GeneralLedgerController.cs" />
+    <Compile Include="Controllers\Account\IncomeController.cs" />
+    <Compile Include="Controllers\Account\InvoiceController.cs" />
+    <Compile Include="Controllers\Account\InvoiceShipmentController.cs" />
     <Compile Include="Controllers\BaseWebApiController.cs" />
+    <Compile Include="Controllers\Business\PaymentController.cs" />
+    <Compile Include="Controllers\Business\PricingController.cs" />
+    <Compile Include="Controllers\Business\ScanController.cs" />
+    <Compile Include="Controllers\Business\ShipmentTrackController.cs" />
+    <Compile Include="Controllers\Client\ClientNodeController.cs" />
+    <Compile Include="Controllers\Customers\CompanyContactPersonController.cs" />
+    <Compile Include="Controllers\Customers\CompanyController.cs" />
+    <Compile Include="Controllers\Customers\CustomerController.cs" />
+    <Compile Include="Controllers\Customers\IndividualCustomerController.cs" />
+    <Compile Include="Controllers\Fleets\FleetController.cs" />
+    <Compile Include="Controllers\Fleets\FleetMakeController.cs" />
+    <Compile Include="Controllers\Fleets\FleetManagementController.cs" />
+    <Compile Include="Controllers\Fleets\FleetModelController.cs" />
+    <Compile Include="Controllers\Fleets\FleetPartController.cs" />
+    <Compile Include="Controllers\Fleets\FleetTripController.cs" />
+    <Compile Include="Controllers\Nav\MainNavController.cs" />
+    <Compile Include="Controllers\Nav\SubNavController.cs" />
+    <Compile Include="Controllers\Nav\SubSubNavController.cs" />
+    <Compile Include="Controllers\Partnership\PartnerApplicationController.cs" />
+    <Compile Include="Controllers\Partnership\PartnerController.cs" />
+    <Compile Include="Controllers\PaymentTransactions\PaymentTransactionController.cs" />
+    <Compile Include="Controllers\Report\ReportsController.cs" />
     <Compile Include="Controllers\ServiceCentres\ServiceCentreController.cs" />
     <Compile Include="Controllers\ServiceCentres\StationController.cs" />
     <Compile Include="Controllers\ServiceCentres\UserServiceCentreMappingController.cs" />
+    <Compile Include="Controllers\Shipments\GroupWaybillNumberController.cs" />
+    <Compile Include="Controllers\Shipments\GroupWaybillNumberMappingController.cs" />
+    <Compile Include="Controllers\Shipments\ManifestController.cs" />
+    <Compile Include="Controllers\Shipments\ManifestGroupWaybillNumberMappingController.cs" />
+    <Compile Include="Controllers\Shipments\ShipmentCollectionController.cs" />
+    <Compile Include="Controllers\Shipments\ShipmentController.cs" />
+    <Compile Include="Controllers\Shipments\ShipmentReturnController.cs" />
+    <Compile Include="Controllers\Shipments\WaybillNumberController.cs" />
+    <Compile Include="Controllers\StateController.cs" />
     <Compile Include="Controllers\User\LoginController.cs" />
     <Compile Include="Controllers\User\UserController.cs" />
     <Compile Include="Controllers\Zone\DeliveryOptionController.cs" />
@@ -310,6 +348,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Controllers\JobCards\" />
+    <Folder Include="Controllers\Stocks\" />
+    <Folder Include="Controllers\Stores\" />
+    <Folder Include="Controllers\Vendors\" />
+    <Folder Include="Controllers\Workshops\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GIGLS.Core\GIGLS.Core.csproj">
@@ -340,7 +383,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>4288</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:4288/</IISUrl>
+          <IISUrl>http://localhost/giglsresourceapi</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
