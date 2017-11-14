@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Newtonsoft.Json.Converters;
 using System.Web.Http;
 
 namespace GIGLS.WebApi
@@ -19,6 +17,19 @@ namespace GIGLS.WebApi
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+            SetJsonSettings(config);
+        }
+
+        private static void SetJsonSettings(HttpConfiguration config)
+        {
+            config.Formatters.Remove(config.Formatters.XmlFormatter);
+            var formatter = config.Formatters.JsonFormatter;
+            formatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+
+            // for working with enums
+            config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new StringEnumConverter());
+
         }
     }
 }
