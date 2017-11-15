@@ -6,8 +6,6 @@ using System.Web.Http;
 using GIGLS.CORE.IServices.Shipments;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.WebApi.Filters;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -16,28 +14,10 @@ namespace GIGLS.WebApi.Controllers.Shipments
     public class ShipmentCollectionController : BaseWebApiController
     {
         private readonly IShipmentCollectionService _service;
-        private readonly IShipmentTrackingService _trackingService;
 
-        public ShipmentCollectionController(IShipmentCollectionService service, IShipmentTrackingService trackingService) : base(nameof(ShipmentCollectionController))
+        public ShipmentCollectionController(IShipmentCollectionService service) : base(nameof(ShipmentCollectionController))
         {
             _service = service;
-            _trackingService = trackingService;
-        }
-
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("waitingforcollection")]
-        public async Task<IServiceResponse<IEnumerable<ShipmentTrackingDTO>>> GetShipmentWaitingForCollection()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var result = await _trackingService.GetShipmentWaitingForCollection();
-
-                return new ServiceResponse<IEnumerable<ShipmentTrackingDTO>>
-                {
-                    Object = result
-                };
-            });
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -107,6 +87,40 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [Route("")]
         public async Task<IServiceResponse<bool>> UpdateShipmentCollectionBywaybill(ShipmentCollectionDTO shipmentCollection)
         {
+            return await HandleApiOperationAsync(async () => {
+                await _service.UpdateShipmentCollection(shipmentCollection);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("waitingforcollection")]
+        public async Task<IServiceResponse<IEnumerable<ShipmentCollectionDTO>>> GetShipmentWaitingForCollection()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.GetShipmentWaitingForCollection();
+
+                return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("collected")]
+        public async Task<IServiceResponse<bool>> UpdateShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
+        {
+            shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.Collected;
+
             return await HandleApiOperationAsync(async () => {
                 await _service.UpdateShipmentCollection(shipmentCollection);
                 return new ServiceResponse<bool>

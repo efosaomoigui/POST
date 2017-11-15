@@ -1,7 +1,4 @@
-﻿using GIGLS.Core;
-using System;
-
-namespace GIGLS.Core.Domain
+﻿namespace GIGLS.Core.Domain
 {
     public class InvoiceShipment : BaseDomain, IAuditable
     {

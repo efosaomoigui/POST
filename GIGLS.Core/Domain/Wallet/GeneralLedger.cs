@@ -1,5 +1,4 @@
-﻿using GIGLS.Core.Domain;
-using System;
+﻿using System;
 
 namespace GIGLS.Core.Domain.Wallet
 {
