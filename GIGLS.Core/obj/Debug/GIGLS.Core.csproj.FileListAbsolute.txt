@@ -40,5 +40,6 @@ C:\projects\GIGDRIVE2\GIGLOS\GIGLS\GIGLS.Core\bin\Debug\System.IdentityModel.Tok
 C:\projects\GIGDRIVE2\GIGLOS\GIGLS\GIGLS.Core\bin\Debug\System.Net.Http.Formatting.xml
 C:\projects\GIGDRIVE2\GIGLOS\GIGLS\GIGLS.Core\bin\Debug\System.Web.Http.xml
 C:\projects\GIGDRIVE2\GIGLOS\GIGLS\GIGLS.Core\bin\Debug\System.Web.Http.Owin.xml
+C:\projects\GIGDRIVE2\GIGLOS\GIGLS\GIGLS.Core\obj\Debug\GIGLS.Core.csprojResolveAssemblyReference.cache
 C:\projects\GIGDRIVE2\GIGLOS\GIGLS\GIGLS.Core\obj\Debug\GIGLS.Core.dll
 C:\projects\GIGDRIVE2\GIGLOS\GIGLS\GIGLS.Core\obj\Debug\GIGLS.Core.pdb

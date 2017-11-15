@@ -134,6 +134,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Business\PackagingAndShipment\ShipmentPackaging.cs" />
+    <Compile Include="Business\Payment\PaymentService.cs" />
+    <Compile Include="Business\Pricing\PricingService.cs" />
+    <Compile Include="Business\Scanning\ScanService.cs" />
+    <Compile Include="Business\Tracking\ShipmentTrackService.cs" />
     <Compile Include="Implementation\Account\ExpenditureService.cs" />
     <Compile Include="Implementation\Account\GeneralLedgerService.cs" />
     <Compile Include="Implementation\Account\IncomeService.cs" />
@@ -216,6 +221,11 @@
       <Project>{ca1b58fd-e1d5-48d3-a27d-d4e756cbf3e5}</Project>
       <Name>GIGLS.Infrastructure</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Business\AdminConsole\" />
+    <Folder Include="Business\Finance\" />
+    <Folder Include="Business\OrderManagement\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
