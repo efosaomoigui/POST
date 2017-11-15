@@ -272,7 +272,6 @@
     <Compile Include="Controllers\Account\InsuranceController.cs" />
     <Compile Include="Controllers\Account\InvoiceController.cs" />
     <Compile Include="Controllers\Account\InvoiceShipmentController.cs" />
-    <Compile Include="Controllers\Account\PaymentController.cs" />
     <Compile Include="Controllers\Account\VATController.cs" />
     <Compile Include="Controllers\BaseWebApiController.cs" />
     <Compile Include="Controllers\Business\PaymentController.cs" />

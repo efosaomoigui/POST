@@ -373,7 +373,6 @@
     <Compile Include="IServices\Account\IInsuranceService.cs" />
     <Compile Include="IServices\Account\IInvoiceService.cs" />
     <Compile Include="IServices\Account\IInvoiceShipmentService.cs" />
-    <Compile Include="IServices\Account\IPaymentService.cs" />
     <Compile Include="IServices\Account\IVATService.cs" />
     <Compile Include="IServices\Business\IPaymentService.cs" />
     <Compile Include="IServices\Business\IPricingService.cs" />

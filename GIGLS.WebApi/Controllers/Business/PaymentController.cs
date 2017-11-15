@@ -24,15 +24,15 @@ namespace GIGLS.WebApi.Controllers.Business
         [Route("{waybill}/cash")]
         public async Task<IServiceResponse<bool>> CashPayment(string waybill, PaymentTransactionDTO paymentDto)
         {
-            return await HandleApiOperationAsync( async () =>
-            {
-                var cash = await _paymentService.ProcessCashPayment(waybill, paymentDto);
+            return await HandleApiOperationAsync(async () =>
+           {
+               var cash = await _paymentService.ProcessCashPayment(waybill, paymentDto);
 
-                return new ServiceResponse<bool>
-                {
-                    Object = cash
-                };
-            });
+               return new ServiceResponse<bool>
+               {
+                   Object = cash
+               };
+           });
         }
 
         [GIGLSActivityAuthorize(Activity = "Create")]
@@ -66,5 +66,22 @@ namespace GIGLS.WebApi.Controllers.Business
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("{waybill}/confirmpayment")]
+        public async Task<IServiceResponse<bool>> ConfirmPayment(string waybill, PaymentTransactionDTO paymentDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _paymentService.ConfirmPayment(waybill, paymentDto);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }
