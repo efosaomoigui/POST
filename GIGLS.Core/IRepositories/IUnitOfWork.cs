@@ -77,9 +77,11 @@ namespace GIGLS.Core
         IGeneralLedgerRepository GeneralLedger { get; set; }
         IClientNodeRepository ClientNode { get; set; }
         IInvoiceRepository Invoice { get; set; }
+        IVATRepository VAT { get; set; }
+        IInsuranceRepository Insurance { get; set; }
         IInvoiceShipmentRepository InvoiceShipment { get; set; }
         INumberGeneratorMonitorRepository NumberGeneratorMonitor { get; set; }
-        IShipmentReturnRepository ShipmentReturn{ get; set; }
+        IShipmentReturnRepository ShipmentReturn { get; set; }
         IShipmentCollectionRepository ShipmentCollection { get; set; }
         IMainNavRepository MainNav { get; set; }
         ISubNavRepository SubNav { get; set; }
