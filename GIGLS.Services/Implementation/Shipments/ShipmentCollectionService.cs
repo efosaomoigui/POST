@@ -100,7 +100,7 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentCollection.Address = shipmentCollectionDto.Address;
             shipmentCollection.IndentificationUrl = shipmentCollectionDto.IndentificationUrl;
             shipmentCollection.ShipmentScanStatus = shipmentCollectionDto.ShipmentScanStatus;
-            shipmentCollection.UserId = shipmentCollectionDto.UserId;
+            shipmentCollection.UserId = await _uow.User.GetCurrentUserId();
             await _uow.CompleteAsync();
         }
     }
