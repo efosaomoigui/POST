@@ -210,6 +210,7 @@
     <Compile Include="DTO\Customers\CompanyDTO.cs" />
     <Compile Include="DTO\Customers\CustomerDTO.cs" />
     <Compile Include="DTO\Customers\IndividualCustomerDTO.cs" />
+    <Compile Include="DTO\Dashboard\DashboardDTO.cs" />
     <Compile Include="DTO\Fleets\FleetDTO.cs" />
     <Compile Include="DTO\Fleets\FleetLocationDTO.cs" />
     <Compile Include="DTO\Fleets\FleetMakeDTO.cs" />
@@ -383,6 +384,7 @@
     <Compile Include="IServices\Customers\ICompanyService.cs" />
     <Compile Include="IServices\Customers\ICustomerService.cs" />
     <Compile Include="IServices\Customers\IIndividualCustomerService.cs" />
+    <Compile Include="IServices\Dashboard\IDashboardService.cs" />
     <Compile Include="IServices\Fleets\IFleetMakeService.cs" />
     <Compile Include="IServices\Fleets\IFleetManagementService.cs" />
     <Compile Include="IServices\Fleets\IFleetModelService.cs" />

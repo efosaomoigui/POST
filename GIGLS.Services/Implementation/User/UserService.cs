@@ -10,6 +10,7 @@ using System;
 using GIGLS.CORE.Domain;
 using System.Security.Claims;
 using GIGLS.Core.IServices.ServiceCentres;
+using System.Web;
 
 namespace GIGLS.Services.Implementation.User
 {
@@ -245,6 +246,12 @@ namespace GIGLS.Services.Implementation.User
         {
             var result = _unitOfWork.User.GetClaimsAsync(userid);
             return result;
+        }
+
+        public Task<string> GetCurrentUserId()
+        {
+            var userId = HttpContext.Current?.User?.Identity?.GetUserId();
+            return Task.FromResult(!string.IsNullOrEmpty(userId) ? userId : "Anonymous");
         }
     }
 }

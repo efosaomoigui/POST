@@ -34,6 +34,5 @@ namespace GIGLS.Core.IRepositories.User
         Task<IdentityResult> AddClaimAsync(string userid, Claim claim);
         Task<IdentityResult> RemoveClaimAsync(string userid, Claim claim);
         Task<IList<Claim>> GetClaimsAsync(string userid);
-        Task<string> GetCurrentUserId();
     }
 }
