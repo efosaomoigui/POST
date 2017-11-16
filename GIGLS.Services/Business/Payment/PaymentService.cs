@@ -35,6 +35,11 @@ namespace GIGLS.Services.Business.Payment
             await _paymentTransactionService.UpdatePaymentTransaction(waybill, paymentDto);
             return true;
         }
-        
+
+        public async Task<bool> ConfirmPayment(string waybill, PaymentTransactionDTO paymentDto)
+        {
+            return await _paymentTransactionService.ConfirmPaymentTransaction(waybill, paymentDto);
+        }
+
     }
 }

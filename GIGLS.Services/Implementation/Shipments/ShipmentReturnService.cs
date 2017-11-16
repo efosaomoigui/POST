@@ -6,16 +6,23 @@ using GIGLS.Core;
 using AutoMapper;
 using GIGLS.Infrastructure;
 using GIGLS.CORE.Domain;
+using System;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Shipments;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
     public class ShipmentReturnService : IShipmentReturnService
     {
         private readonly IUnitOfWork _uow;
+        private readonly IShipmentService _shipmentService;
+        private readonly IShipmentCollectionService _collectionService;
 
-        public ShipmentReturnService(IUnitOfWork uow)
+        public ShipmentReturnService(IUnitOfWork uow, IShipmentService shipmentService, IShipmentCollectionService collectionService)
         {
             _uow = uow;
+            _shipmentService = shipmentService;
+            _collectionService = collectionService;
             MapperConfig.Initialize();
         }
 
@@ -34,13 +41,60 @@ namespace GIGLS.Services.Implementation.Shipments
             await _uow.CompleteAsync();
         }
 
+        public async Task AddShipmentReturn(string waybill)
+        {          
+            try
+            {
+                waybill = waybill.Trim().ToLower();
+
+                var returnShipment = await _uow.ShipmentReturn.GetAsync(x => x.WaybillOld.ToLower() == waybill);
+
+                if (returnShipment != null)
+                {
+                    throw new GenericException($"Shipment with waybill: {waybill} already processed for Returns");
+                }
+
+                var shipmentCollection = await _collectionService.GetShipmentCollectionById(waybill);
+
+                if (shipmentCollection.ShipmentScanStatus == ShipmentScanStatus.Collected)
+                {
+                    throw new GenericException($"Shipment with waybill: {waybill} had been collected");
+                }                               
+                
+                var shipment = await _shipmentService.GetShipment(waybill);
+
+                int departure = shipment.DepartureServiceCentreId; 
+
+                shipment.DepartureServiceCentreId = shipment.DestinationServiceCentreId;
+                shipment.DestinationServiceCentreId = departure;
+
+                var newShipment = await _shipmentService.AddShipment(shipment);
+
+                var newShipmentReturn = new ShipmentReturn
+                {
+                    WaybillNew = newShipment.Waybill,
+                    WaybillOld = shipment.Waybill,
+                    OriginalPayment = newShipment.GrandTotal,
+                    //Discount =                
+                };
+                
+                _uow.ShipmentReturn.Add(newShipmentReturn);
+                await _uow.CompleteAsync();
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         public async Task<ShipmentReturnDTO> GetShipmentReturnById(string waybill)
         {
             var shipmentReturn = await _uow.ShipmentReturn.GetAsync(x => x.WaybillNew.Equals(waybill));
 
             if (shipmentReturn == null)
             {
-                throw new GenericException("INFORMATION DOES NOT EXIST");
+                throw new GenericException($"Shipment with waybill: {waybill} does Not Exist");
             }
             return Mapper.Map<ShipmentReturnDTO>(shipmentReturn);
         }

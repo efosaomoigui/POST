@@ -9,7 +9,6 @@ using GIGLS.Core.DTO.User;
 using Microsoft.AspNet.Identity;
 using GIGLS.CORE.Domain;
 using System.Security.Claims;
-using System.Web;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
 {
@@ -195,10 +194,5 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             return Result;
         }
 
-        public Task<string> GetCurrentUserId()
-        {
-            var userId = HttpContext.Current?.User?.Identity?.GetUserId();
-            return Task.FromResult(!string.IsNullOrEmpty(userId) ? userId : "Anonymous");
-        }
     }
 }

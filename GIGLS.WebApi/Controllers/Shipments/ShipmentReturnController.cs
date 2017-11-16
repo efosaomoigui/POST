@@ -82,6 +82,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("{waybill}")]
+        public async Task<IServiceResponse<bool>> AddShipmentReturn(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.AddShipmentReturn(waybill);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("")]

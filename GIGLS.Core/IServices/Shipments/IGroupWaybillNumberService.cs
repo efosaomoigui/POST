@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -16,5 +17,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task UpdateGroupWaybillNumber(string groupwaybillNumber);
         Task RemoveGroupWaybillNumber(int groupwaybillId);
         Task RemoveGroupWaybillNumber(string groupwaybillId);
+        Task<GroupWaybillNumber> GetGroupWayBillNumberForScan(string groupwaybillNumber);
     }
 }

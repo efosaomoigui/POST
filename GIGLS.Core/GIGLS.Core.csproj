@@ -150,6 +150,7 @@
     <Compile Include="Domain\GroupWaybillNumberMapping.cs" />
     <Compile Include="Domain\GroupWaybillNumberMonitor.cs" />
     <Compile Include="Domain\IndividualCustomer.cs" />
+    <Compile Include="Domain\Insurance.cs" />
     <Compile Include="Domain\Invoice.cs" />
     <Compile Include="Domain\InvoiceShipment.cs" />
     <Compile Include="Domain\JobCard.cs" />
@@ -184,6 +185,7 @@
     <Compile Include="Domain\SubSubNav.cs" />
     <Compile Include="Domain\User.cs" />
     <Compile Include="Domain\UserServiceCentreMapping.cs" />
+    <Compile Include="Domain\VAT.cs" />
     <Compile Include="Domain\Vendor.cs" />
     <Compile Include="Domain\Wallet\AccountSummary.cs" />
     <Compile Include="Domain\Wallet\AccountTransaction.cs" />
@@ -198,14 +200,17 @@
     <Compile Include="Domain\Workshop.cs" />
     <Compile Include="Domain\Zone.cs" />
     <Compile Include="DTO\Account\GeneralLedgerDTO.cs" />
+    <Compile Include="DTO\Account\InsuranceDTO.cs" />
     <Compile Include="DTO\Account\InvoiceDTO.cs" />
     <Compile Include="DTO\Account\InvoiceShipmentDTO.cs" />
+    <Compile Include="DTO\Account\VATDTO.cs" />
     <Compile Include="DTO\BaseDomainDTO.cs" />
     <Compile Include="DTO\Client\ClientNodeDTO.cs" />
     <Compile Include="DTO\Customers\CompanyContactPersonDTO.cs" />
     <Compile Include="DTO\Customers\CompanyDTO.cs" />
     <Compile Include="DTO\Customers\CustomerDTO.cs" />
     <Compile Include="DTO\Customers\IndividualCustomerDTO.cs" />
+    <Compile Include="DTO\Dashboard\DashboardDTO.cs" />
     <Compile Include="DTO\Fleets\FleetDTO.cs" />
     <Compile Include="DTO\Fleets\FleetLocationDTO.cs" />
     <Compile Include="DTO\Fleets\FleetMakeDTO.cs" />
@@ -233,6 +238,7 @@
     <Compile Include="DTO\Shipments\GroupWaybillNumberDTO.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberMappingDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestDTO.cs" />
+    <Compile Include="DTO\Shipments\ScanDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentCollectionDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentItemDTO.cs" />
@@ -290,6 +296,7 @@
     <Compile Include="Enums\TrackingType.cs" />
     <Compile Include="Enums\UserStatus.cs" />
     <Compile Include="Enums\UserType.cs" />
+    <Compile Include="Enums\VATType.cs" />
     <Compile Include="Enums\VendorType.cs" />
     <Compile Include="Enums\WalletType.cs" />
     <Compile Include="IAuditable.cs" />
@@ -298,8 +305,10 @@
     <Compile Include="IMessageService\Config\SMSConfig.cs" />
     <Compile Include="IMessageService\IMessageSender.cs" />
     <Compile Include="IRepositories\Account\IGeneralLedgerRepository.cs" />
+    <Compile Include="IRepositories\Account\IInsuranceRepository.cs" />
     <Compile Include="IRepositories\Account\IInvoiceRepository.cs" />
     <Compile Include="IRepositories\Account\IInvoiceShipmentRepository.cs" />
+    <Compile Include="IRepositories\Account\IVATRepository.cs" />
     <Compile Include="IRepositories\Client\IClientNodeRepository.cs" />
     <Compile Include="IRepositories\Customers\ICompanyContactPersonRepository.cs" />
     <Compile Include="IRepositories\Customers\ICompanyRepository.cs" />
@@ -363,8 +372,10 @@
     <Compile Include="IServices\Account\IExpenditureService.cs" />
     <Compile Include="IServices\Account\IGeneralLedgerService.cs" />
     <Compile Include="IServices\Account\IIncomeService.cs" />
+    <Compile Include="IServices\Account\IInsuranceService.cs" />
     <Compile Include="IServices\Account\IInvoiceService.cs" />
     <Compile Include="IServices\Account\IInvoiceShipmentService.cs" />
+    <Compile Include="IServices\Account\IVATService.cs" />
     <Compile Include="IServices\Business\IPaymentService.cs" />
     <Compile Include="IServices\Business\IPricingService.cs" />
     <Compile Include="IServices\Business\IScanService.cs" />
@@ -374,6 +385,7 @@
     <Compile Include="IServices\Customers\ICompanyService.cs" />
     <Compile Include="IServices\Customers\ICustomerService.cs" />
     <Compile Include="IServices\Customers\IIndividualCustomerService.cs" />
+    <Compile Include="IServices\Dashboard\IDashboardService.cs" />
     <Compile Include="IServices\Fleets\IFleetMakeService.cs" />
     <Compile Include="IServices\Fleets\IFleetManagementService.cs" />
     <Compile Include="IServices\Fleets\IFleetModelService.cs" />

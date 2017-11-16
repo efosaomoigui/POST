@@ -1,9 +1,10 @@
 ﻿using GIGLS.Core.IServices;
-using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Services.Implementation;
 using System.Threading.Tasks;
 using System.Web.Http;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.Enums;
 using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Business
@@ -22,11 +23,11 @@ namespace GIGLS.WebApi.Controllers.Business
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]
-        public async Task<IServiceResponse<bool>> ScanShipment(string waybillNumber, ShipmentScanStatus scanStatus)
+        public async Task<IServiceResponse<bool>> ScanShipment(ScanDTO scanStatus)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _scan.ScanShipment(waybillNumber, scanStatus);
+                var result = await _scan.ScanShipment(scanStatus);
 
                 return new ServiceResponse<bool>
                 {
@@ -34,5 +35,21 @@ namespace GIGLS.WebApi.Controllers.Business
                 };
             });
         }
+
+        //[GIGLSActivityAuthorize(Activity = "Create")]
+        //[HttpPost]
+        //[Route("")]
+        //public async Task<IServiceResponse<bool>> ScanShipment(string waybillNumber, ShipmentScanStatus scanStatus)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var result = await _scan.ScanShipment(waybillNumber, scanStatus);
+
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Object = result
+        //        };
+        //    });
+        //}
     }
 }

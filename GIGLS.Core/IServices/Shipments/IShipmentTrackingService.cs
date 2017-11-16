@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;

@@ -44,6 +44,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         //    });
         //}
 
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
         public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> GetShipments([FromUri]FilterOptionsDto filterOptionsDto) 
@@ -91,7 +92,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("{waybill}")]
+        [Route("{waybill}/waybill")]
         public async Task<IServiceResponse<ShipmentDTO>> GetShipment(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
@@ -122,7 +123,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
-        [Route("{waybill}")]
+        [Route("{waybill}/waybill")]
         public async Task<IServiceResponse<bool>> DeleteShipment(string waybill)
         {
             return await HandleApiOperationAsync(async () =>

@@ -9,16 +9,19 @@ using AutoMapper;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
 using System;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
     public class ShipmentCollectionService : IShipmentCollectionService
     {
         private readonly IUnitOfWork _uow;
+        private IUserService _userService;
 
-        public ShipmentCollectionService(IUnitOfWork uow)
+        public ShipmentCollectionService(IUnitOfWork uow, IUserService userService)
         {
             _uow = uow;
+            _userService = userService;
             MapperConfig.Initialize();
         }
 
@@ -51,7 +54,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentCollection == null)
             {
-                throw new GenericException("INFORMATION DOES NOT EXIST");
+                throw new GenericException($"Shipment with waybill: {waybill} does not exist");
             }
             return Mapper.Map<ShipmentCollectionDTO>(shipmentCollection);
 
@@ -77,7 +80,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentCollection == null)
             {
-                throw new GenericException("INFORMATION DOES NOT EXIST");
+                throw new GenericException($"Shipment with waybill: {waybill} does not exist");
             }
             _uow.ShipmentCollection.Remove(shipmentCollection);
             await _uow.CompleteAsync();
@@ -100,7 +103,7 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentCollection.Address = shipmentCollectionDto.Address;
             shipmentCollection.IndentificationUrl = shipmentCollectionDto.IndentificationUrl;
             shipmentCollection.ShipmentScanStatus = shipmentCollectionDto.ShipmentScanStatus;
-            shipmentCollection.UserId = await _uow.User.GetCurrentUserId();
+            shipmentCollection.UserId = await _userService.GetCurrentUserId();
             await _uow.CompleteAsync();
         }
     }
