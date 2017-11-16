@@ -10,6 +10,7 @@ namespace GIGLS.CORE.IServices.Shipments
         Task<IEnumerable<ShipmentReturnDTO>> GetShipmentReturns();
         Task<ShipmentReturnDTO> GetShipmentReturnById(string waybill);
         Task AddShipmentReturn(ShipmentReturnDTO shipmentReturn);
+        Task AddShipmentReturn(string waybill);
         Task UpdateShipmentReturn(ShipmentReturnDTO shipmentReturn);
         Task RemoveShipmentReturn(string waybill);
     }

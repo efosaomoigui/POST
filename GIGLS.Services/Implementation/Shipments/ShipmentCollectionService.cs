@@ -51,7 +51,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentCollection == null)
             {
-                throw new GenericException("INFORMATION DOES NOT EXIST");
+                throw new GenericException($"Shipment with waybill: {waybill} does not exist");
             }
             return Mapper.Map<ShipmentCollectionDTO>(shipmentCollection);
 
@@ -77,7 +77,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentCollection == null)
             {
-                throw new GenericException("INFORMATION DOES NOT EXIST");
+                throw new GenericException($"Shipment with waybill: {waybill} does not exist");
             }
             _uow.ShipmentCollection.Remove(shipmentCollection);
             await _uow.CompleteAsync();
