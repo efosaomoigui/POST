@@ -237,5 +237,11 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //This is use because I dont want an Exception to be throw when calling it
+        public async Task<GroupWaybillNumber> GetGroupWayBillNumberForScan(string groupwaybillNumber)
+        {
+            var groupwaybill = await _uow.GroupWaybillNumber.GetAsync(x => x.GroupWaybillCode.Equals(groupwaybillNumber));
+            return groupwaybill;
+        }
     }
 }
