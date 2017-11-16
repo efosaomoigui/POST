@@ -118,7 +118,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
                 return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto.ToList()), count);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

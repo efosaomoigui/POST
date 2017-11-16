@@ -82,7 +82,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 await _uow.CompleteAsync();
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

@@ -196,6 +196,7 @@
     <Compile Include="Implementation\Stores\StoreService.cs" />
     <Compile Include="Implementation\User\UserService.cs" />
     <Compile Include="Implementation\Utility\NumberGeneratorMonitorService.cs" />
+    <Compile Include="Implementation\Utility\PasswordGenerator.cs" />
     <Compile Include="Implementation\Vendors\VendorService.cs" />
     <Compile Include="Implementation\Wallet\WalletService.cs" />
     <Compile Include="Implementation\Wallet\WalletTransactionService.cs" />

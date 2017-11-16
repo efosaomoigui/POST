@@ -16,20 +16,24 @@ using GIGLS.CORE.Domain;
 using System.Security.Claims;
 using GIGLS.WebApi.Filters;
 using GIGLS.CORE.DTO.User;
+using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.WebApi.Controllers.User
 {
-    //[Authorize]
+    [Authorize]
     //[RoutePrefix("api/user")]
     public class UserController : BaseWebApiController
     {
         private readonly IUserService _userService;
-        public UserController(IUserService userService) : base(nameof(UserController))
+        private readonly IPasswordGenerator _passwordGenerator;
+
+        public UserController(IUserService userService, IPasswordGenerator passwordGenerator) : base(nameof(UserController))
         {
             _userService = userService;
+            _passwordGenerator = passwordGenerator;
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user")]
         public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetUsers()
@@ -50,9 +54,13 @@ namespace GIGLS.WebApi.Controllers.User
         [Route("api/user")]
         public async Task<IServiceResponse<object>> AddUser(UserDTO userdto)
         {
+            //Generate Password
+            string password = await _passwordGenerator.Generate();
+            userdto.Password = password;
 
             return await HandleApiOperationAsync(async () =>
             {
+
                 var result = await _userService.AddUser(userdto);
                 if (!result.Succeeded)
                 {
@@ -60,6 +68,8 @@ namespace GIGLS.WebApi.Controllers.User
                 }
 
                 var user = await _userService.GetUserByEmail(userdto.Email);
+                user.Password = password;
+
                 return new ServiceResponse<object>
                 {
                     Object = user
@@ -68,7 +78,7 @@ namespace GIGLS.WebApi.Controllers.User
             });
         }
 
-       // [GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user/{userId}")]
         public async Task<IServiceResponse<UserDTO>> GetUser(string userId)
@@ -388,6 +398,7 @@ namespace GIGLS.WebApi.Controllers.User
         }
 
         //[GIGLSActivityAuthorize(Activity = "Create")]
+        [AllowAnonymous]
         [HttpPost]
         [Route("api/user/login")]
         public async Task<IServiceResponse<JObject>> Login(UserloginDetailsModel userLoginModel)

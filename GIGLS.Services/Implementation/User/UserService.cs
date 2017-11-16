@@ -27,10 +27,9 @@ namespace GIGLS.Services.Implementation.User
         //Register a new user
         public async Task<IdentityResult> AddUser(UserDTO userDto)
         {
-
-            if (await _unitOfWork.User.GetUserByName(userDto.FirstName.ToLower()) != null)
+            if (await _unitOfWork.User.GetUserByEmail(userDto.Email.ToLower()) != null)
             {
-                throw new GenericException("User exist already!");
+                throw new GenericException($"User with email: {userDto.Email} already exist");
             }
             var usertemp = new GIGL.GIGLS.Core.Domain.User(){};
 
@@ -39,6 +38,7 @@ namespace GIGLS.Services.Implementation.User
             user.Id = usertemp.Id;
             user.DateCreated = DateTime.Now.Date;
             user.DateModified = DateTime.Now.Date;
+            user.UserName = user.Email;
 
             var u = await _unitOfWork.User.RegisterUser(user, userDto.Password);
             return u;
@@ -129,9 +129,22 @@ namespace GIGLS.Services.Implementation.User
                 throw new GenericException("User does not exist!");
             }
 
-            var userdomain = Mapper.Map<GIGL.GIGLS.Core.Domain.User>(userDto);
-            userdomain.Id = userid;
-            return await _unitOfWork.User.UpdateUser(userid, userdomain);
+            user.Department = userDto.Department;
+            user.Designation = user.Designation;
+            user.Email = userDto.Email;
+            user.FirstName = userDto.FirstName;
+            user.LastName = userDto.LastName;
+            user.Gender = userDto.Gender;
+            user.Organisation = userDto.Organisation;
+            user.IsActive = userDto.IsActive;
+            user.PhoneNumber = userDto.PhoneNumber;
+
+            return await _unitOfWork.User.UpdateUser(userid, user);
+
+            //var userdomain = Mapper.Map<GIGL.GIGLS.Core.Domain.User>(userDto);
+            //userdomain.Id = userid;
+            //return await _unitOfWork.User.UpdateUser(userid, userdomain);
+
         }
 
         public async Task<IdentityResult> ActivateUser(string userid, bool val)  
