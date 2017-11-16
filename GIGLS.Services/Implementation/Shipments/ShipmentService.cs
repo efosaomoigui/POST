@@ -14,7 +14,6 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.DTO.Customers;
-using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 
 namespace GIGLS.Services.Implementation.Shipments
@@ -80,7 +79,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(waybill));
                 if (shipment == null)
                 {
-                    throw new GenericException("Shipment Information does not exist");
+                    throw new GenericException($"Shipment with waybill: {waybill} does not exist");
                 }
                 _uow.Shipment.Remove(shipment);
                 _uow.Complete();
@@ -95,7 +94,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(waybill), "DeliveryOption");
+                var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(waybill));
 
                 if (shipment == null)
                 {
@@ -136,6 +135,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
                 shipmentDto.CustomerDetails = await _customerService.GetCustomer(shipmentDto.CustomerId, customerType);
+                shipmentDto.Customer = new List<CustomerDTO>();
+                shipmentDto.Customer.Add(shipmentDto.CustomerDetails);
 
                 return shipmentDto;
             }
@@ -203,7 +204,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(waybill));
                 if (shipment == null)
                 {
-                    throw new GenericException("Shipment Information does not exist");
+                    throw new GenericException($"Shipment with waybill: {waybill} does not exist");
                 }
 
                 shipment.SealNumber = shipmentDto.SealNumber;
