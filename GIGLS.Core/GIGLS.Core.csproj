@@ -237,6 +237,7 @@
     <Compile Include="DTO\Shipments\GroupWaybillNumberDTO.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberMappingDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestDTO.cs" />
+    <Compile Include="DTO\Shipments\ScanDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentCollectionDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentItemDTO.cs" />

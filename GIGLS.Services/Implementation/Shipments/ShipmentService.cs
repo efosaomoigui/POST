@@ -376,5 +376,12 @@ namespace GIGLS.Services.Implementation.Shipments
             _uow.GeneralLedger.Add(generalLedger);
         }
 
+
+        //This is use because I dont want an Exception to be throw when calling it
+        public async Task<Shipment> GetShipmentForScan(string waybill)
+        {
+            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(waybill));         
+            return shipment;
+        }
     }
 }

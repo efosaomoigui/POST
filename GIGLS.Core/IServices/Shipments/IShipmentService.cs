@@ -1,5 +1,5 @@
-﻿using GIGLS.Core.DTO.Shipments;
-using GIGLS.CORE.DTO.Report;
+﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO.Shipments;
 using System;
 using System.Collections.Generic;
@@ -17,5 +17,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task UpdateShipment(string waybill, ShipmentDTO shipment);
         Task DeleteShipment(int shipmentId);
         Task DeleteShipment(string waybill);
+        Task<Shipment> GetShipmentForScan(string waybill);
     }
 }
