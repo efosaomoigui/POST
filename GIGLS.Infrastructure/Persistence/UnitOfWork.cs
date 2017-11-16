@@ -201,6 +201,12 @@ namespace GIGLS.Infrastructure.Persistence
         public IInvoiceRepository Invoice { get; set; }
 
         [Inject]
+        public IVATRepository VAT { get; set; }
+
+        [Inject]
+        public IInsuranceRepository Insurance { get; set; }
+
+        [Inject]
         public IInvoiceShipmentRepository InvoiceShipment { get; set; }
 
         [Inject]

@@ -24,7 +24,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         {
             if (paymentTransaction == null)
                 throw new GenericException("NULL_INPUT");
-            
+
             var transactionExist = await _uow.PaymentTransaction.ExistAsync(x => x.Waybill.Equals(paymentTransaction.Waybill));
 
             if (transactionExist == true)
@@ -39,7 +39,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             };
             _uow.PaymentTransaction.Add(payment);
             await _uow.CompleteAsync();
-            return new { Id = payment.PaymentTransactionId};
+            return new { Id = payment.PaymentTransactionId };
         }
 
         public async Task<PaymentTransactionDTO> GetPaymentTransactionById(string waybill)
@@ -76,8 +76,28 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             payment.TransactionCode = paymentTransaction.TransactionCode;
             payment.PaymentStatus = paymentTransaction.PaymentStatus;
-            payment.PaymentTypes = paymentTransaction.PaymentTypes;            
+            payment.PaymentTypes = paymentTransaction.PaymentTypes;
             await _uow.CompleteAsync();
         }
+
+        public async Task<bool> ConfirmPaymentTransaction(string waybill, PaymentTransactionDTO paymentTransaction)
+        {
+            if (paymentTransaction == null)
+                throw new GenericException("Null Input");
+
+            var payment = await _uow.PaymentTransaction.GetAsync(x => x.Waybill.Equals(waybill));
+            if (payment == null)
+                throw new GenericException($"No Payment Transaction Exist For {waybill} waybill");
+
+            if (payment.PaymentStatus == PaymentStatus.Paid)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
     }
 }

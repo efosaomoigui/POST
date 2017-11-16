@@ -142,8 +142,10 @@
     <Compile Include="Implementation\Account\ExpenditureService.cs" />
     <Compile Include="Implementation\Account\GeneralLedgerService.cs" />
     <Compile Include="Implementation\Account\IncomeService.cs" />
+    <Compile Include="Implementation\Account\InsuranceService.cs" />
     <Compile Include="Implementation\Account\InvoiceService.cs" />
     <Compile Include="Implementation\Account\InvoiceShipmentService.cs" />
+    <Compile Include="Implementation\Account\VATService.cs" />
     <Compile Include="Implementation\Client\ClientNodeService.cs" />
     <Compile Include="Implementation\Customers\CompanyContactPersonService.cs" />
     <Compile Include="Implementation\Customers\CompanyService.cs" />

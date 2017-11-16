@@ -8,5 +8,6 @@ namespace GIGLS.Core.IServices.Business
         Task<bool> ProcessCashPayment(string waybill, PaymentTransactionDTO paymentDto);
         Task<bool> ProcessPosPayment(string waybill, PaymentTransactionDTO paymentDto);
         Task<bool> ProcessOnlinePayment(string waybill, PaymentTransactionDTO paymentDto);
+        Task<bool> ConfirmPayment(string waybill, PaymentTransactionDTO paymentDto);
     }
 }

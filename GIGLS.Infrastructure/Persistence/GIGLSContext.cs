@@ -143,6 +143,8 @@ namespace GIGLS.Infrastructure.Persistence
         //GeneralLedger
         public DbSet<Core.Domain.GeneralLedger> GeneralLedger { get; set; }
         public DbSet<Invoice> Invoice { get; set; }
+        public DbSet<VAT> VAT { get; set; }
+        public DbSet<Insurance> Insurance { get; set; }
         public DbSet<InvoiceShipment> InvoiceShipment { get; set; }
 
         //ClientNode

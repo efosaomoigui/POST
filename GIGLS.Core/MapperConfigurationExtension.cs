@@ -121,6 +121,12 @@ namespace GIGLS.Core
                 config.CreateMap<Invoice, InvoiceDTO>();
                 config.CreateMap<InvoiceDTO, Invoice>();
 
+                config.CreateMap<VAT, VATDTO>();
+                config.CreateMap<VATDTO, VAT>();
+
+                config.CreateMap<Insurance, InsuranceDTO>();
+                config.CreateMap<InsuranceDTO, Insurance>();
+
                 config.CreateMap<InvoiceShipment, InvoiceShipmentDTO>();
                 config.CreateMap<InvoiceShipmentDTO, InvoiceShipment>();
 
