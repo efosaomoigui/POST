@@ -303,7 +303,7 @@ namespace GIGLS.Services.Implementation.User
 
                 foreach (var claim in userClaims)
                 {
-                    if (claim.ValueType == "Activity")
+                    if (claim.Type == "Activity")
                     {
                         await RemoveClaimAsync(userid, claim);
                     }
@@ -317,7 +317,7 @@ namespace GIGLS.Services.Implementation.User
 
                 foreach (var claim in systemUserClaims)
                 {
-                    if (claim.ValueType == "Activity")
+                    if (claim.Type == "Activity")
                     {
                         await AddClaimAsync(userid, claim);
                     }

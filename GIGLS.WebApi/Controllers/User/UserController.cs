@@ -51,7 +51,7 @@ namespace GIGLS.WebApi.Controllers.User
 
         //[GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("api/getsystemusers")]
+        [Route("api/user/getsystemusers")]
         public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetSystemUsers()
         {
             return await HandleApiOperationAsync(async () =>
@@ -464,9 +464,9 @@ namespace GIGLS.WebApi.Controllers.User
         }
 
         [GIGLSActivityAuthorize(Activity = "Create")]
-        [HttpPost]
-        [Route("api/user/rolesettings/{systemuserid}/{userid}")]
-        public async Task<IServiceResponse<bool>> RoleSettings(string systemuserid, string userid)
+        [HttpGet]
+        [Route("api/user/rolesettings/{userid}/{systemuserid}")]
+        public async Task<IServiceResponse<bool>> RoleSettings(string userid, string systemuserid )
         {
             return await HandleApiOperationAsync(async () =>
             {
