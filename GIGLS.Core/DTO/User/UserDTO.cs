@@ -3,6 +3,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Fleets;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Core.DTO.User
 {
@@ -30,7 +31,7 @@ namespace GIGLS.Core.DTO.User
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
 
-        public int Gender { get; set; }
+        public Gender Gender { get; set; }
         public string Designation { get; set; }
         public string Department { get; set; }
         public string PictureUrl { get; set; }

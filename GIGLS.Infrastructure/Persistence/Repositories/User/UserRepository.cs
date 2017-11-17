@@ -54,16 +54,15 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
 
             //var updateuser = await _userManager.FindByIdAsync(userId);
 
-            //updateuser.Department = userdto.Department;
-            //updateuser.Designation = userdto.Designation;
-            //updateuser.Email = userdto.Email;
-            //updateuser.FirstName = userdto.FirstName;
-            //updateuser.LastName = userdto.LastName;
-            ////user.Gender =  userDto.Gender;
-            //updateuser.Organisation = userdto.Organisation;
-            //updateuser.IsActive = userdto.IsActive;
+            //updateuser.Department = user.Department;
+            //updateuser.Designation = user.Designation;
+            //updateuser.Email = user.Email;
+            //updateuser.FirstName = user.FirstName;
+            //updateuser.LastName = user.LastName;
+            //user.Gender = user.Gender;
+            //updateuser.Organisation = user.Organisation;
+            //updateuser.IsActive = user.IsActive;
 
-            //updateuser.firstname = userdto.FirstName;    
             return await _userManager.UpdateAsync(user);
         }
 
@@ -84,7 +83,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             {
                 return await _userManager.CreateAsync(user, password);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

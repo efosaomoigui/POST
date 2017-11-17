@@ -430,6 +430,7 @@
     <Compile Include="IServices\Stores\IStoreService.cs" />
     <Compile Include="IServices\User\IUserService.cs" />
     <Compile Include="IServices\Utility\INumberGeneratorMonitorService.cs" />
+    <Compile Include="IServices\Utility\IPasswordGenerator.cs" />
     <Compile Include="IServices\Vendors\IVendorService.cs" />
     <Compile Include="IServices\Wallet\IWalletNumberService.cs" />
     <Compile Include="IServices\Wallet\IWalletService.cs" />
