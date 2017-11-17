@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.DTO.Dashboard
 {
-    public class DashboardDTO : BaseDomainDTO
+    public class DashboardDTO
     {
         public int TotalShipmentDelivered { get; set; }
         public int TotalShipmentOrdered { get; set; }
