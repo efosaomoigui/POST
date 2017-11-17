@@ -1,4 +1,5 @@
-﻿using GIGLS.CORE.DTO;
+﻿using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.CORE.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,9 @@ namespace GIGLS.Core.DTO.Dashboard
 {
     public class DashboardDTO : BaseDomainDTO
     {
-        public int TotalShipmentDeliveries { get; set; }
-        public int TotalShipmentOrders { get; set; }
+        public int TotalShipmentDelivered { get; set; }
+        public int TotalShipmentOrdered { get; set; }
         public int TotalCustomers { get; set; }
+        public ServiceCentreDTO ServiceCentre { get; set; }
     }
 }

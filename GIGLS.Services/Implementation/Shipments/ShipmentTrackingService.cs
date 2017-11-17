@@ -83,7 +83,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<IEnumerable<ShipmentTrackingDTO>> GetShipmentTrackings()
+        public async Task<List<ShipmentTrackingDTO>> GetShipmentTrackings()
         {
             try
             {
