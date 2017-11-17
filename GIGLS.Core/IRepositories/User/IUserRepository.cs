@@ -13,6 +13,7 @@ namespace GIGLS.Core.IRepositories.User
     public interface IUserRepository : IAuthRepository<GIGL.GIGLS.Core.Domain.User> //where TEntity:class
     {
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetUsers();
+        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetSystemUsers();
         Task<GIGL.GIGLS.Core.Domain.User> GetUserById(string id);
         Task<GIGL.GIGLS.Core.Domain.User> GetUserByEmail(string email);
         Task<GIGL.GIGLS.Core.Domain.User> GetUserById(int id);

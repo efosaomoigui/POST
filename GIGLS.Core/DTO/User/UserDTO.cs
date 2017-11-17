@@ -41,6 +41,7 @@ namespace GIGLS.Core.DTO.User
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
         public string UserActiveServiceCentre { get; set; }
+        public UserType UserType { get; set; }
         public List<ServiceCentreDTO> ServiceCentres { get; set; }
         public List<ShipmentDTO> Shipments { get; set; }
         public List<FleetTripDTO> FleetTrips { get; set; }

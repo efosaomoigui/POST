@@ -9,6 +9,7 @@ using GIGLS.Core.DTO.User;
 using Microsoft.AspNet.Identity;
 using GIGLS.CORE.Domain;
 using System.Security.Claims;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
 {
@@ -45,7 +46,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
 
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetUsers()
         {
-            var user = _userManager.Users.Where(x=>x.IsDeleted == false).AsEnumerable();
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType != UserType.System).AsEnumerable();
+            return Task.FromResult(user);
+        }
+
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetSystemUsers()
+        {
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType == UserType.System).AsEnumerable();
             return Task.FromResult(user);
         }
 
@@ -89,7 +96,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             }
         }
 
-        public async Task<IdentityResult> AddRole(string name)  
+        public async Task<IdentityResult> AddRole(string name)
         {
             var role = new AppRole(name);
             role.DateCreated = DateTime.Now.Date;
@@ -99,19 +106,19 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             return result;
         }
 
-        public Task<AppRole> GetRoleById(string roleId) 
+        public Task<AppRole> GetRoleById(string roleId)
         {
-            var role  = _roleManager.FindByIdAsync(roleId);
+            var role = _roleManager.FindByIdAsync(roleId);
             return role;
         }
 
-        public Task<AppRole> GetRoleByName(string roleName) 
+        public Task<AppRole> GetRoleByName(string roleName)
         {
             var role = _roleManager.FindByNameAsync(roleName);
             return role;
         }
 
-        public Task<IEnumerable<AppRole>> GetRoles() 
+        public Task<IEnumerable<AppRole>> GetRoles()
         {
             var role = _roleManager.Roles.Where(x => x.IsDeleted == false).AsEnumerable();
             return Task.FromResult(role);
@@ -122,7 +129,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             var user = await _userManager.FindByIdAsync(userId);
             user.IsDeleted = true;
             return await _userManager.UpdateAsync(user);
-            
+
             //return await _userManager.DeleteAsync(user);
         }
 
@@ -147,7 +154,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
         }
 
         //Add a user to a role
-        public async Task<IdentityResult> AddToRoleAsync(string userid, string name) 
+        public async Task<IdentityResult> AddToRoleAsync(string userid, string name)
         {
             //var user = await this.GetUserById(userid);
             var Result = await _userManager.AddToRoleAsync(userid, name);
@@ -155,14 +162,14 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
         }
 
         //Returns a list of roles a user has
-        public async Task<IList<string>> GetUserRoles(string userid) 
+        public async Task<IList<string>> GetUserRoles(string userid)
         {
             var Result = await _userManager.GetRolesAsync(userid);
             return Result;
         }
 
         //Returns true if the user with the specified ID is a member of the role
-        public async Task<bool> IsInRoleAsync(string roleId, string name) 
+        public async Task<bool> IsInRoleAsync(string roleId, string name)
         {
             var Result = await _userManager.IsInRoleAsync(roleId, name);
             return Result;
@@ -175,13 +182,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             return Result;
         }
 
-        public async Task<IdentityResult> AddClaimAsync(string userid, Claim claim) 
+        public async Task<IdentityResult> AddClaimAsync(string userid, Claim claim)
         {
             var Result = await _userManager.AddClaimAsync(userid, claim);
             return Result;
         }
-         
-        public async Task<IdentityResult> RemoveClaimAsync(string userid, Claim claim) 
+
+        public async Task<IdentityResult> RemoveClaimAsync(string userid, Claim claim)
         {
             var Result = await _userManager.RemoveClaimAsync(userid, claim);
             return Result;

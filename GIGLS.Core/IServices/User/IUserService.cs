@@ -10,6 +10,7 @@ namespace GIGLS.Core.IServices.User
     public interface IUserService : IServiceDependencyMarker
     {
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetUsers();
+        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetSystemUsers();
         Task<UserDTO> GetUserById(string userId);
         Task<UserDTO> GetUserByEmail(string email);
         Task<UserDTO> GetUserById(int userId);
@@ -34,7 +35,9 @@ namespace GIGLS.Core.IServices.User
         Task<IdentityResult> AddClaimAsync(string userid, Claim claim);
         Task<IdentityResult> RemoveClaimAsync(string userid, Claim claim);
         Task<IList<Claim>> GetClaimsAsync(string userid);
-        
+
+        Task<bool> RoleSettings(string systemuserid, string userid);
+
         Task<string> GetCurrentUserId();
     }
 }

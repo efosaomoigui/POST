@@ -2,9 +2,7 @@
 {
     public enum UserType
     {
-        Administrator,
-        Employee,
-        Partner,
-        Customer
+        Regular,
+        System        
     }
 }

@@ -20,7 +20,7 @@ using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.WebApi.Controllers.User
 {
-    [Authorize]
+    //[Authorize]
     //[RoutePrefix("api/user")]
     public class UserController : BaseWebApiController
     {
@@ -33,7 +33,7 @@ namespace GIGLS.WebApi.Controllers.User
             _passwordGenerator = passwordGenerator;
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
+        //[GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user")]
         public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetUsers()
@@ -41,6 +41,22 @@ namespace GIGLS.WebApi.Controllers.User
             return await HandleApiOperationAsync(async () =>
             {
                 var users = await _userService.GetUsers();
+                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                {
+                    Object = users
+                };
+
+            });
+        }
+
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("api/getsystemusers")]
+        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetSystemUsers()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var users = await _userService.GetSystemUsers();
                 return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
                 {
                     Object = users
@@ -135,7 +151,7 @@ namespace GIGLS.WebApi.Controllers.User
             });
 
         }
-        
+
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("api/user/activate/{userId}")]
@@ -143,7 +159,7 @@ namespace GIGLS.WebApi.Controllers.User
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _userService.ActivateUser(userId, val); 
+                var result = await _userService.ActivateUser(userId, val);
                 if (!result.Succeeded)
                 {
                     throw new GenericException("Operation could not complete update successfully: ", $"{GetErrorResult(result)}");
@@ -206,7 +222,7 @@ namespace GIGLS.WebApi.Controllers.User
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [Route("api/user/createrole")]
-        public async Task<IServiceResponse<object>> CreateRole(RoleDTO roleDTO)  
+        public async Task<IServiceResponse<object>> CreateRole(RoleDTO roleDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -250,7 +266,7 @@ namespace GIGLS.WebApi.Controllers.User
             });
 
         }
-        
+
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("api/user/deleterole/{roleId}")]
@@ -275,7 +291,7 @@ namespace GIGLS.WebApi.Controllers.User
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("api/user/addusertorole/{userid}")]
-        public async Task<IServiceResponse<bool>> addusertorole(string userid, RoleDTO role)   
+        public async Task<IServiceResponse<bool>> addusertorole(string userid, RoleDTO role)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -304,7 +320,7 @@ namespace GIGLS.WebApi.Controllers.User
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("api/user/removeuserfromrole/{userid}")]
-        public async Task<IServiceResponse<bool>> removeuserfromrole(string userid, RoleDTO role)   
+        public async Task<IServiceResponse<bool>> removeuserfromrole(string userid, RoleDTO role)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -332,10 +348,10 @@ namespace GIGLS.WebApi.Controllers.User
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("api/user/addclaimforuser")]
-        public async Task<IServiceResponse<bool>> addclaimforuser(AddClaimDto claim) 
+        public async Task<IServiceResponse<bool>> addclaimforuser(AddClaimDto claim)
         {
             return await HandleApiOperationAsync(async () =>
-            {   
+            {
                 Claim cl = new Claim(claim.claimType, claim.claimValue);
                 var result = await _userService.AddClaimAsync(claim.userId, cl);
 
@@ -353,9 +369,9 @@ namespace GIGLS.WebApi.Controllers.User
         }
 
         [GIGLSActivityAuthorize(Activity = "Create")]
-        [HttpPost] 
-        [Route("api/user/removeclaimforuser")] 
-        public async Task<IServiceResponse<bool>> removeclaimforuser(AddClaimDto claim) 
+        [HttpPost]
+        [Route("api/user/removeclaimforuser")]
+        public async Task<IServiceResponse<bool>> removeclaimforuser(AddClaimDto claim)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -446,6 +462,29 @@ namespace GIGLS.WebApi.Controllers.User
                 }
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("api/user/rolesettings/{systemuserid}/{userid}")]
+        public async Task<IServiceResponse<bool>> RoleSettings(string systemuserid, string userid)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _userService.RoleSettings(systemuserid, userid);
+
+                if (!result)
+                {
+                    throw new GenericException("Operation could not complete update successfully");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+
+        }
+
 
     }
 

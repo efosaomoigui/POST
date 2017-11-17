@@ -11,6 +11,7 @@ using GIGLS.CORE.Domain;
 using System.Security.Claims;
 using GIGLS.Core.IServices.ServiceCentres;
 using System.Web;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Services.Implementation.User
 {
@@ -31,7 +32,7 @@ namespace GIGLS.Services.Implementation.User
             {
                 throw new GenericException($"User with email: {userDto.Email} already exist");
             }
-            var usertemp = new GIGL.GIGLS.Core.Domain.User(){};
+            var usertemp = new GIGL.GIGLS.Core.Domain.User() { };
 
             var user = Mapper.Map<GIGL.GIGLS.Core.Domain.User>(userDto);
 
@@ -50,6 +51,11 @@ namespace GIGLS.Services.Implementation.User
             return _unitOfWork.User.GetUsers();
         }
 
+        //Get all system users
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetSystemUsers()
+        {
+            return _unitOfWork.User.GetSystemUsers();
+        }
 
         //Get a user by Id using Guid from identity implement of EF
         public async Task<UserDTO> GetUserById(string Id)
@@ -147,7 +153,7 @@ namespace GIGLS.Services.Implementation.User
 
         }
 
-        public async Task<IdentityResult> ActivateUser(string userid, bool val)  
+        public async Task<IdentityResult> ActivateUser(string userid, bool val)
         {
 
             var user = await _unitOfWork.User.GetUserById(userid);
@@ -164,7 +170,7 @@ namespace GIGLS.Services.Implementation.User
 
         public Task<AppRole> GetRoleById(string roleId)
         {
-            var role =  _unitOfWork.User.GetRoleById(roleId);
+            var role = _unitOfWork.User.GetRoleById(roleId);
             //var role = Mapper.Map<RoleDTO>(result);
             return role;
         }
@@ -178,12 +184,12 @@ namespace GIGLS.Services.Implementation.User
 
         public Task<IEnumerable<AppRole>> GetRoles()
         {
-            var role = _unitOfWork.User.GetRoles(); 
+            var role = _unitOfWork.User.GetRoles();
             //var role = Mapper.Map<RoleDTO>(result);
             return role;
         }
 
-        public async Task<IdentityResult> AddRole(RoleDTO roleDTO) 
+        public async Task<IdentityResult> AddRole(RoleDTO roleDTO)
         {
             if (await GetRoleByName(roleDTO.Name) != null)
             {
@@ -191,7 +197,7 @@ namespace GIGLS.Services.Implementation.User
             }
 
             var result = await _unitOfWork.User.AddRole(roleDTO.Name);
-            return  result;
+            return result;
         }
 
         public Task<IdentityResult> RemoveRole(string roleId)
@@ -224,7 +230,7 @@ namespace GIGLS.Services.Implementation.User
             return result;
         }
 
-        public Task<IdentityResult> RemoveFromRoleAsync(string userid, string name) 
+        public Task<IdentityResult> RemoveFromRoleAsync(string userid, string name)
         {
             var result = _unitOfWork.User.RemoveFromRoleAsync(userid, name);
             return result;
@@ -251,7 +257,7 @@ namespace GIGLS.Services.Implementation.User
             {
                 throw new GenericException("User does not exist!");
             }
-            var result = await  _unitOfWork.User.RemoveClaimAsync(userid, claim);
+            var result = await _unitOfWork.User.RemoveClaimAsync(userid, claim);
             return result;
         }
 
@@ -266,5 +272,70 @@ namespace GIGLS.Services.Implementation.User
             var userId = HttpContext.Current?.User?.Identity?.GetUserId();
             return Task.FromResult(!string.IsNullOrEmpty(userId) ? userId : "Anonymous");
         }
+
+        public async Task<bool> RoleSettings(string systemuserid, string userid)
+        {
+            var result = false;
+
+            try
+            {
+                // get the users
+                var systemUser = await GetUserById(systemuserid);
+                var user = await GetUserById(userid);
+
+                if(systemUser.UserType != UserType.System)
+                {
+                    throw new GenericException("User is not a System Type!");
+                }
+
+                // get the roles and claims
+                var systemUserRoles = await GetUserRoles(systemuserid);
+                var userRoles = await GetUserRoles(userid);
+
+                var systemUserClaims = await GetClaimsAsync(systemuserid);
+                var userClaims = await GetClaimsAsync(userid);
+
+                // remove all roles and activity claims from the user
+                foreach (var role in userRoles)
+                {
+                    await RemoveFromRoleAsync(userid, role);
+                }
+
+                foreach (var claim in userClaims)
+                {
+                    if (claim.ValueType == "Activity")
+                    {
+                        await RemoveClaimAsync(userid, claim);
+                    }
+                }
+
+                // assign roles and claim from systemUser
+                foreach (var role in systemUserRoles)
+                {
+                    await AddToRoleAsync(userid, role);
+                }
+
+                foreach (var claim in systemUserClaims)
+                {
+                    if (claim.ValueType == "Activity")
+                    {
+                        await AddClaimAsync(userid, claim);
+                    }
+                }
+
+                // complete transaction if all actions are successful
+                await _unitOfWork.CompleteAsync();
+                result = true;
+            }
+            catch (Exception ex)
+            {
+                result = false;
+
+                throw;
+            }
+
+            return result;
+        }
+
     }
 }

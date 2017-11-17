@@ -21,6 +21,7 @@ namespace GIGL.GIGLS.Core.Domain
         public bool IsActive { get; set; }
         public string Organisation { get; set; }
         public int Status { get; set; }
+        public UserType UserType { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime DateModified { get; set; }
         public bool IsDeleted { get; set; }
