@@ -110,13 +110,9 @@
   <ItemGroup>
     <Compile Include="GenericException.cs" />
     <Compile Include="IdentityInfrastrure\GiglsUserStore.cs" />
-    <Compile Include="Migrations\201711170025012_a.cs" />
-    <Compile Include="Migrations\201711170025012_a.Designer.cs">
-      <DependentUpon>201711170025012_a.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201711170718517_b.cs" />
-    <Compile Include="Migrations\201711170718517_b.Designer.cs">
-      <DependentUpon>201711170718517_b.cs</DependentUpon>
+    <Compile Include="Migrations\201711171155123_updateDb.cs" />
+    <Compile Include="Migrations\201711171155123_updateDb.Designer.cs">
+      <DependentUpon>201711171155123_updateDb.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Persistence\GIGLSContext.cs" />
@@ -200,11 +196,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201711170025012_a.resx">
-      <DependentUpon>201711170025012_a.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201711170718517_b.resx">
-      <DependentUpon>201711170718517_b.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201711171155123_updateDb.resx">
+      <DependentUpon>201711171155123_updateDb.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

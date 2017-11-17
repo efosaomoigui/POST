@@ -48,7 +48,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
         {
             //var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType != UserType.System).AsEnumerable();
 
-            var user = _userManager.Users.Where(x => x.IsDeleted == false).AsEnumerable();
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType == UserType.Regular).AsEnumerable();
             return Task.FromResult(user);
         }
 
