@@ -221,7 +221,7 @@ namespace GIGLS.Services.Implementation.Dashboard
                                             }).ToList();
 
             // populate customer
-            PopulateCustomer(dashboardDTO);
+            await PopulateCustomer(dashboardDTO);
 
             return dashboardDTO;
         }
@@ -285,7 +285,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             return dashboardDTO;
         }
 
-        private void PopulateCustomer(DashboardDTO dashboardDTO)
+        private async Task PopulateCustomer(DashboardDTO dashboardDTO)
         {
             foreach (var order in dashboardDTO.MostRecentOrder)
             {
@@ -306,9 +306,10 @@ namespace GIGLS.Services.Implementation.Dashboard
                     }
 
 
-                    order.Customer = _customerService.GetCustomer(
-                        customerId, customerType).
-                        Result.FirstName;
+                    var customer = await _customerService.GetCustomer(
+                        customerId, customerType);
+
+                    order.Customer = customer.Name;
                 }
             }
         }
