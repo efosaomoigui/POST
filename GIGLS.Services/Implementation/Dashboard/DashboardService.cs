@@ -146,33 +146,16 @@ namespace GIGLS.Services.Implementation.Dashboard
                                                 //waybill
                                                 Waybill = s.Waybill,
                                                 //status
-                                                Status = shipmentTrackings.
-                                                    Where(a => a.Waybill == s.Waybill).
-                                                    OrderByDescending(b => b.DateCreated).
-                                                    First().Status,
+                                                //Status = shipmentTrackings.
+                                                //    Where(a => a.Waybill == s.Waybill).
+                                                //    OrderByDescending(b => b.DateCreated).
+                                                //    First().Status,
                                                 //date
                                                 Date = s.DateCreated
                                             }).ToList();
 
             // populate customer
-            foreach (var order in dashboardDTO.MostRecentOrder)
-            {
-                string[] custArray = order.Customer.Split(':');
-
-                if (custArray[0] == null || custArray[1] == null)
-                {
-                    order.Customer = "Anonymous";
-                }
-                else
-                {
-                    var CustomerId = int.Parse(custArray[0]);
-                    var CustomerType = custArray[1];
-                    order.Customer = _customerService.GetCustomer(
-                        CustomerId,
-                        (CustomerType)Enum.Parse(typeof(CustomerType), CustomerType)).
-                        Result.FirstName;
-                }
-            }
+            PopulateCustomer(dashboardDTO);
 
             return dashboardDTO;
         }
@@ -229,34 +212,16 @@ namespace GIGLS.Services.Implementation.Dashboard
                                                 //waybill
                                                 Waybill = s.Waybill,
                                                 //status
-                                                Status = shipmentTrackings.
-                                                    Where(a => a.Waybill == s.Waybill).
-                                                    OrderByDescending(b => b.DateCreated).
-                                                    First().Status,
+                                                //Status = shipmentTrackings.
+                                                //    Where(a => a.Waybill == s.Waybill).
+                                                //    OrderByDescending(b => b.DateCreated).
+                                                //    First().Status,
                                                 //date
                                                 Date = s.DateCreated
                                             }).ToList();
 
             // populate customer
-            foreach (var order in dashboardDTO.MostRecentOrder)
-            {
-                string[] custArray = order.Customer.Split(':');
-
-                if (custArray[0] == null || custArray[1] == null)
-                {
-                    order.Customer = "Anonymous";
-                }
-                else
-                {
-                    var CustomerId = int.Parse(custArray[0]);
-                    var CustomerType = custArray[1];
-                    order.Customer = _customerService.GetCustomer(
-                        CustomerId,
-                        (CustomerType)Enum.Parse(typeof(CustomerType), CustomerType)).
-                        Result.FirstName;
-                }
-            }
-
+            PopulateCustomer(dashboardDTO);
 
             return dashboardDTO;
         }
@@ -305,35 +270,46 @@ namespace GIGLS.Services.Implementation.Dashboard
                                                 //waybill
                                                 Waybill = s.Waybill,
                                                 //status
-                                                Status = shipmentTrackings.
-                                                    Where(a => a.Waybill == s.Waybill).
-                                                    OrderByDescending(b => b.DateCreated).
-                                                    First().Status,
+                                                //Status = shipmentTrackings.
+                                                //    Where(a => a.Waybill == s.Waybill).
+                                                //    OrderByDescending(b => b.DateCreated).
+                                                //    First().Status,
                                                 //date
                                                 Date = s.DateCreated
                                             }).ToList();
 
             // populate customer
+            PopulateCustomer(dashboardDTO);
+
+            return dashboardDTO;
+        }
+
+        private void PopulateCustomer(DashboardDTO dashboardDTO)
+        {
             foreach (var order in dashboardDTO.MostRecentOrder)
             {
                 string[] custArray = order.Customer.Split(':');
 
-                if (custArray[0] == null || custArray[1] == null)
+                if (string.IsNullOrEmpty(custArray[0]) || string.IsNullOrEmpty(custArray[1]))
                 {
                     order.Customer = "Anonymous";
                 }
                 else
                 {
-                    var CustomerId = int.Parse(custArray[0]);
-                    var CustomerType = custArray[1];
+                    var customerId = int.Parse(custArray[0]);
+                    var customerType = CustomerType.Company;
+
+                    if (CustomerType.IndividualCustomer.ToString().Contains(custArray[1]))
+                    {
+                        customerType = CustomerType.IndividualCustomer;
+                    }
+
+
                     order.Customer = _customerService.GetCustomer(
-                        CustomerId,
-                        (CustomerType)Enum.Parse(typeof(CustomerType), CustomerType)).
+                        customerId, customerType).
                         Result.FirstName;
                 }
             }
-
-            return dashboardDTO;
         }
     }
 }
