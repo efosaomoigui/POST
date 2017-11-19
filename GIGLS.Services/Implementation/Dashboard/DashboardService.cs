@@ -23,6 +23,7 @@ namespace GIGLS.Services.Implementation.Dashboard
         private IStationService _stationService;
         private IIndividualCustomerService _individualCustomerService;
         private ICompanyService _companyService;
+        private ICustomerService _customerService;
 
         public DashboardService(
             IShipmentService shipmentService, IUserService userService,
@@ -30,7 +31,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             IServiceCentreService serviceCenterService,
             IStationService stationService,
             IIndividualCustomerService individualCustomerService,
-            ICompanyService companyService
+            ICompanyService companyService,
+            ICustomerService customerService
             )
         {
             _shipmentService = shipmentService;
@@ -40,6 +42,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             _stationService = stationService;
             _individualCustomerService = individualCustomerService;
             _companyService = companyService;
+            _customerService = customerService;
         }
 
         public async Task<DashboardDTO> GetDashboard()
@@ -104,13 +107,13 @@ namespace GIGLS.Services.Implementation.Dashboard
             var shipmentTrackings = await _shipmentTrackingService.GetShipmentTrackings();
             var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Delivered.ToString()).ToList();
             var shipmentsDeliveredByServiceCenter =
-                shipmentsDelivered.Where(s => serviceCentreShipments.Select(d => d.Waybill).Contains(s.Waybill));
+                serviceCentreShipments.Where(s => shipmentsDelivered.Select(d => d.Waybill).Contains(s.Waybill));
 
 
             // get shipment ordered
             var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Recieved.ToString()).ToList();
             var shipmentsOrderedByServiceCenter =
-                    shipmentsOrdered.Where(s => serviceCentreShipments.Select(d => d.Waybill).Contains(s.Waybill));
+                    serviceCentreShipments.Where(s => shipmentsOrdered.Select(d => d.Waybill).Contains(s.Waybill));
 
 
             // get all customers - individual and company
@@ -123,6 +126,32 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.TotalShipmentDelivered = shipmentsDelivered.Count;
             dashboardDTO.TotalShipmentOrdered = shipmentsOrdered.Count;
             dashboardDTO.TotalCustomers = totalCustomers;
+
+            // MostRecentOrder
+            var mostRecentOrder =
+                shipmentsOrderedByServiceCenter.
+                OrderByDescending(s => s.DateCreated).Take(10);
+
+            dashboardDTO.MostRecentOrder = (from s in mostRecentOrder
+                                            select new ShipmentOrderDTO()
+                                            {
+                                                // customer
+                                                Customer = _customerService.GetCustomer(
+                                                    s.CustomerId,
+                                                    (CustomerType)Enum.Parse(typeof(CustomerType), s.CustomerType)).
+                                                    Result.FirstName,
+                                                //price
+                                                Price = s.GrandTotal,
+                                                //waybill
+                                                Waybill = s.Waybill,
+                                                //status
+                                                Status = shipmentTrackings.
+                                                    Where(a => a.Waybill == s.Waybill).
+                                                    OrderByDescending(b => b.DateCreated).
+                                                    First().Status,
+                                                //date
+                                                Date = s.DateCreated
+                                            }).ToList();
 
             return dashboardDTO;
         }
@@ -140,13 +169,13 @@ namespace GIGLS.Services.Implementation.Dashboard
             var shipmentTrackings = await _shipmentTrackingService.GetShipmentTrackings();
             var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Delivered.ToString()).ToList();
             var shipmentsDeliveredByServiceCenter =
-                shipmentsDelivered.Where(s => serviceCentreShipments.Select(d => d.Waybill).Contains(s.Waybill));
+                serviceCentreShipments.Where(s => shipmentsDelivered.Select(d => d.Waybill).Contains(s.Waybill));
 
 
             // get shipment ordered
             var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Recieved.ToString()).ToList();
             var shipmentsOrderedByServiceCenter =
-                    shipmentsOrdered.Where(s => serviceCentreShipments.Select(d => d.Waybill).Contains(s.Waybill));
+                    serviceCentreShipments.Where(s => shipmentsOrdered.Select(d => d.Waybill).Contains(s.Waybill));
 
 
             // get all customers - individual and company
@@ -160,12 +189,41 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.TotalShipmentOrdered = shipmentsOrdered.Count;
             dashboardDTO.TotalCustomers = totalCustomers;
 
+            // MostRecentOrder
+            var mostRecentOrder =
+                shipmentsOrderedByServiceCenter.
+                OrderByDescending(s => s.DateCreated).Take(10);
+
+            dashboardDTO.MostRecentOrder = (from s in mostRecentOrder
+                                            select new ShipmentOrderDTO()
+                                            {
+                                                // customer
+                                                Customer = _customerService.GetCustomer(
+                                                    s.CustomerId,
+                                                    (CustomerType)Enum.Parse(typeof(CustomerType), s.CustomerType)).
+                                                    Result.FirstName,
+                                                //price
+                                                Price = s.GrandTotal,
+                                                //waybill
+                                                Waybill = s.Waybill,
+                                                //status
+                                                Status = shipmentTrackings.
+                                                    Where(a => a.Waybill == s.Waybill).
+                                                    OrderByDescending(b => b.DateCreated).
+                                                    First().Status,
+                                                //date
+                                                Date = s.DateCreated
+                                            }).ToList();
+
             return dashboardDTO;
         }
 
         private async Task<DashboardDTO> GetDashboardForGlobal()
         {
             var dashboardDTO = new DashboardDTO();
+
+            int[] serviceCenterIds = { };   //empty array
+            var serviceCentreShipments = await _shipmentService.GetShipments(serviceCenterIds);
 
             // get shipment delivered
             var shipmentTrackings = await _shipmentTrackingService.GetShipmentTrackings();
@@ -184,6 +242,32 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.TotalShipmentDelivered = shipmentsDelivered.Count;
             dashboardDTO.TotalShipmentOrdered = shipmentsOrdered.Count;
             dashboardDTO.TotalCustomers = totalCustomers;
+
+            // MostRecentOrder
+            var mostRecentOrder =
+                serviceCentreShipments.
+                OrderByDescending(s => s.DateCreated).Take(10);
+
+            dashboardDTO.MostRecentOrder = (from s in mostRecentOrder
+                                            select new ShipmentOrderDTO()
+                                            {
+                                                // customer
+                                                Customer = _customerService.GetCustomer(
+                                                    s.CustomerId,
+                                                    (CustomerType)Enum.Parse(typeof(CustomerType), s.CustomerType)).
+                                                    Result.FirstName,
+                                                //price
+                                                Price = s.GrandTotal,
+                                                //waybill
+                                                Waybill = s.Waybill,
+                                                //status
+                                                Status = shipmentTrackings.
+                                                    Where(a => a.Waybill == s.Waybill).
+                                                    OrderByDescending(b => b.DateCreated).
+                                                    First().Status,
+                                                //date
+                                                Date = s.DateCreated
+                                            }).ToList();
 
             return dashboardDTO;
         }

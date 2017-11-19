@@ -27,7 +27,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
         public Task<List<ShipmentDTO>> GetShipments(int[] serviceCentreIds)
         {
-            var shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+            var shipment = _context.Shipment.AsQueryable();
+            if (serviceCentreIds.Length > 0)
+            {
+                shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+            }            
 
             List<ShipmentDTO> shipmentDto = (from r in shipment
                                              select new ShipmentDTO()
