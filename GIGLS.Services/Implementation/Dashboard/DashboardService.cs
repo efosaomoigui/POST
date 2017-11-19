@@ -119,7 +119,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             var totalCustomers = companys.Count + individuals.Count;
 
             // set properties
-            //dashboardDTO.ServiceCentre = serviceCentreDTO;
+            dashboardDTO.ServiceCentre = serviceCentre;
             dashboardDTO.TotalShipmentDelivered = shipmentsDelivered.Count;
             dashboardDTO.TotalShipmentOrdered = shipmentsOrdered.Count;
             dashboardDTO.TotalCustomers = totalCustomers;
