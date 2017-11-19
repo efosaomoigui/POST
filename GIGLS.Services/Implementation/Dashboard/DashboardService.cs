@@ -112,9 +112,9 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // get shipment ordered
             var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Recieved.ToString()).ToList();
-            var shipmentsOrderedByServiceCenter =
-                    serviceCentreShipments.Where(s => shipmentsOrdered.Select(d => d.Waybill).Contains(s.Waybill));
-
+            //var shipmentsOrderedByServiceCenter =
+            //        serviceCentreShipments.Where(s => shipmentsOrdered.Select(d => d.Waybill).Contains(s.Waybill));
+            var shipmentsOrderedByServiceCenter = serviceCentreShipments;
 
             // get all customers - individual and company
             var companys = await _companyService.GetCompanies();
@@ -124,7 +124,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             // set properties
             dashboardDTO.ServiceCentre = serviceCentre;
             dashboardDTO.TotalShipmentDelivered = shipmentsDelivered.Count;
-            dashboardDTO.TotalShipmentOrdered = shipmentsOrdered.Count;
+            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count;
             dashboardDTO.TotalCustomers = totalCustomers;
 
             // MostRecentOrder
@@ -178,9 +178,9 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // get shipment ordered
             var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Recieved.ToString()).ToList();
-            var shipmentsOrderedByServiceCenter =
-                    serviceCentreShipments.Where(s => shipmentsOrdered.Select(d => d.Waybill).Contains(s.Waybill));
-
+            //var shipmentsOrderedByServiceCenter =
+            //        serviceCentreShipments.Where(s => shipmentsOrdered.Select(d => d.Waybill).Contains(s.Waybill));
+            var shipmentsOrderedByServiceCenter = serviceCentreShipments;
 
             // get all customers - individual and company
             var companys = await _companyService.GetCompanies();
@@ -190,7 +190,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             // set properties
             //dashboardDTO.ServiceCentre = serviceCentreDTO;
             dashboardDTO.TotalShipmentDelivered = shipmentsDelivered.Count;
-            dashboardDTO.TotalShipmentOrdered = shipmentsOrdered.Count;
+            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count;
             dashboardDTO.TotalCustomers = totalCustomers;
 
             // MostRecentOrder
@@ -238,7 +238,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Delivered.ToString()).ToList();
 
             // get shipment ordered
-            var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Recieved.ToString()).ToList();
+            //var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Recieved.ToString()).ToList();
+            var shipmentsOrderedByServiceCenter = serviceCentreShipments;
 
             // get all customers - individual and company
             var companys = await _companyService.GetCompanies();
@@ -248,7 +249,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             // set properties
             //dashboardDTO.ServiceCentre = serviceCentreDTO;
             dashboardDTO.TotalShipmentDelivered = shipmentsDelivered.Count;
-            dashboardDTO.TotalShipmentOrdered = shipmentsOrdered.Count;
+            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count;
             dashboardDTO.TotalCustomers = totalCustomers;
 
             // MostRecentOrder
