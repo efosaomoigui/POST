@@ -11,6 +11,8 @@ using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
 using System;
 using GIGLS.Infrastructure;
+using GIGLS.Core.DTO.Shipments;
+using System.Collections.Generic;
 
 namespace GIGLS.Services.Implementation.Dashboard
 {
@@ -117,9 +119,10 @@ namespace GIGLS.Services.Implementation.Dashboard
             var shipmentsOrderedByServiceCenter = serviceCentreShipments;
 
             // get all customers - individual and company
-            var companys = await _companyService.GetCompanies();
-            var individuals = await _individualCustomerService.GetIndividualCustomers();
-            var totalCustomers = companys.Count + individuals.Count;
+            //var companys = await _companyService.GetCompanies();
+            //var individuals = await _individualCustomerService.GetIndividualCustomers();
+            //var totalCustomers = companys.Count + individuals.Count;
+            var totalCustomers = GetTotalCutomersCount(shipmentsOrderedByServiceCenter);
 
             // set properties
             dashboardDTO.ServiceCentre = serviceCentre;
@@ -183,9 +186,10 @@ namespace GIGLS.Services.Implementation.Dashboard
             var shipmentsOrderedByServiceCenter = serviceCentreShipments;
 
             // get all customers - individual and company
-            var companys = await _companyService.GetCompanies();
-            var individuals = await _individualCustomerService.GetIndividualCustomers();
-            var totalCustomers = companys.Count + individuals.Count;
+            //var companys = await _companyService.GetCompanies();
+            //var individuals = await _individualCustomerService.GetIndividualCustomers();
+            //var totalCustomers = companys.Count + individuals.Count;
+            var totalCustomers = GetTotalCutomersCount(shipmentsOrderedByServiceCenter);
 
             // set properties
             //dashboardDTO.ServiceCentre = serviceCentreDTO;
@@ -242,9 +246,11 @@ namespace GIGLS.Services.Implementation.Dashboard
             var shipmentsOrderedByServiceCenter = serviceCentreShipments;
 
             // get all customers - individual and company
-            var companys = await _companyService.GetCompanies();
-            var individuals = await _individualCustomerService.GetIndividualCustomers();
-            var totalCustomers = companys.Count + individuals.Count;
+            //var companys = await _companyService.GetCompanies();
+            //var individuals = await _individualCustomerService.GetIndividualCustomers();
+            //var totalCustomers = companys.Count + individuals.Count;
+            var totalCustomers = GetTotalCutomersCount(shipmentsOrderedByServiceCenter);
+
 
             // set properties
             //dashboardDTO.ServiceCentre = serviceCentreDTO;
@@ -283,6 +289,20 @@ namespace GIGLS.Services.Implementation.Dashboard
             await PopulateCustomer(dashboardDTO);
 
             return dashboardDTO;
+        }
+
+        private int GetTotalCutomersCount(List<ShipmentDTO> shipmentsOrderedByServiceCenter)
+        {
+            int count = 0;
+            HashSet<string> customerHashSet = new HashSet<string>();
+
+            foreach (var shipment in shipmentsOrderedByServiceCenter)
+            {
+                customerHashSet.Add($"{shipment.CustomerType}:{shipment.CustomerId}");
+            }
+
+            count = customerHashSet.Count;
+            return count;
         }
 
         private async Task PopulateCustomer(DashboardDTO dashboardDTO)
