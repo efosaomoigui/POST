@@ -155,7 +155,7 @@ namespace GIGLS.Services.Implementation.Dashboard
                                             }).ToList();
 
             // populate customer
-            PopulateCustomer(dashboardDTO);
+            await PopulateCustomer(dashboardDTO);
 
             return dashboardDTO;
         }
@@ -280,7 +280,7 @@ namespace GIGLS.Services.Implementation.Dashboard
                                             }).ToList();
 
             // populate customer
-            PopulateCustomer(dashboardDTO);
+            await PopulateCustomer(dashboardDTO);
 
             return dashboardDTO;
         }
