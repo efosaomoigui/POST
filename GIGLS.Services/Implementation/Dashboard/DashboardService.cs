@@ -135,11 +135,12 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.MostRecentOrder = (from s in mostRecentOrder
                                             select new ShipmentOrderDTO()
                                             {
-                                                // customer
-                                                Customer = _customerService.GetCustomer(
-                                                    s.CustomerId,
-                                                    (CustomerType)Enum.Parse(typeof(CustomerType), s.CustomerType)).
-                                                    Result.FirstName,
+                                                //// customer
+                                                Customer = string.Format($"{s.CustomerId}:{s.CustomerType}"),
+                                                //Customer = _customerService.GetCustomer(
+                                                //    s.CustomerId,
+                                                //    (CustomerType)Enum.Parse(typeof(CustomerType), s.CustomerType)).
+                                                //    Result.FirstName,
                                                 //price
                                                 Price = s.GrandTotal,
                                                 //waybill
@@ -152,6 +153,26 @@ namespace GIGLS.Services.Implementation.Dashboard
                                                 //date
                                                 Date = s.DateCreated
                                             }).ToList();
+
+            // populate customer
+            foreach (var order in dashboardDTO.MostRecentOrder)
+            {
+                string[] custArray = order.Customer.Split(':');
+
+                if (custArray[0] == null || custArray[1] == null)
+                {
+                    order.Customer = "Anonymous";
+                }
+                else
+                {
+                    var CustomerId = int.Parse(custArray[0]);
+                    var CustomerType = custArray[1];
+                    order.Customer = _customerService.GetCustomer(
+                        CustomerId,
+                        (CustomerType)Enum.Parse(typeof(CustomerType), CustomerType)).
+                        Result.FirstName;
+                }
+            }
 
             return dashboardDTO;
         }
@@ -197,11 +218,12 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.MostRecentOrder = (from s in mostRecentOrder
                                             select new ShipmentOrderDTO()
                                             {
-                                                // customer
-                                                Customer = _customerService.GetCustomer(
-                                                    s.CustomerId,
-                                                    (CustomerType)Enum.Parse(typeof(CustomerType), s.CustomerType)).
-                                                    Result.FirstName,
+                                                //// customer
+                                                Customer = string.Format($"{s.CustomerId}:{s.CustomerType}"),
+                                                //Customer = _customerService.GetCustomer(
+                                                //    s.CustomerId,
+                                                //    (CustomerType)Enum.Parse(typeof(CustomerType), s.CustomerType)).
+                                                //    Result.FirstName,
                                                 //price
                                                 Price = s.GrandTotal,
                                                 //waybill
@@ -214,6 +236,27 @@ namespace GIGLS.Services.Implementation.Dashboard
                                                 //date
                                                 Date = s.DateCreated
                                             }).ToList();
+
+            // populate customer
+            foreach (var order in dashboardDTO.MostRecentOrder)
+            {
+                string[] custArray = order.Customer.Split(':');
+
+                if (custArray[0] == null || custArray[1] == null)
+                {
+                    order.Customer = "Anonymous";
+                }
+                else
+                {
+                    var CustomerId = int.Parse(custArray[0]);
+                    var CustomerType = custArray[1];
+                    order.Customer = _customerService.GetCustomer(
+                        CustomerId,
+                        (CustomerType)Enum.Parse(typeof(CustomerType), CustomerType)).
+                        Result.FirstName;
+                }
+            }
+
 
             return dashboardDTO;
         }
@@ -251,11 +294,12 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.MostRecentOrder = (from s in mostRecentOrder
                                             select new ShipmentOrderDTO()
                                             {
-                                                // customer
-                                                Customer = _customerService.GetCustomer(
-                                                    s.CustomerId,
-                                                    (CustomerType)Enum.Parse(typeof(CustomerType), s.CustomerType)).
-                                                    Result.FirstName,
+                                                //// customer
+                                                Customer = string.Format($"{s.CustomerId}:{s.CustomerType}"),
+                                                //Customer = _customerService.GetCustomer(
+                                                //    s.CustomerId,
+                                                //    (CustomerType)Enum.Parse(typeof(CustomerType), s.CustomerType)).
+                                                //    Result.FirstName,
                                                 //price
                                                 Price = s.GrandTotal,
                                                 //waybill
@@ -268,6 +312,26 @@ namespace GIGLS.Services.Implementation.Dashboard
                                                 //date
                                                 Date = s.DateCreated
                                             }).ToList();
+
+            // populate customer
+            foreach (var order in dashboardDTO.MostRecentOrder)
+            {
+                string[] custArray = order.Customer.Split(':');
+
+                if (custArray[0] == null || custArray[1] == null)
+                {
+                    order.Customer = "Anonymous";
+                }
+                else
+                {
+                    var CustomerId = int.Parse(custArray[0]);
+                    var CustomerType = custArray[1];
+                    order.Customer = _customerService.GetCustomer(
+                        CustomerId,
+                        (CustomerType)Enum.Parse(typeof(CustomerType), CustomerType)).
+                        Result.FirstName;
+                }
+            }
 
             return dashboardDTO;
         }
