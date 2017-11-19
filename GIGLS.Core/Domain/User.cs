@@ -26,6 +26,10 @@ namespace GIGL.GIGLS.Core.Domain
         public DateTime DateModified { get; set; }
         public bool IsDeleted { get; set; }
 
+        //for system user
+        public string SystemUserId { get; set; }
+        public string SystemUserRole { get; set; }
+
         //public async Task GenerateUserIdentityAsync(Microsoft.AspNet.Identity.UserManager manager)
         //{
         //    return await GenerateUserIdentityAsync(manager, DefaultAuthenticationTypes.ApplicationCookie);

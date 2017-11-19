@@ -46,5 +46,8 @@ namespace GIGLS.Core.DTO.User
         public List<ShipmentDTO> Shipments { get; set; }
         public List<FleetTripDTO> FleetTrips { get; set; }
 
+        //for system user
+        public string SystemUserId { get; set; }
+        public string SystemUserRole { get; set; }
     }
 }

@@ -12,6 +12,7 @@ using System.Security.Claims;
 using GIGLS.Core.IServices.ServiceCentres;
 using System.Web;
 using GIGLS.Core.Enums;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.User
 {
@@ -144,6 +145,8 @@ namespace GIGLS.Services.Implementation.User
             user.Organisation = userDto.Organisation;
             user.IsActive = userDto.IsActive;
             user.PhoneNumber = userDto.PhoneNumber;
+            user.SystemUserId = userDto.SystemUserId;
+            user.SystemUserRole = userDto.SystemUserRole;
 
             return await _unitOfWork.User.UpdateUser(userid, user);
 
@@ -289,11 +292,11 @@ namespace GIGLS.Services.Implementation.User
 
             try
             {
+                List<Claim> nonActivityClaim = new List<Claim>();
+
                 // get the users
                 var systemUser = await GetUserById(systemuserid);
-                var user = await GetUserById(userid);
-
-                if(systemUser.UserType != UserType.System)
+                if (systemUser.UserType != UserType.System)
                 {
                     throw new GenericException("User is not a System Type!");
                 }
@@ -317,6 +320,10 @@ namespace GIGLS.Services.Implementation.User
                     {
                         await RemoveClaimAsync(userid, claim);
                     }
+                    else
+                    {
+                        nonActivityClaim.Add(claim);
+                    }
                 }
 
                 // assign roles and claim from systemUser
@@ -332,6 +339,17 @@ namespace GIGLS.Services.Implementation.User
                         await AddClaimAsync(userid, claim);
                     }
                 }
+
+                foreach (var claim in nonActivityClaim)
+                {
+                    await AddClaimAsync(userid, claim);
+                }
+
+                //update the user with the system user role
+                var userDTO = await GetUserById(userid);
+                userDTO.SystemUserId = systemuserid;
+                userDTO.SystemUserRole = systemUser.FirstName;
+                await UpdateUser(userid, userDTO);
 
                 // complete transaction if all actions are successful
                 await _unitOfWork.CompleteAsync();
