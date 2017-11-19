@@ -245,6 +245,16 @@ namespace GIGLS.Services.Implementation.User
                 throw new GenericException("User does not exist!");
             }
 
+            var userClaims = await GetClaimsAsync(userid);
+
+            foreach (var cl in userClaims) 
+            {
+                if (cl.Type == "Privilege")
+                {
+                    await RemoveClaimAsync(userid, cl);
+                }
+            }
+
             var result = await _unitOfWork.User.AddClaimAsync(userid, claim);
             return result;
         }
