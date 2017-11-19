@@ -130,7 +130,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             // MostRecentOrder
             var mostRecentOrder =
                 shipmentsOrderedByServiceCenter.
-                OrderByDescending(s => s.DateCreated).Take(10);
+                OrderByDescending(s => s.DateCreated).Take(5);
 
             dashboardDTO.MostRecentOrder = (from s in mostRecentOrder
                                             select new ShipmentOrderDTO()
@@ -196,7 +196,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             // MostRecentOrder
             var mostRecentOrder =
                 shipmentsOrderedByServiceCenter.
-                OrderByDescending(s => s.DateCreated).Take(10);
+                OrderByDescending(s => s.DateCreated).Take(5);
 
             dashboardDTO.MostRecentOrder = (from s in mostRecentOrder
                                             select new ShipmentOrderDTO()
@@ -254,7 +254,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             // MostRecentOrder
             var mostRecentOrder =
                 serviceCentreShipments.
-                OrderByDescending(s => s.DateCreated).Take(10);
+                OrderByDescending(s => s.DateCreated).Take(5);
 
             dashboardDTO.MostRecentOrder = (from s in mostRecentOrder
                                             select new ShipmentOrderDTO()
