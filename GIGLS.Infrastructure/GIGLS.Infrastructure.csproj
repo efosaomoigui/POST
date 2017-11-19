@@ -110,10 +110,6 @@
   <ItemGroup>
     <Compile Include="GenericException.cs" />
     <Compile Include="IdentityInfrastrure\GiglsUserStore.cs" />
-    <Compile Include="Migrations\201711171155123_updateDb.cs" />
-    <Compile Include="Migrations\201711171155123_updateDb.Designer.cs">
-      <DependentUpon>201711171155123_updateDb.cs</DependentUpon>
-    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Persistence\GIGLSContext.cs" />
     <Compile Include="Persistence\Repositories\Account\GeneralLedgerRepository.cs" />
@@ -194,11 +190,6 @@
       <Project>{e09465db-8bc7-4f1c-81d8-4ea1daa77ad4}</Project>
       <Name>GIGLS.Core</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Migrations\201711171155123_updateDb.resx">
-      <DependentUpon>201711171155123_updateDb.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

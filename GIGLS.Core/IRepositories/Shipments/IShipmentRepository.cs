@@ -13,5 +13,6 @@ namespace GIGLS.Core.IRepositories.Shipments
     {
         Tuple<Task<List<ShipmentDTO>>, int> GetShipments(FilterOptionsDto filterOptionsDto);
         Task<List<ShipmentDTO>> GetShipments(ShipmentFilterCriteria queryDto);
+        Task<List<ShipmentDTO>> GetShipments(int[] serviceCentreIds);
     }
 }

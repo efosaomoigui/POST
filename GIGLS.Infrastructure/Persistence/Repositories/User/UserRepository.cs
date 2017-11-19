@@ -46,9 +46,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
 
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetUsers()
         {
-            //var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType != UserType.System).AsEnumerable();
-
-            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType == UserType.Regular).AsEnumerable();
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType != UserType.System).AsEnumerable();
+            //var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType == UserType.Regular).AsEnumerable();
             return Task.FromResult(user);
         }
 

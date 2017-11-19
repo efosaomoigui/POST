@@ -25,14 +25,76 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             _context = context;
         }
 
-        public  Tuple<Task<List<ShipmentDTO>>, int> GetShipments(FilterOptionsDto filterOptionsDto)
+        public Task<List<ShipmentDTO>> GetShipments(int[] serviceCentreIds)
+        {
+            var shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+
+            List<ShipmentDTO> shipmentDto = (from r in shipment
+                                             select new ShipmentDTO()
+                                             {
+                                                 ShipmentId = r.ShipmentId,
+                                                 Waybill = r.Waybill,
+                                                 CustomerId = r.CustomerId,
+                                                 CustomerType = r.CustomerType,
+                                                 ActualDateOfArrival = r.ActualDateOfArrival,
+                                                 //ActualReceiverName = r.ActualReceiverName,
+                                                 //ActualreceiverPhone = r.ActualreceiverPhone,
+                                                 //Comments = r.Comments,
+                                                 DateCreated = r.DateCreated,
+                                                 DateModified = r.DateModified,
+                                                 DeliveryOptionId = r.DeliveryOptionId,
+                                                 DeliveryOption = new DeliveryOptionDTO
+                                                 {
+                                                     Code = r.DeliveryOption.Code,
+                                                     Description = r.DeliveryOption.Description
+                                                 },
+                                                 DeliveryTime = r.DeliveryTime,
+                                                 DepartureServiceCentreId = r.DepartureServiceCentreId,
+                                                 DepartureServiceCentre = new ServiceCentreDTO
+                                                 {
+                                                     Code = r.DepartureServiceCentre.Code,
+                                                     Name = r.DepartureServiceCentre.Name
+                                                 },
+                                                 DestinationServiceCentreId = r.DestinationServiceCentreId,
+                                                 DestinationServiceCentre = new ServiceCentreDTO
+                                                 {
+                                                     Code = r.DestinationServiceCentre.Code,
+                                                     Name = r.DestinationServiceCentre.Name
+                                                 },
+                                                 ExpectedDateOfArrival = r.ExpectedDateOfArrival,
+                                                 //GroupWaybill = r.GroupWaybill,
+                                                 //IdentificationType = r.IdentificationType,
+                                                 //IndentificationUrl = r.IndentificationUrl,
+                                                 //IsDomestic = r.IsDomestic,
+                                                 PaymentStatus = r.PaymentStatus,
+                                                 ReceiverAddress = r.ReceiverAddress,
+                                                 ReceiverCity = r.ReceiverCity,
+                                                 ReceiverCountry = r.ReceiverCountry,
+                                                 ReceiverEmail = r.ReceiverEmail,
+                                                 ReceiverName = r.ReceiverName,
+                                                 ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                                 ReceiverState = r.ReceiverState,
+                                                 SealNumber = r.SealNumber,
+                                                 UserId = r.UserId,
+                                                 Value = r.Value,
+                                                 GrandTotal = r.GrandTotal
+                                                 //DepartureTerminalName = r.DepartureTerminal.Name,
+                                                 //DestinationTerminalName = r.DestinationTerminal.Name       
+                                                 //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
+                                             }).ToList();
+
+
+            return Task.FromResult(shipmentDto.ToList());
+        }
+
+        public Tuple<Task<List<ShipmentDTO>>, int> GetShipments(FilterOptionsDto filterOptionsDto)
         {
             try
             {
                 var count = Context.Shipment.ToList().Count();
                 var shipment = Context.Shipment.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count);
 
-                    List<ShipmentDTO> shipmentDto = (from r in shipment
+                List<ShipmentDTO> shipmentDto = (from r in shipment
                                                  select new ShipmentDTO()
                                                  {
                                                      ShipmentId = r.ShipmentId,
@@ -124,7 +186,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
         }
 
-        public int GetShipmentTotal() 
+        public int GetShipmentTotal()
         {
             var count = Context.State.ToList().Count();
             return count;
