@@ -356,6 +356,16 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentDTO.Waybill = waybill;
             var newShipment = Mapper.Map<Shipment>(shipmentDTO);
 
+            // set declared value of the shipment
+            if(shipmentDTO.IsdeclaredVal)
+            {
+                newShipment.DeclarationOfValueCheck = shipmentDTO.DeclarationOfValueCheck;
+            }
+            else
+            {
+                newShipment.DeclarationOfValueCheck = null;
+            }
+
             _uow.Shipment.Add(newShipment);
             //await _uow.CompleteAsync();
 

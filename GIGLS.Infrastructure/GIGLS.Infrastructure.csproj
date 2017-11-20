@@ -114,6 +114,10 @@
     <Compile Include="Migrations\201711191824531_UserAdditions.Designer.cs">
       <DependentUpon>201711191824531_UserAdditions.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201711201240197_ShipmentDeclaredValue.cs" />
+    <Compile Include="Migrations\201711201240197_ShipmentDeclaredValue.Designer.cs">
+      <DependentUpon>201711201240197_ShipmentDeclaredValue.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Persistence\GIGLSContext.cs" />
     <Compile Include="Persistence\Repositories\Account\GeneralLedgerRepository.cs" />
@@ -198,6 +202,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201711191824531_UserAdditions.resx">
       <DependentUpon>201711191824531_UserAdditions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201711201240197_ShipmentDeclaredValue.resx">
+      <DependentUpon>201711201240197_ShipmentDeclaredValue.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
