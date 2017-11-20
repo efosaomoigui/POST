@@ -319,29 +319,35 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private async Task<ShipmentDTO> CreateShipment(ShipmentDTO shipmentDTO)
         {
-            //for test//
-            var userServiceCentreMapping = new UserServiceCentreMapping();
-            var userServiceCentreMappingList = await _uow.UserServiceCentreMapping.FindAsync(s => s.IsActive == true);
-            foreach (var item in userServiceCentreMappingList)
-            {
-                userServiceCentreMapping = item;
-                break;
-            }
-            var departureServiceCentreId = userServiceCentreMapping.ServiceCentreId;
-            var userId = userServiceCentreMapping.UserId;
+            ////for test//
+            //var userServiceCentreMapping = new UserServiceCentreMapping();
+            //var userServiceCentreMappingList = await _uow.UserServiceCentreMapping.FindAsync(s => s.IsActive == true);
+            //foreach (var item in userServiceCentreMappingList)
+            //{
+            //    userServiceCentreMapping = item;
+            //    break;
+            //}
+            //var departureServiceCentreId = userServiceCentreMapping.ServiceCentreId;
+            //var userId = userServiceCentreMapping.UserId;
 
-            shipmentDTO.DepartureServiceCentreId = userServiceCentreMapping.ServiceCentreId;
-            shipmentDTO.UserId = userServiceCentreMapping.UserId;
-            //for test//
+            //shipmentDTO.DepartureServiceCentreId = userServiceCentreMapping.ServiceCentreId;
+            //shipmentDTO.UserId = userServiceCentreMapping.UserId;
+            ////for test//
 
 
             await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
             await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
 
-            //Get User Login service Centre detail
-            var loginUserServiceCentre = await _userServiceCentre.GetUserActiveServiceCentre(shipmentDTO.UserId);
-            shipmentDTO.DepartureServiceCentreId = loginUserServiceCentre.ServiceCentreId;
+            ////Get User Login service Centre detail
+            //var loginUserServiceCentre = await _userServiceCentre.GetUserActiveServiceCentre(shipmentDTO.UserId);
+            //shipmentDTO.DepartureServiceCentreId = loginUserServiceCentre.ServiceCentreId;
 
+            // get the current user info
+            var currentUserId = await _userService.GetCurrentUserId();
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
+            shipmentDTO.DepartureServiceCentreId = serviceCenterIds[0];
+            shipmentDTO.UserId = currentUserId;
 
             //Generate Waybill Number(serviceCentreCode, userId, servicecentreId)
             //var waybill = await _waybillService.GenerateWaybillNumber(loginUserServiceCentre.Code, shipmentDTO.UserId, loginUserServiceCentre.ServiceCentreId);

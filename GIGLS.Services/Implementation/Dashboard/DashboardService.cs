@@ -193,7 +193,8 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // set properties
             //dashboardDTO.ServiceCentre = serviceCentreDTO;
-            dashboardDTO.Station = serviceCentres.Where(s => s.StationId == stationId).Select(s => s.Station).First();
+            var stationDTO = await _stationService.GetStationById(stationId);
+            dashboardDTO.Station = stationDTO;
             dashboardDTO.TotalShipmentDelivered = shipmentsDelivered.Count;
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count;
             dashboardDTO.TotalCustomers = totalCustomers;
