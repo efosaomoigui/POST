@@ -474,7 +474,7 @@ namespace GIGLS.WebApi.Controllers.User
 
                 if (!result)
                 {
-                    throw new GenericException("Operation could not complete update successfully");
+                    throw new GenericException("Operation could not complete update successfully");    
                 }
 
                 return new ServiceResponse<bool>
