@@ -193,6 +193,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // set properties
             //dashboardDTO.ServiceCentre = serviceCentreDTO;
+            dashboardDTO.Station = serviceCentres.Where(s => s.StationId == stationId).Select(s => s.Station).First();
             dashboardDTO.TotalShipmentDelivered = shipmentsDelivered.Count;
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count;
             dashboardDTO.TotalCustomers = totalCustomers;
@@ -325,11 +326,18 @@ namespace GIGLS.Services.Implementation.Dashboard
                         customerType = CustomerType.IndividualCustomer;
                     }
 
+                    try
+                    {
+                        var customer = await _customerService.GetCustomer(
+                            customerId, customerType);
 
-                    var customer = await _customerService.GetCustomer(
-                        customerId, customerType);
+                        order.Customer = customer.Name;
 
-                    order.Customer = customer.Name;
+                    }
+                    catch (Exception ex)
+                    {
+                        order.Customer = "Anonymous";
+                    }
                 }
             }
         }
