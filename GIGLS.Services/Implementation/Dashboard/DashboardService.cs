@@ -332,8 +332,14 @@ namespace GIGLS.Services.Implementation.Dashboard
                         var customer = await _customerService.GetCustomer(
                             customerId, customerType);
 
-                        order.Customer = customer.Name;
-
+                        if(customerType == CustomerType.IndividualCustomer)
+                        {
+                            order.Customer = string.Format($"{customer.FirstName} {customer.LastName}"); ;
+                        }
+                        else
+                        {
+                            order.Customer = customer.Name;
+                        }
                     }
                     catch (Exception ex)
                     {

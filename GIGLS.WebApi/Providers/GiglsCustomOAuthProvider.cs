@@ -88,6 +88,12 @@ namespace GIGLS.WebApi.Providers
                     return;
                 }
 
+                if (user.SystemUserId == null)
+                {
+                    context.SetError("invalid_grant", "The user has not been assigned a role.");
+                    return;
+                }
+
                 //if (!user.LockoutEnabled) 
                 //{
                 //    context.SetError("invalid_grant", "Your account is locked!");
