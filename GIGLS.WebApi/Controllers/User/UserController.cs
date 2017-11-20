@@ -466,7 +466,7 @@ namespace GIGLS.WebApi.Controllers.User
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpGet]
         [Route("api/user/rolesettings/{userid}/{systemuserid}")]
-        public async Task<IServiceResponse<bool>> RoleSettings(string userid, string systemuserid )
+        public async Task<IServiceResponse<bool>> RoleSettings(string userid, string systemuserid)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -485,6 +485,27 @@ namespace GIGLS.WebApi.Controllers.User
 
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("api/user/checkpriviledge")]
+        public async Task<IServiceResponse<bool>> CheckPriviledge()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _userService.CheckPriviledge();
+
+                if (!result)
+                {
+                    throw new GenericException("Operation could not complete update successfully");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+
+        }
 
     }
 

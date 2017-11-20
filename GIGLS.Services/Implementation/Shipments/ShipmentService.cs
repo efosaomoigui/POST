@@ -15,6 +15,7 @@ using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -26,11 +27,12 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUserServiceCentreMappingService _userServiceCentre;
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly ICustomerService _customerService;
+        private readonly IUserService _userService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
             INumberGeneratorMonitorService numberGeneratorMonitorService,
-            ICustomerService customerService
+            ICustomerService customerService, IUserService userService
             )
         {
             _uow = uow;
@@ -39,6 +41,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _userServiceCentre = userServiceCentre;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _customerService = customerService;
+            _userService = userService;
             MapperConfig.Initialize();
         }
 
@@ -46,7 +49,8 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                return _uow.Shipment.GetShipments(filterOptionsDto);
+                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                return _uow.Shipment.GetShipments(filterOptionsDto, serviceCenters);
             }
             catch (Exception)
             {

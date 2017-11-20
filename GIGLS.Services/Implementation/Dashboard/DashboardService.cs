@@ -333,5 +333,56 @@ namespace GIGLS.Services.Implementation.Dashboard
                 }
             }
         }
+
+        public async Task<int[]> GetCurrentUserServiceCenters()
+        {
+            int[] serviceCenterIds = { };   //empty array
+            // get current user
+            try
+            {
+                var currentUserId = await _userService.GetCurrentUserId();
+                var currentUser = await _userService.GetUserById(currentUserId);
+                var userClaims = await _userService.GetClaimsAsync(currentUserId);
+
+                string[] claimValue = null;
+                foreach (var claim in userClaims)
+                {
+                    if (claim.Type == "Privilege")
+                    {
+                        claimValue = claim.Value.Split(':');   // format stringName:stringValue
+                    }
+                }
+                if (claimValue == null)
+                {
+                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                }
+
+                if (claimValue[0] == "Global")
+                {
+                    serviceCenterIds = new int[] { };
+                }
+                else if (claimValue[0] == "Station")
+                {
+                    var stationId = int.Parse(claimValue[1]);
+                    var serviceCentres = await _serviceCenterService.GetServiceCentres();
+                    serviceCenterIds = serviceCentres.Where(s => s.StationId == stationId).Select(s => s.ServiceCentreId).ToArray();
+                }
+                else if (claimValue[0] == "ServiceCentre")
+                {
+                    int serviceCenterId = int.Parse(claimValue[1]);
+                    serviceCenterIds = new int[] { serviceCenterId };
+                }
+                else
+                {
+                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return serviceCenterIds;
+        }
     }
 }

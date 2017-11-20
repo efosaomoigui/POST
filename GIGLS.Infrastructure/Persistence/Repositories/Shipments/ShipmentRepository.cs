@@ -31,7 +31,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             if (serviceCentreIds.Length > 0)
             {
                 shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
-            }            
+            }
 
             List<ShipmentDTO> shipmentDto = (from r in shipment
                                              select new ShipmentDTO()
@@ -91,12 +91,20 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(shipmentDto.ToList());
         }
 
-        public Tuple<Task<List<ShipmentDTO>>, int> GetShipments(FilterOptionsDto filterOptionsDto)
+        public Tuple<Task<List<ShipmentDTO>>, int> GetShipments(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
         {
             try
             {
-                var count = Context.Shipment.ToList().Count();
-                var shipment = Context.Shipment.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count);
+                //filter by service center
+                var shipment = _context.Shipment.AsQueryable();
+                if (serviceCentreIds.Length > 0)
+                {
+                    shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+                }
+                ////
+
+                var count = shipment.ToList().Count();
+                shipment = shipment.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count);
 
                 List<ShipmentDTO> shipmentDto = (from r in shipment
                                                  select new ShipmentDTO()

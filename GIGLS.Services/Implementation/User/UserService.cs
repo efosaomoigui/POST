@@ -19,10 +19,12 @@ namespace GIGLS.Services.Implementation.User
     public class UserService : IUserService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private IServiceCentreService _serviceCentreService;
 
-        public UserService(IUnitOfWork uow)
+        public UserService(IUnitOfWork uow, IServiceCentreService serviceCentreService)
         {
             _unitOfWork = uow;
+            _serviceCentreService = serviceCentreService;
             MapperConfig.Initialize();
         }
 
@@ -63,14 +65,14 @@ namespace GIGLS.Services.Implementation.User
         {
             string userActiveServiceCentre = null;
 
-            var user = await _unitOfWork.User.GetUserById(Id);
+            var user = _unitOfWork.User.GetUserById(Id).Result;
 
             if (user != null)
             {
-                var activeCentre = await _unitOfWork.UserServiceCentreMapping.GetAsync(x => x.IsActive == true && x.User.Id.Equals(Id));
+                var activeCentre = _unitOfWork.UserServiceCentreMapping.GetAsync(x => x.IsActive == true && x.User.Id.Equals(Id)).Result;
                 if (activeCentre != null)
                 {
-                    var serviceCentre = await _unitOfWork.ServiceCentre.GetAsync(x => x.ServiceCentreId == activeCentre.ServiceCentreId);
+                    var serviceCentre = _unitOfWork.ServiceCentre.GetAsync(x => x.ServiceCentreId == activeCentre.ServiceCentreId).Result;
                     userActiveServiceCentre = serviceCentre.Name;
                 }
             }
@@ -250,7 +252,7 @@ namespace GIGLS.Services.Implementation.User
 
             var userClaims = await GetClaimsAsync(userid);
 
-            foreach (var cl in userClaims) 
+            foreach (var cl in userClaims)
             {
                 if (cl.Type == "Privilege")
                 {
@@ -274,16 +276,16 @@ namespace GIGLS.Services.Implementation.User
             return result;
         }
 
-        public Task<IList<Claim>> GetClaimsAsync(string userid)
+        public async Task<IList<Claim>> GetClaimsAsync(string userid)
         {
-            var result = _unitOfWork.User.GetClaimsAsync(userid);
+            var result = await _unitOfWork.User.GetClaimsAsync(userid);
             return result;
         }
 
-        public Task<string> GetCurrentUserId()
+        public async Task<string> GetCurrentUserId()
         {
             var userId = HttpContext.Current?.User?.Identity?.GetUserId();
-            return Task.FromResult(!string.IsNullOrEmpty(userId) ? userId : "Anonymous");
+            return await Task.FromResult(!string.IsNullOrEmpty(userId) ? userId : "Anonymous");
         }
 
         public async Task<bool> RoleSettings(string systemuserid, string userid)
@@ -363,6 +365,93 @@ namespace GIGLS.Services.Implementation.User
             }
 
             return result;
+        }
+
+
+        public async Task<bool> CheckPriviledge()
+        {
+            var result = false;
+
+            try
+            {
+                var currentUserId = await GetCurrentUserId();
+                var currentUser = await GetUserById(currentUserId);
+                var userClaims = await GetClaimsAsync(currentUserId);
+
+                string[] claimValue = null;
+                foreach (var claim in userClaims)
+                {
+                    if (claim.Type == "Privilege")
+                    {
+                        claimValue = claim.Value.Split(':');   // format stringName:stringValue
+                    }
+                }
+                if (claimValue == null)
+                {
+                    return result;
+                }
+
+                if (claimValue[0] == "Global" ||
+                    claimValue[0] == "Station" ||
+                    claimValue[0] == "ServiceCentre")
+                {
+                    result = true;
+                }
+            }
+            catch (Exception ex) { }
+
+            return result;
+        }
+
+        public async Task<int[]> GetPriviledgeServiceCenters()
+        {
+            int[] serviceCenterIds = { };   //empty array
+            // get current user
+            try
+            {
+                var currentUserId = GetCurrentUserId().Result;
+                var currentUser = GetUserById(currentUserId).Result;
+                var userClaims = GetClaimsAsync(currentUserId).Result;
+
+                string[] claimValue = null;
+                foreach (var claim in userClaims)
+                {
+                    if (claim.Type == "Privilege")
+                    {
+                        claimValue = claim.Value.Split(':');   // format stringName:stringValue
+                    }
+                }
+                if (claimValue == null)
+                {
+                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                }
+
+                if (claimValue[0] == "Global")
+                {
+                    serviceCenterIds = new int[] { };
+                }
+                else if (claimValue[0] == "Station")
+                {
+                    var stationId = int.Parse(claimValue[1]);
+                    var serviceCentres = await _serviceCentreService.GetServiceCentres();
+                    serviceCenterIds = serviceCentres.Where(s => s.StationId == stationId).Select(s => s.ServiceCentreId).ToArray();
+                }
+                else if (claimValue[0] == "ServiceCentre")
+                {
+                    int serviceCenterId = int.Parse(claimValue[1]);
+                    serviceCenterIds = new int[] { serviceCenterId };
+                }
+                else
+                {
+                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return serviceCenterIds;
         }
 
     }

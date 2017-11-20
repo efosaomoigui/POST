@@ -39,5 +39,7 @@ namespace GIGLS.Core.IServices.User
         Task<bool> RoleSettings(string systemuserid, string userid);
 
         Task<string> GetCurrentUserId();
+        Task<bool> CheckPriviledge();
+        Task<int[]> GetPriviledgeServiceCenters();
     }
 }
