@@ -9,7 +9,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Zone
 {
-    //[Authorize]
+    [Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/domesticroutezonemap")]
     public class DomesticRouteZoneMapController : BaseWebApiController
     {
@@ -19,7 +19,7 @@ namespace GIGLS.WebApi.Controllers.Zone
             _mapService = mapService;
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
         public async Task<IServiceResponse<IEnumerable<DomesticRouteZoneMapDTO>>> GetDomesticRouteZoneMaps()

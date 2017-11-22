@@ -9,7 +9,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.ServiceCentres
 {
-    //[Authorize]
+    [Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/station")]
     public class StationController : BaseWebApiController
     {
@@ -19,7 +19,7 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             _stationService = stationService;
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
         public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetStations()
