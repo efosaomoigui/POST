@@ -1,5 +1,4 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
+﻿using GIGLS.Core.Enums;
 using GIGLS.Core.DTO.Customers;
 using System;
 using System.Collections.Generic;
