@@ -66,5 +66,9 @@ namespace GIGL.GIGLS.Core.Domain
 
         //General Details comes with role user
         public string UserId { get; set; }
+
+        public bool IsdeclaredVal { get; set; }
+        public decimal? DeclarationOfValueCheck { get; set; }
+
     }
 }

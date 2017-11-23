@@ -4,12 +4,11 @@ using GIGLS.Services.Implementation;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Enums;
 using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Business
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/scan")]
     public class ScanController : BaseWebApiController
     {

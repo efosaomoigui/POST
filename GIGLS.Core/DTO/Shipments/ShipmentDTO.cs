@@ -68,5 +68,9 @@ namespace GIGLS.Core.DTO.Shipments
         public List<CustomerDTO> Customer { get; set; }
         public CustomerDTO CustomerDetails { get; set; }
 
+        //
+        public bool IsdeclaredVal { get; set; }
+        public decimal? DeclarationOfValueCheck { get; set; }
+
     }
 }

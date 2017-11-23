@@ -7,28 +7,35 @@ using GIGLS.Core.Enums;
 using GIGLS.Infrastructure;
 using System.Collections.Generic;
 using GIGLS.CORE.Domain;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
     public class ShipmentTrackingService : IShipmentTrackingService
     {
         private readonly IUnitOfWork _uow;
-        public ShipmentTrackingService(IUnitOfWork uow)
+        private readonly IUserService _userService;
+
+        public ShipmentTrackingService(IUnitOfWork uow, IUserService userService)
         {
             _uow = uow;
+            _userService = userService;
         }
 
         public async Task<object> AddShipmentTracking(ShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus)
         {
             try
             {
+                var currentUserId = await _userService.GetCurrentUserId();
+
                 var newShipmentTracking = new GIGL.GIGLS.Core.Domain.ShipmentTracking
                 {
                     Waybill = tracking.Waybill,
                     //TrackingType = (TrackingType)Enum.Parse(typeof(TrackingType), tracking.TrackingType),
                     Location = tracking.Location,
                     Status = tracking.Status,
-                    DateTime = DateTime.Now
+                    DateTime = DateTime.Now,
+                    UserId = currentUserId
                 };
                 _uow.ShipmentTracking.Add(newShipmentTracking);
 
