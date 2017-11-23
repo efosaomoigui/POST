@@ -140,5 +140,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        public async Task<bool> CheckShipmentTracking(string waybill, string status)
+        {
+            bool shipmentTracking = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill.Equals(waybill) && x.Status.Equals(status));
+            return shipmentTracking;
+        }
     }
 }

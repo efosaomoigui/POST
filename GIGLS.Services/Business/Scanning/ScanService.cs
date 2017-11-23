@@ -50,14 +50,23 @@ namespace GIGLS.Services.Business.Scanning
 
             if(shipment != null)
             {
-                var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
-                {
-                    DateTime = DateTime.Now,
-                    Status = scan.ShipmentScanStatus.ToString(),
-                    Waybill = scan.WaybillNumber,
-                }, scan.ShipmentScanStatus);
+                //check if the waybill has not been scan for the same status before
+                var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scan.ShipmentScanStatus.ToString());
 
-                return true;
+                if (!checkTrack)
+                {
+                    var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
+                    {
+                        DateTime = DateTime.Now,
+                        Status = scan.ShipmentScanStatus.ToString(),
+                        Waybill = scan.WaybillNumber,
+                    }, scan.ShipmentScanStatus);
+                    return true;
+                }
+                else
+                {
+                    throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already scan for { scan.ShipmentScanStatus.ToString() } status");
+                }                
             }
 
             // verify the group waybill number exists in the system
@@ -72,17 +81,21 @@ namespace GIGLS.Services.Business.Scanning
                 {
                     foreach (var groupShipment in groupShipmentList)
                     {
-                        await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
+                        var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(groupShipment.WaybillCode, scan.ShipmentScanStatus.ToString());
+                        if (!checkTrack)
                         {
-                            DateTime = DateTime.Now,
-                            Status = scan.ShipmentScanStatus.ToString(),
-                            Waybill = groupShipment.WaybillCode,
-                        }, scan.ShipmentScanStatus);
+                            await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
+                            {
+                                DateTime = DateTime.Now,
+                                Status = scan.ShipmentScanStatus.ToString(),
+                                Waybill = groupShipment.WaybillCode,
+                            }, scan.ShipmentScanStatus);
+                        }
                     }
                 }
                 else
                 {
-                    throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} does not exist");
+                    throw new GenericException($"No Shipment for Group waybill: {scan.WaybillNumber} ");
                 }
             }
             
