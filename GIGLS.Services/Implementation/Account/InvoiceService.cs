@@ -61,6 +61,27 @@ namespace GIGLS.Services.Implementation.Account
             return invoiceDTO;
         }
 
+        public async Task<InvoiceDTO> GetInvoiceByWaybill(string waybl) 
+        {
+            var invoice =  _uow.Invoice.GetAll().Select(e => e.Waybill  == waybl); 
+
+            if (invoice == null)
+            {
+                throw new GenericException("Invoice does not exists");
+            }
+
+            var invoiceDTO = Mapper.Map<InvoiceDTO>(invoice);
+
+            // get Shipment
+            var waybill = invoiceDTO.Waybill;
+            invoiceDTO.Shipment = await _shipmentService.GetShipment(waybill);
+
+            // get Customer
+            invoiceDTO.Customer = invoiceDTO.Shipment.CustomerDetails;
+
+            return invoiceDTO;
+        }
+
         public async Task<object> AddInvoice(InvoiceDTO invoiceDto)
         {
             var newInvoice = Mapper.Map<Invoice>(invoiceDto);

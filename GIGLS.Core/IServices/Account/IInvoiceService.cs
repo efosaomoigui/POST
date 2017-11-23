@@ -8,6 +8,7 @@ namespace GIGLS.Core.IServices.Account
     {
         Task<IEnumerable<InvoiceDTO>> GetInvoices();
         Task<InvoiceDTO> GetInvoiceById(int invoiceId);
+        Task<InvoiceDTO> GetInvoiceByWaybill(string waybill); 
         Task<object> AddInvoice(InvoiceDTO invoice);
         Task UpdateInvoice(int invoiceId, InvoiceDTO invoice);
         Task RemoveInvoice(int invoiceId);
