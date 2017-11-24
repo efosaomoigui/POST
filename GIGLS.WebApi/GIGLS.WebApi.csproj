@@ -290,6 +290,7 @@
     <Compile Include="Controllers\Fleets\FleetModelController.cs" />
     <Compile Include="Controllers\Fleets\FleetPartController.cs" />
     <Compile Include="Controllers\Fleets\FleetTripController.cs" />
+    <Compile Include="Controllers\MessageController.cs" />
     <Compile Include="Controllers\Nav\MainNavController.cs" />
     <Compile Include="Controllers\Nav\SubNavController.cs" />
     <Compile Include="Controllers\Nav\SubSubNavController.cs" />
