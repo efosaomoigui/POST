@@ -8,7 +8,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers
 {
-    //[Authorize(Roles = "Admin,Shipment,Account,Report")]
+    [Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/message")]
     public class MessageController : BaseWebApiController
     {
@@ -19,7 +19,7 @@ namespace GIGLS.WebApi.Controllers
             _messageService = messageService;
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("email")]
         public async Task<IServiceResponse<IEnumerable<MessageDTO>>> GetEmails()
@@ -35,7 +35,7 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("sms")]
         public async Task<IServiceResponse<IEnumerable<MessageDTO>>> GetSms()
@@ -52,7 +52,7 @@ namespace GIGLS.WebApi.Controllers
         }
 
 
-        //[GIGLSActivityAuthorize(Activity = "Create")]
+        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]
         public async Task<IServiceResponse<object>> AddMessage(MessageDTO messageDto)
@@ -68,7 +68,7 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-       // [GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{messageId:int}")]
         public async Task<IServiceResponse<MessageDTO>> GetMessage(int messageId)
@@ -84,7 +84,7 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-       // [GIGLSActivityAuthorize(Activity = "Delete")]
+        [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("{messageId:int}")]
         public async Task<IServiceResponse<bool>> DeleteMessage(int messageId)
@@ -100,7 +100,7 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Update")]
+        [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("{messageId:int}")]
         public async Task<IServiceResponse<bool>> UpdateMessage(int messageId, MessageDTO messageDto)
