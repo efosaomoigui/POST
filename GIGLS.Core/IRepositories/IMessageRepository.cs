@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.IRepositories
 {
-    public interface IEmailSmsRepository : IRepository<EmailSms>
+    public interface IMessageRepository : IRepository<Message>
     {
-        Task<IEnumerable<EmailSmsDTO>> GetEmailSmsAsync(EmailSmsType type);
+        Task<IEnumerable<MessageDTO>> GetMessageAsync(EmailSmsType type);
     }
 }

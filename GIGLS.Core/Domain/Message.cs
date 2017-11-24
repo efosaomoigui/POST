@@ -2,10 +2,10 @@
 
 namespace GIGLS.Core.Domain
 {
-    public class EmailSms : BaseDomain, IAuditable
+    public class Message : BaseDomain, IAuditable
     {
-        public int EmailSmsId { get; set; }
-        public string Message { get; set; }
+        public int MessageId { get; set; }
+        public string Body { get; set; }
         public string Subject { get; set; }
         public string From { get; set; }
         public string To { get; set; }

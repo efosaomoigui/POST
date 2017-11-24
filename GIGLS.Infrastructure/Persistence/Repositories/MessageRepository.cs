@@ -12,20 +12,20 @@ using GIGLS.Core.Enums;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories
 {
-    public class EmailSmsRepository : Repository<EmailSms, GIGLSContext>, IEmailSmsRepository
+    public class MessageRepository : Repository<Message, GIGLSContext>, IMessageRepository
     {
-        public EmailSmsRepository(GIGLSContext context) : base(context)
+        public MessageRepository(GIGLSContext context) : base(context)
         {
         }
         
-        public Task<IEnumerable<EmailSmsDTO>> GetEmailSmsAsync(EmailSmsType type)
+        public Task<IEnumerable<MessageDTO>> GetMessageAsync(EmailSmsType type)
         {
             try
             {
-                var emailSms = Context.EmailSms.Where(x => x.EmailSmsType == type).ToList();
+                var Message = Context.Message.Where(x => x.EmailSmsType == type).ToList();
 
-                var emailSmsDto = Mapper.Map<IEnumerable<EmailSmsDTO>>(emailSms);
-                return Task.FromResult(emailSmsDto);
+                var MessageDto = Mapper.Map<IEnumerable<MessageDTO>>(Message);
+                return Task.FromResult(MessageDto);
             }
             catch (Exception)
             {

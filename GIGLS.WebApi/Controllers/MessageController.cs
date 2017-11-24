@@ -9,26 +9,26 @@ using GIGLS.WebApi.Filters;
 namespace GIGLS.WebApi.Controllers
 {
     //[Authorize(Roles = "Admin,Shipment,Account,Report")]
-    [RoutePrefix("api/emailSms")]
-    public class EmailSmsController : BaseWebApiController
+    [RoutePrefix("api/message")]
+    public class MessageController : BaseWebApiController
     {
-        private readonly IEmailSmsService _emailSmsService;
+        private readonly IMessageService _messageService;
 
-        public EmailSmsController(IEmailSmsService emailSmsService):base(nameof(EmailSmsController))
+        public MessageController(IMessageService messageService):base(nameof(MessageController))
         {
-            _emailSmsService = emailSmsService;
+            _messageService = messageService;
         }
 
         //[GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("email")]
-        public async Task<IServiceResponse<IEnumerable<EmailSmsDTO>>> GetEmails()
+        public async Task<IServiceResponse<IEnumerable<MessageDTO>>> GetEmails()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var emails = await _emailSmsService.GetEmailAsync();
+                var emails = await _messageService.GetEmailAsync();
 
-                return new ServiceResponse<IEnumerable<EmailSmsDTO>>
+                return new ServiceResponse<IEnumerable<MessageDTO>>
                 {
                     Object = emails
                 };
@@ -38,13 +38,13 @@ namespace GIGLS.WebApi.Controllers
         //[GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("sms")]
-        public async Task<IServiceResponse<IEnumerable<EmailSmsDTO>>> GetSms()
+        public async Task<IServiceResponse<IEnumerable<MessageDTO>>> GetSms()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var sms = await _emailSmsService.GetSmsAsync();
+                var sms = await _messageService.GetSmsAsync();
 
-                return new ServiceResponse<IEnumerable<EmailSmsDTO>>
+                return new ServiceResponse<IEnumerable<MessageDTO>>
                 {
                     Object = sms
                 };
@@ -55,43 +55,43 @@ namespace GIGLS.WebApi.Controllers
         //[GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]
-        public async Task<IServiceResponse<object>> AddEmailSms(EmailSmsDTO emailSmsDTO)
+        public async Task<IServiceResponse<object>> AddMessage(MessageDTO messageDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var emailSms = await _emailSmsService.AddEmailSms(emailSmsDTO);
+                var message = await _messageService.AddMessage(messageDto);
 
                 return new ServiceResponse<object>
                 {
-                    Object = emailSms
+                    Object = message
                 };
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+       // [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("{emailSmsId:int}")]
-        public async Task<IServiceResponse<EmailSmsDTO>> GetEmailSms(int emailSmsId)
+        [Route("{messageId:int}")]
+        public async Task<IServiceResponse<MessageDTO>> GetMessage(int messageId)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var emailSms = await _emailSmsService.GetEmailSmsById(emailSmsId);
+                var message = await _messageService.GetMessageById(messageId);
 
-                return new ServiceResponse<EmailSmsDTO>
+                return new ServiceResponse<MessageDTO>
                 {
-                    Object = emailSms
+                    Object = message
                 };
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Delete")]
+       // [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
-        [Route("{emailSmsId:int}")]
-        public async Task<IServiceResponse<bool>> DeleteEmailSms(int emailSmsId)
+        [Route("{messageId:int}")]
+        public async Task<IServiceResponse<bool>> DeleteMessage(int messageId)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _emailSmsService.RemoveEmailSms(emailSmsId);
+                await _messageService.RemoveMessage(messageId);
 
                 return new ServiceResponse<bool>
                 {
@@ -102,12 +102,12 @@ namespace GIGLS.WebApi.Controllers
 
         //[GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
-        [Route("{emailSmsId:int}")]
-        public async Task<IServiceResponse<bool>> UpdateEmailSms(int emailSmsId, EmailSmsDTO emailSmsDTO)
+        [Route("{messageId:int}")]
+        public async Task<IServiceResponse<bool>> UpdateMessage(int messageId, MessageDTO messageDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _emailSmsService.UpdateEmailSms(emailSmsId, emailSmsDTO);
+                await _messageService.UpdateMessage(messageId, messageDto);
 
                 return new ServiceResponse<bool>
                 {

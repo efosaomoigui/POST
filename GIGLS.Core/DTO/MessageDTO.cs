@@ -3,10 +3,10 @@ using GIGLS.CORE.DTO;
 
 namespace GIGLS.Core.DTO
 {
-    public class EmailSmsDTO : BaseDomainDTO
+    public class MessageDTO : BaseDomainDTO
     {
-        public int EmailSmsId { get; set; }
-        public string Message { get; set; }
+        public int MessageId { get; set; }
+        public string Body { get; set; }
         public string Subject { get; set; }
         public string From { get; set; }
         public string To { get; set; }

@@ -151,8 +151,8 @@ namespace GIGLS.Core
                 config.CreateMap<SubSubNav, SubSubNavDTO>();
                 config.CreateMap<SubSubNavDTO, SubSubNav>();
 
-                config.CreateMap<EmailSms, EmailSmsDTO>();
-                config.CreateMap<EmailSmsDTO, EmailSms>();
+                config.CreateMap<Message, MessageDTO>();
+                config.CreateMap<MessageDTO, Message>();
             });
 
             isInit = true;
