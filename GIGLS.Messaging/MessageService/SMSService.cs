@@ -1,22 +1,23 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.AspNet.Identity;
 using System.Configuration;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 using Twilio.Exceptions;
+using GIGLS.Core.IMessage;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Messaging.MessageService
 {
-    public class SMSService : IIdentityMessageService
+    public class SMSService : ISMSService
     {
-        public async Task SendAsync(IdentityMessage message)
+        public async Task SendAsync(MessageDTO message)
         {
             await ConfigSendGridasync(message);
         }
 
         // Use NuGet to install Twilio 
-        private async Task<bool> ConfigSendGridasync(IdentityMessage message)
+        private async Task<bool> ConfigSendGridasync(MessageDTO message)
         {
             bool result = false;
 
@@ -34,7 +35,7 @@ namespace GIGLS.Messaging.MessageService
             {
                 // Send an SMS message.
                 var msg = MessageResource.Create(
-                    to: new PhoneNumber(message.Destination),
+                    to: new PhoneNumber(message.To),
                     from: new PhoneNumber(fromNumber),
                     body: message.Body);
 

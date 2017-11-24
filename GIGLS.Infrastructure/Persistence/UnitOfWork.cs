@@ -33,8 +33,6 @@ namespace GIGLS.Infrastructure.Persistence
             _context = context;
         }
 
-        public IEmailMessageSender MessageSender { get; set; }
-
         [Inject]
         public ICompanyRepository Company { get; set; }
 

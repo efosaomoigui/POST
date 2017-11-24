@@ -2,7 +2,7 @@
 {
     public enum MessageType
     {
-        Shipment,
-        Account
+        ShipmentCreation,
+        UserAccountCreation
     }
 }

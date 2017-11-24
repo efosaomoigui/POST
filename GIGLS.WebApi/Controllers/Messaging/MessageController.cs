@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
 
-namespace GIGLS.WebApi.Controllers
+namespace GIGLS.WebApi.Controllers.Messaging
 {
     [Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/message")]

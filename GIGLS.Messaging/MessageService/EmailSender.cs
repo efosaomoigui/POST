@@ -7,7 +7,7 @@ using System.Net;
 
 namespace GIGLS.INFRASTRUCTURE.MessageService
 {
-    public class EmailSender : IEmailMessageSender
+    public class EmailSender
     {
         //private ILogger logger;
         private SmtpClient client;

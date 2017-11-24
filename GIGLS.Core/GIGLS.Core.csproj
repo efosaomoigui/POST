@@ -308,9 +308,9 @@
     <Compile Include="IMessageService\Config\EmailConfig.cs" />
     <Compile Include="IMessageService\Config\IMessageConfig.cs" />
     <Compile Include="IMessageService\Config\SMSConfig.cs" />
-    <Compile Include="IMessageService\IEmailMessageSender.cs" />
+    <Compile Include="IMessageService\IEmailService.cs" />
     <Compile Include="IMessageService\IMessageService.cs" />
-    <Compile Include="IMessageService\ISMSMessageSender.cs" />
+    <Compile Include="IMessageService\ISMSService.cs" />
     <Compile Include="IRepositories\Account\IGeneralLedgerRepository.cs" />
     <Compile Include="IRepositories\Account\IInsuranceRepository.cs" />
     <Compile Include="IRepositories\Account\IInvoiceRepository.cs" />

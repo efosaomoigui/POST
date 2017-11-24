@@ -3,6 +3,7 @@
     public enum EmailSmsType
     {
         Email,
-        SMS
+        SMS,
+        All
     }
 }

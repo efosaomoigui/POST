@@ -1,10 +1,11 @@
-﻿using GIGLS.Core.IServices;
+﻿using GIGLS.Core.Enums;
+using GIGLS.Core.IServices;
 using System.Threading.Tasks;
 
 namespace GIGLS.Core.IMessageService
 {
-    public interface IMessageService : IServiceDependencyMarker
+    public interface IMessageSenderService : IServiceDependencyMarker
     {
-        Task<bool> SendMessage(string address, string subject, string body, string sender = "");
+        Task<bool> SendMessage(MessageType messageType, EmailSmsType emailSmsType);
     }
 }

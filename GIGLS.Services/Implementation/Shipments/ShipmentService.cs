@@ -16,6 +16,7 @@ using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.IServices.User;
+using GIGLS.Core.IMessageService;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -28,11 +29,13 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly ICustomerService _customerService;
         private readonly IUserService _userService;
+        private readonly IMessageSenderService _messageSenderService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
             INumberGeneratorMonitorService numberGeneratorMonitorService,
-            ICustomerService customerService, IUserService userService
+            ICustomerService customerService, IUserService userService,
+            IMessageSenderService messageSenderService
             )
         {
             _uow = uow;
@@ -42,6 +45,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _customerService = customerService;
             _userService = userService;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
 
@@ -274,6 +278,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
 
+                //send message
+                await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All);
+
                 return newShipment;
             }
             catch (Exception)
@@ -357,7 +364,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var newShipment = Mapper.Map<Shipment>(shipmentDTO);
 
             // set declared value of the shipment
-            if(shipmentDTO.IsdeclaredVal)
+            if (shipmentDTO.IsdeclaredVal)
             {
                 newShipment.DeclarationOfValueCheck = shipmentDTO.DeclarationOfValueCheck;
             }

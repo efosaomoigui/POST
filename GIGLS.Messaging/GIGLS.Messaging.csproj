@@ -151,9 +151,6 @@
     <Compile Include="MessageService\EmailSender.cs" />
     <Compile Include="MessageService\EmailService.cs" />
     <Compile Include="MessageService\ILogger.cs" />
-    <Compile Include="MessageService\MessageAdapterService.cs" />
-    <Compile Include="MessageService\MessageService.cs" />
-    <Compile Include="MessageService\SmsSender.cs" />
     <Compile Include="MessageService\SMSService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

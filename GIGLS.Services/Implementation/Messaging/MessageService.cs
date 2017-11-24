@@ -8,7 +8,7 @@ using GIGLS.Infrastructure;
 using AutoMapper;
 using GIGLS.Core.Domain;
 
-namespace GIGLS.Services.Implementation
+namespace GIGLS.Services.Implementation.Messaging
 {
     public class MessageService : IMessageService
     {

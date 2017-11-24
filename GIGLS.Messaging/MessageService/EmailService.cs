@@ -1,30 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNet.Identity;
+﻿using System.Threading.Tasks;
 using SendGrid;
 using SendGrid.Helpers.Mail;
-using System.Net;
 using System.Configuration;
+using GIGLS.Core.IMessage;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Messaging.MessageService
 {
-    public class EmailService : IIdentityMessageService
+    public class EmailService : IEmailService
     {
-        public async Task SendAsync(IdentityMessage message)
+        public async Task SendAsync(MessageDTO message)
         {
             await ConfigSendGridasync(message);
         }
 
-        private async Task ConfigSendGridasync(IdentityMessage message)
+        private async Task ConfigSendGridasync(MessageDTO message)
         {
             var myMessage = new SendGridMessage();
             var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
             var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
 
-            myMessage.AddTo(message.Destination);
+            myMessage.AddTo(message.To);
             myMessage.From = new SendGrid.Helpers.Mail.EmailAddress(fromEmail, fromName);
             myMessage.Subject = message.Subject;
             myMessage.PlainTextContent = message.Body;
