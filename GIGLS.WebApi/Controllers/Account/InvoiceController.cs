@@ -9,7 +9,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Account
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/invoice")]
     public class InvoiceController : BaseWebApiController
     {
@@ -68,6 +68,22 @@ namespace GIGLS.WebApi.Controllers.Account
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("bywaybill")]
+        public async Task<IServiceResponse<InvoiceDTO>> GetInvoiceByWaybill(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var invoice = await _invoiceService.GetInvoiceByWaybill(waybill);
+
+                return new ServiceResponse<InvoiceDTO>
+                {
+                    Object = invoice
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("{invoiceId:int}")]
@@ -99,6 +115,5 @@ namespace GIGLS.WebApi.Controllers.Account
                 };
             });
         }
-
     }
 }

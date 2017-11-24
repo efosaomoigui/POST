@@ -9,7 +9,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Partnership
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Shipment,Account,Report")]
     public class PartnerApplicationController : BaseWebApiController
     {
         private readonly IPartnerApplicationService _partnerApplicationService;

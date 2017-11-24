@@ -9,7 +9,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Account
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/generalledger")]
     public class GeneralLedgerController : BaseWebApiController
     {

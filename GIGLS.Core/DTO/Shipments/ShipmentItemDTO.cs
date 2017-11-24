@@ -1,6 +1,5 @@
 ﻿using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
-using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Shipments
 {

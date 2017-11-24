@@ -1,5 +1,4 @@
 ﻿using GIGLS.CORE.DTO;
-using System;
 
 namespace GIGLS.Core.DTO.Shipments
 {

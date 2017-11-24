@@ -9,7 +9,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/shipmentreturn")]
     public class ShipmentReturnController : BaseWebApiController
     {

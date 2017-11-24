@@ -158,6 +158,9 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<SubNav> SubNav { get; set; }
         public DbSet<SubSubNav> SubSubNav { get; set; }
 
+        //Message
+        public DbSet<Message> Message { get; set; }
+
         #endregion
 
 

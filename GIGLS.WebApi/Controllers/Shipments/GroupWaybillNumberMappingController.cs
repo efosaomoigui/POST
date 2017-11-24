@@ -1,24 +1,16 @@
 ﻿using GIGLS.Core.IServices;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Services.Implementation;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core.DTO.User;
 using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
-    //[Authorize]
+    [Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/groupwaybillnumbermapping")]
     public class GroupWaybillNumberMappingController : BaseWebApiController
     {

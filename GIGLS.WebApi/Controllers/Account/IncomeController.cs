@@ -9,7 +9,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Account
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/income")]
     public class IncomeController : BaseWebApiController
     {

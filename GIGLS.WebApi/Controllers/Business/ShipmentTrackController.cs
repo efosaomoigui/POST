@@ -9,7 +9,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Business
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/shipmenttrack")]
     public class ShipmentTrackController : BaseWebApiController
     {
@@ -22,7 +22,7 @@ namespace GIGLS.WebApi.Controllers.Business
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("")]
+        [Route("{waybillNumber}")]
         public async Task<IServiceResponse<IEnumerable<ShipmentTrackingDTO>>> TrackShipment(string waybillNumber)
         {
             return await HandleApiOperationAsync(async () =>

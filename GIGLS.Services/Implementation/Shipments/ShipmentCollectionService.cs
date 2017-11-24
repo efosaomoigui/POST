@@ -34,15 +34,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"Waybill {shipmentCollection.Waybill} already exist");
             }
 
+            var currentUserId = await _userService.GetCurrentUserId();
+
             var updateShipmentTracking = new ShipmentTracking
             {
                 Waybill = shipmentCollection.Waybill,
                 //Location = tracking.Location,
                 Status = ShipmentScanStatus.Collected.ToString(),
+                UserId = currentUserId,
                 DateTime = DateTime.Now
             };
 
             var data = Mapper.Map<ShipmentCollection>(shipmentCollection);
+            data.UserId = currentUserId;
             _uow.ShipmentCollection.Add(data);
             _uow.ShipmentTracking.Add(updateShipmentTracking);
             await _uow.CompleteAsync();

@@ -227,6 +227,8 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public ISubSubNavRepository SubSubNav { get; set; }
 
+        [Inject]
+        public IMessageRepository Message { get; set; }
 
         public int Complete()
         {

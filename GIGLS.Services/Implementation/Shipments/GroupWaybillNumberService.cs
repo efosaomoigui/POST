@@ -11,6 +11,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.ServiceCentres;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -19,14 +20,16 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUnitOfWork _uow;
         private readonly INumberGeneratorMonitorService _service;
         private readonly IServiceCentreService _serviceCentreService;
+        private readonly IUserService _userService;
 
         public GroupWaybillNumberService(IUnitOfWork uow, 
             INumberGeneratorMonitorService service,
-            IServiceCentreService serviceCentreService)
+            IServiceCentreService serviceCentreService, IUserService userService)
         {
             _uow = uow;
             _service = service;
             _serviceCentreService = serviceCentreService;
+            _userService = userService;
             MapperConfig.Initialize();
         }
 
@@ -38,10 +41,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 var groupwaybill = await _service.GenerateNextNumber(NumberGeneratorType.GroupWaybillNumber, groupWaybillNumberDTO.ServiceCentreCode);
                 var serviceCentre = await _serviceCentreService.GetServiceCentreByCode(groupWaybillNumberDTO.ServiceCentreCode);
 
+                var currentUserId = await _userService.GetCurrentUserId();
+
                 var newGroupWaybill = new GroupWaybillNumber
                 {
                     GroupWaybillCode = groupwaybill,
-                    //UserId = user,
+                    UserId = currentUserId,
                     ServiceCentreId = serviceCentre.ServiceCentreId,
                     IsActive = true
                 };
