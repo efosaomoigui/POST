@@ -70,8 +70,8 @@ namespace GIGLS.WebApi.Controllers.Account
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("bywaybill")]
-        public async Task<IServiceResponse<InvoiceDTO>> GetInvoiceByWaybill(string waybill)
+        [Route("bywaybill/{waybill}")]
+        public async Task<IServiceResponse<InvoiceDTO>> GetInvoiceByWaybill([FromUri]  string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {

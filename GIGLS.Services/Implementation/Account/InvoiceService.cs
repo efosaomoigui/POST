@@ -63,7 +63,8 @@ namespace GIGLS.Services.Implementation.Account
 
         public async Task<InvoiceDTO> GetInvoiceByWaybill(string waybl) 
         {
-            var invoice =  _uow.Invoice.GetAll().Select(e => e.Waybill  == waybl); 
+            var invoices = await _uow.Invoice.GetInvoicesAsync();
+            var invoice = invoices.FirstOrDefault(e => e.Waybill  == waybl); 
 
             if (invoice == null)
             {

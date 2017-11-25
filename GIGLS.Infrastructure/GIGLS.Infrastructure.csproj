@@ -110,10 +110,6 @@
   <ItemGroup>
     <Compile Include="GenericException.cs" />
     <Compile Include="IdentityInfrastrure\GiglsUserStore.cs" />
-    <Compile Include="Migrations\201711191824531_UserAdditions.cs" />
-    <Compile Include="Migrations\201711191824531_UserAdditions.Designer.cs">
-      <DependentUpon>201711191824531_UserAdditions.cs</DependentUpon>
-    </Compile>
     <Compile Include="Migrations\201711201240197_ShipmentDeclaredValue.cs" />
     <Compile Include="Migrations\201711201240197_ShipmentDeclaredValue.Designer.cs">
       <DependentUpon>201711201240197_ShipmentDeclaredValue.cs</DependentUpon>
@@ -200,9 +196,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201711191824531_UserAdditions.resx">
-      <DependentUpon>201711191824531_UserAdditions.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201711201240197_ShipmentDeclaredValue.resx">
       <DependentUpon>201711201240197_ShipmentDeclaredValue.cs</DependentUpon>
     </EmbeddedResource>
