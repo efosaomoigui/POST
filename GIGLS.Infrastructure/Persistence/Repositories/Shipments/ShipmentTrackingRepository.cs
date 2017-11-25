@@ -63,11 +63,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               //User = shipmentTracking.User?.UserName,
                                               Status = shipmentTracking.Status
                                           };
-                return Task.FromResult(shipmentTrackingDto.ToList());
+                return Task.FromResult(shipmentTrackingDto.ToList().OrderByDescending(x => x.DateTime).ToList());
             }
             catch (Exception)
             {
-
                 throw;
             }
 

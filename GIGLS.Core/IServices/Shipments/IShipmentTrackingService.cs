@@ -15,5 +15,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<object> AddShipmentTracking(ShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus);
         Task UpdateShipmentTracking(int trackingId, ShipmentTrackingDTO tracking);
         Task DeleteShipmentTracking(int trackingId);
+        Task<bool> CheckShipmentTracking(string waybill, string status);
     }
 }

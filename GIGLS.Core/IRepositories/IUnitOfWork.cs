@@ -86,6 +86,7 @@ namespace GIGLS.Core
         IMainNavRepository MainNav { get; set; }
         ISubNavRepository SubNav { get; set; }
         ISubSubNavRepository SubSubNav { get; set; }
+        IMessageRepository Message { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

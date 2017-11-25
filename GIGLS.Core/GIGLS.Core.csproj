@@ -74,9 +74,8 @@
       <HintPath>..\packages\Microsoft.Owin.Host.SystemWeb.3.1.0\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Owin.Security, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Owin.Security.2.1.0\lib\net45\Microsoft.Owin.Security.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Microsoft.Owin.Security, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.3.1.0\lib\net45\Microsoft.Owin.Security.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Owin.Security.Cookies, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Owin.Security.Cookies.2.1.0\lib\net45\Microsoft.Owin.Security.Cookies.dll</HintPath>
@@ -161,6 +160,7 @@
     <Compile Include="Domain\Manifest.cs" />
     <Compile Include="Domain\ManifestGroupWaybillNumberMapping.cs" />
     <Compile Include="Domain\ManifestMonitor.cs" />
+    <Compile Include="Domain\Message.cs" />
     <Compile Include="Domain\NumberGeneratorMonitor.cs" />
     <Compile Include="Domain\Partnership\IdentificationType.cs" />
     <Compile Include="Domain\Partnership\Partner.cs" />
@@ -223,6 +223,7 @@
     <Compile Include="DTO\JobCards\JobCardDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardManagementDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardManagementPartDTO.cs" />
+    <Compile Include="DTO\MessageDTO.cs" />
     <Compile Include="DTO\Nav\MainNavDTO.cs" />
     <Compile Include="DTO\Nav\SubNavDTO.cs" />
     <Compile Include="DTO\Nav\SubSubNavDTO.cs" />
@@ -274,6 +275,7 @@
     <Compile Include="Enums\CompanyType.cs" />
     <Compile Include="Enums\CustomerType.cs" />
     <Compile Include="Enums\DebitCreditFlag.cs" />
+    <Compile Include="Enums\EmailSmsType.cs" />
     <Compile Include="Enums\FilterCustomerType.cs" />
     <Compile Include="Enums\FleetType.cs" />
     <Compile Include="Enums\Gender.cs" />
@@ -282,6 +284,7 @@
     <Compile Include="Enums\JobCardStatus.cs" />
     <Compile Include="Enums\JobCardType.cs" />
     <Compile Include="Enums\MaintenanceType.cs" />
+    <Compile Include="Enums\MessageType.cs" />
     <Compile Include="Enums\NumberGeneratorType.cs" />
     <Compile Include="Enums\PartnerApplicationStatus.cs" />
     <Compile Include="Enums\PartnerType.cs" />
@@ -304,7 +307,9 @@
     <Compile Include="IMessageService\Config\EmailConfig.cs" />
     <Compile Include="IMessageService\Config\IMessageConfig.cs" />
     <Compile Include="IMessageService\Config\SMSConfig.cs" />
-    <Compile Include="IMessageService\IMessageSender.cs" />
+    <Compile Include="IMessageService\IEmailService.cs" />
+    <Compile Include="IMessageService\IMessageService.cs" />
+    <Compile Include="IMessageService\ISMSService.cs" />
     <Compile Include="IRepositories\Account\IGeneralLedgerRepository.cs" />
     <Compile Include="IRepositories\Account\IInsuranceRepository.cs" />
     <Compile Include="IRepositories\Account\IInvoiceRepository.cs" />
@@ -322,6 +327,7 @@
     <Compile Include="IRepositories\Fleets\IFleetRepository.cs" />
     <Compile Include="IRepositories\Fleets\IFleetTripRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
+    <Compile Include="IRepositories\IMessageRepository.cs" />
     <Compile Include="IRepositories\IRepository.cs" />
     <Compile Include="IRepositories\IStateRepository.cs" />
     <Compile Include="IRepositories\IUnitOfWork.cs" />
@@ -395,6 +401,7 @@
     <Compile Include="IServices\Fleets\IFleetPartService.cs" />
     <Compile Include="IServices\Fleets\IFleetService.cs" />
     <Compile Include="IServices\Fleets\IFleetTripService.cs" />
+    <Compile Include="IServices\IMessageService.cs" />
     <Compile Include="IServices\IServiceDependencyMarker.cs" />
     <Compile Include="IServices\IServiceReponse.cs" />
     <Compile Include="IServices\IStateService.cs" />
@@ -450,7 +457,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

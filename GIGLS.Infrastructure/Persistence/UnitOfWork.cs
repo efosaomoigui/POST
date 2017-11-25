@@ -33,8 +33,6 @@ namespace GIGLS.Infrastructure.Persistence
             _context = context;
         }
 
-        public IMessageSender MessageSender { get; set; }
-
         [Inject]
         public ICompanyRepository Company { get; set; }
 
@@ -227,6 +225,8 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public ISubSubNavRepository SubSubNav { get; set; }
 
+        [Inject]
+        public IMessageRepository Message { get; set; }
 
         public int Complete()
         {

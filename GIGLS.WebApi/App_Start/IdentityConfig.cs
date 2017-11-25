@@ -25,7 +25,7 @@ namespace GIGLS.WebApi
             GIGLSContext db = new GIGLSContext();
             ApplicationUserManager manager = new ApplicationUserManager(new GiglsUserStore<User>(db));
 
-            manager.EmailService = new EmailService();
+            //manager.EmailService = new EmailService();
 
             // Configure validation logic for usernames
             manager.UserValidator = new UserValidator<User>(manager)

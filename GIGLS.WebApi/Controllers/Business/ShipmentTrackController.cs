@@ -22,7 +22,7 @@ namespace GIGLS.WebApi.Controllers.Business
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("")]
+        [Route("{waybillNumber}")]
         public async Task<IServiceResponse<IEnumerable<ShipmentTrackingDTO>>> TrackShipment(string waybillNumber)
         {
             return await HandleApiOperationAsync(async () =>

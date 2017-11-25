@@ -163,7 +163,8 @@
     <Compile Include="Implementation\JobCards\JobCardManagementPartService.cs" />
     <Compile Include="Implementation\JobCards\JobCardManagementService.cs" />
     <Compile Include="Implementation\JobCards\JobCardService.cs" />
-    <Compile Include="Implementation\Messaging\EmailService.cs" />
+    <Compile Include="Implementation\Messaging\MessageService.cs" />
+    <Compile Include="Implementation\Messaging\MessageSenderService.cs" />
     <Compile Include="Implementation\Nav\MainNavService.cs" />
     <Compile Include="Implementation\Nav\SubNavService.cs" />
     <Compile Include="Implementation\Nav\SubSubNavService.cs" />

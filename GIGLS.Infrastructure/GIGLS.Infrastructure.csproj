@@ -135,6 +135,7 @@
     <Compile Include="Persistence\Repositories\JobCards\JobCardManagementPartRepository.cs" />
     <Compile Include="Persistence\Repositories\JobCards\JobCardManagementRepository.cs" />
     <Compile Include="Persistence\Repositories\JobCards\JobCardRepository.cs" />
+    <Compile Include="Persistence\Repositories\MessageRepository.cs" />
     <Compile Include="Persistence\Repositories\Nav\MainNavRepository.cs" />
     <Compile Include="Persistence\Repositories\Nav\SubNavRepository.cs" />
     <Compile Include="Persistence\Repositories\Nav\SubSubNavRepository.cs" />
