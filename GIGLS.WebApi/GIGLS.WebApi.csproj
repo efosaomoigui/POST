@@ -367,6 +367,10 @@
       <Project>{ca1b58fd-e1d5-48d3-a27d-d4e756cbf3e5}</Project>
       <Name>GIGLS.Infrastructure</Name>
     </ProjectReference>
+    <ProjectReference Include="..\GIGLS.Messaging\GIGLS.Messaging.csproj">
+      <Project>{f5d1aa8b-bb98-43e6-a758-cbfa7563f4a7}</Project>
+      <Name>GIGLS.Messaging</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GIGLS.Services\GIGLS.Services.csproj">
       <Project>{3e97ded8-8a27-4b97-b8a9-fc3511550d91}</Project>
       <Name>GIGLS.Services</Name>
