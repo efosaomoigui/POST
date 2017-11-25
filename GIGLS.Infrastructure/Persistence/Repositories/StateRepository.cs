@@ -18,7 +18,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories
         public Task<IEnumerable<StateDTO>> GetStatesAsync(int pageSize = 10, int page = 1)
         {
             var states = Context.State.ToList();
-            var subresult  = states.Skip(pageSize * (page - 1)).Take(pageSize);
+            var subresult = states;
             var stateDto = Mapper.Map<IEnumerable<StateDTO>>(subresult);
             return Task.FromResult(stateDto);
         }

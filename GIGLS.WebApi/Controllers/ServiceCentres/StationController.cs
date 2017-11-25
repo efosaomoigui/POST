@@ -14,9 +14,11 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
     public class StationController : BaseWebApiController
     {
         private IStationService _stationService;
-        public StationController(IStationService stationService) : base(nameof(StationController))
+        private IServiceCentreService _serviceCentreService; 
+        public StationController(IStationService stationService, IServiceCentreService serviceCentreService) : base(nameof(StationController))
         {
             _stationService = stationService;
+            _serviceCentreService = serviceCentreService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -43,6 +45,23 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             {
 
                 var station =await  _stationService.GetStationById(stationId);
+
+                return new ServiceResponse<StationDTO>
+                {
+                    Object = station
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("serviceCenter/{serviceCenterId:int}")]
+        public async Task<IServiceResponse<StationDTO>> GetStationByServiceCenterId(int serviceCenterId) 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var serviceCenter = await _serviceCentreService.GetServiceCentreById(serviceCenterId);
+                var station = await _stationService.GetStationById(serviceCenter.StationId);
 
                 return new ServiceResponse<StationDTO>
                 {

@@ -110,9 +110,9 @@
   <ItemGroup>
     <Compile Include="GenericException.cs" />
     <Compile Include="IdentityInfrastrure\GiglsUserStore.cs" />
-    <Compile Include="Migrations\201711201240197_ShipmentDeclaredValue.cs" />
-    <Compile Include="Migrations\201711201240197_ShipmentDeclaredValue.Designer.cs">
-      <DependentUpon>201711201240197_ShipmentDeclaredValue.cs</DependentUpon>
+    <Compile Include="Migrations\201711170718517_b.cs" />
+    <Compile Include="Migrations\201711170718517_b.Designer.cs">
+      <DependentUpon>201711170718517_b.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Persistence\GIGLSContext.cs" />
@@ -197,8 +197,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201711201240197_ShipmentDeclaredValue.resx">
-      <DependentUpon>201711201240197_ShipmentDeclaredValue.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201711170718517_b.resx">
+      <DependentUpon>201711170718517_b.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
