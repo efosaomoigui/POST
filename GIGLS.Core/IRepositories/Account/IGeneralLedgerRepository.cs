@@ -10,8 +10,8 @@ namespace GIGLS.Core.IRepositories.Account
 {
     public interface IGeneralLedgerRepository : IRepository<GeneralLedger>
     {
-        Task<List<GeneralLedgerDTO>> GetGeneralLedgersAsync();
-        Task<List<GeneralLedgerDTO>> GetGeneralLedgersAsync(CreditDebitType creditDebitType);
-        Task<List<GeneralLedgerDTO>> GetGeneralLedgersAsync(AccountFilterCriteria AccountFilterCriteria);
+        Task<List<GeneralLedgerDTO>> GetGeneralLedgersAsync(int[] serviceCentreIds);
+        Task<List<GeneralLedgerDTO>> GetGeneralLedgersAsync(CreditDebitType creditDebitType, int[] serviceCentreIds);
+        Task<List<GeneralLedgerDTO>> GetGeneralLedgersAsync(AccountFilterCriteria AccountFilterCriteria, int[] serviceCentreIds);
     }
 }

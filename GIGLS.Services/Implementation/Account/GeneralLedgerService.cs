@@ -4,6 +4,7 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Account;
+using GIGLS.Core.IServices.User;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -16,22 +17,26 @@ namespace GIGLS.Services.Implementation.Account
     public class GeneralLedgerService : IGeneralLedgerService
     {
         private readonly IUnitOfWork _uow;
+        private readonly IUserService _userService;
 
-        public GeneralLedgerService(IUnitOfWork uow)
+        public GeneralLedgerService(IUnitOfWork uow, IUserService userService)
         {
             _uow = uow;
+            _userService = userService;
             MapperConfig.Initialize();
         }
 
         public async Task<IEnumerable<GeneralLedgerDTO>> GetGeneralLedgers()
         {
-            var generalLedgers = await _uow.GeneralLedger.GetGeneralLedgersAsync();
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var generalLedgers = await _uow.GeneralLedger.GetGeneralLedgersAsync(serviceCenterIds);
             return generalLedgers;
         }
 
         public async Task<IEnumerable<GeneralLedgerDTO>> GetGeneralLedgersAsync(CreditDebitType creditDebitType)
         {
-            var generalLedgers = await _uow.GeneralLedger.GetGeneralLedgersAsync(creditDebitType);
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var generalLedgers = await _uow.GeneralLedger.GetGeneralLedgersAsync(creditDebitType, serviceCenterIds);
             return generalLedgers;
         }
 

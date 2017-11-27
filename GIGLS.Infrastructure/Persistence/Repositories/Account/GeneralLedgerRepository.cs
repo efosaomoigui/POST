@@ -20,26 +20,50 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
         {
         }
 
-        public Task<List<GeneralLedgerDTO>> GetGeneralLedgersAsync()
+        public Task<List<GeneralLedgerDTO>> GetGeneralLedgersAsync(int[] serviceCentreIds)
         {
-            var generalLedgers = Context.GeneralLedger.Include(s => s.ServiceCentre).ToList();
+            //filter by service center
+            var generalLedgerContext = Context.GeneralLedger.AsQueryable();
+            if (serviceCentreIds.Length > 0)
+            {
+                generalLedgerContext = Context.GeneralLedger.Where(s => serviceCentreIds.Contains(s.ServiceCentreId));
+            }
+            ////
+
+            var generalLedgers = generalLedgerContext.Include(s => s.ServiceCentre).ToList();
             var generalLedgerDto = Mapper.Map<IEnumerable<GeneralLedgerDTO>>(generalLedgers);
             return Task.FromResult(generalLedgerDto.OrderByDescending(s => s.DateOfEntry).ToList());
         }
         
-        public Task<List<GeneralLedgerDTO>> GetGeneralLedgersAsync(CreditDebitType creditDebitType)
+        public Task<List<GeneralLedgerDTO>> GetGeneralLedgersAsync(CreditDebitType creditDebitType, int[] serviceCentreIds)
         {
-            var generalLedgers = Context.GeneralLedger.Include(s => s.ServiceCentre).Where(s => s.CreditDebitType == creditDebitType).ToList();
+            //filter by service center
+            var generalLedgerContext = Context.GeneralLedger.AsQueryable();
+            if (serviceCentreIds.Length > 0)
+            {
+                generalLedgerContext = Context.GeneralLedger.Where(s => serviceCentreIds.Contains(s.ServiceCentreId));
+            }
+            ////
+
+            var generalLedgers = generalLedgerContext.Include(s => s.ServiceCentre).Where(s => s.CreditDebitType == creditDebitType).ToList();
             var generalLedgerDto = Mapper.Map<IEnumerable<GeneralLedgerDTO>>(generalLedgers);
             return Task.FromResult(generalLedgerDto.OrderByDescending(s => s.DateOfEntry).ToList());
         }
 
-        public Task<List<GeneralLedgerDTO>> GetGeneralLedgersAsync(AccountFilterCriteria accountFilterCriteria)
+        public Task<List<GeneralLedgerDTO>> GetGeneralLedgersAsync(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
         {
             DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
             DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
 
-            IQueryable<GeneralLedger> generalLedgers = Context.GeneralLedger;
+            //filter by service center
+            var generalLedgerContext = Context.GeneralLedger.AsQueryable();
+            if (serviceCentreIds.Length > 0)
+            {
+                generalLedgerContext = Context.GeneralLedger.Where(s => serviceCentreIds.Contains(s.ServiceCentreId));
+            }
+            ////
+
+            IQueryable<GeneralLedger> generalLedgers = generalLedgerContext;
 
             //If No Date Supply
             if (!accountFilterCriteria.StartDate.HasValue && !accountFilterCriteria.EndDate.HasValue)

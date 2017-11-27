@@ -198,24 +198,30 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
         }
 
-        public int GetShipmentTotal()
-        {
-            var count = Context.State.ToList().Count();
-            return count;
-        }
+        //public int GetShipmentTotal()
+        //{
+        //    var count = Context.State.ToList().Count();
+        //    return count;
+        //}
 
-        public int GetStatesTotal()
-        {
-            var count = Context.State.ToList().Count();
-            return count;
-        }
+        //public int GetStatesTotal()
+        //{
+        //    var count = Context.State.ToList().Count();
+        //    return count;
+        //}
 
-        public Task<List<ShipmentDTO>> GetShipments(ShipmentFilterCriteria f_Criteria)
+        public Task<List<ShipmentDTO>> GetShipments(ShipmentFilterCriteria f_Criteria, int[] serviceCentreIds)
         {
             DateTime StartDate = f_Criteria.StartDate.GetValueOrDefault().Date;
             DateTime EndDate = f_Criteria.EndDate?.Date ?? StartDate;
 
-            IQueryable<Shipment> shipments = Context.Shipment;
+            //filter by service center
+            var shipments = _context.Shipment.AsQueryable();
+            if (serviceCentreIds.Length > 0)
+            {
+                shipments = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+            }
+            ////
 
             //If No Date Supply
             if (!f_Criteria.StartDate.HasValue && !f_Criteria.EndDate.HasValue)
