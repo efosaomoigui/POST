@@ -9,7 +9,7 @@ namespace GIGLS.Core.IRepositories.Account
 {
     public interface IInvoiceRepository : IRepository<Invoice>
     {
-        Task<IEnumerable<InvoiceDTO>> GetInvoicesAsync();
-        Task<List<InvoiceDTO>> GetInvoicesAsync(AccountFilterCriteria accountFilterCriteria);
+        Task<IEnumerable<InvoiceDTO>> GetInvoicesAsync(int[] serviceCentreIds);
+        Task<List<InvoiceDTO>> GetInvoicesAsync(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
     }
 }

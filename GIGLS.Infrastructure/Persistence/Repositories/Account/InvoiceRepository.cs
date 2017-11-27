@@ -17,19 +17,39 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
         public InvoiceRepository(GIGLSContext context) : base(context)
         {
         }
-        public Task<IEnumerable<InvoiceDTO>> GetInvoicesAsync()
+        public Task<IEnumerable<InvoiceDTO>> GetInvoicesAsync(int[] serviceCentreIds)
         {
-            var invoices = Context.Invoice.ToList();
+            //filter by service center using general ledger waybill
+            var generalLedgerContext = Context.GeneralLedger.AsQueryable();
+            var serviceCenterWaybills = new List<string>();
+            if (serviceCentreIds.Length > 0)
+            {
+                generalLedgerContext = Context.GeneralLedger.Where(s => serviceCentreIds.Contains(s.ServiceCentreId));
+                serviceCenterWaybills = generalLedgerContext.Select(s => s.Waybill).ToList();
+            }
+            ////
+
+            var invoices = Context.Invoice.Where(s => serviceCenterWaybills.Contains(s.Waybill)).ToList();
             var invoiceDto = Mapper.Map<IEnumerable<InvoiceDTO>>(invoices);
             return Task.FromResult(invoiceDto);
         }
 
-        public Task<List<InvoiceDTO>> GetInvoicesAsync(AccountFilterCriteria accountFilterCriteria)
+        public Task<List<InvoiceDTO>> GetInvoicesAsync(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
         {
             DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
             DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
 
-            IQueryable<Invoice> invoices = Context.Invoice;
+            //filter by service center using general ledger waybill
+            var generalLedgerContext = Context.GeneralLedger.AsQueryable();
+            var serviceCenterWaybills = new List<string>();
+            if (serviceCentreIds.Length > 0)
+            {
+                generalLedgerContext = Context.GeneralLedger.Where(s => serviceCentreIds.Contains(s.ServiceCentreId));
+                serviceCenterWaybills = generalLedgerContext.Select(s => s.Waybill).ToList();
+            }
+            ////
+
+            IQueryable<Invoice> invoices = Context.Invoice.Where(s => serviceCenterWaybills.Contains(s.Waybill));
 
             //If No Date Supply
             if (!accountFilterCriteria.StartDate.HasValue && !accountFilterCriteria.EndDate.HasValue)

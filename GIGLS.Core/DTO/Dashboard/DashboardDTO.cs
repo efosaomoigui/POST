@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO;
 using System;
 using System.Collections.Generic;
@@ -16,5 +17,8 @@ namespace GIGLS.Core.DTO.Dashboard
         public ServiceCentreDTO ServiceCentre { get; set; }
         public StationDTO Station { get; set; }
         public List<ShipmentOrderDTO> MostRecentOrder { get; set; }
+        public List<GraphDataDTO> GraphData { get; set; }
+        public GraphDataDTO CurrentMonthGraphData { get; set; }
+        public List<ShipmentDTO> ShipmentsOrderedByServiceCenter { get; set; }
     }
 }

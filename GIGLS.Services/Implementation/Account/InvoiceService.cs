@@ -1,18 +1,16 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
-using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Infrastructure;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Account
@@ -23,20 +21,24 @@ namespace GIGLS.Services.Implementation.Account
         private INumberGeneratorMonitorService _service { get; set; }
         private IShipmentService _shipmentService { get; set; }
         private ICustomerService _customerService { get; set; }
+        private readonly IUserService _userService;
 
         public InvoiceService(IUnitOfWork uow, INumberGeneratorMonitorService service,
-            IShipmentService shipmentService, ICustomerService customerService)
+            IShipmentService shipmentService, ICustomerService customerService,
+            IUserService userService)
         {
             _uow = uow;
             _service = service;
             _shipmentService = shipmentService;
             _customerService = customerService;
+            _userService = userService;
             MapperConfig.Initialize();
         }
 
         public async Task<IEnumerable<InvoiceDTO>> GetInvoices()
         {
-            var invoices = await _uow.Invoice.GetInvoicesAsync();
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var invoices = await _uow.Invoice.GetInvoicesAsync(serviceCenterIds);
             return invoices;
         }
 
@@ -63,7 +65,7 @@ namespace GIGLS.Services.Implementation.Account
 
         public async Task<InvoiceDTO> GetInvoiceByWaybill(string waybl) 
         {
-            var invoices = await _uow.Invoice.GetInvoicesAsync();
+            var invoices = await GetInvoices();
             var invoice = invoices.FirstOrDefault(e => e.Waybill  == waybl); 
 
             if (invoice == null)
