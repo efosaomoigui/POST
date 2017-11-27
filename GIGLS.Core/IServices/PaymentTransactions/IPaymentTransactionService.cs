@@ -8,9 +8,9 @@ namespace GIGLS.Core.IServices.PaymentTransactions
     {
         Task<IEnumerable<PaymentTransactionDTO>> GetPaymentTransactions();
         Task<PaymentTransactionDTO> GetPaymentTransactionById(string waybill);
-        Task<object> AddPaymentTransaction(PaymentTransactionDTO paymentTransaction);
+        //Task<object> AddPaymentTransaction(PaymentTransactionDTO paymentTransaction);
         Task UpdatePaymentTransaction(string waybill, PaymentTransactionDTO paymentTransaction);
-        Task<bool> ConfirmPaymentTransaction(string waybill, PaymentTransactionDTO paymentTransaction);
+        Task<bool> ProcessPaymentTransaction(PaymentTransactionDTO paymentTransaction);
         Task RemovePaymentTransaction(string waybill);
     }
 }

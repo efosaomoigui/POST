@@ -5,9 +5,6 @@ namespace GIGLS.Core.IServices.Business
 {
     public interface IPaymentService : IServiceDependencyMarker
     {
-        Task<bool> ProcessCashPayment(string waybill, PaymentTransactionDTO paymentDto);
-        Task<bool> ProcessPosPayment(string waybill, PaymentTransactionDTO paymentDto);
-        Task<bool> ProcessOnlinePayment(string waybill, PaymentTransactionDTO paymentDto);
-        Task<bool> ConfirmPayment(string waybill, PaymentTransactionDTO paymentDto);
+        Task<bool> ProcessPayment(PaymentTransactionDTO paymentDto);
     }
 }

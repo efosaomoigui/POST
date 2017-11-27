@@ -21,60 +21,12 @@ namespace GIGLS.WebApi.Controllers.Business
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
-        [Route("{waybill}/cash")]
-        public async Task<IServiceResponse<bool>> CashPayment(string waybill, PaymentTransactionDTO paymentDto)
-        {
-            return await HandleApiOperationAsync(async () =>
-           {
-               var cash = await _paymentService.ProcessCashPayment(waybill, paymentDto);
-
-               return new ServiceResponse<bool>
-               {
-                   Object = cash
-               };
-           });
-        }
-
-        [GIGLSActivityAuthorize(Activity = "Create")]
-        [HttpPost]
-        [Route("{waybill}/pos")]
-        public async Task<IServiceResponse<bool>> PosPayment(string waybill, PaymentTransactionDTO paymentDto)
+        [Route("ProcessPayment")]
+        public async Task<IServiceResponse<bool>> ProcessPayment(PaymentTransactionDTO paymentDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var pos = await _paymentService.ProcessPosPayment(waybill, paymentDto);
-
-                return new ServiceResponse<bool>
-                {
-                    Object = pos
-                };
-            });
-        }
-
-        [GIGLSActivityAuthorize(Activity = "Create")]
-        [HttpPost]
-        [Route("{waybill}/online")]
-        public async Task<IServiceResponse<bool>> OnlinePayment(string waybill, PaymentTransactionDTO paymentDto)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var online = await _paymentService.ProcessOnlinePayment(waybill, paymentDto);
-
-                return new ServiceResponse<bool>
-                {
-                    Object = false
-                };
-            });
-        }
-
-        [GIGLSActivityAuthorize(Activity = "Create")]
-        [HttpPost]
-        [Route("{waybill}/confirmpayment")]
-        public async Task<IServiceResponse<bool>> ConfirmPayment(string waybill, PaymentTransactionDTO paymentDto)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var result = await _paymentService.ConfirmPayment(waybill, paymentDto);
+                var result = await _paymentService.ProcessPayment(paymentDto);
 
                 return new ServiceResponse<bool>
                 {

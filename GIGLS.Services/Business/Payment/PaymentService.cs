@@ -15,30 +15,9 @@ namespace GIGLS.Services.Business.Payment
             _paymentTransactionService = paymentService;
         }
 
-        public async Task<bool> ProcessCashPayment(string waybill, PaymentTransactionDTO paymentDto)
+        public async Task<bool> ProcessPayment(PaymentTransactionDTO paymentDto)
         {
-            paymentDto.PaymentTypes = PaymentType.Cash;
-            await _paymentTransactionService.UpdatePaymentTransaction(waybill, paymentDto);
-            return true;
-        }
-
-        public async Task<bool> ProcessPosPayment(string waybill, PaymentTransactionDTO paymentDto)
-        {
-            paymentDto.PaymentTypes = PaymentType.Pos;
-            await _paymentTransactionService.UpdatePaymentTransaction(waybill, paymentDto);
-            return true;
-        }
-
-        public async Task<bool> ProcessOnlinePayment(string waybill, PaymentTransactionDTO paymentDto)
-        {
-            paymentDto.PaymentTypes = PaymentType.Online;
-            await _paymentTransactionService.UpdatePaymentTransaction(waybill, paymentDto);
-            return true;
-        }
-
-        public async Task<bool> ConfirmPayment(string waybill, PaymentTransactionDTO paymentDto)
-        {
-            return await _paymentTransactionService.ConfirmPaymentTransaction(waybill, paymentDto);
+            return await _paymentTransactionService.ProcessPaymentTransaction(paymentDto);
         }
 
     }

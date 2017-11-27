@@ -83,7 +83,7 @@ namespace GIGLS.Services.Implementation.Zone
                 await _deliveryService.GetDeliveryOptionById(optionId);
                 await _zoneService.GetZoneById(zoneId);
 
-                var option = await _uow.DeliveryOptionPrice.GetAsync(o => o.DeliveryOptionPriceId == optionId, "Zone, DeliveryOption");
+                var option = await _uow.DeliveryOptionPrice.GetAsync(o => o.DeliveryOptionId == optionId && o.ZoneId == zoneId, "Zone, DeliveryOption");
                 if (option == null)
                 {
                     throw new GenericException("Delivery Option Price Not Exist");

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using GIGLS.Core.Enums;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core;
-using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Business.Pricing
 {
@@ -16,11 +16,12 @@ namespace GIGLS.Services.Business.Pricing
         private readonly ISpecialDomesticZonePriceService _special;
         private readonly IWeightLimitService _weightLimit;
         private readonly IWeightLimitPriceService _weightLimitPrice;
+        private readonly IUserService _userService;
         private readonly IUnitOfWork _uow;
 
         public PricingService (IDomesticRouteZoneMapService zoneService, IDeliveryOptionPriceService optionPriceService,
             IDomesticZonePriceService regular, ISpecialDomesticZonePriceService special,
-            IWeightLimitService weightLimit, IWeightLimitPriceService weightLimitPrice,
+            IWeightLimitService weightLimit, IWeightLimitPriceService weightLimitPrice, IUserService userService,
             IUnitOfWork uow)
         {
             _routeZone = zoneService;
@@ -29,26 +30,19 @@ namespace GIGLS.Services.Business.Pricing
             _special = special;
             _weightLimit = weightLimit;
             _weightLimitPrice = weightLimitPrice;
+            _userService = userService;
             _uow = uow;
         }
 
         public async Task<decimal> GetSpecialPrice(PricingDTO pricingDto)
         {
-            //for test//
-            var userServiceCentreMapping = new UserServiceCentreMapping();
-            var userServiceCentreMappingList = await _uow.UserServiceCentreMapping.FindAsync(s => s.IsActive == true);
-            foreach(var item in userServiceCentreMappingList)
-            {
-                userServiceCentreMapping = item;
-                break;
-            }
-            var departureServiceCentreId = userServiceCentreMapping.ServiceCentreId;
-            var userId = userServiceCentreMapping.UserId;
-            //for test//
+            //Get Login User and Service Centre User belong 
+            var currentUser = await _userService.GetCurrentUserId();
+            var departureServiceCentreId = await _uow.UserServiceCentreMapping.GetAsync(s => s.IsActive == true && s.UserId == currentUser);
 
-
+            
             //var zone = await _routeZone.GetZone(pricingDto.DepartureServiceCentreId, pricingDto.DestinationServiceCentreId);
-            var zone = await _routeZone.GetZone(departureServiceCentreId, pricingDto.DestinationServiceCentreId);
+            var zone = await _routeZone.GetZone(departureServiceCentreId.ServiceCentreId, pricingDto.DestinationServiceCentreId);
 
             decimal PackagePrice = await _special.GetSpecialZonePrice(pricingDto.SpecialPackageId, zone.ZoneId);
 
@@ -72,38 +66,18 @@ namespace GIGLS.Services.Business.Pricing
                     break;
             }
             return null;
-             
-            //if(pricingDto.PricingType == PricingType.Special)
-            //{
-            //   return GetSpecialPrice(pricingDto);
-            //}
-            
-            //if (pricingDto.PricingType == PricingType.Regular)
-            //{
-            //    return GetRegularPrice(pricingDto);
-            //}
-            //return null;
         }
 
         private async Task<decimal> GetRegularPrice(PricingDTO pricingDto)
         {
-            //for test//
-            var userServiceCentreMapping = new UserServiceCentreMapping();
-            var userServiceCentreMappingList = await _uow.UserServiceCentreMapping.FindAsync(s => s.IsActive == true);
-            foreach (var item in userServiceCentreMappingList)
-            {
-                userServiceCentreMapping = item;
-                break;
-            }
-            var departureServiceCentreId = userServiceCentreMapping.ServiceCentreId;
-            var userId = userServiceCentreMapping.UserId;
-            //for test//
-
+            //Get Login User and Service Centre User belong 
+            var currentUser = await _userService.GetCurrentUserId();
+            var departureServiceCentreId = await _uow.UserServiceCentreMapping.GetAsync(s => s.IsActive == true && s.UserId == currentUser);
 
 
             decimal PackagePrice;
 
-            var zone = await _routeZone.GetZone(departureServiceCentreId, pricingDto.DestinationServiceCentreId);
+            var zone = await _routeZone.GetZone(departureServiceCentreId.ServiceCentreId, pricingDto.DestinationServiceCentreId);
             decimal deliveryOptionPrice = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId);
 
             //This is our limit weight. This will be deleted once limit Price Setting is approve

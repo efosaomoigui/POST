@@ -5,7 +5,6 @@ using GIGLS.Core.IServices.Zone;
 using GIGLS.Core;
 using GIGL.GIGLS.Core.Domain;
 using System.Collections.Generic;
-using System.Linq;
 using GIGLS.Infrastructure;
 
 namespace GIGLS.Services.Implementation.Zone
@@ -23,7 +22,7 @@ namespace GIGLS.Services.Implementation.Zone
         {
             try
             {
-                if (await _uow.DomesticZonePrice.ExistAsync(c => c.Weight == domesticZonePrice.Weight))
+                if (await _uow.DomesticZonePrice.ExistAsync(c => c.Weight == domesticZonePrice.Weight && c.ZoneId == domesticZonePrice.ZoneId))
                 {
                     throw new GenericException("Price already set for this Zone and Weight");
                 }
@@ -31,7 +30,6 @@ namespace GIGLS.Services.Implementation.Zone
                 var newPrice = new DomesticZonePrice
                 {
                     Weight = domesticZonePrice.Weight,
-                    //UserId = domesticZonePrice.UserId,
                     Price = domesticZonePrice.Price,
                     ZoneId = domesticZonePrice.ZoneId
                 };
@@ -101,8 +99,6 @@ namespace GIGLS.Services.Implementation.Zone
                     Price   = zone.Price,
                     ZoneId  = zone.ZoneId,
                     ZoneName = zone.Zone.ZoneName
-                    //UserId  = zone.UserId,
-                    //UserName = $"{zone.User.FirstName} {zone.User.LastName}"
                 };
             }
             catch (Exception)
@@ -119,7 +115,6 @@ namespace GIGLS.Services.Implementation.Zone
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -134,16 +129,12 @@ namespace GIGLS.Services.Implementation.Zone
                     throw new Exception("Price for this Zone and Weight does not exist");
                 }
                 zone.Weight = domesticZoneDto.Weight;
-                //zone.UserId = domesticZoneDto.UserId;
                 zone.Price = domesticZoneDto.Price;
-                zone.ZoneId = domesticZoneDto.ZoneId;
-
-                //user logged on
+                zone.ZoneId = domesticZoneDto.ZoneId;                
                 _uow.Complete();
             }
             catch (Exception)
             {
-
                 throw;
             }
         }

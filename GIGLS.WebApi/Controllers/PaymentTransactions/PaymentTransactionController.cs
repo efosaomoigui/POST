@@ -36,21 +36,21 @@ namespace GIGLS.WebApi.Controllers.PaymentTransactions
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Create")]
-        [HttpPost]
-        [Route("")]
-        public async Task<IServiceResponse<object>> AddPaymentTransaction(PaymentTransactionDTO paymentTransactionDto)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var payment = await _paymentService.AddPaymentTransaction(paymentTransactionDto);
+        //[GIGLSActivityAuthorize(Activity = "Create")]
+        //[HttpPost]
+        //[Route("")]
+        //public async Task<IServiceResponse<object>> AddPaymentTransaction(PaymentTransactionDTO paymentTransactionDto)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var payment = await _paymentService.AddPaymentTransaction(paymentTransactionDto);
 
-                return new ServiceResponse<object>
-                {
-                    Object = payment
-                };
-            });
-        }
+        //        return new ServiceResponse<object>
+        //        {
+        //            Object = payment
+        //        };
+        //    });
+        //}
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]

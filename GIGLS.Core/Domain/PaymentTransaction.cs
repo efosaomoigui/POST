@@ -10,5 +10,7 @@ namespace GIGLS.Core.Domain
         public string TransactionCode { get; set; }
         public PaymentStatus PaymentStatus { get; set; }
         public PaymentType PaymentTypes { get; set; }
+
+        public string UserId { get; set; }
     }
 }
