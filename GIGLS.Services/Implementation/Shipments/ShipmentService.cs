@@ -30,12 +30,13 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly ICustomerService _customerService;
         private readonly IUserService _userService;
         private readonly IMessageSenderService _messageSenderService;
+        private readonly ICompanyService _companyService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
             INumberGeneratorMonitorService numberGeneratorMonitorService,
             ICustomerService customerService, IUserService userService,
-            IMessageSenderService messageSenderService
+            IMessageSenderService messageSenderService, ICompanyService companyService
             )
         {
             _uow = uow;
@@ -46,6 +47,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _customerService = customerService;
             _userService = userService;
             _messageSenderService = messageSenderService;
+            _companyService = companyService;
             MapperConfig.Initialize();
         }
 
@@ -326,28 +328,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private async Task<ShipmentDTO> CreateShipment(ShipmentDTO shipmentDTO)
         {
-            ////for test//
-            //var userServiceCentreMapping = new UserServiceCentreMapping();
-            //var userServiceCentreMappingList = await _uow.UserServiceCentreMapping.FindAsync(s => s.IsActive == true);
-            //foreach (var item in userServiceCentreMappingList)
-            //{
-            //    userServiceCentreMapping = item;
-            //    break;
-            //}
-            //var departureServiceCentreId = userServiceCentreMapping.ServiceCentreId;
-            //var userId = userServiceCentreMapping.UserId;
-
-            //shipmentDTO.DepartureServiceCentreId = userServiceCentreMapping.ServiceCentreId;
-            //shipmentDTO.UserId = userServiceCentreMapping.UserId;
-            ////for test//
-
-
             await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
             await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
 
-            ////Get User Login service Centre detail
-            //var loginUserServiceCentre = await _userServiceCentre.GetUserActiveServiceCentre(shipmentDTO.UserId);
-            //shipmentDTO.DepartureServiceCentreId = loginUserServiceCentre.ServiceCentreId;
+            // 
 
             // get the current user info
             var currentUserId = await _userService.GetCurrentUserId();
@@ -383,13 +367,21 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             var invoiceNo = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Invoice);
 
+            var settlementPeriod = 0;
+            if(shipmentDTO.CustomerType == CustomerType.Company.ToString())
+            {
+                var company = await _companyService.GetCompanyById(shipmentDTO.CustomerId);
+                settlementPeriod = company.SettlementPeriod;
+            }
+
             var invoice = new Invoice()
             {
                 InvoiceNo = invoiceNo,
                 Amount = shipmentDTO.GrandTotal,
                 PaymentStatus = PaymentStatus.Pending,
                 Waybill = shipmentDTO.Waybill,
-                PaymentDate = DateTime.Now
+                PaymentDate = DateTime.Now,
+                DueDate = DateTime.Now.AddDays(settlementPeriod)
             };
 
             _uow.Invoice.Add(invoice);

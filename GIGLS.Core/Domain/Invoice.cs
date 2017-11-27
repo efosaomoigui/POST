@@ -18,5 +18,6 @@ namespace GIGLS.Core.Domain
         public string PaymentMethod { get; set; }
         public DateTime PaymentDate { get; set; }
         public string Waybill { get; set; }
+        public DateTime DueDate { get; set; }
     }
 }

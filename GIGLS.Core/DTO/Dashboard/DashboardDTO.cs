@@ -19,6 +19,9 @@ namespace GIGLS.Core.DTO.Dashboard
         public List<ShipmentOrderDTO> MostRecentOrder { get; set; }
         public List<GraphDataDTO> GraphData { get; set; }
         public GraphDataDTO CurrentMonthGraphData { get; set; }
+        public decimal TargetAmount { get; set; }
+        public int TargetOrder { get; set; }
         public List<ShipmentDTO> ShipmentsOrderedByServiceCenter { get; set; }
+        public List<ServiceCentreDTO> ServiceCentersForTarget { get; set; }
     }
 }

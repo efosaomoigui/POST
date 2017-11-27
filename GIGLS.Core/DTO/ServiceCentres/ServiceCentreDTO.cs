@@ -26,5 +26,7 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public StationDTO Station { get; set; }
         public List<UserDTO> Users { get; set; }
         public List<ShipmentDTO> Shipments { get; set; }
+        public decimal TargetAmount { get; set; }
+        public int TargetOrder { get; set; }
     }
 }

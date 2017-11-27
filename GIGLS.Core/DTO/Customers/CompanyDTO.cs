@@ -25,6 +25,7 @@ namespace GIGLS.Core.DTO.Customers
         public CompanyType CompanyType { get; set; }
         public CompanyStatus CompanyStatus { get; set; }
         public decimal Discount { get; set; }
+        public int SettlementPeriod { get; set; }
 
         public List<CompanyContactPersonDTO> ContactPersons { get; set; }
         public List<ShipmentDTO> CompanyShipments { get; set; }

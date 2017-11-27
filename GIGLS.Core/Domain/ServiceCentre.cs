@@ -16,5 +16,7 @@ namespace GIGL.GIGLS.Core.Domain
         public bool IsActive { get; set; }
         public int StationId { get; set; }
         public virtual Station Station { get; set; }
+        public decimal TargetAmount { get; set; }
+        public int TargetOrder { get; set; }
     }
 }

@@ -105,6 +105,11 @@ namespace GIGLS.Services.Implementation.Dashboard
             var serviceCentre = await _serviceCenterService.GetServiceCentreById(serviceCenterId);
             var serviceCentreShipments = await _shipmentService.GetShipments(serviceCenterIds);
 
+            //set for TargetAmount and TargetOrder
+            dashboardDTO.TargetOrder = serviceCentre.TargetOrder;
+            dashboardDTO.TargetAmount = serviceCentre.TargetAmount;
+
+
             // get shipment delivered - global
             var shipmentTrackings = await _shipmentTrackingService.GetShipmentTrackings();
             var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Delivered.ToString()).ToList();
@@ -179,6 +184,10 @@ namespace GIGLS.Services.Implementation.Dashboard
             var serviceCenterIds = serviceCentres.Where(s => s.StationId == stationId).Select(s => s.ServiceCentreId).ToArray();
             var serviceCentreShipments = await _shipmentService.GetShipments(serviceCenterIds);
 
+            //set for TargetAmount and TargetOrder
+            dashboardDTO.TargetOrder = serviceCentres.Where(s => s.StationId == stationId).Sum(s => s.TargetOrder);
+            dashboardDTO.TargetAmount = serviceCentres.Where(s => s.StationId == stationId).Sum(s => s.TargetAmount);
+
             // get shipment delivered - global
             var shipmentTrackings = await _shipmentTrackingService.GetShipmentTrackings();
             var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Delivered.ToString()).ToList();
@@ -252,6 +261,12 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             int[] serviceCenterIds = { };   //empty array
             var serviceCentreShipments = await _shipmentService.GetShipments(serviceCenterIds);
+
+            //set for TargetAmount and TargetOrder
+            var serviceCentres = await _serviceCenterService.GetServiceCentres();
+            dashboardDTO.TargetOrder = serviceCentres.Sum(s => s.TargetOrder);
+            dashboardDTO.TargetAmount = serviceCentres.Sum(s => s.TargetAmount);
+
 
             // get shipment delivered
             var shipmentTrackings = await _shipmentTrackingService.GetShipmentTrackings();
@@ -350,6 +365,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             }
 
             dashboardDTO.GraphData = graphDataList;
+
             await Task.FromResult(0);
         }
 
