@@ -211,6 +211,7 @@
     <Compile Include="DTO\Customers\CustomerDTO.cs" />
     <Compile Include="DTO\Customers\IndividualCustomerDTO.cs" />
     <Compile Include="DTO\Dashboard\DashboardDTO.cs" />
+    <Compile Include="DTO\Dashboard\GraphDataDTO.cs" />
     <Compile Include="DTO\Dashboard\ShipmentOrderDTO.cs" />
     <Compile Include="DTO\Fleets\FleetDTO.cs" />
     <Compile Include="DTO\Fleets\FleetLocationDTO.cs" />

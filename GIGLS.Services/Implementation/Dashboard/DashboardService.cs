@@ -117,6 +117,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             //var shipmentsOrderedByServiceCenter =
             //        serviceCentreShipments.Where(s => shipmentsOrdered.Select(d => d.Waybill).Contains(s.Waybill));
             var shipmentsOrderedByServiceCenter = serviceCentreShipments;
+            dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
 
             // get all customers - individual and company
             //var companys = await _companyService.GetCompanies();
@@ -160,6 +161,12 @@ namespace GIGLS.Services.Implementation.Dashboard
             // populate customer
             await PopulateCustomer(dashboardDTO);
 
+            // populate graph data
+            await PopulateGraphData(dashboardDTO);
+
+            // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
+            dashboardDTO.ShipmentsOrderedByServiceCenter = null;
+
             return dashboardDTO;
         }
 
@@ -184,6 +191,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             //var shipmentsOrderedByServiceCenter =
             //        serviceCentreShipments.Where(s => shipmentsOrdered.Select(d => d.Waybill).Contains(s.Waybill));
             var shipmentsOrderedByServiceCenter = serviceCentreShipments;
+            dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
 
             // get all customers - individual and company
             //var companys = await _companyService.GetCompanies();
@@ -229,6 +237,12 @@ namespace GIGLS.Services.Implementation.Dashboard
             // populate customer
             await PopulateCustomer(dashboardDTO);
 
+            // populate graph data
+            await PopulateGraphData(dashboardDTO);
+
+            // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
+            dashboardDTO.ShipmentsOrderedByServiceCenter = null;
+
             return dashboardDTO;
         }
 
@@ -246,6 +260,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             // get shipment ordered
             //var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Recieved.ToString()).ToList();
             var shipmentsOrderedByServiceCenter = serviceCentreShipments;
+            dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
 
             // get all customers - individual and company
             //var companys = await _companyService.GetCompanies();
@@ -290,7 +305,52 @@ namespace GIGLS.Services.Implementation.Dashboard
             // populate customer
             await PopulateCustomer(dashboardDTO);
 
+            // populate graph data
+            await PopulateGraphData(dashboardDTO);
+
+            // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
+            dashboardDTO.ShipmentsOrderedByServiceCenter = null;
+
             return dashboardDTO;
+        }
+
+        private async Task PopulateGraphData(DashboardDTO dashboardDTO)
+        {
+            var graphDataList = new List<GraphDataDTO>();
+            var shipmentsOrderedByServiceCenter = dashboardDTO.ShipmentsOrderedByServiceCenter;
+            var currentYear = DateTime.Now.Year;
+            var currentMonth = DateTime.Now.Month;
+
+            // filter shipments by current year
+            var thisYearShipments = shipmentsOrderedByServiceCenter.Where(
+                s => s.DateCreated.Year == currentYear);
+
+            // fill GraphDataDTO by month
+            for (int month = 1; month <= 12; month++)
+            {
+                var thisMonthShipments = thisYearShipments.Where(
+                    s => s.DateCreated.Month == month);
+
+                var graphData = new GraphDataDTO
+                {
+                    CalculationDay = 1,
+                    ShipmentMonth = month,
+                    ShipmentYear = currentYear,
+                    TotalShipmentByMonth = thisMonthShipments.Count(),
+                    TotalSalesByMonth = (from a in thisMonthShipments
+                                         select a.GrandTotal).Sum()
+                };
+                graphDataList.Add(graphData);
+
+                // set the current month graphData
+                if (currentMonth == month)
+                {
+                    dashboardDTO.CurrentMonthGraphData = graphData;
+                }
+            }
+
+            dashboardDTO.GraphData = graphDataList;
+            await Task.FromResult(0);
         }
 
         private int GetTotalCutomersCount(List<ShipmentDTO> shipmentsOrderedByServiceCenter)
@@ -332,7 +392,7 @@ namespace GIGLS.Services.Implementation.Dashboard
                         var customer = await _customerService.GetCustomer(
                             customerId, customerType);
 
-                        if(customerType == CustomerType.IndividualCustomer)
+                        if (customerType == CustomerType.IndividualCustomer)
                         {
                             order.Customer = string.Format($"{customer.FirstName} {customer.LastName}"); ;
                         }
