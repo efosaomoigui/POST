@@ -110,9 +110,9 @@
   <ItemGroup>
     <Compile Include="GenericException.cs" />
     <Compile Include="IdentityInfrastrure\GiglsUserStore.cs" />
-    <Compile Include="Migrations\201711170718517_b.cs" />
-    <Compile Include="Migrations\201711170718517_b.Designer.cs">
-      <DependentUpon>201711170718517_b.cs</DependentUpon>
+    <Compile Include="Migrations\201711280832537_Initial.cs" />
+    <Compile Include="Migrations\201711280832537_Initial.Designer.cs">
+      <DependentUpon>201711280832537_Initial.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Persistence\GIGLSContext.cs" />
@@ -187,7 +187,9 @@
     <Compile Include="SoftDeleteHandler\SoftDeleteQueryVisitor.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -197,8 +199,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201711170718517_b.resx">
-      <DependentUpon>201711170718517_b.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201711280832537_Initial.resx">
+      <DependentUpon>201711280832537_Initial.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
