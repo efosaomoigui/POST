@@ -81,12 +81,12 @@ namespace GIGLS.Services.Business.Pricing
             decimal deliveryOptionPrice = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId);
 
             //This is our limit weight. This will be deleted once limit Price Setting is approve
-            var activeWeight = await _weightLimit.GetActiveWeightLimits();
-            decimal weightLimit = activeWeight.Weight;
+            var activeWeightLimit = await _weightLimit.GetActiveWeightLimits();
+            //decimal weightLimit = activeWeight.Weight;
 
-            if (pricingDto.Weight > weightLimit)
+            if (pricingDto.Weight > activeWeightLimit.Weight)
             {
-                PackagePrice = await GetRegularPriceOverflow(pricingDto.Weight, zone.ZoneId);
+                PackagePrice = await GetRegularPriceOverflow(pricingDto.Weight, activeWeightLimit.Weight, zone.ZoneId);
             }
             else
             {
@@ -101,21 +101,22 @@ namespace GIGLS.Services.Business.Pricing
             return PackagePrice;
         }
 
-        private async Task<decimal> GetRegularPriceOverflow(decimal weight, int zoneId)
+        private async Task<decimal> GetRegularPriceOverflow(decimal weight, decimal activeWeightLimit, int zoneId)
         {
-            var activeWeight = await _weightLimit.GetActiveWeightLimits();
+            //var activeWeight = await _weightLimit.GetActiveWeightLimits();
             var activeZone = await _weightLimitPrice.GetWeightLimitPriceByZoneId(zoneId);
 
-            decimal weightLimit = activeWeight.Weight; //This is our limit weight
+            //decimal weightLimit = activeWeight.Weight; //This is our limit weight
 
             decimal weightlimitZonePrice = activeZone.Price; //Limit Price addition base on zone
             decimal additionalWeight = activeZone.Weight; //Addtional Weight Divisor
 
-            decimal weightDifferent = weight - weightLimit;
+            //decimal weightDifferent = weight - weightLimit;
+            decimal weightDifferent = weight - activeWeightLimit;
 
             decimal weightLimitPrice = (weightDifferent / additionalWeight) * weightlimitZonePrice;
 
-            decimal PackagePrice = await _regular.GetDomesticZonePrice(zoneId, weightLimit);
+            decimal PackagePrice = await _regular.GetDomesticZonePrice(zoneId, activeWeightLimit);
 
             decimal shipmentTotalPrice = PackagePrice + weightLimitPrice;
 

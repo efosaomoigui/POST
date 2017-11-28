@@ -6,5 +6,6 @@ namespace GIGLS.Core.Domain
     {
         public int WeightLimitId { get; set; }
         public decimal Weight { get; set; }
+        public bool Status { get; set; }
     }
 }
