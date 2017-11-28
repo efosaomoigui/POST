@@ -8,6 +8,6 @@ namespace GIGLS.Core.IRepositories.Shipments
 {
     public interface IGroupWaybillNumberMappingRepository : IRepository<GroupWaybillNumberMapping>
     {
-        Task<List<GroupWaybillNumberMappingDTO>> GetGroupWaybillMappings();
+        Task<List<GroupWaybillNumberMappingDTO>> GetGroupWaybillMappings(int[] serviceCentreIds);
     }
 }
