@@ -7,6 +7,7 @@ using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -15,50 +16,33 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUnitOfWork _uow;
         private readonly IGroupWaybillNumberService _groupWaybillNumberService;
         private readonly IShipmentService _shipmentService;
+        private readonly IUserService _userService;
 
-        
+        public GroupWaybillNumberMappingService(IUnitOfWork uow, 
+            IGroupWaybillNumberService groupWaybillNumberService, 
+            IShipmentService shipmentService,
+            IUserService userService)
+        {
+            _uow = uow;
+            _groupWaybillNumberService = groupWaybillNumberService;
+            _shipmentService = shipmentService;
+            _userService = userService;
+            MapperConfig.Initialize();
+        }
+
+
         public async Task<IEnumerable<GroupWaybillNumberMappingDTO>> GetAllGroupWayBillNumberMappings()
         {
             try
             {
-                return await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings();
+                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                return await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(serviceCenters);
             }
             catch (Exception)
             {
                 throw;
             }
         }
-
-
-        public GroupWaybillNumberMappingService(IUnitOfWork uow, IGroupWaybillNumberService groupWaybillNumberService, IShipmentService shipmentService)
-        {
-            _uow = uow;
-            _groupWaybillNumberService = groupWaybillNumberService;
-            _shipmentService = shipmentService;
-            MapperConfig.Initialize();
-        }
-
-        ////Get GroupWaybill Number For WaybillNumberId
-        //public async Task<GroupWaybillNumberDTO> GetGroupForWaybillNumber(int waybillNumberId)
-        //{
-        //    try
-        //    {
-        //        var waybillNumberDTO = await _shipmentService.GetWayBillNumberById(waybillNumberId);
-        //        var groupWaybillNumberMapping = await _uow.GroupWaybillNumberMapping.GetAsync(x => x.WaybillNumber == waybillNumberDTO.WaybillCode);
-
-        //        if (groupWaybillNumberMapping == null)
-        //        {
-        //            throw new GenericException($"No GroupWaybill exists for this Waybill Id: {waybillNumberId}");
-        //        }
-
-        //        var groupWaybillNumberDTO = await _groupWaybillNumberService.GetGroupWayBillNumberById(groupWaybillNumberMapping.GroupWaybillNumber);
-        //        return groupWaybillNumberDTO;
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
 
         //Get GroupWaybill Number For WaybillNumber
         public async Task<GroupWaybillNumberDTO> GetGroupForWaybillNumber(string waybillNumber)

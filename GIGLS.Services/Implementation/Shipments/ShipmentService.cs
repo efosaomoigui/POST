@@ -17,6 +17,8 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IMessageService;
+using GIGLS.Core.DTO.ServiceCentres;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -368,7 +370,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var invoiceNo = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Invoice);
 
             var settlementPeriod = 0;
-            if(shipmentDTO.CustomerType == CustomerType.Company.ToString())
+            if (shipmentDTO.CustomerType == CustomerType.Company.ToString())
             {
                 var company = await _companyService.GetCompanyById(shipmentDTO.CustomerId);
                 settlementPeriod = company.SettlementPeriod;
@@ -408,11 +410,54 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
 
-        //This is use because I dont want an Exception to be throw when calling it
+        //This is used because I don't want an Exception to be thrown when calling it
         public async Task<Shipment> GetShipmentForScan(string waybill)
         {
             var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(waybill));
             return shipment;
+        }
+
+        public async Task<List<ShipmentDTO>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                // get shipments for that Service Centre
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var shipmentsBySC = await _uow.Shipment.GetShipments(filterOptionsDto, serviceCenters).Item1;
+
+                // get all grouped waybills for that Service Centre
+                var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(serviceCenters);
+
+                // filter the two lists
+                var ungroupedWaybills = shipmentsBySC.Where(s => !groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber).Contains(s.Waybill));
+
+                return ungroupedWaybills.ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetUnGroupMappingServiceCentres()
+        {
+            try
+            {
+                var filterOptionsDto = new FilterOptionsDto();
+                var ungroupedWaybills = await GetUnGroupedWaybillsForServiceCentre(filterOptionsDto);
+
+                var allServiceCenters = await _centreService.GetServiceCentres();
+
+                var ungroupedServiceCentres = allServiceCenters.ToList().Where(
+                    s => ungroupedWaybills.Select(
+                        a => a.DestinationServiceCentreId).Contains(s.ServiceCentreId)).ToList();
+
+                return ungroupedServiceCentres;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

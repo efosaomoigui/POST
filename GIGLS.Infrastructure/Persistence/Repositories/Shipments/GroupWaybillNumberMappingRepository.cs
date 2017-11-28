@@ -19,9 +19,19 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             _context = context;
         }
 
-        public Task<List<GroupWaybillNumberMappingDTO>> GetGroupWaybillMappings()
+        public Task<List<GroupWaybillNumberMappingDTO>> GetGroupWaybillMappings(int[] serviceCentreIds)
         {
-            var groupwaybillMapping = Context.GroupWaybillNumberMapping;
+            var groupwaybillMapping = Context.GroupWaybillNumberMapping.AsQueryable();
+
+            var serviceCentreWaybills = new List<string>();
+            if (serviceCentreIds.Length > 0)
+            {
+                serviceCentreWaybills = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId)).
+                    Select(s => s.Waybill).ToList();
+            }
+
+
+            groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreWaybills.Contains(s.WaybillNumber));
 
             var groupwaybillMappingDto = from gw in groupwaybillMapping
                                          select new GroupWaybillNumberMappingDTO

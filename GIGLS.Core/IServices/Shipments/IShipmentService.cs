@@ -1,4 +1,5 @@
 ﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO.Shipments;
 using System;
@@ -19,5 +20,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task DeleteShipment(int shipmentId);
         Task DeleteShipment(string waybill);
         Task<Shipment> GetShipmentForScan(string waybill);
+        Task<List<ServiceCentreDTO>> GetUnGroupMappingServiceCentres();
+        Task<List<ShipmentDTO>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto);
     }
 }
