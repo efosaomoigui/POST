@@ -39,18 +39,19 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 {
                     throw new GenericException($"{service.Name} Service Centre Already Exist");
                 }
-                var newCentre = new ServiceCentre
-                {
-                    Name = service.Name,
-                    Address = service.Address,
-                    City = service.City,
-                    Email = service.Email,
-                    StationId = service.StationId,
-                    PhoneNumber = service.PhoneNumber,                    
-                    IsActive = true,
-                    Code = service.Code
-                    //user loggen on Id here
-                };
+                //var newCentre = new ServiceCentre
+                //{
+                //    Name = service.Name,
+                //    Address = service.Address,
+                //    City = service.City,
+                //    Email = service.Email,
+                //    StationId = service.StationId,
+                //    PhoneNumber = service.PhoneNumber,                    
+                //    IsActive = true,
+                //    Code = service.Code
+                //    //user loggen on Id here
+                //};
+                var newCentre = Mapper.Map<ServiceCentre>(service);
                 _uow.ServiceCentre.Add(newCentre);
                 await _uow.CompleteAsync();
                 return new { Id = newCentre.ServiceCentreId};
@@ -89,24 +90,10 @@ namespace GIGLS.Services.IServices.ServiceCentres
                     throw new GenericException("Service Centre does not exist");
                 }
 
-                return new ServiceCentreDTO
-                {
-                    ServiceCentreId = centre.ServiceCentreId,
-                    Address = centre.Address,
-                    City = centre.City,
-                    Code = centre.Code,
-                    Email = centre.Email,
-                    IsActive = centre.IsActive,
-                    Name = centre.Name,
-                    PhoneNumber = centre.PhoneNumber,
-                    StationId = centre.StationId,
-                    StationName = centre.Station.StationName,
-                    StationCode = centre.Station.StationCode
-                };
-
-                //ServiceCentreDTO centreDto =
-                //  Mapper.Map<ServiceCentre, ServiceCentreDTO>(centre);
-                //return centreDto;
+                var centreDto = Mapper.Map<ServiceCentreDTO>(centre);
+                centreDto.StationName = centre.Station.StationName;
+                centreDto.StationCode = centre.Station.StationCode;
+                return centreDto;
             }
             catch (Exception)
             {
@@ -124,24 +111,10 @@ namespace GIGLS.Services.IServices.ServiceCentres
                     throw new GenericException("Service Centre does not exist");
                 }
 
-                return new ServiceCentreDTO
-                {
-                    ServiceCentreId = centre.ServiceCentreId,
-                    Address = centre.Address,
-                    City = centre.City,
-                    Code = centre.Code,
-                    Email = centre.Email,
-                    IsActive =  centre.IsActive,
-                    Name = centre.Name,
-                    PhoneNumber = centre.PhoneNumber,
-                    StationId = centre.StationId,
-                    StationName = centre.Station.StationName,
-                    StationCode = centre.Station.StationCode
-                };
-
-                //ServiceCentreDTO centreDto =
-                //  Mapper.Map<ServiceCentre, ServiceCentreDTO>(centre);
-                //return centreDto;
+                var centreDto =  Mapper.Map<ServiceCentreDTO>(centre);
+                centreDto.StationName = centre.Station.StationName;
+                centreDto.StationCode = centre.Station.StationCode;
+                return centreDto;
             }
             catch (Exception)
             {
@@ -197,6 +170,8 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 centre.StationId = service.StationId;
                 centre.IsActive = true;
                 centre.Code = service.Code;
+                centre.TargetAmount = service.TargetAmount;
+                centre.TargetOrder = service.TargetOrder;
                 _uow.Complete();
             }
             catch (Exception)

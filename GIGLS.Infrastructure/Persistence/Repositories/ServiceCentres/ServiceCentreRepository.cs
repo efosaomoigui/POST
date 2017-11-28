@@ -35,6 +35,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     ServiceCentreId = s.ServiceCentreId,
                                     Code = s.Code,
                                     IsActive = s.IsActive,
+                                    TargetAmount = s.TargetAmount,
+                                    TargetOrder = s.TargetOrder,
                                     StationId = s.StationId,
                                     StationName = sc.StationName,
                                     StationCode = sc.StationCode                               
