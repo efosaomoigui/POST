@@ -421,6 +421,9 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+
+                //filterOptionsDto.count = 100;
+
                 // get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var shipmentsBySC = await _uow.Shipment.GetShipments(filterOptionsDto, serviceCenters).Item1;
@@ -443,7 +446,12 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var filterOptionsDto = new FilterOptionsDto();
+                var filterOptionsDto = new FilterOptionsDto
+                {
+                    count = 1000,
+                    page = 1,
+                    sortorder = "0"
+                };
                 var ungroupedWaybills = await GetUnGroupedWaybillsForServiceCentre(filterOptionsDto);
 
                 var allServiceCenters = await _centreService.GetServiceCentres();
