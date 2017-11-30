@@ -146,7 +146,7 @@
     <Compile Include="Domain\GIGLSContext.cs" />
     <Compile Include="Domain\GroupWaybillNumber.cs" />
     <Compile Include="Domain\GroupWaybillNumberMapping.cs" />
-    <Compile Include="Domain\GroupWaybillNumberMonitor.cs" />
+    <Compile Include="Domain\Haulage.cs" />
     <Compile Include="Domain\IndividualCustomer.cs" />
     <Compile Include="Domain\Insurance.cs" />
     <Compile Include="Domain\Invoice.cs" />
