@@ -178,17 +178,14 @@
     <Compile Include="Implementation\ServiceCentres\UserServiceCentreMappingService.cs" />
     <Compile Include="Implementation\ServiceResponse.cs" />
     <Compile Include="Implementation\Shipments\GroupWaybillNumberMappingService.cs" />
-    <Compile Include="Implementation\Shipments\GroupWaybillNumberMonitorService.cs" />
     <Compile Include="Implementation\Shipments\GroupWaybillNumberService.cs" />
     <Compile Include="Implementation\Shipments\ManifestGroupWaybillNumberMappingService.cs" />
-    <Compile Include="Implementation\Shipments\ManifestMonitorService.cs" />
     <Compile Include="Implementation\Shipments\ManifestService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentCollectionService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentPackageService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentReturnService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentTrackingService.cs" />
-    <Compile Include="Implementation\Shipments\WaybillNumberMonitorService.cs" />
     <Compile Include="Implementation\Shipments\WaybillNumberService.cs" />
     <Compile Include="Implementation\StateService.cs" />
     <Compile Include="Implementation\Stocks\StockRequestPartService.cs" />
