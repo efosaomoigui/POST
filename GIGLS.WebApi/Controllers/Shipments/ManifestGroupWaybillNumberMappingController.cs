@@ -6,6 +6,7 @@ using System.Web.Http;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.WebApi.Filters;
+using System.Linq;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -17,6 +18,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
         public ManifestGroupWaybillNumberMappingController(IManifestGroupWaybillNumberMappingService service) : base(nameof(ManifestGroupWaybillNumberMappingController))
         {
             _service = service;
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("")]
+        public async Task<IServiceResponse<IEnumerable<ManifestGroupWaybillNumberMappingDTO>>> GetAllManifestGroupWayBillNumberMappings()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestGroupWayBillNumberMappings = await _service.GetAllManifestGroupWayBillNumberMappings();
+
+                return new ServiceResponse<IEnumerable<ManifestGroupWaybillNumberMappingDTO>>
+                {
+                    Object = manifestGroupWayBillNumberMappings.ToList()
+                };
+            });
         }
 
         [GIGLSActivityAuthorize(Activity = "Create")]
@@ -129,5 +146,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
     }
 }

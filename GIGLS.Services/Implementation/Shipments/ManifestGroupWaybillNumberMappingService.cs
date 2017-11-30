@@ -23,12 +23,16 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUnitOfWork _uow;
         private readonly IManifestService _manifestService;
         private readonly IGroupWaybillNumberService _groupWaybillNumberService;
+        private readonly IUserService _userService;
 
-        public ManifestGroupWaybillNumberMappingService(IUnitOfWork uow, IManifestService manifestService, IGroupWaybillNumberService groupWaybillNumberService)
+        public ManifestGroupWaybillNumberMappingService(IUnitOfWork uow,
+            IManifestService manifestService, IGroupWaybillNumberService groupWaybillNumberService,
+            IUserService userService)
         {
             _uow = uow;
             _manifestService = manifestService;
             _groupWaybillNumberService = groupWaybillNumberService;
+            _userService = userService;
             MapperConfig.Initialize();
         }
 
@@ -229,6 +233,17 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-
+        public async Task<IEnumerable<ManifestGroupWaybillNumberMappingDTO>> GetAllManifestGroupWayBillNumberMappings()
+        {
+            try
+            {
+                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                return await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
