@@ -6,6 +6,7 @@ using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Domain;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
