@@ -18,8 +18,8 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IShipmentService _shipmentService;
         private readonly IUserService _userService;
 
-        public GroupWaybillNumberMappingService(IUnitOfWork uow, 
-            IGroupWaybillNumberService groupWaybillNumberService, 
+        public GroupWaybillNumberMappingService(IUnitOfWork uow,
+            IGroupWaybillNumberService groupWaybillNumberService,
             IShipmentService shipmentService,
             IUserService userService)
         {
@@ -35,7 +35,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 return await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(serviceCenters);
             }
             catch (Exception)
@@ -169,13 +169,19 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException($"No Shipment exists for this : {waybillNumber}");
                 }
 
+                // get the service centres
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var departureServiceCenterId = serviceCenters[0];
+
                 //Add new Mapping
                 var newMapping = new GroupWaybillNumberMapping
                 {
                     GroupWaybillNumber = groupWaybillNumberDTO.GroupWaybillCode,
                     WaybillNumber = shipmentDTO.Waybill,
                     IsActive = true,
-                    DateMapped = DateTime.Now
+                    DateMapped = DateTime.Now,
+                    DepartureServiceCentreId = departureServiceCenterId,
+                    DestinationServiceCentreId = groupWaybillNumberDTO.ServiceCentreId
                 };
 
                 _uow.GroupWaybillNumberMapping.Add(newMapping);
@@ -200,7 +206,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException($"No GroupWaybill exists for this : {groupWaybillNumber}");
                 }
 
-                foreach(var waybillNumber in waybillNumberList)
+                foreach (var waybillNumber in waybillNumberList)
                 {
                     var shipmentDTO = await _shipmentService.GetShipment(waybillNumber);
                     if (shipmentDTO == null)
@@ -208,13 +214,19 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException($"No Shipment exists for this : {waybillNumber}");
                     }
 
+                    // get the service centres
+                    var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                    var departureServiceCenterId = serviceCenters[0];
+
                     //Add new Mapping
                     var newMapping = new GroupWaybillNumberMapping
                     {
                         GroupWaybillNumber = groupWaybillNumberDTO.GroupWaybillCode,
                         WaybillNumber = shipmentDTO.Waybill,
                         IsActive = true,
-                        DateMapped = DateTime.Now
+                        DateMapped = DateTime.Now,
+                        DepartureServiceCentreId = departureServiceCenterId,
+                        DestinationServiceCentreId = groupWaybillNumberDTO.ServiceCentreId
                     };
                     _uow.GroupWaybillNumberMapping.Add(newMapping);
                 }

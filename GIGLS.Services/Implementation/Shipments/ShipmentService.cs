@@ -467,5 +467,57 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+
+
+        public async Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                //filterOptionsDto.count = 100;
+
+                // get groupedWaybills for that Service Centre
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var groupedWaybillsBySC = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(filterOptionsDto, serviceCenters);
+
+                // get all manifest for that Service Centre
+                var manifestGroupWayBillNumberMappings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters);
+
+                // filter the two lists
+                var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappings.ToList().Select(a => a.GroupWaybillNumber).Contains(s.GroupWaybillNumber));
+
+                return unmappedGroupedWaybills.ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentres()
+        {
+            try
+            {
+                var filterOptionsDto = new FilterOptionsDto
+                {
+                    count = 1000,
+                    page = 1,
+                    sortorder = "0"
+                };
+                var unmappedGroupWaybills = await GetUnmappedGroupedWaybillsForServiceCentre(filterOptionsDto);
+
+                var allServiceCenters = await _centreService.GetServiceCentres();
+
+                var unmappedGroupServiceCentres = allServiceCenters.ToList().Where(
+                    s => unmappedGroupWaybills.Select(
+                        a => a.DestinationServiceCentreId).Contains(s.ServiceCentreId)).ToList();
+
+                return unmappedGroupServiceCentres;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.Domain;
+﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.Domain;
 using System;
 
 namespace GIGLS.CORE.DTO.Shipments
@@ -11,5 +12,12 @@ namespace GIGLS.CORE.DTO.Shipments
 
         public string GroupWaybillNumber { get; set; }
         public string WaybillNumber { get; set; }
+
+        //Receivers Information
+        public int DepartureServiceCentreId { get; set; }
+        public virtual ServiceCentre DepartureServiceCentre { get; set; }
+
+        public int DestinationServiceCentreId { get; set; }
+        public virtual ServiceCentre DestinationServiceCentre { get; set; }
     }
 }

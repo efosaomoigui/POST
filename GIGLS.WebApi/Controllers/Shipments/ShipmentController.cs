@@ -200,5 +200,36 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("unmappedgroupedwaybillsforservicecentre")]
+        public async Task<IServiceResponse<IEnumerable<GroupWaybillNumberMappingDTO>>> GetUnmappedGroupedWaybillsForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var unmappedGroupWaybills = await _service.GetUnmappedGroupedWaybillsForServiceCentre(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<GroupWaybillNumberMappingDTO>>
+                {
+                    Object = unmappedGroupWaybills,
+                    Total = unmappedGroupWaybills.Count
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("unmappedmanifestservicecentre")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetUnmappedManifestServiceCentres()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.GetUnmappedManifestServiceCentres();
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
     }
 }
