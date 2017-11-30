@@ -13,7 +13,7 @@ namespace GIGLS.Infrastructure.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201711280832537_Initial"; }
+            get { return "201711301130243_Initial"; }
         }
         
         string IMigrationMetadata.Source

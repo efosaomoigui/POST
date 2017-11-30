@@ -12,6 +12,7 @@ namespace GIGL.GIGLS.Core.Domain
         public string Nature { get; set; }
         public decimal Price { get; set; }
         public int Quantity { get; set; }
+        public int SerialNumber { get; set; }
 
         //Foreign key information
         public int ShipmentId { get; set; }

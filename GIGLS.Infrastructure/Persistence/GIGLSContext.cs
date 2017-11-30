@@ -64,17 +64,14 @@ namespace GIGLS.Infrastructure.Persistence
 
         //Waybill
         public DbSet<WaybillNumber> WaybillNumber { get; set; }
-        public DbSet<WaybillNumberMonitor> WaybillNumberMonitor { get; set; }
 
         //GroupWaybill
         public DbSet<GroupWaybillNumber> GroupWaybillNumber { get; set; }
-        public DbSet<GroupWaybillNumberMonitor> GroupWaybillNumberMonitor { get; set; }
         public DbSet<GroupWaybillNumberMapping> GroupWaybillNumberMapping { get; set; }
 
 
         //Shipment
         public DbSet<Manifest> Manifest { get; set; }
-        public DbSet<ManifestMonitor> ManifestMonitor { get; set; }
         public DbSet<ManifestGroupWaybillNumberMapping> ManifestGroupWaybillNumberMapping { get; set; }
 
         public DbSet<Shipment> Shipment { get; set; }

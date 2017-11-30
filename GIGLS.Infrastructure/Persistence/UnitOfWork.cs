@@ -60,9 +60,6 @@ namespace GIGLS.Infrastructure.Persistence
         public IManifestRepository Manifest { get; set; }
 
         [Inject]
-        public IManifestMonitorRepository ManifestMonitor { get; set; }
-
-        [Inject]
         public IManifestGroupWaybillNumberMappingRepository ManifestGroupWaybillNumberMapping { get; set; }
 
         [Inject]
@@ -165,13 +162,7 @@ namespace GIGLS.Infrastructure.Persistence
         public IWaybillNumberRepository WaybillNumber { get; set; }
 
         [Inject]
-        public IWaybillNumberMonitorRepository WaybillNumberMonitor { get; set; }
-
-        [Inject]
         public IGroupWaybillNumberRepository GroupWaybillNumber { get; set; }
-
-        [Inject]
-        public IGroupWaybillNumberMonitorRepository GroupWaybillNumberMonitor { get; set; }
 
         [Inject]
         public IGroupWaybillNumberMappingRepository GroupWaybillNumberMapping { get; set; }
