@@ -50,8 +50,7 @@ namespace GIGLS.WebApi.Controllers
                 };
             });
         }
-
-
+        
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]
@@ -70,7 +69,7 @@ namespace GIGLS.WebApi.Controllers
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("{HaulageId:int}")]
+        [Route("{haulageId:int}")]
         public async Task<IServiceResponse<HaulageDTO>> GetHaulage(int haulageId)
         {
             return await HandleApiOperationAsync(async () =>
@@ -86,7 +85,7 @@ namespace GIGLS.WebApi.Controllers
 
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
-        [Route("{HaulageId:int}")]
+        [Route("{haulageId:int}")]
         public async Task<IServiceResponse<bool>> DeleteHaulage(int haulageId)
         {
             return await HandleApiOperationAsync(async () =>
@@ -102,7 +101,7 @@ namespace GIGLS.WebApi.Controllers
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
-        [Route("{HaulageId:int}")]
+        [Route("{haulageId:int}")]
         public async Task<IServiceResponse<bool>> UpdateHaulage(int haulageId, HaulageDTO haulageDto)
         {
             return await HandleApiOperationAsync(async () =>
@@ -119,7 +118,7 @@ namespace GIGLS.WebApi.Controllers
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("{haulageId:int}/status/{status}")]
-        public async Task<IServiceResponse<bool>> UpdateCustomerStatus(int haulageId, bool status)
+        public async Task<IServiceResponse<bool>> UpdateHaulageStatus(int haulageId, bool status)
         {
             return await HandleApiOperationAsync(async () =>
             {
