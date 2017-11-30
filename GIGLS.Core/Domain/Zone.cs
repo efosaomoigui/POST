@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GIGLS.Core.Domain
+﻿namespace GIGLS.Core.Domain
 {
     public class Zone : BaseDomain, IAuditable
     {

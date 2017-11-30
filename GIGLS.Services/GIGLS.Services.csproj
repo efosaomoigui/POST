@@ -160,6 +160,8 @@
     <Compile Include="Implementation\Fleets\FleetPartService.cs" />
     <Compile Include="Implementation\Fleets\FleetService.cs" />
     <Compile Include="Implementation\Fleets\FleetTripService.cs" />
+    <Compile Include="Implementation\Haulage\ZoneHaulagePriceService.cs" />
+    <Compile Include="Implementation\Haulage\HaulageService.cs" />
     <Compile Include="Implementation\JobCards\JobCardManagementPartService.cs" />
     <Compile Include="Implementation\JobCards\JobCardManagementService.cs" />
     <Compile Include="Implementation\JobCards\JobCardService.cs" />

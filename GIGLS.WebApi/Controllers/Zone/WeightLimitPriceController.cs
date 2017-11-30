@@ -38,11 +38,11 @@ namespace GIGLS.WebApi.Controllers.Zone
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{weightLimitPriceId:int}")]
-        public async Task<IServiceResponse<WeightLimitPriceDTO>> GetWeightLimitPriceId(int weightLimitId)
+        public async Task<IServiceResponse<WeightLimitPriceDTO>> GetWeightLimitPriceId(int weightLimitPriceId)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var weightLimit = await _weightService.GetWeightLimitPriceById(weightLimitId);
+                var weightLimit = await _weightService.GetWeightLimitPriceById(weightLimitPriceId);
 
                 return new ServiceResponse<WeightLimitPriceDTO>
                 {
@@ -51,21 +51,21 @@ namespace GIGLS.WebApi.Controllers.Zone
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("{zoneId:int}")]
-        public async Task<IServiceResponse<WeightLimitPriceDTO>> GetWeightLimitPriceByZoneId(int zoneId)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var weightLimit = await _weightService.GetWeightLimitPriceByZoneId(zoneId);
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("{zoneId:int}")]
+        //public async Task<IServiceResponse<WeightLimitPriceDTO>> GetWeightLimitPriceByZoneId(int zoneId)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var weightLimit = await _weightService.GetWeightLimitPriceByZoneId(zoneId);
 
-                return new ServiceResponse<WeightLimitPriceDTO>
-                {
-                    Object = weightLimit
-                };
-            });
-        }
+        //        return new ServiceResponse<WeightLimitPriceDTO>
+        //        {
+        //            Object = weightLimit
+        //        };
+        //    });
+        //}
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]

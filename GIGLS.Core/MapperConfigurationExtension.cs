@@ -16,6 +16,7 @@ using GIGLS.Core.DTO.Client;
 using GIGLS.CORE.Domain;
 using GIGLS.CORE.DTO.Nav;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.Core.DTO.Haulage;
 
 namespace GIGLS.Core
 {
@@ -153,6 +154,12 @@ namespace GIGLS.Core
 
                 config.CreateMap<Message, MessageDTO>();
                 config.CreateMap<MessageDTO, Message>();
+
+                config.CreateMap<Haulage, HaulageDTO>();
+                config.CreateMap<HaulageDTO, Haulage>();
+
+                config.CreateMap<ZoneHaulagePrice, ZoneHaulagePriceDTO>();
+                config.CreateMap<ZoneHaulagePriceDTO, ZoneHaulagePrice>();
             });
 
             isInit = true;

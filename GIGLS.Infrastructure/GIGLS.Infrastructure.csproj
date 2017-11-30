@@ -110,9 +110,9 @@
   <ItemGroup>
     <Compile Include="GenericException.cs" />
     <Compile Include="IdentityInfrastrure\GiglsUserStore.cs" />
-    <Compile Include="Migrations\201711280832537_Initial.cs" />
+    <Compile Include="Migrations\201711301240283_initial.cs" />
     <Compile Include="Migrations\201711280832537_Initial.Designer.cs">
-      <DependentUpon>201711280832537_Initial.cs</DependentUpon>
+      <DependentUpon>201711301240283_initial.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Persistence\GIGLSContext.cs" />
@@ -132,6 +132,8 @@
     <Compile Include="Persistence\Repositories\Fleets\FleetPartRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\FleetRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\FleetTripRepository.cs" />
+    <Compile Include="Persistence\Repositories\Haulage\ZoneHaulagePriceRepository.cs" />
+    <Compile Include="Persistence\Repositories\Haulage\HaulageRepository.cs" />
     <Compile Include="Persistence\Repositories\JobCards\JobCardManagementPartRepository.cs" />
     <Compile Include="Persistence\Repositories\JobCards\JobCardManagementRepository.cs" />
     <Compile Include="Persistence\Repositories\JobCards\JobCardRepository.cs" />
@@ -199,8 +201,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201711280832537_Initial.resx">
-      <DependentUpon>201711280832537_Initial.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201711301240283_initial.resx">
+      <DependentUpon>201711301240283_initial.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

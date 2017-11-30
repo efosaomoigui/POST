@@ -11,7 +11,6 @@ using GIGLS.Core.IRepositories.Fleets;
 using GIGLS.Core.IRepositories.Vendors;
 using GIGLS.Core.IRepositories.Workshops;
 using GIGLS.Core.IRepositories.Zone;
-using GIGLS.Core.IMessage;
 using Ninject;
 using System.Threading.Tasks;
 using GIGLS.Core.IRepositories.Partnership;
@@ -227,6 +226,12 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IMessageRepository Message { get; set; }
+
+        [Inject]
+        public IHaulageRepository Haulage { get; set; }
+
+        [Inject]
+        public IZoneHaulagePriceRepository ZoneHaulagePrice { get; set; }
 
         public int Complete()
         {

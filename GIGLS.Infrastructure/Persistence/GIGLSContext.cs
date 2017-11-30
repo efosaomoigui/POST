@@ -58,6 +58,10 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<DomesticRouteZoneMap> DomesticRouteZoneMap { get; set; }
         public DbSet<DomesticZonePrice> DomesticZonePrice { get; set; }
 
+        //Haulauge Pricing
+        public DbSet<Haulage> Haulage { get; set; }
+        public DbSet<ZoneHaulagePrice> ZoneHaulagePrice { get; set; }
+
         //Waybill
         public DbSet<WaybillNumber> WaybillNumber { get; set; }
         public DbSet<WaybillNumberMonitor> WaybillNumberMonitor { get; set; }
@@ -160,6 +164,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         //Message
         public DbSet<Message> Message { get; set; }
+
 
         #endregion
 
