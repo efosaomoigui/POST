@@ -65,7 +65,7 @@ namespace GIGLS.Services.Implementation.User
         {
             string userActiveServiceCentre = null;
 
-            var user = await Task.Run(() => _unitOfWork.User.GetUserById(Id).Result);
+            var user = _unitOfWork.User.GetUserById(Id).Result;
 
             if (user != null)
             {

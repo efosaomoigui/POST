@@ -149,7 +149,7 @@ namespace GIGLS.WebApi.Controllers
                 if (!ModelState.IsValid)
                     throw new GenericException("There were errors in your input, please correct them and try again.", $"{(int)HttpStatusCode.BadRequest}");
 
-                var methodResponse = await Task.Run(() => action.Invoke());
+                var methodResponse = action.Invoke();
 
                 apiResponse.Object = methodResponse.Object;
 
