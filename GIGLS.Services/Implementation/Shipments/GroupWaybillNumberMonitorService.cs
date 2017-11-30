@@ -1,7 +1,6 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.Domain;
 using GIGLS.Infrastructure;
 using System;
 using System.Threading.Tasks;

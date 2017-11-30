@@ -36,7 +36,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var monitor = _uow.WaybillNumberMonitor.SingleOrDefault(x => x.ServiceCentreCode == serviceCode);
+                var monitor = await Task.Run(() => _uow.WaybillNumberMonitor.SingleOrDefault(x => x.ServiceCentreCode == serviceCode));
                 return monitor;
             }
             catch (Exception)

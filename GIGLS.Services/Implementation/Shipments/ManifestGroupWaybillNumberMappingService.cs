@@ -1,19 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.User;
-using AutoMapper;
 using System.Collections.Generic;
 using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.User;
-using System.Linq;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Shipments

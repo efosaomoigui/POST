@@ -8,7 +8,6 @@ using GIGLS.Core.IServices;
 using System.Net.Http;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
-using GIGLS.Services.Implementation.User;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.AspNet.Identity;
 using GIGLS.WebApi.Models;
@@ -150,7 +149,7 @@ namespace GIGLS.WebApi.Controllers
                 if (!ModelState.IsValid)
                     throw new GenericException("There were errors in your input, please correct them and try again.", $"{(int)HttpStatusCode.BadRequest}");
 
-                var methodResponse = action.Invoke();
+                var methodResponse = await Task.Run(() => action.Invoke());
 
                 apiResponse.Object = methodResponse.Object;
 

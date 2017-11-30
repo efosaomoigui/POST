@@ -1,5 +1,4 @@
 ﻿using GIGLS.Core.Domain;
-using GIGLS.Core.Domain;
 using System;
 
 namespace GIGL.GIGLS.Core.Domain

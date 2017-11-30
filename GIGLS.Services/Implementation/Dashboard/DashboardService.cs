@@ -417,7 +417,7 @@ namespace GIGLS.Services.Implementation.Dashboard
                             order.Customer = customer.Name;
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         order.Customer = "Anonymous";
                     }
