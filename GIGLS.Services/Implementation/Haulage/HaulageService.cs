@@ -24,7 +24,13 @@ namespace GIGLS.Services.Implementation
             var haulages = await _uow.Haulage.GetHaulagesAsync();
             return haulages;
         }
-        
+
+        public async Task<IEnumerable<HaulageDTO>> GetActiveHaulages()
+        {
+            var haulages = await _uow.Haulage.GetAsync(x => x.Status == true);
+            return Mapper.Map<IEnumerable<HaulageDTO>>(haulages);
+        }
+
         public async Task<HaulageDTO> GetHaulageById(int haulageId)
         {
             var haulage = await _uow.Haulage.GetAsync(haulageId);
@@ -65,6 +71,19 @@ namespace GIGLS.Services.Implementation
 
             haulage.Tonne = haulageDto.Tonne;
             haulage.Status = haulageDto.Status;
+            await _uow.CompleteAsync();
+        }
+
+        public async Task UpdateHaulageStatus(int haulageId, bool status)
+        {
+            var haulage = await _uow.Haulage.GetAsync(haulageId);
+
+            if (haulage == null)
+            {
+                throw new GenericException("HAULAGE INFORMATION DOES NOT EXIST");
+            }
+            
+            haulage.Status = status;
             await _uow.CompleteAsync();
         }
 

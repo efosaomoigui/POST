@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.Core.DTO.Haulage;
+using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers
 {
-    //[Authorize(Roles = "Admin,Shipment,Account,Report")]
-    [RoutePrefix("api/ZoneHaulagePrice")]
+    [Authorize(Roles = "Admin,Shipment,Account,Report")]
+    [RoutePrefix("api/zonehaulageprice")]
     public class ZoneHaulagePriceController : BaseWebApiController
     {
         private readonly IZoneHaulagePriceService _zoneHaulagePriceService;
@@ -18,7 +19,7 @@ namespace GIGLS.WebApi.Controllers
             _zoneHaulagePriceService = zoneHaulagePriceService;
         }
 
-       // [GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
         public async Task<IServiceResponse<IEnumerable<ZoneHaulagePriceDTO>>> GetZoneHaulagePrices()
@@ -34,7 +35,7 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Create")]
+        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]
         public async Task<IServiceResponse<object>> AddZoneHaulagePrice(ZoneHaulagePriceDTO zoneHaulagePriceDto)
@@ -50,7 +51,7 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{zoneHaulagePriceId:int}")]
         public async Task<IServiceResponse<ZoneHaulagePriceDTO>> GetZoneHaulagePrice(int zoneHaulagePriceId)
@@ -66,7 +67,7 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Delete")]
+        [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("{zoneHaulagePriceId:int}")]
         public async Task<IServiceResponse<bool>> DeleteZoneHaulagePrice(int zoneHaulagePriceId)
@@ -82,7 +83,7 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Update")]
+        [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("{zoneHaulagePriceId:int}")]
         public async Task<IServiceResponse<bool>> UpdateZoneHaulagePrice(int zoneHaulagePriceId, ZoneHaulagePriceDTO zoneHaulagePriceDto)
