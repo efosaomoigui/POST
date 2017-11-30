@@ -13,5 +13,6 @@ namespace GIGLS.CORE.IServices.Shipments
         Task AddShipmentCollection(ShipmentCollectionDTO shipmentCollection);
         Task UpdateShipmentCollection(ShipmentCollectionDTO shipmentCollection);
         Task RemoveShipmentCollection(string waybill);
+        Task CheckShipmentCollection(string waybill);
     }
 }

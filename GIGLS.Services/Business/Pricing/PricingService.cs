@@ -5,6 +5,7 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core;
 using GIGLS.Core.IServices.User;
+using GIGLS.Infrastructure;
 
 namespace GIGLS.Services.Business.Pricing
 {
@@ -34,15 +35,32 @@ namespace GIGLS.Services.Business.Pricing
             _uow = uow;
         }
 
-        public async Task<decimal> GetSpecialPrice(PricingDTO pricingDto)
+        public Task<decimal> GetPrice(PricingDTO pricingDto)
+        {
+            switch (pricingDto.ShipmentType)
+            {
+                case ShipmentType.Special:
+                    return GetSpecialPrice(pricingDto);
+
+                case ShipmentType.Regular:
+                    return GetRegularPrice(pricingDto);
+                default:
+                    break;
+            }
+            return null;
+        }
+
+        private async Task<decimal> GetSpecialPrice(PricingDTO pricingDto)
         {
             //Get Login User and Service Centre User belong 
             var currentUser = await _userService.GetCurrentUserId();
-            var departureServiceCentreId = await _uow.UserServiceCentreMapping.GetAsync(s => s.IsActive == true && s.UserId == currentUser);
-
             
-            //var zone = await _routeZone.GetZone(pricingDto.DepartureServiceCentreId, pricingDto.DestinationServiceCentreId);
-            var zone = await _routeZone.GetZone(departureServiceCentreId.ServiceCentreId, pricingDto.DestinationServiceCentreId);
+            var departureServiceCentreId = await _userService.GetPriviledgeServiceCenters();
+
+            if(departureServiceCentreId.Length > 1)
+                throw new GenericException("This user is assign to more than one(1) Service Centre  ");
+            
+            var zone = await _routeZone.GetZone(departureServiceCentreId[0], pricingDto.DestinationServiceCentreId);
 
             decimal PackagePrice = await _special.GetSpecialZonePrice(pricingDto.SpecialPackageId, zone.ZoneId);
 
@@ -53,37 +71,26 @@ namespace GIGLS.Services.Business.Pricing
             return shipmentTotalPrice;
         }
         
-        public Task<decimal> GetPrice(PricingDTO pricingDto)
-        {
-            switch (pricingDto.ShipmentType)
-            {
-                case ShipmentType.Special:
-                    return GetSpecialPrice(pricingDto);
-                    
-                case ShipmentType.Regular:
-                    return GetRegularPrice(pricingDto);
-                default:
-                    break;
-            }
-            return null;
-        }
+        
 
         private async Task<decimal> GetRegularPrice(PricingDTO pricingDto)
         {
             //Get Login User and Service Centre User belong 
             var currentUser = await _userService.GetCurrentUserId();
-            var departureServiceCentreId = await _uow.UserServiceCentreMapping.GetAsync(s => s.IsActive == true && s.UserId == currentUser);
 
+            var departureServiceCentreId = await _userService.GetPriviledgeServiceCenters();
+
+            if (departureServiceCentreId.Length > 1)
+                throw new GenericException("This user is assign to more than one(1) Service Centre  ");
 
             decimal PackagePrice;
 
-            var zone = await _routeZone.GetZone(departureServiceCentreId.ServiceCentreId, pricingDto.DestinationServiceCentreId);
+            var zone = await _routeZone.GetZone(departureServiceCentreId[0], pricingDto.DestinationServiceCentreId);
             decimal deliveryOptionPrice = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId);
 
             //This is our limit weight. This will be deleted once limit Price Setting is approve
             var activeWeightLimit = await _weightLimit.GetActiveWeightLimits();
-            //decimal weightLimit = activeWeight.Weight;
-
+           
             if (pricingDto.Weight > activeWeightLimit.Weight)
             {
                 PackagePrice = await GetRegularPriceOverflow(pricingDto.Weight, activeWeightLimit.Weight, zone.ZoneId);
@@ -103,15 +110,11 @@ namespace GIGLS.Services.Business.Pricing
 
         private async Task<decimal> GetRegularPriceOverflow(decimal weight, decimal activeWeightLimit, int zoneId)
         {
-            //var activeWeight = await _weightLimit.GetActiveWeightLimits();
             var activeZone = await _weightLimitPrice.GetWeightLimitPriceByZoneId(zoneId);
-
-            //decimal weightLimit = activeWeight.Weight; //This is our limit weight
-
+                       
             decimal weightlimitZonePrice = activeZone.Price; //Limit Price addition base on zone
             decimal additionalWeight = activeZone.Weight; //Addtional Weight Divisor
 
-            //decimal weightDifferent = weight - weightLimit;
             decimal weightDifferent = weight - activeWeightLimit;
 
             decimal weightLimitPrice = (weightDifferent / additionalWeight) * weightlimitZonePrice;

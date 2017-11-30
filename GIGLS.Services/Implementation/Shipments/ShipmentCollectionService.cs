@@ -110,5 +110,17 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentCollection.UserId = await _userService.GetCurrentUserId();
             await _uow.CompleteAsync();
         }
+
+
+        //Check if the Shipment has not been collected before Processing Return Shipment
+        public async Task CheckShipmentCollection(string waybill)
+        {
+            var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(waybill) && x.ShipmentScanStatus == ShipmentScanStatus.Collected);
+
+            if (shipmentCollection != null)
+            {
+                throw new GenericException($"Shipment with waybill: {waybill} had been collected");
+            }
+        }
     }
 }
