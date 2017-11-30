@@ -359,6 +359,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 newShipment.DeclarationOfValueCheck = null;
             }
 
+            // add serial numbers to the ShipmentItems
+            var serialNumber = 1;
+            foreach(var shipmentItem in newShipment.ShipmentItems)
+            {
+                shipmentItem.SerialNumber = serialNumber;
+                serialNumber++;
+            }
+
             _uow.Shipment.Add(newShipment);
             //await _uow.CompleteAsync();
 
