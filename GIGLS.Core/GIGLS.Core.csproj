@@ -147,6 +147,7 @@
     <Compile Include="Domain\GroupWaybillNumber.cs" />
     <Compile Include="Domain\GroupWaybillNumberMapping.cs" />
     <Compile Include="Domain\Haulage.cs" />
+    <Compile Include="Domain\HaulageDistanceMapping.cs" />
     <Compile Include="Domain\IndividualCustomer.cs" />
     <Compile Include="Domain\Insurance.cs" />
     <Compile Include="Domain\Invoice.cs" />
@@ -267,6 +268,7 @@
     <Compile Include="DTO\Zone\DeliveryOptionPriceDTO.cs" />
     <Compile Include="DTO\Zone\DomesticRouteZoneMapDTO.cs" />
     <Compile Include="DTO\Zone\DomesticZonePriceDTO.cs" />
+    <Compile Include="DTO\Zone\HaulageDistanceMappingDTO.cs" />
     <Compile Include="DTO\Zone\SpecialDomesticPackageDTO.cs" />
     <Compile Include="DTO\Zone\SpecialDomesticZonePriceDTO.cs" />
     <Compile Include="DTO\Zone\WeightLimitDTO.cs" />
@@ -372,6 +374,7 @@
     <Compile Include="IRepositories\Zone\IDeliveryOptionRepository.cs" />
     <Compile Include="IRepositories\Zone\IDomesticRouteZoneMapRepository.cs" />
     <Compile Include="IRepositories\Zone\IDomesticZonePriceRepository.cs" />
+    <Compile Include="IRepositories\Zone\IHaulageDistanceMappingRepository.cs" />
     <Compile Include="IRepositories\Zone\ISpecialDomesticPackageRepository.cs" />
     <Compile Include="IRepositories\Zone\ISpecialDomesticZonePriceRepository.cs" />
     <Compile Include="IRepositories\Zone\IWeightLimitPriceRepository.cs" />
@@ -448,6 +451,7 @@
     <Compile Include="IServices\Zone\IDeliveryOptionService.cs" />
     <Compile Include="IServices\Zone\IDomesticRouteZoneMapService.cs" />
     <Compile Include="IServices\Zone\IDomesticZonePriceService.cs" />
+    <Compile Include="IServices\Zone\IHaulageDistanceMappingService.cs" />
     <Compile Include="IServices\Zone\ISpecialDomesticPackageService.cs" />
     <Compile Include="IServices\Zone\ISpecialDomesticZonePriceService.cs" />
     <Compile Include="IServices\Zone\IWeightLimitPriceService.cs" />

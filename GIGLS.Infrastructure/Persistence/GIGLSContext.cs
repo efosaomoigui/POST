@@ -59,6 +59,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         //Haulauge Pricing
         public DbSet<Haulage> Haulage { get; set; }
+        public DbSet<HaulageDistanceMapping> HaulageDistanceMapping { get; set; }
         public DbSet<ZoneHaulagePrice> ZoneHaulagePrice { get; set; }
 
         //Waybill

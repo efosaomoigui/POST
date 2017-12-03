@@ -85,6 +85,7 @@ namespace GIGLS.Core
         ISubSubNavRepository SubSubNav { get; set; }
         IMessageRepository Message { get; set; }
         IHaulageRepository Haulage { get; set; }
+        IHaulageDistanceMappingRepository HaulageDistanceMapping { get; set; }
         IZoneHaulagePriceRepository ZoneHaulagePrice { get; set; }
 
         int Complete();

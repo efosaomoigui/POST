@@ -222,6 +222,9 @@ namespace GIGLS.Infrastructure.Persistence
         public IHaulageRepository Haulage { get; set; }
 
         [Inject]
+        public IHaulageDistanceMappingRepository HaulageDistanceMapping { get; set; }
+
+        [Inject]
         public IZoneHaulagePriceRepository ZoneHaulagePrice { get; set; }
 
         public int Complete()
