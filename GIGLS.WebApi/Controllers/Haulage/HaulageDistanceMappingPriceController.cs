@@ -8,7 +8,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers
 {
-    //[Authorize(Roles = "Admin,Shipment,Account,Report")]
+    [Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/haulagedistancemappingprice")]
     public class HaulageDistanceMappingPriceController : BaseWebApiController
     {
@@ -19,7 +19,7 @@ namespace GIGLS.WebApi.Controllers
             _haulageDistanceMappingPriceService = haulageDistanceMappingPriceService;
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
         public async Task<IServiceResponse<IEnumerable<HaulageDistanceMappingPriceDTO>>> GetHaulageDistanceMappingPrices()
