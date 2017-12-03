@@ -12,12 +12,12 @@ namespace GIGL.GIGLS.Core.Domain
         public virtual Zone Zone { get; set; }
 
 
-        public int DepartureId { get; set; }
+        public int? DepartureId { get; set; }
 
         [ForeignKey("DepartureId")]
         public virtual Station Departure { get; set; }
 
-        public int DestinationId { get; set; }
+        public int? DestinationId { get; set; }
 
 
         [ForeignKey("DestinationId")]
