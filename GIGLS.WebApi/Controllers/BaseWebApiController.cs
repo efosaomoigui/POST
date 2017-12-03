@@ -12,12 +12,12 @@ using GIGLS.Services.Implementation.User;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.AspNet.Identity;
 using GIGLS.WebApi.Models;
-using Audit.WebApi;
+//using Audit.WebApi;
 using System.Collections.Generic;
 
 namespace GIGLS.WebApi.Controllers
 {
-    [AuditApi]
+    //[AuditApi]
     public class BaseWebApiController : ApiController
     {
         private readonly string _controllerName;

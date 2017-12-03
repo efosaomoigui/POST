@@ -65,7 +65,7 @@ namespace GIGLS.WebApi.Controllers.User
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Create")]
+        //[GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("api/user")]
         public async Task<IServiceResponse<object>> AddUser(UserDTO userdto)

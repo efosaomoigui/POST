@@ -9,7 +9,7 @@ namespace GIGLS.Infrastructure.Migrations
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = false;
+            AutomaticMigrationsEnabled = true;
         }
 
         protected override void Seed(GIGLS.Infrastructure.Persistence.GIGLSContext context)

@@ -12,6 +12,7 @@ using Audit.EntityFramework;
 using GIGLS.Core.Domain.Audit;
 using GIGLS.CORE.Domain;
 using Microsoft.AspNet.Identity.EntityFramework;
+using GIGLS.Infrastructure.Migrations;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -24,10 +25,8 @@ namespace GIGLS.Infrastructure.Persistence
         {
             Configuration.LazyLoadingEnabled = false;
             Configuration.ProxyCreationEnabled = false;
-            //Database.SetInitializer(
-            //    new MigrateDatabaseToLatestVersion<GIGLSContext, INFRASTRUCTURE.Migrations.Configuration>());
 
-            Database.Log = s => System.Diagnostics.Debug.WriteLine(s);
+            //Database.Log = s => System.Diagnostics.Debug.WriteLine(s);
         }
 
         public static GIGLSContext Create()
@@ -166,6 +165,9 @@ namespace GIGLS.Infrastructure.Persistence
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            Database.SetInitializer(
+                new MigrateDatabaseToLatestVersion<GIGLSContext, Migrations.Configuration>());
+
             base.OnModelCreating(modelBuilder);
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
 
