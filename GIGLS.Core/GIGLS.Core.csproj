@@ -197,7 +197,7 @@
     <Compile Include="Domain\WeightLimitPrice.cs" />
     <Compile Include="Domain\Workshop.cs" />
     <Compile Include="Domain\Zone.cs" />
-    <Compile Include="Domain\ZoneHaulagePrice.cs" />
+    <Compile Include="Domain\HaulageDistanceMappingPrice.cs" />
     <Compile Include="DTO\Account\GeneralLedgerDTO.cs" />
     <Compile Include="DTO\Account\InsuranceDTO.cs" />
     <Compile Include="DTO\Account\InvoiceDTO.cs" />
@@ -221,7 +221,7 @@
     <Compile Include="DTO\Fleets\FleetPartInventoryHistoryDTO.cs" />
     <Compile Include="DTO\Fleets\FleetTripDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDTO.cs" />
-    <Compile Include="DTO\Haulage\ZoneHaulagePriceDTO.cs" />
+    <Compile Include="DTO\Haulage\HaulageDistanceMappingPriceDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardManagementDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardManagementPartDTO.cs" />
@@ -330,7 +330,7 @@
     <Compile Include="IRepositories\Fleets\IFleetPartRepository.cs" />
     <Compile Include="IRepositories\Fleets\IFleetRepository.cs" />
     <Compile Include="IRepositories\Fleets\IFleetTripRepository.cs" />
-    <Compile Include="IRepositories\Haulage\IZoneHaulagePriceRepository.cs" />
+    <Compile Include="IRepositories\Haulage\IHaulageDistanceMappingPriceRepository.cs" />
     <Compile Include="IRepositories\Haulage\IHaulageRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
     <Compile Include="IRepositories\IMessageRepository.cs" />

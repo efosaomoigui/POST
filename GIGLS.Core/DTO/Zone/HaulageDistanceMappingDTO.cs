@@ -7,9 +7,7 @@ namespace GIGLS.Core.DTO.Zone
     {
         public int HaulageDistanceMappingId { get; set; }
 
-        public int ZoneId { get; set; }
-        public virtual ZoneDTO Zone { get; set; }
-
+        public int Distance { get; set; }
 
         public int DepartureId { get; set; }
 

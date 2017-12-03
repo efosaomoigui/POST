@@ -8,9 +8,7 @@ namespace GIGL.GIGLS.Core.Domain
     {
         public int HaulageDistanceMappingId { get; set; }
 
-        public int ZoneId { get; set; }
-        public virtual Zone Zone { get; set; }
-
+        public int Distance { get; set; }
 
         public int? DepartureId { get; set; }
 

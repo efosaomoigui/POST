@@ -86,7 +86,7 @@ namespace GIGLS.Core
         IMessageRepository Message { get; set; }
         IHaulageRepository Haulage { get; set; }
         IHaulageDistanceMappingRepository HaulageDistanceMapping { get; set; }
-        IZoneHaulagePriceRepository ZoneHaulagePrice { get; set; }
+        IHaulageDistanceMappingPriceRepository HaulageDistanceMappingPrice { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

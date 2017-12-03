@@ -44,7 +44,7 @@ namespace GIGLS.Services.Implementation.Zone
             {
                 DepartureId = haulageDistanceMapping.DepartureId,
                 DestinationId = haulageDistanceMapping.DestinationId,
-                ZoneId = haulageDistanceMapping.ZoneId,
+                Distance = haulageDistanceMapping.Distance,
                 Status = true
             };
 

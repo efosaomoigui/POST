@@ -10,13 +10,13 @@ using GIGLS.Core.IServices.Zone;
 
 namespace GIGLS.Services.Implementation
 {
-    public class ZoneHaulagePriceService : IZoneHaulagePriceService
+    public class HaulageDistanceMappingPriceService : IHaulageDistanceMappingPriceService
     {
         private readonly IUnitOfWork _uow;
         private readonly IZoneService _zoneService;
         private readonly IHaulageService _haulageService;
 
-        public ZoneHaulagePriceService(IUnitOfWork uow, IZoneService zoneService, IHaulageService haulageService)
+        public HaulageDistanceMappingPriceService(IUnitOfWork uow, IZoneService zoneService, IHaulageService haulageService)
         {
             _uow = uow;
             _zoneService = zoneService;
@@ -24,75 +24,76 @@ namespace GIGLS.Services.Implementation
             MapperConfig.Initialize();
         }
 
-        public async Task<IEnumerable<ZoneHaulagePriceDTO>> GetZoneHaulagePrices()
+        public async Task<IEnumerable<HaulageDistanceMappingPriceDTO>> GetHaulageDistanceMappingPrices()
         {
-            var zoneHaulagePrices = await _uow.ZoneHaulagePrice.GetZoneHaulagePricesAsync();
-            return zoneHaulagePrices;
+            var haulageDistanceMappingPrices = await _uow.HaulageDistanceMappingPrice.GetHaulageDistanceMappingPricesAsync();
+            return haulageDistanceMappingPrices;
         }
         
-        public async Task<ZoneHaulagePriceDTO> GetZoneHaulagePriceById(int zoneHaulagePriceId)
+        public async Task<HaulageDistanceMappingPriceDTO> GetHaulageDistanceMappingPriceById(int haulageDistanceMappingPriceId)
         {
-            var zoneHaulagePrice = await _uow.ZoneHaulagePrice.GetAsync(z => z.ZoneHaulagePriceId == zoneHaulagePriceId, "Haulage,Zone");
+            var haulageDistanceMappingPrice = await _uow.HaulageDistanceMappingPrice.GetAsync(z => z.HaulageDistanceMappingPriceId == haulageDistanceMappingPriceId, "Haulage");
             
-            if (zoneHaulagePrice == null)
+            if (haulageDistanceMappingPrice == null)
             {
-                throw new GenericException("Zone Haulage Price information does not exist");
+                throw new GenericException("Haulage Price information does not exist");
             }
-            var zoneHaulagePriceDto = Mapper.Map<ZoneHaulagePriceDTO>(zoneHaulagePrice);
-            zoneHaulagePriceDto.Tonne = zoneHaulagePrice.Haulage.Tonne;
-            zoneHaulagePriceDto.ZoneName = zoneHaulagePrice.Zone.ZoneName;
+            var zoneHaulagePriceDto = Mapper.Map<HaulageDistanceMappingPriceDTO>(haulageDistanceMappingPrice);
             return zoneHaulagePriceDto;
         }
 
-        public async Task<object> AddZoneHaulagePrice(ZoneHaulagePriceDTO zoneHaulagePriceDto)
+        public async Task<object> AddHaulageDistanceMappingPrice(HaulageDistanceMappingPriceDTO haulageDistanceMappingPriceDto)
         {
-            await _haulageService.GetHaulageById(zoneHaulagePriceDto.HaulageId);
-            await _zoneService.GetZoneById(zoneHaulagePriceDto.ZoneId);
+            await _haulageService.GetHaulageById(haulageDistanceMappingPriceDto.HaulageId);
 
-            if (await _uow.ZoneHaulagePrice.ExistAsync(v => v.HaulageId == zoneHaulagePriceDto.HaulageId && v.ZoneId == zoneHaulagePriceDto.ZoneHaulagePriceId))
+            if (await _uow.HaulageDistanceMappingPrice.ExistAsync(v => 
+            v.HaulageId == haulageDistanceMappingPriceDto.HaulageId &&
+            v.StartRange == haulageDistanceMappingPriceDto.StartRange &&
+            v.EndRange == haulageDistanceMappingPriceDto.EndRange))
             {
-                throw new GenericException($"Price already set for this Tonne and Zone");
+                throw new GenericException($"Price already set for this Tonne and Distance");
             }
 
-            var newZoneHaulagePrice = new ZoneHaulagePrice
+            var newHaulageDistanceMappingPrice = new HaulageDistanceMappingPrice
             {
-                HaulageId = zoneHaulagePriceDto.HaulageId,
-                ZoneId = zoneHaulagePriceDto.ZoneId,
-                Price = zoneHaulagePriceDto.Price
+                HaulageId = haulageDistanceMappingPriceDto.HaulageId,
+                StartRange = haulageDistanceMappingPriceDto.StartRange,
+                EndRange = haulageDistanceMappingPriceDto.EndRange,
+                Price = haulageDistanceMappingPriceDto.Price
             };
 
-            _uow.ZoneHaulagePrice.Add(newZoneHaulagePrice);
+            _uow.HaulageDistanceMappingPrice.Add(newHaulageDistanceMappingPrice);
             await _uow.CompleteAsync();
-            return new { id = newZoneHaulagePrice.ZoneHaulagePriceId };
+            return new { id = newHaulageDistanceMappingPrice.HaulageDistanceMappingPriceId };
         }
 
-        public async Task UpdateZoneHaulagePrice(int zoneHaulagePriceId, ZoneHaulagePriceDTO zoneHaulagePriceDto)
+        public async Task UpdateHaulageDistanceMappingPrice(int haulageDistanceMappingPriceId, HaulageDistanceMappingPriceDTO haulageDistanceMappingPriceDto)
         {
-            await _haulageService.GetHaulageById(zoneHaulagePriceDto.HaulageId);
-            await _zoneService.GetZoneById(zoneHaulagePriceDto.ZoneId);
+            await _haulageService.GetHaulageById(haulageDistanceMappingPriceDto.HaulageId);
 
-            var zoneHaulagePrice = await _uow.ZoneHaulagePrice.GetAsync(zoneHaulagePriceId);
+            var haulageDistanceMappingPrice = await _uow.HaulageDistanceMappingPrice.GetAsync(haulageDistanceMappingPriceId);
 
-            if (zoneHaulagePrice == null)
+            if (haulageDistanceMappingPrice == null)
             {
-                throw new GenericException("Zone Haulage Price information does not exist");
+                throw new GenericException("Haulage Price information does not exist");
             }
 
-            zoneHaulagePrice.HaulageId = zoneHaulagePriceDto.HaulageId;
-            zoneHaulagePrice.ZoneId = zoneHaulagePriceDto.ZoneId;
-            zoneHaulagePrice.Price = zoneHaulagePriceDto.Price;
+            haulageDistanceMappingPrice.HaulageId = haulageDistanceMappingPriceDto.HaulageId;
+            haulageDistanceMappingPrice.StartRange = haulageDistanceMappingPriceDto.StartRange;
+            haulageDistanceMappingPrice.EndRange = haulageDistanceMappingPriceDto.EndRange;
+            haulageDistanceMappingPrice.Price = haulageDistanceMappingPriceDto.Price;
             await _uow.CompleteAsync();
         }
 
-        public async Task RemoveZoneHaulagePrice(int zoneHaulagePriceId)
+        public async Task RemoveHaulageDistanceMappingPrice(int haulageDistanceMappingPriceId)
         {
-            var zoneHaulagePrice = await _uow.ZoneHaulagePrice.GetAsync(zoneHaulagePriceId);
+            var haulageDistanceMappingPrice = await _uow.HaulageDistanceMappingPrice.GetAsync(haulageDistanceMappingPriceId);
 
-            if (zoneHaulagePrice == null)
+            if (haulageDistanceMappingPrice == null)
             {
-                throw new GenericException("Zone Haulage Price information does not exist");
+                throw new GenericException("Haulage Price information does not exist");
             }
-            _uow.ZoneHaulagePrice.Remove(zoneHaulagePrice);
+            _uow.HaulageDistanceMappingPrice.Remove(haulageDistanceMappingPrice);
             await _uow.CompleteAsync();
         }        
     }

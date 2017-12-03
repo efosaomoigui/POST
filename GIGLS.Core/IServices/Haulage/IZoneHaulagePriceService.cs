@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.IServices
 {
-    public interface IZoneHaulagePriceService : IServiceDependencyMarker
+    public interface IHaulageDistanceMappingPriceService : IServiceDependencyMarker
     {
-        Task<IEnumerable<ZoneHaulagePriceDTO>> GetZoneHaulagePrices();
-        Task<ZoneHaulagePriceDTO> GetZoneHaulagePriceById(int zoneHaulagePriceId);
-        Task<object> AddZoneHaulagePrice(ZoneHaulagePriceDTO zoneHaulagePrice);
-        Task UpdateZoneHaulagePrice(int zoneHaulagePriceId, ZoneHaulagePriceDTO zoneHaulagePriceDto);
-        Task RemoveZoneHaulagePrice(int zoneHaulagePriceId);
+        Task<IEnumerable<HaulageDistanceMappingPriceDTO>> GetHaulageDistanceMappingPrices();
+        Task<HaulageDistanceMappingPriceDTO> GetHaulageDistanceMappingPriceById(int haulageDistanceMappingPriceId);
+        Task<object> AddHaulageDistanceMappingPrice(HaulageDistanceMappingPriceDTO haulageDistanceMappingPrice);
+        Task UpdateHaulageDistanceMappingPrice(int haulageDistanceMappingPriceId, HaulageDistanceMappingPriceDTO haulageDistanceMappingPriceDto);
+        Task RemoveHaulageDistanceMappingPrice(int haulageDistanceMappingPriceId);
     }
 }

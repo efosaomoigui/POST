@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.IRepositories
 {
-    public interface IZoneHaulagePriceRepository : IRepository<ZoneHaulagePrice>
+    public interface IHaulageDistanceMappingPriceRepository : IRepository<HaulageDistanceMappingPrice>
     {
-        Task<List<ZoneHaulagePriceDTO>> GetZoneHaulagePricesAsync();
+        Task<List<HaulageDistanceMappingPriceDTO>> GetHaulageDistanceMappingPricesAsync();
     }
 }
