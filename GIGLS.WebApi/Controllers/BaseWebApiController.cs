@@ -16,7 +16,7 @@ using System.Collections.Generic;
 
 namespace GIGLS.WebApi.Controllers
 {
-    [AuditApi]
+    //[AuditApi]
     public class BaseWebApiController : ApiController
     {
         private readonly string _controllerName;
