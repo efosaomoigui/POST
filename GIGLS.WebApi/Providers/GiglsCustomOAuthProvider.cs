@@ -13,7 +13,7 @@ namespace GIGLS.WebApi.Providers
 {
     public class GiglsCustomOAuthProvider : OAuthAuthorizationServerProvider
     {
-        private readonly string _publicClientId;
+        //private readonly string _publicClientId;
 
         //Check to validate a client's credentials
         public override Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext context)

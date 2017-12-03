@@ -1,6 +1,5 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.Domain;
-using System;
 
 namespace GIGL.GIGLS.Core.Domain
 {

@@ -128,6 +128,8 @@
     <Compile Include="Persistence\Repositories\Fleets\FleetPartRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\FleetRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\FleetTripRepository.cs" />
+    <Compile Include="Persistence\Repositories\Haulage\ZoneHaulagePriceRepository.cs" />
+    <Compile Include="Persistence\Repositories\Haulage\HaulageRepository.cs" />
     <Compile Include="Persistence\Repositories\JobCards\JobCardManagementPartRepository.cs" />
     <Compile Include="Persistence\Repositories\JobCards\JobCardManagementRepository.cs" />
     <Compile Include="Persistence\Repositories\JobCards\JobCardRepository.cs" />
@@ -143,17 +145,14 @@
     <Compile Include="Persistence\Repositories\ServiceCentres\StationRepository.cs" />
     <Compile Include="Persistence\Repositories\ServiceCentres\UserServiceCentreMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberMappingRepository.cs" />
-    <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberMonitorRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ManifestGroupWaybillNumberMappingRepository.cs" />
-    <Compile Include="Persistence\Repositories\Shipments\ManifestMonitorRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ManifestRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCollectionRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentItemRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentReturnRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentTrackingRepository.cs" />
-    <Compile Include="Persistence\Repositories\Shipments\WaybillNumberMonitorRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\WaybillNumberRepository.cs" />
     <Compile Include="Persistence\Repositories\StateRepository.cs" />
     <Compile Include="Persistence\Repositories\Stocks\StockRequestPartRepository.cs" />

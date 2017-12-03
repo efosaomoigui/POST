@@ -12,16 +12,20 @@ namespace GIGLS.Services.Implementation.Zone
     public class DomesticZonePriceService : IDomesticZonePriceService
     {
         private readonly IUnitOfWork _uow;
+        private readonly IZoneService _zoneService;
 
-        public DomesticZonePriceService(IUnitOfWork uow)
+        public DomesticZonePriceService(IUnitOfWork uow, IZoneService zoneService)
         {
             _uow = uow;
+            _zoneService = zoneService;
         }
 
         public async Task<object> AddDomesticZonePrice(DomesticZonePriceDTO domesticZonePrice)
         {
             try
             {
+                await _zoneService.GetZoneById(domesticZonePrice.ZoneId);
+
                 if (await _uow.DomesticZonePrice.ExistAsync(c => c.Weight == domesticZonePrice.Weight && c.ZoneId == domesticZonePrice.ZoneId))
                 {
                     throw new GenericException("Price already set for this Zone and Weight");
@@ -123,6 +127,8 @@ namespace GIGLS.Services.Implementation.Zone
         {
             try
             {
+                await _zoneService.GetZoneById(domesticZoneDto.ZoneId);
+
                 var zone = await _uow.DomesticZonePrice.GetAsync(domesticZoneId);
                 if (zone == null || domesticZoneDto.DomesticZonePriceId != domesticZoneId)
                 {

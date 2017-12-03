@@ -46,7 +46,7 @@ namespace GIGLS.Services.Implementation.Messaging
                         }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //throw;
             }

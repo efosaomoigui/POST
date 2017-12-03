@@ -360,8 +360,7 @@ namespace GIGLS.Services.Implementation.User
             catch (Exception ex)
             {
                 result = false;
-
-                throw;
+                throw ex;
             }
 
             return result;
@@ -398,7 +397,7 @@ namespace GIGLS.Services.Implementation.User
                     result = true;
                 }
             }
-            catch (Exception ex) { }
+            catch (Exception ex) { throw ex; }
 
             return result;
         }

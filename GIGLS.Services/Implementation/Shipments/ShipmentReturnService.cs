@@ -7,7 +7,6 @@ using AutoMapper;
 using GIGLS.Infrastructure;
 using GIGLS.CORE.Domain;
 using System;
-using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Shipments;
 
 namespace GIGLS.Services.Implementation.Shipments

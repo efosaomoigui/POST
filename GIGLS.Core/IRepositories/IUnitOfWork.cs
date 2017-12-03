@@ -33,7 +33,6 @@ namespace GIGLS.Core
         IServiceCentreRepository ServiceCentre { get; set; }
         IUserServiceCentreMappingRepository UserServiceCentreMapping { get; set; }
         IManifestRepository Manifest { get; set; }
-        IManifestMonitorRepository ManifestMonitor { get; set; }
         IManifestGroupWaybillNumberMappingRepository ManifestGroupWaybillNumberMapping { get; set; }
         IShipmentItemRepository ShipmentPackage { get; set; }
         IShipmentRepository Shipment { get; set; }
@@ -67,9 +66,7 @@ namespace GIGLS.Core
         IStateRepository State { get; set; }
         IStationRepository Station { get; set; }
         IWaybillNumberRepository WaybillNumber { get; set; }
-        IWaybillNumberMonitorRepository WaybillNumberMonitor { get; set; }
         IGroupWaybillNumberRepository GroupWaybillNumber { get; set; }
-        IGroupWaybillNumberMonitorRepository GroupWaybillNumberMonitor { get; set; }
         IGroupWaybillNumberMappingRepository GroupWaybillNumberMapping { get; set; }
         IWeightLimitPriceRepository WeightLimitPrice { get; set; }
         IWeightLimitRepository WeightLimit { get; set; }
@@ -87,6 +84,8 @@ namespace GIGLS.Core
         ISubNavRepository SubNav { get; set; }
         ISubSubNavRepository SubSubNav { get; set; }
         IMessageRepository Message { get; set; }
+        IHaulageRepository Haulage { get; set; }
+        IZoneHaulagePriceRepository ZoneHaulagePrice { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

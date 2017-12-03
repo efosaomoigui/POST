@@ -22,5 +22,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<Shipment> GetShipmentForScan(string waybill);
         Task<List<ServiceCentreDTO>> GetUnGroupMappingServiceCentres();
         Task<List<ShipmentDTO>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto);
+        Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentres();
+        Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto);
+
     }
 }

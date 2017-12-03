@@ -1,20 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core;
-using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.DTO.User;
-using AutoMapper;
 using System.Collections.Generic;
 using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.User;
-using System.Linq;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.Domain;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -23,12 +15,16 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUnitOfWork _uow;
         private readonly IManifestService _manifestService;
         private readonly IGroupWaybillNumberService _groupWaybillNumberService;
+        private readonly IUserService _userService;
 
-        public ManifestGroupWaybillNumberMappingService(IUnitOfWork uow, IManifestService manifestService, IGroupWaybillNumberService groupWaybillNumberService)
+        public ManifestGroupWaybillNumberMappingService(IUnitOfWork uow,
+            IManifestService manifestService, IGroupWaybillNumberService groupWaybillNumberService,
+            IUserService userService)
         {
             _uow = uow;
             _manifestService = manifestService;
             _groupWaybillNumberService = groupWaybillNumberService;
+            _userService = userService;
             MapperConfig.Initialize();
         }
 
@@ -229,6 +225,17 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-
+        public async Task<IEnumerable<ManifestGroupWaybillNumberMappingDTO>> GetAllManifestGroupWayBillNumberMappings()
+        {
+            try
+            {
+                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                return await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

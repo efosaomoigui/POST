@@ -8,7 +8,6 @@ using GIGLS.Core.IServices;
 using System.Net.Http;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
-using GIGLS.Services.Implementation.User;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.AspNet.Identity;
 using GIGLS.WebApi.Models;
