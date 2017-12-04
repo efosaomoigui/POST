@@ -10,7 +10,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
-    //[Authorize(Roles = "Admin,Shipment,Account,Report")]
+    [Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/groupwaybillnumbermapping")]
     public class GroupWaybillNumberMappingController : BaseWebApiController
     {
@@ -64,8 +64,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Create")]
-        //GroupWaybillNumberMappingDTO
+        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapmultiple")]
         public async Task<IServiceResponse<bool>> MappingWaybillNumberToGroup(GroupWaybillNumberMappingDTO data)
@@ -78,7 +77,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                     Object = true
                 };
             });
-        }    
+        }
 
 
         //[HttpGet]
