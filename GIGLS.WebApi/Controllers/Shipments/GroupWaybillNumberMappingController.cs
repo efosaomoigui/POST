@@ -10,7 +10,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
-    [Authorize(Roles = "Admin,Shipment,Account,Report")]
+    //[Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/groupwaybillnumbermapping")]
     public class GroupWaybillNumberMappingController : BaseWebApiController
     {
@@ -64,14 +64,15 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Create")]
+        //[GIGLSActivityAuthorize(Activity = "Create")]
+        //GroupWaybillNumberMappingDTO
         [HttpPost]
         [Route("mapmultiple")]
-        public async Task<IServiceResponse<bool>> MappingWaybillNumberToGroup(string groupWaybillNumber, List<string> waybillNumbers)
+        public async Task<IServiceResponse<bool>> MappingWaybillNumberToGroup(GroupWaybillNumberMappingDTO data)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _service.MappingWaybillNumberToGroup(groupWaybillNumber, waybillNumbers);
+                await _service.MappingWaybillNumberToGroup(data.GroupWaybillNumber, data.WaybillNumbers);
                 return new ServiceResponse<bool>
                 {
                     Object = true
