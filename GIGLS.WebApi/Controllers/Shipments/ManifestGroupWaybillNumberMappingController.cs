@@ -54,11 +54,26 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("code")]
-        public async Task<IServiceResponse<bool>> MappingWaybillNumberToGroup(string manifest, string groupWaybillNumber)
+        public async Task<IServiceResponse<bool>> MappingManifestToGroupWaybillNumber(string manifest, string groupWaybillNumber)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 await _service.MappingManifestToGroupWaybillNumber(manifest, groupWaybillNumber);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("mapmultiple")]
+        public async Task<IServiceResponse<bool>> MappingManifestToGroupWaybillNumber(ManifestGroupWaybillNumberMappingDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.MappingManifestToGroupWaybillNumber(data.ManifestCode, data.GroupWaybillNumbers);
                 return new ServiceResponse<bool>
                 {
                     Object = true

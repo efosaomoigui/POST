@@ -1,5 +1,6 @@
 ﻿using GIGLS.CORE.DTO;
 using System;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -11,5 +12,6 @@ namespace GIGLS.Core.DTO.Shipments
 
         public string ManifestCode { get; set; }
         public string GroupWaybillNumber { get; set; }
+        public List<string> GroupWaybillNumbers { get; set; }
     }
 }

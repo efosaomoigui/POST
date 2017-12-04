@@ -193,6 +193,48 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //map groupWaybillNumber to Manifest
+        public async Task MappingManifestToGroupWaybillNumber(string manifest, List<string> groupWaybillNumberList)
+        {
+            try
+            {
+                var manifestDTO = await _manifestService.GetManifestByCode(manifest);
+
+                //validate the ids are in the system
+                if (manifestDTO == null)
+                {
+                    throw new GenericException($"No Manifest exists for this code: {manifest}");
+                }
+
+                foreach (var groupWaybillNumber in groupWaybillNumberList)
+                {
+                    var groupWaybillNumberDTO = await _groupWaybillNumberService.GetGroupWayBillNumberById(groupWaybillNumber);
+
+                    if (groupWaybillNumberDTO == null)
+                    {
+                        throw new GenericException($"No GroupWaybill exists for this number: {groupWaybillNumber}");
+                    }
+
+                    //Add new Mapping
+                    var newMapping = new ManifestGroupWaybillNumberMapping
+                    {
+                        ManifestCode = manifestDTO.ManifestCode,
+                        GroupWaybillNumber = groupWaybillNumberDTO.GroupWaybillCode,
+                        IsActive = true,
+                        DateMapped = DateTime.Now
+                    };
+
+                    _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+                }
+
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //remove groupWaybillNumber from manifest
         public async Task RemoveGroupWaybillNumberFromManifest(string manifest, string groupWaybillNumber)
         {
