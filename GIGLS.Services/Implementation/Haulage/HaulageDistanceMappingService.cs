@@ -38,7 +38,7 @@ namespace GIGLS.Services.Implementation
             d.DestinationId == haulageDistanceMapping.DestinationId);
 
             if (mapExists == true)
-                throw new GenericException("The mapping of Route to Zone already exists");
+                throw new GenericException("The mapping of Route already exists");
 
             var mapping = new HaulageDistanceMapping
             {
@@ -85,13 +85,18 @@ namespace GIGLS.Services.Implementation
             var departureServiceCenter = _unitOfWork.ServiceCentre.Get(departure);
             var destinationServiceCenter = _unitOfWork.ServiceCentre.Get(destination);
 
+            if (departureServiceCenter == null || destinationServiceCenter == null)
+            {
+                throw new GenericException("The Service Center does not exist");
+            }
+
             // use Stations
             var haulageDistanceMapping = await _unitOfWork.HaulageDistanceMapping.GetAsync(r =>
                 r.DepartureId == departureServiceCenter.StationId &&
                 r.DestinationId == destinationServiceCenter.StationId, "Destination,Departure");
 
             if (haulageDistanceMapping == null)
-                throw new GenericException("The Mapping of Route to Zone does not exist");
+                throw new GenericException("The Mapping of Route does not exist");
 
             return Mapper.Map<HaulageDistanceMappingDTO>(haulageDistanceMapping);
         }
@@ -104,12 +109,12 @@ namespace GIGLS.Services.Implementation
             var haulageDistanceMapping = Mapper.Map<HaulageDistanceMapping>(haulageDistanceMappingDTO);
 
             if (haulageDistanceMappingId != haulageDistanceMapping.HaulageDistanceMappingId)
-                throw new GenericException("Invalid Mapping Route to Zone for the Input parameters");
+                throw new GenericException("Invalid Mapping Route for the Input parameters");
 
             var zoneMap = _unitOfWork.HaulageDistanceMapping.Get(haulageDistanceMappingId);
 
             if (zoneMap == null)
-                throw new GenericException("The Mapping of Route to Zone does not exist");
+                throw new GenericException("The Mapping of Route does not exist");
 
             zoneMap.DepartureId = haulageDistanceMapping.DepartureId;
             zoneMap.DestinationId = haulageDistanceMapping.DestinationId;
@@ -123,7 +128,7 @@ namespace GIGLS.Services.Implementation
             var zoneMap = _unitOfWork.HaulageDistanceMapping.Get(haulageDistanceMappingId);
 
             if (zoneMap == null)
-                throw new GenericException("The Mapping of Route to Zone does not exist");
+                throw new GenericException("The Mapping of Route does not exist");
 
             zoneMap.Status = status;
             await _unitOfWork.CompleteAsync();

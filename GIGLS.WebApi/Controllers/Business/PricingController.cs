@@ -34,5 +34,21 @@ namespace GIGLS.WebApi.Controllers.Business
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("haulage")]
+        public async Task<IServiceResponse<decimal>> GetHaulagePrice(HaulagePricingDTO haulagePricingDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var price = await _pricing.GetHaulagePrice(haulagePricingDto);
+
+                return new ServiceResponse<decimal>
+                {
+                    Object = price
+                };
+            });
+        }
     }
 }
