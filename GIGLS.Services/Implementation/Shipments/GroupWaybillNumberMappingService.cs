@@ -233,7 +233,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 _uow.Complete();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
