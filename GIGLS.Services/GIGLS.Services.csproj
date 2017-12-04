@@ -160,7 +160,7 @@
     <Compile Include="Implementation\Fleets\FleetPartService.cs" />
     <Compile Include="Implementation\Fleets\FleetService.cs" />
     <Compile Include="Implementation\Fleets\FleetTripService.cs" />
-    <Compile Include="Implementation\Haulage\ZoneHaulagePriceService.cs" />
+    <Compile Include="Implementation\Haulage\HaulageDistanceMappingPriceService.cs" />
     <Compile Include="Implementation\Haulage\HaulageService.cs" />
     <Compile Include="Implementation\JobCards\JobCardManagementPartService.cs" />
     <Compile Include="Implementation\JobCards\JobCardManagementService.cs" />
@@ -205,7 +205,7 @@
     <Compile Include="Implementation\Zone\DeliveryOptionService.cs" />
     <Compile Include="Implementation\Zone\DomesticRouteZoneMapService.cs" />
     <Compile Include="Implementation\Zone\DomesticZonePriceService.cs" />
-    <Compile Include="Implementation\Zone\HaulageDistanceMappingService.cs" />
+    <Compile Include="Implementation\Haulage\HaulageDistanceMappingService.cs" />
     <Compile Include="Implementation\Zone\SpecialDomesticPackageService.cs" />
     <Compile Include="Implementation\Zone\SpecialDomesticZonePriceService.cs" />
     <Compile Include="Implementation\Zone\WeightLimitPriceService.cs" />

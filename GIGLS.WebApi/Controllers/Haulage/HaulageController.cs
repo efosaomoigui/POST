@@ -6,7 +6,7 @@ using System.Web.Http;
 using GIGLS.WebApi.Filters;
 using GIGLS.Core.DTO.Haulage;
 
-namespace GIGLS.WebApi.Controllers
+namespace GIGLS.WebApi.Controllers.Haulage
 {
     [Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/haulage")]

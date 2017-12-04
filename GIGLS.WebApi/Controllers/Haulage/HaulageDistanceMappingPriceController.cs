@@ -6,7 +6,7 @@ using System.Web.Http;
 using GIGLS.Core.DTO.Haulage;
 using GIGLS.WebApi.Filters;
 
-namespace GIGLS.WebApi.Controllers
+namespace GIGLS.WebApi.Controllers.Haulage
 {
     [Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/haulagedistancemappingprice")]
@@ -86,11 +86,11 @@ namespace GIGLS.WebApi.Controllers
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("{haulageDistanceMappingPriceId:int}")]
-        public async Task<IServiceResponse<bool>> UpdateHaulageDistanceMappingPrice(int zoneHaulagePriceId, HaulageDistanceMappingPriceDTO haulageDistanceMappingPriceDto)
+        public async Task<IServiceResponse<bool>> UpdateHaulageDistanceMappingPrice(int haulageDistanceMappingPriceId, HaulageDistanceMappingPriceDTO haulageDistanceMappingPriceDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _haulageDistanceMappingPriceService.UpdateHaulageDistanceMappingPrice(zoneHaulagePriceId, haulageDistanceMappingPriceDto);
+                await _haulageDistanceMappingPriceService.UpdateHaulageDistanceMappingPrice(haulageDistanceMappingPriceId, haulageDistanceMappingPriceDto);
 
                 return new ServiceResponse<bool>
                 {

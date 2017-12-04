@@ -21,6 +21,7 @@ using GIGLS.Core.IRepositories.Client;
 using GIGLS.Core.IRepositories.Utility;
 using GIGLS.CORE.IRepositories.Shipments;
 using GIGLS.CORE.IRepositories.Nav;
+using GIGLS.Core.IRepositories.Haulage;
 
 namespace GIGLS.Infrastructure.Persistence
 {

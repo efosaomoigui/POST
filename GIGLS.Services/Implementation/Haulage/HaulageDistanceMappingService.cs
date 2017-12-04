@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.IServices.Zone;
 using GIGLS.Core;
 using GIGLS.Infrastructure;
 using GIGLS.Core.DTO.Zone;
 using AutoMapper;
 using GIGLS.Core.IServices.ServiceCentres;
+using GIGLS.Core.IServices;
 
-namespace GIGLS.Services.Implementation.Zone
+namespace GIGLS.Services.Implementation
 {
     public class HaulageDistanceMappingService : IHaulageDistanceMappingService
     {
@@ -69,14 +69,14 @@ namespace GIGLS.Services.Implementation.Zone
         public async Task<HaulageDistanceMappingDTO> GetHaulageDistanceMappingById(int haulageDistanceMappingId)
         {
             var haulageDistanceMapping = await _unitOfWork.HaulageDistanceMapping.GetAsync(r =>
-            r.HaulageDistanceMappingId == haulageDistanceMappingId, "Zone, Destination,Departure");
+            r.HaulageDistanceMappingId == haulageDistanceMappingId, "Destination,Departure");
             return Mapper.Map<HaulageDistanceMappingDTO>(haulageDistanceMapping);
         }
 
         public Task<IEnumerable<HaulageDistanceMappingDTO>> GetHaulageDistanceMappings()
         {
             return Task.FromResult(Mapper.Map<IEnumerable<HaulageDistanceMappingDTO>>(
-                _unitOfWork.HaulageDistanceMapping.GetAll("Zone,Departure,Destination")));
+                _unitOfWork.HaulageDistanceMapping.GetAll("Departure,Destination")));
         }
 
         public async Task<HaulageDistanceMappingDTO> GetHaulageDistanceMapping(int departure, int destination)
@@ -88,7 +88,7 @@ namespace GIGLS.Services.Implementation.Zone
             // use Stations
             var haulageDistanceMapping = await _unitOfWork.HaulageDistanceMapping.GetAsync(r =>
                 r.DepartureId == departureServiceCenter.StationId &&
-                r.DestinationId == destinationServiceCenter.StationId, "Zone,Destination,Departure");
+                r.DestinationId == destinationServiceCenter.StationId, "Destination,Departure");
 
             if (haulageDistanceMapping == null)
                 throw new GenericException("The Mapping of Route to Zone does not exist");

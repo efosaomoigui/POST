@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IServices.Zone
+namespace GIGLS.Core.IServices
 {
     public interface IHaulageDistanceMappingService : IServiceDependencyMarker
     {

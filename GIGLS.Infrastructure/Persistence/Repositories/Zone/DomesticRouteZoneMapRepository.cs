@@ -12,12 +12,4 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Zone
         {
         }
     }
-
-    public class HaulageDistanceMappingRepository : Repository<HaulageDistanceMapping, GIGLSContext>, IHaulageDistanceMappingRepository
-    {
-        public HaulageDistanceMappingRepository(GIGLSContext context) : base(context)
-        {
-        }
-    }
-
 }

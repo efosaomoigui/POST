@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
 
-namespace GIGLS.WebApi.Controllers.Zone
+namespace GIGLS.WebApi.Controllers.Haulage
 {
     [Authorize(Roles = "Admin,Shipment,Account,Report")]
     [RoutePrefix("api/haulagedistancemapping")]

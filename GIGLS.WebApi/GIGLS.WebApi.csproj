@@ -318,7 +318,7 @@
     <Compile Include="Controllers\Zone\DeliveryOptionPriceController.cs" />
     <Compile Include="Controllers\Zone\DomesticRouteZoneMapController.cs" />
     <Compile Include="Controllers\Zone\DomesticZonePriceController.cs" />
-    <Compile Include="Controllers\Zone\HaulageDistanceMappingController.cs" />
+    <Compile Include="Controllers\Haulage\HaulageDistanceMappingController.cs" />
     <Compile Include="Controllers\Zone\SpecialDomesticPackageController.cs" />
     <Compile Include="Controllers\Zone\SpecialDomesticZonePriceController.cs" />
     <Compile Include="Controllers\Zone\WeightLimitController.cs" />
