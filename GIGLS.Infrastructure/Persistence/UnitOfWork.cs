@@ -21,6 +21,7 @@ using GIGLS.Core.IRepositories.Client;
 using GIGLS.Core.IRepositories.Utility;
 using GIGLS.CORE.IRepositories.Shipments;
 using GIGLS.CORE.IRepositories.Nav;
+using GIGLS.Core.IRepositories.Haulage;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -222,7 +223,10 @@ namespace GIGLS.Infrastructure.Persistence
         public IHaulageRepository Haulage { get; set; }
 
         [Inject]
-        public IZoneHaulagePriceRepository ZoneHaulagePrice { get; set; }
+        public IHaulageDistanceMappingRepository HaulageDistanceMapping { get; set; }
+
+        [Inject]
+        public IHaulageDistanceMappingPriceRepository HaulageDistanceMappingPrice { get; set; }
 
         public int Complete()
         {

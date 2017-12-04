@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
-using GIGLS.Core.Domain;
 using GIGLS.Core.IServices;
 using GIGLS.Infrastructure;
 using System.Collections.Generic;
@@ -49,7 +48,7 @@ namespace GIGLS.Services.Implementation
                 throw new GenericException($"{haulageDto.Tonne} Tonne already exist");
             }
 
-            var newHaulage = new Haulage
+            var newHaulage = new Core.Domain.Haulage
             {
                 Tonne = haulageDto.Tonne,
                 Status = true

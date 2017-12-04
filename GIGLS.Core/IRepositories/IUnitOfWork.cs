@@ -19,6 +19,7 @@ using GIGLS.Core.IRepositories.Client;
 using GIGLS.Core.IRepositories.Utility;
 using GIGLS.CORE.IRepositories.Shipments;
 using GIGLS.CORE.IRepositories.Nav;
+using GIGLS.Core.IRepositories.Haulage;
 
 namespace GIGLS.Core
 {
@@ -85,7 +86,8 @@ namespace GIGLS.Core
         ISubSubNavRepository SubSubNav { get; set; }
         IMessageRepository Message { get; set; }
         IHaulageRepository Haulage { get; set; }
-        IZoneHaulagePriceRepository ZoneHaulagePrice { get; set; }
+        IHaulageDistanceMappingRepository HaulageDistanceMapping { get; set; }
+        IHaulageDistanceMappingPriceRepository HaulageDistanceMappingPrice { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

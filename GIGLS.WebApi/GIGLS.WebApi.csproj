@@ -290,7 +290,7 @@
     <Compile Include="Controllers\Fleets\FleetModelController.cs" />
     <Compile Include="Controllers\Fleets\FleetPartController.cs" />
     <Compile Include="Controllers\Fleets\FleetTripController.cs" />
-    <Compile Include="Controllers\Haulage\ZoneHaulagePriceController.cs" />
+    <Compile Include="Controllers\Haulage\HaulageDistanceMappingPriceController.cs" />
     <Compile Include="Controllers\Haulage\HaulageController.cs" />
     <Compile Include="Controllers\Messaging\MessageController.cs" />
     <Compile Include="Controllers\Nav\MainNavController.cs" />
@@ -318,6 +318,7 @@
     <Compile Include="Controllers\Zone\DeliveryOptionPriceController.cs" />
     <Compile Include="Controllers\Zone\DomesticRouteZoneMapController.cs" />
     <Compile Include="Controllers\Zone\DomesticZonePriceController.cs" />
+    <Compile Include="Controllers\Haulage\HaulageDistanceMappingController.cs" />
     <Compile Include="Controllers\Zone\SpecialDomesticPackageController.cs" />
     <Compile Include="Controllers\Zone\SpecialDomesticZonePriceController.cs" />
     <Compile Include="Controllers\Zone\WeightLimitController.cs" />

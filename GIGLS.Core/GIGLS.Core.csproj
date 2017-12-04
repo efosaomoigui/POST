@@ -147,6 +147,7 @@
     <Compile Include="Domain\GroupWaybillNumber.cs" />
     <Compile Include="Domain\GroupWaybillNumberMapping.cs" />
     <Compile Include="Domain\Haulage.cs" />
+    <Compile Include="Domain\HaulageDistanceMapping.cs" />
     <Compile Include="Domain\IndividualCustomer.cs" />
     <Compile Include="Domain\Insurance.cs" />
     <Compile Include="Domain\Invoice.cs" />
@@ -196,7 +197,7 @@
     <Compile Include="Domain\WeightLimitPrice.cs" />
     <Compile Include="Domain\Workshop.cs" />
     <Compile Include="Domain\Zone.cs" />
-    <Compile Include="Domain\ZoneHaulagePrice.cs" />
+    <Compile Include="Domain\HaulageDistanceMappingPrice.cs" />
     <Compile Include="DTO\Account\GeneralLedgerDTO.cs" />
     <Compile Include="DTO\Account\InsuranceDTO.cs" />
     <Compile Include="DTO\Account\InvoiceDTO.cs" />
@@ -220,7 +221,7 @@
     <Compile Include="DTO\Fleets\FleetPartInventoryHistoryDTO.cs" />
     <Compile Include="DTO\Fleets\FleetTripDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDTO.cs" />
-    <Compile Include="DTO\Haulage\ZoneHaulagePriceDTO.cs" />
+    <Compile Include="DTO\Haulage\HaulageDistanceMappingPriceDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardManagementDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardManagementPartDTO.cs" />
@@ -230,6 +231,7 @@
     <Compile Include="DTO\Nav\SubSubNavDTO.cs" />
     <Compile Include="DTO\Partnership\PartnerApplicationDto.cs" />
     <Compile Include="DTO\Partnership\PartnerDto.cs" />
+    <Compile Include="DTO\PaymentTransactions\HaulagePricingDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PaymentTransactionDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PricingDTO.cs" />
     <Compile Include="DTO\Report\AccountFilterCriteria.cs" />
@@ -267,6 +269,7 @@
     <Compile Include="DTO\Zone\DeliveryOptionPriceDTO.cs" />
     <Compile Include="DTO\Zone\DomesticRouteZoneMapDTO.cs" />
     <Compile Include="DTO\Zone\DomesticZonePriceDTO.cs" />
+    <Compile Include="DTO\Zone\HaulageDistanceMappingDTO.cs" />
     <Compile Include="DTO\Zone\SpecialDomesticPackageDTO.cs" />
     <Compile Include="DTO\Zone\SpecialDomesticZonePriceDTO.cs" />
     <Compile Include="DTO\Zone\WeightLimitDTO.cs" />
@@ -328,7 +331,7 @@
     <Compile Include="IRepositories\Fleets\IFleetPartRepository.cs" />
     <Compile Include="IRepositories\Fleets\IFleetRepository.cs" />
     <Compile Include="IRepositories\Fleets\IFleetTripRepository.cs" />
-    <Compile Include="IRepositories\Haulage\IZoneHaulagePriceRepository.cs" />
+    <Compile Include="IRepositories\Haulage\IHaulageDistanceMappingPriceRepository.cs" />
     <Compile Include="IRepositories\Haulage\IHaulageRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
     <Compile Include="IRepositories\IMessageRepository.cs" />
@@ -372,6 +375,7 @@
     <Compile Include="IRepositories\Zone\IDeliveryOptionRepository.cs" />
     <Compile Include="IRepositories\Zone\IDomesticRouteZoneMapRepository.cs" />
     <Compile Include="IRepositories\Zone\IDomesticZonePriceRepository.cs" />
+    <Compile Include="IRepositories\Haulage\IHaulageDistanceMappingRepository.cs" />
     <Compile Include="IRepositories\Zone\ISpecialDomesticPackageRepository.cs" />
     <Compile Include="IRepositories\Zone\ISpecialDomesticZonePriceRepository.cs" />
     <Compile Include="IRepositories\Zone\IWeightLimitPriceRepository.cs" />
@@ -402,7 +406,7 @@
     <Compile Include="IServices\Fleets\IFleetPartService.cs" />
     <Compile Include="IServices\Fleets\IFleetService.cs" />
     <Compile Include="IServices\Fleets\IFleetTripService.cs" />
-    <Compile Include="IServices\Haulage\IZoneHaulagePriceService.cs" />
+    <Compile Include="IServices\Haulage\IHaulageDistanceMappingPriceService.cs" />
     <Compile Include="IServices\Haulage\IHaulageService.cs" />
     <Compile Include="IServices\IMessageService.cs" />
     <Compile Include="IServices\IServiceDependencyMarker.cs" />
@@ -448,6 +452,7 @@
     <Compile Include="IServices\Zone\IDeliveryOptionService.cs" />
     <Compile Include="IServices\Zone\IDomesticRouteZoneMapService.cs" />
     <Compile Include="IServices\Zone\IDomesticZonePriceService.cs" />
+    <Compile Include="IServices\Haulage\IHaulageDistanceMappingService.cs" />
     <Compile Include="IServices\Zone\ISpecialDomesticPackageService.cs" />
     <Compile Include="IServices\Zone\ISpecialDomesticZonePriceService.cs" />
     <Compile Include="IServices\Zone\IWeightLimitPriceService.cs" />
