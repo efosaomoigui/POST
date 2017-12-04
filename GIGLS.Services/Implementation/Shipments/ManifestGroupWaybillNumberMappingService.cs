@@ -229,8 +229,20 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var resultSet = new HashSet<string>();
+                var result = new List<ManifestGroupWaybillNumberMappingDTO>();
+
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-                return await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters);
+                var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters);
+                foreach (var item in manifestGroupWaybillMapings)
+                {
+                    if (resultSet.Add(item.ManifestCode))
+                    {
+                        result.Add(item);
+                    }
+                }
+
+                return result;
             }
             catch (Exception)
             {

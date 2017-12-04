@@ -35,8 +35,20 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var resultSet = new HashSet<string>();
+                var result = new List<GroupWaybillNumberMappingDTO>();
+
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                return await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(serviceCenters);
+                var groupWaybillMapings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(serviceCenters);
+                foreach (var item in groupWaybillMapings)
+                {
+                    if (resultSet.Add(item.GroupWaybillNumber))
+                    {
+                        result.Add(item);
+                    }
+                }
+
+                return result;
             }
             catch (Exception)
             {
