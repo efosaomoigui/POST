@@ -81,7 +81,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  SealNumber = r.SealNumber,
                                                  UserId = r.UserId,
                                                  Value = r.Value,
-                                                 GrandTotal = r.GrandTotal
+                                                 GrandTotal = r.GrandTotal,
+                                                 AppliedDiscount = r.AppliedDiscount,
+                                                 DiscountValue = r.DiscountValue
                                                  //DepartureTerminalName = r.DepartureTerminal.Name,
                                                  //DestinationTerminalName = r.DestinationTerminal.Name       
                                                  //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
@@ -154,7 +156,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      SealNumber = r.SealNumber,
                                                      UserId = r.UserId,
                                                      Value = r.Value,
-                                                     GrandTotal = r.GrandTotal
+                                                     GrandTotal = r.GrandTotal,
+                                                     AppliedDiscount = r.AppliedDiscount,
+                                                     DiscountValue = r.DiscountValue
                                                      //DepartureTerminalName = r.DepartureTerminal.Name,
                                                      //DestinationTerminalName = r.DestinationTerminal.Name       
                                                      //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()

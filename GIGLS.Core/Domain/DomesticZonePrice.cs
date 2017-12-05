@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.Domain;
+using GIGLS.Core.Enums;
 
 namespace GIGL.GIGLS.Core.Domain
 {
@@ -10,5 +11,6 @@ namespace GIGL.GIGLS.Core.Domain
         public int ZoneId { get; set; }
         public virtual Zone Zone { get; set; }
         public decimal Price { get; set; }
+        public RegularEcommerceType RegularEcommerceType { get; set; }
     }
 }

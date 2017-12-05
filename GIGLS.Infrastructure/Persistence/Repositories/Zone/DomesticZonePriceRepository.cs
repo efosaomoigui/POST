@@ -30,7 +30,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Zone
                                      Weight = z.Weight,
                                      ZoneId = z.ZoneId,
                                      ZoneName = z.Zone.ZoneName,
-                                     DateCreated = z.DateCreated,                                     
+                                     DateCreated = z.DateCreated,    
+                                     RegularEcommerceType = z.RegularEcommerceType
                                      //user logged on
                                  };
                 return Task.FromResult(zoneDto.ToList());

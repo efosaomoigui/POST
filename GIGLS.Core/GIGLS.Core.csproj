@@ -297,6 +297,7 @@
     <Compile Include="Enums\PaymentTypes.cs" />
     <Compile Include="Enums\PickupOptions.cs" />
     <Compile Include="Enums\PricingType.cs" />
+    <Compile Include="Enums\RegularEcommerceType.cs" />
     <Compile Include="Enums\ShipmentScanStatus.cs" />
     <Compile Include="Enums\ShipmentType.cs" />
     <Compile Include="Enums\StockRequestDestinationType.cs" />

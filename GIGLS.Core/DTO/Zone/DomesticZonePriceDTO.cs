@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.User;
+using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System.Collections.Generic;
 
@@ -15,6 +16,7 @@ namespace GIGLS.Core.DTO.Zone
         public int ZoneId { get; set; }
         public string ZoneName { get; set; }
         public decimal Price { get; set; }
+        public RegularEcommerceType RegularEcommerceType { get; set; }
 
         public string UserId { get; set; }
         public string UserName { get; set; }

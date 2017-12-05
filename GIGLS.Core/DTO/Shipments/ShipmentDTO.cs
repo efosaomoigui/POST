@@ -71,5 +71,9 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsdeclaredVal { get; set; }
         public decimal? DeclarationOfValueCheck { get; set; }
 
+        //discount information
+        public decimal? AppliedDiscount { get; set; }
+        public decimal? DiscountValue { get; set; }
+
     }
 }

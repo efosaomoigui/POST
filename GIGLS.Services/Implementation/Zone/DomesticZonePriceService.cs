@@ -35,14 +35,15 @@ namespace GIGLS.Services.Implementation.Zone
                 {
                     Weight = domesticZonePrice.Weight,
                     Price = domesticZonePrice.Price,
-                    ZoneId = domesticZonePrice.ZoneId
+                    ZoneId = domesticZonePrice.ZoneId,
+                    RegularEcommerceType = domesticZonePrice.RegularEcommerceType
                 };
 
                 _uow.DomesticZonePrice.Add(newPrice);
 
                 await _uow.CompleteAsync();
 
-                return new { Id = newPrice.DomesticZonePriceId};
+                return new { Id = newPrice.DomesticZonePriceId };
             }
             catch (Exception)
             {
@@ -89,7 +90,7 @@ namespace GIGLS.Services.Implementation.Zone
         {
             try
             {
-                var zone = await _uow.DomesticZonePrice.GetAsync(d => d.DomesticZonePriceId == domesticZonePriceId,  "Zone");
+                var zone = await _uow.DomesticZonePrice.GetAsync(d => d.DomesticZonePriceId == domesticZonePriceId, "Zone");
 
                 if (zone == null)
                 {
@@ -99,10 +100,11 @@ namespace GIGLS.Services.Implementation.Zone
                 return new DomesticZonePriceDTO
                 {
                     DomesticZonePriceId = zone.DomesticZonePriceId,
-                    Weight  = zone.Weight,
-                    Price   = zone.Price,
-                    ZoneId  = zone.ZoneId,
-                    ZoneName = zone.Zone.ZoneName
+                    Weight = zone.Weight,
+                    Price = zone.Price,
+                    ZoneId = zone.ZoneId,
+                    ZoneName = zone.Zone.ZoneName,
+                    RegularEcommerceType = zone.RegularEcommerceType
                 };
             }
             catch (Exception)
@@ -136,7 +138,8 @@ namespace GIGLS.Services.Implementation.Zone
                 }
                 zone.Weight = domesticZoneDto.Weight;
                 zone.Price = domesticZoneDto.Price;
-                zone.ZoneId = domesticZoneDto.ZoneId;                
+                zone.ZoneId = domesticZoneDto.ZoneId;
+                zone.RegularEcommerceType = domesticZoneDto.RegularEcommerceType;
                 _uow.Complete();
             }
             catch (Exception)
