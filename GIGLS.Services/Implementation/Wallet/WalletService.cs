@@ -1,6 +1,8 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
 using System;
 using System.Collections.Generic;
@@ -10,10 +12,13 @@ namespace GIGLS.Services.Implementation.Wallet
 {
     public class WalletService : IWalletService
     {
+        private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
+
         private readonly IUnitOfWork _uow;
 
-        public WalletService(IUnitOfWork uow)
+        public WalletService(INumberGeneratorMonitorService numberGeneratorMonitorService, IUnitOfWork uow)
         {
+            _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _uow = uow;
         }
 
@@ -22,7 +27,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var wallets = await _uow.Wallet.GetWalletsAsync();
             return wallets;
         }
-        
+
 
         public async Task<Core.Domain.Wallet.Wallet> GetWalletById(int walletid)
         {
@@ -30,27 +35,23 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (wallet == null)
             {
-                throw new Exception("WALLET_NUMBER_EXHAUSTED");
+                throw new Exception("Wallet does not exist");
             }
             return wallet;
         }
 
         public async Task AddWallet(WalletDTO wallet)
         {
-            wallet.WalletNumber = wallet.WalletNumber.Trim();
-
-            var walletNo = wallet.WalletNumber.ToLower();
-
-            if (await _uow.Wallet.ExistAsync(v => v.WalletNumber.ToLower() == walletNo))
-            {
-                throw new Exception("WALLET_EXIST");
-            }
+            var walletNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Wallet);
+            wallet.WalletNumber = walletNumber;
 
             _uow.Wallet.Add(new Core.Domain.Wallet.Wallet
             {
                 WalletId = wallet.WalletId,
                 WalletNumber = wallet.WalletNumber,
-                Balance = wallet.Balance
+                Balance = wallet.Balance,
+                CustomerId = wallet.CustomerId,
+                CustomerType = wallet.CustomerType
             });
             await _uow.CompleteAsync();
         }
@@ -61,7 +62,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (wall == null)
             {
-                throw new Exception("WALLET_NOT_EXIST");
+                throw new Exception("Wallet does not exists");
             }
 
             wall.WalletNumber = wallet.WalletNumber.Trim();
@@ -75,7 +76,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (wall == null)
             {
-                throw new Exception("WALLET_NOT_EXIST");
+                throw new Exception("Wallet does not exists");
             }
 
             _uow.Wallet.Remove(wall);

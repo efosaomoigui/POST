@@ -122,6 +122,10 @@ namespace GIGLS.Services.Implementation.Utility
                     {
                         return "INV";
                     }
+                case NumberGeneratorType.Wallet:
+                    {
+                        return "WLT";
+                    }
                 default:
                     {
                         return "WAY";

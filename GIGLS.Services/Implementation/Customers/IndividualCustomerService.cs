@@ -8,15 +8,21 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Infrastructure;
 using AutoMapper;
 using System.Linq;
+using GIGLS.Core.IServices.Wallet;
+using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Services.Implementation.Customers
 {
     public class IndividualCustomerService : IIndividualCustomerService
     {
+        private readonly IWalletService _walletService;
+
         private readonly IUnitOfWork _uow;
 
-        public IndividualCustomerService(IUnitOfWork uow)
+        public IndividualCustomerService(IWalletService walletService, IUnitOfWork uow)
         {
+            _walletService = walletService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -37,7 +43,15 @@ namespace GIGLS.Services.Implementation.Customers
 
                 var newCustomer = Mapper.Map<IndividualCustomer>(customer);
                 _uow.IndividualCustomer.Add(newCustomer);
+
                 await _uow.CompleteAsync();
+
+                // add customer to a wallet
+                await _walletService.AddWallet(new WalletDTO
+                {
+                    CustomerId = newCustomer.IndividualCustomerId,
+                    CustomerType = CustomerType.IndividualCustomer
+                });
 
                 return Mapper.Map<IndividualCustomerDTO>(newCustomer);
             }

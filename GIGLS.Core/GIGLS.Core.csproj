@@ -188,7 +188,6 @@
     <Compile Include="Domain\Vendor.cs" />
     <Compile Include="Domain\Wallet\AccountSummary.cs" />
     <Compile Include="Domain\Wallet\AccountTransaction.cs" />
-    <Compile Include="Domain\Wallet\GeneralLedger.cs" />
     <Compile Include="Domain\Wallet\Wallet.cs" />
     <Compile Include="Domain\Wallet\WalletNumber.cs" />
     <Compile Include="Domain\Wallet\WalletTransaction.cs" />

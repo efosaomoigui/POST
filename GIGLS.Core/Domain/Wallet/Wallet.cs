@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.Domain;
+using GIGLS.Core.Enums;
 using System;
 
 namespace GIGLS.Core.Domain.Wallet
@@ -8,6 +9,7 @@ namespace GIGLS.Core.Domain.Wallet
         public int WalletId { get; set; }
         public string WalletNumber { get; set; }
         public decimal Balance { get; set; }
-        public string UserType { get; set; }
+        public int CustomerId { get; set; }
+        public CustomerType CustomerType { get; set; }
     }
 }
