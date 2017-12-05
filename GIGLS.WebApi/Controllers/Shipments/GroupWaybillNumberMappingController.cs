@@ -35,35 +35,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
-        //[HttpPost]
-        //[Route("id")]
-        //public async Task<IServiceResponse<bool>> MappingWaybillNumberToGroup(int groupWaybillNumberId, int waybillNumberId)
-        //{
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-        //        await _service.MappingWaybillNumberToGroup(groupWaybillNumberId, waybillNumberId);
-        //        return new ServiceResponse<bool>
-        //        {
-        //            Object = true
-        //        };
-        //    });
-        //}
-
-        [GIGLSActivityAuthorize(Activity = "Create")]
-        [HttpPost]
-        [Route("code")]
-        public async Task<IServiceResponse<bool>> MappingWaybillNumberToGroup(string groupWaybillNumber, string waybillNumber)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _service.MappingWaybillNumberToGroup(groupWaybillNumber, waybillNumber);
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
-
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapmultiple")]

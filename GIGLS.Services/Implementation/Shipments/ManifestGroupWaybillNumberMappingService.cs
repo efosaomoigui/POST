@@ -122,78 +122,6 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //map groupWaybillNumber to Manifest
-        public async Task MappingManifestToGroupWaybillNumber(int manifestId, int groupWaybillNumberId)
-        {
-            try
-            {
-                var manifestDTO = await _manifestService.GetManifestById(manifestId);
-                var groupWaybillNumberDTO = await _groupWaybillNumberService.GetGroupWayBillNumberById(groupWaybillNumberId);
-
-                //validate the ids are in the system
-                if (manifestDTO == null)
-                {
-                    throw new GenericException($"No Manifest exists for this Id: {manifestId}");
-                }
-                if (groupWaybillNumberDTO == null)
-                {
-                    throw new GenericException($"No GroupWaybill exists for this Id: {groupWaybillNumberId}");
-                }
-
-                //Add new Mapping
-                var newMapping = new ManifestGroupWaybillNumberMapping
-                {
-                    ManifestCode = manifestDTO.ManifestCode,
-                    GroupWaybillNumber = groupWaybillNumberDTO.GroupWaybillCode,
-                    IsActive = true,
-                    DateMapped = DateTime.Now
-                };
-
-                _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
-                _uow.Complete();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        //map groupWaybillNumber to Manifest
-        public async Task MappingManifestToGroupWaybillNumber(string manifest, string groupWaybillNumber)
-        {
-            try
-            {
-                var manifestDTO = await _manifestService.GetManifestByCode(manifest);
-                var groupWaybillNumberDTO = await _groupWaybillNumberService.GetGroupWayBillNumberById(groupWaybillNumber);
-
-                //validate the ids are in the system
-                if (manifestDTO == null)
-                {
-                    throw new GenericException($"No Manifest exists for this code: {manifest}");
-                }
-                if (groupWaybillNumberDTO == null)
-                {
-                    throw new GenericException($"No GroupWaybill exists for this number: {groupWaybillNumber}");
-                }
-
-                //Add new Mapping
-                var newMapping = new ManifestGroupWaybillNumberMapping
-                {
-                    ManifestCode = manifestDTO.ManifestCode,
-                    GroupWaybillNumber = groupWaybillNumberDTO.GroupWaybillCode,
-                    IsActive = true,
-                    DateMapped = DateTime.Now
-                };
-
-                _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
-                _uow.Complete();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        //map groupWaybillNumber to Manifest
         public async Task MappingManifestToGroupWaybillNumber(string manifest, List<string> groupWaybillNumberList)
         {
             try
@@ -206,7 +134,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         DateCreated = DateTime.Now,
                         DateModified = DateTime.Now,
                         DateTime = DateTime.Now,
-                        ReceiverBy = userId
+                        DispatchedBy = userId
                     });
 
                 var manifestDTO = await _manifestService.GetManifestByCode(manifest);

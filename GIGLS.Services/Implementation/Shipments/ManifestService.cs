@@ -38,8 +38,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     DateTime = DateTime.Now,
                     ManifestCode = manifest.ManifestCode,
-                    //MasterWaybill = manifest.MasterWaybill,
-                    //DispatechedBy = user logged on
+                    DispatchedById = manifest.DispatchedBy,
                     ShipmentId = manifest.ShipmentId,
                     FleetTripId = manifest.FleetTripId
                 };
