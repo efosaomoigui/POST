@@ -6,6 +6,7 @@ using GIGLS.Core;
 using GIGL.GIGLS.Core.Domain;
 using System.Collections.Generic;
 using GIGLS.Infrastructure;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -68,11 +69,11 @@ namespace GIGLS.Services.Implementation.Zone
             }
         }
 
-        public async Task<decimal> GetDomesticZonePrice(int zoneId, decimal weight)
+        public async Task<decimal> GetDomesticZonePrice(int zoneId, decimal weight, RegularEcommerceType regularEcommerceType)
         {
             try
             {
-                var zone = await _uow.DomesticZonePrice.GetAsync(d => d.ZoneId == zoneId && d.Weight.Equals(weight));
+                var zone = await _uow.DomesticZonePrice.GetAsync(d => d.ZoneId == zoneId && d.Weight.Equals(weight) && d.RegularEcommerceType == regularEcommerceType);
 
                 if (zone == null)
                 {

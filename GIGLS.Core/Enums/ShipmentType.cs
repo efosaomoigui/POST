@@ -3,6 +3,7 @@
     public enum ShipmentType
     {
         Special,
-        Regular
+        Regular,
+        Ecommerce
     }
 }
