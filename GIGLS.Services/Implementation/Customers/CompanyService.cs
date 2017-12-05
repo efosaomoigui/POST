@@ -9,15 +9,20 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
 using GIGLS.Infrastructure;
 using AutoMapper;
+using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.IServices.Wallet;
 
 namespace GIGLS.Services.Implementation.Customers
 {
     public class CompanyService : ICompanyService
     {
+        private readonly IWalletService _walletService;
+
         private readonly IUnitOfWork _uow;
 
-        public CompanyService(IUnitOfWork uow)
+        public CompanyService(IWalletService walletService, IUnitOfWork uow)
         {
+            _walletService = walletService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -33,10 +38,10 @@ namespace GIGLS.Services.Implementation.Customers
 
                 var newCompany = Mapper.Map<Company>(company);
                 _uow.Company.Add(newCompany);
-                
+
                 if (company.ContactPersons.Any())
                 {
-                    foreach(CompanyContactPersonDTO personDto in company.ContactPersons)
+                    foreach (CompanyContactPersonDTO personDto in company.ContactPersons)
                     {
                         var person = Mapper.Map<CompanyContactPerson>(personDto);
                         person.CompanyId = newCompany.CompanyId;
@@ -45,6 +50,14 @@ namespace GIGLS.Services.Implementation.Customers
                 }
 
                 _uow.Complete();
+
+                // add customer to a wallet
+                await _walletService.AddWallet(new WalletDTO
+                {
+                    CustomerId = newCompany.CompanyId,
+                    CustomerType = CustomerType.Company
+                });
+
                 return Mapper.Map<CompanyDTO>(newCompany);
             }
             catch (Exception)
@@ -71,7 +84,7 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
-        public  Task<List<CompanyDTO>> GetCompanies()
+        public Task<List<CompanyDTO>> GetCompanies()
         {
             return _uow.Company.GetCompanies();
         }
@@ -87,7 +100,7 @@ namespace GIGLS.Services.Implementation.Customers
                 }
 
                 CompanyDTO companyDto = Mapper.Map<CompanyDTO>(company);
-                                
+
                 var contactPersons = _uow.CompanyContactPerson.Find(x => x.CompanyId == companyDto.CompanyId).ToList();
 
                 if (contactPersons.Any())
@@ -139,7 +152,7 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     foreach (CompanyContactPersonDTO personDto in companyDto.ContactPersons)
                     {
-                        var person = await _uow.CompanyContactPerson.GetAsync(personDto.CompanyContactPersonId);                        
+                        var person = await _uow.CompanyContactPerson.GetAsync(personDto.CompanyContactPersonId);
                         person.FirstName = personDto.FirstName;
                         person.LastName = personDto.LastName;
                         person.Email = personDto.Email;

@@ -5,6 +5,8 @@ using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IRepositories.Wallet;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
+using System.Linq;
+using AutoMapper;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 {
@@ -19,7 +21,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 
         public Task<IEnumerable<WalletDTO>> GetWalletsAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var wallets = _context.Wallets.ToList();
+
+                var walletDto = Mapper.Map<IEnumerable<WalletDTO>>(wallets);
+                return Task.FromResult(walletDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

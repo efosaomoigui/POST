@@ -17,6 +17,8 @@ using GIGLS.CORE.Domain;
 using GIGLS.CORE.DTO.Nav;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.DTO.Haulage;
+using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO.Wallet;
 
 namespace GIGLS.Core
 {
@@ -30,11 +32,11 @@ namespace GIGLS.Core
         private static bool isInit = false;
         public static void Initialize()
         {
-            if(isInit)
+            if (isInit)
             {
                 return;
             }
-            
+
             Mapper.Initialize(config =>
             {
 
@@ -49,7 +51,7 @@ namespace GIGLS.Core
 
                 config.CreateMap<User, UserDTO>();
                 config.CreateMap<UserDTO, User>();
-                   
+
                 config.CreateMap<AppRole, RoleDTO>();
                 config.CreateMap<RoleDTO, AppRole>();
 
@@ -163,6 +165,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<HaulageDistanceMappingPrice, HaulageDistanceMappingPriceDTO>();
                 config.CreateMap<HaulageDistanceMappingPriceDTO, HaulageDistanceMappingPrice>();
+
+                config.CreateMap<Wallet, WalletDTO>();
+                config.CreateMap<WalletDTO, Wallet>();
             });
 
             isInit = true;

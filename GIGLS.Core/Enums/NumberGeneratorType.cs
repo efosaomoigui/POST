@@ -11,6 +11,7 @@ namespace GIGLS.Core.Enums
         WaybillNumber,
         GroupWaybillNumber,
         Manifest,
-        Invoice
+        Invoice,
+        Wallet
     }
 }
