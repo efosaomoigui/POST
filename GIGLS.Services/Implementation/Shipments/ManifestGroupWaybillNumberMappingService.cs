@@ -198,6 +198,17 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var userId = await _userService.GetCurrentUserId();
+                await _manifestService.AddManifest(
+                    new ManifestDTO
+                    {
+                        ManifestCode = manifest,
+                        DateCreated = DateTime.Now,
+                        DateModified = DateTime.Now,
+                        DateTime = DateTime.Now,
+                        ReceiverBy = userId
+                    });
+
                 var manifestDTO = await _manifestService.GetManifestByCode(manifest);
 
                 //validate the ids are in the system

@@ -16,10 +16,10 @@ namespace GIGLS.Core.DTO.Shipments
         public string ManifestCode { get; set; }
         public DateTime DateTime { get; set; }
         public string MasterWaybill { get; set; }
-        public int DispatchedBy { get; set; }
-        public int ReceiverBy { get; set; }
-        public int ShipmentId { get; set; }
-        public int FleetTripId { get; set; }
+        public string DispatchedBy { get; set; }
+        public string ReceiverBy { get; set; }
+        public int? ShipmentId { get; set; }
+        public int? FleetTripId { get; set; }
         public List<FleetTripDTO> FleetTrip { get; set; }
         public List<ShipmentDTO> Shipments { get; set; }
     }

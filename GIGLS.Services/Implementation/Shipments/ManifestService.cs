@@ -34,8 +34,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Manifest code already exist");
                 }
 
-                var manifestCode = await _service.GenerateNextNumber(NumberGeneratorType.Manifest);
-
                 var newManifest = new Manifest
                 {
                     DateTime = DateTime.Now,
