@@ -314,6 +314,8 @@
     <Compile Include="Controllers\StateController.cs" />
     <Compile Include="Controllers\User\LoginController.cs" />
     <Compile Include="Controllers\User\UserController.cs" />
+    <Compile Include="Controllers\Wallet\WalletController.cs" />
+    <Compile Include="Controllers\Wallet\WalletTransactionController.cs" />
     <Compile Include="Controllers\Zone\DeliveryOptionController.cs" />
     <Compile Include="Controllers\Zone\DeliveryOptionPriceController.cs" />
     <Compile Include="Controllers\Zone\DomesticRouteZoneMapController.cs" />

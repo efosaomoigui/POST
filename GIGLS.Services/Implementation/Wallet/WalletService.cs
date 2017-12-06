@@ -1,4 +1,5 @@
-﻿using GIGLS.Core;
+﻿using AutoMapper;
+using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
@@ -20,6 +21,7 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _uow = uow;
+            MapperConfig.Initialize();
         }
 
         public async Task<IEnumerable<WalletDTO>> GetWallets()
@@ -29,7 +31,7 @@ namespace GIGLS.Services.Implementation.Wallet
         }
 
 
-        public async Task<Core.Domain.Wallet.Wallet> GetWalletById(int walletid)
+        public async Task<WalletDTO> GetWalletById(int walletid)
         {
             var wallet = await _uow.Wallet.GetAsync(walletid);
 
@@ -37,7 +39,7 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 throw new Exception("Wallet does not exist");
             }
-            return wallet;
+            return Mapper.Map<WalletDTO>(wallet);
         }
 
         public async Task AddWallet(WalletDTO wallet)

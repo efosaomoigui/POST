@@ -11,7 +11,7 @@ namespace GIGLS.Services.Implementation.Wallet
 {
     public class WalletTransactionService : IWalletTransactionService
     {
-        public Task AddWalletTranaction(WalletTransactionDTO walletTransaction)
+        public Task AddWalletTransaction(WalletTransactionDTO walletTransaction)
         {
             throw new NotImplementedException();
         }
@@ -21,7 +21,7 @@ namespace GIGLS.Services.Implementation.Wallet
             throw new NotImplementedException();
         }
 
-        public Task<WalletTransaction> GetWalletTransactionById(int walletTransactionId)
+        public Task<WalletTransactionDTO> GetWalletTransactionById(int walletTransactionId)
         {
             throw new NotImplementedException();
         }
