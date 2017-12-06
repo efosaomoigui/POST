@@ -3,6 +3,7 @@ using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
 using System;
@@ -14,12 +15,15 @@ namespace GIGLS.Services.Implementation.Wallet
     public class WalletService : IWalletService
     {
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
+        private readonly ICustomerService _customerService;
 
         private readonly IUnitOfWork _uow;
 
-        public WalletService(INumberGeneratorMonitorService numberGeneratorMonitorService, IUnitOfWork uow)
+        public WalletService(INumberGeneratorMonitorService numberGeneratorMonitorService, IUnitOfWork uow,
+            ICustomerService customerService)
         {
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
+            _customerService = customerService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -27,6 +31,15 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<IEnumerable<WalletDTO>> GetWallets()
         {
             var wallets = await _uow.Wallet.GetWalletsAsync();
+
+            //set the customer name
+            foreach (var item in wallets)
+            {
+                var customerDTO = await _customerService.GetCustomer(item.CustomerId, item.CustomerType);
+                item.CustomerName = customerDTO.CustomerName;
+            }
+
+
             return wallets;
         }
 
@@ -39,7 +52,13 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 throw new Exception("Wallet does not exist");
             }
-            return Mapper.Map<WalletDTO>(wallet);
+            var walletDTO = Mapper.Map<WalletDTO>(wallet);
+
+            //set the customer name
+            var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
+            walletDTO.CustomerName = customerDTO.CustomerName;
+
+            return walletDTO;
         }
 
         public async Task AddWallet(WalletDTO wallet)
