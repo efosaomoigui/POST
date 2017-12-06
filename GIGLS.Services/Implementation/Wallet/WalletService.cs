@@ -15,15 +15,12 @@ namespace GIGLS.Services.Implementation.Wallet
     public class WalletService : IWalletService
     {
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
-        private readonly ICustomerService _customerService;
 
         private readonly IUnitOfWork _uow;
 
-        public WalletService(INumberGeneratorMonitorService numberGeneratorMonitorService, IUnitOfWork uow,
-            ICustomerService customerService)
+        public WalletService(INumberGeneratorMonitorService numberGeneratorMonitorService, IUnitOfWork uow)
         {
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
-            _customerService = customerService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -35,8 +32,20 @@ namespace GIGLS.Services.Implementation.Wallet
             //set the customer name
             foreach (var item in wallets)
             {
-                var customerDTO = await _customerService.GetCustomer(item.CustomerId, item.CustomerType);
-                item.CustomerName = customerDTO.CustomerName;
+                // handle Company customers
+                if (CustomerType.Company.Equals(item.CustomerType))
+                {
+                    var companyDTO = await _uow.Company.GetAsync(s => s.CompanyId == item.CustomerId);
+                    item.CustomerName = companyDTO.Name;
+                }
+                else
+                {
+                    // handle IndividualCustomers
+                    var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
+                        s => s.IndividualCustomerId == item.CustomerId);
+                    item.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " +
+                        $"{individualCustomerDTO.LastName}");
+                }
             }
 
 
@@ -55,8 +64,20 @@ namespace GIGLS.Services.Implementation.Wallet
             var walletDTO = Mapper.Map<WalletDTO>(wallet);
 
             //set the customer name
-            var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
-            walletDTO.CustomerName = customerDTO.CustomerName;
+            // handle Company customers
+            if (CustomerType.Company.Equals(wallet.CustomerType))
+            {
+                var companyDTO = await _uow.Company.GetAsync(s => s.CompanyId == walletDTO.CustomerId);
+                walletDTO.CustomerName = companyDTO.Name;
+            }
+            else
+            {
+                // handle IndividualCustomers
+                var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
+                    s => s.IndividualCustomerId == walletDTO.CustomerId);
+                walletDTO.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " +
+                    $"{individualCustomerDTO.LastName}");
+            }
 
             return walletDTO;
         }
