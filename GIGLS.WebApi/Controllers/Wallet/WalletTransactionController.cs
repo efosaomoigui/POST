@@ -52,7 +52,7 @@ namespace GIGLS.WebApi.Controllers.Wallet
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("{walletId:int}")]
+        [Route("{walletId:int}/summary")]
         public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactionByWalletId(int walletId)
         {
             return await HandleApiOperationAsync(async () =>
