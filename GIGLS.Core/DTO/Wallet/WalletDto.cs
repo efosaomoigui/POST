@@ -10,5 +10,6 @@ namespace GIGLS.Core.DTO.Wallet
         public decimal Balance { get; set; }
         public int CustomerId { get; set; }
         public CustomerType CustomerType { get; set; }
+        public string CustomerName { get; set; }
     }
 }
