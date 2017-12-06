@@ -7,10 +7,10 @@ namespace GIGLS.Core.IServices.Wallet
 {
     public interface IWalletTransactionService : IServiceDependencyMarker
     {
-        Task<IEnumerable<WalletTransactionDTO>> GetWalletTransaction();
+        Task<IEnumerable<WalletTransactionDTO>> GetWalletTransactions();
         Task<WalletTransactionDTO> GetWalletTransactionById(int walletTransactionId);
         Task<WalletTransactionSummaryDTO> GetWalletTransactionByWalletId(int walletId);
-        Task AddWalletTransaction(WalletTransactionDTO walletTransaction);
+        Task<object> AddWalletTransaction(WalletTransactionDTO walletTransaction);
         Task UpdateWalletTransaction(int walletTransactionId, WalletTransactionDTO walletTransaction);
         Task RemoveWalletTransaction(int walletTransactionId);
     }

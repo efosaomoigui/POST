@@ -8,6 +8,6 @@ namespace GIGLS.Core.IRepositories.Wallet
 {
     public interface IWalletTransactionRepository : IRepository<WalletTransaction>
     {
-        Task<IEnumerable<WalletTransactionDTO>> GetWalletTransactionAsync();
+        Task<List<WalletTransactionDTO>> GetWalletTransactionAsync(int[] serviceCentreIds);
     }
 }

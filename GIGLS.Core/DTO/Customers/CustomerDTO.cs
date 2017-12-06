@@ -7,6 +7,20 @@ namespace GIGLS.Core.DTO.Customers
     {
         //CustomerDTO
         public CustomerType CustomerType { get; set; }
+        public string CustomerName
+        {
+            get
+            {
+                if (CustomerType.Equals(CustomerType.Company))
+                {
+                    return Name;
+                }
+                else
+                {
+                    return string.Format($"{FirstName} {LastName}");
+                }
+            }
+        }
 
         // CompanyDTO
         public int CompanyId { get; set; }

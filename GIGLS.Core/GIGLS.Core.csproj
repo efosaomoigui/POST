@@ -263,6 +263,7 @@
     <Compile Include="DTO\Wallet\WalletDto.cs" />
     <Compile Include="DTO\Wallet\WalletNumberDto.cs" />
     <Compile Include="DTO\Wallet\WalletTransactionDto.cs" />
+    <Compile Include="DTO\Wallet\WalletTransactionSummaryDTO.cs" />
     <Compile Include="DTO\Workshops\WorkshopDTO.cs" />
     <Compile Include="DTO\Zone\DeliveryOptionDTO.cs" />
     <Compile Include="DTO\Zone\DeliveryOptionPriceDTO.cs" />

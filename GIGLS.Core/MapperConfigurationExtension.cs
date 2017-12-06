@@ -168,6 +168,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<Wallet, WalletDTO>();
                 config.CreateMap<WalletDTO, Wallet>();
+
+                config.CreateMap<WalletTransaction, WalletTransactionDTO>();
+                config.CreateMap<WalletTransactionDTO, WalletTransaction>();
             });
 
             isInit = true;
