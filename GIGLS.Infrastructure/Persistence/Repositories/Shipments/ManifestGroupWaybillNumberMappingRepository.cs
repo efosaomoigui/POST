@@ -27,10 +27,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             {
                 serviceCentreGroupWaybills = _context.GroupWaybillNumberMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId)).
                     Select(s => s.GroupWaybillNumber).ToList();
+                manifestGroupwaybillMapping = manifestGroupwaybillMapping.Where(s => serviceCentreGroupWaybills.Contains(s.GroupWaybillNumber));
             }
-
-
-            manifestGroupwaybillMapping = manifestGroupwaybillMapping.Where(s => serviceCentreGroupWaybills.Contains(s.GroupWaybillNumber));
 
             var manifestGroupwaybillMappingDTO = from mgw in manifestGroupwaybillMapping
                                                  select new ManifestGroupWaybillNumberMappingDTO
