@@ -3,10 +3,10 @@ using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
+using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -63,7 +63,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (wallet == null)
             {
-                throw new Exception("Wallet does not exist");
+                throw new GenericException("Wallet does not exist");
             }
             var walletDTO = Mapper.Map<WalletDTO>(wallet);
 
@@ -84,6 +84,18 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             return walletDTO;
+        }
+
+        public async Task<Core.Domain.Wallet.Wallet> GetWalletById(string walletNumber)
+        {
+            var wallet = await _uow.Wallet.GetAsync(x => x.WalletNumber.Equals(walletNumber));
+
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exist");
+            }
+            
+            return wallet;
         }
 
         public async Task AddWallet(WalletDTO wallet)
@@ -107,7 +119,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var wallet = await _uow.Wallet.GetAsync(walletId);
             if (wallet == null)
             {
-                throw new Exception("Wallet does not exists");
+                throw new GenericException("Wallet does not exists");
             }
 
             //create entry in WalletTransaction table
@@ -119,6 +131,7 @@ namespace GIGLS.Services.Implementation.Wallet
             newWalletTransaction.DateModified = DateTime.Now;
             newWalletTransaction.DateOfEntry = DateTime.Now;
             newWalletTransaction.ServiceCentreId = serviceCenterIds[0];
+            newWalletTransaction.UserId = await _userService.GetCurrentUserId();
 
             _uow.WalletTransaction.Add(newWalletTransaction);
 
@@ -147,7 +160,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (wall == null)
             {
-                throw new Exception("Wallet does not exists");
+                throw new GenericException("Wallet does not exists");
             }
 
             _uow.Wallet.Remove(wall);

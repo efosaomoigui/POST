@@ -9,6 +9,8 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
 using System;
 using GIGLS.Core.IServices.User;
+using GIGLS.Core.IServices.Wallet;
+using GIGLS.Core.Domain.Wallet;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -16,11 +18,13 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
     {
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
+        private readonly IWalletService _walletService;
 
-        public PaymentTransactionService(IUnitOfWork uow, IUserService userService)
+        public PaymentTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService)
         {
             _uow = uow;
             _userService = userService;
+            _walletService = walletService;
             MapperConfig.Initialize();
         }
 
@@ -85,13 +89,45 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             if (paymentTransaction == null)
                 throw new GenericException("Null Input");
-
+               
             // get the current user info
             var currentUserId = await _userService.GetCurrentUserId();
 
             //get Ledger and Invoice
             var generalLedgerEntity = await _uow.GeneralLedger.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
             var invoiceEntity = await _uow.Invoice.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
+
+            //settlement by wallet
+            if (paymentTransaction.PaymentType == PaymentType.Wallet)
+            {
+                //I used transaction code to represent wallet number when process for wallet
+                var wallet = await _walletService.GetWalletById(paymentTransaction.TransactionCode);
+
+                //deduct the price for the wallet and update wallet transaction table
+                if(wallet.Balance < invoiceEntity.Amount)
+                {
+                    throw new GenericException("Insufficient Balance in the Wallet");
+                }
+
+                wallet.Balance = wallet.Balance - invoiceEntity.Amount;
+
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
+                var newWalletTransaction = new WalletTransaction
+                {
+                    WalletId = wallet.WalletId,
+                    Amount = invoiceEntity.Amount,
+                    DateOfEntry = DateTime.Now,
+                    ServiceCentreId = serviceCenterIds[0],
+                    UserId = currentUserId,
+                    CreditDebitType = CreditDebitType.Debit,
+                    PaymentType = PaymentType.Wallet,
+                    Waybill = paymentTransaction.Waybill,
+                    Description = generalLedgerEntity.Description
+                };
+                
+                _uow.WalletTransaction.Add(newWalletTransaction);                
+            }
 
             // create payment
             paymentTransaction.UserId = currentUserId;

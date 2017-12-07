@@ -50,5 +50,6 @@ namespace GIGLS.Core.DTO.Customers
         public string PicData { get; set; }
         //public DateTime DateCreated { get; set; }
         //public DateTime DateModified { get; set; }
+        public string WalletNumber { get; set; }
     }
 }

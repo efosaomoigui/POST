@@ -4,6 +4,7 @@
     {
         Cash,
         Pos,
-        Online
+        Online,
+        Wallet
     }
 }

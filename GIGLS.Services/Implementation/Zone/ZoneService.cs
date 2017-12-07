@@ -44,7 +44,7 @@ namespace GIGLS.Services.Implementation.Zone
                 var zone = await _uow.Zone.GetAsync(zoneId);
                 if (zone == null)
                 {
-                    throw new GenericException("Zone Not Exist");
+                    throw new GenericException("Zone does not exist");
                 }
                 _uow.Zone.Remove(zone);
                 _uow.Complete();
