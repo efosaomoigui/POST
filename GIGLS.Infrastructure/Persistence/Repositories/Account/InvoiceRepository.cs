@@ -22,14 +22,20 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             //filter by service center using general ledger waybill
             var generalLedgerContext = Context.GeneralLedger.AsQueryable();
             var serviceCenterWaybills = new List<string>();
+            var invoices = new List<Invoice>();
             if (serviceCentreIds.Length > 0)
             {
                 generalLedgerContext = Context.GeneralLedger.Where(s => serviceCentreIds.Contains(s.ServiceCentreId));
                 serviceCenterWaybills = generalLedgerContext.Select(s => s.Waybill).ToList();
+                invoices = Context.Invoice.Where(s => serviceCenterWaybills.Contains(s.Waybill)).ToList();
             }
             ////
+            else
+            {
+                invoices = Context.Invoice.ToList();
+            }
 
-            var invoices = Context.Invoice.Where(s => serviceCenterWaybills.Contains(s.Waybill)).ToList();
+            
             var invoiceDto = Mapper.Map<IEnumerable<InvoiceDTO>>(invoices);
             return Task.FromResult(invoiceDto);
         }
@@ -42,14 +48,18 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             //filter by service center using general ledger waybill
             var generalLedgerContext = Context.GeneralLedger.AsQueryable();
             var serviceCenterWaybills = new List<string>();
+            IQueryable<Invoice> invoices = new List<Invoice>().AsQueryable();
             if (serviceCentreIds.Length > 0)
             {
                 generalLedgerContext = Context.GeneralLedger.Where(s => serviceCentreIds.Contains(s.ServiceCentreId));
                 serviceCenterWaybills = generalLedgerContext.Select(s => s.Waybill).ToList();
+               invoices = Context.Invoice.Where(s => serviceCenterWaybills.Contains(s.Waybill));
             }
             ////
-
-            IQueryable<Invoice> invoices = Context.Invoice.Where(s => serviceCenterWaybills.Contains(s.Waybill));
+            else
+            {
+                invoices = Context.Invoice;
+            }
 
             //If No Date Supply
             if (!accountFilterCriteria.StartDate.HasValue && !accountFilterCriteria.EndDate.HasValue)

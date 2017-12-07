@@ -28,10 +28,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             {
                 serviceCentreWaybills = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId)).
                     Select(s => s.Waybill).ToList();
+                groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreWaybills.Contains(s.WaybillNumber));
             }
-
-
-            groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreWaybills.Contains(s.WaybillNumber));
 
             var groupwaybillMappingDto = from gw in groupwaybillMapping
                                          select new GroupWaybillNumberMappingDTO
@@ -59,10 +57,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             {
                 serviceCentreWaybills = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId)).
                     Select(s => s.Waybill).ToList();
+                groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreWaybills.Contains(s.WaybillNumber));
             }
-
-
-            groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreWaybills.Contains(s.WaybillNumber));
 
             var groupwaybillMappingDto = (from gw in groupwaybillMapping
                                           select new GroupWaybillNumberMappingDTO
