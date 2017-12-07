@@ -4,6 +4,7 @@ using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Customers;
+using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
 using System;
@@ -16,11 +17,14 @@ namespace GIGLS.Services.Implementation.Wallet
     {
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
 
+        private readonly IUserService _userService;
         private readonly IUnitOfWork _uow;
 
-        public WalletService(INumberGeneratorMonitorService numberGeneratorMonitorService, IUnitOfWork uow)
+        public WalletService(IUserService userService,
+            INumberGeneratorMonitorService numberGeneratorMonitorService, IUnitOfWork uow)
         {
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
+            _userService = userService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -98,17 +102,42 @@ namespace GIGLS.Services.Implementation.Wallet
             await _uow.CompleteAsync();
         }
 
-        public async Task UpdateWallet(int walletId, WalletDTO wallet)
+        public async Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
         {
-            var wall = await _uow.Wallet.GetAsync(walletId);
-
-            if (wall == null)
+            var wallet = await _uow.Wallet.GetAsync(walletId);
+            if (wallet == null)
             {
                 throw new Exception("Wallet does not exists");
             }
 
-            wall.WalletNumber = wallet.WalletNumber.Trim();
-            wall.Balance = wallet.Balance;
+            //create entry in WalletTransaction table
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
+            var newWalletTransaction = Mapper.Map<WalletTransaction>(walletTransactionDTO);
+            newWalletTransaction.WalletId = walletId;
+            newWalletTransaction.DateCreated = DateTime.Now;
+            newWalletTransaction.DateModified = DateTime.Now;
+            newWalletTransaction.DateOfEntry = DateTime.Now;
+            newWalletTransaction.ServiceCentreId = serviceCenterIds[0];
+
+            _uow.WalletTransaction.Add(newWalletTransaction);
+
+            //get balance
+            var walletTransactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == walletId);
+            decimal balance = 0;
+            foreach (var item in walletTransactions)
+            {
+                if (item.CreditDebitType == CreditDebitType.Credit)
+                {
+                    balance += balance + item.Amount;
+                }
+                else
+                {
+                    balance += balance - item.Amount;
+                }
+            }
+
+            wallet.Balance = balance;
             await _uow.CompleteAsync();
         }
 
