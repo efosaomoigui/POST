@@ -148,6 +148,7 @@
     <Compile Include="Domain\GroupWaybillNumberMapping.cs" />
     <Compile Include="Domain\Haulage.cs" />
     <Compile Include="Domain\HaulageDistanceMapping.cs" />
+    <Compile Include="Domain\PackingList .cs" />
     <Compile Include="Domain\IndividualCustomer.cs" />
     <Compile Include="Domain\Insurance.cs" />
     <Compile Include="Domain\Invoice.cs" />
@@ -221,6 +222,7 @@
     <Compile Include="DTO\Fleets\FleetTripDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDistanceMappingPriceDTO.cs" />
+    <Compile Include="DTO\Haulage\PackingListDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardManagementDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardManagementPartDTO.cs" />
@@ -333,6 +335,7 @@
     <Compile Include="IRepositories\Fleets\IFleetRepository.cs" />
     <Compile Include="IRepositories\Fleets\IFleetTripRepository.cs" />
     <Compile Include="IRepositories\Haulage\IHaulageDistanceMappingPriceRepository.cs" />
+    <Compile Include="IRepositories\Haulage\IPackingListRepository.cs" />
     <Compile Include="IRepositories\Haulage\IHaulageRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
     <Compile Include="IRepositories\IMessageRepository.cs" />
@@ -409,6 +412,7 @@
     <Compile Include="IServices\Fleets\IFleetTripService.cs" />
     <Compile Include="IServices\Haulage\IHaulageDistanceMappingPriceService.cs" />
     <Compile Include="IServices\Haulage\IHaulageService.cs" />
+    <Compile Include="IServices\Haulage\IPackingListService.cs" />
     <Compile Include="IServices\IMessageService.cs" />
     <Compile Include="IServices\IServiceDependencyMarker.cs" />
     <Compile Include="IServices\IServiceReponse.cs" />

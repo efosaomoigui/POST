@@ -166,6 +166,9 @@ namespace GIGLS.Core
                 config.CreateMap<HaulageDistanceMappingPrice, HaulageDistanceMappingPriceDTO>();
                 config.CreateMap<HaulageDistanceMappingPriceDTO, HaulageDistanceMappingPrice>();
 
+                config.CreateMap<PackingList, PackingListDTO>();
+                config.CreateMap<PackingListDTO, PackingList>();
+
                 config.CreateMap<Wallet, WalletDTO>();
                 config.CreateMap<WalletDTO, Wallet>();
 

@@ -7,6 +7,7 @@ namespace GIGLS.Core.DTO.Wallet
     {
         public string WalletOwnerName { get; set; }
         public string WalletNumber { get; set; }
+        public decimal WalletBalance { get; set; }
         public List<WalletTransactionDTO> WalletTransactions { get; set; }
     }
 }

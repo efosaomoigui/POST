@@ -77,6 +77,7 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 WalletTransactions = walletTransactionDTOList,
                 WalletNumber = wallet.WalletNumber,
+                WalletBalance = wallet.Balance,
                 WalletOwnerName = customerDTO.CustomerName
             };
         }

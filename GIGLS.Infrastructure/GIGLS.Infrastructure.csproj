@@ -131,6 +131,7 @@
     <Compile Include="Persistence\Repositories\Haulage\HaulageDistanceMappingPriceRepository.cs" />
     <Compile Include="Persistence\Repositories\Haulage\HaulageDistanceMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Haulage\HaulageRepository.cs" />
+    <Compile Include="Persistence\Repositories\Haulage\PackingListRepository.cs" />
     <Compile Include="Persistence\Repositories\JobCards\JobCardManagementPartRepository.cs" />
     <Compile Include="Persistence\Repositories\JobCards\JobCardManagementRepository.cs" />
     <Compile Include="Persistence\Repositories\JobCards\JobCardRepository.cs" />

@@ -292,6 +292,7 @@
     <Compile Include="Controllers\Fleets\FleetTripController.cs" />
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingPriceController.cs" />
     <Compile Include="Controllers\Haulage\HaulageController.cs" />
+    <Compile Include="Controllers\Haulage\PackingListController.cs" />
     <Compile Include="Controllers\Messaging\MessageController.cs" />
     <Compile Include="Controllers\Nav\MainNavController.cs" />
     <Compile Include="Controllers\Nav\SubNavController.cs" />

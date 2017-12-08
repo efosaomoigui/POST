@@ -61,6 +61,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<Haulage> Haulage { get; set; }
         public DbSet<HaulageDistanceMapping> HaulageDistanceMapping { get; set; }
         public DbSet<HaulageDistanceMappingPrice> HaulageDistanceMappingPrice { get; set; }
+        public DbSet<PackingList> PackingList { get; set; }
 
         //Waybill
         public DbSet<WaybillNumber> WaybillNumber { get; set; }
