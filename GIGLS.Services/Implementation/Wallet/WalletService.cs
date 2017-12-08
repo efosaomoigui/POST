@@ -134,6 +134,7 @@ namespace GIGLS.Services.Implementation.Wallet
             newWalletTransaction.UserId = await _userService.GetCurrentUserId();
 
             _uow.WalletTransaction.Add(newWalletTransaction);
+            await _uow.CompleteAsync();
 
             //get balance
             var walletTransactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == walletId);
@@ -142,14 +143,15 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 if (item.CreditDebitType == CreditDebitType.Credit)
                 {
-                    balance += balance + item.Amount;
+                    balance += item.Amount;
                 }
                 else
                 {
-                    balance += balance - item.Amount;
+                    balance -= item.Amount;
                 }
             }
 
+            wallet = await _uow.Wallet.GetAsync(walletId);
             wallet.Balance = balance;
             await _uow.CompleteAsync();
         }
