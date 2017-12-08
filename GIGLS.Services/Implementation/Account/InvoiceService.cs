@@ -60,6 +60,23 @@ namespace GIGLS.Services.Implementation.Account
             // get Customer
             invoiceDTO.Customer = invoiceDTO.Shipment.CustomerDetails;
 
+            //get wallet number
+            if(invoiceDTO.Customer.CustomerType == CustomerType.Company)
+            {
+                var wallet = await _uow.Wallet.GetAsync(
+                    s => s.CustomerId == invoiceDTO.Customer.CompanyId &&
+                    s.CustomerType == CustomerType.Company);
+                invoiceDTO.Customer.WalletNumber = wallet?.WalletNumber;
+            }
+            else
+            {
+                var wallet = await _uow.Wallet.GetAsync(
+                    s => s.CustomerId == invoiceDTO.Customer.IndividualCustomerId &&
+                    s.CustomerType == CustomerType.IndividualCustomer);
+                invoiceDTO.Customer.WalletNumber = wallet?.WalletNumber;
+            }
+
+
             return invoiceDTO;
         }
 
@@ -81,6 +98,22 @@ namespace GIGLS.Services.Implementation.Account
 
             // get Customer
             invoiceDTO.Customer = invoiceDTO.Shipment.CustomerDetails;
+
+            //get wallet number
+            if (invoiceDTO.Customer.CustomerType == CustomerType.Company)
+            {
+                var wallet = await _uow.Wallet.GetAsync(
+                    s => s.CustomerId == invoiceDTO.Customer.CompanyId &&
+                    s.CustomerType == CustomerType.Company);
+                invoiceDTO.Customer.WalletNumber = wallet?.WalletNumber;
+            }
+            else
+            {
+                var wallet = await _uow.Wallet.GetAsync(
+                    s => s.CustomerId == invoiceDTO.Customer.IndividualCustomerId &&
+                    s.CustomerType == CustomerType.IndividualCustomer);
+                invoiceDTO.Customer.WalletNumber = wallet?.WalletNumber;
+            }
 
             return invoiceDTO;
         }
