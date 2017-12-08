@@ -4,6 +4,6 @@
     {
         public int DepartureServiceCentreId { get; set; }
         public int DestinationServiceCentreId { get; set; }
-        public decimal WeightInTonne { get; set; }
+        public int Haulageid { get; set; }
     }
 }

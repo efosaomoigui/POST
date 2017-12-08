@@ -149,11 +149,10 @@ namespace GIGLS.Services.Business.Pricing
 
             var departureServiceCentreId = haulagePricingDto.DepartureServiceCentreId;
             var destinationServiceCentreId = haulagePricingDto.DestinationServiceCentreId;
-            var weightInTonne = haulagePricingDto.WeightInTonne;
+            var haulageid = haulagePricingDto.Haulageid;
 
             //check haulage exists
-            var haulages = await _haulageService.GetHaulages();
-            var haulage = haulages.FirstOrDefault(s => s.Tonne == weightInTonne);
+            var haulage = await _haulageService.GetHaulageById(haulageid);
             if(haulage == null)
             {
                 throw new GenericException("The Tonne specified has not been mapped");
@@ -184,7 +183,7 @@ namespace GIGLS.Services.Business.Pricing
             foreach (var item in haulageDistanceMappingPrices)
             {
                 if (item.StartRange >= distance && distance <= item.EndRange
-                    && item.Haulage.Tonne == weightInTonne)
+                    && item.Haulage.HaulageId == haulageid)
                 {
                     price = item.Price * distance;
                     return price;
