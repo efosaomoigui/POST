@@ -74,5 +74,9 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal? AppliedDiscount { get; set; }
         public decimal? DiscountValue { get; set; }
 
+        public decimal? Insurance { get; set; }
+        public decimal? Vat { get; set; }
+        public decimal? Total { get; set; }
+
     }
 }
