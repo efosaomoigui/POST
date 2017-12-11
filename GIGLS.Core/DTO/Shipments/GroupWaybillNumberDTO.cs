@@ -1,4 +1,5 @@
-﻿using GIGLS.CORE.DTO;
+﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.CORE.DTO;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -11,6 +12,10 @@ namespace GIGLS.Core.DTO.Shipments
         public string UserId { get; set; }
 
         public int ServiceCentreId { get; set; }
-        public virtual string ServiceCentreCode { get; set; }
+        public string ServiceCentreCode { get; set; }
+
+        //
+        public ServiceCentre DepartureServiceCentre { get; set; }
+        public ServiceCentre DestinationServiceCentre { get; set; }
     }
 }

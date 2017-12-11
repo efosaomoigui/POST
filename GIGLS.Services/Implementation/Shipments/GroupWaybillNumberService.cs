@@ -137,6 +137,14 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var groupwaybillDto = Mapper.Map<GroupWaybillNumberDTO>(groupwaybill);
                 groupwaybillDto.ServiceCentreCode = groupwaybill.ServiceCentre?.Name;
+
+                //set departure and destination service centres
+                var groupWaybillNumberMappingList = await _uow.GroupWaybillNumberMapping.FindAsync(s => s.GroupWaybillNumber == groupwaybill.GroupWaybillCode);
+                var groupWaybillNumberMapping = groupWaybillNumberMappingList.FirstOrDefault();
+
+                groupwaybillDto.DepartureServiceCentre = groupWaybillNumberMapping.DepartureServiceCentre;
+                groupwaybillDto.DestinationServiceCentre = groupWaybillNumberMapping.DestinationServiceCentre;
+
                 return groupwaybillDto;
             }
             catch (Exception)
@@ -158,6 +166,14 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var groupwaybillDto = Mapper.Map<GroupWaybillNumberDTO>(groupwaybill);
                 groupwaybillDto.ServiceCentreCode = groupwaybill.ServiceCentre?.Name;
+
+                //set departure and destination service centres
+                var groupWaybillNumberMappingList = await _uow.GroupWaybillNumberMapping.FindAsync(s => s.GroupWaybillNumber == groupwaybill.GroupWaybillCode);
+                var groupWaybillNumberMapping = groupWaybillNumberMappingList.FirstOrDefault();
+
+                groupwaybillDto.DepartureServiceCentre = groupWaybillNumberMapping.DepartureServiceCentre;
+                groupwaybillDto.DestinationServiceCentre = groupWaybillNumberMapping.DestinationServiceCentre;
+
                 return groupwaybillDto;
             }
             catch (Exception)
