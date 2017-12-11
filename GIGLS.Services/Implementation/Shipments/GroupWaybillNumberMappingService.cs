@@ -105,7 +105,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         DestinationServiceCentre = shipmentDTO.DestinationServiceCentre
                     });
 
-                    departureServiceCentre = shipmentDTO.DestinationServiceCentre;
+                    departureServiceCentre = shipmentDTO.DepartureServiceCentre;
                     destinationServiceCentre = shipmentDTO.DestinationServiceCentre;
                 }
 
@@ -149,7 +149,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         DestinationServiceCentre = shipmentDTO.DestinationServiceCentre
                     });
 
-                    departureServiceCentre = shipmentDTO.DestinationServiceCentre;
+                    departureServiceCentre = shipmentDTO.DepartureServiceCentre;
                     destinationServiceCentre = shipmentDTO.DestinationServiceCentre;
                 }
 
