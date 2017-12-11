@@ -8,7 +8,7 @@ using GIGLS.Core.IServices.Dashboard;
 
 namespace GIGLS.WebApi.Controllers.Dashboard
 {
-    [Authorize(Roles = "Admin,Shipment,Account,Report")]
+    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
     [RoutePrefix("api/dashboard")]
     public class DashboardController : BaseWebApiController
     {

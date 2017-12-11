@@ -9,7 +9,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Wallet
 {
-    [Authorize(Roles = "Admin,Shipment,Account,Report")]
+    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
     [RoutePrefix("api/wallet")]
     public class WalletController : BaseWebApiController
     {

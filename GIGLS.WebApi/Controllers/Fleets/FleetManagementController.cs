@@ -10,7 +10,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Fleets
 {
-    [Authorize(Roles = "Admin,Shipment,Account,Report")]
+    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
     [RoutePrefix("api/fleetmanagement")]
     public class FleetManagementController : BaseWebApiController
     {

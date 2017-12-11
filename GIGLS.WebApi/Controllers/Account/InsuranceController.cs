@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace GIGLS.WebApi.Controllers.Account
 {
-    [Authorize(Roles = "Admin,Shipment,Account,Report")]
+    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
     [RoutePrefix("api/insurance")]
     public class InsuranceController : BaseWebApiController
     {
