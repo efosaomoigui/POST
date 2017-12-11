@@ -87,14 +87,14 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("waybillnumbersingroup/id/{groupWaybillNumberId}")]
-        public async Task<IServiceResponse<List<WaybillNumberDTO>>> GetWaybillNumbersInGroup(int groupWaybillNumberId)
+        public async Task<IServiceResponse<GroupWaybillNumberMappingDTO>> GetWaybillNumbersInGroup(int groupWaybillNumberId)
         {
             return await HandleApiOperationAsync(async () =>
             {
 
                 var waybillNumbersInGroup = await _service.GetWaybillNumbersInGroup(groupWaybillNumberId);
 
-                return new ServiceResponse<List<WaybillNumberDTO>>
+                return new ServiceResponse<GroupWaybillNumberMappingDTO>
                 {
                     Object = waybillNumbersInGroup
                 };
@@ -104,14 +104,14 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("waybillnumbersingroup/code/{groupWaybillNumber}")]
-        public async Task<IServiceResponse<List<WaybillNumberDTO>>> GetWaybillNumbersInGroup(string groupWaybillNumber)
+        public async Task<IServiceResponse<GroupWaybillNumberMappingDTO>> GetWaybillNumbersInGroup(string groupWaybillNumber)
         {
             return await HandleApiOperationAsync(async () =>
             {
 
                 var waybillNumbersInGroup = await _service.GetWaybillNumbersInGroup(groupWaybillNumber);
 
-                return new ServiceResponse<List<WaybillNumberDTO>>
+                return new ServiceResponse<GroupWaybillNumberMappingDTO>
                 {
                     Object = waybillNumbersInGroup
                 };
