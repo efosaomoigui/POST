@@ -7,6 +7,7 @@ using GIGLS.Core.DTO.Zone;
 using AutoMapper;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation
 {
@@ -91,9 +92,11 @@ namespace GIGLS.Services.Implementation
             }
 
             // use Stations
-            var haulageDistanceMapping = await _unitOfWork.HaulageDistanceMapping.GetAsync(r =>
+            var haulageDistanceMappingList = await _unitOfWork.HaulageDistanceMapping.FindAsync(r =>
                 r.DepartureId == departureServiceCenter.StationId &&
                 r.DestinationId == destinationServiceCenter.StationId, "Destination,Departure");
+
+            var haulageDistanceMapping = haulageDistanceMappingList.FirstOrDefault();
 
             if (haulageDistanceMapping == null)
                 throw new GenericException("The Mapping of Route does not exist");
