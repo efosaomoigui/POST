@@ -376,7 +376,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private async Task<string> CreateInvoice(ShipmentDTO shipmentDTO)
         {
-            var invoiceNo = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Invoice);
+            var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
+            var invoiceNo = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Invoice, departureServiceCentre.Code);
 
             var settlementPeriod = 0;
             if (shipmentDTO.CustomerType == CustomerType.Company.ToString())
