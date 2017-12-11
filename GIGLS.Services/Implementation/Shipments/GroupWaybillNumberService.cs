@@ -22,7 +22,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IServiceCentreService _serviceCentreService;
         private readonly IUserService _userService;
 
-        public GroupWaybillNumberService(IUnitOfWork uow, 
+        public GroupWaybillNumberService(IUnitOfWork uow,
             INumberGeneratorMonitorService service,
             IServiceCentreService serviceCentreService, IUserService userService)
         {
@@ -142,8 +142,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 var groupWaybillNumberMappingList = await _uow.GroupWaybillNumberMapping.FindAsync(s => s.GroupWaybillNumber == groupwaybill.GroupWaybillCode);
                 var groupWaybillNumberMapping = groupWaybillNumberMappingList.FirstOrDefault();
 
-                groupwaybillDto.DepartureServiceCentre = groupWaybillNumberMapping.DepartureServiceCentre;
-                groupwaybillDto.DestinationServiceCentre = groupWaybillNumberMapping.DestinationServiceCentre;
+                if (groupWaybillNumberMapping != null)
+                {
+                    groupwaybillDto.DepartureServiceCentre = groupWaybillNumberMapping.DepartureServiceCentre;
+                    groupwaybillDto.DestinationServiceCentre = groupWaybillNumberMapping.DestinationServiceCentre;
+                }
 
                 return groupwaybillDto;
             }
