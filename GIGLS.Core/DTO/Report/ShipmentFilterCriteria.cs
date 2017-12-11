@@ -1,5 +1,4 @@
 ﻿using GIGLS.CORE.Enums;
-using System;
 
 namespace GIGLS.CORE.DTO.Report
 {
