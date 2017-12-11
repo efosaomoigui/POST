@@ -9,6 +9,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.IServices.User;
 using System.Linq;
+using GIGLS.Core.DTO.ServiceCentres;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -91,17 +92,28 @@ namespace GIGLS.Services.Implementation.Shipments
                 //add to list
                 List<WaybillNumberDTO> resultList = new List<WaybillNumberDTO>();
                 List<ShipmentDTO> shipmentList = new List<ShipmentDTO>();
+                var departureServiceCentre = new ServiceCentreDTO();
+                var destinationServiceCentre = new ServiceCentreDTO();
                 foreach (var groupWaybillNumberMapping in groupWaybillNumberMappingList)
                 {
                     var shipmentDTO = await _shipmentService.GetShipment(groupWaybillNumberMapping.WaybillNumber);
-                    shipmentList.Add(shipmentDTO);
                     resultList.Add(new WaybillNumberDTO { WaybillCode = shipmentDTO.Waybill });
+                    shipmentList.Add(new ShipmentDTO
+                    {
+                        Waybill = shipmentDTO.Waybill,
+                        DepartureServiceCentre = shipmentDTO.DepartureServiceCentre,
+                        DestinationServiceCentre = shipmentDTO.DestinationServiceCentre
+                    });
+
+                    departureServiceCentre = shipmentDTO.DestinationServiceCentre;
+                    destinationServiceCentre = shipmentDTO.DestinationServiceCentre;
                 }
 
                 var groupWaybillNumberMappingDTO = new GroupWaybillNumberMappingDTO
                 {
-                    DepartureServiceCentreId = groupWaybillNumberMappingList.FirstOrDefault().DepartureServiceCentreId,
-                    DestinationServiceCentreId = groupWaybillNumberMappingList.FirstOrDefault().DestinationServiceCentreId,
+                    GroupWaybillNumber = groupWaybillNumberDTO.GroupWaybillCode,
+                    DepartureServiceCentre = departureServiceCentre,
+                    DestinationServiceCentre = destinationServiceCentre,
                     Shipments = shipmentList
                 };
 
@@ -124,17 +136,28 @@ namespace GIGLS.Services.Implementation.Shipments
                 //add to list
                 List<WaybillNumberDTO> resultList = new List<WaybillNumberDTO>();
                 List<ShipmentDTO> shipmentList = new List<ShipmentDTO>();
+                var departureServiceCentre = new ServiceCentreDTO();
+                var destinationServiceCentre = new ServiceCentreDTO();
                 foreach (var groupWaybillNumberMapping in groupWaybillNumberMappingList)
                 {
                     var shipmentDTO = await _shipmentService.GetShipment(groupWaybillNumberMapping.WaybillNumber);
-                    shipmentList.Add(shipmentDTO);
                     resultList.Add(new WaybillNumberDTO { WaybillCode = shipmentDTO.Waybill });
+                    shipmentList.Add(new ShipmentDTO
+                    {
+                        Waybill = shipmentDTO.Waybill,
+                        DepartureServiceCentre = shipmentDTO.DepartureServiceCentre,
+                        DestinationServiceCentre = shipmentDTO.DestinationServiceCentre
+                    });
+
+                    departureServiceCentre = shipmentDTO.DestinationServiceCentre;
+                    destinationServiceCentre = shipmentDTO.DestinationServiceCentre;
                 }
 
                 var groupWaybillNumberMappingDTO = new GroupWaybillNumberMappingDTO
                 {
-                    DepartureServiceCentreId = groupWaybillNumberMappingList.FirstOrDefault().DepartureServiceCentreId,
-                    DestinationServiceCentreId = groupWaybillNumberMappingList.FirstOrDefault().DestinationServiceCentreId,
+                    GroupWaybillNumber = groupWaybillNumberDTO.GroupWaybillCode,
+                    DepartureServiceCentre = departureServiceCentre,
+                    DestinationServiceCentre = destinationServiceCentre,
                     Shipments = shipmentList
                 };
 

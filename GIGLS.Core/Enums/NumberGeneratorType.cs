@@ -8,10 +8,10 @@ namespace GIGLS.Core.Enums
 {
     public enum NumberGeneratorType
     {
-        WaybillNumber,
-        GroupWaybillNumber,
-        Manifest,
-        Invoice,
-        Wallet
+        WaybillNumber = 111,
+        GroupWaybillNumber = 112,
+        Manifest = 113,
+        Invoice = 114,
+        Wallet = 115
     }
 }

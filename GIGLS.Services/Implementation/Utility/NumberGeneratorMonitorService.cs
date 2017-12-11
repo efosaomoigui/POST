@@ -46,8 +46,13 @@ namespace GIGLS.Services.Implementation.Utility
                     await AddNumberGeneratorMonitor(serviceCenterCode, numberGeneratorType, numberStr);
                 }
 
+                //pad the service centre
+                var serviceCenter = await _uow.ServiceCentre.GetAsync(s => s.Code == serviceCenterCode);
+                var serviceCentreId = (serviceCenter == null) ? 0 : serviceCenter.ServiceCentreId;
+                var codeStr = serviceCentreId.ToString("000");
+
                 //Add the numberCode with the serviceCenterCode and numberGeneratorType
-                numberGenerated = ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + serviceCenterCode + numberStr;
+                numberGenerated = ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + codeStr + numberStr;
                 return numberGenerated;
             }
             catch (Exception)
@@ -102,33 +107,33 @@ namespace GIGLS.Services.Implementation.Utility
         }
 
 
-        private string ResolvePrefixFromNumberGeneratorType(NumberGeneratorType numberGeneratorType)
+        private int ResolvePrefixFromNumberGeneratorType(NumberGeneratorType numberGeneratorType)
         {
             switch (numberGeneratorType)
             {
                 case NumberGeneratorType.WaybillNumber:
                     {
-                        return "WAY";
+                        return (int)NumberGeneratorType.WaybillNumber;
                     }
                 case NumberGeneratorType.GroupWaybillNumber:
                     {
-                        return "GRP";
+                        return (int)NumberGeneratorType.GroupWaybillNumber;
                     }
                 case NumberGeneratorType.Manifest:
                     {
-                        return "MAN";
+                        return (int)NumberGeneratorType.Manifest;
                     }
                 case NumberGeneratorType.Invoice:
                     {
-                        return "INV";
+                        return (int)NumberGeneratorType.Invoice;
                     }
                 case NumberGeneratorType.Wallet:
                     {
-                        return "WLT";
+                        return (int)NumberGeneratorType.Wallet;
                     }
                 default:
                     {
-                        return "WAY";
+                        return (int)NumberGeneratorType.WaybillNumber;
                     }
             }
         }
