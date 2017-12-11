@@ -8,6 +8,7 @@ using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.IServices.User;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -80,7 +81,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
 
         //Get WaybillNumbers In Group
-        public async Task<List<WaybillNumberDTO>> GetWaybillNumbersInGroup(int groupWaybillNumberId)
+        public async Task<GroupWaybillNumberMappingDTO> GetWaybillNumbersInGroup(int groupWaybillNumberId)
         {
             try
             {
@@ -89,13 +90,22 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //add to list
                 List<WaybillNumberDTO> resultList = new List<WaybillNumberDTO>();
+                List<ShipmentDTO> shipmentList = new List<ShipmentDTO>();
                 foreach (var groupWaybillNumberMapping in groupWaybillNumberMappingList)
                 {
                     var shipmentDTO = await _shipmentService.GetShipment(groupWaybillNumberMapping.WaybillNumber);
+                    shipmentList.Add(shipmentDTO);
                     resultList.Add(new WaybillNumberDTO { WaybillCode = shipmentDTO.Waybill });
                 }
 
-                return resultList;
+                var groupWaybillNumberMappingDTO = new GroupWaybillNumberMappingDTO
+                {
+                    DepartureServiceCentreId = groupWaybillNumberMappingList.FirstOrDefault().DepartureServiceCentreId,
+                    DestinationServiceCentreId = groupWaybillNumberMappingList.FirstOrDefault().DestinationServiceCentreId,
+                    Shipments = shipmentList
+                };
+
+                return groupWaybillNumberMappingDTO;
             }
             catch (Exception)
             {
@@ -104,7 +114,7 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Get WaybillNumbers In Group
-        public async Task<List<WaybillNumberDTO>> GetWaybillNumbersInGroup(string groupWaybillNumber)
+        public async Task<GroupWaybillNumberMappingDTO> GetWaybillNumbersInGroup(string groupWaybillNumber)
         {
             try
             {
@@ -113,13 +123,22 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //add to list
                 List<WaybillNumberDTO> resultList = new List<WaybillNumberDTO>();
+                List<ShipmentDTO> shipmentList = new List<ShipmentDTO>();
                 foreach (var groupWaybillNumberMapping in groupWaybillNumberMappingList)
                 {
                     var shipmentDTO = await _shipmentService.GetShipment(groupWaybillNumberMapping.WaybillNumber);
+                    shipmentList.Add(shipmentDTO);
                     resultList.Add(new WaybillNumberDTO { WaybillCode = shipmentDTO.Waybill });
                 }
 
-                return resultList;
+                var groupWaybillNumberMappingDTO = new GroupWaybillNumberMappingDTO
+                {
+                    DepartureServiceCentreId = groupWaybillNumberMappingList.FirstOrDefault().DepartureServiceCentreId,
+                    DestinationServiceCentreId = groupWaybillNumberMappingList.FirstOrDefault().DestinationServiceCentreId,
+                    Shipments = shipmentList
+                };
+
+                return groupWaybillNumberMappingDTO;
             }
             catch (Exception)
             {

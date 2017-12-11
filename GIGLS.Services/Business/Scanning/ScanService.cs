@@ -74,21 +74,22 @@ namespace GIGLS.Services.Business.Scanning
 
             if (groupWaybill != null)
             {
-                var groupShipmentList = await _groupService.GetWaybillNumbersInGroup(scan.WaybillNumber);
-                
+                var groupMappingShipmentList = await _groupService.GetWaybillNumbersInGroup(scan.WaybillNumber);
+
+                var groupShipmentList = groupMappingShipmentList.Shipments;
                 //In case no shipment attached to the group waybill  
-                if(groupShipmentList.Count > 0 )
+                if (groupShipmentList.Count > 0 )
                 {
                     foreach (var groupShipment in groupShipmentList)
                     {
-                        var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(groupShipment.WaybillCode, scan.ShipmentScanStatus.ToString());
+                        var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(groupShipment.Waybill, scan.ShipmentScanStatus.ToString());
                         if (!checkTrack)
                         {
                             await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                             {
                                 DateTime = DateTime.Now,
                                 Status = scan.ShipmentScanStatus.ToString(),
-                                Waybill = groupShipment.WaybillCode,
+                                Waybill = groupShipment.Waybill,
                             }, scan.ShipmentScanStatus);
                         }
                     }
