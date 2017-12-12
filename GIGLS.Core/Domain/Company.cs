@@ -22,6 +22,7 @@ namespace GIGL.GIGLS.Core.Domain
         public string Industry { get; set; }
         public CompanyType CompanyType { get; set; }
         public CompanyStatus CompanyStatus { get; set; }
+        public string CustomerCode { get; set; }
         public decimal Discount { get; set; }
         public int SettlementPeriod { get; set; }
         public virtual ICollection<CompanyContactPerson> CompanyContactPersons { get; set; }

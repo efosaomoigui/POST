@@ -121,6 +121,14 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException($"Shipment with waybill: {waybill} had been collected");
             }
+
+            var shipmentDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(waybill) && x.ShipmentScanStatus == ShipmentScanStatus.Delivered);
+
+            if (shipmentDelivered == null)
+            {
+                throw new GenericException($"Shipment with waybill: {waybill} is not available for Return Processing");
+            }
         }
+        
     }
 }

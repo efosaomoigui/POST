@@ -6,17 +6,21 @@ using GIGLS.Core;
 using GIGL.GIGLS.Core.Domain;
 using AutoMapper;
 using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.Domain;
 using GIGLS.Infrastructure;
+using GIGLS.Core.IServices.Wallet;
+using GIGLS.Core.Enums;
+using GIGLS.Core.DTO.Wallet;
 
 namespace GIGLS.Services.IServices.ServiceCentres
 {
     public class ServiceCentreService : IServiceCentreService
     {
+        private readonly IWalletService _walletService;
         private readonly IUnitOfWork _uow;
 
-        public ServiceCentreService(IUnitOfWork uow)
+        public ServiceCentreService(IWalletService walletService, IUnitOfWork uow)
         {
+            _walletService = walletService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -39,21 +43,18 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 {
                     throw new GenericException($"{service.Name} Service Centre Already Exist");
                 }
-                //var newCentre = new ServiceCentre
-                //{
-                //    Name = service.Name,
-                //    Address = service.Address,
-                //    City = service.City,
-                //    Email = service.Email,
-                //    StationId = service.StationId,
-                //    PhoneNumber = service.PhoneNumber,                    
-                //    IsActive = true,
-                //    Code = service.Code
-                //    //user loggen on Id here
-                //};
+
                 var newCentre = Mapper.Map<ServiceCentre>(service);
                 _uow.ServiceCentre.Add(newCentre);
                 await _uow.CompleteAsync();
+
+                // create wallet for Service Centre
+                await _walletService.AddWallet(new WalletDTO
+                {
+                    CustomerId = newCentre.ServiceCentreId,
+                    CustomerType = CustomerType.ServiceCentre
+                });
+
                 return new { Id = newCentre.ServiceCentreId};
             }
             catch (Exception)

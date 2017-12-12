@@ -23,7 +23,7 @@ namespace GIGLS.Core.DTO.Customers
         public string PhoneNumber { get; set; }
         public string PictureUrl { get; set; }
         public string PicData { get; set; }
-
+        public string CustomerCode { get; set; }
         public List<ShipmentDTO> CustomerShipments { get; set; }
     }
 }

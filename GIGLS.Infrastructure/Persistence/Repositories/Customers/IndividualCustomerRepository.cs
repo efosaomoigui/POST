@@ -39,6 +39,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                       State = s.State,
                                       DateCreated = s.DateCreated,
                                       DateModified = s.DateModified,
+                                      CustomerCode = s.CustomerCode
                                       //select all shipments of the customer                              
                                   };
                 return Task.FromResult(customerdto.ToList());

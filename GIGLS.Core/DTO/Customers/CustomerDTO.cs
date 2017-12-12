@@ -51,5 +51,6 @@ namespace GIGLS.Core.DTO.Customers
         //public DateTime DateCreated { get; set; }
         //public DateTime DateModified { get; set; }
         public string WalletNumber { get; set; }
+        public string CustomerCode { get; set; }
     }
 }
