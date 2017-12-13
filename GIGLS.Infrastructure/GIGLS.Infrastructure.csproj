@@ -164,6 +164,8 @@
     <Compile Include="Persistence\Repositories\User\UserRepository.cs" />
     <Compile Include="Persistence\Repositories\Utility\NumberGeneratorMonitorRepository.cs" />
     <Compile Include="Persistence\Repositories\Vendors\VendorRepository.cs" />
+    <Compile Include="Persistence\Repositories\Wallet\CashOnDeliveryAccountRepository.cs" />
+    <Compile Include="Persistence\Repositories\Wallet\CashOnDeliveryBalanceRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\WalletNumberRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\WalletRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\WalletTransactionRepository.cs" />

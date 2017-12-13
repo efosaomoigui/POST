@@ -189,6 +189,8 @@
     <Compile Include="Domain\Vendor.cs" />
     <Compile Include="Domain\Wallet\AccountSummary.cs" />
     <Compile Include="Domain\Wallet\AccountTransaction.cs" />
+    <Compile Include="Domain\Wallet\CashOnDeliveryAccount.cs" />
+    <Compile Include="Domain\Wallet\CashOnDeliveryBalance.cs" />
     <Compile Include="Domain\Wallet\Wallet.cs" />
     <Compile Include="Domain\Wallet\WalletNumber.cs" />
     <Compile Include="Domain\Wallet\WalletTransaction.cs" />
@@ -262,6 +264,8 @@
     <Compile Include="DTO\User\RoleDTO.cs" />
     <Compile Include="DTO\User\UserDTO.cs" />
     <Compile Include="DTO\Vendors\VendorDTO.cs" />
+    <Compile Include="DTO\Wallet\CashOnDeliveryAccountDTO.cs" />
+    <Compile Include="DTO\Wallet\CashOnDeliveryBalanceDTO.cs" />
     <Compile Include="DTO\Wallet\WalletDto.cs" />
     <Compile Include="DTO\Wallet\WalletNumberDto.cs" />
     <Compile Include="DTO\Wallet\WalletTransactionDto.cs" />
@@ -371,7 +375,9 @@
     <Compile Include="IRepositories\User\IUserRepository.cs" />
     <Compile Include="IRepositories\Utility\INumberGeneratorMonitorRepository.cs" />
     <Compile Include="IRepositories\Vendors\IVendorRepository.cs" />
+    <Compile Include="IRepositories\Wallet\ICashOnDeliveryBalanceRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletNumberRepository.cs" />
+    <Compile Include="IRepositories\Wallet\ICashOnDeliveryAccountRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletTransactionRepository.cs" />
     <Compile Include="IRepositories\Workshops\IWorkshopRepository.cs" />
@@ -450,6 +456,8 @@
     <Compile Include="IServices\Utility\IPasswordGenerator.cs" />
     <Compile Include="IServices\Vendors\IVendorService.cs" />
     <Compile Include="IServices\Wallet\IWalletNumberService.cs" />
+    <Compile Include="IServices\Wallet\ICashOnDeliveryBalanceService.cs" />
+    <Compile Include="IServices\Wallet\ICashOnDeliveryAccountService.cs" />
     <Compile Include="IServices\Wallet\IWalletService.cs" />
     <Compile Include="IServices\Wallet\IWalletTransactionService.cs" />
     <Compile Include="IServices\Workshops\IWorkshopService.cs" />

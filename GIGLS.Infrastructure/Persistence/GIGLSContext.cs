@@ -133,7 +133,8 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<Wallet> Wallets { get; set; }
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
         public DbSet<WalletNumber> WalletNumbers { get; set; }
-
+        public DbSet<CashOnDeliveryAccount> CashOnDeliveryAccount { get; set; }
+        public DbSet<CashOnDeliveryBalance> CashOnDeliveryBalance { get; set; }
 
         //Weight Limit
         public DbSet<WeightLimit> WeightLimits { get; set; }

@@ -19,6 +19,7 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.DTO.ServiceCentres;
 using System.Linq;
+using GIGLS.Core.DTO.Zone;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -33,12 +34,14 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUserService _userService;
         private readonly IMessageSenderService _messageSenderService;
         private readonly ICompanyService _companyService;
+        private readonly IDomesticRouteZoneMapService _domesticRouteZoneMapService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
             INumberGeneratorMonitorService numberGeneratorMonitorService,
             ICustomerService customerService, IUserService userService,
-            IMessageSenderService messageSenderService, ICompanyService companyService
+            IMessageSenderService messageSenderService, ICompanyService companyService,
+            IDomesticRouteZoneMapService domesticRouteZoneMapService
             )
         {
             _uow = uow;
@@ -50,6 +53,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _userService = userService;
             _messageSenderService = messageSenderService;
             _companyService = companyService;
+            _domesticRouteZoneMapService = domesticRouteZoneMapService;
             MapperConfig.Initialize();
         }
 
@@ -533,6 +537,19 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+        public async Task<DomesticRouteZoneMapDTO> GetZone(int destinationServiceCentre)
+        {
+            // use currentUser login servicecentre
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            if (serviceCenters.Length > 1)
+            {
+                throw new GenericException("This user is assign to more than one(1) Service Centre  ");
+            }
+
+            var zone = await _domesticRouteZoneMapService.GetZone(serviceCenters[0], destinationServiceCentre);
+            return zone;
         }
     }
 }

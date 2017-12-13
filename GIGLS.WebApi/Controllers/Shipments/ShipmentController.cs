@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.CORE.DTO.Shipments;
@@ -227,6 +228,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
                 {
                     Object = centres
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("zone/{destinationServiceCentreId:int}")]
+        public async Task<IServiceResponse<DomesticRouteZoneMapDTO>> GetZone(int destinationServiceCentreId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var zone = await _service.GetZone(destinationServiceCentreId);
+
+                return new ServiceResponse<DomesticRouteZoneMapDTO>
+                {
+                    Object = zone
                 };
             });
         }

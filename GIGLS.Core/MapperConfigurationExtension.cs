@@ -174,6 +174,12 @@ namespace GIGLS.Core
 
                 config.CreateMap<WalletTransaction, WalletTransactionDTO>();
                 config.CreateMap<WalletTransactionDTO, WalletTransaction>();
+
+                config.CreateMap<CashOnDeliveryBalance, CashOnDeliveryBalanceDTO>();
+                config.CreateMap<CashOnDeliveryBalanceDTO, CashOnDeliveryBalance>();
+
+                config.CreateMap<CashOnDeliveryAccount, CashOnDeliveryAccountDTO>();
+                config.CreateMap<CashOnDeliveryAccountDTO, CashOnDeliveryAccount>();
             });
 
             isInit = true;
