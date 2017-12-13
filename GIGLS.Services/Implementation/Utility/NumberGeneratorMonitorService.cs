@@ -53,6 +53,14 @@ namespace GIGLS.Services.Implementation.Utility
 
                 //Add the numberCode with the serviceCenterCode and numberGeneratorType
                 numberGenerated = ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + codeStr + numberStr;
+
+                if(numberGeneratorType == NumberGeneratorType.CustomerCodeIndividual ||
+                   numberGeneratorType == NumberGeneratorType.CustomerCodeCorporate ||
+                   numberGeneratorType == NumberGeneratorType.CustomerCodeEcommerce)
+                {
+                    numberGenerated = ResolvePrefixFromNumberGeneratorTypeForCustomers(numberGeneratorType) + numberStr;
+                }
+
                 return numberGenerated;
             }
             catch (Exception)
@@ -138,5 +146,27 @@ namespace GIGLS.Services.Implementation.Utility
             }
         }
 
+        private string ResolvePrefixFromNumberGeneratorTypeForCustomers(NumberGeneratorType numberGeneratorType)
+        {
+            switch (numberGeneratorType)
+            {
+                case NumberGeneratorType.CustomerCodeIndividual:
+                    {
+                        return "IND-";
+                    }
+                case NumberGeneratorType.CustomerCodeCorporate:
+                    {
+                        return "COO-";
+                    }
+                case NumberGeneratorType.CustomerCodeEcommerce:
+                    {
+                        return "ECO-";
+                    }
+                default:
+                    {
+                        return "IND-";
+                    }
+            }
+        }
     }
 }

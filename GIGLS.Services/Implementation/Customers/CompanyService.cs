@@ -11,18 +11,22 @@ using GIGLS.Infrastructure;
 using AutoMapper;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices.Wallet;
+using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.Services.Implementation.Customers
 {
     public class CompanyService : ICompanyService
     {
         private readonly IWalletService _walletService;
+        private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
 
         private readonly IUnitOfWork _uow;
 
-        public CompanyService(IWalletService walletService, IUnitOfWork uow)
+        public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService, 
+            IWalletService walletService, IUnitOfWork uow)
         {
             _walletService = walletService;
+            _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -37,6 +41,21 @@ namespace GIGLS.Services.Implementation.Customers
                 }
 
                 var newCompany = Mapper.Map<Company>(company);
+
+                //generate customer code
+                if(newCompany.CompanyType == CompanyType.Corporate)
+                {
+                    var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
+                        NumberGeneratorType.CustomerCodeCorporate);
+                    newCompany.CustomerCode = customerCode;
+                }
+                else
+                {
+                    var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
+                        NumberGeneratorType.CustomerCodeEcommerce);
+                    newCompany.CustomerCode = customerCode;
+                }
+
                 _uow.Company.Add(newCompany);
 
                 if (company.ContactPersons.Any())
