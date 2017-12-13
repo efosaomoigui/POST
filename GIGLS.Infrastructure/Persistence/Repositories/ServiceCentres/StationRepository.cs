@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.IRepositories.ServiceCentres;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;

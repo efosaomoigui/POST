@@ -121,6 +121,8 @@
     <Compile Include="Persistence\Repositories\Customers\CompanyContactPersonRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\CompanyRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\IndividualCustomerRepository.cs" />
+    <Compile Include="Persistence\Repositories\Fleets\DispatchActivityRepository.cs" />
+    <Compile Include="Persistence\Repositories\Fleets\DispatchRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\FleetMakeRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\FleetModelRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\FleetPartInventoryHistoryRepository.cs" />

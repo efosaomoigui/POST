@@ -5,11 +5,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core;
+using GIGLS.Infrastructure;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
     public class CashOnDeliveryAccountService : ICashOnDeliveryAccountService
     {
+        private readonly IUnitOfWork _uow;
+
+        public CashOnDeliveryAccountService(IUnitOfWork uow)
+        {
+            _uow = uow;
+            MapperConfig.Initialize();
+        }
+
         public Task AddCashOnDeliveryAccount(CashOnDeliveryAccountDTO cashOnDeliveryAccountDto)
         {
             throw new NotImplementedException();
@@ -27,17 +37,33 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public Task<IEnumerable<CashOnDeliveryAccountDTO>> GetCashOnDeliveryAccounts()
         {
-            throw new NotImplementedException();
+            return _uow.CashOnDeliveryAccount.GetCashOnDeliveryAccountAsync();
         }
 
-        public Task RemoveCashOnDeliveryAccount(int cashOnDeliveryAccountId)
+        public async Task RemoveCashOnDeliveryAccount(int cashOnDeliveryAccountId)
         {
-            throw new NotImplementedException();
+            var account = await _uow.CashOnDeliveryAccount.GetAsync(cashOnDeliveryAccountId);
+
+            if (account == null)
+            {
+                throw new GenericException("Wallet does not exists");
+            }
+
+            _uow.CashOnDeliveryAccount.Remove(account);
+            await _uow.CompleteAsync();
         }
 
-        public Task UpdateCashOnDeliveryAccount(int cashOnDeliveryAccountId, CashOnDeliveryAccountDTO cashOnDeliveryAccountDto)
+        public async Task UpdateCashOnDeliveryAccount(int cashOnDeliveryAccountId, CashOnDeliveryAccountDTO cashOnDeliveryAccountDto)
         {
-            throw new NotImplementedException();
+            var account = await _uow.CashOnDeliveryAccount.GetAsync(cashOnDeliveryAccountId);
+
+            if (account == null)
+            {
+                throw new GenericException("Cash on Delivery Balance does not exists");
+            }
+
+            account.CreditDebitType = cashOnDeliveryAccountDto.CreditDebitType;
+            await _uow.CompleteAsync();
         }
     }
 }

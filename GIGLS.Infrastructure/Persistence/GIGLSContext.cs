@@ -99,6 +99,8 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<FleetTrip> FleetTrip { get; set; }
         public DbSet<FleetPartInventory> FleetPartInventory { get; set; }
         public DbSet<FleetPartInventoryHistory> FleetPartInventoryHistory { get; set; }
+        public DbSet<Dispatch> Dispatch { get; set; }
+        public DbSet<DispatchActivity> DispatchActivity { get; set; }
 
         //Partner
         public DbSet<Partner> Partners { get; set; }
@@ -163,7 +165,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         //Message
         public DbSet<Message> Message { get; set; }
-
+        
 
         #endregion
 

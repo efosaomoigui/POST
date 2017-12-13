@@ -180,6 +180,12 @@ namespace GIGLS.Core
 
                 config.CreateMap<CashOnDeliveryAccount, CashOnDeliveryAccountDTO>();
                 config.CreateMap<CashOnDeliveryAccountDTO, CashOnDeliveryAccount>();
+
+                config.CreateMap<Dispatch, DispatchDTO>();
+                config.CreateMap<DispatchDTO, DispatchDTO>();
+
+                config.CreateMap<DispatchActivity, DispatchActivityDTO>();
+                config.CreateMap<DispatchActivityDTO, DispatchActivity>();
             });
 
             isInit = true;

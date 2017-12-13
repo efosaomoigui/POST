@@ -91,6 +91,8 @@ namespace GIGLS.Core
         IPackingListRepository PackingList { get; set;}
         ICashOnDeliveryAccountRepository CashOnDeliveryAccount { get; set; }        
         ICashOnDeliveryBalanceRepository CashOnDeliveryBalance { get; set; }
+        IDispatchRepository Dispatch { get; set; }
+        IDispatchActivityRepository DispatchActivity { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
