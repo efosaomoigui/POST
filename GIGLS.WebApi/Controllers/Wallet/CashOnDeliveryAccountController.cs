@@ -9,7 +9,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Wallet
 {
-   // [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    // [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
     [RoutePrefix("api/cashondeliveryaccount")]
     public class CashOnDeliveryAccountController : BaseWebApiController
     {
@@ -54,13 +54,13 @@ namespace GIGLS.WebApi.Controllers.Wallet
        // [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{walletNumber}/wallet")]
-        public async Task<IServiceResponse<List<CashOnDeliveryAccountDTO>>> GetCashOnDeliveryAccountByWallet(string walletNumber)
+        public async Task<IServiceResponse<CashOnDeliveryAccountSummaryDTO>> GetCashOnDeliveryAccountByWallet(string walletNumber)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _cashOnDeliveryAccountService.GetCashOnDeliveryAccountByWallet(walletNumber);
 
-                return new ServiceResponse<List<CashOnDeliveryAccountDTO>>
+                return new ServiceResponse<CashOnDeliveryAccountSummaryDTO>
                 {
                     Object = result
                 };

@@ -269,6 +269,7 @@
     <Compile Include="DTO\User\UserDTO.cs" />
     <Compile Include="DTO\Vendors\VendorDTO.cs" />
     <Compile Include="DTO\Wallet\CashOnDeliveryAccountDTO.cs" />
+    <Compile Include="DTO\Wallet\CashOnDeliveryAccountSummaryDTO.cs" />
     <Compile Include="DTO\Wallet\CashOnDeliveryBalanceDTO.cs" />
     <Compile Include="DTO\Wallet\WalletDto.cs" />
     <Compile Include="DTO\Wallet\WalletNumberDto.cs" />

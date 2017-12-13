@@ -99,6 +99,37 @@ namespace GIGLS.Services.Implementation.Wallet
             return balanceDto;
         }
 
+
+        public async Task<CashOnDeliveryBalanceDTO> GetCashOnDeliveryBalanceByWalletId(int walletId)
+        {
+            var balance = await _uow.CashOnDeliveryBalance.GetAsync(c => c.WalletId == walletId, "Wallet");
+
+            if (balance == null)
+            {
+                throw new GenericException("Wallet does not exist");
+            }
+
+            var balanceDto = Mapper.Map<CashOnDeliveryBalanceDTO>(balance);
+
+            //set the customer name
+            // handle Company customers
+            if (CustomerType.Company.Equals(balance.Wallet.CustomerType))
+            {
+                var companyDTO = await _uow.Company.GetAsync(s => s.CompanyId == balance.Wallet.CustomerId);
+                balanceDto.Wallet.CustomerName = companyDTO.Name;
+            }
+            else
+            {
+                // handle IndividualCustomers
+                var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
+                    s => s.IndividualCustomerId == balance.Wallet.CustomerId);
+                balanceDto.Wallet.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " +
+                    $"{individualCustomerDTO.LastName}");
+            }
+
+            return balanceDto;
+        }
+
         public Task<IEnumerable<CashOnDeliveryBalanceDTO>> GetCashOnDeliveryBalances()
         {
             return _uow.CashOnDeliveryBalance.GetCashOnDeliveryBalanceAsync();

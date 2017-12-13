@@ -9,6 +9,7 @@ namespace GIGLS.Core.IServices.CashOnDeliveryBalance
         Task<IEnumerable<CashOnDeliveryBalanceDTO>> GetCashOnDeliveryBalances();
         Task<CashOnDeliveryBalanceDTO> GetCashOnDeliveryBalanceById(int cashOnDeliveryBalanceId);
         Task<CashOnDeliveryBalanceDTO> GetCashOnDeliveryBalanceByWallet(string walletNumber);
+        Task<CashOnDeliveryBalanceDTO> GetCashOnDeliveryBalanceByWalletId(int walletId);
         Task AddCashOnDeliveryBalance(CashOnDeliveryBalanceDTO cashOnDeliveryBalanceDTO);
         Task UpdateCashOnDeliveryBalance(int cashOnDeliveryBalanceId, CashOnDeliveryBalanceDTO cashOnDeliveryBalanceDTO);
         Task RemoveCashOnDeliveryBalance(int cashOnDeliveryBalanceId);
