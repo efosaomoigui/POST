@@ -7,20 +7,15 @@ using GIGL.GIGLS.Core.Domain;
 using AutoMapper;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.Enums;
-using GIGLS.Core.DTO.Wallet;
 
 namespace GIGLS.Services.IServices.ServiceCentres
 {
     public class ServiceCentreService : IServiceCentreService
     {
-        private readonly IWalletService _walletService;
         private readonly IUnitOfWork _uow;
 
-        public ServiceCentreService(IWalletService walletService, IUnitOfWork uow)
+        public ServiceCentreService(IUnitOfWork uow)
         {
-            _walletService = walletService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -47,13 +42,6 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 var newCentre = Mapper.Map<ServiceCentre>(service);
                 _uow.ServiceCentre.Add(newCentre);
                 await _uow.CompleteAsync();
-
-                // create wallet for Service Centre
-                await _walletService.AddWallet(new WalletDTO
-                {
-                    CustomerId = newCentre.ServiceCentreId,
-                    CustomerType = CustomerType.ServiceCentre
-                });
 
                 return new { Id = newCentre.ServiceCentreId};
             }
