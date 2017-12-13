@@ -57,6 +57,8 @@ namespace GIGLS.Core.DTO.Shipments
 
         //Invoice parameters: Helps generate invoice for ecomnerce customers  by customerType
         public bool IsCashOnDelivery { get; set; }
+        public decimal? IsCashOnDeliveryAmount { get; set; }
+
         public decimal? ExpectedAmountToCollect { get; set; }
         public decimal? ActualAmountCollected { get; set; }
 
