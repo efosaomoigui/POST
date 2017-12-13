@@ -368,6 +368,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 serialNumber++;
             }
 
+            //do not save the child objects
+            newShipment.DepartureServiceCentre = null;
+            newShipment.DestinationServiceCentre = null;
+            newShipment.DeliveryOption = null;
+
             _uow.Shipment.Add(newShipment);
             //await _uow.CompleteAsync();
 
