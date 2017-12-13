@@ -11,18 +11,22 @@ using System.Linq;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.Services.Implementation.Customers
 {
     public class IndividualCustomerService : IIndividualCustomerService
     {
         private readonly IWalletService _walletService;
+        private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
 
         private readonly IUnitOfWork _uow;
 
-        public IndividualCustomerService(IWalletService walletService, IUnitOfWork uow)
+        public IndividualCustomerService(INumberGeneratorMonitorService numberGeneratorMonitorService,
+            IWalletService walletService, IUnitOfWork uow)
         {
             _walletService = walletService;
+            _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -42,6 +46,12 @@ namespace GIGLS.Services.Implementation.Customers
                 }
 
                 var newCustomer = Mapper.Map<IndividualCustomer>(customer);
+
+                //generate customer code
+                var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
+                    NumberGeneratorType.CustomerCodeIndividual);
+                newCustomer.CustomerCode = customerCode;
+
                 _uow.IndividualCustomer.Add(newCustomer);
 
                 await _uow.CompleteAsync();
