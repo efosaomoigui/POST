@@ -83,5 +83,10 @@ namespace GIGLS.Core.DTO.Shipments
 
         //wallet information
         public string WalletNumber { get; set; }
+
+        //from client
+        public decimal? vatvalue_display { get; set; }
+        public decimal? InvoiceDiscountValue_display { get; set; }
+
     }
 }

@@ -387,6 +387,10 @@ namespace GIGLS.Services.Implementation.Shipments
             newShipment.DestinationServiceCentre = null;
             newShipment.DeliveryOption = null;
 
+            //save the display value of Insurance and Vat
+            newShipment.Vat = shipmentDTO.vatvalue_display;
+            newShipment.DiscountValue = shipmentDTO.InvoiceDiscountValue_display;
+
             _uow.Shipment.Add(newShipment);
             //await _uow.CompleteAsync();
 
