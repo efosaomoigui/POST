@@ -20,6 +20,7 @@ using GIGLS.Core.IMessageService;
 using GIGLS.Core.DTO.ServiceCentres;
 using System.Linq;
 using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.IServices.Wallet;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -35,13 +36,15 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IMessageSenderService _messageSenderService;
         private readonly ICompanyService _companyService;
         private readonly IDomesticRouteZoneMapService _domesticRouteZoneMapService;
+        private readonly IWalletService _walletService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
             INumberGeneratorMonitorService numberGeneratorMonitorService,
             ICustomerService customerService, IUserService userService,
             IMessageSenderService messageSenderService, ICompanyService companyService,
-            IDomesticRouteZoneMapService domesticRouteZoneMapService
+            IDomesticRouteZoneMapService domesticRouteZoneMapService,
+            IWalletService walletService
             )
         {
             _uow = uow;
@@ -54,6 +57,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _messageSenderService = messageSenderService;
             _companyService = companyService;
             _domesticRouteZoneMapService = domesticRouteZoneMapService;
+            _walletService = walletService;
             MapperConfig.Initialize();
         }
 
@@ -165,6 +169,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDto.CustomerDetails = await _customerService.GetCustomer(shipmentDto.CustomerId, customerType);
                 shipmentDto.Customer = new List<CustomerDTO>();
                 shipmentDto.Customer.Add(shipmentDto.CustomerDetails);
+
+                //get wallet number
+                var wallets = await _walletService.GetWallets();
+                var customerWallet = wallets.ToList().FirstOrDefault(
+                    s => s.CustomerId == shipmentDto.CustomerId && s.CustomerType == customerType);
+                shipmentDto.WalletNumber = customerWallet.WalletNumber;
 
                 return shipmentDto;
             }
