@@ -130,9 +130,29 @@ namespace GIGLS.Services.Implementation.Wallet
             return balanceDto;
         }
 
-        public Task<IEnumerable<CashOnDeliveryBalanceDTO>> GetCashOnDeliveryBalances()
+        public async Task<IEnumerable<CashOnDeliveryBalanceDTO>> GetCashOnDeliveryBalances()
         {
-            return _uow.CashOnDeliveryBalance.GetCashOnDeliveryBalanceAsync();
+            var balances = await _uow.CashOnDeliveryBalance.GetCashOnDeliveryBalanceAsync();
+
+            foreach (var item in balances)
+            {
+                // handle Company customers
+                if (CustomerType.Company.Equals(item.Wallet.CustomerType))
+                {
+                    var companyDTO = await _uow.Company.GetAsync(s => s.CompanyId == item.Wallet.CustomerId);
+                    item.Wallet.CustomerName = companyDTO.Name;
+                }
+                else
+                {
+                    // handle IndividualCustomers
+                    var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
+                        s => s.IndividualCustomerId == item.Wallet.CustomerId);
+                    item.Wallet.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " +
+                        $"{individualCustomerDTO.LastName}");
+                }
+            }
+
+            return balances;
         }
 
         public async Task RemoveCashOnDeliveryBalance(int cashOnDeliveryBalanceId)
