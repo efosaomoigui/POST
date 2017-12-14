@@ -79,5 +79,10 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal? Vat { get; set; }
         public decimal? Total { get; set; }
 
+        //from client
+        public decimal? vatvalue_display { get; set; }
+        public decimal? InvoiceDiscountValue_display { get; set; }
+        public decimal? offInvoiceDiscountvalue_display { get; set; }
+
     }
 }

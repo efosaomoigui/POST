@@ -87,6 +87,7 @@ namespace GIGLS.Core.DTO.Shipments
         //from client
         public decimal? vatvalue_display { get; set; }
         public decimal? InvoiceDiscountValue_display { get; set; }
+        public decimal? offInvoiceDiscountvalue_display { get; set; }
 
     }
 }
