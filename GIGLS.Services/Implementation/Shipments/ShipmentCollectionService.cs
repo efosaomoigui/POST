@@ -10,6 +10,8 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
 using System;
 using GIGLS.Core.IServices.User;
+using GIGLS.Core.IServices.CashOnDeliveryAccount;
+using GIGLS.Core.DTO.Wallet;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -17,11 +19,14 @@ namespace GIGLS.Services.Implementation.Shipments
     {
         private readonly IUnitOfWork _uow;
         private IUserService _userService;
+        private ICashOnDeliveryAccountService _cashOnDeliveryAccountService;
 
-        public ShipmentCollectionService(IUnitOfWork uow, IUserService userService)
+        public ShipmentCollectionService(IUnitOfWork uow, IUserService userService,
+            ICashOnDeliveryAccountService cashOnDeliveryAccountService)
         {
             _uow = uow;
             _userService = userService;
+            _cashOnDeliveryAccountService = cashOnDeliveryAccountService;
             MapperConfig.Initialize();
         }
 
@@ -47,6 +52,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var data = Mapper.Map<ShipmentCollection>(shipmentCollection);
             data.UserId = currentUserId;
+            
             _uow.ShipmentCollection.Add(data);
             _uow.ShipmentTracking.Add(updateShipmentTracking);
             await _uow.CompleteAsync();
@@ -99,6 +105,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException("INFORMATION DOES NOT EXIST");
             }
 
+            if (shipmentCollectionDto.UserId == null)
+            {
+                shipmentCollectionDto.UserId = await _userService.GetCurrentUserId();
+            }
+
             shipmentCollection.Name = shipmentCollectionDto.Name;
             shipmentCollection.PhoneNumber = shipmentCollectionDto.PhoneNumber;
             shipmentCollection.Email = shipmentCollectionDto.Email;
@@ -107,7 +118,24 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentCollection.Address = shipmentCollectionDto.Address;
             shipmentCollection.IndentificationUrl = shipmentCollectionDto.IndentificationUrl;
             shipmentCollection.ShipmentScanStatus = shipmentCollectionDto.ShipmentScanStatus;
-            shipmentCollection.UserId = await _userService.GetCurrentUserId();
+            shipmentCollection.UserId = shipmentCollectionDto.UserId;
+
+            //cash collected on Delivery
+            if (shipmentCollectionDto.IsCashOnDelivery == true)
+            {
+                await _cashOnDeliveryAccountService.AddCashOnDeliveryAccount(new CashOnDeliveryAccountDTO
+                {
+                    Amount = (decimal)shipmentCollectionDto.CashOnDeliveryAmount,
+                    CreditDebitType = CreditDebitType.Credit,
+                    UserId = shipmentCollectionDto.UserId,
+                    Wallet = new WalletDTO
+                    {
+                        WalletNumber = shipmentCollectionDto.WalletNumber
+                    },
+                    Description = shipmentCollectionDto.Description
+                });
+            }
+
             await _uow.CompleteAsync();
         }
 

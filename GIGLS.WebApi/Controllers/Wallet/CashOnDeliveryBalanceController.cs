@@ -9,7 +9,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.CashOnDeliveryBalance
 {
-    //[Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
     [RoutePrefix("api/cashondeliverybalance")]
     public class CashOnDeliveryBalanceController : BaseWebApiController
     {
@@ -20,7 +20,7 @@ namespace GIGLS.WebApi.Controllers.CashOnDeliveryBalance
             _cashOnDeliveryBalanceService = cashOnDeliveryBalanceService;
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
         public async Task<IServiceResponse<IEnumerable<CashOnDeliveryBalanceDTO>>> GetCashOnDeliveryBalances()
@@ -35,7 +35,7 @@ namespace GIGLS.WebApi.Controllers.CashOnDeliveryBalance
             });
         }
 
-       // [GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{cashOnDeliveryBalanceId:int}")]
         public async Task<IServiceResponse<CashOnDeliveryBalanceDTO>> GetCashOnDeliveryBalanceById(int cashOnDeliveryBalanceId)
@@ -51,7 +51,7 @@ namespace GIGLS.WebApi.Controllers.CashOnDeliveryBalance
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{walletNumber}/wallet")]
         public async Task<IServiceResponse<CashOnDeliveryBalanceDTO>> GetCashOnDeliveryBalanceByWallet(string walletNumber)

@@ -74,8 +74,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
                 
                 _uow.ShipmentReturn.Add(newShipmentReturn);
-                await _uow.CompleteAsync();
 
+                //update shipment collection status to Return status
+                var shipmentColection = await _collectionService.GetShipmentCollectionById(waybill);
+                shipmentColection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.Returns;
+                await _collectionService.UpdateShipmentCollection(shipmentColection);
+
+                await _uow.CompleteAsync();
             }
             catch (Exception)
             {

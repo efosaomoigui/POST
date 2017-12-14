@@ -14,6 +14,12 @@ namespace GIGLS.CORE.DTO.Shipments
         public string IndentificationUrl { get; set; }
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
 
+        //IsCashOnDelivery Processing
+        public string WalletNumber { get; set; }
+        public bool IsCashOnDelivery { get; set; }
+        public decimal? CashOnDeliveryAmount { get; set; }
+        public string Description { get; set; }
+
         //Who process the collection
         public string UserId { get; set; }
     }

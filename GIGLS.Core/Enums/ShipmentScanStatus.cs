@@ -6,6 +6,7 @@
         Transit,
         Processing,
         Delivered,
-        Collected
+        Collected,
+        Returns
     }
 }

@@ -9,7 +9,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Wallet
 {
-    // [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
     [RoutePrefix("api/cashondeliveryaccount")]
     public class CashOnDeliveryAccountController : BaseWebApiController
     {
@@ -20,7 +20,7 @@ namespace GIGLS.WebApi.Controllers.Wallet
             _cashOnDeliveryAccountService = cashOnDeliveryAccountService;
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
         public async Task<IServiceResponse<IEnumerable<CashOnDeliveryAccountDTO>>> GetCashOnDeliveryAccounts()
@@ -35,7 +35,7 @@ namespace GIGLS.WebApi.Controllers.Wallet
             });
         }
 
-       // [GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{cashOnDeliveryAccountId:int}")]
         public async Task<IServiceResponse<CashOnDeliveryAccountDTO>> GetCashOnDeliveryAccountById(int cashOnDeliveryAccountId)
@@ -51,7 +51,7 @@ namespace GIGLS.WebApi.Controllers.Wallet
             });
         }
 
-       // [GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{walletNumber}/wallet")]
         public async Task<IServiceResponse<CashOnDeliveryAccountSummaryDTO>> GetCashOnDeliveryAccountByWallet(string walletNumber)
@@ -67,7 +67,7 @@ namespace GIGLS.WebApi.Controllers.Wallet
             });
         }
 
-       // [GIGLSActivityAuthorize(Activity = "Create")]
+        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]
         public async Task<IServiceResponse<object>> AddCashOnDeliveryAccount(CashOnDeliveryAccountDTO newCashOnDeliveryAccount)
@@ -82,7 +82,7 @@ namespace GIGLS.WebApi.Controllers.Wallet
             });
         }
 
-       // [GIGLSActivityAuthorize(Activity = "Update")]
+        [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("{cashOnDeliveryAccountId:int}")]
         public async Task<IServiceResponse<object>> UpdateCashOnDeliveryAccount(int cashOnDeliveryAccountId, CashOnDeliveryAccountDTO cashOnDeliveryAccountDTO)

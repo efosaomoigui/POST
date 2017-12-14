@@ -32,17 +32,21 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task AddCashOnDeliveryAccount(CashOnDeliveryAccountDTO cashOnDeliveryAccountDto)
         {
-            //still thinking if to used wallet Id or Wallet Number
-            //check for wallet id before processing 
-            //var wallet = _walletService.GetWalletById(cashOnDeliveryAccountDto.WalletId);
-
-            var accountBalance = await _uow.CashOnDeliveryBalance.GetAsync(x => x.WalletId == cashOnDeliveryAccountDto.WalletId);
+            //Use wallet Number
+            var wallet = await _walletService.GetWalletById(cashOnDeliveryAccountDto.Wallet.WalletNumber);
+            
+            if (cashOnDeliveryAccountDto.UserId == null)
+            {
+                cashOnDeliveryAccountDto.UserId = await _userService.GetCurrentUserId();
+            }
+            
+            var accountBalance = await _uow.CashOnDeliveryBalance.GetAsync(x => x.WalletId == wallet.WalletId);
 
             if(accountBalance == null)
             {
                 var newBalance = new CashOnDeliveryBalance
                 {
-                    WalletId = cashOnDeliveryAccountDto.WalletId,
+                    WalletId = wallet.WalletId,
                     Balance = 0,
                     UserId = cashOnDeliveryAccountDto.UserId
                 };
@@ -52,15 +56,17 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 accountBalance = await _uow.CashOnDeliveryBalance.GetAsync(newBalance.CashOnDeliveryBalanceId);
             }
-            
+
             //create COD Account and all COD Account for the wwallet
+            cashOnDeliveryAccountDto.Wallet = null;
             var newCODAccount = Mapper.Map<CashOnDeliveryAccount>(cashOnDeliveryAccountDto);
-            newCODAccount.UserId = await _userService.GetCurrentUserId();
+            newCODAccount.WalletId = wallet.WalletId;           
+            newCODAccount.UserId = cashOnDeliveryAccountDto.UserId;
             _uow.CashOnDeliveryAccount.Add(newCODAccount);
             await _uow.CompleteAsync();
 
             //calculate balance
-            var CODTransactions = await _uow.CashOnDeliveryAccount.FindAsync(s => s.WalletId == cashOnDeliveryAccountDto.WalletId);
+            var CODTransactions = await _uow.CashOnDeliveryAccount.FindAsync(s => s.WalletId == wallet.WalletId);
             decimal balance = 0;
             foreach (var item in CODTransactions)
             {
@@ -156,8 +162,10 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 throw new GenericException("Cash on Delivery account does not exists");
             }
+            var currentUser = await _userService.GetCurrentUserId();
 
             account.CreditDebitType = cashOnDeliveryAccountDto.CreditDebitType;
+            account.UserId = currentUser;
             await _uow.CompleteAsync();
         }
     }
