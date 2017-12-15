@@ -10,6 +10,7 @@ using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.IServices.User;
 using System.Linq;
 using GIGLS.Core.DTO.ServiceCentres;
+using AutoMapper;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -47,6 +48,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (resultSet.Add(item.GroupWaybillNumber))
                     {
                         result.Add(item);
+
+                        // get the service cenre
+                        var departureSC = await _uow.ServiceCentre.GetAsync(item.DepartureServiceCentreId);
+                        var destinationSC = await _uow.ServiceCentre.GetAsync(item.DepartureServiceCentreId);
+
+                        item.DepartureServiceCentre = Mapper.Map<ServiceCentreDTO>(departureSC);
+                        item.DestinationServiceCentre = Mapper.Map<ServiceCentreDTO>(destinationSC);
                     }
                 }
 
