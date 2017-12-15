@@ -33,7 +33,7 @@ namespace GIGLS.WebApi.Controllers.User
             _passwordGenerator = passwordGenerator;
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user")]
         public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetUsers()
@@ -49,7 +49,7 @@ namespace GIGLS.WebApi.Controllers.User
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user/getsystemusers")]
         public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetSystemUsers()
@@ -65,7 +65,7 @@ namespace GIGLS.WebApi.Controllers.User
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "Create")]
+        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("api/user")]
         public async Task<IServiceResponse<object>> AddUser(UserDTO userdto)
@@ -507,6 +507,47 @@ namespace GIGLS.WebApi.Controllers.User
 
         }
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPut]
+        [Route("api/user/resetpassword/{userid}/{password}")]
+        public async Task<IServiceResponse<bool>> ResetPassword(string userid, string password)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _userService.ResetPassword(userid, password);
+
+                if (!result.Succeeded)
+                {
+                    throw new GenericException("Operation could not complete update successfully");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPut]
+        [Route("api/user/changepassword/{userid}/{currentPassword}/{newPassword}")]
+        public async Task<IServiceResponse<bool>> ChangePassword(string userid, string currentPassword, string newPassword)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _userService.ChangePassword(userid, currentPassword, newPassword);
+
+                if (!result.Succeeded)
+                {
+                    throw new GenericException("Operation could not complete update successfully");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
     }
 
 }

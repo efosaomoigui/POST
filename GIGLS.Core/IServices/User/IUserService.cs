@@ -41,5 +41,8 @@ namespace GIGLS.Core.IServices.User
         Task<string> GetCurrentUserId();
         Task<bool> CheckPriviledge();
         Task<int[]> GetPriviledgeServiceCenters();
+
+        Task<IdentityResult> ResetPassword(string userid, string password);
+        Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword);
     }
 }

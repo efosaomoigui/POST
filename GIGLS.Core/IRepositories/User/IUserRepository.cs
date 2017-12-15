@@ -35,5 +35,8 @@ namespace GIGLS.Core.IRepositories.User
         Task<IdentityResult> AddClaimAsync(string userid, Claim claim);
         Task<IdentityResult> RemoveClaimAsync(string userid, Claim claim);
         Task<IList<Claim>> GetClaimsAsync(string userid);
+
+        Task<IdentityResult> ResetPassword(string userid, string password);
+        Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword);
     }
 }

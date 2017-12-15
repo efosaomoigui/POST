@@ -453,5 +453,31 @@ namespace GIGLS.Services.Implementation.User
             return serviceCenterIds;
         }
 
+        //change user password by Admin
+        public async Task<IdentityResult> ResetPassword(string userid, string password)
+        {
+            var user = await _unitOfWork.User.GetUserById(userid);
+
+            if (user == null || password == null || password == "")
+            {
+                throw new GenericException("User does not exist!");
+            }
+
+            var result = await _unitOfWork.User.ResetPassword(userid, password);
+            return result;
+        }
+
+        public async Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword)
+        {
+            var user = await _unitOfWork.User.GetUserById(userid);
+
+            if (user == null || newPassword == null || newPassword == "")
+            {
+                throw new GenericException("User does not exist!");
+            }
+
+            var result = await _unitOfWork.User.ChangePassword(userid, currentPassword, newPassword);
+            return result;
+        }        
     }
 }

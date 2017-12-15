@@ -201,5 +201,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             return Result;
         }
 
+        public async Task<IdentityResult> ResetPassword(string userid, string password)
+        {
+            await _userManager.RemovePasswordAsync(userid);
+            var Result = await _userManager.AddPasswordAsync(userid, password);
+            return Result;
+        }
+
+        public async Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword)
+        {
+            var Result = await _userManager.ChangePasswordAsync(userid, currentPassword, newPassword);
+            return Result;
+        }
     }
 }
