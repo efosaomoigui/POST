@@ -26,7 +26,10 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var currentUserId = await _userService.GetCurrentUserId();
+                if(tracking.User == null)
+                {
+                    tracking.User = await _userService.GetCurrentUserId();
+                }
 
                 var newShipmentTracking = new GIGL.GIGLS.Core.Domain.ShipmentTracking
                 {
@@ -35,7 +38,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     Location = tracking.Location,
                     Status = tracking.Status,
                     DateTime = DateTime.Now,
-                    UserId = currentUserId
+                    UserId = tracking.User
                 };
                 _uow.ShipmentTracking.Add(newShipmentTracking);
 

@@ -8,5 +8,6 @@ namespace GIGLS.Core.IServices.Customers
     {
         Task<CustomerDTO> CreateCustomer(CustomerDTO customer);
         Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType);
+        Task<IndividualCustomerDTO> GetCustomerByPhoneNumber(string phoneNumber);        
     }
 }

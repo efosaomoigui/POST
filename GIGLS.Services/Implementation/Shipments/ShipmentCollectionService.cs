@@ -12,6 +12,8 @@ using System;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.CashOnDeliveryAccount;
 using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -20,13 +22,15 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUnitOfWork _uow;
         private IUserService _userService;
         private ICashOnDeliveryAccountService _cashOnDeliveryAccountService;
+        private readonly IShipmentTrackingService _shipmentTrackingService;
 
         public ShipmentCollectionService(IUnitOfWork uow, IUserService userService,
-            ICashOnDeliveryAccountService cashOnDeliveryAccountService)
+            ICashOnDeliveryAccountService cashOnDeliveryAccountService, IShipmentTrackingService shipmentTrackingService)
         {
             _uow = uow;
             _userService = userService;
             _cashOnDeliveryAccountService = cashOnDeliveryAccountService;
+            _shipmentTrackingService = shipmentTrackingService;
             MapperConfig.Initialize();
         }
 
@@ -119,6 +123,15 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentCollection.IndentificationUrl = shipmentCollectionDto.IndentificationUrl;
             shipmentCollection.ShipmentScanStatus = shipmentCollectionDto.ShipmentScanStatus;
             shipmentCollection.UserId = shipmentCollectionDto.UserId;
+
+            //Add Collected Scan to Scan History
+            var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
+            {
+                DateTime = DateTime.Now,
+                Status = shipmentCollectionDto.ShipmentScanStatus.ToString(),
+                Waybill = shipmentCollectionDto.Waybill,
+                User = shipmentCollectionDto.UserId,
+            }, shipmentCollectionDto.ShipmentScanStatus);
 
             //cash collected on Delivery
             if (shipmentCollectionDto.IsCashOnDelivery == true)

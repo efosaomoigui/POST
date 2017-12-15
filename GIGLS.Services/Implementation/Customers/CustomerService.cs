@@ -123,5 +123,18 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
+        public async Task<IndividualCustomerDTO> GetCustomerByPhoneNumber(string phoneNumber)
+        {
+            try
+            {
+                // handle IndividualCustomers
+                var individualCustomerDTO = await _individualCustomerService.GetCustomerByPhoneNumber(phoneNumber);
+                return individualCustomerDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -107,6 +107,27 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
+              
+
+        public async Task<IndividualCustomerDTO> GetCustomerByPhoneNumber(string phoneNumber)
+        {
+            try
+            {
+                var customer = await _uow.IndividualCustomer.GetAsync(x => x.PhoneNumber.Equals(phoneNumber));
+
+                if (customer == null)
+                {
+                    throw new GenericException("Individual Customer information does not exist");
+                }
+
+                IndividualCustomerDTO individual = Mapper.Map<IndividualCustomerDTO>(customer);
+                return individual;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         public async Task<List<IndividualCustomerDTO>> GetIndividualCustomers()
         {
