@@ -8,6 +8,7 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Wallet
@@ -53,7 +54,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (walletTransaction == null)
             {
-                throw new GenericException("WalletTransaction information does not exist");
+                throw new GenericException("Wallet Transaction information does not exist");
             }
             return Mapper.Map<WalletTransactionDTO>(walletTransaction);
         }
@@ -61,9 +62,9 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactionByWalletId(int walletId)
         {
             var walletTransactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == walletId);
-            if (walletTransactions == null)
+            if (walletTransactions.Count() < 1)
             {
-                throw new GenericException("WalletTransaction information does not exist");
+                throw new GenericException("Wallet Transaction information does not exist");
             }
             var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions);
 
@@ -88,7 +89,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (walletTransaction == null)
             {
-                throw new GenericException("WalletTransaction does not exist");
+                throw new GenericException("Wallet Transaction does not exist");
             }
             _uow.WalletTransaction.Remove(walletTransaction);
             await _uow.CompleteAsync();
@@ -100,7 +101,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (walletTransaction == null)
             {
-                throw new GenericException("WalletTransaction does not exist");
+                throw new GenericException("Wallet Transaction does not exist");
             }
             walletTransaction.Amount = walletTransactionDTO.Amount;
             walletTransaction.DateOfEntry = DateTime.Now;
