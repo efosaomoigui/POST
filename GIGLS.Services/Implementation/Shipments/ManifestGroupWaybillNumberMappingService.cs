@@ -82,11 +82,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 var manifestGroupWaybillNumberMappingList = await _uow.ManifestGroupWaybillNumberMapping.FindAsync(x => x.ManifestCode == manifestDTO.ManifestCode);
 
                 //add to list
+                var resultSet = new HashSet<string>();
                 List<GroupWaybillNumberDTO> resultList = new List<GroupWaybillNumberDTO>();
                 foreach (var manifestGroupWaybillNumberMapping in manifestGroupWaybillNumberMappingList)
                 {
                     var groupWaybillNumberDTO = await _groupWaybillNumberService.GetGroupWayBillNumberById(manifestGroupWaybillNumberMapping.GroupWaybillNumber);
-                    resultList.Add(groupWaybillNumberDTO);
+                    if (resultSet.Add(groupWaybillNumberDTO.GroupWaybillCode))
+                    {
+                        resultList.Add(groupWaybillNumberDTO);
+                    }
                 }
 
                 return resultList;
@@ -106,11 +110,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 var manifestGroupWaybillNumberMappingList = await _uow.ManifestGroupWaybillNumberMapping.FindAsync(x => x.ManifestCode == manifestDTO.ManifestCode);
 
                 //add to list
+                var resultSet = new HashSet<string>();
                 List<GroupWaybillNumberDTO> resultList = new List<GroupWaybillNumberDTO>();
                 foreach (var manifestGroupWaybillNumberMapping in manifestGroupWaybillNumberMappingList)
                 {
                     var groupWaybillNumberDTO = await _groupWaybillNumberService.GetGroupWayBillNumberById(manifestGroupWaybillNumberMapping.GroupWaybillNumber);
-                    resultList.Add(groupWaybillNumberDTO);
+                    if (resultSet.Add(groupWaybillNumberDTO.GroupWaybillCode))
+                    {
+                        resultList.Add(groupWaybillNumberDTO);
+                    }
                 }
 
                 return resultList;
