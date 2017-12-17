@@ -305,6 +305,7 @@
     <Compile Include="Enums\NumberGeneratorType.cs" />
     <Compile Include="Enums\PartnerApplicationStatus.cs" />
     <Compile Include="Enums\PartnerType.cs" />
+    <Compile Include="Enums\PaymentServiceType.cs" />
     <Compile Include="Enums\PaymentStatus.cs" />
     <Compile Include="Enums\PaymentTypes.cs" />
     <Compile Include="Enums\PickupOptions.cs" />

@@ -11,6 +11,7 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Services.Implementation.Fleets
 {
@@ -57,15 +58,35 @@ namespace GIGLS.Services.Implementation.Fleets
                 }
 
                 // update system wallet, by creating a wallet transaction
-                var systemWallet = await _walletService.GetSystemWallet();
-                var walletTransaction = new WalletTransactionDTO
+                //var systemWallet = await _walletService.GetSystemWallet();
+                //var walletTransaction = new WalletTransactionDTO
+                //{
+                //    Amount = dispatch.Amount,
+                //    WalletId = systemWallet.WalletId,
+                //    CreditDebitType = Core.Enums.CreditDebitType.Credit,
+                //    Description = "Debit from Dispatch"
+                //};
+                //await _walletService.UpdateWallet(systemWallet.WalletId, walletTransaction);
+
+                
+                // get the current user info
+                var currentUserId = await _userService.GetCurrentUserId();
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                var departureServiceCentreId = serviceCenterIds[0];
+                //update General Ledger
+                var generalLedger = new GeneralLedger()
                 {
+                    DateOfEntry = DateTime.Now,
+
+                    ServiceCentreId = departureServiceCentreId,
+                    UserId = currentUserId,
                     Amount = dispatch.Amount,
-                    WalletId = systemWallet.WalletId,
-                    CreditDebitType = Core.Enums.CreditDebitType.Credit,
-                    Description = "Credit from Dispatch"
+                    CreditDebitType = CreditDebitType.Debit,
+                    Description = "Debit from Dispatch",
+                    IsDeferred = false,
+                    PaymentServiceType = PaymentServiceType.Dispatch
                 };
-                await _walletService.UpdateWallet(systemWallet.WalletId, walletTransaction);
+                _uow.GeneralLedger.Add(generalLedger);
 
                 // commit transaction
                 await _uow.CompleteAsync();
