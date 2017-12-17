@@ -135,16 +135,19 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Wallet does not exists");
             }
 
+            if (walletTransactionDTO.UserId == null)
+            {
+                walletTransactionDTO.UserId = await _userService.GetCurrentUserId();
+            }
+
             //create entry in WalletTransaction table
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
 
             var newWalletTransaction = Mapper.Map<WalletTransaction>(walletTransactionDTO);
             newWalletTransaction.WalletId = walletId;
-            newWalletTransaction.DateCreated = DateTime.Now;
-            newWalletTransaction.DateModified = DateTime.Now;
             newWalletTransaction.DateOfEntry = DateTime.Now;
             newWalletTransaction.ServiceCentreId = serviceCenterIds[0];
-            newWalletTransaction.UserId = await _userService.GetCurrentUserId();
+            newWalletTransaction.UserId = walletTransactionDTO.UserId;
 
             _uow.WalletTransaction.Add(newWalletTransaction);
             await _uow.CompleteAsync();

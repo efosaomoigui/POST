@@ -10,6 +10,8 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.IServices.CashOnDeliveryBalance;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.IServices.User;
+using GIGLS.Core.IServices.Account;
+using GIGLS.Core.DTO.Account;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -19,14 +21,16 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IWalletService _walletService;
         private readonly ICashOnDeliveryBalanceService _cashOnDeliveryBalanceService;
         private readonly IUserService _userService;
+        private readonly IGeneralLedgerService _generalLedgerService;
 
-        public CashOnDeliveryAccountService(IUnitOfWork uow, IWalletService walletService,
+        public CashOnDeliveryAccountService(IUnitOfWork uow, IWalletService walletService, IGeneralLedgerService generalLedgerService,
             ICashOnDeliveryBalanceService cashOnDeliveryBalanceService, IUserService userService)
         {
             _uow = uow;
             _walletService = walletService;
             _cashOnDeliveryBalanceService = cashOnDeliveryBalanceService;
             _userService = userService;
+            _generalLedgerService = generalLedgerService;
             MapperConfig.Initialize();
         }
 
@@ -65,7 +69,7 @@ namespace GIGLS.Services.Implementation.Wallet
             _uow.CashOnDeliveryAccount.Add(newCODAccount);
             await _uow.CompleteAsync();
 
-            //calculate balance
+            //calculate balance for code
             var CODTransactions = await _uow.CashOnDeliveryAccount.FindAsync(s => s.WalletId == wallet.WalletId);
             decimal balance = 0;
             foreach (var item in CODTransactions)
@@ -81,6 +85,33 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             accountBalance.Balance = balance;
+
+            //add to wallet transaction and wallet
+            await _walletService.UpdateWallet(wallet.WalletId, new WalletTransactionDTO
+            {
+                Amount = cashOnDeliveryAccountDto.Amount,
+                CreditDebitType = cashOnDeliveryAccountDto.CreditDebitType,
+                WalletId = wallet.WalletId,
+                Description = cashOnDeliveryAccountDto.Description,
+                UserId = cashOnDeliveryAccountDto.UserId,
+                Waybill = cashOnDeliveryAccountDto.Waybill                
+            });
+
+
+            //create entry in WalletTransaction table
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
+            //add to general ledger
+            await _generalLedgerService.AddGeneralLedger(new GeneralLedgerDTO
+            {
+                Amount = cashOnDeliveryAccountDto.Amount,
+                CreditDebitType = cashOnDeliveryAccountDto.CreditDebitType,
+                Description = cashOnDeliveryAccountDto.Description,
+                UserId = cashOnDeliveryAccountDto.UserId,
+                Waybill = cashOnDeliveryAccountDto.Waybill,
+                ServiceCentreId = serviceCenterIds[0]
+            });
+
             await _uow.CompleteAsync();
         }
 
