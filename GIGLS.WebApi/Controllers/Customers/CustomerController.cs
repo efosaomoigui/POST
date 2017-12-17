@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace GIGLS.WebApi.Controllers
 {
-    //[Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
     [RoutePrefix("api/Customer")]
     public class CustomerController : BaseWebApiController
     {
@@ -68,7 +68,7 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{customerType}")]
         public async Task<IServiceResponse<List<CustomerDTO>>> GetCustomers(CustomerType customerType)
