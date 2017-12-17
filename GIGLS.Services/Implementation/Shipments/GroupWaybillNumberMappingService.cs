@@ -51,7 +51,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                         // get the service cenre
                         var departureSC = await _uow.ServiceCentre.GetAsync(item.DepartureServiceCentreId);
-                        var destinationSC = await _uow.ServiceCentre.GetAsync(item.DepartureServiceCentreId);
+                        var destinationSC = await _uow.ServiceCentre.GetAsync(item.DestinationServiceCentreId);
 
                         item.DepartureServiceCentre = Mapper.Map<ServiceCentreDTO>(departureSC);
                         item.DestinationServiceCentre = Mapper.Map<ServiceCentreDTO>(destinationSC);
