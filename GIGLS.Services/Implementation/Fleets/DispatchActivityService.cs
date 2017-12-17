@@ -3,34 +3,100 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Fleets;
+using GIGLS.Core;
+using System.Linq;
+using GIGLS.Core.Domain;
+using AutoMapper;
+using GIGLS.Infrastructure;
 
 namespace GIGLS.Services.Implementation.Fleets
 {
     public class DispatchActivityService : IDispatchActivityService
     {
-        public Task<object> AddDispatchActivity(DispatchActivityDTO DispatchActivity)
+        private readonly IUnitOfWork _uow;
+
+        public DispatchActivityService(IUnitOfWork uow)
         {
-            throw new NotImplementedException();
+            _uow = uow;
+            MapperConfig.Initialize();
         }
 
-        public Task DeleteDispatchActivity(int DispatchActivityId)
+        public async Task<object> AddDispatchActivity(DispatchActivityDTO dispatchActivity)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var newDispatchActivity = Mapper.Map<DispatchActivity>(dispatchActivity);
+                _uow.DispatchActivity.Add(newDispatchActivity);
+                await _uow.CompleteAsync();
+                return new { Id = newDispatchActivity.DispatchActivityId };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-        public Task<IEnumerable<DispatchActivityDTO>> GetDispatchActivities()
+        public async Task DeleteDispatchActivity(int dispatchActivityId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var dispatchActivity = await _uow.DispatchActivity.GetAsync(dispatchActivityId);
+                if (dispatchActivity == null)
+                {
+                    throw new GenericException("Information does not Exist");
+                }
+                _uow.DispatchActivity.Remove(dispatchActivity);
+                await _uow.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-        public Task<DispatchActivityDTO> GetDispatchActivityById(int DispatchActivityId)
+        public async Task<IEnumerable<DispatchActivityDTO>> GetDispatchActivities()
         {
-            throw new NotImplementedException();
+            return await _uow.DispatchActivity.GetDispatchActivitiesAsync();
         }
 
-        public Task UpdateDispatchActivity(int DispatchActivityId, DispatchActivityDTO DispatchActivity)
+        public async Task<DispatchActivityDTO> GetDispatchActivityById(int dispatchActivityId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var dispatchActivity = await _uow.DispatchActivity.GetAsync(dispatchActivityId);
+                if (dispatchActivity == null)
+                {
+                    throw new GenericException("Information does not Exist");
+                }
+                return Mapper.Map<DispatchActivityDTO>(dispatchActivity);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdateDispatchActivity(int dispatchActivityId, DispatchActivityDTO dispatchActivityDTO)
+        {
+            try
+            {
+                var dispatchActivity = await _uow.DispatchActivity.GetAsync(dispatchActivityId);
+                if (dispatchActivity == null || dispatchActivityDTO.DispatchActivityId != dispatchActivityId)
+                {
+                    throw new GenericException("Information does not Exist");
+                }
+
+                dispatchActivity.DispatchActivityId = dispatchActivityDTO.DispatchActivityId;
+                dispatchActivity.DispatchId = dispatchActivityDTO.DispatchId;
+                dispatchActivity.Description = dispatchActivityDTO.Description;
+                dispatchActivity.Location = dispatchActivityDTO.Location;
+
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

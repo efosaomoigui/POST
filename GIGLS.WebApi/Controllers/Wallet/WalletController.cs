@@ -49,7 +49,23 @@ namespace GIGLS.WebApi.Controllers.Wallet
                 };
             });
         }
-        
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getsystemwallet")]
+        public async Task<IServiceResponse<WalletDTO>> GetSystemWalletById()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _walletService.GetSystemWallet();
+
+                return new ServiceResponse<WalletDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]

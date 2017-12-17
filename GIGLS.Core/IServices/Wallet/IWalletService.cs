@@ -14,6 +14,7 @@ namespace GIGLS.Core.IServices.Wallet
         Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO);
         Task RemoveWallet(int walletId);
         Task<WalletNumber> GenerateNextValidWalletNumber();
+        Task<WalletDTO> GetSystemWallet();
     }
 
 }

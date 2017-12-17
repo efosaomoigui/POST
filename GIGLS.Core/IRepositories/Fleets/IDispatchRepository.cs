@@ -8,6 +8,6 @@ namespace GIGLS.Core.IRepositories.Fleets
 {
     public interface IDispatchRepository : IRepository<Dispatch>
     {
-        Task<IEnumerable<DispatchDTO>> GetDispatchAsync();
+        Task<List<DispatchDTO>> GetDispatchAsync();
     }
 }

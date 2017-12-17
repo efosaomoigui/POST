@@ -9,5 +9,6 @@ namespace GIGLS.Core.Domain.Wallet
         public decimal Balance { get; set; }
         public int CustomerId { get; set; }
         public CustomerType CustomerType { get; set; }
+        public bool IsSystem { get; set; }
     }
 }

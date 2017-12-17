@@ -13,14 +13,14 @@ namespace GIGLS.Core.DTO.Fleets
         public int RescuedDispatchId { get; set; }
         public DispatchDTO RescuedDispatch { get; set; }
         public string DriverDetail { get; set; }
-        public string DispatcherUser { get; set; }
-        public string DispatcheeUser { get; set; }
+        public string DispatchedBy { get; set; }
+        public string ReceivedBy { get; set; }
         public DispatchCategory DispatchCategory { get; set; }
 
-        public int DepartureId { get; set; }
+        public int? DepartureId { get; set; }
         public StationDTO Departure { get; set; }
         
-        public int DestinationId { get; set; }
+        public int? DestinationId { get; set; }
         public StationDTO Destination { get; set; }
     }
 }

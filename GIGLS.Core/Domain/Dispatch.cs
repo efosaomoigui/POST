@@ -11,8 +11,8 @@ namespace GIGLS.Core.Domain
         public decimal Amount { get; set; }
         public int RescuedDispatchId { get; set; }
         public string DriverDetail { get; set; }
-        public string DispatcherUser { get; set; }
-        public string DispatcheeUser { get; set; }
+        public string DispatchedBy { get; set; }
+        public string ReceivedBy { get; set; }
         public DispatchCategory DispatchCategory { get; set; }
         
         public int? DepartureId { get; set; }

@@ -98,6 +98,19 @@ namespace GIGLS.Services.Implementation.Wallet
             return wallet;
         }
 
+        public async Task<WalletDTO> GetSystemWallet()
+        {
+            var wallet = await _uow.Wallet.GetAsync(x => x.IsSystem == true);
+
+            if (wallet == null)
+            {
+                throw new GenericException("System Wallet does not exist");
+            }
+
+            return Mapper.Map<WalletDTO>(wallet);
+        }
+
+
         public async Task AddWallet(WalletDTO wallet)
         {
             var walletNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Wallet);

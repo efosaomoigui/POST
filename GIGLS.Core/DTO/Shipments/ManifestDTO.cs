@@ -22,5 +22,7 @@ namespace GIGLS.Core.DTO.Shipments
         public int? FleetTripId { get; set; }
         public List<FleetTripDTO> FleetTrip { get; set; }
         public List<ShipmentDTO> Shipments { get; set; }
+        public bool IsDispatched { get; set; }
+        public bool IsReceived { get; set; }
     }
 }

@@ -23,5 +23,9 @@ namespace GIGL.GIGLS.Core.Domain
 
         public int? FleetTripId { get; set; }
         public virtual FleetTrip FleetTrip { get; set; }
+
+        public bool IsDispatched { get; set; }
+        public bool IsReceived { get; set; }
+
     }
 }

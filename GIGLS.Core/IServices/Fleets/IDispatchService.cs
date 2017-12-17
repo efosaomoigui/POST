@@ -6,7 +6,7 @@ namespace GIGLS.Core.IServices.Fleets
 {
     public interface IDispatchService : IServiceDependencyMarker
     {
-        Task<IEnumerable<DispatchDTO>> GetDispatchs();
+        Task<List<DispatchDTO>> GetDispatchs();
         Task<DispatchDTO> GetDispatchById(int DispatchId);
         Task<object> AddDispatch(DispatchDTO Dispatch);
         Task UpdateDispatch(int DispatchId, DispatchDTO Dispatch);

@@ -11,5 +11,6 @@ namespace GIGLS.Core.DTO.Wallet
         public int CustomerId { get; set; }
         public CustomerType CustomerType { get; set; }
         public string CustomerName { get; set; }
+        public bool IsSystem { get; set; }
     }
 }
