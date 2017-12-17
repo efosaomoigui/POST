@@ -25,5 +25,6 @@ namespace GIGLS.Core.DTO.Account
         public bool IsDeferred { get; set; }
         public string Waybill { get; set; }
         public string ClientNodeId { get; set; }
+        public PaymentServiceType PaymentServiceType { get; set; }
     }
 }

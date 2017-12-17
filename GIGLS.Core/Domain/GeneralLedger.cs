@@ -25,5 +25,6 @@ namespace GIGLS.Core.Domain
         public string ClientNodeId { get; set; }
         public PaymentType PaymentType { get; set; }
         public string PaymentTypeReference { get; set; }
+        public PaymentServiceType PaymentServiceType { get; set; }
     }
 }
