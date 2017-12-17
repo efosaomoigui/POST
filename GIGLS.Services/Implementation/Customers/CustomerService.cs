@@ -5,6 +5,7 @@ using GIGLS.Core.IServices.Customers;
 using GIGLS.Core;
 using AutoMapper;
 using GIGLS.Core.Enums;
+using System.Collections.Generic;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -113,6 +114,41 @@ namespace GIGLS.Services.Implementation.Customers
                     var individualCustomerDTO = await _individualCustomerService.GetCustomerById(customerId);
                     var customerDTO = Mapper.Map<CustomerDTO>(individualCustomerDTO);
                     customerDTO.CustomerType = CustomerType.IndividualCustomer;
+
+                    return customerDTO;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CustomerDTO>> GetCustomers(CustomerType customerType)
+        {
+            try
+            {
+                // handle Company customers
+                if (CustomerType.IndividualCustomer.Equals(customerType))
+                {
+                    var individualCustomerDTO = await _individualCustomerService.GetIndividualCustomers();
+                    var customerDTO = Mapper.Map<List<CustomerDTO>>(individualCustomerDTO);
+
+                    foreach (var item in customerDTO)
+                    {
+                        item.CustomerType = CustomerType.IndividualCustomer;
+                    }
+                    return customerDTO;
+                }
+                else
+                {
+                    var companyDTO = await _companyService.GetCompanies();
+                    var customerDTO = Mapper.Map<List<CustomerDTO>>(companyDTO);
+
+                    foreach (var item in customerDTO)
+                    {
+                        item.CustomerType = CustomerType.Company;
+                    }
 
                     return customerDTO;
                 }

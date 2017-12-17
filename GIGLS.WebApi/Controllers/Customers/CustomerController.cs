@@ -6,10 +6,11 @@ using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.Enums;
 using GIGLS.WebApi.Filters;
+using System.Collections.Generic;
 
 namespace GIGLS.WebApi.Controllers
 {
-    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    //[Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
     [RoutePrefix("api/Customer")]
     public class CustomerController : BaseWebApiController
     {
@@ -66,6 +67,23 @@ namespace GIGLS.WebApi.Controllers
                 };
             });
         }
+
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{customerType}")]
+        public async Task<IServiceResponse<List<CustomerDTO>>> GetCustomers(CustomerType customerType)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var customerObj = await _service.GetCustomers(customerType);
+
+                return new ServiceResponse<List<CustomerDTO>>
+                {
+                    Object = customerObj
+                };
+            });
+        }
+
 
     }
 }
