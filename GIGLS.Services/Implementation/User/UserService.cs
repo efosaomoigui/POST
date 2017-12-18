@@ -217,9 +217,19 @@ namespace GIGLS.Services.Implementation.User
             return result;
         }
 
-        public Task<IdentityResult> AddToRoleAsync(string userId, string name)
+        public async Task<IdentityResult> AddToRoleAsync(string userId, string name)
         {
-            var result = _unitOfWork.User.AddToRoleAsync(userId, name);
+            var result = await _unitOfWork.User.AddToRoleAsync(userId, name);
+            await _unitOfWork.CompleteAsync();
+
+            //update all users that belong to this system user
+            var usersList = await GetUsers();
+            var usersInSystemUsers = usersList.ToList().Where(s => s.SystemUserId == userId);
+            foreach (var userInList in usersInSystemUsers)
+            {
+                await RoleSettings(userId, userInList.Id);
+            }
+
             return result;
         }
 
@@ -235,9 +245,19 @@ namespace GIGLS.Services.Implementation.User
             return result;
         }
 
-        public Task<IdentityResult> RemoveFromRoleAsync(string userid, string name)
+        public async Task<IdentityResult> RemoveFromRoleAsync(string userId, string name)
         {
-            var result = _unitOfWork.User.RemoveFromRoleAsync(userid, name);
+            var result = await _unitOfWork.User.RemoveFromRoleAsync(userId, name);
+            await _unitOfWork.CompleteAsync();
+
+            //update all users that belong to this system user
+            var usersList = await GetUsers();
+            var usersInSystemUsers = usersList.ToList().Where(s => s.SystemUserId == userId);
+            foreach (var userInList in usersInSystemUsers)
+            {
+                await RoleSettings(userId, userInList.Id);
+            }
+
             return result;
         }
 
@@ -261,6 +281,16 @@ namespace GIGLS.Services.Implementation.User
             }
 
             var result = await _unitOfWork.User.AddClaimAsync(userid, claim);
+            await _unitOfWork.CompleteAsync();
+
+            //update all users that belong to this system user
+            var usersList = await GetUsers();
+            var usersInSystemUsers = usersList.ToList().Where(s => s.SystemUserId == userid);
+            foreach(var userInList in usersInSystemUsers)
+            {
+                await RoleSettings(userid, userInList.Id);
+            }
+            
             return result;
         }
 
@@ -273,6 +303,16 @@ namespace GIGLS.Services.Implementation.User
                 throw new GenericException("User does not exist!");
             }
             var result = await _unitOfWork.User.RemoveClaimAsync(userid, claim);
+            await _unitOfWork.CompleteAsync();
+
+            //update all users that belong to this system user
+            var usersList = await GetUsers();
+            var usersInSystemUsers = usersList.ToList().Where(s => s.SystemUserId == userid);
+            foreach (var userInList in usersInSystemUsers)
+            {
+                await RoleSettings(userid, userInList.Id);
+            }
+
             return result;
         }
 
