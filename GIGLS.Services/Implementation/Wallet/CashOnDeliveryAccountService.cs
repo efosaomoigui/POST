@@ -61,7 +61,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 accountBalance = await _uow.CashOnDeliveryBalance.GetAsync(newBalance.CashOnDeliveryBalanceId);
             }
 
-            //create COD Account and all COD Account for the wwallet
+            //create COD Account and all COD Account for the wallet
             cashOnDeliveryAccountDto.Wallet = null;
             var newCODAccount = Mapper.Map<CashOnDeliveryAccount>(cashOnDeliveryAccountDto);
             newCODAccount.WalletId = wallet.WalletId;           
@@ -101,11 +101,21 @@ namespace GIGLS.Services.Implementation.Wallet
             //create entry in WalletTransaction table
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
 
+            CreditDebitType creditType;
+            if(cashOnDeliveryAccountDto.CreditDebitType == CreditDebitType.Credit)
+            {
+                creditType = CreditDebitType.Debit;
+            }
+            else
+            {
+                creditType = CreditDebitType.Credit;
+            }
+
             //add to general ledger
             await _generalLedgerService.AddGeneralLedger(new GeneralLedgerDTO
             {
                 Amount = cashOnDeliveryAccountDto.Amount,
-                CreditDebitType = cashOnDeliveryAccountDto.CreditDebitType,
+                CreditDebitType = creditType,
                 Description = cashOnDeliveryAccountDto.Description,
                 UserId = cashOnDeliveryAccountDto.UserId,
                 Waybill = cashOnDeliveryAccountDto.Waybill,
