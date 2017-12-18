@@ -5,6 +5,7 @@
         Cash,
         Pos,
         Online,
-        Wallet
+        Wallet,
+        Transfer
     }
 }
