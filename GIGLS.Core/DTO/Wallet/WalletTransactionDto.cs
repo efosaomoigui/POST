@@ -1,4 +1,5 @@
 ﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
@@ -12,7 +13,7 @@ namespace GIGLS.Core.DTO.Wallet
         public DateTime DateOfEntry { get; set; }
 
         public int ServiceCentreId { get; set; }
-        public ServiceCentre ServiceCentre { get; set; }
+        public ServiceCentreDTO ServiceCentre { get; set; }
 
         public int WalletId { get; set; }
         public WalletDTO Wallet { get; set; }

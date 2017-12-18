@@ -3,6 +3,7 @@ using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices.Customers;
+using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Infrastructure;
@@ -19,14 +20,17 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUserService _userService;
         private readonly IWalletService _walletService;
         private readonly ICustomerService _customerService;
+        private readonly IServiceCentreService _centreService;
 
         public WalletTransactionService(IUnitOfWork uow, IUserService userService, 
-            IWalletService walletService, ICustomerService customerService)
+            IWalletService walletService, ICustomerService customerService,
+            IServiceCentreService centreService)
         {
             _uow = uow;
             _userService = userService;
             _walletService = walletService;
             _customerService = customerService;
+            _centreService = centreService;
             MapperConfig.Initialize();
         }
 
@@ -67,6 +71,14 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Wallet Transaction information does not exist");
             }
             var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions);
+
+            // get the service centre
+            foreach(var item in walletTransactionDTOList)
+            {
+                var serviceCentre = await _centreService.GetServiceCentreById(item.ServiceCentreId);
+                item.ServiceCentre = serviceCentre;
+            }
+            
 
             // get the wallet owner information
             var wallet = await _walletService.GetWalletById(walletId);
