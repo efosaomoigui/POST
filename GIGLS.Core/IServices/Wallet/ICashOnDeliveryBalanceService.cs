@@ -13,6 +13,7 @@ namespace GIGLS.Core.IServices.CashOnDeliveryBalance
         Task AddCashOnDeliveryBalance(CashOnDeliveryBalanceDTO cashOnDeliveryBalanceDTO);
         Task UpdateCashOnDeliveryBalance(int cashOnDeliveryBalanceId, CashOnDeliveryBalanceDTO cashOnDeliveryBalanceDTO);
         Task RemoveCashOnDeliveryBalance(int cashOnDeliveryBalanceId);
+        Task<IEnumerable<CashOnDeliveryBalanceDTO>> GetCashOnDeliveryPaymentSheet();
     }
 
 }

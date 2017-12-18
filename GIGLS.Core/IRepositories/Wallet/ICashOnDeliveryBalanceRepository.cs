@@ -9,5 +9,6 @@ namespace GIGLS.Core.IRepositories.Wallet
     public interface ICashOnDeliveryBalanceRepository : IRepository<CashOnDeliveryBalance>
     {
         Task<IEnumerable<CashOnDeliveryBalanceDTO>> GetCashOnDeliveryBalanceAsync();
+        Task<IEnumerable<CashOnDeliveryBalanceDTO>> GetCashOnDeliveryPaymentSheetAsync();
     }
 }

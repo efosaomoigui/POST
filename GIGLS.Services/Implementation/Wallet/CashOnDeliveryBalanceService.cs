@@ -98,8 +98,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             return balanceDto;
         }
-
-
+        
         public async Task<CashOnDeliveryBalanceDTO> GetCashOnDeliveryBalanceByWalletId(int walletId)
         {
             var balance = await _uow.CashOnDeliveryBalance.GetAsync(c => c.WalletId == walletId, "Wallet");
@@ -155,6 +154,31 @@ namespace GIGLS.Services.Implementation.Wallet
             return balances;
         }
 
+        public async Task<IEnumerable<CashOnDeliveryBalanceDTO>> GetCashOnDeliveryPaymentSheet()
+        {
+            var balances = await _uow.CashOnDeliveryBalance.GetCashOnDeliveryPaymentSheetAsync();
+
+            foreach (var item in balances)
+            {               
+                // handle Company customers
+                if (CustomerType.Company.Equals(item.Wallet.CustomerType))
+                {
+                    var companyDTO = await _uow.Company.GetAsync(s => s.CompanyId == item.Wallet.CustomerId);
+                    item.Wallet.CustomerName = companyDTO.Name;
+                }
+                else
+                {
+                    // handle IndividualCustomers
+                    var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
+                        s => s.IndividualCustomerId == item.Wallet.CustomerId);
+                    item.Wallet.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " +
+                        $"{individualCustomerDTO.LastName}");
+                }
+            }
+
+            return balances;
+        }
+        
         public async Task RemoveCashOnDeliveryBalance(int cashOnDeliveryBalanceId)
         {
             var balance = await _uow.CashOnDeliveryBalance.GetAsync(cashOnDeliveryBalanceId);
@@ -181,6 +205,7 @@ namespace GIGLS.Services.Implementation.Wallet
             balance.UserId = cashOnDeliveryBalanceDTO.UserId;
             await _uow.CompleteAsync();
         }
+
         
     }
 }

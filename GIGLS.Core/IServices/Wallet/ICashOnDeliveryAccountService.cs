@@ -12,6 +12,7 @@ namespace GIGLS.Core.IServices.CashOnDeliveryAccount
         Task AddCashOnDeliveryAccount(CashOnDeliveryAccountDTO cashOnDeliveryAccountDto);
         Task UpdateCashOnDeliveryAccount(int cashOnDeliveryAccountId, CashOnDeliveryAccountDTO cashOnDeliveryAccountDto);
         Task RemoveCashOnDeliveryAccount(int cashOnDeliveryAccountId);
+        Task ProcessCashOnDeliveryPaymentSheet(List<CashOnDeliveryBalanceDTO> data);
     }
 
 }

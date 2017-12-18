@@ -102,13 +102,16 @@ namespace GIGLS.Services.Implementation.Wallet
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
 
             CreditDebitType creditType;
+            var description = "";
             if(cashOnDeliveryAccountDto.CreditDebitType == CreditDebitType.Credit)
             {
                 creditType = CreditDebitType.Debit;
+                description = "Debit for COD Payment Settlement";
             }
             else
             {
                 creditType = CreditDebitType.Credit;
+                description = "Credit for COD Payment Settlement";
             }
 
             //add to general ledger
@@ -116,7 +119,7 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 Amount = cashOnDeliveryAccountDto.Amount,
                 CreditDebitType = creditType,
-                Description = cashOnDeliveryAccountDto.Description,
+                Description = description,
                 UserId = cashOnDeliveryAccountDto.UserId,
                 Waybill = cashOnDeliveryAccountDto.Waybill,
                 ServiceCentreId = serviceCenterIds[0]
@@ -208,6 +211,24 @@ namespace GIGLS.Services.Implementation.Wallet
             account.CreditDebitType = cashOnDeliveryAccountDto.CreditDebitType;
             account.UserId = currentUser;
             await _uow.CompleteAsync();
+        }
+
+        public async Task ProcessCashOnDeliveryPaymentSheet(List<CashOnDeliveryBalanceDTO> data)
+        {
+            var listCashOnDeliverys = await _cashOnDeliveryBalanceService.GetCashOnDeliveryPaymentSheet();
+
+            foreach (var cashOnDeliveryBalance in listCashOnDeliverys)
+            {
+                var cashOnDeliveryAccount = new CashOnDeliveryAccountDTO
+                {
+                    Amount = cashOnDeliveryBalance.Balance,
+                    Wallet = cashOnDeliveryBalance.Wallet,
+                    CreditDebitType = CreditDebitType.Debit,
+                    Description = "Debit for COD Payment Settlement"
+                };
+
+                await AddCashOnDeliveryAccount(cashOnDeliveryAccount);
+            }
         }
     }
 }

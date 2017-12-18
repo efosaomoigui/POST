@@ -32,5 +32,19 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Wallet
                 throw;
             }
         }
+
+        public Task<IEnumerable<CashOnDeliveryBalanceDTO>> GetCashOnDeliveryPaymentSheetAsync()
+        {
+            try
+            {
+                var codBalance = _context.CashOnDeliveryBalance.Include("Wallet").Where(x => x.Balance > 0).ToList();
+                var codAccountsDto = Mapper.Map<IEnumerable<CashOnDeliveryBalanceDTO>>(codBalance);
+                return Task.FromResult(codAccountsDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

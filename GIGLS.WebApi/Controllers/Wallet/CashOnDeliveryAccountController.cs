@@ -95,6 +95,22 @@ namespace GIGLS.WebApi.Controllers.Wallet
                     Object = true
                 };
             });
-        }        
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("processpaymentsheet")]
+        public async Task<IServiceResponse<bool>> ProcessCashOnDeliveryPaymentSheet(List<CashOnDeliveryBalanceDTO> data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _cashOnDeliveryAccountService.ProcessCashOnDeliveryPaymentSheet(data);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
     }
 }

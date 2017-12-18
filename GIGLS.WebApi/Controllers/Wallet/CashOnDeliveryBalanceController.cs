@@ -66,6 +66,21 @@ namespace GIGLS.WebApi.Controllers.CashOnDeliveryBalance
                 };
             });
         }
-        
+
+        //COD Payment Sheet
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("paymentsheet")]
+        public async Task<IServiceResponse<IEnumerable<CashOnDeliveryBalanceDTO>>> GetCashOnDeliveryPaymentSheet()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var cashOnDeliveryBalances = await _cashOnDeliveryBalanceService.GetCashOnDeliveryPaymentSheet();
+                return new ServiceResponse<IEnumerable<CashOnDeliveryBalanceDTO>>
+                {
+                    Object = cashOnDeliveryBalances
+                };
+            });
+        }
     }
 }
