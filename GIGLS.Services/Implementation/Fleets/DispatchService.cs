@@ -12,6 +12,7 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.Core.DTO.ServiceCentres;
 
 namespace GIGLS.Services.Implementation.Fleets
 {
@@ -42,10 +43,12 @@ namespace GIGLS.Services.Implementation.Fleets
             try
             {
                 //get the login user
-                var userId = await _userService.GetCurrentUserId();
+                var currentUserId = await _userService.GetCurrentUserId();
+                var currentUserDetail = await _userService.GetUserById(currentUserId);
 
                 // create dispatch
                 var newDispatch = Mapper.Map<Dispatch>(dispatch);
+                newDispatch.DispatchedBy  = currentUserDetail.FirstName + " " + currentUserDetail.LastName;                
                 _uow.Dispatch.Add(newDispatch);
 
                 // update manifest
@@ -53,7 +56,7 @@ namespace GIGLS.Services.Implementation.Fleets
                 if(manifestObj != null)
                 {
                     var manifestEntity = _uow.Manifest.Get(manifestObj.ManifestId);
-                    manifestEntity.DispatchedById = userId;
+                    manifestEntity.DispatchedById = currentUserId;
                     manifestEntity.IsDispatched = true;
                 }
 
@@ -70,7 +73,7 @@ namespace GIGLS.Services.Implementation.Fleets
 
                 
                 // get the current user info
-                var currentUserId = await _userService.GetCurrentUserId();
+                //var currentUserId = await _userService.GetCurrentUserId();
                 var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
                 var departureServiceCentreId = serviceCenterIds[0];
                 //update General Ledger
@@ -125,7 +128,26 @@ namespace GIGLS.Services.Implementation.Fleets
                 {
                     throw new GenericException("Information does not Exist");
                 }
+
                 return Mapper.Map<DispatchDTO>(dispatch);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<DispatchDTO> GetDispatchManifestCode(string manifest)
+        {
+            try
+            {
+                var dispatch = await _uow.Dispatch.GetAsync(x => x.ManifestNumber.Equals(manifest));
+                if (dispatch == null)
+                {
+                    throw new GenericException("Information does not Exist");
+                }
+                                
+                return Mapper.Map<DispatchDTO>(dispatch); 
             }
             catch (Exception)
             {
@@ -135,7 +157,18 @@ namespace GIGLS.Services.Implementation.Fleets
 
         public async Task<List<DispatchDTO>> GetDispatchs()
         {
-            return await _uow.Dispatch.GetDispatchAsync();
+            var dispatchs =  await _uow.Dispatch.GetDispatchAsync();
+
+            foreach (var item in dispatchs)
+            {
+                // get the service cenre
+                var departureSC = await _uow.Station.GetAsync((int)item.DepartureId);
+                var destinationSC = await _uow.Station.GetAsync((int)item.DestinationId);
+
+                item.Departure = Mapper.Map<StationDTO>(departureSC);
+                item.Destination = Mapper.Map<StationDTO>(destinationSC);
+            }
+            return dispatchs;
         }
 
         public async Task UpdateDispatch(int dispatchId, DispatchDTO dispatchDTO)

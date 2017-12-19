@@ -9,7 +9,6 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.dispatchs
 {
-
     [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
     [RoutePrefix("api/dispatch")]
     public class DispatchController : BaseWebApiController
@@ -53,7 +52,7 @@ namespace GIGLS.WebApi.Controllers.dispatchs
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Delete")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{dispatchId:int}")]
         public async Task<IServiceResponse<DispatchDTO>> GetDispatch(int dispatchId)
@@ -68,6 +67,23 @@ namespace GIGLS.WebApi.Controllers.dispatchs
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{manifest}/manifest")]
+        public async Task<IServiceResponse<DispatchDTO>> GetDispatchManifestCode(string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var dispatch = await _dispatchService.GetDispatchManifestCode(manifest);
+
+                return new ServiceResponse<DispatchDTO>
+                {
+                    Object = dispatch
+                };
+            });
+        }
+
 
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
