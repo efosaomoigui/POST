@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.Enums;
+﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGLS.Core.Domain
@@ -14,7 +15,10 @@ namespace GIGLS.Core.Domain
         public string DispatchedBy { get; set; }
         public string ReceivedBy { get; set; }
         public DispatchCategory DispatchCategory { get; set; }
-        
+
+        public int? ServiceCentreId { get; set; }
+        public virtual ServiceCentre ServiceCentre { get; set; }
+
         public int? DepartureId { get; set; }
 
         [ForeignKey("DepartureId")]

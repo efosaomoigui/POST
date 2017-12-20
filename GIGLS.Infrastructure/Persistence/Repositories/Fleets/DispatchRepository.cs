@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Fleets;
 using System.Linq;
+using GIGLS.Core.DTO.ServiceCentres;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
 {
@@ -18,11 +19,16 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
             _context = context;
         }
 
-        public Task<List<DispatchDTO>> GetDispatchAsync()
+        public Task<List<DispatchDTO>> GetDispatchAsync(int[] serviceCentreIds)
         {
             try
             {
-                var dispatchs = Context.Dispatch;
+                var dispatchs = _context.Dispatch.AsQueryable();
+                if (serviceCentreIds.Length > 0)
+                {
+                    dispatchs = dispatchs.Where(s => s.ServiceCentreId != null);
+                    dispatchs = dispatchs.Where(s => serviceCentreIds.Contains((int)s.ServiceCentreId));
+                }
 
                 var dispatchDto = from r in dispatchs
                                   select new DispatchDTO
@@ -39,7 +45,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
                                       DepartureId = r.DepartureId,
                                       DestinationId = r.DestinationId,
                                       DateCreated = r.DateCreated,
-                                      DateModified = r.DateModified
+                                      DateModified = r.DateModified,
+                                      ServiceCentreId = r.ServiceCentreId,
+                                      ServiceCentre = new ServiceCentreDTO
+                                      {
+                                          Code = r.ServiceCentre.Code,
+                                          Name = r.ServiceCentre.Name
+                                      }
                                   };
                 return Task.FromResult(dispatchDto.ToList());
             }

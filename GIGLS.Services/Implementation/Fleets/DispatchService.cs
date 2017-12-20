@@ -36,23 +36,28 @@ namespace GIGLS.Services.Implementation.Fleets
         /// <summary>
         /// This method creates a new dispatch, updates the manifest and system wallet information
         /// </summary>
-        /// <param name="dispatch"></param>
+        /// <param name="dispatchDTO"></param>
         /// <returns></returns>
-        public async Task<object> AddDispatch(DispatchDTO dispatch)
+        public async Task<object> AddDispatch(DispatchDTO dispatchDTO)
         {
             try
             {
+                // get user login service centre
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                var userServiceCentreId = serviceCenterIds[0];
+
                 //get the login user
                 var currentUserId = await _userService.GetCurrentUserId();
                 var currentUserDetail = await _userService.GetUserById(currentUserId);
 
                 // create dispatch
-                var newDispatch = Mapper.Map<Dispatch>(dispatch);
-                newDispatch.DispatchedBy  = currentUserDetail.FirstName + " " + currentUserDetail.LastName;                
+                var newDispatch = Mapper.Map<Dispatch>(dispatchDTO);
+                newDispatch.DispatchedBy  = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
+                newDispatch.ServiceCentreId = userServiceCentreId;
                 _uow.Dispatch.Add(newDispatch);
 
                 // update manifest
-                var manifestObj = _uow.Manifest.SingleOrDefault(s => s.ManifestCode == dispatch.ManifestNumber);
+                var manifestObj = _uow.Manifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
                 if(manifestObj != null)
                 {
                     var manifestEntity = _uow.Manifest.Get(manifestObj.ManifestId);
@@ -72,18 +77,14 @@ namespace GIGLS.Services.Implementation.Fleets
                 //await _walletService.UpdateWallet(systemWallet.WalletId, walletTransaction);
 
                 
-                // get the current user info
-                //var currentUserId = await _userService.GetCurrentUserId();
-                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-                var departureServiceCentreId = serviceCenterIds[0];
                 //update General Ledger
                 var generalLedger = new GeneralLedger()
                 {
                     DateOfEntry = DateTime.Now,
 
-                    ServiceCentreId = departureServiceCentreId,
+                    ServiceCentreId = userServiceCentreId,
                     UserId = currentUserId,
-                    Amount = dispatch.Amount,
+                    Amount = dispatchDTO.Amount,
                     CreditDebitType = CreditDebitType.Debit,
                     Description = "Debit from Dispatch",
                     IsDeferred = false,
@@ -157,7 +158,8 @@ namespace GIGLS.Services.Implementation.Fleets
 
         public async Task<List<DispatchDTO>> GetDispatchs()
         {
-            var dispatchs =  await _uow.Dispatch.GetDispatchAsync();
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var dispatchs =  await _uow.Dispatch.GetDispatchAsync(serviceCenterIds);
 
             foreach (var item in dispatchs)
             {
@@ -192,6 +194,7 @@ namespace GIGLS.Services.Implementation.Fleets
                 dispatch.DispatchCategory = dispatchDTO.DispatchCategory;
                 dispatch.DepartureId = dispatchDTO.DepartureId;
                 dispatch.DestinationId = dispatchDTO.DestinationId;
+                dispatch.ServiceCentreId = dispatchDTO.ServiceCentreId;
 
                 _uow.Complete();
             }

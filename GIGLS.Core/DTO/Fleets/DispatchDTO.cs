@@ -17,6 +17,9 @@ namespace GIGLS.Core.DTO.Fleets
         public string ReceivedBy { get; set; }
         public DispatchCategory DispatchCategory { get; set; }
 
+        public int? ServiceCentreId { get; set; }
+        public ServiceCentreDTO ServiceCentre { get; set; }
+
         public int? DepartureId { get; set; }
         public StationDTO Departure { get; set; }
         
