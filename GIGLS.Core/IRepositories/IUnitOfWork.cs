@@ -20,6 +20,7 @@ using GIGLS.Core.IRepositories.Utility;
 using GIGLS.CORE.IRepositories.Shipments;
 using GIGLS.CORE.IRepositories.Nav;
 using GIGLS.Core.IRepositories.Haulage;
+using GIGLS.Core.IRepositories.MessagingLog;
 
 namespace GIGLS.Core
 {
@@ -93,6 +94,8 @@ namespace GIGLS.Core
         ICashOnDeliveryBalanceRepository CashOnDeliveryBalance { get; set; }
         IDispatchRepository Dispatch { get; set; }
         IDispatchActivityRepository DispatchActivity { get; set; }
+        IEmailSendLogRepository EmailSendLog { get; set; }
+        ISmsSendLogRepository SmsSendLog { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

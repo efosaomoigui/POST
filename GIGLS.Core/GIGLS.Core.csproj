@@ -150,6 +150,8 @@
     <Compile Include="Domain\GroupWaybillNumberMapping.cs" />
     <Compile Include="Domain\Haulage.cs" />
     <Compile Include="Domain\HaulageDistanceMapping.cs" />
+    <Compile Include="Domain\MessagingLog\EmailSendLog.cs" />
+    <Compile Include="Domain\MessagingLog\SmsSendLog.cs" />
     <Compile Include="Domain\PackingList .cs" />
     <Compile Include="Domain\IndividualCustomer.cs" />
     <Compile Include="Domain\Insurance.cs" />
@@ -233,6 +235,9 @@
     <Compile Include="DTO\JobCards\JobCardManagementDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardManagementPartDTO.cs" />
     <Compile Include="DTO\MessageDTO.cs" />
+    <Compile Include="DTO\MessagingLog\EmailSendLogDTO.cs" />
+    <Compile Include="DTO\MessagingLog\MessageFilterOption.cs" />
+    <Compile Include="DTO\MessagingLog\SmsSendLogDTO.cs" />
     <Compile Include="DTO\Nav\MainNavDTO.cs" />
     <Compile Include="DTO\Nav\SubNavDTO.cs" />
     <Compile Include="DTO\Nav\SubSubNavDTO.cs" />
@@ -302,6 +307,7 @@
     <Compile Include="Enums\JobCardType.cs" />
     <Compile Include="Enums\MaintenanceType.cs" />
     <Compile Include="Enums\MessageType.cs" />
+    <Compile Include="Enums\MessagingLogStatus.cs" />
     <Compile Include="Enums\NumberGeneratorType.cs" />
     <Compile Include="Enums\PartnerApplicationStatus.cs" />
     <Compile Include="Enums\PartnerType.cs" />
@@ -358,6 +364,8 @@
     <Compile Include="IRepositories\JobCards\IJobCardManagementPartRepository.cs" />
     <Compile Include="IRepositories\JobCards\IJobCardManagementRepository.cs" />
     <Compile Include="IRepositories\JobCards\IJobCardRepository.cs" />
+    <Compile Include="IRepositories\MessagingLog\IEmailSendLogRepository.cs" />
+    <Compile Include="IRepositories\MessagingLog\ISmsSendLogRepository.cs" />
     <Compile Include="IRepositories\Nav\IMainNavRepository.cs" />
     <Compile Include="IRepositories\Nav\ISubNavRepository.cs" />
     <Compile Include="IRepositories\Nav\ISubSubNavRepository.cs" />
@@ -437,6 +445,8 @@
     <Compile Include="IServices\JobCards\IJobCardManagementPartService.cs" />
     <Compile Include="IServices\JobCards\IJobCardManagementService.cs" />
     <Compile Include="IServices\JobCards\IJobCardService.cs" />
+    <Compile Include="IServices\MessagingLog\IEmailSendLogService.cs" />
+    <Compile Include="IServices\MessagingLog\ISmsSendLogService.cs" />
     <Compile Include="IServices\Nav\IMainNavService.cs" />
     <Compile Include="IServices\Nav\ISubNavService.cs" />
     <Compile Include="IServices\Nav\ISubSubNavService.cs" />

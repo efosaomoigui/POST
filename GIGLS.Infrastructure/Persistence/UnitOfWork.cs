@@ -22,6 +22,7 @@ using GIGLS.Core.IRepositories.Utility;
 using GIGLS.CORE.IRepositories.Shipments;
 using GIGLS.CORE.IRepositories.Nav;
 using GIGLS.Core.IRepositories.Haulage;
+using GIGLS.Core.IRepositories.MessagingLog;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -242,6 +243,12 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IDispatchActivityRepository DispatchActivity { get; set; }
+
+        [Inject]
+        public IEmailSendLogRepository EmailSendLog { get; set; }
+
+        [Inject]
+        public ISmsSendLogRepository SmsSendLog { get; set; }
 
         public int Complete()
         {
