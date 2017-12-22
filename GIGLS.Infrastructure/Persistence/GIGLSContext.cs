@@ -13,6 +13,7 @@ using GIGLS.Core.Domain.Audit;
 using GIGLS.CORE.Domain;
 using Microsoft.AspNet.Identity.EntityFramework;
 using GIGLS.Infrastructure.Migrations;
+using GIGLS.Core.Domain.MessagingLog;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -165,7 +166,9 @@ namespace GIGLS.Infrastructure.Persistence
 
         //Message
         public DbSet<Message> Message { get; set; }
-        
+        public DbSet<EmailSendLog> EmailSendLog { get; set; }
+        public DbSet<SmsSendLog> SmsSendLog { get; set; }
+
 
         #endregion
 

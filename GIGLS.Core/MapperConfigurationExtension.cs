@@ -19,6 +19,8 @@ using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.Domain.MessagingLog;
 
 namespace GIGLS.Core
 {
@@ -186,6 +188,12 @@ namespace GIGLS.Core
 
                 config.CreateMap<DispatchActivity, DispatchActivityDTO>();
                 config.CreateMap<DispatchActivityDTO, DispatchActivity>();
+
+                config.CreateMap<EmailSendLog, EmailSendLogDTO>();
+                config.CreateMap<EmailSendLogDTO, EmailSendLog>();
+
+                config.CreateMap<SmsSendLog, SmsSendLogDTO>();
+                config.CreateMap<SmsSendLogDTO, SmsSendLog>();
             });
 
             isInit = true;
