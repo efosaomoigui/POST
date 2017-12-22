@@ -22,13 +22,13 @@ namespace GIGLS.WebApi.Controllers.Messaging
 
 
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
+        [HttpPost]
         [Route("")]
-        public async Task<IServiceResponse<IEnumerable<SmsSendLogDTO>>> GetSmsSendLogs()
+        public async Task<IServiceResponse<IEnumerable<SmsSendLogDTO>>> GetSmsSendLogs(MessageFilterOption filter)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var sms = await _messageService.GetSmsSendLogAsync();
+                var sms = await _messageService.GetSmsSendLogAsync(filter);
 
                 return new ServiceResponse<IEnumerable<SmsSendLogDTO>>
                 {

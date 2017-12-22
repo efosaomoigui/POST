@@ -16,18 +16,62 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.MessagingLog
         {
         }
 
-        public Task<IEnumerable<SmsSendLogDTO>> GetSmsSendLogsAsync()
+        public Task<List<SmsSendLogDTO>> GetSmsSendLogsAsync(MessageFilterOption filter)
         {
             try
             {
-                var messages = Context.SmsSendLog.ToList();
-                var messageDto = Mapper.Map<IEnumerable<SmsSendLogDTO>>(messages);
-                return Task.FromResult(messageDto);
+                DateTime StartDate = filter.StartDate.GetValueOrDefault().Date;
+                DateTime EndDate = filter.EndDate?.Date ?? StartDate;
+
+                var messages = Context.SmsSendLog.AsQueryable();
+
+                //If No Date Supply
+                if (!filter.StartDate.HasValue && !filter.EndDate.HasValue)
+                {
+                    var Today = DateTime.Today;
+                    var nextDay = DateTime.Today.AddDays(1).Date;
+                    messages = messages.Where(x => x.DateCreated >= Today && x.DateCreated < nextDay);
+                }
+
+                if (filter.StartDate.HasValue && filter.EndDate.HasValue)
+                {
+                    if (filter.StartDate.Equals(filter.EndDate))
+                    {
+                        var nextDay = DateTime.Today.AddDays(1).Date;
+                        messages = messages.Where(x => x.DateCreated >= StartDate && x.DateCreated < nextDay);
+                    }
+                    else
+                    {
+                        var dayAfterEndDate = EndDate.AddDays(1).Date;
+                        messages = messages.Where(x => x.DateCreated >= StartDate && x.DateCreated < dayAfterEndDate);
+                    }
+                }
+
+                if (filter.StartDate.HasValue && !filter.EndDate.HasValue)
+                {
+                    var nextDay = DateTime.Today.AddDays(1).Date;
+                    messages = messages.Where(x => x.DateCreated >= StartDate && x.DateCreated < nextDay);
+                }
+
+                if (filter.EndDate.HasValue && !filter.StartDate.HasValue)
+                {
+                    var dayAfterEndDate = EndDate.AddDays(1).Date;
+                    messages = messages.Where(x => x.DateCreated < dayAfterEndDate);
+                }
+
+                if (filter.Status.HasValue)
+                {
+                    messages = messages.Where(x => x.Status.Equals(filter.Status));
+                }
+
+                var result = messages.ToList();
+                var messageDto = Mapper.Map<IEnumerable<SmsSendLogDTO>>(result);
+                return Task.FromResult(messageDto.OrderByDescending(x => x.DateCreated).ToList());
             }
             catch (Exception)
             {
                 throw;
             }
-        }
+        }        
     }
 }

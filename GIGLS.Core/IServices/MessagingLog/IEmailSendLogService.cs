@@ -6,7 +6,7 @@ namespace GIGLS.Core.IServices.MessagingLog
 {
     public interface IEmailSendLogService : IServiceDependencyMarker
     {
-        Task<IEnumerable<EmailSendLogDTO>> GetEmailSendLogAsync();
+        Task<List<EmailSendLogDTO>> GetEmailSendLogAsync(MessageFilterOption filter);
         Task<EmailSendLogDTO> GetEmailSendLogById(int messageId);
         Task<object> AddEmailSendLog(EmailSendLogDTO messageDto);
         Task UpdateEmailSendLog(int messageId, EmailSendLogDTO messageDto);

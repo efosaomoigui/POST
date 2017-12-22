@@ -35,9 +35,9 @@ namespace GIGLS.Services.Implementation.Messaging
             return new { id = message.SmsSendLogId };
         }
 
-        public Task<IEnumerable<SmsSendLogDTO>> GetSmsSendLogAsync()
+        public Task<List<SmsSendLogDTO>> GetSmsSendLogAsync(MessageFilterOption filter)
         {
-            var messages = _uow.SmsSendLog.GetSmsSendLogsAsync();
+            var messages = _uow.SmsSendLog.GetSmsSendLogsAsync(filter);
             return messages;
         }
 

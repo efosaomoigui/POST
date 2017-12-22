@@ -8,6 +8,6 @@ namespace GIGLS.Core.IRepositories.MessagingLog
 {
     public interface ISmsSendLogRepository : IRepository<SmsSendLog>
     {
-        Task<IEnumerable<SmsSendLogDTO>> GetSmsSendLogsAsync();
+        Task<List<SmsSendLogDTO>> GetSmsSendLogsAsync(MessageFilterOption filter);
     }
 }
