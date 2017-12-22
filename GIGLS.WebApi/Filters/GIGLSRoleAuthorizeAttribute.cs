@@ -8,6 +8,7 @@ using System.Web.Http.Controllers;
 
 namespace GIGLS.WebApi.Filters
 {
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class GIGLSRoleAuthorizeAttribute : AuthorizeAttribute 
     {
         //Authorize attribute properties

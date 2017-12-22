@@ -59,7 +59,7 @@ namespace GIGLS.WebApi.Providers
             //var userRoles = context.OwinContext.Get<ApplicationUserManager>().GetRoles(user.Id);
             //var userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
 
-            var UserR = _repo._userManager3.GetRolesAsync(user).Result;
+            var UserR = _repo._userManager.GetRolesAsync(user.Id).Result;
 
             foreach (var role in UserR)
             {

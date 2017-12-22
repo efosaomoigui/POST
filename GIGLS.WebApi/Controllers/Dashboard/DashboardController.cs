@@ -8,7 +8,7 @@ using GIGLS.Core.IServices.Dashboard;
 
 namespace GIGLS.WebApi.Controllers.Dashboard
 {
-    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    //[Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
     [RoutePrefix("api/dashboard")]
     public class DashboardController : BaseWebApiController
     {
@@ -18,7 +18,7 @@ namespace GIGLS.WebApi.Controllers.Dashboard
             _dashboardService = dashboardService;
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
+        //[GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
         public async Task<IServiceResponse<DashboardDTO>> GetDashboard()

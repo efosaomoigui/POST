@@ -20,7 +20,7 @@ using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.WebApi.Controllers.User
 {
-    //[Authorize]
+    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
     //[RoutePrefix("api/user")]
     public class UserController : BaseWebApiController
     {
@@ -352,7 +352,8 @@ namespace GIGLS.WebApi.Controllers.User
         {
             return await HandleApiOperationAsync(async () =>
             {
-                Claim cl = new Claim(claim.claimType, claim.claimValue);
+                var val = claim.claimValue + "." + claim.SystemRole;
+                Claim cl = new Claim(claim.claimType, val);
                 var result = await _userService.AddClaimAsync(claim.userId, cl);
 
                 if (!result.Succeeded)
@@ -375,7 +376,8 @@ namespace GIGLS.WebApi.Controllers.User
         {
             return await HandleApiOperationAsync(async () =>
             {
-                Claim cl = new Claim(claim.claimType, claim.claimValue);
+                var val = claim.claimValue+"."+claim.SystemRole;
+                Claim cl = new Claim(claim.claimType, val);
                 var result = await _userService.RemoveClaimAsync(claim.userId, cl);
 
                 if (!result.Succeeded)

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace GIGL.GIGLS.Core.Domain
 {
     public class ApplicationUserRole : IdentityUserRole<string> { }
-    public class User : IdentityUser
+    public class User : IdentityUser<string, IdentityUserLogin, IdentityUserRole, AppUserClaim>
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

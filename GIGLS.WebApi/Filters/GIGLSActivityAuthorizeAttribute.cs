@@ -12,11 +12,20 @@ namespace GIGLS.WebApi.Filters
     {
 
         public string Activity { get; set; }
+        //public string Roles { get; set; }
 
         protected override bool IsAuthorized(HttpActionContext actionContext)
         {
             ClaimsIdentity claimsIdentity;
             var httpContext = HttpContext.Current;
+
+            Type tp = actionContext.ControllerContext.Controller.GetType();
+            var dnAttribute = tp.GetCustomAttributes(typeof(AuthorizeAttribute), true).
+                FirstOrDefault() as AuthorizeAttribute;
+            if (dnAttribute != null)
+            {
+                Roles = dnAttribute.Roles;
+            }
 
             if (!(httpContext.User.Identity is ClaimsIdentity))
             {
@@ -25,25 +34,47 @@ namespace GIGLS.WebApi.Filters
 
             claimsIdentity = httpContext.User.Identity as ClaimsIdentity;
 
+            //Roles from Identity
+            var RoleClaims = claimsIdentity.FindAll("Role");
+            if (RoleClaims == null)
+            {
+                // just extra defense
+                return false;
+            }
+            var roles = from b in RoleClaims select b.Value;  //Admin from your login
+            var roleList = (!String.IsNullOrEmpty(this.Roles)) ? this.Roles.Split(',') : new String[] { };
+
             //var locIdClaims = claimsIdentity.FindFirst("LocationId");
             var ActivityClaims = claimsIdentity.FindAll("Activity");
 
-            if (ActivityClaims ==null)
+            if (ActivityClaims == null)
             {
                 // just extra defense
                 return false;
             }
 
+
+
             var activities = from a in ActivityClaims select a.Value;
             var activityList = (!String.IsNullOrEmpty(this.Activity)) ? this.Activity.Split(',') : new String[] { };
 
-            if (activities.Intersect(activityList).Any() == false)
+            var roleactivityList = new List<String> { };
+            foreach (var roleItem in roleList)
+            {
+                foreach (var activityItem in activityList)
+                {
+                    roleactivityList.Add($"{activityItem}.{roleItem}");
+                }
+            }
+
+            if (activities.Intersect(roleactivityList).Any() == false)
             {
                 return false;
             }
 
             //Continue with the regular Authorize check
-            return base.IsAuthorized(actionContext);
+            var rst = base.IsAuthorized(actionContext);
+            return rst;
         }
     }
 }

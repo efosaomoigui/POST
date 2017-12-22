@@ -17,7 +17,7 @@ using GIGLS.Infrastructure.Migrations;
 namespace GIGLS.Infrastructure.Persistence
 {
     [DbConfigurationType(typeof(EntityFrameworkConfiguration))]
-    public class GIGLSContext : AuditIdentityDbContext<User, AppRole, string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim>
+    public class GIGLSContext : AuditIdentityDbContext<User, AppRole, string, IdentityUserLogin, IdentityUserRole, AppUserClaim>
     {
         //, throwIfV1Schema: false
         public GIGLSContext()

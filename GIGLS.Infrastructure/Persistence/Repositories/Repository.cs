@@ -134,7 +134,7 @@ namespace GIGLS.Infrastructure.Persistence.Repository
         public Repository<User, TContext> _repo;
         public Repository<AppRole, TContext> _repoRole;
         //private TContext context { get; set; }
-        public UserStore<User, AppRole, string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim> _userManager3;
+        //public UserStore<User, AppRole, string, IdentityUserLogin, IdentityUserRole, AppUserClaim> _userManager3;
 
 
         public AuthRepository(TContext context)
@@ -144,7 +144,7 @@ namespace GIGLS.Infrastructure.Persistence.Repository
             _repo = new Repository<User, TContext>(context);
             //_repoRole = new Repository<AppRole, TContext>(context); 
             //this.context = context;
-            _userManager3 = new GiglsUserStore<User>(context);
+            //_userManager3 = new GiglsUserStore<User>(context);
         }
 
 
