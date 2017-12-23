@@ -39,7 +39,8 @@ namespace GIGLS.Services.Implementation.User
 
             var user = Mapper.Map<GIGL.GIGLS.Core.Domain.User>(userDto);
 
-            user.Id = usertemp.Id;
+            ///user.Id = usertemp.Id;
+            user.Id = Guid.NewGuid().ToString();
             user.DateCreated = DateTime.Now.Date;
             user.DateModified = DateTime.Now.Date;
             user.UserName = user.Email;
