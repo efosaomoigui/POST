@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace GIGLS.WebApi.Controllers.Account
 {
-    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    [Authorize(Roles = "Account")]
     [RoutePrefix("api/vat")]
     public class VATController : BaseWebApiController
     {

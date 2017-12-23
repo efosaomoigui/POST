@@ -9,7 +9,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Partnership
 {
-    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    [Authorize(Roles = "Admin")]
     [RoutePrefix("api/partner")]
     public class PartnerController : BaseWebApiController
     {

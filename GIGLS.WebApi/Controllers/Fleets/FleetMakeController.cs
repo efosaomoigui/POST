@@ -9,7 +9,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Fleets
 {
-    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    [Authorize(Roles = "Shipment")]
     [RoutePrefix("api/fleetmake")]
     public class FleetMakeController : BaseWebApiController
     {

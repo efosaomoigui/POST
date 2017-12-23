@@ -9,7 +9,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
-    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    [Authorize(Roles = "Shipment")]
     [RoutePrefix("api/groupwaybill")]
     public class GroupWaybillNumberController : BaseWebApiController
     {

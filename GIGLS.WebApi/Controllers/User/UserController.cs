@@ -20,7 +20,7 @@ using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.WebApi.Controllers.User
 {
-    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    [Authorize(Roles = "Admin")]
     //[RoutePrefix("api/user")]
     public class UserController : BaseWebApiController
     {

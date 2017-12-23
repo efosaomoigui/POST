@@ -9,7 +9,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.PaymentTransactions
 {
-    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    [Authorize(Roles = "Account")]
     [RoutePrefix("api/paymenttransaction")]
     public class PaymentTransactionController : BaseWebApiController
     {

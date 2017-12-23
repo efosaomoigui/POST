@@ -8,7 +8,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Haulage
 {
-    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    [Authorize(Roles = "Admin")]
     [RoutePrefix("api/haulagedistancemappingprice")]
     public class HaulageDistanceMappingPriceController : BaseWebApiController
     {

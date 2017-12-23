@@ -10,7 +10,7 @@ using System.Web.Http;
 namespace GIGLS.WebApi.Controllers.Fleets
 {
 
-    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    [Authorize(Roles = "Shipment")]
     [RoutePrefix("api/dispatchactivity")]
     public class DispatchActivityController : BaseWebApiController
     {

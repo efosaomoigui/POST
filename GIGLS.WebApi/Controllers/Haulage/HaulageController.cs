@@ -8,7 +8,7 @@ using GIGLS.Core.DTO.Haulage;
 
 namespace GIGLS.WebApi.Controllers.Haulage
 {
-    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    [Authorize(Roles = "Admin")]
     [RoutePrefix("api/haulage")]
     public class HaulageController : BaseWebApiController
     {

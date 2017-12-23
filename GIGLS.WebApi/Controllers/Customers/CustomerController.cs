@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace GIGLS.WebApi.Controllers
 {
-    [Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    [Authorize(Roles = "Shipment")]
     [RoutePrefix("api/Customer")]
     public class CustomerController : BaseWebApiController
     {

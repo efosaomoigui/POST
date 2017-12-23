@@ -8,8 +8,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers
 {
-    [Authorize(Roles = "SuperAdmin,SubAdmin")]
-    //[Authorize(Roles = "SuperAdmin,SubAdmin,Shipment,Account,Report")]
+    [Authorize(Roles = "Admin")]
     [RoutePrefix("api/state")]
     public class StateController : BaseWebApiController
     {
