@@ -53,8 +53,6 @@ namespace GIGLS.WebApi.Filters
                 return false;
             }
 
-
-
             var activities = from a in ActivityClaims select a.Value;
             var activityList = (!String.IsNullOrEmpty(this.Activity)) ? this.Activity.Split(',') : new String[] { };
 
@@ -63,7 +61,7 @@ namespace GIGLS.WebApi.Filters
             {
                 foreach (var activityItem in activityList)
                 {
-                    roleactivityList.Add($"{activityItem}.{roleItem}");
+                    roleactivityList.Add($"{activityItem.Trim()}.{roleItem.Trim()}");
                 }
             }
 

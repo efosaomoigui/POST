@@ -358,6 +358,7 @@
     <Content Include="app.manifest">
       <SubType>Designer</SubType>
     </Content>
+    <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %2814%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">

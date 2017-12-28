@@ -9,7 +9,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.PackingList
 {
-    [Authorize(Roles = "Shipment")]
+    [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/packinglist")]
     public class PackingListController : BaseWebApiController
     {

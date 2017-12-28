@@ -9,7 +9,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/IndividualCustomer")]
     public class IndividualCustomerController : BaseWebApiController
     {

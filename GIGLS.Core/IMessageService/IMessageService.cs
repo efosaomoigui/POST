@@ -6,6 +6,6 @@ namespace GIGLS.Core.IMessageService
 {
     public interface IMessageSenderService : IServiceDependencyMarker
     {
-        Task<bool> SendMessage(MessageType messageType, EmailSmsType emailSmsType);
+        Task<bool> SendMessage(MessageType messageType, EmailSmsType emailSmsType, object obj);
     }
 }

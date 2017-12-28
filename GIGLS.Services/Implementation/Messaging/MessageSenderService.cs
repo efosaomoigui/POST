@@ -5,6 +5,8 @@ using GIGLS.Core.IServices;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.Services.Implementation.Messaging
 {
@@ -22,7 +24,7 @@ namespace GIGLS.Services.Implementation.Messaging
             _messageService = messageService;
         }
 
-        public async Task<bool> SendMessage(MessageType messageType, EmailSmsType emailSmsType)
+        public async Task<bool> SendMessage(MessageType messageType, EmailSmsType emailSmsType, object obj)
         {
             try
             {
@@ -30,18 +32,18 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     case EmailSmsType.Email:
                         {
-                            await SendEmailMessage(messageType);
+                            await SendEmailMessage(messageType, obj);
                             break;
                         }
                     case EmailSmsType.SMS:
                         {
-                            await SendSMSMessage(messageType);
+                            await SendSMSMessage(messageType, obj);
                             break;
                         }
                     case EmailSmsType.All:
                         {
-                            await SendEmailMessage(messageType);
-                            await SendSMSMessage(messageType);
+                            await SendEmailMessage(messageType, obj);
+                            await SendSMSMessage(messageType, obj);
                             break;
                         }
                 }
@@ -54,18 +56,49 @@ namespace GIGLS.Services.Implementation.Messaging
             return await Task.FromResult(true);
         }
 
-        private async Task SendEmailMessage(MessageType messageType)
+        private async Task SendEmailMessage(MessageType messageType, object obj)
         {
-            var emailMessages = await _messageService.GetEmailAsync();
-            var messageDTO = emailMessages.FirstOrDefault(s => s.MessageType == messageType);
-            await _emailService.SendAsync(messageDTO);
+            try
+            {
+                var emailMessages = await _messageService.GetEmailAsync();
+                var messageDTO = emailMessages.FirstOrDefault(s => s.MessageType == messageType);
+
+                //prepare message finalBody
+                PrepareMessageFinalBody(messageDTO, obj);
+                await _emailService.SendAsync(messageDTO);
+            }
+            catch(Exception ex)
+            {
+
+            }
         }
 
-        private async Task SendSMSMessage(MessageType messageType)
+        private async Task SendSMSMessage(MessageType messageType, object obj)
         {
-            var smsMessages = await _messageService.GetSmsAsync();
-            var messageDTO = smsMessages.FirstOrDefault(s => s.MessageType == messageType);
-            await _sMSService.SendAsync(messageDTO);
+            try
+            {
+                var smsMessages = await _messageService.GetSmsAsync();
+                var messageDTO = smsMessages.FirstOrDefault(s => s.MessageType == messageType);
+
+                //prepare message finalBody
+                //PrepareMessageFinalBody(messageDTO, obj);
+                await _sMSService.SendAsync(messageDTO);
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
+
+        private void PrepareMessageFinalBody(MessageDTO messageDTO, object obj)
+        {
+            if(obj is ShipmentDTO)
+            {
+                var shipmentDTO = (ShipmentDTO)obj;
+                messageDTO.FinalBody = string.Format(messageDTO.Body, shipmentDTO.Customer[0].CustomerName, shipmentDTO.Waybill);
+                messageDTO.To = shipmentDTO.Customer[0].Email;
+            }
+        }
+
     }
 }

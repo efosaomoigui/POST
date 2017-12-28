@@ -297,7 +297,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 await _uow.CompleteAsync();
 
                 //send message
-                await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All);
+                await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All, shipmentDTO);
 
                 return newShipment;
             }
