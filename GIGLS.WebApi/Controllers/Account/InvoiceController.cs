@@ -9,7 +9,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Account
 {
-    [Authorize(Roles = "Account, ViewAdmin")]
+    [Authorize(Roles = "Account,Shipment")]
     [RoutePrefix("api/invoice")]
     public class InvoiceController : BaseWebApiController
     {

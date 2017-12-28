@@ -27,7 +27,7 @@ namespace GIGLS.Services.Implementation.Zone
             {
                 await _zoneService.GetZoneById(domesticZonePrice.ZoneId);
 
-                if (await _uow.DomesticZonePrice.ExistAsync(c => c.Weight == domesticZonePrice.Weight && c.ZoneId == domesticZonePrice.ZoneId))
+                if (await _uow.DomesticZonePrice.ExistAsync(c => c.Weight == domesticZonePrice.Weight && c.ZoneId == domesticZonePrice.ZoneId && c.RegularEcommerceType == domesticZonePrice.RegularEcommerceType))
                 {
                     throw new GenericException("Price already set for this Zone and Weight");
                 }

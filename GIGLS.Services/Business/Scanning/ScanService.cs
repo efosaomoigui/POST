@@ -1,10 +1,10 @@
 ﻿using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Business;
 using System;
 using System.Threading.Tasks;
 using GIGLS.Infrastructure;
+using GIGLS.Services.Implementation.Utility;
 
 namespace GIGLS.Services.Business.Scanning
 {
@@ -48,24 +48,26 @@ namespace GIGLS.Services.Business.Scanning
             // verify the waybill number exists in the system
             var shipment = await _shipmentService.GetShipmentForScan(scan.WaybillNumber);
 
-            if(shipment != null)
+            string scanStatus = EnumHelper.GetDescription(scan.ShipmentScanStatus);
+
+            if (shipment != null)
             {
                 //check if the waybill has not been scan for the same status before
-                var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scan.ShipmentScanStatus.ToString());
+                var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);
 
                 if (!checkTrack)
                 {
                     var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                     {
                         DateTime = DateTime.Now,
-                        Status = scan.ShipmentScanStatus.ToString(),
+                        Status = scanStatus, //scan.ShipmentScanStatus.ToString(),
                         Waybill = scan.WaybillNumber,
                     }, scan.ShipmentScanStatus);
                     return true;
                 }
                 else
                 {
-                    throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already scan for { scan.ShipmentScanStatus.ToString() } status");
+                    throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already scan for { scanStatus } status");
                 }                
             }
 
@@ -82,13 +84,13 @@ namespace GIGLS.Services.Business.Scanning
                 {
                     foreach (var groupShipment in groupShipmentList)
                     {
-                        var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(groupShipment.Waybill, scan.ShipmentScanStatus.ToString());
+                        var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(groupShipment.Waybill, scanStatus);
                         if (!checkTrack)
                         {
                             await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                             {
                                 DateTime = DateTime.Now,
-                                Status = scan.ShipmentScanStatus.ToString(),
+                                Status = scanStatus,
                                 Waybill = groupShipment.Waybill,
                             }, scan.ShipmentScanStatus);
                         }

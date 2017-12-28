@@ -14,6 +14,7 @@ using GIGLS.Core.IServices.CashOnDeliveryAccount;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Services.Implementation.Utility;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -164,7 +165,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"Shipment with waybill: {waybill} had been collected");
             }
 
-            var shipmentDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(waybill) && x.ShipmentScanStatus == ShipmentScanStatus.Delivered);
+            var shipmentDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(waybill) && x.ShipmentScanStatus == ShipmentScanStatus.DDSA);
 
             if (shipmentDelivered == null)
             {

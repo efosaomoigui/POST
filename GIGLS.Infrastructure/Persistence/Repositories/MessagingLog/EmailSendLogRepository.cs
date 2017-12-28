@@ -61,7 +61,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.MessagingLog
 
                 if (filter.Status.HasValue)
                 {
-                    messages = messages.Where(x => x.Status.Equals(filter.Status));
+                    messages = messages.Where(x => x.Status == filter.Status);
                 }
 
                 var result = messages.ToList();
