@@ -26,7 +26,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                if(tracking.User == null)
+                if (tracking.User == null)
                 {
                     tracking.User = await _userService.GetCurrentUserId();
                 }
@@ -42,7 +42,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
                 _uow.ShipmentTracking.Add(newShipmentTracking);
 
-                if (scanStatus.Equals(ShipmentScanStatus.Delivered))
+                if (scanStatus.Equals(ShipmentScanStatus.DDSA))
                 {
                     var newShipmentCollection = new ShipmentCollection
                     {

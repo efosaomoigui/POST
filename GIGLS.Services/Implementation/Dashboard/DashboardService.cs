@@ -13,6 +13,7 @@ using System;
 using GIGLS.Infrastructure;
 using GIGLS.Core.DTO.Shipments;
 using System.Collections.Generic;
+using GIGLS.Services.Implementation.Utility;
 
 namespace GIGLS.Services.Implementation.Dashboard
 {
@@ -112,7 +113,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // get shipment delivered - global
             var shipmentTrackings = await _shipmentTrackingService.GetShipmentTrackings();
-            var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Delivered.ToString()).ToList();
+            var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DDSA)).ToList();
             var shipmentsDeliveredByServiceCenter =
                 serviceCentreShipments.Where(s => shipmentsDelivered.Select(d => d.Waybill).Contains(s.Waybill));
 
