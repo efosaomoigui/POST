@@ -4,6 +4,7 @@ using GIGLS.Core.DTO.Fleets;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GIGLS.Core.Enums;
+using System;
 
 namespace GIGLS.Core.DTO.User
 {
@@ -45,6 +46,7 @@ namespace GIGLS.Core.DTO.User
         public List<ServiceCentreDTO> ServiceCentres { get; set; }
         public List<ShipmentDTO> Shipments { get; set; }
         public List<FleetTripDTO> FleetTrips { get; set; }
+        public DateTime DateCreated { get; set; }
 
         //for system user
         public string SystemUserId { get; set; }

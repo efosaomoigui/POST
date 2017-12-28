@@ -12,5 +12,7 @@ namespace GIGLS.Core.DTO
         public string To { get; set; }
         public EmailSmsType EmailSmsType { get; set; }
         public MessageType MessageType { get; set; }
+
+        public string FinalBody { get; set; }
     }
 }

@@ -18,7 +18,7 @@ using GIGLS.Core.Domain.MessagingLog;
 namespace GIGLS.Infrastructure.Persistence
 {
     [DbConfigurationType(typeof(EntityFrameworkConfiguration))]
-    public class GIGLSContext : AuditIdentityDbContext<User, AppRole, string, IdentityUserLogin, IdentityUserRole, AppUserClaim>
+    public class GIGLSContext : IdentityDbContext<User, AppRole, string, IdentityUserLogin, IdentityUserRole, AppUserClaim>
     {
         //, throwIfV1Schema: false
         public GIGLSContext()

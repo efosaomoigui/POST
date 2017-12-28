@@ -23,8 +23,8 @@ namespace GIGLS.Messaging.MessageService
             myMessage.AddTo(message.To);
             myMessage.From = new SendGrid.Helpers.Mail.EmailAddress(fromEmail, fromName);
             myMessage.Subject = message.Subject;
-            myMessage.PlainTextContent = message.Body;
-            myMessage.HtmlContent = message.Body;
+            myMessage.PlainTextContent = message.FinalBody;
+            myMessage.HtmlContent = message.FinalBody;
 
             var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
             var client = new SendGridClient(apiKey);
