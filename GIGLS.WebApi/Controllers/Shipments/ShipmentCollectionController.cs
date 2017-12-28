@@ -119,7 +119,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [Route("collected")]
         public async Task<IServiceResponse<bool>> UpdateShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
         {
-            shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.Collected;
+            shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.DDSA;
 
             return await HandleApiOperationAsync(async () => {
                 await _service.UpdateShipmentCollection(shipmentCollection);

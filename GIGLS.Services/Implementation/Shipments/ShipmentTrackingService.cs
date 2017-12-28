@@ -42,7 +42,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
                 _uow.ShipmentTracking.Add(newShipmentTracking);
 
-                if (scanStatus.Equals(ShipmentScanStatus.DDSA))
+                if (scanStatus.Equals(ShipmentScanStatus.DASD) || scanStatus.Equals(ShipmentScanStatus.DASP))
                 {
                     var newShipmentCollection = new ShipmentCollection
                     {

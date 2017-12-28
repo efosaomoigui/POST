@@ -67,7 +67,7 @@ namespace GIGLS.Services.Business.Scanning
                 }
                 else
                 {
-                    throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already scan for { scanStatus } status");
+                    throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already scan for { scanStatus }");
                 }                
             }
 

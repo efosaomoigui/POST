@@ -4,17 +4,10 @@ namespace GIGLS.Core.Enums
 {
     public enum ShipmentScanStatus
     {
-        Recieved,
-        Transit,
-        Processing,
-        Delivered,
-        Collected,
-        Returns,
-
-        [Description("ARRIVAL SCAN AT SERVICE CENTER(TERMINAL PICK UP)")]
+        [Description("ARRIVAL SCAN AT SERVICE CENTER (TERMINAL PICK UP)")]
         ASP,
 
-        [Description("DESTINATION DAILY SCAN AWAITING DELIVERY(TERMINAL PICK UP SHIPMENTS)")]
+        [Description("DESTINATION DAILY SCAN AWAITING DELIVERY (TERMINAL PICK UP SHIPMENTS)")]
         ASPD,
 
         [Description("DESTINATION ARRIVAL SCAN (HOME DELIVERY SHIPMENTS)")]
@@ -41,7 +34,7 @@ namespace GIGLS.Core.Enums
         [Description("DEPART SERVICE CENTER TO GATEWAY LAGOS")]
         DSCG,
 
-        [Description("DEPART SERVICE CENTER TO DESTINATION(TERMINAL PICK UP SHIPMENTS)")]
+        [Description("DEPART SERVICE CENTER TO DESTINATION (TERMINAL PICK UP SHIPMENTS)")]
         DSCP,
 
         [Description("GATEWAY SHIPMENT ARRIVAL FROM ALL SERVICE CENTERS (HOME DELIVERY SHIPMENTS)")]
@@ -57,6 +50,9 @@ namespace GIGLS.Core.Enums
         GDH,
 
         [Description("GATEWAY SHIPMENT DEPARTURE TO ALL DESTINATIONS (TERMINAL PICK UP SHIPMENTS)")]
-        GDP
+        GDP,
+
+        [Description("SHIPMENT SCAN FOR RETURNS")]
+        SSR
     }
 }

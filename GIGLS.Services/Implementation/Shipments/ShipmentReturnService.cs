@@ -77,7 +77,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //update shipment collection status to Return status
                 var shipmentCollection = await _collectionService.GetShipmentCollectionById(waybill);
-                shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.Returns;
+                shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.SSR;
                 await _collectionService.UpdateShipmentCollection(shipmentCollection);
 
                 await _uow.CompleteAsync();
