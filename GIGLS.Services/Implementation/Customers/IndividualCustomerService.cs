@@ -40,10 +40,10 @@ namespace GIGLS.Services.Implementation.Customers
                     throw new GenericException($"Individual Customer Phone Number {customer.PhoneNumber } Already Exist");
                 }
 
-                if (await _uow.IndividualCustomer.ExistAsync(c => c.Email == customer.Email.Trim()))
-                {
-                    throw new GenericException($"Individual Customer Email {customer.Email } Already Exist");
-                }
+                //if (await _uow.IndividualCustomer.ExistAsync(c => c.Email == customer.Email.Trim()))
+                //{
+                //    throw new GenericException($"Individual Customer Email {customer.Email } Already Exist");
+                //}
 
                 var newCustomer = Mapper.Map<IndividualCustomer>(customer);
 
