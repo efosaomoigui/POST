@@ -61,15 +61,15 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     var individualCustomerId = 0;
                     var individualCustomerByPhone = await _uow.IndividualCustomer.FindAsync(c => c.PhoneNumber == customerDTO.PhoneNumber.Trim());
-                    var individualCustomerByEmail = await _uow.IndividualCustomer.FindAsync(c => c.Email == customerDTO.Email.Trim());
+                    //var individualCustomerByEmail = await _uow.IndividualCustomer.FindAsync(c => c.Email == customerDTO.Email.Trim());
                     foreach(var item in individualCustomerByPhone)
                     {
                          individualCustomerId = item.IndividualCustomerId;
                     }
-                    foreach (var item in individualCustomerByEmail)
-                    {
-                         individualCustomerId = item.IndividualCustomerId;
-                    }
+                    //foreach (var item in individualCustomerByEmail)
+                    //{
+                    //     individualCustomerId = item.IndividualCustomerId;
+                    //}
 
                     if (individualCustomerId > 0)
                     {
