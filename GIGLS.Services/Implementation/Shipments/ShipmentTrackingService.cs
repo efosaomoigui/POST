@@ -31,6 +31,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     tracking.User = await _userService.GetCurrentUserId();
                 }
 
+                if(tracking.Location == null)
+                {
+                    var UserServiceCenters = await _userService.GetPriviledgeServiceCenters();
+                    var serviceCenter = await _uow.ServiceCentre.GetAsync(UserServiceCenters[0]);
+                    tracking.Location = serviceCenter.Name;
+                }
+
                 var newShipmentTracking = new GIGL.GIGLS.Core.Domain.ShipmentTracking
                 {
                     Waybill = tracking.Waybill,
@@ -84,7 +91,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     ShipmentTrackingId = shipmentTracking.ShipmentTrackingId,
                     TrackingType = shipmentTracking.TrackingType.ToString(),
                     Status = shipmentTracking.Status,
-                    User = shipmentTracking.User.UserName
+                    User = shipmentTracking.User.FirstName + " " + shipmentTracking.User.LastName,
                 };
             }
             catch (Exception)

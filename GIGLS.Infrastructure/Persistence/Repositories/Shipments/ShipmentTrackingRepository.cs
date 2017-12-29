@@ -33,7 +33,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               Waybill = shipmentTracking.Waybill,
                                               ShipmentTrackingId = shipmentTracking.ShipmentTrackingId,
                                               TrackingType = shipmentTracking.TrackingType.ToString(),
-                                              //User = shipmentTracking.User?.UserName,
+                                              User = shipmentTracking.User.FirstName + " " + shipmentTracking.User.LastName,
                                               Status = shipmentTracking.Status
                                           };
                 return Task.FromResult(shipmentTrackingDto.ToList());
@@ -60,7 +60,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               Waybill = shipmentTracking.Waybill,
                                               ShipmentTrackingId = shipmentTracking.ShipmentTrackingId,
                                               TrackingType = shipmentTracking.TrackingType.ToString(),
-                                              //User = shipmentTracking.User?.UserName,
+                                              User = shipmentTracking.User.FirstName + " "+ shipmentTracking.User.LastName,
                                               Status = shipmentTracking.Status
                                           };
                 return Task.FromResult(shipmentTrackingDto.ToList().OrderByDescending(x => x.DateTime).ToList());
