@@ -12,6 +12,7 @@ namespace GIGLS.Core.IServices.Shipments
     public interface IShipmentService : IServiceDependencyMarker
     {
         Tuple<Task<List<ShipmentDTO>>, int> GetShipments(FilterOptionsDto filterOptionsDto);
+        Task<List<ShipmentDTO>> GetIncomingShipments(FilterOptionsDto filterOptionsDto);
         Task<List<ShipmentDTO>> GetShipments(int[] serviceCentreIds);
         Task<ShipmentDTO> GetShipment(int shipmentId);
         Task<ShipmentDTO> GetShipment(string waybill);

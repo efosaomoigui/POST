@@ -74,6 +74,27 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public Task<List<ShipmentDTO>> GetIncomingShipments(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                var allShipments = _uow.Shipment.GetShipments(filterOptionsDto, new int[] { });
+
+                var incomingShipments = new List<ShipmentDTO>();
+                if (serviceCenters.Length > 0)
+                {
+                    incomingShipments = allShipments.Item1.Result.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).ToList();
+                }
+
+                return Task.FromResult(incomingShipments);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public Task<List<ShipmentDTO>> GetShipments(int[] serviceCentreIds)
         {
             try
