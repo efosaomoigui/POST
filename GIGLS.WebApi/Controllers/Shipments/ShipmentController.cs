@@ -1,8 +1,10 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
+﻿using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
@@ -260,6 +262,23 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<DomesticRouteZoneMapDTO>
                 {
                     Object = zone
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("dailysales")]
+        public async Task<IServiceResponse<DailySalesDTO>> GetDailySales(AccountFilterCriteria accountFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                var dailySales = await _service.GetDailySales(accountFilterCriteria);
+
+                return new ServiceResponse<DailySalesDTO>
+                {
+                    Object = dailySales
                 };
             });
         }

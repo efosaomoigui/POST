@@ -21,6 +21,8 @@ using GIGLS.Core.DTO.ServiceCentres;
 using System.Linq;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices.Wallet;
+using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.Account;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -592,6 +594,34 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var zone = await _domesticRouteZoneMapService.GetZone(serviceCenters[0], destinationServiceCentre);
             return zone;
+        }
+
+        public async Task<DailySalesDTO> GetDailySales(AccountFilterCriteria accountFilterCriteria)
+        {
+            //set defaults
+            if(accountFilterCriteria.StartDate == null)
+            {
+                accountFilterCriteria.StartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+            }
+
+            if (accountFilterCriteria.EndDate == null)
+            {
+                accountFilterCriteria.EndDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+            }
+
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var invoices = await _uow.Invoice.GetInvoicesAsync(accountFilterCriteria, serviceCenterIds);
+
+            var dailySalesDTO = new DailySalesDTO()
+            {
+                StartDate = (DateTime) accountFilterCriteria.StartDate,
+                EndDate = (DateTime)accountFilterCriteria.EndDate,
+                Invoices = invoices,
+                SalesCount = invoices.Count,
+                TotalSales = invoices.Sum(s => s.Amount)
+            };
+
+            return dailySalesDTO;
         }
     }
 }

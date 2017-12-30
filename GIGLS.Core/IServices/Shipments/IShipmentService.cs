@@ -1,7 +1,9 @@
 ﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Zone;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using System;
 using System.Collections.Generic;
@@ -27,5 +29,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentres();
         Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto);
         Task<DomesticRouteZoneMapDTO> GetZone(int destinationServiceCentre);
+        Task<DailySalesDTO> GetDailySales(AccountFilterCriteria accountFilterCriteria);
     }
 }

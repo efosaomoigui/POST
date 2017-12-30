@@ -204,6 +204,7 @@
     <Compile Include="Domain\Workshop.cs" />
     <Compile Include="Domain\Zone.cs" />
     <Compile Include="Domain\HaulageDistanceMappingPrice.cs" />
+    <Compile Include="DTO\Account\DailySalesDTO.cs" />
     <Compile Include="DTO\Account\GeneralLedgerDTO.cs" />
     <Compile Include="DTO\Account\InsuranceDTO.cs" />
     <Compile Include="DTO\Account\InvoiceDTO.cs" />
