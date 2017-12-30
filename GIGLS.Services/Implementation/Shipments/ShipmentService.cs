@@ -74,7 +74,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public Task<List<ShipmentDTO>> GetIncomingShipments(FilterOptionsDto filterOptionsDto)
+        public async Task<List<ShipmentDTO>> GetIncomingShipments(FilterOptionsDto filterOptionsDto)
         {
             try
             {
@@ -87,7 +87,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     incomingShipments = allShipments.Item1.Result.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).ToList();
                 }
 
-                return Task.FromResult(incomingShipments);
+                //populate the service centres
+                foreach(var shipment in incomingShipments)
+                {
+                    shipment.DepartureServiceCentre = await _centreService.GetServiceCentreById(shipment.DepartureServiceCentreId);
+                    shipment.DestinationServiceCentre = await _centreService.GetServiceCentreById(shipment.DestinationServiceCentreId);
+                }
+
+                return incomingShipments;
             }
             catch (Exception)
             {
