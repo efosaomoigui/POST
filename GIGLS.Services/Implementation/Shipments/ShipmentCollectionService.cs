@@ -15,6 +15,7 @@ using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Services.Implementation.Utility;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -84,8 +85,18 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentWaitingForCollection()
         {
-            var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.DASD || x.ShipmentScanStatus == ShipmentScanStatus.DASP);
+            //get all shipments by servicecentre
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            var shipments = await _uow.Shipment.FindAsync(s => serviceCenters.Contains(s.DestinationServiceCentreId));
+            var shipmentsWaybills = shipments.ToList().Select(a => a.Waybill).AsEnumerable();
+
+            var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x => 
+            x.ShipmentScanStatus == ShipmentScanStatus.DASD || 
+            x.ShipmentScanStatus == ShipmentScanStatus.DASP &&
+            shipmentsWaybills.Contains(x.Waybill));
+
             var shipmentCollectionDto = Mapper.Map<IEnumerable<ShipmentCollectionDTO>>(shipmentCollection);
+
             return await Task.FromResult(shipmentCollectionDto);
         }
 
