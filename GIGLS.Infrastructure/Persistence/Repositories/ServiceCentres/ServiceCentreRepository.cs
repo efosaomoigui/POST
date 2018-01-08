@@ -41,7 +41,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     StationName = sc.StationName,
                                     StationCode = sc.StationCode                               
                               };
-                return Task.FromResult(centreDto.ToList());
+                return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
             catch (Exception)
             {
