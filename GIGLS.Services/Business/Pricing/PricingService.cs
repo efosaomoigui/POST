@@ -127,6 +127,7 @@ namespace GIGLS.Services.Business.Pricing
 
         private async Task<decimal> GetRegularPriceOverflow(decimal weight, decimal activeWeightLimit, int zoneId)
         {
+            //Price for Active Weight Limit
             var activeZone = await _weightLimitPrice.GetWeightLimitPriceByZoneId(zoneId);
 
             decimal weightlimitZonePrice = activeZone.Price; //Limit Price addition base on zone

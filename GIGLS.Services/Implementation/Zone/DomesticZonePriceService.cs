@@ -73,7 +73,7 @@ namespace GIGLS.Services.Implementation.Zone
         {
             try
             {
-                var zone = await _uow.DomesticZonePrice.GetAsync(d => d.ZoneId == zoneId && d.Weight.Equals(weight) && d.RegularEcommerceType == regularEcommerceType);
+                var zone = await _uow.DomesticZonePrice.GetDomesticZonePrice(zoneId, weight, regularEcommerceType);
 
                 if (zone == null)
                 {

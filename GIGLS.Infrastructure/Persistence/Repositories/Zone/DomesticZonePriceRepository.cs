@@ -7,6 +7,7 @@ using GIGLS.Core.IRepositories.Zone;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System.Linq;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Zone
 {
@@ -37,6 +38,19 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Zone
                 return Task.FromResult(zoneDto.ToList());
             }
             catch (Exception )
+            {
+                throw;
+            }
+        }
+
+        public Task<DomesticZonePrice> GetDomesticZonePrice(int zoneId, decimal weight, RegularEcommerceType regularEcommerceType)
+        {
+            try
+            {
+                var zones = Context.DomesticZonePrice.FirstOrDefault(d => d.ZoneId == zoneId && d.Weight >= weight && d.RegularEcommerceType == regularEcommerceType);
+                return Task.FromResult(zones);
+            }
+            catch (Exception)
             {
                 throw;
             }
