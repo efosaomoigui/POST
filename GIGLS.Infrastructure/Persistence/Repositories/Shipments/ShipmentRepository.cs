@@ -135,11 +135,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                          Name = r.DepartureServiceCentre.Name
                                                      },
                                                      DestinationServiceCentreId = r.DestinationServiceCentreId,
-                                                     DestinationServiceCentre = new ServiceCentreDTO
+                                                     DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
                                                      {
-                                                         Code = r.DestinationServiceCentre.Code,
-                                                         Name = r.DestinationServiceCentre.Name
-                                                     },
+                                                         Code = x.Code,
+                                                         Name = x.Name
+                                                     }).FirstOrDefault(),
+
                                                      ExpectedDateOfArrival = r.ExpectedDateOfArrival,
                                                      //GroupWaybill = r.GroupWaybill,
                                                      //IdentificationType = r.IdentificationType,
@@ -158,9 +159,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      Value = r.Value,
                                                      GrandTotal = r.GrandTotal,
                                                      AppliedDiscount = r.AppliedDiscount,
-                                                     DiscountValue = r.DiscountValue
-                                                     //DepartureTerminalName = r.DepartureTerminal.Name,
-                                                     //DestinationTerminalName = r.DestinationTerminal.Name       
+                                                     DiscountValue = r.DiscountValue      
                                                      //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
                                                  }).ToList();
                 //return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
