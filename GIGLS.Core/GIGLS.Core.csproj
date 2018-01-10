@@ -215,6 +215,7 @@
     <Compile Include="DTO\Customers\CompanyContactPersonDTO.cs" />
     <Compile Include="DTO\Customers\CompanyDTO.cs" />
     <Compile Include="DTO\Customers\CustomerDTO.cs" />
+    <Compile Include="DTO\Customers\CustomerSearchOption.cs" />
     <Compile Include="DTO\Customers\IndividualCustomerDTO.cs" />
     <Compile Include="DTO\Dashboard\DashboardDTO.cs" />
     <Compile Include="DTO\Dashboard\GraphDataDTO.cs" />
@@ -295,6 +296,7 @@
     <Compile Include="Enums\AccountType.cs" />
     <Compile Include="Enums\CompanyStatus.cs" />
     <Compile Include="Enums\CompanyType.cs" />
+    <Compile Include="Enums\CustomerFilterOption.cs" />
     <Compile Include="Enums\CustomerType.cs" />
     <Compile Include="Enums\DebitCreditFlag.cs" />
     <Compile Include="Enums\DispatchCategory.cs" />

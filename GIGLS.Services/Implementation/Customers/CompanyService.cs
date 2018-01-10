@@ -207,5 +207,9 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
+        public async Task<List<CompanyDTO>> GetCompanies(CompanyType companyType, CustomerSearchOption searchOption)
+        {
+            return await _uow.Company.GetCompanies(companyType, searchOption);
+        }
     }
 }

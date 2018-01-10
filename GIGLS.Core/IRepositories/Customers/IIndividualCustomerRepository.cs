@@ -9,5 +9,6 @@ namespace GIGLS.Core.IRepositories.Customers
     public interface IIndividualCustomerRepository : IRepository<IndividualCustomer>
     {
         Task<List<IndividualCustomerDTO>> GetIndividualCustomers();
+        Task<List<IndividualCustomerDTO>> GetIndividualCustomers(string searchData);
     }
 }

@@ -13,5 +13,6 @@ namespace GIGLS.Core.IServices.Customers
         Task<CompanyDTO> AddCompany(CompanyDTO company);
         Task DeleteCompany(int companyId);
         Task UpdateCompanyStatus(int companyId, CompanyStatus status);
+        Task<List<CompanyDTO>> GetCompanies(CompanyType companyType, CustomerSearchOption searchOption);
     }
 }

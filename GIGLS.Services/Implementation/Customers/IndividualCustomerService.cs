@@ -176,5 +176,10 @@ namespace GIGLS.Services.Implementation.Customers
             customer.State = customerDto.State;
             _uow.Complete();
         }
+
+        public async Task<List<IndividualCustomerDTO>> GetIndividualCustomers(string searchData)
+        {
+            return await _uow.IndividualCustomer.GetIndividualCustomers(searchData);
+        }
     }
 }

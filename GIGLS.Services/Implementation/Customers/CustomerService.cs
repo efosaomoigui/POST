@@ -172,5 +172,51 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
+
+        public async Task<List<CustomerDTO>> SearchForCustomers(CustomerSearchOption searchOption)
+        {
+            try
+            {
+                // handle Company customers
+                if (CustomerFilterOption.Individual.Equals(searchOption.CustomerType))
+                {
+                    var individualCustomerDTO = await _individualCustomerService.GetIndividualCustomers(searchOption.SearchData);
+                    var customerDTO = Mapper.Map<List<CustomerDTO>>(individualCustomerDTO);
+
+                    foreach (var item in customerDTO)
+                    {
+                        item.CustomerType = CustomerType.IndividualCustomer;
+                    }
+                    return customerDTO;
+                }
+                else
+                {
+                    CompanyType companyType;
+
+                    if (CustomerFilterOption.Corporate.Equals(searchOption.CustomerType))
+                    {
+                        companyType = CompanyType.Corporate;
+                    }
+                    else
+                    {
+                        companyType = CompanyType.Ecommerce;
+                    }
+                    var companyDTO = await _companyService.GetCompanies(companyType, searchOption);
+                    var customerDTO = Mapper.Map<List<CustomerDTO>>(companyDTO);
+
+                    foreach (var item in customerDTO)
+                    {
+                        item.CustomerType = CustomerType.Company;
+                    }
+
+                    return customerDTO;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

@@ -7,6 +7,7 @@ using GIGLS.Core.IRepositories.Customers;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System.Linq;
+using AutoMapper;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
 {
@@ -43,6 +44,20 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                       //select all shipments of the customer                              
                                   };
                 return Task.FromResult(customerdto.ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<IndividualCustomerDTO>> GetIndividualCustomers(string searchData)
+        {
+            try
+            {
+                var customers = _context.IndividualCustomer.Where(x => x.PhoneNumber.Contains(searchData) || x.FirstName.Contains(searchData) || x.LastName.Contains(searchData)).ToList();
+                var customersDto = Mapper.Map<List<IndividualCustomerDTO>>(customers);
+                return Task.FromResult(customersDto);
             }
             catch (Exception)
             {

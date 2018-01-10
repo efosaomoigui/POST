@@ -84,6 +84,22 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("searchcustomers")]
+        public async Task<IServiceResponse<List<CustomerDTO>>> SearchForCustomers(CustomerSearchOption searchOption)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                var customersObj = await _service.SearchForCustomers(searchOption);
+
+                return new ServiceResponse<List<CustomerDTO>>
+                {
+                    Object = customersObj
+                };
+            });
+        }
 
     }
 }
