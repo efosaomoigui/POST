@@ -41,7 +41,7 @@ namespace GIGLS.WebApi.Controllers.Report
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Create")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("shipments")]
         public async Task<IServiceResponse<List<ShipmentDTO>>> GetShipments(ShipmentFilterCriteria filterCriteria)
@@ -57,7 +57,7 @@ namespace GIGLS.WebApi.Controllers.Report
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Create")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("income")]
         public async Task<IServiceResponse<List<GeneralLedgerDTO>>> GetIncome(AccountFilterCriteria accountFilterCriteria)
@@ -73,7 +73,7 @@ namespace GIGLS.WebApi.Controllers.Report
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Create")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("expenditure")]
         public async Task<IServiceResponse<List<GeneralLedgerDTO>>> GetExpenditure(AccountFilterCriteria accountFilterCriteria)
@@ -89,7 +89,7 @@ namespace GIGLS.WebApi.Controllers.Report
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Create")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("invoice")]
         public async Task<IServiceResponse<List<InvoiceDTO>>> GetInvoice(AccountFilterCriteria accountFilterCriteria)
@@ -105,5 +105,21 @@ namespace GIGLS.WebApi.Controllers.Report
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("customershipments")]
+        public async Task<IServiceResponse<List<ShipmentDTO>>> GetCustomerShipments(ShipmentFilterCriteria f_Criteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                var shipments = await _shipmentService.GetCustomerShipments(f_Criteria);
+
+                return new ServiceResponse<List<ShipmentDTO>>
+                {
+                    Object = shipments
+                };
+            });
+        }
     }
 }

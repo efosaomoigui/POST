@@ -1,10 +1,10 @@
-﻿using GIGLS.Core.Enums;
+﻿using GIGLS.CORE.Enums;
 
 namespace GIGLS.Core.DTO.Customers
 {
     public class CustomerSearchOption
     {
-        public CustomerFilterOption CustomerType { get; set; }
+        public FilterCustomerType CustomerType { get; set; }
         public string SearchData { get; set; }
     }
 }

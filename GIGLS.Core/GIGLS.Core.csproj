@@ -296,7 +296,6 @@
     <Compile Include="Enums\AccountType.cs" />
     <Compile Include="Enums\CompanyStatus.cs" />
     <Compile Include="Enums\CompanyType.cs" />
-    <Compile Include="Enums\CustomerFilterOption.cs" />
     <Compile Include="Enums\CustomerType.cs" />
     <Compile Include="Enums\DebitCreditFlag.cs" />
     <Compile Include="Enums\DispatchCategory.cs" />

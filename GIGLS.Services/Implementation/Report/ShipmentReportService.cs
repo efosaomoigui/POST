@@ -35,5 +35,10 @@ namespace GIGLS.Services.Implementation.Report
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
             return await _uow.Shipment.GetShipments(filterCriteria, serviceCenters);
         }
+
+        public async Task<List<ShipmentDTO>> GetCustomerShipments(ShipmentFilterCriteria f_Criteria)
+        {
+            return await _uow.Shipment.GetCustomerShipments(f_Criteria);
+        }
     }
 }

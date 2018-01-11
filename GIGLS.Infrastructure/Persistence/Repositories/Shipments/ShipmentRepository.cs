@@ -308,5 +308,135 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var shipmentDto = Mapper.Map<IEnumerable<ShipmentDTO>>(result);
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
         }
+
+
+        public Task<List<ShipmentDTO>> GetCustomerShipments(ShipmentFilterCriteria f_Criteria)
+        {
+            DateTime StartDate = f_Criteria.StartDate.GetValueOrDefault().Date;
+            DateTime EndDate = f_Criteria.EndDate?.Date ?? StartDate;
+
+            //filter by service center
+            var shipments = _context.Shipment.AsQueryable();
+
+            //If No Date Supply
+            if (!f_Criteria.StartDate.HasValue && !f_Criteria.EndDate.HasValue)
+            {
+                var Today = DateTime.Today;
+                var nextDay = DateTime.Today.AddDays(1).Date;
+                shipments = shipments.Where(x => x.DateCreated >= Today && x.DateCreated < nextDay);
+            }
+
+            if (f_Criteria.StartDate.HasValue && f_Criteria.EndDate.HasValue)
+            {
+                if (f_Criteria.StartDate.Equals(f_Criteria.EndDate))
+                {
+                    var nextDay = DateTime.Today.AddDays(1).Date;
+                    shipments = shipments.Where(x => x.DateCreated >= StartDate && x.DateCreated < nextDay);
+                }
+                else
+                {
+                    var dayAfterEndDate = EndDate.AddDays(1).Date;
+                    shipments = shipments.Where(x => x.DateCreated >= StartDate && x.DateCreated < dayAfterEndDate);
+                }
+            }
+
+            if (f_Criteria.StartDate.HasValue && !f_Criteria.EndDate.HasValue)
+            {
+                var nextDay = DateTime.Today.AddDays(1).Date;
+                shipments = shipments.Where(x => x.DateCreated >= StartDate && x.DateCreated < nextDay);
+            }
+
+            if (f_Criteria.EndDate.HasValue && !f_Criteria.StartDate.HasValue)
+            {
+                var dayAfterEndDate = EndDate.AddDays(1).Date;
+                shipments = shipments.Where(x => x.DateCreated < dayAfterEndDate);
+            }
+
+            if (f_Criteria.ServiceCentreId > 0)
+            {
+                shipments = shipments.Where(x => x.DepartureServiceCentreId == f_Criteria.ServiceCentreId);
+            }
+
+            if (f_Criteria.StationId > 0)
+            {
+                var serviceCentre = Context.ServiceCentre.Where(y => y.StationId == f_Criteria.StationId);
+                shipments = shipments.Where(y => serviceCentre.Any(x => y.DepartureServiceCentreId == x.ServiceCentreId));
+            }
+
+            if (f_Criteria.StateId > 0)
+            {
+                var station = Context.Station.Where(s => s.StateId == f_Criteria.StateId);
+                var serviceCentre = Context.ServiceCentre.Where(w => station.Any(x => w.StationId == x.StationId));
+                shipments = shipments.Where(y => serviceCentre.Any(x => y.DepartureServiceCentreId == x.ServiceCentreId));
+            }
+
+            if (!string.IsNullOrWhiteSpace(f_Criteria.UserId))
+            {
+                shipments = shipments.Where(x => x.UserId == f_Criteria.UserId);
+            }
+
+            if (f_Criteria.FilterCustomerType.HasValue && f_Criteria.CustomerId > 0)
+            {                
+                if (f_Criteria.FilterCustomerType.Equals(FilterCustomerType.IndividualCustomer))
+                {
+                    shipments = shipments.Where(x => !x.CustomerType.Equals(CustomerType.Company.ToString()) && x.CustomerId == f_Criteria.CustomerId);
+                }
+                else
+                {
+                    shipments = shipments.Where(x => x.CustomerType.Equals(CustomerType.Company.ToString()) && x.CustomerId == f_Criteria.CustomerId);
+                }
+            }
+            
+            List<ShipmentDTO> shipmentDto = (from r in shipments
+                                             select new ShipmentDTO()
+                                             {
+                                                 ShipmentId = r.ShipmentId,
+                                                 Waybill = r.Waybill,
+                                                 CustomerId = r.CustomerId,
+                                                 CustomerType = r.CustomerType,
+                                                 ActualDateOfArrival = r.ActualDateOfArrival,
+                                                 DateCreated = r.DateCreated,
+                                                 DateModified = r.DateModified,
+                                                 DeliveryOptionId = r.DeliveryOptionId,
+                                                 DeliveryOption = new DeliveryOptionDTO
+                                                 {
+                                                     Code = r.DeliveryOption.Code,
+                                                     Description = r.DeliveryOption.Description
+                                                 },
+                                                 DeliveryTime = r.DeliveryTime,
+                                                 DepartureServiceCentreId = r.DepartureServiceCentreId,
+                                                 DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                                 {
+                                                     Code = x.Code,
+                                                     Name = x.Name
+                                                 }).FirstOrDefault(),
+
+                                                 DestinationServiceCentreId = r.DestinationServiceCentreId,
+                                                 DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                                 {
+                                                     Code = x.Code,
+                                                     Name = x.Name
+                                                 }).FirstOrDefault(),
+
+                                                 ExpectedDateOfArrival = r.ExpectedDateOfArrival,
+                                                 PaymentStatus = r.PaymentStatus,
+                                                 ReceiverAddress = r.ReceiverAddress,
+                                                 ReceiverCity = r.ReceiverCity,
+                                                 ReceiverCountry = r.ReceiverCountry,
+                                                 ReceiverEmail = r.ReceiverEmail,
+                                                 ReceiverName = r.ReceiverName,
+                                                 ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                                 ReceiverState = r.ReceiverState,
+                                                 SealNumber = r.SealNumber,
+                                                 UserId = r.UserId,
+                                                 Value = r.Value,
+                                                 GrandTotal = r.GrandTotal,
+                                                 AppliedDiscount = r.AppliedDiscount,
+                                                 DiscountValue = r.DiscountValue
+                                             }).ToList();
+            
+            return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
+        }
+
     }
 }

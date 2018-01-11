@@ -10,5 +10,6 @@ namespace GIGLS.CORE.IServices.Report
     {
         Task<List<ShipmentDTO>> GetShipments(ShipmentFilterCriteria filterCriteria);
         Task<List<ShipmentDTO>> GetTodayShipments();
+        Task<List<ShipmentDTO>> GetCustomerShipments(ShipmentFilterCriteria f_Criteria);
     }
 }

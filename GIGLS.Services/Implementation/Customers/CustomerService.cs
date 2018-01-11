@@ -6,6 +6,7 @@ using GIGLS.Core;
 using AutoMapper;
 using GIGLS.Core.Enums;
 using System.Collections.Generic;
+using GIGLS.CORE.Enums;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -178,7 +179,7 @@ namespace GIGLS.Services.Implementation.Customers
             try
             {
                 // handle Company customers
-                if (CustomerFilterOption.Individual.Equals(searchOption.CustomerType))
+                if (FilterCustomerType.IndividualCustomer.Equals(searchOption.CustomerType))
                 {
                     var individualCustomerDTO = await _individualCustomerService.GetIndividualCustomers(searchOption.SearchData);
                     var customerDTO = Mapper.Map<List<CustomerDTO>>(individualCustomerDTO);
@@ -186,6 +187,7 @@ namespace GIGLS.Services.Implementation.Customers
                     foreach (var item in customerDTO)
                     {
                         item.CustomerType = CustomerType.IndividualCustomer;
+                        item.CompanyId = item.IndividualCustomerId;
                     }
                     return customerDTO;
                 }
@@ -193,7 +195,7 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     CompanyType companyType;
 
-                    if (CustomerFilterOption.Corporate.Equals(searchOption.CustomerType))
+                    if (FilterCustomerType.Corporate.Equals(searchOption.CustomerType))
                     {
                         companyType = CompanyType.Corporate;
                     }
@@ -207,6 +209,7 @@ namespace GIGLS.Services.Implementation.Customers
                     foreach (var item in customerDTO)
                     {
                         item.CustomerType = CustomerType.Company;
+                        item.IndividualCustomerId = item.CompanyId;
                     }
 
                     return customerDTO;
