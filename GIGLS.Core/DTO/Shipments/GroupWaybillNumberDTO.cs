@@ -1,5 +1,6 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGLS.CORE.DTO;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -17,5 +18,7 @@ namespace GIGLS.Core.DTO.Shipments
         //
         public ServiceCentre DepartureServiceCentre { get; set; }
         public ServiceCentre DestinationServiceCentre { get; set; }
+
+        public List<string> WaybillNumbers { get; set; }
     }
 }

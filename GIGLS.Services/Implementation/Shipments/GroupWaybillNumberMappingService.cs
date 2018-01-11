@@ -144,6 +144,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //add to list
                 List<WaybillNumberDTO> resultList = new List<WaybillNumberDTO>();
                 List<ShipmentDTO> shipmentList = new List<ShipmentDTO>();
+                List<string> waybills = new List<string>();
                 var departureServiceCentre = new ServiceCentreDTO();
                 var destinationServiceCentre = new ServiceCentreDTO();
                 foreach (var groupWaybillNumberMapping in groupWaybillNumberMappingList)
@@ -157,6 +158,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         DestinationServiceCentre = shipmentDTO.DestinationServiceCentre
                     });
 
+                    waybills.Add(shipmentDTO.Waybill);
+
                     departureServiceCentre = shipmentDTO.DepartureServiceCentre;
                     destinationServiceCentre = shipmentDTO.DestinationServiceCentre;
                 }
@@ -166,7 +169,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     GroupWaybillNumber = groupWaybillNumberDTO.GroupWaybillCode,
                     DepartureServiceCentre = departureServiceCentre,
                     DestinationServiceCentre = destinationServiceCentre,
-                    Shipments = shipmentList
+                    Shipments = shipmentList,
+                    WaybillNumbers = waybills
                 };
 
                 return groupWaybillNumberMappingDTO;

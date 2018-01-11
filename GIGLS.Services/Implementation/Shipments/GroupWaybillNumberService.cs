@@ -140,6 +140,16 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //set departure and destination service centres
                 var groupWaybillNumberMappingList = await _uow.GroupWaybillNumberMapping.FindAsync(s => s.GroupWaybillNumber == groupwaybill.GroupWaybillCode);
+
+                //Add waybill here
+                List<string> waybills = new List<string>();
+                foreach (var item in groupWaybillNumberMappingList)
+                {
+                    waybills.Add(item.WaybillNumber);
+                }
+
+                groupwaybillDto.WaybillNumbers = waybills;
+
                 var groupWaybillNumberMapping = groupWaybillNumberMappingList.FirstOrDefault();
 
                 if (groupWaybillNumberMapping != null)
