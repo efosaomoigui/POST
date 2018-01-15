@@ -9,7 +9,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Business
 {
-    [Authorize(Roles = "Shipment")]
+    [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/shipmenttrack")]
     public class ShipmentTrackController : BaseWebApiController
     {

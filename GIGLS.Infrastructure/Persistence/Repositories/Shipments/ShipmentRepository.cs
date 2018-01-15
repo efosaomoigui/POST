@@ -304,8 +304,54 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 }
             }
 
-            var result = shipments.ToList();
-            var shipmentDto = Mapper.Map<IEnumerable<ShipmentDTO>>(result);
+            List<ShipmentDTO> shipmentDto = (from r in shipments
+                                             select new ShipmentDTO()
+                                             {
+                                                 ShipmentId = r.ShipmentId,
+                                                 Waybill = r.Waybill,
+                                                 CustomerId = r.CustomerId,
+                                                 CustomerType = r.CustomerType,
+                                                 ActualDateOfArrival = r.ActualDateOfArrival,
+                                                 DateCreated = r.DateCreated,
+                                                 DateModified = r.DateModified,
+                                                 DeliveryOptionId = r.DeliveryOptionId,
+                                                 DeliveryOption = new DeliveryOptionDTO
+                                                 {
+                                                     Code = r.DeliveryOption.Code,
+                                                     Description = r.DeliveryOption.Description
+                                                 },
+                                                 DeliveryTime = r.DeliveryTime,
+                                                 DepartureServiceCentreId = r.DepartureServiceCentreId,
+                                                 DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                                 {
+                                                     Code = x.Code,
+                                                     Name = x.Name
+                                                 }).FirstOrDefault(),
+
+                                                 DestinationServiceCentreId = r.DestinationServiceCentreId,
+                                                 DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                                 {
+                                                     Code = x.Code,
+                                                     Name = x.Name
+                                                 }).FirstOrDefault(),
+
+                                                 ExpectedDateOfArrival = r.ExpectedDateOfArrival,
+                                                 PaymentStatus = r.PaymentStatus,
+                                                 ReceiverAddress = r.ReceiverAddress,
+                                                 ReceiverCity = r.ReceiverCity,
+                                                 ReceiverCountry = r.ReceiverCountry,
+                                                 ReceiverEmail = r.ReceiverEmail,
+                                                 ReceiverName = r.ReceiverName,
+                                                 ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                                 ReceiverState = r.ReceiverState,
+                                                 SealNumber = r.SealNumber,
+                                                 UserId = r.UserId,
+                                                 Value = r.Value,
+                                                 GrandTotal = r.GrandTotal,
+                                                 AppliedDiscount = r.AppliedDiscount,
+                                                 DiscountValue = r.DiscountValue
+                                             }).ToList();
+            
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
         }
 

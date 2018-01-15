@@ -63,7 +63,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             }
             ////
 
-            IQueryable<GeneralLedger> generalLedgers = generalLedgerContext;
+            IQueryable<GeneralLedger> generalLedgers = generalLedgerContext.Include("ServiceCentre");
 
             //If No Date Supply
             if (!accountFilterCriteria.StartDate.HasValue && !accountFilterCriteria.EndDate.HasValue)
