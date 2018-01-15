@@ -11,7 +11,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Report
 {
-    [Authorize(Roles = "Report")]
+    [Authorize(Roles = "Report, ViewAdmin")]
     [RoutePrefix("api/report")]
     public class ReportsController : BaseWebApiController
     {

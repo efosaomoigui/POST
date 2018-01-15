@@ -16,6 +16,7 @@ namespace GIGLS.Core.DTO.Dashboard
         public int TotalCustomers { get; set; }
         public ServiceCentreDTO ServiceCentre { get; set; }
         public StationDTO Station { get; set; }
+        public string Public { get; set; }
         public List<ShipmentOrderDTO> MostRecentOrder { get; set; }
         public List<GraphDataDTO> GraphData { get; set; }
         public GraphDataDTO CurrentMonthGraphData { get; set; }
