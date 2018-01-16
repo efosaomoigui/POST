@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGLS.Core.Domain.ShipmentScan
 {
@@ -6,6 +7,7 @@ namespace GIGLS.Core.Domain.ShipmentScan
     {
         public int ScanStatusId { get; set; }
 
+        [StringLength(10)]
         [Index(IsUnique = true)]
         public string Code { get; set; }
 

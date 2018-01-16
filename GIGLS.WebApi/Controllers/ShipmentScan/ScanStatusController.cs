@@ -68,6 +68,22 @@ namespace GIGLS.WebApi.Controllers.ShipmentScan
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("code/{code}")]
+        public async Task<IServiceResponse<ScanStatusDTO>> GetScanStatus(string code)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var scanStatus = await _scanService.GetScanStatusByCode(code);
+
+                return new ServiceResponse<ScanStatusDTO>
+                {
+                    Object = scanStatus
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("{scanStatusId:int}")]
