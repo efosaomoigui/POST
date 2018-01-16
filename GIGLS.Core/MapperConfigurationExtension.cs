@@ -21,6 +21,8 @@ using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.Domain.MessagingLog;
+using GIGLS.Core.Domain.ShipmentScan;
+using GIGLS.Core.DTO.ShipmentScan;
 
 namespace GIGLS.Core
 {
@@ -194,6 +196,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<SmsSendLog, SmsSendLogDTO>();
                 config.CreateMap<SmsSendLogDTO, SmsSendLog>();
+
+                config.CreateMap<ScanStatus, ScanStatusDTO>();
+                config.CreateMap<ScanStatusDTO, ScanStatus>();
             });
 
             isInit = true;

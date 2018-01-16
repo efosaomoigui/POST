@@ -14,6 +14,7 @@ using GIGLS.CORE.Domain;
 using Microsoft.AspNet.Identity.EntityFramework;
 using GIGLS.Infrastructure.Migrations;
 using GIGLS.Core.Domain.MessagingLog;
+using GIGLS.Core.Domain.ShipmentScan;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -169,6 +170,8 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<EmailSendLog> EmailSendLog { get; set; }
         public DbSet<SmsSendLog> SmsSendLog { get; set; }
 
+        //Shipment Scan Status
+        public DbSet<ScanStatus> ScanStatus { get; set; }
 
         #endregion
 

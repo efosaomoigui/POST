@@ -463,6 +463,7 @@
     <Compile Include="IServices\ServiceCentres\IServiceCentreService.cs" />
     <Compile Include="IServices\ServiceCentres\IStationService.cs" />
     <Compile Include="IServices\ServiceCentres\IUserServiceCentreMappingService.cs" />
+    <Compile Include="IServices\ShipmentScan\IScanStatusService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberMappingService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberService.cs" />
     <Compile Include="IServices\Shipments\IManifestGroupWaybillNumberMappingService.cs" />
@@ -508,9 +509,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="IServices\ShipmentScan\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

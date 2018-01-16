@@ -184,6 +184,7 @@
     <Compile Include="Implementation\ServiceCentres\StationService.cs" />
     <Compile Include="Implementation\ServiceCentres\UserServiceCentreMappingService.cs" />
     <Compile Include="Implementation\ServiceResponse.cs" />
+    <Compile Include="Implementation\ShipmentScan\ScanStatusService.cs" />
     <Compile Include="Implementation\Shipments\GroupWaybillNumberMappingService.cs" />
     <Compile Include="Implementation\Shipments\GroupWaybillNumberService.cs" />
     <Compile Include="Implementation\Shipments\ManifestGroupWaybillNumberMappingService.cs" />

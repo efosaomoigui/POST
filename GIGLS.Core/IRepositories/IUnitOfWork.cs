@@ -21,6 +21,7 @@ using GIGLS.CORE.IRepositories.Shipments;
 using GIGLS.CORE.IRepositories.Nav;
 using GIGLS.Core.IRepositories.Haulage;
 using GIGLS.Core.IRepositories.MessagingLog;
+using GIGLS.Core.IRepositories.ShipmentScan;
 
 namespace GIGLS.Core
 {
@@ -96,6 +97,7 @@ namespace GIGLS.Core
         IDispatchActivityRepository DispatchActivity { get; set; }
         IEmailSendLogRepository EmailSendLog { get; set; }
         ISmsSendLogRepository SmsSendLog { get; set; }
+        IScanStatusRepository ScanStatus { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

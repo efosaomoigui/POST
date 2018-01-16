@@ -23,6 +23,7 @@ using GIGLS.CORE.IRepositories.Shipments;
 using GIGLS.CORE.IRepositories.Nav;
 using GIGLS.Core.IRepositories.Haulage;
 using GIGLS.Core.IRepositories.MessagingLog;
+using GIGLS.Core.IRepositories.ShipmentScan;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -249,6 +250,9 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public ISmsSendLogRepository SmsSendLog { get; set; }
+
+        [Inject]
+        public IScanStatusRepository ScanStatus { get; set; }
 
         public int Complete()
         {

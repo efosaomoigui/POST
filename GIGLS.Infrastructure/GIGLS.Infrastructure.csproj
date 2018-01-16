@@ -150,6 +150,7 @@
     <Compile Include="Persistence\Repositories\ServiceCentres\ServiceCentreRepository.cs" />
     <Compile Include="Persistence\Repositories\ServiceCentres\StationRepository.cs" />
     <Compile Include="Persistence\Repositories\ServiceCentres\UserServiceCentreMappingRepository.cs" />
+    <Compile Include="Persistence\Repositories\ShipmentScan\ScanStatusRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ManifestGroupWaybillNumberMappingRepository.cs" />

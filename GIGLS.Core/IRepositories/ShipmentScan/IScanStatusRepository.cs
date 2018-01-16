@@ -4,7 +4,7 @@ using GIGLS.Core.DTO.ShipmentScan;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.IRepositories.Zone
+namespace GIGLS.Core.IRepositories.ShipmentScan
 {
     public interface IScanStatusRepository : IRepository<ScanStatus>
     {
