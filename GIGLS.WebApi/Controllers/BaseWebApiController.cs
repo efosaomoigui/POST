@@ -110,6 +110,16 @@ namespace GIGLS.WebApi.Controllers
                         m => m.Value.Errors.Select(e => e.Exception?.Message ?? e.ErrorMessage)
                     );
                 }
+                else
+                {
+                    apiResponse.Code = $"{(int)HttpStatusCode.InternalServerError}";
+                    List<string> errorList = new List<string>();
+                    errorList.Add(giglsex.Message);
+                    if(giglsex.InnerException != null ) errorList.Add(giglsex.InnerException?.Message);
+                    if(giglsex.InnerException?.InnerException != null) errorList.Add(giglsex.InnerException?.InnerException?.Message);
+                    if(giglsex.InnerException?.InnerException?.InnerException != null) errorList.Add(giglsex.InnerException?.InnerException?.InnerException?.Message);
+                    apiResponse.ValidationErrors.Add("Error", errorList);
+                }
             }
             catch (Exception ex)
             {
@@ -119,9 +129,9 @@ namespace GIGLS.WebApi.Controllers
 
                 List<string> errorList = new List<string>();
                 errorList.Add(ex.Message);
-                errorList.Add(ex.InnerException?.Message);
-                errorList.Add(ex.InnerException?.InnerException?.Message);
-                errorList.Add(ex.InnerException?.InnerException?.InnerException?.Message);
+                if(ex.InnerException != null) errorList.Add(ex.InnerException?.Message);
+                if(ex.InnerException?.InnerException != null) errorList.Add(ex.InnerException?.InnerException?.Message);
+                if(ex.InnerException?.InnerException?.InnerException != null) errorList.Add(ex.InnerException?.InnerException?.InnerException?.Message);
                 apiResponse.ValidationErrors.Add("Error", errorList);
             }
 
