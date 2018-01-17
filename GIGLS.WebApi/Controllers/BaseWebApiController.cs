@@ -112,7 +112,7 @@ namespace GIGLS.WebApi.Controllers
                 }
                 else
                 {
-                    apiResponse.Code = $"{(int)HttpStatusCode.InternalServerError}";
+                    //apiResponse.Code = $"{(int)HttpStatusCode.InternalServerError}";
                     List<string> errorList = new List<string>();
                     errorList.Add(giglsex.Message);
                     if(giglsex.InnerException != null ) errorList.Add(giglsex.InnerException?.Message);

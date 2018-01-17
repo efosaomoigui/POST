@@ -43,12 +43,22 @@ namespace GIGLS.Services.Implementation.Zone
         public async Task<WeightLimitPriceDTO> GetWeightLimitPriceById(int weightLimitPriceId)
         {
             var weight = await _uow.WeightLimitPrice.GetAsync(x => x.WeightLimitPriceId == weightLimitPriceId);
+            if (weight == null)
+            {
+                throw new GenericException("Weight limit price does not exist");
+            }
+
             return Mapper.Map<WeightLimitPriceDTO>(weight);
         }
 
         public async Task<WeightLimitPriceDTO> GetWeightLimitPriceByZoneId(int zoneId)
         {
             var weight = await _uow.WeightLimitPrice.GetAsync(x => x.ZoneId == zoneId);
+            if (weight == null)
+            {
+                throw new GenericException("Weight limit price does not exist");
+            }
+
             return Mapper.Map<WeightLimitPriceDTO>(weight);
         }
 
