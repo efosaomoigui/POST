@@ -64,16 +64,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             //If No Date Supply
             if (!accountFilterCriteria.StartDate.HasValue && !accountFilterCriteria.EndDate.HasValue)
             {
-                var Today = DateTime.Today;
-                var nextDay = DateTime.Today.AddDays(1).Date;
-                invoices = invoices.Where(x => x.DateCreated >= Today && x.DateCreated < nextDay);
+                var today = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                var nextDay = today.AddDays(1).Date;
+                invoices = invoices.Where(x => x.DateCreated >= today && x.DateCreated < nextDay);
             }
 
+            //StartDate has value and EndDate has Value 
             if (accountFilterCriteria.StartDate.HasValue && accountFilterCriteria.EndDate.HasValue)
             {
                 if (accountFilterCriteria.StartDate.Equals(accountFilterCriteria.EndDate))
                 {
-                    var nextDay = DateTime.Today.AddDays(1).Date;
+                    var nextDay = ((DateTime) accountFilterCriteria.StartDate).AddDays(1).Date;
                     invoices = invoices.Where(x => x.DateCreated >= StartDate && x.DateCreated < nextDay);
                 }
                 else
@@ -83,12 +84,14 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                 }
             }
 
+            //StartDate has value and EndDate has no Value
             if (accountFilterCriteria.StartDate.HasValue && !accountFilterCriteria.EndDate.HasValue)
             {
-                var nextDay = DateTime.Today.AddDays(1).Date;
+                var nextDay = ((DateTime)accountFilterCriteria.StartDate).AddDays(1).Date;
                 invoices = invoices.Where(x => x.DateCreated >= StartDate && x.DateCreated < nextDay);
             }
 
+            //StartDate has no value and EndDate has Value
             if (accountFilterCriteria.EndDate.HasValue && !accountFilterCriteria.StartDate.HasValue)
             {
                 var dayAfterEndDate = EndDate.AddDays(1).Date;

@@ -560,7 +560,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 // filter the two lists
                 var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappings.ToList().Select(a => a.GroupWaybillNumber).Contains(s.GroupWaybillNumber));
 
-                return unmappedGroupedWaybills.ToList();
+                var resultSet = new HashSet<string>();
+                var result = new List<GroupWaybillNumberMappingDTO>();                
+                foreach (var item in unmappedGroupedWaybills)
+                {
+                    if (resultSet.Add(item.GroupWaybillNumber))
+                    {
+                        result.Add(item);
+                        item.DestinationServiceCentre = await _centreService.GetServiceCentreById(item.DestinationServiceCentreId);
+                    }
+                }
+
+                return result.ToList();
             }
             catch (Exception)
             {
