@@ -114,7 +114,7 @@ namespace GIGLS.Services.Implementation.ShipmentScan
                 scanStatus.Incident = scanStatusDto.Incident;
                 scanStatus.Code = scanStatusDto.Code;
                 scanStatus.Comment = scanStatusDto.Comment;
-                scanStatus.ScanReason = scanStatusDto.ScanReason;
+                scanStatus.Reason = scanStatusDto.Reason;
                 _uow.Complete();
             }
             catch (Exception)

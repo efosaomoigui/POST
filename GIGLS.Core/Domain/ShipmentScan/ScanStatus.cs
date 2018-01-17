@@ -12,7 +12,7 @@ namespace GIGLS.Core.Domain.ShipmentScan
         public string Code { get; set; }
 
         public string Incident { get; set; }
-        public string ScanReason { get; set; }
+        public string Reason { get; set; }
         public string Comment { get; set; }
     }
 }
