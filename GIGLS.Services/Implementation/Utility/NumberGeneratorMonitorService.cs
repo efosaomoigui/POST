@@ -34,7 +34,7 @@ namespace GIGLS.Services.Implementation.Utility
 
                 //2. Increment lastcode to get the next available numberCode by 1
                 var number = long.Parse(numberCode) + 1;
-                var numberStr = number.ToString("00000000");
+                var numberStr = number.ToString("000000");
 
                 //Add or update the NumberGeneratorMonitor Table for the Service Centre and numberGeneratorType
                 if (monitor != null)
@@ -152,19 +152,19 @@ namespace GIGLS.Services.Implementation.Utility
             {
                 case NumberGeneratorType.CustomerCodeIndividual:
                     {
-                        return "IND-";
+                        return "IND";
                     }
                 case NumberGeneratorType.CustomerCodeCorporate:
                     {
-                        return "COO-";
+                        return "ACC";
                     }
                 case NumberGeneratorType.CustomerCodeEcommerce:
                     {
-                        return "ECO-";
+                        return "ECO";
                     }
                 default:
                     {
-                        return "IND-";
+                        return "IND";
                     }
             }
         }

@@ -23,6 +23,8 @@ using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.IServices.Business;
+using GIGLS.Services.Implementation.Utility;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -39,6 +41,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly ICompanyService _companyService;
         private readonly IDomesticRouteZoneMapService _domesticRouteZoneMapService;
         private readonly IWalletService _walletService;
+        private readonly IShipmentTrackingService _shipmentTrackingService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
@@ -46,7 +49,7 @@ namespace GIGLS.Services.Implementation.Shipments
             ICustomerService customerService, IUserService userService,
             IMessageSenderService messageSenderService, ICompanyService companyService,
             IDomesticRouteZoneMapService domesticRouteZoneMapService,
-            IWalletService walletService
+            IWalletService walletService, IShipmentTrackingService shipmentTrackingService
             )
         {
             _uow = uow;
@@ -60,6 +63,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _companyService = companyService;
             _domesticRouteZoneMapService = domesticRouteZoneMapService;
             _walletService = walletService;
+            _shipmentTrackingService = shipmentTrackingService;
             MapperConfig.Initialize();
         }
 
@@ -90,7 +94,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //populate the service centres
-                foreach(var shipment in incomingShipments)
+                foreach (var shipment in incomingShipments)
                 {
                     shipment.DepartureServiceCentre = await _centreService.GetServiceCentreById(shipment.DepartureServiceCentreId);
                     shipment.DestinationServiceCentre = await _centreService.GetServiceCentreById(shipment.DestinationServiceCentreId);
@@ -326,6 +330,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
 
+                //scan the shipment for tracking
+                await ScanShipment(new ScanDTO
+                {
+                    WaybillNumber = newShipment.Waybill,
+                    ShipmentScanStatus = ShipmentScanStatus.CRT
+                });
+
                 //send message
                 await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All, shipmentDTO);
 
@@ -406,7 +417,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             // add serial numbers to the ShipmentItems
             var serialNumber = 1;
-            foreach(var shipmentItem in newShipment.ShipmentItems)
+            foreach (var shipmentItem in newShipment.ShipmentItems)
             {
                 shipmentItem.SerialNumber = serialNumber;
                 serialNumber++;
@@ -599,7 +610,7 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<DailySalesDTO> GetDailySales(AccountFilterCriteria accountFilterCriteria)
         {
             //set defaults
-            if(accountFilterCriteria.StartDate == null)
+            if (accountFilterCriteria.StartDate == null)
             {
                 accountFilterCriteria.StartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
             }
@@ -614,7 +625,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var dailySalesDTO = new DailySalesDTO()
             {
-                StartDate = (DateTime) accountFilterCriteria.StartDate,
+                StartDate = (DateTime)accountFilterCriteria.StartDate,
                 EndDate = (DateTime)accountFilterCriteria.EndDate,
                 Invoices = invoices,
                 SalesCount = invoices.Count,
@@ -623,5 +634,27 @@ namespace GIGLS.Services.Implementation.Shipments
 
             return dailySalesDTO;
         }
+
+        ///////////
+        public async Task<bool> ScanShipment(ScanDTO scan)
+        {
+            // verify the waybill number exists in the system
+            var shipment = await GetShipmentForScan(scan.WaybillNumber);
+
+            string scanStatus = EnumHelper.GetDescription(scan.ShipmentScanStatus);
+
+            if (shipment != null)
+            {
+                var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
+                {
+                    DateTime = DateTime.Now,
+                    Status = scanStatus, //scan.ShipmentScanStatus.ToString(),
+                    Waybill = scan.WaybillNumber,
+                }, scan.ShipmentScanStatus);
+            }
+
+            return true;
+        }
+
     }
 }

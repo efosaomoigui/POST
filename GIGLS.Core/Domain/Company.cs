@@ -2,6 +2,8 @@
 using GIGLS.Core.Enums;
 using GIGLS.Core.Domain;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGL.GIGLS.Core.Domain
 {
@@ -18,6 +20,9 @@ namespace GIGL.GIGLS.Core.Domain
         public string City { get; set; }
         public string State { get; set; }
         public string Address { get; set; }
+
+        [MaxLength(20), MinLength(3)]
+        [Index(IsUnique = true)]
         public string PhoneNumber { get; set; }
         public string Industry { get; set; }
         public CompanyType CompanyType { get; set; }
