@@ -8,6 +8,7 @@ using GIGLS.Infrastructure;
 using GIGLS.CORE.Domain;
 using System;
 using GIGLS.Core.IServices.Shipments;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -96,7 +97,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public Task<IEnumerable<ShipmentReturnDTO>> GetShipmentReturns()
         {
-            var shipmentReturns = _uow.ShipmentReturn.GetAll();
+            var shipmentReturns = _uow.ShipmentReturn.GetAll().ToList().OrderByDescending(x => x.DateCreated);
             var shipmentReturnsDto = Mapper.Map<IEnumerable<ShipmentReturnDTO>>(shipmentReturns);
             return Task.FromResult(shipmentReturnsDto);
         }

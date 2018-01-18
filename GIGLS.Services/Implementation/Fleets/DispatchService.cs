@@ -145,7 +145,8 @@ namespace GIGLS.Services.Implementation.Fleets
                 var dispatch = await _uow.Dispatch.GetAsync(x => x.ManifestNumber.Equals(manifest));
                 if (dispatch == null)
                 {
-                    throw new GenericException("Information does not Exist");
+                    //throw new GenericException("Information does not Exist");
+                    return null;
                 }
                                 
                 return Mapper.Map<DispatchDTO>(dispatch); 

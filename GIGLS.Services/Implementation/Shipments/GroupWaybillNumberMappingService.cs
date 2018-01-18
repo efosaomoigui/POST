@@ -58,7 +58,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                return result;
+                return result.ToList().OrderByDescending(x => x.DateCreated);
             }
             catch (Exception)
             {
