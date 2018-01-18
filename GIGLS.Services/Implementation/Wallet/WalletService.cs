@@ -9,6 +9,7 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Wallet
@@ -52,8 +53,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
             }
 
-
-            return wallets;
+            return wallets.ToList().OrderBy(x => x.CustomerName);
         }
 
 

@@ -39,7 +39,7 @@ namespace GIGLS.Services.Implementation.Account
         {
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var invoices = await _uow.Invoice.GetInvoicesAsync(serviceCenterIds);
-            return invoices;
+            return invoices.ToList().OrderByDescending(x => x.DateCreated);
         }
 
         public async Task<InvoiceDTO> GetInvoiceById(int invoiceId)
