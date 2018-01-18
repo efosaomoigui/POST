@@ -8,6 +8,7 @@ using GIGLS.Infrastructure;
 using System.Collections.Generic;
 using GIGLS.CORE.Domain;
 using GIGLS.Core.IServices.User;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -121,7 +122,35 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                return await _uow.ShipmentTracking.GetShipmentTrackingsAsync(waybill);
+                var shipmentTracking = await _uow.ShipmentTracking.GetShipmentTrackingsAsync(waybill);
+
+                if (shipmentTracking.Count > 0)
+                {
+                    //1. check if waybill is a returned waybill
+                    var shipmentReturn = await _uow.ShipmentReturn.GetAsync(s => s.WaybillNew == waybill || s.WaybillOld == waybill);
+                    if (shipmentReturn != null)
+                    {
+                        if (shipmentReturn.WaybillNew == waybill)
+                        {
+                            //get shipmentTracking for old waybill
+                            var shipmentTrackingOldWaybill = await _uow.ShipmentTracking.GetShipmentTrackingsAsync(shipmentReturn.WaybillOld);
+
+                            //add to original list
+                            shipmentTracking.AddRange(shipmentTrackingOldWaybill);
+                        }
+
+                        if (shipmentReturn.WaybillOld == waybill)
+                        {
+                            //get shipmentTracking for new waybill
+                            var shipmentTrackingNewWaybill = await _uow.ShipmentTracking.GetShipmentTrackingsAsync(shipmentReturn.WaybillNew);
+
+                            //add to original list
+                            shipmentTracking.AddRange(shipmentTrackingNewWaybill);
+                        }
+                    }
+                }
+
+                return shipmentTracking.ToList().OrderByDescending(x => x.DateTime).ToList();
             }
             catch (Exception)
             {

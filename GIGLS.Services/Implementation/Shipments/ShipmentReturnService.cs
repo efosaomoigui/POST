@@ -42,44 +42,39 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var returnShipment = await _uow.ShipmentReturn.GetAsync(x => x.WaybillOld.Equals(waybill));
-
                 if (returnShipment != null)
                 {
                     throw new GenericException($"Shipment with waybill: {waybill} already processed for Returns");
                 }
-
-                //var shipmentCollection = await _collectionService.GetShipmentCollectionById(waybill);
-                //if (shipmentCollection.ShipmentScanStatus == ShipmentScanStatus.Collected)
-                //{
-                //    throw new GenericException($"Shipment with waybill: {waybill} had been collected");
-                //}                               
-                
+      
+                //check if Shipment has been collected
                 await _collectionService.CheckShipmentCollection(waybill);
 
+                //Get Existing Shipment information and swap departure and destination
                 var shipment = await _shipmentService.GetShipment(waybill);
-
                 int departure = shipment.DepartureServiceCentreId; 
-
                 shipment.DepartureServiceCentreId = shipment.DestinationServiceCentreId;
                 shipment.DestinationServiceCentreId = departure;
 
+                //update shipment collection status to Returnstatus
+                var shipmentCollection = await _collectionService.GetShipmentCollectionById(waybill);
+                shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.SSR;
+                await _collectionService.UpdateShipmentCollection(shipmentCollection);
+
+                //Create new shipment
                 var newShipment = await _shipmentService.AddShipment(shipment);
 
+                //create new shipment return
                 var newShipmentReturn = new ShipmentReturn
                 {
                     WaybillNew = newShipment.Waybill,
                     WaybillOld = waybill,
                     OriginalPayment = newShipment.GrandTotal,
                     //Discount =                
-                };
-                
+                };                
                 _uow.ShipmentReturn.Add(newShipmentReturn);
-
-                //update shipment collection status to Return status
-                var shipmentCollection = await _collectionService.GetShipmentCollectionById(waybill);
-                shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.SSR;
-                await _collectionService.UpdateShipmentCollection(shipmentCollection);
-
+                
+                //complete transaction
                 await _uow.CompleteAsync();
             }
             catch (Exception)
@@ -94,7 +89,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentReturn == null)
             {
-                throw new GenericException($"Shipment with waybill: {waybill} does Not Exist");
+                throw new GenericException($"Shipment with waybill: {waybill} does not exist");
             }
             return Mapper.Map<ShipmentReturnDTO>(shipmentReturn);
         }
@@ -112,7 +107,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentReturn == null)
             {
-                throw new GenericException("INFORMATION DOES NOT EXIST");
+                throw new GenericException($"Shipment with waybill: {waybill} does not exist");
             }
             _uow.ShipmentReturn.Remove(shipmentReturn);
             await _uow.CompleteAsync();
@@ -124,7 +119,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentReturn == null)
             {
-                throw new GenericException("INFORMATION DOES NOT EXIST");
+                throw new GenericException($"Shipment does not exist");
             }
 
             shipmentReturn.WaybillNew = shipmentReturnDto.WaybillNew;

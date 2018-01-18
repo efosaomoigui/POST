@@ -118,7 +118,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentCollection == null)
             {
-                throw new GenericException("INFORMATION DOES NOT EXIST");
+                throw new GenericException("Shipment does not exist");
             }
 
             if (shipmentCollectionDto.UserId == null)
@@ -173,7 +173,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentCollection != null)
             {
-                throw new GenericException($"Shipment with waybill: {waybill} had been collected");
+                throw new GenericException($"Shipment with waybill: {waybill} has been collected");
             }
 
             var shipmentDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(waybill) && (x.ShipmentScanStatus == ShipmentScanStatus.DASD || x.ShipmentScanStatus == ShipmentScanStatus.DASP));
