@@ -76,11 +76,21 @@ namespace GIGLS.Services.Implementation.Shipments
 
         }
 
-        public Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentCollections()
+        public async Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentCollections()
         {
-            var shipmentCollection = _uow.ShipmentCollection.GetAll();
+            //get all shipments by servicecentre
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            var shipments = await _uow.Shipment.FindAsync(s => serviceCenters.Contains(s.DestinationServiceCentreId));
+            var shipmentsWaybills = shipments.ToList().Select(a => a.Waybill).AsEnumerable();
+
+            //get collected shipment
+            var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x =>
+            x.ShipmentScanStatus == ShipmentScanStatus.DDSA &&  
+            shipmentsWaybills.Contains(x.Waybill));
+
             var shipmentCollectionDto = Mapper.Map<IEnumerable<ShipmentCollectionDTO>>(shipmentCollection);
-            return Task.FromResult(shipmentCollectionDto);
+
+            return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateModified));
         }
 
         public async Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentWaitingForCollection()
