@@ -9,18 +9,22 @@ using GIGLS.CORE.Domain;
 using System;
 using GIGLS.Core.IServices.Shipments;
 using System.Linq;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
     public class ShipmentReturnService : IShipmentReturnService
     {
         private readonly IUnitOfWork _uow;
+        private IUserService _userService;
         private readonly IShipmentService _shipmentService;
         private readonly IShipmentCollectionService _collectionService;
 
-        public ShipmentReturnService(IUnitOfWork uow, IShipmentService shipmentService, IShipmentCollectionService collectionService)
+        public ShipmentReturnService(IUnitOfWork uow, IUserService userService,
+            IShipmentService shipmentService, IShipmentCollectionService collectionService)
         {
             _uow = uow;
+            _userService = userService;
             _shipmentService = shipmentService;
             _collectionService = collectionService;
             MapperConfig.Initialize();
@@ -95,11 +99,21 @@ namespace GIGLS.Services.Implementation.Shipments
             return Mapper.Map<ShipmentReturnDTO>(shipmentReturn);
         }
 
-        public Task<IEnumerable<ShipmentReturnDTO>> GetShipmentReturns()
+        public async Task<IEnumerable<ShipmentReturnDTO>> GetShipmentReturns()
         {
-            var shipmentReturns = _uow.ShipmentReturn.GetAll().ToList().OrderByDescending(x => x.DateCreated);
+            //get all shipments by servicecentre
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            var shipments = await _uow.Shipment.FindAsync(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+            var shipmentsWaybills = shipments.ToList().Select(a => a.Waybill).AsEnumerable();                     
+
+            //get collected shipment
+            var shipmentReturns = await _uow.ShipmentReturn.FindAsync(x => shipmentsWaybills.Contains(x.WaybillNew));
             var shipmentReturnsDto = Mapper.Map<IEnumerable<ShipmentReturnDTO>>(shipmentReturns);
-            return Task.FromResult(shipmentReturnsDto);
+            return await Task.FromResult(shipmentReturnsDto.OrderByDescending(x => x.DateCreated));
+
+            //var shipmentReturns = _uow.ShipmentReturn.GetAll().ToList().OrderByDescending(x => x.DateCreated);
+            //var shipmentReturnsDto = Mapper.Map<IEnumerable<ShipmentReturnDTO>>(shipmentReturns);
+            //return Task.FromResult(shipmentReturnsDto);
         }
 
         public async Task RemoveShipmentReturn(string waybill)
