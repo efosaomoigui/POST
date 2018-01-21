@@ -106,7 +106,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 ////
 
                 var count = shipment.ToList().Count();
-                shipment = shipment.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count);
+                //shipment = shipment.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count);
 
                 List<ShipmentDTO> shipmentDto = (from r in shipment
                                                  select new ShipmentDTO()
@@ -192,6 +192,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                     }
 
                 }
+
+                shipmentDto = shipmentDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
 
                 return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto.ToList()), count);
             }
