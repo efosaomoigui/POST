@@ -1,4 +1,5 @@
-﻿using GIGLS.CORE.DTO;
+﻿using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.CORE.DTO;
 using System;
 
 namespace GIGLS.Core.DTO.Shipments
@@ -12,5 +13,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string TrackingType { get; set; }
         public string User { get; set; }
         public string Waybill { get; set; }
+        public ScanStatusDTO ScanStatus { get; set; }
     }
 }

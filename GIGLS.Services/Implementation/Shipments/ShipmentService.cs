@@ -657,14 +657,14 @@ namespace GIGLS.Services.Implementation.Shipments
             // verify the waybill number exists in the system
             var shipment = await GetShipmentForScan(scan.WaybillNumber);
 
-            string scanStatus = EnumHelper.GetDescription(scan.ShipmentScanStatus);
+            string scanStatus = scan.ShipmentScanStatus.ToString(); 
 
             if (shipment != null)
             {
                 var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                 {
                     DateTime = DateTime.Now,
-                    Status = scanStatus, //scan.ShipmentScanStatus.ToString(),
+                    Status = scanStatus, 
                     Waybill = scan.WaybillNumber,
                 }, scan.ShipmentScanStatus);
             }

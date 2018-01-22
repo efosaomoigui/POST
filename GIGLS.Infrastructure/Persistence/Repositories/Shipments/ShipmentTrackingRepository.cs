@@ -1,5 +1,6 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IRepositories.Shipments;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
@@ -60,8 +61,15 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               Waybill = shipmentTracking.Waybill,
                                               ShipmentTrackingId = shipmentTracking.ShipmentTrackingId,
                                               TrackingType = shipmentTracking.TrackingType.ToString(),
-                                              User = shipmentTracking.User.FirstName + " "+ shipmentTracking.User.LastName,
-                                              Status = shipmentTracking.Status
+                                              User = shipmentTracking.User.FirstName + " " + shipmentTracking.User.LastName,
+                                              Status = shipmentTracking.Status,
+                                              ScanStatus = Context.ScanStatus.Where(c => c.Code == shipmentTracking.Status).Select(x => new ScanStatusDTO
+                                              {
+                                                Code = x.Code,
+                                                Incident = x.Incident,
+                                                Reason = x.Reason,
+                                                Comment = x.Comment
+                                              }).FirstOrDefault(),
                                           };
                 return Task.FromResult(shipmentTrackingDto.ToList().OrderByDescending(x => x.DateTime).ToList());
             }
@@ -71,6 +79,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
 
         }
-        
+
     }
 }
