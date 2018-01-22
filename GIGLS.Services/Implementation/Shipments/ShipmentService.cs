@@ -93,6 +93,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     incomingShipments = allShipments.Item1.Result.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).ToList();
                 }
 
+                //delivered shipments should not be displayed in expected shipments
+                var shipmetCollection = _uow.ShipmentCollection.GetAll().ToList();
+                incomingShipments = incomingShipments.Where(s =>
+                !shipmetCollection.Select(a => a.Waybill).Contains(s.Waybill)).ToList();
+
                 //populate the service centres
                 foreach (var shipment in incomingShipments)
                 {

@@ -20,23 +20,23 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
         public Task<IEnumerable<InvoiceDTO>> GetInvoicesAsync(int[] serviceCentreIds)
         {
             //filter by service center using general ledger waybill
-            var generalLedgerContext = Context.GeneralLedger.AsQueryable();
+            var shipmentContext = Context.Shipment.AsQueryable();
             var serviceCenterWaybills = new List<string>();
-            var invoices = new List<Invoice>();
+            IQueryable<Invoice> invoices = new List<Invoice>().AsQueryable();
             if (serviceCentreIds.Length > 0)
             {
-                generalLedgerContext = Context.GeneralLedger.Where(s => serviceCentreIds.Contains(s.ServiceCentreId));
-                serviceCenterWaybills = generalLedgerContext.Select(s => s.Waybill).ToList();
-                invoices = Context.Invoice.Where(s => serviceCenterWaybills.Contains(s.Waybill)).ToList();
+                shipmentContext = Context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+                serviceCenterWaybills = shipmentContext.Select(s => s.Waybill).ToList();
+                invoices = Context.Invoice.Where(s => serviceCenterWaybills.Contains(s.Waybill));
             }
             ////
             else
             {
-                invoices = Context.Invoice.ToList();
+                invoices = Context.Invoice;
             }
 
             
-            var invoiceDto = Mapper.Map<IEnumerable<InvoiceDTO>>(invoices);
+            var invoiceDto = Mapper.Map<IEnumerable<InvoiceDTO>>(invoices.ToList());
             return Task.FromResult(invoiceDto);
         }
 
@@ -46,13 +46,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
 
             //filter by service center using general ledger waybill
-            var generalLedgerContext = Context.GeneralLedger.AsQueryable();
+            var shipmentContext = Context.Shipment.AsQueryable();
             var serviceCenterWaybills = new List<string>();
             IQueryable<Invoice> invoices = new List<Invoice>().AsQueryable();
             if (serviceCentreIds.Length > 0)
             {
-                generalLedgerContext = Context.GeneralLedger.Where(s => serviceCentreIds.Contains(s.ServiceCentreId));
-                serviceCenterWaybills = generalLedgerContext.Select(s => s.Waybill).ToList();
+                shipmentContext = Context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+                serviceCenterWaybills = shipmentContext.Select(s => s.Waybill).ToList();
                invoices = Context.Invoice.Where(s => serviceCenterWaybills.Contains(s.Waybill));
             }
             ////
@@ -87,8 +87,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             //StartDate has value and EndDate has no Value
             if (accountFilterCriteria.StartDate.HasValue && !accountFilterCriteria.EndDate.HasValue)
             {
-                var nextDay = ((DateTime)accountFilterCriteria.StartDate).AddDays(1).Date;
-                invoices = invoices.Where(x => x.DateCreated >= StartDate && x.DateCreated < nextDay);
+                var today = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                //var nextDay = ((DateTime)accountFilterCriteria.StartDate).AddDays(1).Date;
+                invoices = invoices.Where(x => x.DateCreated >= StartDate && x.DateCreated < today);
             }
 
             //StartDate has no value and EndDate has Value
