@@ -228,39 +228,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
             ////
 
-            //If No Date Supply
-            if (!f_Criteria.StartDate.HasValue && !f_Criteria.EndDate.HasValue)
-            {
-                var Today = DateTime.Today;
-                var nextDay = DateTime.Today.AddDays(1).Date;
-                shipments = shipments.Where(x => x.DateCreated >= Today && x.DateCreated < nextDay);
-            }
-
-            if (f_Criteria.StartDate.HasValue && f_Criteria.EndDate.HasValue)
-            {
-                if (f_Criteria.StartDate.Equals(f_Criteria.EndDate))
-                {
-                    var nextDay = DateTime.Today.AddDays(1).Date;
-                    shipments = shipments.Where(x => x.DateCreated >= StartDate && x.DateCreated < nextDay);
-                }
-                else
-                {
-                    var dayAfterEndDate = EndDate.AddDays(1).Date;
-                    shipments = shipments.Where(x => x.DateCreated >= StartDate && x.DateCreated < dayAfterEndDate);
-                }
-            }
-
-            if (f_Criteria.StartDate.HasValue && !f_Criteria.EndDate.HasValue)
-            {
-                var nextDay = DateTime.Today.AddDays(1).Date;
-                shipments = shipments.Where(x => x.DateCreated >= StartDate && x.DateCreated < nextDay);
-            }
-
-            if (f_Criteria.EndDate.HasValue && !f_Criteria.StartDate.HasValue)
-            {
-                var dayAfterEndDate = EndDate.AddDays(1).Date;
-                shipments = shipments.Where(x => x.DateCreated < dayAfterEndDate);
-            }
+            //get startDate and endDate
+            var queryDate = f_Criteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+            shipments = shipments.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate);
 
             if (f_Criteria.ServiceCentreId > 0)
             {
