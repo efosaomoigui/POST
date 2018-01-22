@@ -35,7 +35,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                 invoices = Context.Invoice;
             }
 
-            
+
             var invoiceDto = Mapper.Map<IEnumerable<InvoiceDTO>>(invoices.ToList());
             return Task.FromResult(invoiceDto);
         }
@@ -53,7 +53,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             {
                 shipmentContext = Context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
                 serviceCenterWaybills = shipmentContext.Select(s => s.Waybill).ToList();
-               invoices = Context.Invoice.Where(s => serviceCenterWaybills.Contains(s.Waybill));
+                invoices = Context.Invoice.Where(s => serviceCenterWaybills.Contains(s.Waybill));
             }
             ////
             else
@@ -61,52 +61,43 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                 invoices = Context.Invoice;
             }
 
-            //If No Date Supply
-            if (!accountFilterCriteria.StartDate.HasValue && !accountFilterCriteria.EndDate.HasValue)
-            {
-                var today = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
-                var nextDay = today.AddDays(1).Date;
-                invoices = invoices.Where(x => x.DateCreated >= today && x.DateCreated < nextDay);
-            }
+            //get startDate and endDate
+            var queryDate = accountFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+            invoices = invoices.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate);
 
-            //StartDate has value and EndDate has Value 
-            if (accountFilterCriteria.StartDate.HasValue && accountFilterCriteria.EndDate.HasValue)
-            {
-                if (accountFilterCriteria.StartDate.Equals(accountFilterCriteria.EndDate))
-                {
-                    var nextDay = ((DateTime) accountFilterCriteria.StartDate).AddDays(1).Date;
-                    invoices = invoices.Where(x => x.DateCreated >= StartDate && x.DateCreated < nextDay);
-                }
-                else
-                {
-                    var dayAfterEndDate = EndDate.AddDays(1).Date;
-                    invoices = invoices.Where(x => x.DateCreated >= StartDate && x.DateCreated < dayAfterEndDate);
-                }
-            }
-
-            //StartDate has value and EndDate has no Value
-            if (accountFilterCriteria.StartDate.HasValue && !accountFilterCriteria.EndDate.HasValue)
-            {
-                var today = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
-                //var nextDay = ((DateTime)accountFilterCriteria.StartDate).AddDays(1).Date;
-                invoices = invoices.Where(x => x.DateCreated >= StartDate && x.DateCreated < today);
-            }
-
-            //StartDate has no value and EndDate has Value
-            if (accountFilterCriteria.EndDate.HasValue && !accountFilterCriteria.StartDate.HasValue)
-            {
-                var dayAfterEndDate = EndDate.AddDays(1).Date;
-                invoices = invoices.Where(x => x.DateCreated < dayAfterEndDate);
-            }
-
-            if(accountFilterCriteria.PaymentStatus.HasValue)
+            //payment status
+            if (accountFilterCriteria.PaymentStatus.HasValue)
             {
                 invoices = invoices.Where(x => x.PaymentStatus.Equals(accountFilterCriteria.PaymentStatus));
+            }
+
+            //service center
+            if (accountFilterCriteria.ServiceCentreId > 0)
+            {
+                shipmentContext = Context.Shipment.Where(s => accountFilterCriteria.ServiceCentreId == s.DepartureServiceCentreId);
+                serviceCenterWaybills = shipmentContext.Select(s => s.Waybill).ToList();
+                invoices = invoices.Where(s => serviceCenterWaybills.Contains(s.Waybill));
+            }
+
+            //station
+            if (accountFilterCriteria.StationId > 0)
+            {
+                //get the service centres in that station
+                var serviceCentres = Context.ServiceCentre.Where(s => s.StationId == accountFilterCriteria.StationId).
+                    Select(a => a.ServiceCentreId).ToList();
+
+                shipmentContext = Context.Shipment.Where(s => serviceCentres.Contains(s.DepartureServiceCentreId));
+                serviceCenterWaybills = shipmentContext.Select(s => s.Waybill).ToList();
+                invoices = invoices.Where(s => serviceCenterWaybills.Contains(s.Waybill));
             }
 
             var result = invoices.ToList();
             var invoicesResult = Mapper.Map<IEnumerable<InvoiceDTO>>(result);
             return Task.FromResult(invoicesResult.OrderByDescending(x => x.DateCreated).ToList());
-        }        
+        }
+
+
     }
 }
