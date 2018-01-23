@@ -11,6 +11,7 @@ using GIGLS.Core.IServices.User;
 using System.Linq;
 using GIGLS.Core.DTO.ServiceCentres;
 using AutoMapper;
+using GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -186,12 +187,24 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var groupWaybillNumberDTO = await _groupWaybillNumberService.GetGroupWayBillNumberById(groupWaybillNumber);
+                var groupwaybillObj = await _uow.GroupWaybillNumber.GetAsync(x => x.GroupWaybillCode.Equals(groupWaybillNumber));
 
                 //validate the ids are in the system
-                if (groupWaybillNumberDTO == null)
+                var serviceCenterId = int.Parse(groupWaybillNumber.Substring(1, 3));
+                if (groupwaybillObj == null)
                 {
-                    throw new GenericException($"No GroupWaybill exists for this : {groupWaybillNumber}");
+                    var serviceCentre = _uow.ServiceCentre.Get(serviceCenterId);
+                    var currentUserId = await _userService.GetCurrentUserId();
+                    var newGroupWaybill = new GroupWaybillNumber
+                    {
+                        GroupWaybillCode = groupWaybillNumber,
+                        UserId = currentUserId,
+                        ServiceCentreId = serviceCentre.ServiceCentreId,
+                        IsActive = true
+                    };
+
+                    _uow.GroupWaybillNumber.Add(newGroupWaybill);
+                    await _uow.CompleteAsync();
                 }
 
                 foreach (var waybillNumber in waybillNumberList)
@@ -209,12 +222,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     //Add new Mapping
                     var newMapping = new GroupWaybillNumberMapping
                     {
-                        GroupWaybillNumber = groupWaybillNumberDTO.GroupWaybillCode,
+                        GroupWaybillNumber = groupWaybillNumber,
                         WaybillNumber = shipmentDTO.Waybill,
                         IsActive = true,
                         DateMapped = DateTime.Now,
                         DepartureServiceCentreId = departureServiceCenterId,
-                        DestinationServiceCentreId = groupWaybillNumberDTO.ServiceCentreId
+                        DestinationServiceCentreId = serviceCenterId
                     };
                     _uow.GroupWaybillNumberMapping.Add(newMapping);
                 }

@@ -135,22 +135,21 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var userId = await _userService.GetCurrentUserId();
-                await _manifestService.AddManifest(
-                    new ManifestDTO
-                    {
-                        ManifestCode = manifest,
-                        DateCreated = DateTime.Now,
-                        DateModified = DateTime.Now,
-                        DateTime = DateTime.Now,
-                        DispatchedBy = userId
-                    });
 
-                var manifestDTO = await _manifestService.GetManifestByCode(manifest);
+                //var manifestDTO = await _manifestService.GetManifestByCode(manifest);
+                var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
 
                 //validate the ids are in the system
-                if (manifestDTO == null)
+                if (manifestObj == null)
                 {
-                    throw new GenericException($"No Manifest exists for this code: {manifest}");
+                    await _manifestService.AddManifest(
+                        new ManifestDTO
+                        {
+                            ManifestCode = manifest,
+                            DateTime = DateTime.Now,
+                            DispatchedBy = userId
+                        });
+                    //throw new GenericException($"No Manifest exists for this code: {manifest}");
                 }
 
                 foreach (var groupWaybillNumber in groupWaybillNumberList)
@@ -165,7 +164,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     //Add new Mapping
                     var newMapping = new ManifestGroupWaybillNumberMapping
                     {
-                        ManifestCode = manifestDTO.ManifestCode,
+                        ManifestCode = manifest,
                         GroupWaybillNumber = groupWaybillNumberDTO.GroupWaybillCode,
                         IsActive = true,
                         DateMapped = DateTime.Now
