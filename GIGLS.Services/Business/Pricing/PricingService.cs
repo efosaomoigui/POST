@@ -183,9 +183,13 @@ namespace GIGLS.Services.Business.Pricing
 
             foreach (var item in haulageDistanceMappingPrices)
             {
-                if (item.StartRange >= distance && distance <= item.EndRange
+                if (distance >= item.StartRange && distance <= item.EndRange
                     && item.Haulage.HaulageId == haulageid)
                 {
+                    if(distance == 0)
+                    {
+                        distance = 1;
+                    }
                     price = item.Price * distance;
                     return price;
                 }
