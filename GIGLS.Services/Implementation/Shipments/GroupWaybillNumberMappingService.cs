@@ -12,6 +12,7 @@ using System.Linq;
 using GIGLS.Core.DTO.ServiceCentres;
 using AutoMapper;
 using GIGLS.Core.Domain;
+using GIGLS.Core.IServices.ServiceCentres;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -21,15 +22,17 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IGroupWaybillNumberService _groupWaybillNumberService;
         private readonly IShipmentService _shipmentService;
         private readonly IUserService _userService;
+        private readonly IServiceCentreService _centreService;
 
         public GroupWaybillNumberMappingService(IUnitOfWork uow,
             IGroupWaybillNumberService groupWaybillNumberService,
-            IShipmentService shipmentService,
+            IShipmentService shipmentService, IServiceCentreService centreService,
             IUserService userService)
         {
             _uow = uow;
             _groupWaybillNumberService = groupWaybillNumberService;
             _shipmentService = shipmentService;
+            _centreService = centreService;
             _userService = userService;
             MapperConfig.Initialize();
         }
@@ -191,9 +194,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //validate the ids are in the system
                 var serviceCenterId = int.Parse(groupWaybillNumber.Substring(1, 3));
+                var serviceCentre = await _centreService.GetServiceCentreById(serviceCenterId);
                 if (groupwaybillObj == null)
-                {
-                    var serviceCentre = _uow.ServiceCentre.Get(serviceCenterId);
+                {                    
                     var currentUserId = await _userService.GetCurrentUserId();
                     var newGroupWaybill = new GroupWaybillNumber
                     {
