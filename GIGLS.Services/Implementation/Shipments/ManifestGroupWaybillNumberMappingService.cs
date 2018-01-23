@@ -7,6 +7,7 @@ using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Domain;
 using GIGLS.Core.IServices.User;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -230,7 +231,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                return result;
+                return result.OrderByDescending(x => x.DateCreated);
             }
             catch (Exception)
             {
