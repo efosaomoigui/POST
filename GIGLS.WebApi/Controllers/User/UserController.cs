@@ -416,6 +416,57 @@ namespace GIGLS.WebApi.Controllers.User
 
         }
 
+        //Login afte session expires
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("api/user/login2")]
+        public async Task<IServiceResponse<JObject>> Login2(string username, string password)
+        {
+
+            string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+            //const string apiBaseUri = "http://giglsresourceapi.azurewebsites.net/api/";
+            string getTokenResponse;
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                using (var client = new HttpClient())
+                {
+                    //setup client
+                    client.BaseAddress = new Uri(apiBaseUri);
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    //setup login data
+                    var formContent = new FormUrlEncodedContent(new[]
+                    {
+                         new KeyValuePair<string, string>("grant_type", "password"),
+                         new KeyValuePair<string, string>("Username", username),
+                         new KeyValuePair<string, string>("Password", password),
+                     });
+
+                    //setup login data
+                    HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
+
+                    //get access token from response body
+                    var responseJson = await responseMessage.Content.ReadAsStringAsync();
+                    var jObject = JObject.Parse(responseJson);
+
+                    getTokenResponse = jObject.GetValue("access_token").ToString();
+
+                    if (!responseMessage.IsSuccessStatusCode)
+                    {
+                        throw new GenericException("Operation could not complete login successfully:");
+                    }
+
+                    return new ServiceResponse<JObject>
+                    {
+                        Object = jObject
+                    };
+                }
+            });
+        }
+
+
         //[GIGLSActivityAuthorize(Activity = "Create")]
         [AllowAnonymous]
         [HttpPost]
