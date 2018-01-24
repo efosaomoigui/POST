@@ -645,6 +645,13 @@ namespace GIGLS.Services.Implementation.Shipments
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var invoices = await _uow.Invoice.GetInvoicesAsync(accountFilterCriteria, serviceCenterIds);
 
+            //get shipment info
+            foreach (var item in invoices)
+            {
+                var shipmentDTO = await GetShipment(item.Waybill);
+                item.Shipment = shipmentDTO;
+            }
+
             var dailySalesDTO = new DailySalesDTO()
             {
                 StartDate = (DateTime)accountFilterCriteria.StartDate,

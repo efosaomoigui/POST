@@ -7,6 +7,7 @@ using GIGLS.Core;
 using GIGLS.Core.IServices.User;
 using AutoMapper;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.IServices.Shipments;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -14,11 +15,14 @@ namespace GIGLS.Services.Implementation.Report
     {
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
+        private readonly IShipmentService _shipmentService;
+        
 
-        public AccountReportService(IUnitOfWork uow, IUserService userService)
+        public AccountReportService(IUnitOfWork uow, IUserService userService, IShipmentService shipmentService)
         {
             _uow = uow;
             _userService = userService;
+            _shipmentService = shipmentService;
         }
         public async Task<List<GeneralLedgerDTO>> GetExpenditureReports(AccountFilterCriteria accountFilterCriteria)
         {
@@ -42,8 +46,7 @@ namespace GIGLS.Services.Implementation.Report
             //get shipment info
             foreach(var item in invoices)
             {
-                var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == item.Waybill);
-                var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
+                var shipmentDTO = await _shipmentService.GetShipment(item.Waybill);
                 item.Shipment = shipmentDTO;
             }
 

@@ -40,14 +40,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             var invoiceDto = Mapper.Map<IEnumerable<InvoiceDTO>>(invoices.ToList());
 
-            //get shipment information
-            foreach (var item in invoiceDto)
-            {
-                var shipment = Context.Shipment.SingleOrDefault(s => s.Waybill == item.Waybill);
-                var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
-                item.Shipment = shipmentDTO;
-            }
-
             return Task.FromResult(invoiceDto);
         }
 
@@ -106,14 +98,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             var result = invoices.ToList();
             var invoicesResult = Mapper.Map<IEnumerable<InvoiceDTO>>(result);
-
-            //get shipment information
-            foreach (var item in invoicesResult)
-            {
-                var shipment = Context.Shipment.SingleOrDefault(s => s.Waybill == item.Waybill);
-                var shipmentDTO = Mapper.Map<ShipmentDTO>(shipment);
-                item.Shipment = shipmentDTO;
-            }
 
             return Task.FromResult(invoicesResult.OrderByDescending(x => x.DateCreated).ToList());
         }
