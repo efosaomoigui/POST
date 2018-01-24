@@ -320,6 +320,7 @@
     <Compile Include="Controllers\StateController.cs" />
     <Compile Include="Controllers\User\LoginController.cs" />
     <Compile Include="Controllers\User\UserController.cs" />
+    <Compile Include="Controllers\Utility\GlobalPropertyController.cs" />
     <Compile Include="Controllers\Wallet\CashOnDeliveryAccountController.cs" />
     <Compile Include="Controllers\Wallet\CashOnDeliveryBalanceController.cs" />
     <Compile Include="Controllers\Wallet\WalletController.cs" />

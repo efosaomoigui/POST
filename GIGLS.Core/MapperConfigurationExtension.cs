@@ -23,6 +23,8 @@ using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.Domain.MessagingLog;
 using GIGLS.Core.Domain.ShipmentScan;
 using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.Core.Domain.Utility;
+using GIGLS.Core.DTO.Utility;
 
 namespace GIGLS.Core
 {
@@ -199,6 +201,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<ScanStatus, ScanStatusDTO>();
                 config.CreateMap<ScanStatusDTO, ScanStatus>();
+
+                config.CreateMap<GlobalProperty, GlobalPropertyDTO>();
+                config.CreateMap<GlobalPropertyDTO, GlobalProperty>();
             });
 
             isInit = true;

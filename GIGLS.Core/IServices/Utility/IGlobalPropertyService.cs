@@ -1,0 +1,16 @@
+﻿using GIGLS.Core.DTO.Utility;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace GIGLS.Core.IServices.Utility
+{
+    public interface IGlobalPropertyService : IServiceDependencyMarker
+    {
+
+        Task<IEnumerable<GlobalPropertyDTO>> GetGlobalProperties();
+        Task<GlobalPropertyDTO> GetGlobalPropertyById(int globalPropertyId);
+        Task<object> AddGlobalProperty(GlobalPropertyDTO globalProperty);
+        Task UpdateGlobalProperty(int globalPropertyId, GlobalPropertyDTO globalProperty);
+        Task RemoveGlobalProperty(int globalPropertyId);
+    }
+}

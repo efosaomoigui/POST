@@ -15,6 +15,7 @@ using Microsoft.AspNet.Identity.EntityFramework;
 using GIGLS.Infrastructure.Migrations;
 using GIGLS.Core.Domain.MessagingLog;
 using GIGLS.Core.Domain.ShipmentScan;
+using GIGLS.Core.Domain.Utility;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -172,6 +173,9 @@ namespace GIGLS.Infrastructure.Persistence
 
         //Shipment Scan Status
         public DbSet<ScanStatus> ScanStatus { get; set; }
+
+        //Global Property
+        public DbSet<GlobalProperty> GlobalProperty { get; set; }
 
         #endregion
 

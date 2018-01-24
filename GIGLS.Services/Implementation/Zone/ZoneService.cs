@@ -109,7 +109,7 @@ namespace GIGLS.Services.Implementation.Zone
                 }
                 zone.ZoneName = zoneDto.ZoneName;
                 zone.Status = zoneDto.Status;
-                zone.RowVersion = zoneDto.RowVersion;
+               // zone.RowVersion = zoneDto.RowVersion;
                 _uow.Complete();
             }
             catch (Exception)

@@ -190,6 +190,7 @@
     <Compile Include="Domain\SubSubNav.cs" />
     <Compile Include="Domain\User.cs" />
     <Compile Include="Domain\UserServiceCentreMapping.cs" />
+    <Compile Include="Domain\Utility\GlobalProperty.cs" />
     <Compile Include="Domain\VAT.cs" />
     <Compile Include="Domain\Vendor.cs" />
     <Compile Include="Domain\Wallet\AccountSummary.cs" />
@@ -276,6 +277,7 @@
     <Compile Include="DTO\User\ClaimDto.cs" />
     <Compile Include="DTO\User\RoleDTO.cs" />
     <Compile Include="DTO\User\UserDTO.cs" />
+    <Compile Include="DTO\Utility\GlobalPropertyDTO.cs" />
     <Compile Include="DTO\Vendors\VendorDTO.cs" />
     <Compile Include="DTO\Wallet\CashOnDeliveryAccountDTO.cs" />
     <Compile Include="DTO\Wallet\CashOnDeliveryAccountSummaryDTO.cs" />
@@ -395,6 +397,7 @@
     <Compile Include="IRepositories\Stocks\IStockSupplyDetailsRepository.cs" />
     <Compile Include="IRepositories\Stores\IStoreRepository.cs" />
     <Compile Include="IRepositories\User\IUserRepository.cs" />
+    <Compile Include="IRepositories\Utility\IGlobalPropertyRepository.cs" />
     <Compile Include="IRepositories\Utility\INumberGeneratorMonitorRepository.cs" />
     <Compile Include="IRepositories\Vendors\IVendorRepository.cs" />
     <Compile Include="IRepositories\Wallet\ICashOnDeliveryBalanceRepository.cs" />
@@ -479,6 +482,7 @@
     <Compile Include="IServices\Stocks\IStockSupplyDetailsService.cs" />
     <Compile Include="IServices\Stores\IStoreService.cs" />
     <Compile Include="IServices\User\IUserService.cs" />
+    <Compile Include="IServices\Utility\IGlobalPropertyService.cs" />
     <Compile Include="IServices\Utility\INumberGeneratorMonitorService.cs" />
     <Compile Include="IServices\Utility\IPasswordGenerator.cs" />
     <Compile Include="IServices\Vendors\IVendorService.cs" />

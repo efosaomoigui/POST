@@ -98,6 +98,7 @@ namespace GIGLS.Core
         IEmailSendLogRepository EmailSendLog { get; set; }
         ISmsSendLogRepository SmsSendLog { get; set; }
         IScanStatusRepository ScanStatus { get; set; }
+        IGlobalPropertyRepository GlobalProperty { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

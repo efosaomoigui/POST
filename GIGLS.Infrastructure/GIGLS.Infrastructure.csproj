@@ -167,6 +167,7 @@
     <Compile Include="Persistence\Repositories\Stocks\StockSupplyDetailsRepository.cs" />
     <Compile Include="Persistence\Repositories\Stores\StoreRepository.cs" />
     <Compile Include="Persistence\Repositories\User\UserRepository.cs" />
+    <Compile Include="Persistence\Repositories\Utility\GlobalPropertyRepository.cs" />
     <Compile Include="Persistence\Repositories\Utility\NumberGeneratorMonitorRepository.cs" />
     <Compile Include="Persistence\Repositories\Vendors\VendorRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\CashOnDeliveryAccountRepository.cs" />
