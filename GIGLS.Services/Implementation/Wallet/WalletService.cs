@@ -142,6 +142,12 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //create entry in WalletTransaction table
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            if (serviceCenterIds.Length <= 0)
+            {
+                var currentUser = await _userService.GetUserById(walletTransactionDTO.UserId);
+                throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+            }
+
 
             var newWalletTransaction = Mapper.Map<WalletTransaction>(walletTransactionDTO);
             newWalletTransaction.WalletId = walletId;

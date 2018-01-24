@@ -12,23 +12,23 @@ namespace GIGLS.Services.Implementation.Utility
         /// ASP,
         /// Then when you pass in the enum, it will retrieve the description
         /// </summary>
-        public static string GetDescription(Enum en)
-        {
-            Type type = en.GetType();
+        //public static string GetDescription(Enum en)
+        //{
+        //    Type type = en.GetType();
 
-            MemberInfo[] memInfo = type.GetMember(en.ToString());
+        //    MemberInfo[] memInfo = type.GetMember(en.ToString());
 
-            if (memInfo != null && memInfo.Length > 0)
-            {
-                object[] attrs = memInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
+        //    if (memInfo != null && memInfo.Length > 0)
+        //    {
+        //        object[] attrs = memInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
 
-                if (attrs != null && attrs.Length > 0)
-                {
-                    return ((DescriptionAttribute)attrs[0]).Description;
-                }
-            }
+        //        if (attrs != null && attrs.Length > 0)
+        //        {
+        //            return ((DescriptionAttribute)attrs[0]).Description;
+        //        }
+        //    }
 
-            return en.ToString();
-        }
+        //    return en.ToString();
+        //}
     }
 }

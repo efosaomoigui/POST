@@ -86,9 +86,9 @@ namespace GIGLS.Services.Business.Pricing
 
             return shipmentTotalPrice;
         }
-        
+
         private async Task<decimal> GetRegularPrice(PricingDTO pricingDto)
-        {                        
+        {
             if (pricingDto.DepartureServiceCentreId <= 0)
             {
                 // use currentUser login servicecentre
@@ -105,7 +105,7 @@ namespace GIGLS.Services.Business.Pricing
 
             //This is our limit weight.
             var activeWeightLimit = await _weightLimit.GetActiveWeightLimits();
-            
+
             decimal PackagePrice;
 
             if (pricingDto.Weight > activeWeightLimit.Weight)
@@ -154,7 +154,7 @@ namespace GIGLS.Services.Business.Pricing
 
             //check haulage exists
             var haulage = await _haulageService.GetHaulageById(haulageid);
-            if(haulage == null)
+            if (haulage == null)
             {
                 throw new GenericException("The Tonne specified has not been mapped");
             }
@@ -178,22 +178,24 @@ namespace GIGLS.Services.Business.Pricing
             var distance = haulageDistanceMapping.Distance;
 
             //get the price
-            var haulageDistanceMappingPrices = await _haulageDistanceMappingPriceService.
-                GetHaulageDistanceMappingPrices();
+            var haulageDistanceMappingPriceList = await _uow.HaulageDistanceMappingPrice.
+                FindAsync(z => z.HaulageId == haulageid &&
+                distance >= z.StartRange && distance <= z.EndRange);
+            var haulageDistanceMappingPrice = haulageDistanceMappingPriceList.FirstOrDefault();
 
-            foreach (var item in haulageDistanceMappingPrices)
+            if (haulageDistanceMappingPrice != null)
             {
-                if (item.StartRange >= distance && distance <= item.EndRange
-                    && item.Haulage.HaulageId == haulageid)
+                if (distance == 0)
                 {
-                    price = item.Price * distance;
-                    return price;
+                    distance = 1;
                 }
+                price = haulageDistanceMappingPrice.Price * distance;
+                return price;
             }
 
             return price;
         }
-        
+
         private async Task<decimal> GetEcommercePrice(PricingDTO pricingDto)
         {
             if (pricingDto.DepartureServiceCentreId <= 0)
@@ -201,17 +203,18 @@ namespace GIGLS.Services.Business.Pricing
                 // use currentUser login servicecentre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
-                if (serviceCenters.Length > 1) {
+                if (serviceCenters.Length > 1)
+                {
                     throw new GenericException("This user is assign to more than one(1) Service Centre  ");
-                }                    
+                }
                 pricingDto.DepartureServiceCentreId = serviceCenters[0];
             }
-            
+
             var zone = await _routeZone.GetZone(pricingDto.DepartureServiceCentreId, pricingDto.DestinationServiceCentreId);
             decimal deliveryOptionPrice = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId);
 
             decimal PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Ecommerce);
             return PackagePrice + deliveryOptionPrice;
-        }        
+        }
     }
 }

@@ -93,6 +93,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     incomingShipments = allShipments.Item1.Result.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).ToList();
                 }
 
+                //delivered shipments should not be displayed in expected shipments
+                var shipmetCollection = _uow.ShipmentCollection.GetAll().ToList();
+                incomingShipments = incomingShipments.Where(s =>
+                !shipmetCollection.Select(a => a.Waybill).Contains(s.Waybill)).ToList();
+
                 //populate the service centres
                 foreach (var shipment in incomingShipments)
                 {
@@ -652,14 +657,14 @@ namespace GIGLS.Services.Implementation.Shipments
             // verify the waybill number exists in the system
             var shipment = await GetShipmentForScan(scan.WaybillNumber);
 
-            string scanStatus = EnumHelper.GetDescription(scan.ShipmentScanStatus);
+            string scanStatus = scan.ShipmentScanStatus.ToString(); 
 
             if (shipment != null)
             {
                 var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                 {
                     DateTime = DateTime.Now,
-                    Status = scanStatus, //scan.ShipmentScanStatus.ToString(),
+                    Status = scanStatus, 
                     Waybill = scan.WaybillNumber,
                 }, scan.ShipmentScanStatus);
             }

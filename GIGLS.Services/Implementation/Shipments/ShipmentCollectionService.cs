@@ -51,7 +51,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 Waybill = shipmentCollection.Waybill,
                 //Location = tracking.Location,
-                Status = EnumHelper.GetDescription(ShipmentScanStatus.DDSA), //ShipmentScanStatus.Collected.ToString(),
+                Status = ShipmentScanStatus.OKT.ToString(), //EnumHelper.GetDescription(ShipmentScanStatus.DDSA),
                 UserId = currentUserId,
                 DateTime = DateTime.Now
             };
@@ -85,7 +85,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //get collected shipment
             var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x =>
-            x.ShipmentScanStatus == ShipmentScanStatus.DDSA &&  
+            x.ShipmentScanStatus == ShipmentScanStatus.OKT ||
+            x.ShipmentScanStatus == ShipmentScanStatus.OKC  &&  
             shipmentsWaybills.Contains(x.Waybill));
 
             var shipmentCollectionDto = Mapper.Map<IEnumerable<ShipmentCollectionDTO>>(shipmentCollection);
@@ -101,8 +102,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var shipmentsWaybills = shipments.ToList().Select(a => a.Waybill).AsEnumerable();
 
             var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x => 
-            x.ShipmentScanStatus == ShipmentScanStatus.DASD || 
-            x.ShipmentScanStatus == ShipmentScanStatus.DASP &&
+            x.ShipmentScanStatus == ShipmentScanStatus.ARF &&
             shipmentsWaybills.Contains(x.Waybill));
 
             var shipmentCollectionDto = Mapper.Map<IEnumerable<ShipmentCollectionDTO>>(shipmentCollection);
@@ -150,7 +150,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
             {
                 DateTime = DateTime.Now,
-                Status = EnumHelper.GetDescription(shipmentCollectionDto.ShipmentScanStatus), //shipmentCollectionDto.ShipmentScanStatus.ToString(),
+                Status = shipmentCollectionDto.ShipmentScanStatus.ToString(),
                 Waybill = shipmentCollectionDto.Waybill,
                 User = shipmentCollectionDto.UserId,
             }, shipmentCollectionDto.ShipmentScanStatus);
@@ -179,14 +179,14 @@ namespace GIGLS.Services.Implementation.Shipments
         //Check if the Shipment has not been collected before Processing Return Shipment
         public async Task CheckShipmentCollection(string waybill)
         {
-            var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(waybill) && x.ShipmentScanStatus == ShipmentScanStatus.DDSA);
+            var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(waybill) && (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC));
 
             if (shipmentCollection != null)
             {
                 throw new GenericException($"Shipment with waybill: {waybill} has been collected");
             }
 
-            var shipmentDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(waybill) && (x.ShipmentScanStatus == ShipmentScanStatus.DASD || x.ShipmentScanStatus == ShipmentScanStatus.DASP));
+            var shipmentDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(waybill) && (x.ShipmentScanStatus == ShipmentScanStatus.ARF));
 
             if (shipmentDelivered == null)
             {

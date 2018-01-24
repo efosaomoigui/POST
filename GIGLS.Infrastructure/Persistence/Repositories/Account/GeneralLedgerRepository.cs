@@ -65,39 +65,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             IQueryable<GeneralLedger> generalLedgers = generalLedgerContext.Include("ServiceCentre");
 
-            //If No Date Supply
-            if (!accountFilterCriteria.StartDate.HasValue && !accountFilterCriteria.EndDate.HasValue)
-            {
-                var Today = DateTime.Today;
-                var nextDay = DateTime.Today.AddDays(1).Date;
-                generalLedgers = generalLedgers.Where(x => x.DateCreated >= Today && x.DateCreated < nextDay);
-            }
+            //get startDate and endDate
+            var queryDate = accountFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+            generalLedgers = generalLedgers.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate);
 
-            if (accountFilterCriteria.StartDate.HasValue && accountFilterCriteria.EndDate.HasValue)
-            {
-                if (accountFilterCriteria.StartDate.Equals(accountFilterCriteria.EndDate))
-                {
-                    var nextDay = DateTime.Today.AddDays(1).Date;
-                    generalLedgers = generalLedgers.Where(x => x.DateCreated >= StartDate && x.DateCreated < nextDay);
-                }
-                else
-                {
-                    var dayAfterEndDate = EndDate.AddDays(1).Date;
-                    generalLedgers = generalLedgers.Where(x => x.DateCreated >= StartDate && x.DateCreated < dayAfterEndDate);
-                }
-            }
-
-            if (accountFilterCriteria.StartDate.HasValue && !accountFilterCriteria.EndDate.HasValue)
-            {
-                var nextDay = DateTime.Today.AddDays(1).Date;
-                generalLedgers = generalLedgers.Where(x => x.DateCreated >= StartDate && x.DateCreated < nextDay);
-            }
-
-            if (accountFilterCriteria.EndDate.HasValue && !accountFilterCriteria.StartDate.HasValue)
-            {
-                var dayAfterEndDate = EndDate.AddDays(1).Date;
-                generalLedgers = generalLedgers.Where(x => x.DateCreated < dayAfterEndDate);
-            }
 
             if (accountFilterCriteria.creditDebitType.HasValue)
             {

@@ -121,8 +121,8 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // get shipment delivered - global
             var shipmentTrackings = await _shipmentTrackingService.GetShipmentTrackings();
-            //var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Delivered.ToString()).ToList();
-            var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASP) || s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASD)).ToList();
+            var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.ARF.ToString()).ToList();
+            //var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASP) || s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASD)).ToList();
             var shipmentsDeliveredByServiceCenter =
                 serviceCentreShipments.Where(s => shipmentsDelivered.Select(d => d.Waybill).Contains(s.Waybill));
 
@@ -131,7 +131,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             //var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Recieved.ToString()).ToList();
             //var shipmentsOrderedByServiceCenter =
             //        serviceCentreShipments.Where(s => shipmentsOrdered.Select(d => d.Waybill).Contains(s.Waybill));
-            var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == EnumHelper.GetDescription(ShipmentScanStatus.ASP) || s.Status == EnumHelper.GetDescription(ShipmentScanStatus.ASPD)).ToList();
+            // var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == EnumHelper.GetDescription(ShipmentScanStatus.ASP) || s.Status == EnumHelper.GetDescription(ShipmentScanStatus.ASPD)).ToList();
+            var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.CRT.ToString()).ToList();
             var shipmentsOrderedByServiceCenter = serviceCentreShipments;
             dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
 
@@ -201,8 +202,8 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // get shipment delivered - global
             var shipmentTrackings = await _shipmentTrackingService.GetShipmentTrackings();
-            //var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Delivered.ToString()).ToList();
-            var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASP) || s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASD)).ToList();
+            var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.ARF.ToString()).ToList();
+            //var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASP) || s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASD)).ToList();
             var shipmentsDeliveredByServiceCenter =
                 serviceCentreShipments.Where(s => shipmentsDelivered.Select(d => d.Waybill).Contains(s.Waybill));
 
@@ -211,7 +212,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             //var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Recieved.ToString()).ToList();
             //var shipmentsOrderedByServiceCenter =
             //        serviceCentreShipments.Where(s => shipmentsOrdered.Select(d => d.Waybill).Contains(s.Waybill));
-            var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == EnumHelper.GetDescription(ShipmentScanStatus.ASP) || s.Status == EnumHelper.GetDescription(ShipmentScanStatus.ASPD)).ToList();
+            //var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == EnumHelper.GetDescription(ShipmentScanStatus.ASP) || s.Status == EnumHelper.GetDescription(ShipmentScanStatus.ASPD)).ToList();
+            var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.CRT.ToString()).ToList();
             var shipmentsOrderedByServiceCenter = serviceCentreShipments;
             dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
 
@@ -283,8 +285,8 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // get shipment delivered
             var shipmentTrackings = await _shipmentTrackingService.GetShipmentTrackings();
-            //var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Delivered.ToString()).ToList();
-            var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASP) || s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASD)).ToList();
+            var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.ARF.ToString()).ToList();
+            //var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASP) || s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASD)).ToList();
 
             // get shipment ordered
             //var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Recieved.ToString()).ToList();

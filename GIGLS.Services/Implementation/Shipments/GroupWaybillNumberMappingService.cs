@@ -11,6 +11,8 @@ using GIGLS.Core.IServices.User;
 using System.Linq;
 using GIGLS.Core.DTO.ServiceCentres;
 using AutoMapper;
+using GIGLS.Core.Domain;
+using GIGLS.Core.IServices.ServiceCentres;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -20,15 +22,17 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IGroupWaybillNumberService _groupWaybillNumberService;
         private readonly IShipmentService _shipmentService;
         private readonly IUserService _userService;
+        private readonly IServiceCentreService _centreService;
 
         public GroupWaybillNumberMappingService(IUnitOfWork uow,
             IGroupWaybillNumberService groupWaybillNumberService,
-            IShipmentService shipmentService,
+            IShipmentService shipmentService, IServiceCentreService centreService,
             IUserService userService)
         {
             _uow = uow;
             _groupWaybillNumberService = groupWaybillNumberService;
             _shipmentService = shipmentService;
+            _centreService = centreService;
             _userService = userService;
             MapperConfig.Initialize();
         }
@@ -186,12 +190,24 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var groupWaybillNumberDTO = await _groupWaybillNumberService.GetGroupWayBillNumberById(groupWaybillNumber);
+                var groupwaybillObj = await _uow.GroupWaybillNumber.GetAsync(x => x.GroupWaybillCode.Equals(groupWaybillNumber));
 
                 //validate the ids are in the system
-                if (groupWaybillNumberDTO == null)
-                {
-                    throw new GenericException($"No GroupWaybill exists for this : {groupWaybillNumber}");
+                var serviceCenterId = int.Parse(groupWaybillNumber.Substring(1, 3));
+                var serviceCentre = await _centreService.GetServiceCentreById(serviceCenterId);
+                if (groupwaybillObj == null)
+                {                    
+                    var currentUserId = await _userService.GetCurrentUserId();
+                    var newGroupWaybill = new GroupWaybillNumber
+                    {
+                        GroupWaybillCode = groupWaybillNumber,
+                        UserId = currentUserId,
+                        ServiceCentreId = serviceCentre.ServiceCentreId,
+                        IsActive = true
+                    };
+
+                    _uow.GroupWaybillNumber.Add(newGroupWaybill);
+                    await _uow.CompleteAsync();
                 }
 
                 foreach (var waybillNumber in waybillNumberList)
@@ -209,12 +225,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     //Add new Mapping
                     var newMapping = new GroupWaybillNumberMapping
                     {
-                        GroupWaybillNumber = groupWaybillNumberDTO.GroupWaybillCode,
+                        GroupWaybillNumber = groupWaybillNumber,
                         WaybillNumber = shipmentDTO.Waybill,
                         IsActive = true,
                         DateMapped = DateTime.Now,
                         DepartureServiceCentreId = departureServiceCenterId,
-                        DestinationServiceCentreId = groupWaybillNumberDTO.ServiceCentreId
+                        DestinationServiceCentreId = serviceCenterId
                     };
                     _uow.GroupWaybillNumberMapping.Add(newMapping);
                 }

@@ -50,7 +50,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
                 _uow.ShipmentTracking.Add(newShipmentTracking);
 
-                if (scanStatus.Equals(ShipmentScanStatus.DASD) || scanStatus.Equals(ShipmentScanStatus.DASP))
+                if (scanStatus.Equals(ShipmentScanStatus.ARF))
                 {
                     var newShipmentCollection = new ShipmentCollection
                     {

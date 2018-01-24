@@ -39,20 +39,20 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var groupwaybill = await _service.GenerateNextNumber(NumberGeneratorType.GroupWaybillNumber, groupWaybillNumberDTO.ServiceCentreCode);
-                var serviceCentre = await _serviceCentreService.GetServiceCentreByCode(groupWaybillNumberDTO.ServiceCentreCode);
+                //var serviceCentre = await _serviceCentreService.GetServiceCentreByCode(groupWaybillNumberDTO.ServiceCentreCode);
 
-                var currentUserId = await _userService.GetCurrentUserId();
+                //var currentUserId = await _userService.GetCurrentUserId();
 
-                var newGroupWaybill = new GroupWaybillNumber
-                {
-                    GroupWaybillCode = groupwaybill,
-                    UserId = currentUserId,
-                    ServiceCentreId = serviceCentre.ServiceCentreId,
-                    IsActive = true
-                };
+                //var newGroupWaybill = new GroupWaybillNumber
+                //{
+                //    GroupWaybillCode = groupwaybill,
+                //    UserId = currentUserId,
+                //    ServiceCentreId = serviceCentre.ServiceCentreId,
+                //    IsActive = true
+                //};
 
-                _uow.GroupWaybillNumber.Add(newGroupWaybill);
-                await _uow.CompleteAsync();
+                //_uow.GroupWaybillNumber.Add(newGroupWaybill);
+                //await _uow.CompleteAsync();
                 return groupwaybill;
             }
             catch (Exception)

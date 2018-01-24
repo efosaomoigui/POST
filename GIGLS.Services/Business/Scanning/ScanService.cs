@@ -48,7 +48,7 @@ namespace GIGLS.Services.Business.Scanning
             // verify the waybill number exists in the system
             var shipment = await _shipmentService.GetShipmentForScan(scan.WaybillNumber);
 
-            string scanStatus = EnumHelper.GetDescription(scan.ShipmentScanStatus);
+            string scanStatus = scan.ShipmentScanStatus.ToString();
 
             if (shipment != null)
             {
