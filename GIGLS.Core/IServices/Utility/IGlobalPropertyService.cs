@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Utility;
+using GIGLS.Core.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,5 +14,6 @@ namespace GIGLS.Core.IServices.Utility
         Task UpdateGlobalProperty(int globalPropertyId, GlobalPropertyDTO globalProperty);
         Task UpdateGlobalProperty(int globalPropertyId, bool status);
         Task RemoveGlobalProperty(int globalPropertyId);
+        Task<GlobalPropertyDTO> GetGlobalProperty(GlobalPropertyType globalPropertyType);
     }
 }

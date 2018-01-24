@@ -256,6 +256,7 @@
     <Compile Include="DTO\ServiceCentres\ServiceCentreDTO.cs" />
     <Compile Include="DTO\ServiceCentres\StationDTO.cs" />
     <Compile Include="DTO\ShipmentScan\ScanStatusDTO.cs" />
+    <Compile Include="DTO\Shipments\DemurrageDTO.cs" />
     <Compile Include="DTO\Shipments\FilterOptionsDto.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberDTO.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberMappingDTO.cs" />
@@ -307,6 +308,7 @@
     <Compile Include="Enums\FilterCustomerType.cs" />
     <Compile Include="Enums\FleetType.cs" />
     <Compile Include="Enums\Gender.cs" />
+    <Compile Include="Enums\GlobalPropertyType.cs" />
     <Compile Include="Enums\InventoryType.cs" />
     <Compile Include="Enums\JobCardMaintenanceStatus.cs" />
     <Compile Include="Enums\JobCardStatus.cs" />

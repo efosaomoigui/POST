@@ -42,6 +42,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IDomesticRouteZoneMapService _domesticRouteZoneMapService;
         private readonly IWalletService _walletService;
         private readonly IShipmentTrackingService _shipmentTrackingService;
+        private readonly IGlobalPropertyService _globalPropertyService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
@@ -49,7 +50,8 @@ namespace GIGLS.Services.Implementation.Shipments
             ICustomerService customerService, IUserService userService,
             IMessageSenderService messageSenderService, ICompanyService companyService,
             IDomesticRouteZoneMapService domesticRouteZoneMapService,
-            IWalletService walletService, IShipmentTrackingService shipmentTrackingService
+            IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
+            IGlobalPropertyService globalPropertyService
             )
         {
             _uow = uow;
@@ -64,6 +66,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _domesticRouteZoneMapService = domesticRouteZoneMapService;
             _walletService = walletService;
             _shipmentTrackingService = shipmentTrackingService;
+            _globalPropertyService = globalPropertyService;
             MapperConfig.Initialize();
         }
 
@@ -221,12 +224,51 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipmentCollectionDTO = Mapper.Map<ShipmentCollectionDTO>(shipmentCollection);
                 shipmentDto.ShipmentCollection = shipmentCollectionDTO;
 
+                //get Demurrage information
+                GetDemurrageInformation(shipmentDto);
+
                 return shipmentDto;
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        private async Task GetDemurrageInformation(ShipmentDTO shipmentDto)
+        {
+            var price = 0;
+            var demurrageDays = 0;
+
+            //get GlobalProperty
+            var demurrageCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurrageDayCount);
+            var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice);
+
+            //validate
+            if(demurrageCountObj == null || demurragePriceObj == null)
+            {
+                return;
+            }
+
+            //get ShipmentCollection
+            var shipmentCollection = shipmentDto.ShipmentCollection;
+
+            var today = DateTime.Now;
+            var demurrageStartDate = shipmentCollection.DateCreated.AddDays(int.Parse(demurrageCountObj.Value));
+            demurrageDays = today.Subtract(demurrageStartDate).Days;
+
+            if(demurrageDays > 0)
+            {
+                price = demurrageDays * (int.Parse(demurragePriceObj.Value));
+            }
+
+            //set Demurrage info in ShipmentDTO
+            shipmentDto.Demurrage = new DemurrageDTO
+            {
+                Amount = price,
+                DayCount = demurrageDays,
+                WaybillNumber = shipmentDto.Waybill
+            };
         }
 
         public async Task UpdateShipment(int shipmentId, ShipmentDTO shipmentDto)

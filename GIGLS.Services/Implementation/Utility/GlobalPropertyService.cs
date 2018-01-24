@@ -7,6 +7,7 @@ using GIGLS.Core;
 using GIGLS.Infrastructure;
 using GIGLS.Core.Domain.Utility;
 using AutoMapper;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Services.Implementation.Utility
 {
@@ -57,7 +58,7 @@ namespace GIGLS.Services.Implementation.Utility
                 var global = await _uow.GlobalProperty.GetAsync(globalPropertyId);
                 if (global == null)
                 {
-                    throw new GenericException("Information deos not exist");
+                    throw new GenericException("Information does not exist");
                 }
 
                 var globalDTo = Mapper.Map<GlobalPropertyDTO>(global);
@@ -76,7 +77,7 @@ namespace GIGLS.Services.Implementation.Utility
                 var global = await _uow.GlobalProperty.GetAsync(globalPropertyId);
                 if (global == null)
                 {
-                    throw new GenericException("Information deos not exist");
+                    throw new GenericException("Information does not exist");
                 }
                 _uow.GlobalProperty.Remove(global);
                 _uow.Complete();
@@ -94,7 +95,7 @@ namespace GIGLS.Services.Implementation.Utility
                 var global = await _uow.GlobalProperty.GetAsync(globalPropertyId);
                 if (global == null || globalProperty.GlobalPropertyId != globalPropertyId)
                 {
-                    throw new GenericException("Information deos not exist");
+                    throw new GenericException("Information does not exist");
                 }
 
                 global.Key = globalProperty.Key;
@@ -116,11 +117,25 @@ namespace GIGLS.Services.Implementation.Utility
                 var global = await _uow.GlobalProperty.GetAsync(globalPropertyId);
                 if (global == null)
                 {
-                    throw new GenericException("Information deos not exist");
+                    throw new GenericException("Information does not exist");
                 }
 
                 global.IsActive = status;
                 _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<GlobalPropertyDTO> GetGlobalProperty(GlobalPropertyType globalPropertyType)
+        {
+            try
+            {
+                var global = _uow.GlobalProperty.SingleOrDefault(s => s.Key == globalPropertyType.ToString());
+                var globalDTo = Mapper.Map<GlobalPropertyDTO>(global);
+                return await Task.FromResult(globalDTo);
             }
             catch (Exception)
             {
