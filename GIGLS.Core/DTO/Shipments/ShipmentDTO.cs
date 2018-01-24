@@ -92,5 +92,8 @@ namespace GIGLS.Core.DTO.Shipments
 
         //ShipmentCollection
         public ShipmentCollectionDTO ShipmentCollection { get; set; }
+
+        //Demurrage Information
+        public DemurrageDTO Demurrage { get; set; }
     }
 }
