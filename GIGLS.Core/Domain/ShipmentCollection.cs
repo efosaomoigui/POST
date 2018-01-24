@@ -21,7 +21,7 @@ namespace GIGLS.CORE.Domain
         public string IndentificationUrl { get; set; }
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
 
-        //Who process the collection
+        //Who processed the collection
         public string UserId { get; set; }
     }
 }

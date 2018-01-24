@@ -215,6 +215,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     s => s.CustomerId == shipmentDto.CustomerId && s.CustomerType == customerType);
                 shipmentDto.WalletNumber = customerWallet.WalletNumber;
 
+                //get ShipmentCollection if it exists
+                var shipmentCollection = _uow.ShipmentCollection.
+                    SingleOrDefault(s => s.Waybill == shipmentDto.Waybill);
+                var shipmentCollectionDTO = Mapper.Map<ShipmentCollectionDTO>(shipmentCollection);
+                shipmentDto.ShipmentCollection = shipmentCollectionDTO;
+
                 return shipmentDto;
             }
             catch (Exception)
