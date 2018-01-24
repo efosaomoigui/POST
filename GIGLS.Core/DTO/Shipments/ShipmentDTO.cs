@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using GIGLS.CORE.DTO;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Zone;
+using GIGLS.CORE.DTO.Shipments;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -89,5 +90,7 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal? InvoiceDiscountValue_display { get; set; }
         public decimal? offInvoiceDiscountvalue_display { get; set; }
 
+        //ShipmentCollection
+        public ShipmentCollectionDTO ShipmentCollection { get; set; }
     }
 }
