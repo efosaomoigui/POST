@@ -99,5 +99,20 @@ namespace GIGLS.WebApi.Controllers.Utility
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("{globalPropertyId:int}/status/{status}")]
+        public async Task<IServiceResponse<object>> UpdateZone(int globalPropertyId, bool status)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _globalService.UpdateGlobalProperty(globalPropertyId, status);
+                return new ServiceResponse<object>
+                {
+                    Object = true
+                };
+            });
+        }
     }
 }

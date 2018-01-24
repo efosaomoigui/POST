@@ -11,6 +11,7 @@ namespace GIGLS.Core.IServices.Utility
         Task<GlobalPropertyDTO> GetGlobalPropertyById(int globalPropertyId);
         Task<object> AddGlobalProperty(GlobalPropertyDTO globalProperty);
         Task UpdateGlobalProperty(int globalPropertyId, GlobalPropertyDTO globalProperty);
+        Task UpdateGlobalProperty(int globalPropertyId, bool status);
         Task RemoveGlobalProperty(int globalPropertyId);
     }
 }

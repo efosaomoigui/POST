@@ -108,5 +108,24 @@ namespace GIGLS.Services.Implementation.Utility
                 throw;
             }
         }
+
+        public async Task UpdateGlobalProperty(int globalPropertyId, bool status)
+        {
+            try
+            {
+                var global = await _uow.GlobalProperty.GetAsync(globalPropertyId);
+                if (global == null)
+                {
+                    throw new GenericException("Information deos not exist");
+                }
+
+                global.IsActive = status;
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
