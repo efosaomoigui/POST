@@ -22,7 +22,14 @@ namespace GIGLS.Services.Implementation.Report
         public async Task<List<ShipmentDTO>> GetShipments(ShipmentFilterCriteria filterCriteria)
         {
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-            return await _uow.Shipment.GetShipments(filterCriteria, serviceCenters);
+            var shipmentDto =  await _uow.Shipment.GetShipments(filterCriteria, serviceCenters);
+            
+            foreach(var item in shipmentDto)
+            {
+                var user = await _uow.User.GetUserById(item.UserId);
+                item.UserId = user.FirstName + " " + user.LastName;
+            }
+            return shipmentDto;
         }
 
         public async Task<List<ShipmentDTO>> GetTodayShipments()

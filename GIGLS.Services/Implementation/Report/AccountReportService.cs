@@ -28,14 +28,28 @@ namespace GIGLS.Services.Implementation.Report
         {
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             accountFilterCriteria.creditDebitType = Core.Enums.CreditDebitType.Debit;
-            return await _uow.GeneralLedger.GetGeneralLedgersAsync(accountFilterCriteria, serviceCenterIds);
+            var generalLedgerDTO = await _uow.GeneralLedger.GetGeneralLedgersAsync(accountFilterCriteria, serviceCenterIds);
+
+            foreach (var item in generalLedgerDTO)
+            {
+                var user = await _uow.User.GetUserById(item.UserId);
+                item.UserId = user.FirstName + " " + user.LastName;
+            }
+            return generalLedgerDTO;
         }
 
         public async Task<List<GeneralLedgerDTO>> GetIncomeReports(AccountFilterCriteria accountFilterCriteria)
         {
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             accountFilterCriteria.creditDebitType = Core.Enums.CreditDebitType.Credit;
-            return await _uow.GeneralLedger.GetGeneralLedgersAsync(accountFilterCriteria, serviceCenterIds);
+            var generalLedgerDTO = await _uow.GeneralLedger.GetGeneralLedgersAsync(accountFilterCriteria, serviceCenterIds);
+             
+            foreach (var item in generalLedgerDTO)
+            {
+                var user = await _uow.User.GetUserById(item.UserId);
+                item.UserId = user.FirstName + " " + user.LastName;
+            }
+            return generalLedgerDTO;
         }
 
         public async Task<List<InvoiceDTO>> GetInvoiceReports(AccountFilterCriteria accountFilterCriteria)
@@ -47,9 +61,10 @@ namespace GIGLS.Services.Implementation.Report
             foreach(var item in invoices)
             {
                 var shipmentDTO = await _shipmentService.GetShipment(item.Waybill);
+                var user = await _uow.User.GetUserById(shipmentDTO.UserId);
                 item.Shipment = shipmentDTO;
+                item.Shipment.UserId = user.FirstName + " " + user.LastName;
             }
-
             return invoices;
         }
     }

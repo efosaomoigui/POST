@@ -23,8 +23,6 @@ using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.DTO.Account;
-using GIGLS.Core.IServices.Business;
-using GIGLS.Services.Implementation.Utility;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -697,7 +695,9 @@ namespace GIGLS.Services.Implementation.Shipments
             foreach (var item in invoices)
             {
                 var shipmentDTO = await GetShipment(item.Waybill);
+                var user = await _uow.User.GetUserById(shipmentDTO.UserId);
                 item.Shipment = shipmentDTO;
+                item.Shipment.UserId = user.FirstName + " " + user.LastName;
             }
 
             var dailySalesDTO = new DailySalesDTO()
