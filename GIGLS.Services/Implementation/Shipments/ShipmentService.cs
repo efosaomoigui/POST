@@ -247,6 +247,12 @@ namespace GIGLS.Services.Implementation.Shipments
             //validate
             if(demurrageCountObj == null || demurragePriceObj == null)
             {
+                shipmentDto.Demurrage = new DemurrageDTO
+                {
+                    Amount = price,
+                    DayCount = demurrageDays,
+                    WaybillNumber = shipmentDto.Waybill
+                };
                 return;
             }
 

@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.Enums;
+﻿using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.CORE.DTO.Shipments
 {
@@ -19,8 +20,11 @@ namespace GIGLS.CORE.DTO.Shipments
         public bool IsCashOnDelivery { get; set; }
         public decimal? CashOnDeliveryAmount { get; set; }
         public string Description { get; set; }
+        
+        //Demurrage Information
+        public DemurrageDTO Demurrage { get; set; }
 
-        //Who process the collection
+        //Who processed the collection
         public string UserId { get; set; }
     }
 }
