@@ -189,6 +189,7 @@
     <Compile Include="Implementation\Shipments\GroupWaybillNumberService.cs" />
     <Compile Include="Implementation\Shipments\ManifestGroupWaybillNumberMappingService.cs" />
     <Compile Include="Implementation\Shipments\ManifestService.cs" />
+    <Compile Include="Implementation\Shipments\MissingShipmentService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentCollectionService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentPackageService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentReturnService.cs" />

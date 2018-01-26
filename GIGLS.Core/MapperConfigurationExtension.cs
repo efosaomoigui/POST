@@ -204,6 +204,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<GlobalProperty, GlobalPropertyDTO>();
                 config.CreateMap<GlobalPropertyDTO, GlobalProperty>();
+
+                config.CreateMap<MissingShipment, MissingShipmentDTO>();
+                config.CreateMap<MissingShipmentDTO, MissingShipment>();
             });
 
             isInit = true;
