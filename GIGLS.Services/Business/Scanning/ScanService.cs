@@ -14,14 +14,20 @@ namespace GIGLS.Services.Business.Scanning
         private readonly IShipmentService _shipmentService;
         private readonly IGroupWaybillNumberMappingService _groupService;
         private readonly IGroupWaybillNumberService _groupWaybill;
+        private readonly IManifestService _manifestService;
+        private readonly IManifestGroupWaybillNumberMappingService _groupManifest;
+
 
         public ScanService(IShipmentService shipmentService, IShipmentTrackingService shipmentTrackingService, 
-            IGroupWaybillNumberMappingService groupService, IGroupWaybillNumberService groupWaybill)
+            IGroupWaybillNumberMappingService groupService, IGroupWaybillNumberService groupWaybill, 
+            IManifestService manifestService, IManifestGroupWaybillNumberMappingService groupManifest)
         {
             _shipmentService = shipmentService;
             _shipmentTrackingService = shipmentTrackingService;
             _groupService = groupService;
             _groupWaybill = groupWaybill;
+            _manifestService = manifestService;
+            _groupManifest = groupManifest;
         }
 
         //public async Task<bool> ScanShipment(string waybillNumber, ShipmentScanStatus scanStatus)
@@ -45,7 +51,7 @@ namespace GIGLS.Services.Business.Scanning
 
         public async Task<bool> ScanShipment(ScanDTO scan)
         {
-            // verify the waybill number exists in the system
+            // check if the waybill number exists in the system
             var shipment = await _shipmentService.GetShipmentForScan(scan.WaybillNumber);
 
             string scanStatus = scan.ShipmentScanStatus.ToString();
@@ -60,7 +66,7 @@ namespace GIGLS.Services.Business.Scanning
                     var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                     {
                         DateTime = DateTime.Now,
-                        Status = scanStatus, //scan.ShipmentScanStatus.ToString(),
+                        Status = scanStatus, 
                         Waybill = scan.WaybillNumber,
                     }, scan.ShipmentScanStatus);
                     return true;
@@ -71,7 +77,7 @@ namespace GIGLS.Services.Business.Scanning
                 }                
             }
 
-            // verify the group waybill number exists in the system
+            // check if the group waybill number exists in the system
             var groupWaybill = await _groupWaybill.GetGroupWayBillNumberForScan(scan.WaybillNumber);
 
             if (groupWaybill != null)
@@ -79,6 +85,7 @@ namespace GIGLS.Services.Business.Scanning
                 var groupMappingShipmentList = await _groupService.GetWaybillNumbersInGroup(scan.WaybillNumber);
 
                 var groupShipmentList = groupMappingShipmentList.Shipments;
+
                 //In case no shipment attached to the group waybill  
                 if (groupShipmentList.Count > 0 )
                 {
@@ -101,8 +108,44 @@ namespace GIGLS.Services.Business.Scanning
                     throw new GenericException($"No Shipment for Group waybill: {scan.WaybillNumber} ");
                 }
             }
-            
-            if (shipment == null && groupWaybill == null)
+
+            // check if the manifest number exists in the system
+            var manifest = await _manifestService.GetManifestCodeForScan(scan.WaybillNumber);
+
+            if (manifest != null)
+            {
+                var groupWaybillInManifestList = await _groupManifest.GetGroupWaybillNumbersInManifest(manifest.ManifestId);
+               
+                //In case no shipment attached to the manifest  
+                if (groupWaybillInManifestList.Count > 0)
+                {
+                    foreach (var groupShipment in groupWaybillInManifestList)
+                    {
+                        if(groupShipment.WaybillNumbers.Count > 0)
+                        {
+                            foreach (var waybill in groupShipment.WaybillNumbers)
+                            {
+                                var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(waybill, scanStatus);
+                                if (!checkTrack)
+                                {
+                                    await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
+                                    {
+                                        DateTime = DateTime.Now,
+                                        Status = scanStatus,
+                                        Waybill = waybill,
+                                    }, scan.ShipmentScanStatus);
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    throw new GenericException($"No Shipment attached to this Manifest: {scan.WaybillNumber} ");
+                }
+            }
+
+            if (shipment == null && groupWaybill == null && manifest == null)
             {
                 throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} does not exist");
             }

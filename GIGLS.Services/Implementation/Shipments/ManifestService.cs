@@ -180,5 +180,11 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //This will be used because we dont want to throw an Exception when calling it
+        public async Task<Manifest> GetManifestCodeForScan(string manifestCode)
+        {
+            var groupwaybill = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifestCode));
+            return groupwaybill;
+        }
     }
 }

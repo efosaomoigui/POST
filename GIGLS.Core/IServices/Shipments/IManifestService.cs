@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,5 +14,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task UpdateManifest(int manifestId, ManifestDTO manifest);
         Task DeleteManifest(int manifestId);
         Task<string> GenerateManifestCode(ManifestDTO manifestDTO);
+        Task<Manifest> GetManifestCodeForScan(string manifestCode);
     }
 }
