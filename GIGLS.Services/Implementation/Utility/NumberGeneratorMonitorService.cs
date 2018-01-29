@@ -54,9 +54,10 @@ namespace GIGLS.Services.Implementation.Utility
                 //Add the numberCode with the serviceCenterCode and numberGeneratorType
                 numberGenerated = ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + codeStr + numberStr;
 
-                if(numberGeneratorType == NumberGeneratorType.CustomerCodeIndividual ||
+                if (numberGeneratorType == NumberGeneratorType.CustomerCodeIndividual ||
                    numberGeneratorType == NumberGeneratorType.CustomerCodeCorporate ||
-                   numberGeneratorType == NumberGeneratorType.CustomerCodeEcommerce)
+                   numberGeneratorType == NumberGeneratorType.CustomerCodeEcommerce ||
+                   numberGeneratorType == NumberGeneratorType.Wallet)
                 {
                     numberGenerated = ResolvePrefixFromNumberGeneratorTypeForCustomers(numberGeneratorType) + numberStr;
                 }
@@ -161,6 +162,10 @@ namespace GIGLS.Services.Implementation.Utility
                 case NumberGeneratorType.CustomerCodeEcommerce:
                     {
                         return "ECO";
+                    }
+                case NumberGeneratorType.Wallet:
+                    {
+                        return (int)NumberGeneratorType.Wallet + "";
                     }
                 default:
                     {
