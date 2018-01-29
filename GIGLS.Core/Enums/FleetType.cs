@@ -2,8 +2,12 @@
 {
     public enum FleetType
     {
-        Vehicle,
+        Truck,
+        Van,
+        SalonCar,
+        MiniTruck,
         Motorcycle,
+        Vehicle,
         Boat,
         Bicycle
     }

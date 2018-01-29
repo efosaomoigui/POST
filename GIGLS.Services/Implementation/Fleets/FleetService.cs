@@ -129,6 +129,7 @@ namespace GIGLS.Services.Implementation.Fleets
                 fleet.FleetType = fleetDto.FleetType;
                 fleet.ModelId = fleetDto.ModelId;
                 fleet.PartnerId = fleetDto.PartnerId;
+                fleet.Capacity = fleetDto.Capacity;
                 _uow.Complete();
             }
             catch (Exception)

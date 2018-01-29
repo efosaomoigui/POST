@@ -3,6 +3,7 @@
     public enum RegularEcommerceType
     {
         Regular,
-        Ecommerce
+        Ecommerce,
+        ReturnForEcommerce
     }
 }
