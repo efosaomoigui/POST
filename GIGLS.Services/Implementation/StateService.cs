@@ -5,6 +5,7 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.IServices;
 using GIGLS.Infrastructure;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation
@@ -22,7 +23,7 @@ namespace GIGLS.Services.Implementation
         public async Task<IEnumerable<StateDTO>> GetStates(int pageSize, int page)
         {
             var states = await _uow.State.GetStatesAsync(pageSize, page);
-            return states;
+            return states.OrderBy(x => x.StateName).ToList();
         }
 
 
