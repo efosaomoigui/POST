@@ -42,7 +42,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Fleets
                                    DateCreated = r.DateCreated,
                                    DateModified = r.DateModified
                                };
-                return Task.FromResult(fleetDto.ToList());
+                return Task.FromResult(fleetDto.OrderBy(x => x.RegistrationNumber).ToList());
             }
             catch (Exception)
             {

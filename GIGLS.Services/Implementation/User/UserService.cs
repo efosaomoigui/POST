@@ -320,7 +320,7 @@ namespace GIGLS.Services.Implementation.User
         public async Task<IList<Claim>> GetClaimsAsync(string userid)
         {
             var result = await _unitOfWork.User.GetClaimsAsync(userid);
-            return result;
+            return result.OrderBy(x => x.Value).ToList();
         }
 
         public async Task<string> GetCurrentUserId()

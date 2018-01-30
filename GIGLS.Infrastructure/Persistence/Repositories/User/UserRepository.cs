@@ -48,13 +48,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
         {
             var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType != UserType.System).AsEnumerable();
             //var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType == UserType.Regular).AsEnumerable();
-            return Task.FromResult(user);
+            return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
         }
 
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetSystemUsers()
         {
             var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType == UserType.System).AsEnumerable();
-            return Task.FromResult(user);
+            return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
         }
 
         public async Task<IdentityResult> UpdateUser(string userId, GIGL.GIGLS.Core.Domain.User user)
@@ -122,7 +122,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
         public Task<IEnumerable<AppRole>> GetRoles()
         {
             var role = _roleManager.Roles.Where(x => x.IsDeleted == false).AsEnumerable();
-            return Task.FromResult(role);
+            return Task.FromResult(role.OrderBy(x => x.Name).AsEnumerable());
         }
 
         public async Task<IdentityResult> Remove(string userId)

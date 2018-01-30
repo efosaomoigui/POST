@@ -17,6 +17,7 @@ using System.Security.Claims;
 using GIGLS.WebApi.Filters;
 using GIGLS.CORE.DTO.User;
 using GIGLS.Core.IServices.Utility;
+using System.Linq;
 
 namespace GIGLS.WebApi.Controllers.User
 {
@@ -184,7 +185,7 @@ namespace GIGLS.WebApi.Controllers.User
 
                 return new ServiceResponse<IList<string>>
                 {
-                    Object = roles
+                    Object = roles.OrderBy(x => x).ToList()
                 };
             });
         }
