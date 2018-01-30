@@ -16,6 +16,7 @@ using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Services.Implementation.Utility;
 using System.Linq;
+using GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -58,7 +59,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var data = Mapper.Map<ShipmentCollection>(shipmentCollection);
             data.UserId = currentUserId;
-            
+
             _uow.ShipmentCollection.Add(data);
             _uow.ShipmentTracking.Add(updateShipmentTracking);
             await _uow.CompleteAsync();
@@ -86,7 +87,7 @@ namespace GIGLS.Services.Implementation.Shipments
             //get collected shipment
             var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x =>
             x.ShipmentScanStatus == ShipmentScanStatus.OKT ||
-            x.ShipmentScanStatus == ShipmentScanStatus.OKC  &&  
+            x.ShipmentScanStatus == ShipmentScanStatus.OKC &&
             shipmentsWaybills.Contains(x.Waybill));
 
             var shipmentCollectionDto = Mapper.Map<IEnumerable<ShipmentCollectionDTO>>(shipmentCollection);
@@ -101,7 +102,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var shipments = await _uow.Shipment.FindAsync(s => serviceCenters.Contains(s.DestinationServiceCentreId));
             var shipmentsWaybills = shipments.ToList().Select(a => a.Waybill).AsEnumerable();
 
-            var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x => 
+            var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x =>
             x.ShipmentScanStatus == ShipmentScanStatus.ARF &&
             shipmentsWaybills.Contains(x.Waybill));
 
@@ -172,6 +173,27 @@ namespace GIGLS.Services.Implementation.Shipments
                 });
             }
 
+            if (shipmentCollectionDto.Demurrage.Amount > 0)
+            {
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                //update general ledger for demurrage
+                var generalLedger = new GeneralLedger()
+                {
+                    DateOfEntry = DateTime.Now,
+
+                    ServiceCentreId = serviceCenters[0],
+                    UserId = shipmentCollectionDto.UserId,
+                    Amount = shipmentCollectionDto.Demurrage.Amount,
+                    CreditDebitType = CreditDebitType.Credit,
+                    Description = "Payment for Demurrage",
+                    IsDeferred = false,
+                    Waybill = shipmentCollectionDto.Waybill
+                    //ClientNodeId = shipment.c
+                };
+                _uow.GeneralLedger.Add(generalLedger);
+            }
+
+
             await _uow.CompleteAsync();
         }
 
@@ -193,6 +215,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"Shipment with waybill: {waybill} is not available for Return Processing");
             }
         }
-        
+
     }
 }

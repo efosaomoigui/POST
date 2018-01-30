@@ -531,7 +531,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 UserId = shipmentDTO.UserId,
                 Amount = shipmentDTO.GrandTotal,
                 CreditDebitType = CreditDebitType.Credit,
-                //Description = shipment.
+                Description = "Payment for Shipment",
                 IsDeferred = true,
                 Waybill = shipmentDTO.Waybill,
                 //ClientNodeId = shipment.c
