@@ -6,6 +6,7 @@ using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Infrastructure;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.ServiceCentres
@@ -96,8 +97,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                     Country = st.State.Country
                 });
             }
-            return stationDto;
-            //return  Mapper.Map<IEnumerable<StationDTO>>(stations);
+            return stationDto.OrderBy(x => x.StationName).ToList();
         }
 
         public async Task UpdateStation(int stationId, StationDTO stationDto)
