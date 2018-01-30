@@ -9,5 +9,8 @@ namespace GIGLS.Core.IServices.Business
         //Task<decimal> GetSpecialPrice(PricingDTO pricingDto);
         Task<decimal> GetPrice(PricingDTO pricingDto);
         Task<decimal> GetHaulagePrice(HaulagePricingDTO pricingDto);
+
+        Task<decimal> GetEcommerceReturnPrice(PricingDTO pricingDto);
+        
     }
 }

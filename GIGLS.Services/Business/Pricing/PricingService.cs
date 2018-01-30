@@ -216,5 +216,26 @@ namespace GIGLS.Services.Business.Pricing
             decimal PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Ecommerce);
             return PackagePrice + deliveryOptionPrice;
         }
+
+        public async Task<decimal> GetEcommerceReturnPrice(PricingDTO pricingDto)
+        {
+            if (pricingDto.DepartureServiceCentreId <= 0)
+            {
+                // use currentUser login servicecentre
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+
+                if (serviceCenters.Length > 1)
+                {
+                    throw new GenericException("This user is assign to more than one(1) Service Centre  ");
+                }
+                pricingDto.DepartureServiceCentreId = serviceCenters[0];
+            }
+
+            var zone = await _routeZone.GetZone(pricingDto.DepartureServiceCentreId, pricingDto.DestinationServiceCentreId);
+            decimal deliveryOptionPrice = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId);
+
+            decimal PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.ReturnForEcommerce);
+            return PackagePrice + deliveryOptionPrice;
+        }
     }
 }

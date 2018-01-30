@@ -157,7 +157,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }, shipmentCollectionDto.ShipmentScanStatus);
 
             //cash collected on Delivery
-            if (shipmentCollectionDto.IsCashOnDelivery == true)
+            if (shipmentCollectionDto.IsCashOnDelivery)
             {
                 await _cashOnDeliveryAccountService.AddCashOnDeliveryAccount(new CashOnDeliveryAccountDTO
                 {
@@ -173,7 +173,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 });
             }
 
-            if (shipmentCollectionDto.Demurrage.Amount > 0)
+            if (shipmentCollectionDto.Demurrage?.Amount > 0)
             {
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 //update general ledger for demurrage
