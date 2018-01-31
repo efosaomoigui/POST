@@ -81,11 +81,15 @@ namespace GIGLS.Services.Implementation.Account
             if (invoiceDTO.PaymentStatus == PaymentStatus.Pending)
             {
                 var partialTransactionsForWaybill = await _uow.PaymentPartialTransaction.FindAsync(x => x.Waybill.Equals(waybill));
-                invoiceDTO.PaymentPartialTransaction = new PaymentPartialTransactionProcessDTO()
+
+                if (partialTransactionsForWaybill.Count() > 0)
                 {
-                    Waybill = waybill,
-                    PaymentPartialTransactions = Mapper.Map<List<PaymentPartialTransactionDTO>>(partialTransactionsForWaybill)
-                };
+                    invoiceDTO.PaymentPartialTransaction = new PaymentPartialTransactionProcessDTO()
+                    {
+                        Waybill = waybill,
+                        PaymentPartialTransactions = Mapper.Map<List<PaymentPartialTransactionDTO>>(partialTransactionsForWaybill)
+                    };
+                }
             }
 
             return invoiceDTO;
