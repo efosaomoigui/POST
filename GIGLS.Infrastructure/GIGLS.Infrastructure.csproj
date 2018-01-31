@@ -112,6 +112,7 @@
     <Compile Include="IdentityInfrastrure\GiglsUserStore.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Persistence\GIGLSContext.cs" />
+    <Compile Include="Persistence\GIGLSContextForView.cs" />
     <Compile Include="Persistence\Repositories\Account\GeneralLedgerRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\InsuranceRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\InvoiceRepository.cs" />

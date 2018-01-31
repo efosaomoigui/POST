@@ -11,5 +11,6 @@ namespace GIGLS.Core.IRepositories.Account
     {
         Task<IEnumerable<InvoiceDTO>> GetInvoicesAsync(int[] serviceCentreIds);
         Task<List<InvoiceDTO>> GetInvoicesAsync(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
+        Task<List<InvoiceDTO>> GetInvoicesFromViewAsync(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
     }
 }

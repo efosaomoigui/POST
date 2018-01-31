@@ -515,6 +515,7 @@
     <Compile Include="IServices\Zone\IZoneService.cs" />
     <Compile Include="MapperConfigurationExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="View\InvoiceView.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">

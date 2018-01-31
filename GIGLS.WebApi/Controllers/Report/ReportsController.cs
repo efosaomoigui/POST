@@ -107,6 +107,22 @@ namespace GIGLS.WebApi.Controllers.Report
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
+        [Route("invoiceFromView")]
+        public async Task<IServiceResponse<List<InvoiceDTO>>> GetInvoiceFromView(AccountFilterCriteria accountFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var invoices = await _accountService.GetInvoiceReportsFromView(accountFilterCriteria);
+
+                return new ServiceResponse<List<InvoiceDTO>>
+                {
+                    Object = invoices
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
         [Route("customershipments")]
         public async Task<IServiceResponse<List<ShipmentDTO>>> GetCustomerShipments(ShipmentFilterCriteria f_Criteria)
         {
