@@ -180,6 +180,9 @@ namespace GIGLS.Infrastructure.Persistence
         public IPaymentTransactionRepository PaymentTransaction { get; set; }
 
         [Inject]
+        public IPaymentPartialTransactionRepository PaymentPartialTransaction { get; set; }
+
+        [Inject]
         public IUserRepository User { get; set; }
 
         [Inject]

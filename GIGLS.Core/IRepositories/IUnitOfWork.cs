@@ -74,6 +74,7 @@ namespace GIGLS.Core
         IWeightLimitPriceRepository WeightLimitPrice { get; set; }
         IWeightLimitRepository WeightLimit { get; set; }
         IPaymentTransactionRepository PaymentTransaction { get; set; }
+        IPaymentPartialTransactionRepository PaymentPartialTransaction { get; set; }
         IGeneralLedgerRepository GeneralLedger { get; set; }
         IClientNodeRepository ClientNode { get; set; }
         IInvoiceRepository Invoice { get; set; }

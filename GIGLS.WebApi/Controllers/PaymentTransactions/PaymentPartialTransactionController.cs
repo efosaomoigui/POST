@@ -10,26 +10,26 @@ using GIGLS.WebApi.Filters;
 namespace GIGLS.WebApi.Controllers.PaymentTransactions
 {
     [Authorize(Roles = "Account")]
-    [RoutePrefix("api/paymenttransaction")]
-    public class PaymentTransactionController : BaseWebApiController
+    [RoutePrefix("api/paymentPartialTransaction")]
+    public class PaymentPartialTransactionController : BaseWebApiController
     {
-        private readonly IPaymentTransactionService _paymentService;
+        private readonly IPaymentPartialTransactionService _paymentPartialService;
 
-        public PaymentTransactionController(IPaymentTransactionService paymentService) : base(nameof(PaymentTransactionController))
+        public PaymentPartialTransactionController(IPaymentPartialTransactionService paymentPartialService) : base(nameof(PaymentPartialTransactionController))
         {
-            _paymentService = paymentService;
+            _paymentPartialService = paymentPartialService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
-        public async Task<IServiceResponse<IEnumerable<PaymentTransactionDTO>>> GetPaymentTransactions()
+        public async Task<IServiceResponse<IEnumerable<PaymentPartialTransactionDTO>>> GetPaymentPartialTransactions()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var payment = await _paymentService.GetPaymentTransactions();
+                var payment = await _paymentPartialService.GetPaymentPartialTransactions();
 
-                return new ServiceResponse<IEnumerable<PaymentTransactionDTO>>
+                return new ServiceResponse<IEnumerable<PaymentPartialTransactionDTO>>
                 {
                     Object = payment
                 };
@@ -55,13 +55,13 @@ namespace GIGLS.WebApi.Controllers.PaymentTransactions
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{waybill}")]
-        public async Task<IServiceResponse<PaymentTransactionDTO>> GetPaymentTransactionByWaybill(string waybill)
+        public async Task<IServiceResponse<PaymentPartialTransactionDTO>> GetPaymentPartialTransactionByWaybill(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var payment = await _paymentService.GetPaymentTransactionById(waybill);
+                var payment = await _paymentPartialService.GetPaymentPartialTransactionById(waybill);
 
-                return new ServiceResponse<PaymentTransactionDTO>
+                return new ServiceResponse<PaymentPartialTransactionDTO>
                 {
                     Object = payment
                 };
@@ -71,11 +71,11 @@ namespace GIGLS.WebApi.Controllers.PaymentTransactions
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("{waybill}")]
-        public async Task<IServiceResponse<bool>> DeletePaymentTransaction(string waybill)
+        public async Task<IServiceResponse<bool>> DeletePaymentPartialTransaction(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _paymentService.RemovePaymentTransaction(waybill);
+                await _paymentPartialService.RemovePaymentPartialTransaction(waybill);
 
                 return new ServiceResponse<bool>
                 {
@@ -87,11 +87,11 @@ namespace GIGLS.WebApi.Controllers.PaymentTransactions
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("{waybill}")]
-        public async Task<IServiceResponse<bool>> UpdatePaymentTransaction(string waybill, PaymentTransactionDTO paymentTransaction)
+        public async Task<IServiceResponse<bool>> UpdatePaymentPartialTransaction(string waybill, PaymentPartialTransactionDTO paymentPartialTransaction)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _paymentService.UpdatePaymentTransaction(waybill, paymentTransaction);
+                await _paymentPartialService.UpdatePaymentPartialTransaction(waybill, paymentPartialTransaction);
 
                 return new ServiceResponse<bool>
                 {

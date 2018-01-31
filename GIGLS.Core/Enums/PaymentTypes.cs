@@ -6,6 +6,7 @@
         Pos,
         Online,
         Wallet,
-        Transfer
+        Transfer,
+        Partial
     }
 }

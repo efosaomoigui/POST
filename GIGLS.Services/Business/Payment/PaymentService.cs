@@ -9,10 +9,13 @@ namespace GIGLS.Services.Business.Payment
     public class PaymentService : IPaymentService
     {
         private readonly IPaymentTransactionService _paymentTransactionService;
+        private readonly IPaymentPartialTransactionService _paymentPartialTransactionService;
 
-        public PaymentService(IPaymentTransactionService paymentService)
+        public PaymentService(IPaymentTransactionService paymentService,
+            IPaymentPartialTransactionService paymentPartialService)
         {
             _paymentTransactionService = paymentService;
+            _paymentPartialTransactionService = paymentPartialService;
         }
 
         public async Task<bool> ProcessPayment(PaymentTransactionDTO paymentDto)
@@ -20,5 +23,9 @@ namespace GIGLS.Services.Business.Payment
             return await _paymentTransactionService.ProcessPaymentTransaction(paymentDto);
         }
 
+        public async Task<bool> ProcessPaymentPartial(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO)
+        {
+            return await _paymentPartialTransactionService.ProcessPaymentPartialTransaction(paymentPartialTransactionProcessDTO);
+        }
     }
 }

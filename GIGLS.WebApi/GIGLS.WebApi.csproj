@@ -303,6 +303,7 @@
     <Compile Include="Controllers\Nav\SubSubNavController.cs" />
     <Compile Include="Controllers\Partnership\PartnerApplicationController.cs" />
     <Compile Include="Controllers\Partnership\PartnerController.cs" />
+    <Compile Include="Controllers\PaymentTransactions\PaymentPartialTransactionController.cs" />
     <Compile Include="Controllers\PaymentTransactions\PaymentTransactionController.cs" />
     <Compile Include="Controllers\Report\ReportsController.cs" />
     <Compile Include="Controllers\ServiceCentres\ServiceCentreController.cs" />

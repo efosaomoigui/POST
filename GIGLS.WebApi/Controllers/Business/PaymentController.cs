@@ -35,5 +35,20 @@ namespace GIGLS.WebApi.Controllers.Business
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("ProcessPartialPayment")]
+        public async Task<IServiceResponse<bool>> ProcessPaymentPartial(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _paymentService.ProcessPaymentPartial(paymentPartialTransactionProcessDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

@@ -148,6 +148,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         //Payment
         public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
+        public DbSet<PaymentPartialTransaction> PaymentPartialTransactions { get; set; }
 
         //GeneralLedger
         public DbSet<Core.Domain.GeneralLedger> GeneralLedger { get; set; }

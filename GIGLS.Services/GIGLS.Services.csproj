@@ -177,6 +177,7 @@
     <Compile Include="Implementation\Nav\SubSubNavService.cs" />
     <Compile Include="Implementation\Partnership\PartnerApplicationService.cs" />
     <Compile Include="Implementation\Partnership\PartnerService.cs" />
+    <Compile Include="Implementation\PaymentTransactions\PaymentPartialTransactionService.cs" />
     <Compile Include="Implementation\PaymentTransactions\PaymentTransactionService.cs" />
     <Compile Include="Implementation\Report\AccountReportService.cs" />
     <Compile Include="Implementation\Report\ShipmentReportService.cs" />

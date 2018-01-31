@@ -79,6 +79,9 @@ namespace GIGLS.Core
                 config.CreateMap<PaymentTransaction, PaymentTransactionDTO>();
                 config.CreateMap<PaymentTransactionDTO, PaymentTransaction>();
 
+                config.CreateMap<PaymentPartialTransaction, PaymentPartialTransactionDTO>();
+                config.CreateMap<PaymentPartialTransactionDTO, PaymentPartialTransaction>();
+
                 config.CreateMap<Partner, PartnerDTO>();
                 config.CreateMap<PartnerDTO, Partner>();
 

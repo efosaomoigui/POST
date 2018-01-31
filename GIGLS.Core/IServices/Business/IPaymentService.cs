@@ -6,5 +6,6 @@ namespace GIGLS.Core.IServices.Business
     public interface IPaymentService : IServiceDependencyMarker
     {
         Task<bool> ProcessPayment(PaymentTransactionDTO paymentDto);
+        Task<bool> ProcessPaymentPartial(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO);
     }
 }

@@ -32,12 +32,12 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private async Task<object> AddPaymentTransaction(PaymentTransactionDTO paymentTransaction)
         {
             if (paymentTransaction == null)
-                throw new GenericException("NULL_INPUT");
+                throw new GenericException("Null Input");
 
             var transactionExist = await _uow.PaymentTransaction.ExistAsync(x => x.Waybill.Equals(paymentTransaction.Waybill));
 
             if (transactionExist == true)
-                throw new GenericException($"PAYMENT_TRANSACTION_FOR_{paymentTransaction.Waybill}_ALREADY_EXIST");
+                throw new GenericException($"Payment Transaction for {paymentTransaction.Waybill} already exist");
             
             var payment = Mapper.Map<PaymentTransaction>(paymentTransaction);
             _uow.PaymentTransaction.Add(payment);
@@ -62,7 +62,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             if (transaction == null)
             {
-                throw new GenericException("PAYMENT_TRANSACTION_DOES_NOT_EXIST");
+                throw new GenericException("Payment Transaction does not exist");
             }
             _uow.PaymentTransaction.Remove(transaction);
             await _uow.CompleteAsync();
@@ -71,11 +71,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         public async Task UpdatePaymentTransaction(string waybill, PaymentTransactionDTO paymentTransaction)
         {
             if (paymentTransaction == null)
-                throw new GenericException("NULL_INPUT");
+                throw new GenericException("Null Input");
 
             var payment = await _uow.PaymentTransaction.GetAsync(x => x.Waybill.Equals(waybill));
             if (payment == null)
-                throw new GenericException($"NO_PAYMENT_TRANSACTION_EXIST_FOR_{waybill}_WAYBILL");
+                throw new GenericException($"No Payment Transaction exist for {waybill} waybill");
 
             payment.TransactionCode = paymentTransaction.TransactionCode;
             payment.PaymentStatus = paymentTransaction.PaymentStatus;
@@ -133,6 +133,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             paymentTransaction.UserId = currentUserId;
             paymentTransaction.PaymentStatus = PaymentStatus.Paid;
             var paymentTransactionId =  await AddPaymentTransaction(paymentTransaction);
+
 
             // update GeneralLedger
             generalLedgerEntity.IsDeferred = false;
