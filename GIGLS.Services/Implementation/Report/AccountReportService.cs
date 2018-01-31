@@ -67,5 +67,13 @@ namespace GIGLS.Services.Implementation.Report
             }
             return invoices;
         }
+
+        public async Task<List<InvoiceDTO>> GetInvoiceReportsFromView(AccountFilterCriteria accountFilterCriteria)
+        {
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var invoices = await _uow.Invoice.GetInvoicesFromViewAsync(accountFilterCriteria, serviceCenterIds);
+            return invoices;
+        }
+        
     }
 }
