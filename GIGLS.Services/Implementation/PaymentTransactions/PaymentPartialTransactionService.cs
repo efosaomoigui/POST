@@ -34,15 +34,14 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             if (paymentPartialTransaction == null)
                 throw new GenericException("Null Input");
 
-            var transactionExist = await _uow.PaymentPartialTransaction.ExistAsync(x => x.Waybill.Equals(paymentPartialTransaction.Waybill));
-
-            if (transactionExist == true)
-                throw new GenericException($"Payment Partial Transaction for {paymentPartialTransaction.Waybill} already exist");
+           // var transactionExist = await _uow.PaymentPartialTransaction.ExistAsync(x => x.Waybill.Equals(paymentPartialTransaction.Waybill));
+          //  if (transactionExist == true)
+          //      throw new GenericException($"Payment Partial Transaction for {paymentPartialTransaction.Waybill} already exist");
 
             var payment = Mapper.Map<PaymentPartialTransaction>(paymentPartialTransaction);
             _uow.PaymentPartialTransaction.Add(payment);
             //await _uow.CompleteAsync();
-            return new { Id = payment.PaymentPartialTransactionId };
+            return await Task.FromResult(new { Id = payment.PaymentPartialTransactionId });
         }
 
         public async Task<PaymentPartialTransactionDTO> GetPaymentPartialTransactionById(string waybill)
@@ -79,7 +78,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             payment.TransactionCode = paymentPartialTransaction.TransactionCode;
             payment.PaymentStatus = paymentPartialTransaction.PaymentStatus;
-            payment.PaymentTypes = paymentPartialTransaction.PaymentType;
+            payment.PaymentType = paymentPartialTransaction.PaymentType;
             await _uow.CompleteAsync();
         }
 
@@ -101,11 +100,18 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //get the GrandTotal Amount to be paid
             var grandTotal = invoiceEntity.Amount;
 
+            //get total amount already paid
+            decimal totalAmountAlreadyPaid = 0;
+            var partialTransactionsForWaybill = await _uow.PaymentPartialTransaction.FindAsync(x => x.Waybill.Equals(waybill));
+            foreach(var item in partialTransactionsForWaybill)
+            {
+                totalAmountAlreadyPaid += item.Amount;
+            }
+
             //get total amount customer is paying
             decimal totalAmountPaid = 0;
-            foreach (var paymentPartialTransaction in paymentPartialTransactionProcessDTO.PaymentPartialTransactionDTOs)
+            foreach (var paymentPartialTransaction in paymentPartialTransactionProcessDTO.PaymentPartialTransactions)
             {
-                ////////////////////////////////////////////
                 //settlement by wallet
                 if (paymentPartialTransaction.PaymentType == PaymentType.Wallet)
                 {
@@ -143,16 +149,20 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 paymentPartialTransaction.UserId = currentUserId;
                 paymentPartialTransaction.PaymentStatus = PaymentStatus.Paid;
                 var paymentTransactionId = await AddPaymentPartialTransaction(paymentPartialTransaction);
-
-                //////////////////////////////////////////
+                
                 totalAmountPaid += paymentPartialTransaction.Amount;
             }
             // get the balance
-            decimal balanceAmount = grandTotal - totalAmountPaid;
+            decimal balanceAmount = (grandTotal - totalAmountAlreadyPaid) - totalAmountPaid;
 
+            //if customer over pays, throw an exception
+            if (balanceAmount < 0)
+            {
+                throw new GenericException($"The amount of {totalAmountPaid} you are trying to pay is greater than {grandTotal - totalAmountAlreadyPaid} balance you are to pay.");
+            }
 
             /////2.  When payment is complete and balance is 0
-            if (balanceAmount <= 0)
+            if (balanceAmount == 0)
             {
                 // update GeneralLedger
                 generalLedgerEntity.IsDeferred = false;

@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
@@ -20,5 +21,7 @@ namespace GIGLS.Core.DTO.Account
         //public virtual List<Shipment> Shipments { get; set; }
         public ShipmentDTO Shipment { get; set; }
         public CustomerDTO Customer { get; set; }
+
+        public PaymentPartialTransactionProcessDTO PaymentPartialTransaction { get; set; }
     }
 }

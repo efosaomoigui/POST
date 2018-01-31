@@ -6,6 +6,6 @@ namespace GIGLS.Core.DTO.PaymentTransactions
     public class PaymentPartialTransactionProcessDTO : BaseDomainDTO
     {
         public string Waybill { get; set; }
-        public List<PaymentPartialTransactionDTO> PaymentPartialTransactionDTOs { get; set; }
+        public List<PaymentPartialTransactionDTO> PaymentPartialTransactions { get; set; }
     }
 }

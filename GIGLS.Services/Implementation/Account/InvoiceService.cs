@@ -2,6 +2,7 @@
 using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Customers;
@@ -52,45 +53,6 @@ namespace GIGLS.Services.Implementation.Account
             }
 
             var invoiceDTO = Mapper.Map<InvoiceDTO>(invoice);
-            
-            // get Shipment
-            var waybill = invoiceDTO.Waybill;
-            invoiceDTO.Shipment = await _shipmentService.GetShipment(waybill);
-
-            // get Customer
-            invoiceDTO.Customer = invoiceDTO.Shipment.CustomerDetails;
-
-            //get wallet number
-            if(invoiceDTO.Customer.CustomerType == CustomerType.Company)
-            {
-                var wallet = await _uow.Wallet.GetAsync(
-                    s => s.CustomerId == invoiceDTO.Customer.CompanyId &&
-                    s.CustomerType == CustomerType.Company);
-                invoiceDTO.Customer.WalletNumber = wallet?.WalletNumber;
-            }
-            else
-            {
-                var wallet = await _uow.Wallet.GetAsync(
-                    s => s.CustomerId == invoiceDTO.Customer.IndividualCustomerId &&
-                    s.CustomerType == CustomerType.IndividualCustomer);
-                invoiceDTO.Customer.WalletNumber = wallet?.WalletNumber;
-            }
-
-
-            return invoiceDTO;
-        }
-
-        public async Task<InvoiceDTO> GetInvoiceByWaybill(string waybl) 
-        {
-            //var invoices = await GetInvoices();
-            var invoice = await _uow.Invoice.GetAsync(e => e.Waybill  == waybl); 
-
-            if (invoice == null)
-            {
-                throw new GenericException("Invoice does not exists");
-            }
-
-            var invoiceDTO = Mapper.Map<InvoiceDTO>(invoice);
 
             // get Shipment
             var waybill = invoiceDTO.Waybill;
@@ -115,7 +77,31 @@ namespace GIGLS.Services.Implementation.Account
                 invoiceDTO.Customer.WalletNumber = wallet?.WalletNumber;
             }
 
+            ///// Partial Payments, if invoice status is pending
+            if (invoiceDTO.PaymentStatus == PaymentStatus.Pending)
+            {
+                var partialTransactionsForWaybill = await _uow.PaymentPartialTransaction.FindAsync(x => x.Waybill.Equals(waybill));
+                invoiceDTO.PaymentPartialTransaction = new PaymentPartialTransactionProcessDTO()
+                {
+                    Waybill = waybill,
+                    PaymentPartialTransactions = Mapper.Map<List<PaymentPartialTransactionDTO>>(partialTransactionsForWaybill)
+                };
+            }
+
             return invoiceDTO;
+        }
+
+        public async Task<InvoiceDTO> GetInvoiceByWaybill(string waybl)
+        {
+            //var invoices = await GetInvoices();
+            var invoice = await _uow.Invoice.GetAsync(e => e.Waybill == waybl);
+
+            if (invoice == null)
+            {
+                throw new GenericException("Invoice does not exists");
+            }
+
+            return await GetInvoiceById(invoice.InvoiceId);
         }
 
         public async Task<object> AddInvoice(InvoiceDTO invoiceDto)
