@@ -44,10 +44,10 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             return await Task.FromResult(new { Id = payment.PaymentPartialTransactionId });
         }
 
-        public async Task<PaymentPartialTransactionDTO> GetPaymentPartialTransactionById(string waybill)
+        public async Task<IEnumerable<PaymentPartialTransactionDTO>> GetPaymentPartialTransactionById(string waybill)
         {
-            var transaction = await _uow.PaymentPartialTransaction.GetAsync(x => x.Waybill.Equals(waybill));
-            return Mapper.Map<PaymentPartialTransactionDTO>(transaction);
+            var transaction = await _uow.PaymentPartialTransaction.FindAsync(x => x.Waybill.Equals(waybill));
+            return Mapper.Map<IEnumerable<PaymentPartialTransactionDTO>>(transaction);
         }
 
         public Task<IEnumerable<PaymentPartialTransactionDTO>> GetPaymentPartialTransactions()

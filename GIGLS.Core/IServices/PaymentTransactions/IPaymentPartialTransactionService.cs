@@ -7,7 +7,7 @@ namespace GIGLS.Core.IServices.PaymentTransactions
     public interface IPaymentPartialTransactionService : IServiceDependencyMarker
     {
         Task<IEnumerable<PaymentPartialTransactionDTO>> GetPaymentPartialTransactions();
-        Task<PaymentPartialTransactionDTO> GetPaymentPartialTransactionById(string waybill);
+        Task<IEnumerable<PaymentPartialTransactionDTO>> GetPaymentPartialTransactionById(string waybill);
         //Task<object> AddPaymentPartialTransaction(PaymentPartialTransactionDTO paymentPartialTransaction);
         Task UpdatePaymentPartialTransaction(string waybill, PaymentPartialTransactionDTO paymentPartialTransaction);
         Task<bool> ProcessPaymentPartialTransaction(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO);
