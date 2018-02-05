@@ -2,13 +2,11 @@
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
-using System.ComponentModel.DataAnnotations;
 
-namespace GIGLS.Core.View
+namespace GIGLS.Core.DTO.Account
 {
-    public class InvoiceView : BaseDomainDTO
+    public class InvoiceViewDTO : BaseDomainDTO
     {
-        [Key]
         public int InvoiceId { get; set; }
         public string InvoiceNo { get; set; }
         public decimal Amount { get; set; }

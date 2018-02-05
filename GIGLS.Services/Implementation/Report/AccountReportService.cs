@@ -8,6 +8,8 @@ using GIGLS.Core.IServices.User;
 using AutoMapper;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.Enums;
+using System;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -17,13 +19,13 @@ namespace GIGLS.Services.Implementation.Report
         private readonly IUserService _userService;
         private readonly IShipmentService _shipmentService;
         
-
         public AccountReportService(IUnitOfWork uow, IUserService userService, IShipmentService shipmentService)
         {
             _uow = uow;
             _userService = userService;
             _shipmentService = shipmentService;
         }
+
         public async Task<List<GeneralLedgerDTO>> GetExpenditureReports(AccountFilterCriteria accountFilterCriteria)
         {
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
@@ -68,10 +70,19 @@ namespace GIGLS.Services.Implementation.Report
             return invoices;
         }
 
-        public async Task<List<InvoiceDTO>> GetInvoiceReportsFromView(AccountFilterCriteria accountFilterCriteria)
+        public async Task<List<InvoiceViewDTO>> GetInvoiceReportsFromView(AccountFilterCriteria accountFilterCriteria)
         {
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var invoices = await _uow.Invoice.GetInvoicesFromViewAsync(accountFilterCriteria, serviceCenterIds);
+
+            foreach(var item in invoices)
+            {
+                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), item.CustomerType);
+                var customerDetails = await _shipmentService.GetCustomer(item.CustomerId, customerType);
+
+                item.CustomerDetails = customerDetails;
+            }
+
             return invoices;
         }
         
