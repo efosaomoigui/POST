@@ -54,7 +54,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
-        [Route("")]
+        [Route("{waybill}")]
         public async Task<IServiceResponse<bool>> AddShipmentCancel(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
