@@ -210,6 +210,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<MissingShipment, MissingShipmentDTO>();
                 config.CreateMap<MissingShipmentDTO, MissingShipment>();
+
+                config.CreateMap<ShipmentCancel, ShipmentCancelDTO>();
+                config.CreateMap<ShipmentCancelDTO, ShipmentCancel>();
             });
 
             isInit = true;

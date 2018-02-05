@@ -158,6 +158,7 @@
     <Compile Include="Persistence\Repositories\Shipments\ManifestGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ManifestRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\MissingShipmentRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\ShipmentCancelRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCollectionRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentItemRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentRepository.cs" />

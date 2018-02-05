@@ -101,6 +101,7 @@ namespace GIGLS.Core
         IScanStatusRepository ScanStatus { get; set; }
         IGlobalPropertyRepository GlobalProperty { get; set; }
         IMissingShipmentRepository MissingShipment { get; set; }
+        IShipmentCancelRepository ShipmentCancel { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

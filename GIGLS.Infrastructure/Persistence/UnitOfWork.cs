@@ -263,6 +263,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IMissingShipmentRepository MissingShipment { get; set; }
 
+        [Inject]
+        public IShipmentCancelRepository ShipmentCancel { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

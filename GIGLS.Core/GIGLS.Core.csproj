@@ -175,6 +175,7 @@
     <Compile Include="Domain\ReceiveShipment.cs" />
     <Compile Include="Domain\ServiceCentre.cs" />
     <Compile Include="Domain\Shipment.cs" />
+    <Compile Include="Domain\ShipmentCancel.cs" />
     <Compile Include="Domain\ShipmentCollection.cs" />
     <Compile Include="Domain\ShipmentItem.cs" />
     <Compile Include="Domain\ShipmentReturn.cs" />
@@ -268,6 +269,7 @@
     <Compile Include="DTO\Shipments\ManifestGroupWaybillNumberMappingDTO.cs" />
     <Compile Include="DTO\Shipments\MissingShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\ScanDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentCancelDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentCollectionDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentItemDTO.cs" />
@@ -394,6 +396,7 @@
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberRepository.cs" />
     <Compile Include="IRepositories\Shipments\IManifestGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IManifestRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentCancelRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentCollectionRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentItemRepository.cs" />
     <Compile Include="IRepositories\Shipments\IMissingShipmentRepository.cs" />
@@ -482,6 +485,7 @@
     <Compile Include="IServices\Shipments\IManifestGroupWaybillNumberMappingService.cs" />
     <Compile Include="IServices\Shipments\IManifestService.cs" />
     <Compile Include="IServices\Shipments\IMissingShipmentService.cs" />
+    <Compile Include="IServices\Shipments\IShipmentCancelService.cs" />
     <Compile Include="IServices\Shipments\IShipmentCollectionService.cs" />
     <Compile Include="IServices\Shipments\IShipmentPackageService.cs" />
     <Compile Include="IServices\Shipments\IShipmentReturnService.cs" />
