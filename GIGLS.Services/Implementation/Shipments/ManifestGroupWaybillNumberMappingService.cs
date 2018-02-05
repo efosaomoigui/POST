@@ -148,7 +148,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             ManifestCode = manifest,
                             DateTime = DateTime.Now,
-                            DispatchedBy = userId
+                            //DispatchedBy = userId
                         });
                     //throw new GenericException($"No Manifest exists for this code: {manifest}");
                 }

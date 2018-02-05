@@ -41,7 +41,18 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      DateCreated = mgw.DateCreated,
                                                      DateModified = mgw.DateModified,
                                                      IsDeleted = mgw.IsDeleted,
-                                                     RowVersion = mgw.RowVersion
+                                                     RowVersion = mgw.RowVersion,
+                                                     ManifestDetails = Context.Manifest.Where(x => x.ManifestCode == mgw.ManifestCode).
+                                                     Select(p => new ManifestDTO {
+                                                         DateCreated = p.DateCreated,
+                                                         DateModified = p.DateModified,
+                                                         ManifestCode = p.ManifestCode,
+                                                         DateTime = p.DateTime,
+                                                         IsDispatched = p.IsDispatched,
+                                                         IsReceived = p.IsReceived,
+                                                         DispatchedBy = Context.Users.Where(d => d.Id == p.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
+                                                         ReceiverBy  = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault()       
+                                                     }).FirstOrDefault()
                                                  };
 
             return await Task.FromResult(manifestGroupwaybillMappingDTO.ToList());

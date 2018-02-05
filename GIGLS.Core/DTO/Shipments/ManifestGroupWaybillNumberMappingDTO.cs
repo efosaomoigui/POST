@@ -11,6 +11,8 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsActive { get; set; }
 
         public string ManifestCode { get; set; }
+        public ManifestDTO ManifestDetails { get; set; }
+        
         public string GroupWaybillNumber { get; set; }
         public List<string> GroupWaybillNumbers { get; set; }
     }
