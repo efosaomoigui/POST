@@ -28,6 +28,7 @@ namespace GIGLS.Core.View
         public decimal Vat { get; set; }
         public decimal Total { get; set; }
         public decimal CashOnDeliveryAmount { get; set; }
+        public bool IsCancelled { get; set; }
 
         //Customer Information
         public int CustomerId { get; set; }

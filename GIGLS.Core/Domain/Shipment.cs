@@ -84,5 +84,7 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal? InvoiceDiscountValue_display { get; set; }
         public decimal? offInvoiceDiscountvalue_display { get; set; }
 
+        //Cancelled shipment
+        public bool IsCancelled { get; set; }
     }
 }
