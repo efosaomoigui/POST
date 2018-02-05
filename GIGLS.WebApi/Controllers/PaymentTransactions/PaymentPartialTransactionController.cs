@@ -55,13 +55,13 @@ namespace GIGLS.WebApi.Controllers.PaymentTransactions
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{waybill}")]
-        public async Task<IServiceResponse<PaymentPartialTransactionDTO>> GetPaymentPartialTransactionByWaybill(string waybill)
+        public async Task<IServiceResponse<IEnumerable<PaymentPartialTransactionDTO>>> GetPaymentPartialTransactionByWaybill(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var payment = await _paymentPartialService.GetPaymentPartialTransactionById(waybill);
 
-                return new ServiceResponse<PaymentPartialTransactionDTO>
+                return new ServiceResponse<IEnumerable<PaymentPartialTransactionDTO>>
                 {
                     Object = payment
                 };
