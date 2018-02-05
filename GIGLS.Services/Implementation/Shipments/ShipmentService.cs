@@ -810,9 +810,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //2.4.1 Update customers wallet (credit)
                 CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
-                var customer = await _customerService.GetCustomer(shipment.CustomerId, customerType);
-
-                var wallet = await _walletService.GetWalletById(customer.WalletNumber);
+                var wallet = _uow.Wallet.SingleOrDefault(s => s.CustomerId == shipment.CustomerId && s.CustomerType == customerType);
                 wallet.Balance = wallet.Balance + invoice.Amount;
 
                 //2.4.2 Update customers wallet's Transaction (credit)
