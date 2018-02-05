@@ -152,7 +152,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             if (accountFilterCriteria.StationId > 0)
             {
                 //get the service centres in that station
-                invoices = invoices.Where(s => s.StationId == accountFilterCriteria.StationId);
+                invoices = invoices.Where(s => s.DepartureStationId == accountFilterCriteria.StationId);
             }
 
             var result = invoices.ToList();

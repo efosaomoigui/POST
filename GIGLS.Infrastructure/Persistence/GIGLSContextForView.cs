@@ -1,6 +1,7 @@
 ﻿using System.Data.Entity;
 using GIGLS.INFRASTRUCTURE.SoftDeleteHandler;
 using GIGLS.Core.View;
+using System.Data.Entity.ModelConfiguration.Conventions;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -15,6 +16,11 @@ namespace GIGLS.Infrastructure.Persistence
         }
 
         public DbSet<InvoiceView> InvoiceView { get; set; }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
+        }
 
     }
 }

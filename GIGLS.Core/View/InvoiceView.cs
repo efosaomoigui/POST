@@ -33,7 +33,6 @@ namespace GIGLS.Core.View
         //Customer Information
         public int CustomerId { get; set; }
         public string CustomerType { get; set; }
-        public CustomerDTO CustomerDetails { get; set; }
 
         //Receiver Information
         public string ReceiverName { get; set; }
@@ -50,8 +49,8 @@ namespace GIGLS.Core.View
         public string DeliveryOptionDescription { get; set; }
 
         //station
-        public int StationId { get; set; }
-        public string StationName { get; set; }
+        //public int StationId { get; set; }
+        //public string StationName { get; set; }
 
         public int DepartureStationId { get; set; }
         public string DepartureStationName { get; set; }

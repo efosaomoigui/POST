@@ -689,17 +689,16 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            var invoices = await _uow.Invoice.GetInvoicesAsync(accountFilterCriteria, serviceCenterIds);
+            var invoices = await _uow.Invoice.GetInvoicesFromViewAsync(accountFilterCriteria, serviceCenterIds);
 
-            //get shipment info
+            //get customer details
             foreach (var item in invoices)
             {
-                var shipmentDTO = await GetShipment(item.Waybill);
-                var user = await _uow.User.GetUserById(shipmentDTO.UserId);
-                item.Shipment = shipmentDTO;
-                item.Shipment.UserId = user.FirstName + " " + user.LastName;
+                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), item.CustomerType);
+                var customerDetails = await GetCustomer(item.CustomerId, customerType);
+                item.CustomerDetails = customerDetails;
             }
-
+            
             var dailySalesDTO = new DailySalesDTO()
             {
                 StartDate = (DateTime)accountFilterCriteria.StartDate,
