@@ -32,6 +32,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             if (serviceCentreIds.Length > 0)
             {
                 shipmentContext = Context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+                
+                //filter by cancelled shipments
+                shipmentContext = shipmentContext.Where(s => s.IsCancelled == false);
+
                 serviceCenterWaybills = shipmentContext.Select(s => s.Waybill).ToList();
                 invoices = Context.Invoice.Where(s => serviceCenterWaybills.Contains(s.Waybill));
             }
@@ -59,6 +63,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             if (serviceCentreIds.Length > 0)
             {
                 shipmentContext = Context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+
+                //filter by cancelled shipments
+                shipmentContext = shipmentContext.Where(s => s.IsCancelled == false);
+
                 serviceCenterWaybills = shipmentContext.Select(s => s.Waybill).ToList();
                 invoices = Context.Invoice.Where(s => serviceCenterWaybills.Contains(s.Waybill));
             }
@@ -117,6 +125,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             {
                 invoices = invoices.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
             }
+
+            //filter by cancelled shipments
+            invoices = invoices.Where(s => s.IsCancelled == false);
+
 
             //get startDate and endDate
             var queryDate = accountFilterCriteria.getStartDateAndEndDate();

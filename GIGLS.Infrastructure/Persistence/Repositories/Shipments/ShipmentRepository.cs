@@ -33,6 +33,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
             }
 
+            //filter by cancelled shipments
+            shipment = shipment.Where(s => s.IsCancelled == false);
+
+
             List<ShipmentDTO> shipmentDto = (from r in shipment
                                              select new ShipmentDTO()
                                              {
@@ -104,6 +108,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                     shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
                 }
                 ////
+
+                //filter by cancelled shipments
+                shipment = shipment.Where(s => s.IsCancelled == false);
+
 
                 var count = shipment.ToList().Count();
                 //shipment = shipment.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count);
@@ -228,6 +236,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
             ////
 
+            //filter by cancelled shipments
+            shipments = shipments.Where(s => s.IsCancelled == false);
+
             //get startDate and endDate
             var queryDate = f_Criteria.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
@@ -337,6 +348,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
             //filter by service center
             var shipments = _context.Shipment.AsQueryable();
+
+            //filter by cancelled shipments
+            shipments = shipments.Where(s => s.IsCancelled == false);
 
             //If No Date Supply
             if (!f_Criteria.StartDate.HasValue && !f_Criteria.EndDate.HasValue)
