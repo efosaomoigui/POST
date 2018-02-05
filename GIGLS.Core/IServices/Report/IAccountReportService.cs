@@ -11,6 +11,6 @@ namespace GIGLS.CORE.IServices.Report
         Task<List<GeneralLedgerDTO>> GetIncomeReports(AccountFilterCriteria accountFilterCriteria);
         Task<List<GeneralLedgerDTO>> GetExpenditureReports(AccountFilterCriteria accountFilterCriteria);
         Task<List<InvoiceDTO>> GetInvoiceReports(AccountFilterCriteria accountFilterCriteria);
-        Task<List<InvoiceDTO>> GetInvoiceReportsFromView(AccountFilterCriteria accountFilterCriteria);
+        Task<List<InvoiceViewDTO>> GetInvoiceReportsFromView(AccountFilterCriteria accountFilterCriteria);
     }
 }

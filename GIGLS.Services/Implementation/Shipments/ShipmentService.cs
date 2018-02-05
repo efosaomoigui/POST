@@ -733,5 +733,12 @@ namespace GIGLS.Services.Implementation.Shipments
             return true;
         }
 
+        //utility method, called by another service and added here
+        //to prevent ninject cyclic dependency
+        public async Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType)
+        {
+            return await _customerService.GetCustomer(customerId, customerType);
+        }
+
     }
 }

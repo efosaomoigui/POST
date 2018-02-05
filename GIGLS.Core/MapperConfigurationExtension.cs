@@ -25,6 +25,7 @@ using GIGLS.Core.Domain.ShipmentScan;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.Domain.Utility;
 using GIGLS.Core.DTO.Utility;
+using GIGLS.Core.View;
 
 namespace GIGLS.Core
 {
@@ -132,6 +133,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<Invoice, InvoiceDTO>();
                 config.CreateMap<InvoiceDTO, Invoice>();
+
+                config.CreateMap<InvoiceView, InvoiceViewDTO>();
+                config.CreateMap<InvoiceViewDTO, InvoiceView>();
 
                 config.CreateMap<VAT, VATDTO>();
                 config.CreateMap<VATDTO, VAT>();

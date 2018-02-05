@@ -1,8 +1,10 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using System;
@@ -30,5 +32,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto);
         Task<DomesticRouteZoneMapDTO> GetZone(int destinationServiceCentre);
         Task<DailySalesDTO> GetDailySales(AccountFilterCriteria accountFilterCriteria);
+
+        Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType);
     }
 }
