@@ -14,11 +14,13 @@ namespace GIGLS.Services.Implementation.Shipments
     {
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
+        private readonly IShipmentService _shipmentService;
 
-        public ShipmentCancelService(IUnitOfWork uow, IUserService userService)
+        public ShipmentCancelService(IUnitOfWork uow, IUserService userService, IShipmentService shipmentService)
         {
             _uow = uow;
             _userService = userService;
+            _shipmentService = shipmentService;
             MapperConfig.Initialize();
         }
 
@@ -47,6 +49,10 @@ namespace GIGLS.Services.Implementation.Shipments
             };
 
             _uow.ShipmentCancel.Add(newCancel);
+
+            //cancel shipment from the shipment service
+            var boolResult = await _shipmentService.CancelShipment(waybill);
+
             await _uow.CompleteAsync();
             return new { waybill = newCancel.Waybill };
         }

@@ -34,5 +34,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<DailySalesDTO> GetDailySales(AccountFilterCriteria accountFilterCriteria);
 
         Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType);
+        Task<bool> CancelShipment(string waybill);
     }
 }
