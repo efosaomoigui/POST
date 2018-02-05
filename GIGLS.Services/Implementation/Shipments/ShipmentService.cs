@@ -23,6 +23,7 @@ using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.Domain.Wallet;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -243,7 +244,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice);
 
             //validate
-            if(demurrageCountObj == null || demurragePriceObj == null)
+            if (demurrageCountObj == null || demurragePriceObj == null)
             {
                 shipmentDto.Demurrage = new DemurrageDTO
                 {
@@ -261,7 +262,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var demurrageStartDate = shipmentCollection.DateCreated.AddDays(int.Parse(demurrageCountObj.Value));
             demurrageDays = today.Subtract(demurrageStartDate).Days;
 
-            if(demurrageDays > 0)
+            if (demurrageDays > 0)
             {
                 price = demurrageDays * (int.Parse(demurragePriceObj.Value));
             }
@@ -618,7 +619,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappings.ToList().Select(a => a.GroupWaybillNumber).Contains(s.GroupWaybillNumber));
 
                 var resultSet = new HashSet<string>();
-                var result = new List<GroupWaybillNumberMappingDTO>();                
+                var result = new List<GroupWaybillNumberMappingDTO>();
                 foreach (var item in unmappedGroupedWaybills)
                 {
                     if (resultSet.Add(item.GroupWaybillNumber))
@@ -718,14 +719,14 @@ namespace GIGLS.Services.Implementation.Shipments
             // verify the waybill number exists in the system
             var shipment = await GetShipmentForScan(scan.WaybillNumber);
 
-            string scanStatus = scan.ShipmentScanStatus.ToString(); 
+            string scanStatus = scan.ShipmentScanStatus.ToString();
 
             if (shipment != null)
             {
                 var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                 {
                     DateTime = DateTime.Now,
-                    Status = scanStatus, 
+                    Status = scanStatus,
                     Waybill = scan.WaybillNumber,
                 }, scan.ShipmentScanStatus);
             }
@@ -738,6 +739,116 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType)
         {
             return await _customerService.GetCustomer(customerId, customerType);
+        }
+
+
+        /// <summary>
+        /// This method is responsible for cancelling a shipment.
+        /// It ensures that accounting entries are reversed accordingly or rolls back if an error occurs.
+        /// A shipment can be cancelled if a dispatch has not yet been created for that waybill.
+        /// 
+        /// Steps for this process
+        /// 1. Update shipment to 'cancelled' status
+        /// 2. Update Invoice to 'cancelled' status
+        /// 3. Create new entry in General Ledger for Invoice amount (debit)
+        /// 4. Update customers wallet (credit)
+        /// 5. Scan the Shipment for cancellation
+        /// </summary>
+        /// <param name="waybill"></param>
+        /// <returns>true if the operation was successful or false if it fails</returns>
+        public async Task<bool> CancelShipment(string waybill)
+        {
+            var boolRresult = false;
+            try
+            {
+                //1. check if there is a dispatch for the waybill (Manifest -> Group -> Waybill)
+                //If there is, throw an exception (since, the shipment has already left the terminal)
+                var groupwaybillMapping = _uow.GroupWaybillNumberMapping.SingleOrDefault(s => s.WaybillNumber == waybill);
+                if (groupwaybillMapping != null)
+                {
+                    var mainfestMapping = _uow.ManifestGroupWaybillNumberMapping.
+                        SingleOrDefault(s => s.GroupWaybillNumber == groupwaybillMapping.GroupWaybillNumber);
+
+                    if (mainfestMapping != null)
+                    {
+                        var dispatch = _uow.Dispatch.SingleOrDefault(s => s.ManifestNumber == mainfestMapping.ManifestCode);
+
+                        if (dispatch != null)
+                        {
+                            throw new GenericException($"Error Cancelling the Shipment." +
+                                $" The shipment with waybill number {waybill} has already been dispatched by" +
+                                $" vehicle number {dispatch.RegistrationNumber}.");
+                        }
+                    }
+                }
+
+
+                //2. Reverse accounting entries
+                //2.1 Update shipment to cancelled
+                var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == waybill);
+                shipment.IsCancelled = true;
+
+                //2.2 Update shipment to cancelled
+                var invoice = _uow.Invoice.SingleOrDefault(s => s.Waybill == waybill);
+                invoice.PaymentStatus = PaymentStatus.Cancelled;
+
+                //2.3 Create new entry in General Ledger for Invoice amount (debit)
+                var currentUserId = await _userService.GetCurrentUserId();
+                var generalLedger = new GeneralLedger()
+                {
+                    DateOfEntry = DateTime.Now,
+
+                    ServiceCentreId = shipment.DepartureServiceCentreId,
+                    UserId = currentUserId,
+                    Amount = invoice.Amount,
+                    CreditDebitType = CreditDebitType.Debit,
+                    Description = "Debit for Shipment Cancellation",
+                    IsDeferred = false,
+                    Waybill = waybill,
+                    PaymentServiceType = PaymentServiceType.Shipment
+                };
+                _uow.GeneralLedger.Add(generalLedger);
+
+                //2.4.1 Update customers wallet (credit)
+                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
+                var customer = await _customerService.GetCustomer(shipment.CustomerId, customerType);
+
+                var wallet = await _walletService.GetWalletById(customer.WalletNumber);
+                wallet.Balance = wallet.Balance + invoice.Amount;
+
+                //2.4.2 Update customers wallet's Transaction (credit)
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                var newWalletTransaction = new WalletTransaction
+                {
+                    WalletId = wallet.WalletId,
+                    Amount = invoice.Amount,
+                    DateOfEntry = DateTime.Now,
+                    ServiceCentreId = serviceCenterIds[0],
+                    UserId = currentUserId,
+                    CreditDebitType = CreditDebitType.Credit,
+                    PaymentType = PaymentType.Wallet,
+                    Waybill = waybill,
+                    Description = "Credit for Shipment Cancellation"
+                };
+                _uow.WalletTransaction.Add(newWalletTransaction);
+
+                //2.5 Scan the Shipment for cancellation
+                await ScanShipment(new ScanDTO
+                {
+                    WaybillNumber = waybill,
+                    ShipmentScanStatus = ShipmentScanStatus.TRO // Change to Scan for Cancellation
+                });
+
+                //send message
+                //await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All, waybill);
+                boolRresult = true;
+
+                return boolRresult;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
     }

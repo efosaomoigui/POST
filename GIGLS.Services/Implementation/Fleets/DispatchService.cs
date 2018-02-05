@@ -13,6 +13,7 @@ using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.DTO.ServiceCentres;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Fleets
 {
@@ -42,6 +43,9 @@ namespace GIGLS.Services.Implementation.Fleets
         {
             try
             {
+                //Verify that all waybills are not cancelled
+                VerifyWaybillsInManifest(dispatchDTO.ManifestNumber);
+
                 // get user login service centre
                 var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
                 var userServiceCentreId = serviceCenterIds[0];
@@ -99,6 +103,32 @@ namespace GIGLS.Services.Implementation.Fleets
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// This method ensures that all waybills attached to this manifestNumber
+        /// are not in the cancelled status.
+        /// </summary>
+        /// <param name="manifestNumber"></param>
+        private async Task VerifyWaybillsInManifest(string manifestNumber)
+        {
+            // manifest -> groupwaybill -> waybill
+            //manifest
+            var manifestMappings = await _uow.ManifestGroupWaybillNumberMapping.FindAsync(s => s.ManifestCode == manifestNumber);
+            var listOfGroupWaybills = manifestMappings.Select(s => s.GroupWaybillNumber);
+
+            //groupwaybill
+            var groupwaybillMappings = await _uow.GroupWaybillNumberMapping.FindAsync(s => listOfGroupWaybills.Contains(s.GroupWaybillNumber));
+            var listOfWaybills = groupwaybillMappings.Select(s => s.WaybillNumber);
+
+            //waybill - from shipmentCancel entity
+            var cancelledWaybills = await _uow.ShipmentCancel.FindAsync(s => listOfWaybills.Contains(s.Waybill));
+            if(cancelledWaybills.ToList().Count > 0)
+            {
+                var waybills = cancelledWaybills.ToList().ToString();
+                throw new GenericException($"{waybills} : The waybill has been cancelled. " +
+                    $"Please remove from the manifest and try again.");
             }
         }
 
