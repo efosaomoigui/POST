@@ -786,59 +786,66 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-
-                //2. Reverse accounting entries
-                //2.1 Update shipment to cancelled
-                var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == waybill);
-                shipment.IsCancelled = true;
-
-                //2.2 Update shipment to cancelled
                 var invoice = _uow.Invoice.SingleOrDefault(s => s.Waybill == waybill);
-                invoice.PaymentStatus = PaymentStatus.Cancelled;
-
-                //2.3 Create new entry in General Ledger for Invoice amount (debit)
-                var currentUserId = await _userService.GetCurrentUserId();
-                var generalLedger = new GeneralLedger()
+                if (invoice.PaymentStatus == PaymentStatus.Paid) 
                 {
-                    DateOfEntry = DateTime.Now,
+                    //2. Reverse accounting entries
+                    //2.1 Update shipment to cancelled
+                    var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == waybill);
+                    shipment.IsCancelled = true;
 
-                    ServiceCentreId = shipment.DepartureServiceCentreId,
-                    UserId = currentUserId,
-                    Amount = invoice.Amount,
-                    CreditDebitType = CreditDebitType.Debit,
-                    Description = "Debit for Shipment Cancellation",
-                    IsDeferred = false,
-                    Waybill = waybill,
-                    PaymentServiceType = PaymentServiceType.Shipment
-                };
-                _uow.GeneralLedger.Add(generalLedger);
+                    //2.2 Update shipment to cancelled
+                    invoice.PaymentStatus = PaymentStatus.Cancelled;
 
-                //2.4.1 Update customers wallet (credit)
-                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
-                var wallet = _uow.Wallet.SingleOrDefault(s => s.CustomerId == shipment.CustomerId && s.CustomerType == customerType);
-                wallet.Balance = wallet.Balance + invoice.Amount;
+                    //2.3 Create new entry in General Ledger for Invoice amount (debit)
+                    var currentUserId = await _userService.GetCurrentUserId();
+                    var generalLedger = new GeneralLedger()
+                    {
+                        DateOfEntry = DateTime.Now,
 
-                //2.4.2 Update customers wallet's Transaction (credit)
-                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-                var newWalletTransaction = new WalletTransaction
-                {
-                    WalletId = wallet.WalletId,
-                    Amount = invoice.Amount,
-                    DateOfEntry = DateTime.Now,
-                    ServiceCentreId = serviceCenterIds[0],
-                    UserId = currentUserId,
-                    CreditDebitType = CreditDebitType.Credit,
-                    PaymentType = PaymentType.Wallet,
-                    Waybill = waybill,
-                    Description = "Credit for Shipment Cancellation"
-                };
-                _uow.WalletTransaction.Add(newWalletTransaction);
+                        ServiceCentreId = shipment.DepartureServiceCentreId,
+                        UserId = currentUserId,
+                        Amount = invoice.Amount,
+                        CreditDebitType = CreditDebitType.Debit,
+                        Description = "Debit for Shipment Cancellation",
+                        IsDeferred = false,
+                        Waybill = waybill,
+                        PaymentServiceType = PaymentServiceType.Shipment
+                    };
+                    _uow.GeneralLedger.Add(generalLedger);
+
+                    //2.4.1 Update customers wallet (credit)
+                    //get CustomerDetails
+                    if (shipment.CustomerType.Contains("Individual"))
+                    {
+                        shipment.CustomerType = CustomerType.IndividualCustomer.ToString();
+                    }
+                    CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
+                    var wallet = _uow.Wallet.SingleOrDefault(s => s.CustomerId == shipment.CustomerId && s.CustomerType == customerType);
+                    wallet.Balance = wallet.Balance + invoice.Amount;
+
+                    //2.4.2 Update customers wallet's Transaction (credit)
+                    var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                    var newWalletTransaction = new WalletTransaction
+                    {
+                        WalletId = wallet.WalletId,
+                        Amount = invoice.Amount,
+                        DateOfEntry = DateTime.Now,
+                        ServiceCentreId = serviceCenterIds[0],
+                        UserId = currentUserId,
+                        CreditDebitType = CreditDebitType.Credit,
+                        PaymentType = PaymentType.Wallet,
+                        Waybill = waybill,
+                        Description = "Credit for Shipment Cancellation"
+                    };
+                    _uow.WalletTransaction.Add(newWalletTransaction);
+                }
 
                 //2.5 Scan the Shipment for cancellation
                 await ScanShipment(new ScanDTO
                 {
                     WaybillNumber = waybill,
-                    ShipmentScanStatus = ShipmentScanStatus.TRO // Change to Scan for Cancellation
+                    ShipmentScanStatus = ShipmentScanStatus.SSC 
                 });
 
                 //send message
