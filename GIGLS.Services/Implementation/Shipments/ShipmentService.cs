@@ -695,6 +695,11 @@ namespace GIGLS.Services.Implementation.Shipments
             //get customer details
             foreach (var item in invoices)
             {
+                //get CustomerDetails
+                if (item.CustomerType.Contains("Individual"))
+                {
+                    item.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
                 CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), item.CustomerType);
                 var customerDetails = await GetCustomer(item.CustomerId, customerType);
                 item.CustomerDetails = customerDetails;
