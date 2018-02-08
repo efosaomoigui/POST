@@ -57,7 +57,8 @@ namespace GIGLS.Services.Implementation.Utility
                 if (numberGeneratorType == NumberGeneratorType.CustomerCodeIndividual ||
                    numberGeneratorType == NumberGeneratorType.CustomerCodeCorporate ||
                    numberGeneratorType == NumberGeneratorType.CustomerCodeEcommerce ||
-                   numberGeneratorType == NumberGeneratorType.Wallet)
+                   numberGeneratorType == NumberGeneratorType.Wallet ||
+                   numberGeneratorType == NumberGeneratorType.Partner)
                 {
                     numberGenerated = ResolvePrefixFromNumberGeneratorTypeForCustomers(numberGeneratorType) + numberStr;
                 }
@@ -166,6 +167,10 @@ namespace GIGLS.Services.Implementation.Utility
                 case NumberGeneratorType.Wallet:
                     {
                         return (int)NumberGeneratorType.Wallet + "";
+                    }
+                case NumberGeneratorType.Partner:
+                    {
+                        return "PL";
                     }
                 default:
                     {

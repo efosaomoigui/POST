@@ -11,6 +11,5 @@ namespace GIGLS.Core.IServices.Partnership
         Task<object> AddPartner(PartnerDTO partner);
         Task UpdatePartner(int partnerId, PartnerDTO partner);
         Task RemovePartner(int partnerId);
-        Task<string> GenerateNextValidPartnerCode();
     }
 }
