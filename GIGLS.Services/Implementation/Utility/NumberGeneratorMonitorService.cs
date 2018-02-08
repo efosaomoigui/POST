@@ -170,7 +170,7 @@ namespace GIGLS.Services.Implementation.Utility
                     }
                 case NumberGeneratorType.Partner:
                     {
-                        return "PL";
+                        return "P";
                     }
                 default:
                     {
