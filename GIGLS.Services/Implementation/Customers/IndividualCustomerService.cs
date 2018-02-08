@@ -146,7 +146,8 @@ namespace GIGLS.Services.Implementation.Customers
                     PhoneNumber = s.PhoneNumber,
                     State = s.State,
                     DateModified = s.DateModified,
-                    DateCreated = s.DateCreated
+                    DateCreated = s.DateCreated,
+                    CustomerCode = s.CustomerCode
                 }).ToList();
 
                 return await Task.FromResult(customers);
