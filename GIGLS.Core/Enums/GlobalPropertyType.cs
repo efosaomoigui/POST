@@ -4,5 +4,7 @@
     {
         DemurragePrice,
         DemurrageDayCount,
+        EcommerceWeightLimit,
+        EcommerceReturnWeightLimit
     }
 }
