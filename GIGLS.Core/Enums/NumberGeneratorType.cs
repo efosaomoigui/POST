@@ -9,6 +9,7 @@
         Wallet = 5,
         CustomerCodeIndividual = 6,
         CustomerCodeCorporate = 7,
-        CustomerCodeEcommerce = 8
+        CustomerCodeEcommerce = 8,
+        Partner = 9
     }
 }

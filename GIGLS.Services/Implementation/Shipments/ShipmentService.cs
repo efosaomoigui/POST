@@ -553,18 +553,29 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-
                 //filterOptionsDto.count = 100;
 
                 // get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var shipmentsBySC = await _uow.Shipment.GetShipments(filterOptionsDto, serviceCenters).Item1;
 
+                // get only paid shipments from Invoice
+                var paidShipments = new List<ShipmentDTO>();
+                foreach(var shipmentItem in shipmentsBySC)
+                {
+                    var invoice = await _uow.Invoice.GetAsync(s => s.Waybill == shipmentItem.Waybill);
+
+                    if (invoice.PaymentStatus == PaymentStatus.Paid)
+                    {
+                        paidShipments.Add(shipmentItem);
+                    }
+                }
+
                 // get all grouped waybills for that Service Centre
                 var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(serviceCenters);
 
                 // filter the two lists
-                var ungroupedWaybills = shipmentsBySC.Where(s => !groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber).Contains(s.Waybill));
+                var ungroupedWaybills = paidShipments.Where(s => !groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber).Contains(s.Waybill));
 
                 return ungroupedWaybills.ToList();
             }

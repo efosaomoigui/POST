@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using AutoMapper;
 using GIGLS.Core.Domain.Partnership;
 using GIGLS.Infrastructure;
+using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Services.Implementation.Partnership
 {
@@ -14,11 +16,14 @@ namespace GIGLS.Services.Implementation.Partnership
     {
         private readonly IUnitOfWork _uow;
         private readonly IWalletService _walletService;
+        private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
 
-        public PartnerService(IUnitOfWork uow, IWalletService walletService)
+        public PartnerService(IUnitOfWork uow, IWalletService walletService, 
+            INumberGeneratorMonitorService numberGeneratorMonitorService)
         {
             _uow = uow;
             _walletService = walletService;
+            _numberGeneratorMonitorService = numberGeneratorMonitorService;
             MapperConfig.Initialize();
         }
 
@@ -40,18 +45,6 @@ namespace GIGLS.Services.Implementation.Partnership
             return partnerDto;
         }
 
-        public async Task<string> GenerateNextValidPartnerCode()
-        {
-            var PartnerCode = await _uow.Partner.GetLastValidPartnerCode();
-
-            var partnercode = PartnerCode?.PartnerCode ?? "0";
-
-            var number = long.Parse(partnercode) + 1;
-            var numberStr = number.ToString("000000");
-            return numberStr;
-
-        }
-
         public async Task<object> AddPartner(PartnerDTO partnerDto)
         {            
             partnerDto.PartnerName = partnerDto.PartnerName.Trim();
@@ -60,9 +53,11 @@ namespace GIGLS.Services.Implementation.Partnership
             {
                 throw new GenericException("PARTNER_EXISTS");
             }
-            
+
+            var partnerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Partner);
+
             var partner = Mapper.Map<Partner>(partnerDto);
-            partner.PartnerCode = await GenerateNextValidPartnerCode();            
+            partner.PartnerCode = partnerCode;            
             _uow.Partner.Add(partner);
             await _uow.CompleteAsync();
             return new { id = partner.PartnerId };
