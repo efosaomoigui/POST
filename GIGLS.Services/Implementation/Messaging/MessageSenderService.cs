@@ -81,7 +81,8 @@ namespace GIGLS.Services.Implementation.Messaging
                 var messageDTO = smsMessages.FirstOrDefault(s => s.MessageType == messageType);
 
                 //prepare message finalBody
-                //PrepareMessageFinalBody(messageDTO, obj);
+                PrepareMessageFinalBody(messageDTO, obj);
+
                 await _sMSService.SendAsync(messageDTO);
             }
             catch (Exception ex)
@@ -96,8 +97,25 @@ namespace GIGLS.Services.Implementation.Messaging
             {
                 var shipmentDTO = (ShipmentDTO)obj;
                 messageDTO.FinalBody = string.Format(messageDTO.Body, shipmentDTO.Customer[0].CustomerName, shipmentDTO.Waybill);
-                messageDTO.To = shipmentDTO.Customer[0].Email;
+                messageDTO.To = shipmentDTO.Customer[0].PhoneNumber;
             }
+
+            //resolve phone numbers to +2347011111111
+            var toPhoneNumber = messageDTO.To;
+            //1
+            if (toPhoneNumber.Trim().StartsWith("0"))   //07011111111
+            {
+                toPhoneNumber = toPhoneNumber.Substring(1, toPhoneNumber.Length - 1);
+                toPhoneNumber = $"+234{toPhoneNumber}";
+            }
+            //2
+            if (!toPhoneNumber.Trim().StartsWith("+"))  //2347011111111
+            {
+                toPhoneNumber = $"+{toPhoneNumber}";
+            }
+
+            //assign
+            messageDTO.To = toPhoneNumber;
         }
 
     }
