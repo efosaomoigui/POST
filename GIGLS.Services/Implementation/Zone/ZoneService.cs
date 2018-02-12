@@ -24,7 +24,7 @@ namespace GIGLS.Services.Implementation.Zone
             {
                 if (await _uow.Zone.ExistAsync(c => c.ZoneName.ToLower() == zone.ZoneName.Trim().ToLower()))
                 {
-                    throw new GenericException("Zone Already Exist");
+                    throw new GenericException("Zone information already exist");
                 }
                 var newZone = Mapper.Map<Core.Domain.Zone>(zone);
                 _uow.Zone.Add(newZone);
@@ -44,7 +44,7 @@ namespace GIGLS.Services.Implementation.Zone
                 var zone = await _uow.Zone.GetAsync(zoneId);
                 if (zone == null)
                 {
-                    throw new GenericException("Zone does not exist");
+                    throw new GenericException("Zone information does not exist");
                 }
                 _uow.Zone.Remove(zone);
                 _uow.Complete();
@@ -74,7 +74,7 @@ namespace GIGLS.Services.Implementation.Zone
                 var zone = await _uow.Zone.GetAsync(zoneId);
                 if (zone == null)
                 {
-                    throw new GenericException("Zone Not Exist");
+                    throw new GenericException("Zone information does not exist");
                 }
 
                 var zoneDTO = Mapper.Map<ZoneDTO>(zone);
@@ -105,7 +105,7 @@ namespace GIGLS.Services.Implementation.Zone
                 var zone = await _uow.Zone.GetAsync(zoneId);
                 if (zone == null || zoneDto.ZoneId != zoneId)
                 {
-                    throw new GenericException("Zone Not Exist");
+                    throw new GenericException("Zone information does not exist");
                 }
                 zone.ZoneName = zoneDto.ZoneName;
                 zone.Status = zoneDto.Status;
@@ -114,7 +114,6 @@ namespace GIGLS.Services.Implementation.Zone
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -126,7 +125,7 @@ namespace GIGLS.Services.Implementation.Zone
                 var zone = await _uow.Zone.GetAsync(zoneId);
                 if (zone == null)
                 {
-                    throw new GenericException("Zone Not Exist");
+                    throw new GenericException("Zone information does not exist");
                 }
                 zone.Status = status;
                 _uow.Complete();

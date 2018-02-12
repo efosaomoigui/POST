@@ -130,6 +130,7 @@
     <Compile Include="Domain\ClientNode.cs" />
     <Compile Include="Domain\Company.cs" />
     <Compile Include="Domain\CompanyContactPerson.cs" />
+    <Compile Include="Domain\Country.cs" />
     <Compile Include="Domain\DeliveryOption.cs" />
     <Compile Include="Domain\DeliveryOptionPrice.cs" />
     <Compile Include="Domain\Dispatch.cs" />
@@ -218,6 +219,7 @@
     <Compile Include="DTO\Account\VATDTO.cs" />
     <Compile Include="DTO\BaseDomainDTO.cs" />
     <Compile Include="DTO\Client\ClientNodeDTO.cs" />
+    <Compile Include="DTO\CountryDTO.cs" />
     <Compile Include="DTO\Customers\CompanyContactPersonDTO.cs" />
     <Compile Include="DTO\Customers\CompanyDTO.cs" />
     <Compile Include="DTO\Customers\CustomerDTO.cs" />
@@ -373,6 +375,7 @@
     <Compile Include="IRepositories\Haulage\IPackingListRepository.cs" />
     <Compile Include="IRepositories\Haulage\IHaulageRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
+    <Compile Include="IRepositories\ICountryRepository.cs" />
     <Compile Include="IRepositories\IMessageRepository.cs" />
     <Compile Include="IRepositories\IRepository.cs" />
     <Compile Include="IRepositories\IStateRepository.cs" />
@@ -459,6 +462,7 @@
     <Compile Include="IServices\Haulage\IHaulageDistanceMappingPriceService.cs" />
     <Compile Include="IServices\Haulage\IHaulageService.cs" />
     <Compile Include="IServices\Haulage\IPackingListService.cs" />
+    <Compile Include="IServices\ICountryService.cs" />
     <Compile Include="IServices\IMessageService.cs" />
     <Compile Include="IServices\IServiceDependencyMarker.cs" />
     <Compile Include="IServices\IServiceReponse.cs" />

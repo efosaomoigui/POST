@@ -217,6 +217,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<ShipmentCancel, ShipmentCancelDTO>();
                 config.CreateMap<ShipmentCancelDTO, ShipmentCancel>();
+
+                config.CreateMap<Country, CountryDTO>();
+                config.CreateMap<CountryDTO, Country>();
             });
 
             isInit = true;

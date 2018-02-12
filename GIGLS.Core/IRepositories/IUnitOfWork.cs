@@ -102,6 +102,7 @@ namespace GIGLS.Core
         IGlobalPropertyRepository GlobalProperty { get; set; }
         IMissingShipmentRepository MissingShipment { get; set; }
         IShipmentCancelRepository ShipmentCancel { get; set; }
+        ICountryRepository Country { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

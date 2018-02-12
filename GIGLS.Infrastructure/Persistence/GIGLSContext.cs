@@ -43,6 +43,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         public DbSet<AuditTrailEvent> AuditTrailEvent { get; set; }
 
+        public DbSet<Country> Country { get; set; }
         public DbSet<State> State { get; set; }
         public DbSet<Station> Station { get; set; }
         public DbSet<Zone> Zone { get; set; }

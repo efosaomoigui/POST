@@ -147,6 +147,7 @@
     <Compile Include="Implementation\Account\InvoiceShipmentService.cs" />
     <Compile Include="Implementation\Account\VATService.cs" />
     <Compile Include="Implementation\Client\ClientNodeService.cs" />
+    <Compile Include="Implementation\CountryService.cs" />
     <Compile Include="Implementation\Customers\CompanyContactPersonService.cs" />
     <Compile Include="Implementation\Customers\CompanyService.cs" />
     <Compile Include="Implementation\Customers\CustomerService.cs" />
