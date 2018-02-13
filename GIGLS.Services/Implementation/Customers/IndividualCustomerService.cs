@@ -115,10 +115,10 @@ namespace GIGLS.Services.Implementation.Customers
             {
                 var customer = await _uow.IndividualCustomer.GetAsync(x => x.PhoneNumber.Equals(phoneNumber));
 
-                if (customer == null)
-                {
-                    throw new GenericException("Individual Customer information does not exist");
-                }
+                //if (customer == null)
+                //{
+                //    throw new GenericException("Individual Customer information does not exist");
+                //}
 
                 IndividualCustomerDTO individual = Mapper.Map<IndividualCustomerDTO>(customer);
                 return individual;
