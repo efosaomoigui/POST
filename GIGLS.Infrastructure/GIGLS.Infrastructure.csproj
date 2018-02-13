@@ -183,6 +183,7 @@
     <Compile Include="Persistence\Repositories\Workshops\WorkshopRepository.cs" />
     <Compile Include="Persistence\Repositories\Zone\DeliveryOptionPriceRepository.cs" />
     <Compile Include="Persistence\Repositories\Zone\DeliveryOptionRepository.cs" />
+    <Compile Include="Persistence\Repositories\Zone\CountryRouteZoneMapRepository.cs" />
     <Compile Include="Persistence\Repositories\Zone\DomesticRouteZoneMapRepository.cs" />
     <Compile Include="Persistence\Repositories\Zone\DomesticZonePriceRepository.cs" />
     <Compile Include="Persistence\Repositories\Zone\SpecialDomesticPackageRepository.cs" />

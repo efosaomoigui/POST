@@ -269,6 +269,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public ICountryRepository Country { get; set; }
 
+        [Inject]
+        public ICountryRouteZoneMapRepository CountryRouteZoneMap { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

@@ -60,6 +60,7 @@ namespace GIGLS.Infrastructure.Persistence
         //General Shipment Pricing
         public DbSet<DomesticRouteZoneMap> DomesticRouteZoneMap { get; set; }
         public DbSet<DomesticZonePrice> DomesticZonePrice { get; set; }
+        public DbSet<CountryRouteZoneMap> CountryRouteZoneMap { get; set; }        
 
         //Haulauge Pricing
         public DbSet<Haulage> Haulage { get; set; }
@@ -193,6 +194,9 @@ namespace GIGLS.Infrastructure.Persistence
 
             modelBuilder.Entity<DomesticRouteZoneMap>().Property(p => p.DestinationId).IsOptional();
             modelBuilder.Entity<DomesticRouteZoneMap>().Property(p => p.DepartureId).IsOptional();
+
+            modelBuilder.Entity<CountryRouteZoneMap>().Property(p => p.DestinationId).IsOptional();
+            modelBuilder.Entity<CountryRouteZoneMap>().Property(p => p.DepartureId).IsOptional();
         }
 
         #region Customize to handle Date and Delete status of Entities

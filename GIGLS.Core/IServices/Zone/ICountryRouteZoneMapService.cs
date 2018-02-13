@@ -1,5 +1,4 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Zone;
+﻿using GIGLS.Core.DTO.Zone;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

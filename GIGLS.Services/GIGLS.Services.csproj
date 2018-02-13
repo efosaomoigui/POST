@@ -217,6 +217,7 @@
     <Compile Include="Implementation\Workshops\WorkshopService.cs" />
     <Compile Include="Implementation\Zone\DeliveryOptionPriceService.cs" />
     <Compile Include="Implementation\Zone\DeliveryOptionService.cs" />
+    <Compile Include="Implementation\Zone\CountryRouteZoneMapService.cs" />
     <Compile Include="Implementation\Zone\DomesticRouteZoneMapService.cs" />
     <Compile Include="Implementation\Zone\DomesticZonePriceService.cs" />
     <Compile Include="Implementation\Haulage\HaulageDistanceMappingService.cs" />

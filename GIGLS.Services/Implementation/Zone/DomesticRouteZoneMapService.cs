@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.IServices.Zone;
@@ -7,9 +6,6 @@ using GIGLS.Core;
 using GIGLS.Infrastructure;
 using GIGLS.Core.DTO.Zone;
 using AutoMapper;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.Domain;
-using GIGLS.Services;
 using GIGLS.Core.IServices.ServiceCentres;
 
 namespace GIGLS.Services.Implementation.Zone
@@ -113,6 +109,7 @@ namespace GIGLS.Services.Implementation.Zone
 
             zoneMap.DepartureId = routeZoneMap.DepartureId;
             zoneMap.DestinationId = routeZoneMap.DestinationId;
+            zoneMap.ZoneId = routeZoneMap.ZoneId;
             zoneMap.Status = routeZoneMap.Status;
 
             await _unitOfWork.CompleteAsync();

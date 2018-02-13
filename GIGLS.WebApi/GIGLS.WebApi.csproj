@@ -331,6 +331,7 @@
     <Compile Include="Controllers\Wallet\WalletTransactionController.cs" />
     <Compile Include="Controllers\Zone\DeliveryOptionController.cs" />
     <Compile Include="Controllers\Zone\DeliveryOptionPriceController.cs" />
+    <Compile Include="Controllers\Zone\CountryRouteZoneMapController.cs" />
     <Compile Include="Controllers\Zone\DomesticRouteZoneMapController.cs" />
     <Compile Include="Controllers\Zone\DomesticZonePriceController.cs" />
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingController.cs" />
