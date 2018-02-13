@@ -50,6 +50,9 @@ namespace GIGLS.Core
                 config.CreateMap<DomesticRouteZoneMapDTO, DomesticRouteZoneMap>();
                 config.CreateMap<DomesticRouteZoneMap, DomesticRouteZoneMapDTO>();
 
+                config.CreateMap<CountryRouteZoneMapDTO, CountryRouteZoneMap>();
+                config.CreateMap<CountryRouteZoneMap, CountryRouteZoneMapDTO>();
+
                 config.CreateMap<ZoneDTO, GIGLS.Core.Domain.Zone>();
                 config.CreateMap<GIGLS.Core.Domain.Zone, ZoneDTO>();
 

@@ -4,6 +4,7 @@
     {
         Regular,
         Ecommerce,
-        ReturnForEcommerce
+        ReturnForEcommerce,
+        International
     }
 }

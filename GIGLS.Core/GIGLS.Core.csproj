@@ -131,6 +131,7 @@
     <Compile Include="Domain\Company.cs" />
     <Compile Include="Domain\CompanyContactPerson.cs" />
     <Compile Include="Domain\Country.cs" />
+    <Compile Include="Domain\CountryRouteZoneMap.cs" />
     <Compile Include="Domain\DeliveryOption.cs" />
     <Compile Include="Domain\DeliveryOptionPrice.cs" />
     <Compile Include="Domain\Dispatch.cs" />
@@ -300,6 +301,7 @@
     <Compile Include="DTO\Workshops\WorkshopDTO.cs" />
     <Compile Include="DTO\Zone\DeliveryOptionDTO.cs" />
     <Compile Include="DTO\Zone\DeliveryOptionPriceDTO.cs" />
+    <Compile Include="DTO\Zone\CountryRouteZoneMapDTO.cs" />
     <Compile Include="DTO\Zone\DomesticRouteZoneMapDTO.cs" />
     <Compile Include="DTO\Zone\DomesticZonePriceDTO.cs" />
     <Compile Include="DTO\Zone\HaulageDistanceMappingDTO.cs" />
@@ -424,6 +426,7 @@
     <Compile Include="IRepositories\Workshops\IWorkshopRepository.cs" />
     <Compile Include="IRepositories\Zone\IDeliveryOptionPriceRepository.cs" />
     <Compile Include="IRepositories\Zone\IDeliveryOptionRepository.cs" />
+    <Compile Include="IRepositories\Zone\ICountryRouteZoneMapRepository.cs" />
     <Compile Include="IRepositories\Zone\IDomesticRouteZoneMapRepository.cs" />
     <Compile Include="IRepositories\Zone\IDomesticZonePriceRepository.cs" />
     <Compile Include="IRepositories\Haulage\IHaulageDistanceMappingRepository.cs" />
@@ -514,6 +517,7 @@
     <Compile Include="IServices\Workshops\IWorkshopService.cs" />
     <Compile Include="IServices\Zone\IDeliveryOptionPriceService.cs" />
     <Compile Include="IServices\Zone\IDeliveryOptionService.cs" />
+    <Compile Include="IServices\Zone\ICountryRouteZoneMapService.cs" />
     <Compile Include="IServices\Zone\IDomesticRouteZoneMapService.cs" />
     <Compile Include="IServices\Zone\IDomesticZonePriceService.cs" />
     <Compile Include="IServices\Haulage\IHaulageDistanceMappingService.cs" />

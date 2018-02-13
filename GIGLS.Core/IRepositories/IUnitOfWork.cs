@@ -103,6 +103,7 @@ namespace GIGLS.Core
         IMissingShipmentRepository MissingShipment { get; set; }
         IShipmentCancelRepository ShipmentCancel { get; set; }
         ICountryRepository Country { get; set; }
+        ICountryRouteZoneMapRepository CountryRouteZoneMap { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
