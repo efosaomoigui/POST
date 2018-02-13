@@ -8,5 +8,6 @@
         public string sortvalue { get; set; }
         public string filter { get; set; }
         public string filterValue { get; set; }
+        public bool? IsInternational { get; set; }
     }
 }

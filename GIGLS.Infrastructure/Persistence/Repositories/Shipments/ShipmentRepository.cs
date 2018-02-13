@@ -112,6 +112,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 //filter by cancelled shipments
                 shipment = shipment.Where(s => s.IsCancelled == false);
 
+                //filter by Local or International Shipment
+                if(filterOptionsDto.IsInternational != null)
+                {
+                    shipment = shipment.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
+                }
+
 
                 var count = shipment.ToList().Count();
                 //shipment = shipment.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count);

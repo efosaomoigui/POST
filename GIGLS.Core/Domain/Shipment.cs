@@ -86,5 +86,6 @@ namespace GIGL.GIGLS.Core.Domain
 
         //Cancelled shipment
         public bool IsCancelled { get; set; }
+        public bool IsInternational { get; set; }
     }
 }

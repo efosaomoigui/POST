@@ -97,5 +97,6 @@ namespace GIGLS.Core.DTO.Shipments
         public DemurrageDTO Demurrage { get; set; }
 
         public bool IsCancelled { get; set; }
+        public bool IsInternational { get; set; }
     }
 }
