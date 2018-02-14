@@ -28,7 +28,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Zone
                                     Weight = r.Weight,
                                     Price = r.Price,
                                     ZoneId = r.ZoneId,
-                                    ZoneName = r.Zone.ZoneName
+                                    ZoneName = r.Zone.ZoneName,
+                                    RegularEcommerceType = r.RegularEcommerceType
                                 };
                 return Task.FromResult(optionDto.ToList());
             }

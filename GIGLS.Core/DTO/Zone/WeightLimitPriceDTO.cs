@@ -1,4 +1,5 @@
-﻿using GIGLS.CORE.DTO;
+﻿using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO;
 
 namespace GIGLS.Core.DTO.Zone
 {
@@ -13,5 +14,7 @@ namespace GIGLS.Core.DTO.Zone
         public decimal Price { get; set; }
 
         public decimal Weight { get; set; }
+
+        public RegularEcommerceType RegularEcommerceType { get; set; }
     }
 }

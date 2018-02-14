@@ -50,5 +50,21 @@ namespace GIGLS.WebApi.Controllers.Business
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("international")]
+        public async Task<IServiceResponse<decimal>> GetInternationalPrice(PricingDTO pricingDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var price = await _pricing.GetInternationalPrice(pricingDto);
+
+                return new ServiceResponse<decimal>
+                {
+                    Object = price
+                };
+            });
+        }
     }
 }

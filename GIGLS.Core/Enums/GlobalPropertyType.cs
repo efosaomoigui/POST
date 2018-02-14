@@ -5,6 +5,7 @@
         DemurragePrice,
         DemurrageDayCount,
         EcommerceWeightLimit,
-        EcommerceReturnWeightLimit
+        EcommerceReturnWeightLimit,
+        International
     }
 }

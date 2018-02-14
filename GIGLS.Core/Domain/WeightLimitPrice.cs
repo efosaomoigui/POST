@@ -1,4 +1,4 @@
-﻿using System;
+﻿using GIGLS.Core.Enums;
 
 namespace GIGLS.Core.Domain
 {
@@ -11,5 +11,7 @@ namespace GIGLS.Core.Domain
 
         public decimal Price { get; set; }
         public decimal Weight { get; set; }
+        
+        public RegularEcommerceType RegularEcommerceType { get; set; }
     }
 }

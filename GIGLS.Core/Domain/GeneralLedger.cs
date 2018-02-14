@@ -1,7 +1,6 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace GIGLS.Core.Domain
@@ -26,5 +25,6 @@ namespace GIGLS.Core.Domain
         public PaymentType PaymentType { get; set; }
         public string PaymentTypeReference { get; set; }
         public PaymentServiceType PaymentServiceType { get; set; }
+        public bool IsInternational { get; set; }
     }
 }
