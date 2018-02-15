@@ -11,7 +11,7 @@ namespace GIGLS.Core.Domain
         public int StateId { get; set; }
         public string StateName { get; set; }
         public string StateCode { get; set; }
-        public string Country { get; set; }
+        public int CountryId { get; set; }        
         public virtual ICollection<Station> Stations { get; set; }        
     }
 }

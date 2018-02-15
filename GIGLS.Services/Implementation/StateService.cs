@@ -29,13 +29,7 @@ namespace GIGLS.Services.Implementation
 
         public async Task<StateDTO> GetStateById(int stateId)
         {
-            var state = await _uow.State.GetAsync(stateId);
-
-            if (state == null)
-            {
-                throw new GenericException("STATE INFORMATION DOES NOT EXIST");
-            }
-            return Mapper.Map<StateDTO>(state);
+            return await _uow.State.GetStateById(stateId);
         }
 
         public async Task<object> AddState(StateDTO stateDto)
@@ -52,7 +46,7 @@ namespace GIGLS.Services.Implementation
             {
                 StateName = stateDto.StateName,
                 StateCode = stateDto.StateCode,
-                Country = stateDto.Country
+                CountryId = stateDto.CountryId
             };
 
             _uow.State.Add(newState);
@@ -70,7 +64,7 @@ namespace GIGLS.Services.Implementation
             }
             state.StateName = stateDto.StateName.Trim();
             state.StateCode = stateDto.StateCode;
-            //states.Country = state.Country.Trim();
+            state.CountryId = stateDto.CountryId;
             await _uow.CompleteAsync();
         }
 

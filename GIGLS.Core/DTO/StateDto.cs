@@ -13,7 +13,8 @@ namespace GIGLS.Core.DTO
         public int StateId { get; set; }
         public string StateName { get; set; }
         public string StateCode { get; set; }
-        public string Country { get; set; }
+        public int CountryId { get; set; }
+        public CountryDTO Country { get; set; }
 
         public List<StationDTO> Stations { get; set; }
     }

@@ -8,7 +8,8 @@ namespace GIGLS.Core.IRepositories
 {
     public interface IStateRepository : IRepository<State>
     {
-        Task<IEnumerable<StateDTO>> GetStatesAsync(int pageSize, int page);
+        Task<List<StateDTO>> GetStatesAsync(int pageSize, int page);
         int GetStatesTotal();
+        Task<StateDTO> GetStateById(int stateId);
     }
 }

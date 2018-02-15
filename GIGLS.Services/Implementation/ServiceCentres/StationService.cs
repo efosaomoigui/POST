@@ -65,7 +65,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
 
             if (station == null)
             {
-                throw new GenericException("STATION_NOT_EXIST");
+                throw new GenericException("STATION INFORMATION DOES NOT EXIST");
             }
             return new StationDTO
             {
@@ -74,9 +74,8 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 StationCode = station.StationCode,
                 StateId = station.StateId,
                 StateName = station.State.StateName,
-                Country = station.State.Country
+                //Country = station.State.Country
             };
-            // return Mapper.Map<StationDTO>(station);
         }
         
         public async Task<IEnumerable<StationDTO>> GetStations()
@@ -93,8 +92,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                     StationCode = st.StationCode,
                     StationName = st.StationName,
                     StateId = st.StateId,
-                    StateName = st.State.StateName,
-                    Country = st.State.Country
+                    StateName = st.State.StateName
                 });
             }
             return stationDto.OrderBy(x => x.StationName).ToList();
@@ -108,7 +106,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
 
             if (station == null || stationId != stationDto.StationId)
             {
-                throw new GenericException("STATION_NOT_EXIST");
+                throw new GenericException("STATION INFORMATION DOES NOT EXIST");
             }
 
             station.StationName = stationDto.StationName.Trim();
