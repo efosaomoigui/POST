@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using GIGLS.Core;
+﻿using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
 using GIGLS.Core.IServices;

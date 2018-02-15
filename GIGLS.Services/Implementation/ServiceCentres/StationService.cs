@@ -1,6 +1,5 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.Domain;
-using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.ServiceCentres;
@@ -32,7 +31,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
 
             if (await _uow.Station.ExistAsync(v => v.StationCode.ToLower() == stationCode))
             {
-                throw new GenericException($"{station.StationName} STATION_ALREADY_EXIST");
+                throw new GenericException($"{station.StationName} STATION INFORMATION ALREADY EXIST");
             }
 
             var newStation = new Station
@@ -53,7 +52,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
 
             if (station == null)
             {
-                throw new GenericException("STATION_NOT_EXIST");
+                throw new GenericException("STATION INFORMATION DOES NOT EXIST");
             }
             _uow.Station.Remove(station);
             await _uow.CompleteAsync();
@@ -74,7 +73,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 StationCode = station.StationCode,
                 StateId = station.StateId,
                 StateName = station.State.StateName,
-                //Country = station.State.Country
+                Country = station.State.CountryId.ToString()
             };
         }
         
