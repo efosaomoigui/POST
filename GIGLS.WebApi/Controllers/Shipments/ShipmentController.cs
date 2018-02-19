@@ -267,6 +267,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("countryzone/{destinationCountryId:int}")]
+        public async Task<IServiceResponse<CountryRouteZoneMapDTO>> GetCountryZone(int destinationCountryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var zone = await _service.GetCountryZone(destinationCountryId);
+
+                return new ServiceResponse<CountryRouteZoneMapDTO>
+                {
+                    Object = zone
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("dailysales")]
         public async Task<IServiceResponse<DailySalesDTO>> GetDailySales(AccountFilterCriteria accountFilterCriteria)

@@ -31,6 +31,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentres();
         Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto);
         Task<DomesticRouteZoneMapDTO> GetZone(int destinationServiceCentre);
+        Task<CountryRouteZoneMapDTO> GetCountryZone(int destinationCountry);
         Task<DailySalesDTO> GetDailySales(AccountFilterCriteria accountFilterCriteria);
 
         Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType);

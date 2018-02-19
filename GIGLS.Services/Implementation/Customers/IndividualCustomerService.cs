@@ -113,7 +113,7 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
-                var customer = await _uow.IndividualCustomer.GetAsync(x => x.PhoneNumber.Equals(phoneNumber));
+                var customer = await _uow.IndividualCustomer.GetAsync(x => x.PhoneNumber.Contains(phoneNumber));
 
                 //if (customer == null)
                 //{

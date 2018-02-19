@@ -10,6 +10,7 @@ using GIGLS.Core.IServices;
 using System.Linq;
 using GIGLS.Core.IServices.Utility;
 using System;
+using GIGLS.Core.IServices.ServiceCentres;
 
 namespace GIGLS.Services.Business.Pricing
 {
@@ -28,12 +29,13 @@ namespace GIGLS.Services.Business.Pricing
         private readonly IUnitOfWork _uow;
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ICountryRouteZoneMapService _countryrouteMapService;
+        private readonly IServiceCentreService _centreService;
 
         public PricingService(IDomesticRouteZoneMapService zoneService, IDeliveryOptionPriceService optionPriceService,
             IDomesticZonePriceService regular, ISpecialDomesticZonePriceService special,
             IWeightLimitService weightLimit, IWeightLimitPriceService weightLimitPrice,
             IUserService userService, IHaulageDistanceMappingService haulageDistanceMappingService,
-            IHaulageDistanceMappingPriceService haulageDistanceMappingPriceService,
+            IHaulageDistanceMappingPriceService haulageDistanceMappingPriceService, IServiceCentreService centreService,
             IHaulageService haulageService, IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryrouteMapService, IUnitOfWork uow)
         {
             _routeZone = zoneService;
@@ -48,6 +50,7 @@ namespace GIGLS.Services.Business.Pricing
             _haulageService = haulageService;
             _globalPropertyService = globalPropertyService;
             _countryrouteMapService = countryrouteMapService;
+            _centreService = centreService;
             _uow = uow;
         }
 
@@ -295,10 +298,19 @@ namespace GIGLS.Services.Business.Pricing
 
         public async Task<decimal> GetInternationalPrice(PricingDTO pricingDto)
         {
+            // use currentUser login servicecentre
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            if (serviceCenters.Length > 1)
+            {
+                throw new GenericException("This user is assign to more than one(1) Service Centre  ");
+            }
 
-            var zone = await _countryrouteMapService.GetZone(pricingDto.DepartureServiceCentreId, pricingDto.DestinationServiceCentreId);
+            var serviceCentreDetail = await _centreService.GetServiceCentreById(serviceCenters[0]);
 
-            decimal deliveryOptionPrice = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId);
+
+            var zone = await _countryrouteMapService.GetZone(serviceCentreDetail.CountryId, pricingDto.DestinationServiceCentreId);
+
+            //decimal deliveryOptionPrice = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId);
 
             //Get Ecommerce limit weight from GlobalProperty
             var internationalWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.International);
@@ -316,7 +328,8 @@ namespace GIGLS.Services.Business.Pricing
                 PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.International);
             }
 
-            return PackagePrice + deliveryOptionPrice;
+            // return PackagePrice + deliveryOptionPrice;
+            return PackagePrice;
         }
 
         private async Task<decimal> GetInternationalPriceOverflow(decimal weight, decimal activeWeightLimit, int zoneId)

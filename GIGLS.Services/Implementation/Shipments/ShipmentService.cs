@@ -42,6 +42,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IWalletService _walletService;
         private readonly IShipmentTrackingService _shipmentTrackingService;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
@@ -50,7 +51,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IMessageSenderService messageSenderService, ICompanyService companyService,
             IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
-            IGlobalPropertyService globalPropertyService
+            IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService
             )
         {
             _uow = uow;
@@ -66,6 +67,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _walletService = walletService;
             _shipmentTrackingService = shipmentTrackingService;
             _globalPropertyService = globalPropertyService;
+            _countryRouteZoneMapService = countryRouteZoneMapService;
             MapperConfig.Initialize();
         }
 
@@ -408,8 +410,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private async Task<CustomerDTO> CreateCustomer(ShipmentDTO shipmentDTO)
         {
-            var customerDTO = shipmentDTO.Customer[0];
+            var customerDTO = shipmentDTO.Customer[0];           
             var customerType = shipmentDTO.CustomerType;
+
+            //reset rowversion
+            customerDTO.RowVersion = null;
 
             // company
             if (CustomerType.Company.ToString() == customerType)
@@ -515,7 +520,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 PaymentStatus = PaymentStatus.Pending,
                 Waybill = shipmentDTO.Waybill,
                 PaymentDate = DateTime.Now,
-                DueDate = DateTime.Now.AddDays(settlementPeriod)
+                DueDate = DateTime.Now.AddDays(settlementPeriod),
+                IsInternational = shipmentDTO.IsInternational
             };
 
             _uow.Invoice.Add(invoice);
@@ -535,6 +541,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 Description = "Payment for Shipment",
                 IsDeferred = true,
                 Waybill = shipmentDTO.Waybill,
+                IsInternational = shipmentDTO.IsInternational
                 //ClientNodeId = shipment.c
             };
 
@@ -684,6 +691,21 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             var zone = await _domesticRouteZoneMapService.GetZone(serviceCenters[0], destinationServiceCentre);
+            return zone;
+        }
+
+        public async Task<CountryRouteZoneMapDTO> GetCountryZone(int destinationCountry)
+        {
+            // use currentUser login servicecentre
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            if (serviceCenters.Length > 1)
+            {
+                throw new GenericException("This user is assign to more than one(1) Service Centre  ");
+            }
+
+            var serviceCentreDetail = await _centreService.GetServiceCentreById(serviceCenters[0]);
+
+            var zone = await _countryRouteZoneMapService.GetZone(serviceCentreDetail.CountryId, destinationCountry);            
             return zone;
         }
 
