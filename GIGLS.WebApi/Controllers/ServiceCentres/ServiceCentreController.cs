@@ -35,6 +35,36 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("local")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetLocalServiceCentres()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.GetLocalServiceCentres();
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("international")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetInternationalServiceCentres()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.GetInternationalServiceCentres();
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]

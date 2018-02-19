@@ -9,5 +9,7 @@ namespace GIGLS.Core.IRepositories.ServiceCentres
     public interface IServiceCentreRepository : IRepository<ServiceCentre>
     {
         Task<List<ServiceCentreDTO>> GetServiceCentres();
+        Task<List<ServiceCentreDTO>> GetLocalServiceCentres();
+        Task<List<ServiceCentreDTO>> GetInternationalServiceCentres();
     }
 }

@@ -23,6 +23,7 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public int StationId { get; set; }
         public string StationName { get; set; }
         public string StationCode { get; set; }
+        public string Country { get; set; }
         public StationDTO Station { get; set; }
         public List<UserDTO> Users { get; set; }
         public List<ShipmentDTO> Shipments { get; set; }

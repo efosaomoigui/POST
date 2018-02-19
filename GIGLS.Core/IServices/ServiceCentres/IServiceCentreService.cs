@@ -13,5 +13,7 @@ namespace GIGLS.Core.IServices.ServiceCentres
         Task UpdateServiceCentre(int serviceCentreId, ServiceCentreDTO service);
         Task DeleteServiceCentre(int serviceCentreId);
         Task ServiceCentreStatus(int serviceCentreId, bool status);
+        Task<List<ServiceCentreDTO>> GetLocalServiceCentres();
+        Task<List<ServiceCentreDTO>> GetInternationalServiceCentres();
     }
 }

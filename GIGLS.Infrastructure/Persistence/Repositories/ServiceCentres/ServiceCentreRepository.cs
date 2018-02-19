@@ -48,5 +48,75 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                 throw;
             }
         }
+
+        public Task<List<ServiceCentreDTO>> GetLocalServiceCentres()
+        {
+            try
+            {
+                var centres = _context.ServiceCentre;
+                var centreDto = from s in centres
+                                join sc in _context.Station on s.StationId equals sc.StationId
+                                join st in _context.State on sc.StateId equals st.StateId
+                                join c in _context.Country on st.CountryId equals c.CountryId
+                                where c.CountryName == "Nigeria"
+                                select new ServiceCentreDTO
+                                {
+                                    Name = s.Name,
+                                    Address = s.Address,
+                                    City = s.City,
+                                    Email = s.Email,
+                                    PhoneNumber = s.PhoneNumber,
+                                    ServiceCentreId = s.ServiceCentreId,
+                                    Code = s.Code,
+                                    IsActive = s.IsActive,
+                                    TargetAmount = s.TargetAmount,
+                                    TargetOrder = s.TargetOrder,
+                                    StationId = s.StationId,
+                                    StationName = sc.StationName,
+                                    StationCode = sc.StationCode,
+                                    Country = c.CountryName
+                                };
+                return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<ServiceCentreDTO>> GetInternationalServiceCentres()
+        {
+            try
+            {
+                var centres = _context.ServiceCentre;
+                var centreDto = from s in centres
+                                join sc in _context.Station on s.StationId equals sc.StationId
+                                join st in _context.State on sc.StateId equals st.StateId
+                                join c in _context.Country on st.CountryId equals c.CountryId
+                                where c.CountryName != "Nigeria"
+                                select new ServiceCentreDTO
+                                {
+                                    Name = s.Name,
+                                    Address = s.Address,
+                                    City = s.City,
+                                    Email = s.Email,
+                                    PhoneNumber = s.PhoneNumber,
+                                    ServiceCentreId = s.ServiceCentreId,
+                                    Code = s.Code,
+                                    IsActive = s.IsActive,
+                                    TargetAmount = s.TargetAmount,
+                                    TargetOrder = s.TargetOrder,
+                                    StationId = s.StationId,
+                                    StationName = sc.StationName,
+                                    StationCode = sc.StationCode,
+                                    Country = c.CountryName
+                                };
+                return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -26,7 +26,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
             {
                 if (!await _uow.Station.ExistAsync(c => c.StationId == service.StationId))
                 {
-                    throw new GenericException("STATION_SELECTED_DOES_NOT_EXIST");
+                    throw new GenericException("STATION SELECTED DOES NOT EXIST");
                 }
 
                 service.Name = service.Name.Trim();
@@ -39,6 +39,9 @@ namespace GIGLS.Services.IServices.ServiceCentres
                     throw new GenericException($"{service.Name} Service Centre Already Exist");
                 }
 
+                service.Name = service.Name.ToUpper();
+                service.Code = service.Code.ToUpper();
+                service.IsActive = true;
                 var newCentre = Mapper.Map<ServiceCentre>(service);
                 _uow.ServiceCentre.Add(newCentre);
                 await _uow.CompleteAsync();
@@ -116,6 +119,30 @@ namespace GIGLS.Services.IServices.ServiceCentres
             try
             {
                 return await _uow.ServiceCentre.GetServiceCentres();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        
+        public async Task<List<ServiceCentreDTO>> GetLocalServiceCentres()
+        {
+            try
+            {
+                return await _uow.ServiceCentre.GetLocalServiceCentres();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetInternationalServiceCentres()
+        {
+            try
+            {
+                return await _uow.ServiceCentre.GetInternationalServiceCentres();
             }
             catch (Exception)
             {
