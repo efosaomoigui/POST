@@ -97,16 +97,12 @@ namespace GIGLS.Services.IServices.ServiceCentres
         {
             try
             {
-                var centre = await _uow.ServiceCentre.GetAsync( s => s.ServiceCentreId == serviceCentreId, "Station");
+                var centre = await _uow.ServiceCentre.GetServiceCentresById(serviceCentreId);
                 if (centre == null)
                 {
                     throw new GenericException("Service Centre does not exist");
                 }
-
-                var centreDto =  Mapper.Map<ServiceCentreDTO>(centre);
-                centreDto.StationName = centre.Station.StationName;
-                centreDto.StationCode = centre.Station.StationCode;
-                return centreDto;
+                return centre;
             }
             catch (Exception)
             {
