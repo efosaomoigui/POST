@@ -6,6 +6,13 @@
         DemurrageDayCount,
         EcommerceWeightLimit,
         EcommerceReturnWeightLimit,
-        International
+        InternationalWeightLimit,
+        InternationalWeightLimit30,
+        InternationalWeightLimit70,
+        InternationalWeightLimit100,
+        PercentageForInternationalShipment,
+        LIBYA,
+        SYRIA,
+        YEMEN
     }
 }

@@ -33,6 +33,7 @@ namespace GIGLS.Services.Implementation.Utility
                 {
                     Key = globalProperty.Key,
                     Value = globalProperty.Value,
+                    Description = globalProperty.Description,
                     IsActive = true
                 };
 
@@ -100,6 +101,7 @@ namespace GIGLS.Services.Implementation.Utility
 
                 global.Key = globalProperty.Key;
                 global.Value = globalProperty.Value;
+                global.Description = globalProperty.Description;
                 global.IsActive = global.IsActive;
                 _uow.Complete();
 

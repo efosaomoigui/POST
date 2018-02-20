@@ -11,6 +11,7 @@ using System.Linq;
 using GIGLS.Core.IServices.Utility;
 using System;
 using GIGLS.Core.IServices.ServiceCentres;
+using GIGLS.Core.DTO.Zone;
 
 namespace GIGLS.Services.Business.Pricing
 {
@@ -307,13 +308,12 @@ namespace GIGLS.Services.Business.Pricing
 
             var serviceCentreDetail = await _centreService.GetServiceCentreById(serviceCenters[0]);
 
-
             var zone = await _countryrouteMapService.GetZone(serviceCentreDetail.CountryId, pricingDto.DestinationServiceCentreId);
 
             //decimal deliveryOptionPrice = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId);
 
-            //Get Ecommerce limit weight from GlobalProperty
-            var internationalWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.International);
+            //Get International Weight Limit from GlobalProperty
+            var internationalWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalWeightLimit);
 
             decimal weightLimit = decimal.Parse(internationalWeightLimitObj.Value);
 
@@ -328,15 +328,80 @@ namespace GIGLS.Services.Business.Pricing
                 PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.International);
             }
 
+            //Get Percentage Charge For International Shipment Service
+            var PercentageForInternationalShipment = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PercentageForInternationalShipment);
+            decimal percentage = decimal.Parse(PercentageForInternationalShipment.Value);
+
+            var percentagePrice = (percentage / 100) * PackagePrice;
+
+            // War Surcharge calculation
+            var warSurchargePrice = await WarSurcharge(pricingDto.DestinationServiceCentreId);
+
+
             // return PackagePrice + deliveryOptionPrice;
-            return PackagePrice;
+            return (PackagePrice + percentagePrice + warSurchargePrice);
+        }
+
+
+        // War Surcharge calculation
+        private async Task<decimal> WarSurcharge(int countryId)
+        {
+            decimal warSurcharge = 0;
+
+            var libyaObj= await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.LIBYA);
+            var syriaObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SYRIA);
+            var yemenObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.YEMEN);
+
+            var country = await _uow.Country.GetAsync(countryId);
+            if (country != null)
+            {
+                if (country.CountryName == libyaObj.Key)
+                {
+                    warSurcharge = decimal.Parse(libyaObj.Value);
+                }
+
+                if (country.CountryName == syriaObj.Key)
+                {
+                    warSurcharge = decimal.Parse(syriaObj.Value);
+                }
+
+                if (country.CountryName == yemenObj.Key)
+                {
+                    warSurcharge = decimal.Parse(yemenObj.Value);
+                }
+            }
+
+            return warSurcharge;
         }
 
         private async Task<decimal> GetInternationalPriceOverflow(decimal weight, decimal activeWeightLimit, int zoneId)
         {
-            //Price for Active Weight Limit
-            var activeZone = await _weightLimitPrice.GetWeightLimitPriceByZoneId(zoneId, RegularEcommerceType.International);
+            var InternationalWeightLimit30 = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalWeightLimit30);
+            var InternationalWeightLimit70 = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalWeightLimit70);
+            var InternationalWeightLimit100 = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalWeightLimit100);
 
+            decimal weightLimit30 = decimal.Parse(InternationalWeightLimit30.Value);
+            decimal weightLimit70 = decimal.Parse(InternationalWeightLimit70.Value);
+            decimal weightLimit100 = decimal.Parse(InternationalWeightLimit100.Value);
+            
+            //Price for Active Weight Limit
+            WeightLimitPriceDTO activeZone;
+
+            if (weight <= weightLimit30)
+            {
+                activeZone = await _weightLimitPrice.GetWeightLimitPriceByZoneId(zoneId, RegularEcommerceType.InternationalWeightLimit30);
+            }
+
+            else if (weight <= weightLimit70)
+            {
+                activeZone = await _weightLimitPrice.GetWeightLimitPriceByZoneId(zoneId, RegularEcommerceType.InternationalWeightLimit70);
+            }
+
+            else
+            {
+                activeZone = await _weightLimitPrice.GetWeightLimitPriceByZoneId(zoneId, RegularEcommerceType.InternationalWeightLimit100);
+            }
+            
             decimal weightlimitZonePrice = activeZone.Price; //Limit Price addition base on zone
             decimal additionalWeight = activeZone.Weight; //Addtional Weight Divisor
 

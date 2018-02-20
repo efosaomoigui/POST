@@ -5,6 +5,9 @@
         Regular,
         Ecommerce,
         ReturnForEcommerce,
-        International
+        International,
+        InternationalWeightLimit30,
+        InternationalWeightLimit70,
+        InternationalWeightLimit100
     }
 }
