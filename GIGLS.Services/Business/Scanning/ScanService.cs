@@ -4,7 +4,9 @@ using GIGLS.Core.IServices.Business;
 using System;
 using System.Threading.Tasks;
 using GIGLS.Infrastructure;
-using GIGLS.Services.Implementation.Utility;
+using GIGLS.Core.IServices.User;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.ShipmentScan;
 
 namespace GIGLS.Services.Business.Scanning
 {
@@ -16,11 +18,14 @@ namespace GIGLS.Services.Business.Scanning
         private readonly IGroupWaybillNumberService _groupWaybill;
         private readonly IManifestService _manifestService;
         private readonly IManifestGroupWaybillNumberMappingService _groupManifest;
+        private IUserService _userService;
+        private readonly IScanStatusService _scanService;
 
 
         public ScanService(IShipmentService shipmentService, IShipmentTrackingService shipmentTrackingService, 
             IGroupWaybillNumberMappingService groupService, IGroupWaybillNumberService groupWaybill, 
-            IManifestService manifestService, IManifestGroupWaybillNumberMappingService groupManifest)
+            IManifestService manifestService, IManifestGroupWaybillNumberMappingService groupManifest,
+            IUserService userService, IScanStatusService scanService)
         {
             _shipmentService = shipmentService;
             _shipmentTrackingService = shipmentTrackingService;
@@ -28,6 +33,8 @@ namespace GIGLS.Services.Business.Scanning
             _groupWaybill = groupWaybill;
             _manifestService = manifestService;
             _groupManifest = groupManifest;
+            _userService = userService;
+            _scanService = scanService;
         }
 
         //public async Task<bool> ScanShipment(string waybillNumber, ShipmentScanStatus scanStatus)
@@ -58,8 +65,22 @@ namespace GIGLS.Services.Business.Scanning
 
             if (shipment != null)
             {
+                if(scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
+                {
+                    //Check if the user is a staff at final destination
+                    var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                    if (serviceCenters.Length == 1 && serviceCenters[0] == shipment.DestinationServiceCentreId)
+                    {
+                        //do nothing
+                    }
+                    else
+                    { 
+                        throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+                    }
+                }
+
                 //check if the waybill has not been scan for the same status before
-                var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);
+                var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);     
 
                 if (!checkTrack)
                 {
@@ -73,7 +94,8 @@ namespace GIGLS.Services.Business.Scanning
                 }
                 else
                 {
-                    throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already scan for { scanStatus }");
+                    var scanResult = await _scanService.GetScanStatusByCode(scanStatus);
+                    throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already scan for { scanResult.Incident }");
                 }                
             }
 

@@ -63,9 +63,21 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Get Existing Shipment information and swap departure and destination
                 var shipment = await _shipmentService.GetShipment(waybill);
+                int originalDestinationId = shipment.DestinationServiceCentreId;
                 int departure = shipment.DepartureServiceCentreId;
                 shipment.DepartureServiceCentreId = shipment.DestinationServiceCentreId;
                 shipment.DestinationServiceCentreId = departure;
+
+                //Check if the user is a staff at final destination
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                if (serviceCenters.Length == 1 && serviceCenters[0] == originalDestinationId)
+                {
+                    //do nothing
+                }
+                else
+                {
+                    throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+                }
 
                 //update the price for returned shipments
                 await UpdatePriceForReturnedShipment(shipment);
