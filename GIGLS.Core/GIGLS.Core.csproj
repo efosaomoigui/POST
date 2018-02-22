@@ -498,6 +498,7 @@
     <Compile Include="IServices\Shipments\IShipmentCollectionService.cs" />
     <Compile Include="IServices\Shipments\IShipmentPackageService.cs" />
     <Compile Include="IServices\Shipments\IShipmentReturnService.cs" />
+    <Compile Include="IServices\Shipments\IShipmentRerouteService.cs" />
     <Compile Include="IServices\Shipments\IShipmentService.cs" />
     <Compile Include="IServices\Shipments\IShipmentTrackingService.cs" />
     <Compile Include="IServices\Shipments\IWaybillNumberService.cs" />

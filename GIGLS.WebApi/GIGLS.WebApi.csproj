@@ -319,6 +319,7 @@
     <Compile Include="Controllers\Shipments\ShipmentCancelController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentCollectionController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentController.cs" />
+    <Compile Include="Controllers\Shipments\ShipmentRerouteController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentReturnController.cs" />
     <Compile Include="Controllers\Shipments\WaybillNumberController.cs" />
     <Compile Include="Controllers\StateController.cs" />
