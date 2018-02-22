@@ -13,6 +13,7 @@ using System;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.IServices.Shipments;
 
 namespace GIGLS.Services.Business.Pricing
 {
@@ -32,13 +33,16 @@ namespace GIGLS.Services.Business.Pricing
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ICountryRouteZoneMapService _countryrouteMapService;
         private readonly IServiceCentreService _centreService;
+        private readonly IShipmentService _shipmentService;
 
         public PricingService(IDomesticRouteZoneMapService zoneService, IDeliveryOptionPriceService optionPriceService,
             IDomesticZonePriceService regular, ISpecialDomesticZonePriceService special,
             IWeightLimitService weightLimit, IWeightLimitPriceService weightLimitPrice,
             IUserService userService, IHaulageDistanceMappingService haulageDistanceMappingService,
             IHaulageDistanceMappingPriceService haulageDistanceMappingPriceService, IServiceCentreService centreService,
-            IHaulageService haulageService, IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryrouteMapService, IUnitOfWork uow)
+            IHaulageService haulageService, IGlobalPropertyService globalPropertyService, 
+            ICountryRouteZoneMapService countryrouteMapService, IShipmentService shipmentService,
+            IUnitOfWork uow)
         {
             _routeZone = zoneService;
             _optionPrice = optionPriceService;
@@ -53,6 +57,7 @@ namespace GIGLS.Services.Business.Pricing
             _globalPropertyService = globalPropertyService;
             _countryrouteMapService = countryrouteMapService;
             _centreService = centreService;
+            _shipmentService = shipmentService;
             _uow = uow;
         }
 
@@ -417,15 +422,63 @@ namespace GIGLS.Services.Business.Pricing
             return shipmentTotalPrice;
         }
         
-        public Task<ShipmentDTO> GetReroutePrice(ReroutePricingDTO pricingDto)
+        public async Task<ShipmentDTO> GetReroutePrice(ReroutePricingDTO pricingDto)
         {
-            //var waybill = pricingDto.Waybill;
-            //var destinationServiceCentreId = 1;
+            var waybill = pricingDto.Waybill;
+            var departureServiceCentreId = pricingDto.DepartureServiceCentreId;
+            var destinationServiceCentreId = pricingDto.DestinationServiceCentreId;
+
+            //1. get the shipment
+            var shipment = await _shipmentService.GetShipment(waybill);
+
+            //2. get the shipment item and calculate the new prices
+            decimal totalPrice = 0;
+            foreach(var item in shipment.ShipmentItems)
+            {
+                // Get SpecialPackageId if shipment is a special type
+                var specialPackageId = 0;
+                if (item.ShipmentType == ShipmentType.Special)
+                {
+                    var specialPackage = await _uow.SpecialDomesticPackage.GetAsync(s => s.Name == item.Description);
+                    if(specialPackage != null)
+                    {
+                        specialPackageId = specialPackage.SpecialDomesticPackageId;
+                    }
+                }
+
+                //unit price per item
+                var itemPrice = await GetPrice(new PricingDTO()
+                {
+                    DepartureServiceCentreId = departureServiceCentreId,
+                    DestinationServiceCentreId = destinationServiceCentreId,
+                    DeliveryOptionId = shipment.DeliveryOptionId,
+                    ShipmentType = item.ShipmentType,
+                    SpecialPackageId = specialPackageId,
+                    Weight = decimal.Parse(item.Weight.ToString())                    
+                });
+
+                //unit price based on quantity
+                var totalItemPrice = itemPrice * item.Quantity;
+
+                //set the new price
+                item.Price = totalItemPrice;
+
+                //accumulate the total price
+                totalPrice += totalItemPrice;
+            }
+
+            //set totalPrice and GrandTotal for reroute
+            shipment.Total = totalPrice;
+            shipment.GrandTotal = totalPrice;
+
+            //update departure and destination
+            shipment.DepartureServiceCentreId = departureServiceCentreId;
+            shipment.DepartureServiceCentre = await _centreService.GetServiceCentreByIdForInternational(departureServiceCentreId);
+            shipment.DestinationServiceCentreId = destinationServiceCentreId;
+            shipment.DestinationServiceCentre = await _centreService.GetServiceCentreByIdForInternational(destinationServiceCentreId);
 
 
-
-
-            throw new NotImplementedException();
+            return shipment;
         }
     }
 }
