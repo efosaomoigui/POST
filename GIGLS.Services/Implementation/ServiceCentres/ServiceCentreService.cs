@@ -97,6 +97,14 @@ namespace GIGLS.Services.IServices.ServiceCentres
         {
             try
             {
+                //for international, gets the country information
+                var serviceCentre = await _uow.ServiceCentre.GetServiceCentresByIdForInternational(serviceCentreId);
+                if (serviceCentre != null)
+                {
+                    return serviceCentre;
+                }
+
+                // for local information
                 var centre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == serviceCentreId, "Station");
                 if (centre == null)
                 {

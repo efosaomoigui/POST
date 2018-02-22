@@ -306,7 +306,7 @@ namespace GIGLS.Services.Business.Pricing
                 throw new GenericException("This user is assign to more than one(1) Service Centre  ");
             }
 
-            var serviceCentreDetail = await _centreService.GetServiceCentreById(serviceCenters[0]);
+            var serviceCentreDetail = await _centreService.GetServiceCentreByIdForInternational(serviceCenters[0]);
 
             var zone = await _countryrouteMapService.GetZone(serviceCentreDetail.CountryId, pricingDto.DestinationServiceCentreId);
 
