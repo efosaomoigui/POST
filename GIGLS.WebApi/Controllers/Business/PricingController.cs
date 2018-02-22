@@ -5,6 +5,7 @@ using GIGLS.Services.Implementation;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.WebApi.Controllers.Business
 {
@@ -61,6 +62,22 @@ namespace GIGLS.WebApi.Controllers.Business
                 var price = await _pricing.GetInternationalPrice(pricingDto);
 
                 return new ServiceResponse<decimal>
+                {
+                    Object = price
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("reroute")]
+        public async Task<IServiceResponse<ShipmentDTO>> GetRoutePrice(ReroutePricingDTO pricingDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var price = await _pricing.GetReroutePrice(pricingDto);
+
+                return new ServiceResponse<ShipmentDTO>
                 {
                     Object = price
                 };

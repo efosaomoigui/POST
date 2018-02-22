@@ -259,6 +259,7 @@
     <Compile Include="DTO\PaymentTransactions\PaymentPartialTransactionProcessDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PaymentTransactionDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PricingDTO.cs" />
+    <Compile Include="DTO\PaymentTransactions\ReroutePricingDTO.cs" />
     <Compile Include="DTO\Report\AccountFilterCriteria.cs" />
     <Compile Include="DTO\Report\BaseFilterCriteria.cs" />
     <Compile Include="DTO\Report\ShipmentFilterCriteria.cs" />

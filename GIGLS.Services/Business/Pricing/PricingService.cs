@@ -12,6 +12,7 @@ using GIGLS.Core.IServices.Utility;
 using System;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.Services.Business.Pricing
 {
@@ -414,6 +415,17 @@ namespace GIGLS.Services.Business.Pricing
             decimal shipmentTotalPrice = PackagePrice + weightLimitPrice;
 
             return shipmentTotalPrice;
+        }
+        
+        public Task<ShipmentDTO> GetReroutePrice(ReroutePricingDTO pricingDto)
+        {
+            //var waybill = pricingDto.Waybill;
+            //var destinationServiceCentreId = 1;
+
+
+
+
+            throw new NotImplementedException();
         }
     }
 }
