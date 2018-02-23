@@ -7,6 +7,7 @@ using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.ShipmentScan;
+using GIGLS.Core.IServices.Fleets;
 
 namespace GIGLS.Services.Business.Scanning
 {
@@ -20,12 +21,13 @@ namespace GIGLS.Services.Business.Scanning
         private readonly IManifestGroupWaybillNumberMappingService _groupManifest;
         private IUserService _userService;
         private readonly IScanStatusService _scanService;
+        private readonly IDispatchService _dispatchService;
 
 
         public ScanService(IShipmentService shipmentService, IShipmentTrackingService shipmentTrackingService, 
             IGroupWaybillNumberMappingService groupService, IGroupWaybillNumberService groupWaybill, 
             IManifestService manifestService, IManifestGroupWaybillNumberMappingService groupManifest,
-            IUserService userService, IScanStatusService scanService)
+            IUserService userService, IScanStatusService scanService, IDispatchService dispatchService)
         {
             _shipmentService = shipmentService;
             _shipmentTrackingService = shipmentTrackingService;
@@ -35,6 +37,7 @@ namespace GIGLS.Services.Business.Scanning
             _groupManifest = groupManifest;
             _userService = userService;
             _scanService = scanService;
+            _dispatchService = dispatchService;
         }
 
         //public async Task<bool> ScanShipment(string waybillNumber, ShipmentScanStatus scanStatus)
@@ -145,6 +148,33 @@ namespace GIGLS.Services.Business.Scanning
                     {
                         if(groupShipment.WaybillNumbers.Count > 0)
                         {
+                            //if the shipment scan status is shipment arrive final destination then
+                            //update Dispatch Receiver and manifest receiver id
+                            if(scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
+                            {
+                                var dispatch = await _dispatchService.GetDispatchManifestCode(scan.WaybillNumber);
+                                if (dispatch != null)
+                                {                                    
+                                    //get the user that login
+                                    var userId = await _userService.GetCurrentUserId();
+                                    var user = await _userService.GetUserById(userId);
+
+                                    string reciever = user.FirstName + " " + user.LastName;
+                                    dispatch.ReceivedBy = reciever;
+                                    
+                                    //update manifest also
+                                    var manifestObj = await _manifestService.GetManifestByCode(scan.WaybillNumber);
+                                    if (manifestObj != null)
+                                    {
+                                        manifestObj.IsReceived = true;
+                                        manifestObj.ReceiverBy = userId;
+                                        await _manifestService.UpdateManifest(manifestObj.ManifestId, manifestObj);
+                                    }
+
+                                    await _dispatchService.UpdateDispatch(dispatch.DispatchId, dispatch);
+                                }
+                            }
+
                             foreach (var waybill in groupShipment.WaybillNumbers)
                             {
                                 var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(waybill, scanStatus);

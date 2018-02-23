@@ -9,8 +9,6 @@ using GIGLS.Core.Domain;
 using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.DTO.ServiceCentres;
 using System.Linq;
