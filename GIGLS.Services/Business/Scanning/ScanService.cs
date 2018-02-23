@@ -66,9 +66,10 @@ namespace GIGLS.Services.Business.Scanning
 
             string scanStatus = scan.ShipmentScanStatus.ToString();
 
+            //Check if user has rights to this action
             if (shipment != null)
             {
-                if(scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
+                if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
                 {
                     //Check if the user is a staff at final destination
                     var serviceCenters = await _userService.GetPriviledgeServiceCenters();
@@ -77,11 +78,15 @@ namespace GIGLS.Services.Business.Scanning
                         //do nothing
                     }
                     else
-                    { 
+                    {
                         throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
                     }
                 }
+            }
 
+
+            if (shipment != null)
+            {
                 //check if the waybill has not been scan for the same status before
                 var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);     
 
