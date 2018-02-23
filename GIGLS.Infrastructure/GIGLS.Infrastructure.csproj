@@ -163,6 +163,7 @@
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCollectionRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentItemRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\ShipmentRerouteRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentReturnRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentTrackingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\WaybillNumberRepository.cs" />

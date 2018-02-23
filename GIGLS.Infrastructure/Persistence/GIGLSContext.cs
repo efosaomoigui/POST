@@ -87,6 +87,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<ShipmentReturn> ShipmentReturn { get; set; }
         public DbSet<MissingShipment> MissingShipment { get; set; }
         public DbSet<ShipmentCancel> ShipmentCancel { get; set; }
+        public DbSet<ShipmentReroute> ShipmentReroute { get; set; }
 
         //customer
         public DbSet<Company> Company { get; set; }

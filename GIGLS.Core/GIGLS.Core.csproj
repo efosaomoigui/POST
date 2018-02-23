@@ -180,6 +180,7 @@
     <Compile Include="Domain\ShipmentCancel.cs" />
     <Compile Include="Domain\ShipmentCollection.cs" />
     <Compile Include="Domain\ShipmentItem.cs" />
+    <Compile Include="Domain\ShipmentReroute.cs" />
     <Compile Include="Domain\ShipmentReturn.cs" />
     <Compile Include="Domain\ShipmentScan\ScanStatus.cs" />
     <Compile Include="Domain\ShipmentTracking.cs" />
@@ -278,6 +279,7 @@
     <Compile Include="DTO\Shipments\ShipmentCollectionDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentItemDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentRerouteDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentReturnDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentTrackingDTO.cs" />
     <Compile Include="DTO\Shipments\WaybillNumberDTO.cs" />
@@ -338,6 +340,7 @@
     <Compile Include="Enums\PickupOptions.cs" />
     <Compile Include="Enums\PricingType.cs" />
     <Compile Include="Enums\RegularEcommerceType.cs" />
+    <Compile Include="Enums\ShipmentRerouteInitiator.cs" />
     <Compile Include="Enums\ShipmentScanStatus.cs" />
     <Compile Include="Enums\ShipmentType.cs" />
     <Compile Include="Enums\StockRequestDestinationType.cs" />
@@ -408,6 +411,7 @@
     <Compile Include="IRepositories\Shipments\IShipmentItemRepository.cs" />
     <Compile Include="IRepositories\Shipments\IMissingShipmentRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentRerouteRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentReturnRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentTrackingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IWaybillNumberRepository.cs" />

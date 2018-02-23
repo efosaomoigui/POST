@@ -223,6 +223,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<Country, CountryDTO>();
                 config.CreateMap<CountryDTO, Country>();
+                
+                config.CreateMap<ShipmentReroute, ShipmentRerouteDTO>();
+                config.CreateMap<ShipmentRerouteDTO, ShipmentReroute>();
             });
 
             isInit = true;
