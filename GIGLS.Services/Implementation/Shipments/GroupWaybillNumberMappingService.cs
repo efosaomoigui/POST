@@ -158,7 +158,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentList.Add(new ShipmentDTO
                     {
                         Waybill = shipmentDTO.Waybill,
+                        DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId,
                         DepartureServiceCentre = shipmentDTO.DepartureServiceCentre,
+
+                        DestinationServiceCentreId = shipmentDTO.DestinationServiceCentreId,
                         DestinationServiceCentre = shipmentDTO.DestinationServiceCentre
                     });
 

@@ -65,13 +65,13 @@ namespace GIGLS.Services.Business.Scanning
             var shipment = await _shipmentService.GetShipmentForScan(scan.WaybillNumber);
 
             string scanStatus = scan.ShipmentScanStatus.ToString();
-
-            ////// ShipmentCheck  - CheckIfUserIsAtShipmentFinalDestination
-            await CheckIfUserIsAtShipmentFinalDestination(scan, shipment.DestinationServiceCentreId);
-
+            
             /////////////////////////1. Shipment
             if (shipment != null)
             {
+                ////// ShipmentCheck  - CheckIfUserIsAtShipmentFinalDestination
+                await CheckIfUserIsAtShipmentFinalDestination(scan, shipment.DestinationServiceCentreId);
+
                 //check if the waybill has not been scan for the same status before
                 var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);
 
@@ -102,17 +102,16 @@ namespace GIGLS.Services.Business.Scanning
                 var groupMappingShipmentList = await _groupService.GetWaybillNumbersInGroup(scan.WaybillNumber);
 
                 var groupShipmentList = groupMappingShipmentList.Shipments;
-
-                ////// GroupShipmentCheck  - CheckIfUserIsAtShipmentFinalDestination
-                foreach (var item in groupShipmentList)
-                {
-                    await CheckIfUserIsAtShipmentFinalDestination(scan, item.DestinationServiceCentreId);
-                }
-
-
+                                                
                 //In case no shipment attached to the group waybill  
                 if (groupShipmentList.Count > 0)
                 {
+                    ////// GroupShipmentCheck  - CheckIfUserIsAtShipmentFinalDestination
+                    foreach (var item in groupShipmentList)
+                    {
+                        await CheckIfUserIsAtShipmentFinalDestination(scan, item.DestinationServiceCentreId);
+                    }
+
                     foreach (var groupShipment in groupShipmentList)
                     {
                         var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(groupShipment.Waybill, scanStatus);
