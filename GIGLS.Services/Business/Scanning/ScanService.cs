@@ -24,8 +24,8 @@ namespace GIGLS.Services.Business.Scanning
         private readonly IDispatchService _dispatchService;
 
 
-        public ScanService(IShipmentService shipmentService, IShipmentTrackingService shipmentTrackingService, 
-            IGroupWaybillNumberMappingService groupService, IGroupWaybillNumberService groupWaybill, 
+        public ScanService(IShipmentService shipmentService, IShipmentTrackingService shipmentTrackingService,
+            IGroupWaybillNumberMappingService groupService, IGroupWaybillNumberService groupWaybill,
             IManifestService manifestService, IManifestGroupWaybillNumberMappingService groupManifest,
             IUserService userService, IScanStatusService scanService, IDispatchService dispatchService)
         {
@@ -66,36 +66,21 @@ namespace GIGLS.Services.Business.Scanning
 
             string scanStatus = scan.ShipmentScanStatus.ToString();
 
-            //Check if user has rights to this action
-            if (shipment != null)
-            {
-                if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
-                {
-                    //Check if the user is a staff at final destination
-                    var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                    if (serviceCenters.Length == 1 && serviceCenters[0] == shipment.DestinationServiceCentreId)
-                    {
-                        //do nothing
-                    }
-                    else
-                    {
-                        throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
-                    }
-                }
-            }
+            ////// ShipmentCheck  - CheckIfUserIsAtShipmentFinalDestination
+            await CheckIfUserIsAtShipmentFinalDestination(scan, shipment.DestinationServiceCentreId);
 
-
+            /////////////////////////1. Shipment
             if (shipment != null)
             {
                 //check if the waybill has not been scan for the same status before
-                var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);     
+                var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);
 
                 if (!checkTrack)
                 {
                     var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                     {
                         DateTime = DateTime.Now,
-                        Status = scanStatus, 
+                        Status = scanStatus,
                         Waybill = scan.WaybillNumber,
                     }, scan.ShipmentScanStatus);
                     return true;
@@ -104,9 +89,11 @@ namespace GIGLS.Services.Business.Scanning
                 {
                     var scanResult = await _scanService.GetScanStatusByCode(scanStatus);
                     throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already scan for { scanResult.Incident }");
-                }                
+                }
             }
 
+
+            /////////////////////////2. GroupShipment
             // check if the group waybill number exists in the system
             var groupWaybill = await _groupWaybill.GetGroupWayBillNumberForScan(scan.WaybillNumber);
 
@@ -116,8 +103,15 @@ namespace GIGLS.Services.Business.Scanning
 
                 var groupShipmentList = groupMappingShipmentList.Shipments;
 
+                ////// GroupShipmentCheck  - CheckIfUserIsAtShipmentFinalDestination
+                foreach (var item in groupShipmentList)
+                {
+                    await CheckIfUserIsAtShipmentFinalDestination(scan, item.DestinationServiceCentreId);
+                }
+
+
                 //In case no shipment attached to the group waybill  
-                if (groupShipmentList.Count > 0 )
+                if (groupShipmentList.Count > 0)
                 {
                     foreach (var groupShipment in groupShipmentList)
                     {
@@ -139,44 +133,30 @@ namespace GIGLS.Services.Business.Scanning
                 }
             }
 
+
+            /////////////////////////3. Manifest
             // check if the manifest number exists in the system
             var manifest = await _manifestService.GetManifestCodeForScan(scan.WaybillNumber);
 
             if (manifest != null)
             {
                 var groupWaybillInManifestList = await _groupManifest.GetGroupWaybillNumbersInManifest(manifest.ManifestId);
-               
+
                 //In case no shipment attached to the manifest  
                 if (groupWaybillInManifestList.Count > 0)
                 {
                     foreach (var groupShipment in groupWaybillInManifestList)
                     {
-                        if(groupShipment.WaybillNumbers.Count > 0)
+                        if (groupShipment.WaybillNumbers.Count > 0)
                         {
-                            //if the shipment scan status is shipment arrive final destination then
-                            //update Dispatch Receiver and manifest receiver id
-                            if(scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
+                            ////// ManifestCheck  - CheckIfUserIsAtShipmentFinalDestination
+                            if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
                             {
-                                var dispatch = await _dispatchService.GetDispatchManifestCode(scan.WaybillNumber);
-                                if (dispatch != null)
-                                {                                    
-                                    //get the user that login
-                                    var userId = await _userService.GetCurrentUserId();
-                                    var user = await _userService.GetUserById(userId);
-
-                                    string reciever = user.FirstName + " " + user.LastName;
-                                    dispatch.ReceivedBy = reciever;
-                                    
-                                    //update manifest also
-                                    var manifestObj = await _manifestService.GetManifestByCode(scan.WaybillNumber);
-                                    if (manifestObj != null)
-                                    {
-                                        manifestObj.IsReceived = true;
-                                        manifestObj.ReceiverBy = userId;
-                                        await _manifestService.UpdateManifest(manifestObj.ManifestId, manifestObj);
-                                    }
-
-                                    await _dispatchService.UpdateDispatch(dispatch.DispatchId, dispatch);
+                                foreach (var waybill in groupShipment.WaybillNumbers)
+                                {
+                                    var shipmentItem = await _shipmentService.GetShipmentForScan(waybill);
+                                    // For Shipment Check if user has rights to this action
+                                    await CheckIfUserIsAtShipmentFinalDestination(scan, shipmentItem.DestinationServiceCentreId);
                                 }
                             }
 
@@ -191,6 +171,33 @@ namespace GIGLS.Services.Business.Scanning
                                         Status = scanStatus,
                                         Waybill = waybill,
                                     }, scan.ShipmentScanStatus);
+                                }
+
+                                //if the shipment scan status is shipment arrive final destination then
+                                //update Dispatch Receiver and manifest receiver id
+                                if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
+                                {
+                                    var dispatch = await _dispatchService.GetDispatchManifestCode(scan.WaybillNumber);
+                                    if (dispatch != null)
+                                    {
+                                        //get the user that login
+                                        var userId = await _userService.GetCurrentUserId();
+                                        var user = await _userService.GetUserById(userId);
+
+                                        string reciever = user.FirstName + " " + user.LastName;
+                                        dispatch.ReceivedBy = reciever;
+
+                                        //update manifest also
+                                        var manifestObj = await _manifestService.GetManifestByCode(scan.WaybillNumber);
+                                        if (manifestObj != null)
+                                        {
+                                            manifestObj.IsReceived = true;
+                                            manifestObj.ReceiverBy = userId;
+                                            await _manifestService.UpdateManifest(manifestObj.ManifestId, manifestObj);
+                                        }
+
+                                        await _dispatchService.UpdateDispatch(dispatch.DispatchId, dispatch);
+                                    }
                                 }
                             }
                         }
@@ -208,6 +215,27 @@ namespace GIGLS.Services.Business.Scanning
             }
 
             return true;
+        }
+
+        private async Task CheckIfUserIsAtShipmentFinalDestination(ScanDTO scan, int destinationServiceCentreId)
+        {
+            //1. For Shipment Check if user has rights to this action
+            {
+                if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
+                {
+                    //Check if the user is a staff at final destination
+                    var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                    if (serviceCenters.Length == 1 && serviceCenters[0] == destinationServiceCentreId)
+                    {
+                        //do nothing
+                    }
+                    else
+                    {
+                        throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+                    }
+                }
+            }
+
         }
     }
 }
