@@ -112,6 +112,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 var manifestDTO = Mapper.Map<ManifestDTO>(manifestObj);
+                manifestDTO.DispatchedBy = manifestObj.DispatchedById;
+                manifestDTO.ReceiverBy = manifestObj.ReceiverById;
                 return manifestDTO;
             }
             catch (Exception)
@@ -172,6 +174,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 manifest.ShipmentId = manifestDto.ShipmentId;
                 manifest.FleetTripId = manifestDto.FleetTripId;
 
+                manifest.ReceiverById = manifestDto.ReceiverBy;
+                manifest.IsReceived = manifestDto.IsReceived;
+
+                manifest.DispatchedById = manifestDto.DispatchedBy;
+                manifest.IsDispatched = manifestDto.IsDispatched;
+                
                 _uow.Complete();
             }
             catch (Exception)
