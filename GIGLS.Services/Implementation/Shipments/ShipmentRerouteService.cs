@@ -10,6 +10,7 @@ using GIGLS.Core.Domain;
 using System.Collections.Generic;
 using System.Linq;
 using GIGLS.Core.Enums;
+using GIGLS.CORE.IServices.Shipments;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -17,14 +18,19 @@ namespace GIGLS.Services.Implementation.Shipments
     {
         private readonly IUnitOfWork _uow;
         private IUserService _userService;
+        private readonly IShipmentService _shipmentService;
+        private readonly IShipmentCollectionService _collectionService;
 
-        public ShipmentRerouteService(IUnitOfWork uow, IUserService userService)
+        public ShipmentRerouteService(IUnitOfWork uow, IUserService userService,
+            IShipmentService shipmentService, IShipmentCollectionService collectionService)
         {
             _uow = uow;
             _userService = userService;
+            _shipmentService = shipmentService;
+            _collectionService = collectionService;
             MapperConfig.Initialize();
         }
-        
+
         public Task<IEnumerable<ShipmentRerouteDTO>> GetRerouteShipments()
         {
             //get all shipments by servicecentre
@@ -43,29 +49,89 @@ namespace GIGLS.Services.Implementation.Shipments
             return Task.FromResult(shipmentReturnsDto);
         }
 
-        public async Task<ShipmentDTO> AddRerouteShipment(ShipmentDTO shipment)
+        public async Task<ShipmentDTO> AddRerouteShipment(ShipmentDTO shipmentDTO)
         {
-            if (await _uow.ShipmentReroute.ExistAsync(v => v.WaybillOld.Equals(shipment.Waybill)))
+            try
             {
-                throw new GenericException($"Waybill {shipment.Waybill} already exist");
+                ////1. check if shipment has already been rerouted
+                if (await _uow.ShipmentReroute.ExistAsync(v => v.WaybillOld.Equals(shipmentDTO.Waybill)))
+                {
+                    throw new GenericException($"Shipment with waybill: {shipmentDTO.Waybill} already been rerouted.");
+                }
+
+
+                ////2. check if Shipment has been collected
+                await _collectionService.CheckShipmentCollection(shipmentDTO.Waybill);
+
+                ////3. Check if the user is a staff at final destination
+                //Get original Shipment information
+                var originalShipment = await _shipmentService.GetShipment(shipmentDTO.Waybill);
+                int originalDestinationId = originalShipment.DestinationServiceCentreId;
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                if (serviceCenters.Length == 1 && serviceCenters[0] == originalDestinationId)
+                {
+                    //do nothing
+                }
+                else
+                {
+                    throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+                }
+
+
+                ////4. update shipment collection status to RerouteStatus
+                var shipmentCollection = await _collectionService.GetShipmentCollectionById(shipmentDTO.Waybill);
+                shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.SRR;
+                await _collectionService.UpdateShipmentCollection(shipmentCollection);
+
+                ////5. Create new shipment
+                //5.1 Get Existing Shipment information and update rerouting information
+                originalShipment.DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId;
+                originalShipment.DestinationServiceCentreId = shipmentDTO.DestinationServiceCentreId;
+
+                //5.2 update Receiver information
+                originalShipment.ReceiverName = shipmentDTO.ReceiverName;
+                originalShipment.ReceiverPhoneNumber = shipmentDTO.ReceiverPhoneNumber;
+                originalShipment.ReceiverAddress = shipmentDTO.ReceiverAddress;
+                originalShipment.ReceiverEmail = shipmentDTO.ReceiverEmail;
+                originalShipment.ReceiverCity = shipmentDTO.ReceiverCity;
+                originalShipment.ReceiverState = shipmentDTO.ReceiverState;
+
+                //5.3 update Shipment Items
+                originalShipment.ShipmentItems = shipmentDTO.ShipmentItems;
+
+                //5.4 update TotalPrice and GrandTotal
+                originalShipment.Total = shipmentDTO.Total;
+                originalShipment.GrandTotal = shipmentDTO.GrandTotal;
+
+                //5.5 Create new shipment
+                var newShipment = await _shipmentService.AddShipment(originalShipment);
+
+
+                ////6. create new shipment reroute
+                var user = await _userService.GetCurrentUserId();
+                ShipmentRerouteInitiator initiator = shipmentDTO.GrandTotal > 0 ? ShipmentRerouteInitiator.Customer : ShipmentRerouteInitiator.Staff;
+
+                var newShipmentReroute = new ShipmentReroute
+                {
+                    WaybillNew = newShipment.Waybill,
+                    WaybillOld = shipmentDTO.Waybill,
+                    RerouteBy = user,
+                    ShipmentRerouteInitiator = initiator
+                };
+                _uow.ShipmentReroute.Add(newShipmentReroute);
+
+                //complete transaction
+                await _uow.CompleteAsync();
+
+
+                ////7. return new shipment 
+                return newShipment;
+            }
+            catch (Exception)
+            {
+                throw;
             }
 
-            var user = await _userService.GetCurrentUserId();
-            ShipmentRerouteInitiator initiator = shipment.GrandTotal > 0 ? ShipmentRerouteInitiator.Customer : ShipmentRerouteInitiator.Staff;
-
-            //create new shipment return
-            var newShipmentReroute = new ShipmentReroute
-            {
-                WaybillNew = shipment.Waybill,
-                WaybillOld = shipment.Waybill,
-                RerouteBy = user,
-                ShipmentRerouteInitiator = initiator
-            };
-            _uow.ShipmentReroute.Add(newShipmentReroute);
-
-            await _uow.CompleteAsync();
-
-            return shipment;
         }
 
         public async Task DeleteRerouteShipment(string waybill)

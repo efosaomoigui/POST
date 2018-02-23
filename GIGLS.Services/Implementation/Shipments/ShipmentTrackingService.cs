@@ -127,25 +127,52 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (shipmentTracking.Count > 0)
                 {
                     //1. check if waybill is a returned waybill
-                    var shipmentReturn = await _uow.ShipmentReturn.GetAsync(s => s.WaybillNew == waybill || s.WaybillOld == waybill);
-                    if (shipmentReturn != null)
                     {
-                        if (shipmentReturn.WaybillNew == waybill)
+                        var shipmentReturn = await _uow.ShipmentReturn.GetAsync(s => s.WaybillNew == waybill || s.WaybillOld == waybill);
+                        if (shipmentReturn != null)
                         {
-                            //get shipmentTracking for old waybill
-                            var shipmentTrackingOldWaybill = await _uow.ShipmentTracking.GetShipmentTrackingsAsync(shipmentReturn.WaybillOld);
+                            if (shipmentReturn.WaybillNew == waybill)
+                            {
+                                //get shipmentTracking for old waybill
+                                var shipmentTrackingOldWaybill = await _uow.ShipmentTracking.GetShipmentTrackingsAsync(shipmentReturn.WaybillOld);
 
-                            //add to original list
-                            shipmentTracking.AddRange(shipmentTrackingOldWaybill);
+                                //add to original list
+                                shipmentTracking.AddRange(shipmentTrackingOldWaybill);
+                            }
+
+                            if (shipmentReturn.WaybillOld == waybill)
+                            {
+                                //get shipmentTracking for new waybill
+                                var shipmentTrackingNewWaybill = await _uow.ShipmentTracking.GetShipmentTrackingsAsync(shipmentReturn.WaybillNew);
+
+                                //add to original list
+                                shipmentTracking.AddRange(shipmentTrackingNewWaybill);
+                            }
                         }
+                    }
 
-                        if (shipmentReturn.WaybillOld == waybill)
+                    //2. check if waybill is a rerouted waybill
+                    {
+                        var shipmentReroute = await _uow.ShipmentReroute.GetAsync(s => s.WaybillNew == waybill || s.WaybillOld == waybill);
+                        if (shipmentReroute != null)
                         {
-                            //get shipmentTracking for new waybill
-                            var shipmentTrackingNewWaybill = await _uow.ShipmentTracking.GetShipmentTrackingsAsync(shipmentReturn.WaybillNew);
+                            if (shipmentReroute.WaybillNew == waybill)
+                            {
+                                //get shipmentTracking for old waybill
+                                var shipmentTrackingOldWaybill = await _uow.ShipmentTracking.GetShipmentTrackingsAsync(shipmentReroute.WaybillOld);
 
-                            //add to original list
-                            shipmentTracking.AddRange(shipmentTrackingNewWaybill);
+                                //add to original list
+                                shipmentTracking.AddRange(shipmentTrackingOldWaybill);
+                            }
+
+                            if (shipmentReroute.WaybillOld == waybill)
+                            {
+                                //get shipmentTracking for new waybill
+                                var shipmentTrackingNewWaybill = await _uow.ShipmentTracking.GetShipmentTrackingsAsync(shipmentReroute.WaybillNew);
+
+                                //add to original list
+                                shipmentTracking.AddRange(shipmentTrackingNewWaybill);
+                            }
                         }
                     }
                 }
