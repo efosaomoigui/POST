@@ -7,6 +7,7 @@ using GIGLS.Infrastructure;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
 
 namespace GIGLS.Services.Implementation.ServiceCentres
 {
@@ -77,6 +78,23 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             };
         }
         
+        public async Task UpdateStation(int stationId, StationDTO stationDto)
+        {
+            await _stateService.GetStateById(stationDto.StateId);
+
+            var station = await _uow.Station.GetAsync(stationDto.StationId);
+
+            if (station == null || stationId != stationDto.StationId)
+            {
+                throw new GenericException("STATION INFORMATION DOES NOT EXIST");
+            }
+
+            station.StationName = stationDto.StationName.Trim();
+            station.StationCode = stationDto.StationCode.Trim();
+            station.StateId = stationDto.StateId;
+            await _uow.CompleteAsync();
+        }
+
         public async Task<IEnumerable<StationDTO>> GetStations()
         {
             var stations = await _uow.Station.GetStationsAsync();
@@ -96,22 +114,15 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             }
             return stationDto.OrderBy(x => x.StationName).ToList();
         }
-
-        public async Task UpdateStation(int stationId, StationDTO stationDto)
+        
+        public async Task<List<StationDTO>> GetLocalStations()
         {
-            await _stateService.GetStateById(stationDto.StateId);
+            return await _uow.Station.GetLocalStations();
+        }
 
-            var station = await _uow.Station.GetAsync(stationDto.StationId);
-
-            if (station == null || stationId != stationDto.StationId)
-            {
-                throw new GenericException("STATION INFORMATION DOES NOT EXIST");
-            }
-
-            station.StationName = stationDto.StationName.Trim();
-            station.StationCode = stationDto.StationCode.Trim();
-            station.StateId = stationDto.StateId;
-            await _uow.CompleteAsync();
+        public async Task<List<StationDTO>> GetInternationalStations()
+        {
+            return await _uow.Station.GetInternationalStations();
         }
     }
 }

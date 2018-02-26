@@ -5,6 +5,9 @@ using GIGLS.Core.IRepositories.ServiceCentres;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System.Linq;
+using GIGLS.Core.DTO.ServiceCentres;
+using System;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
 {
@@ -17,6 +20,74 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
         public Task<List<Station>> GetStationsAsync()
         {
             return Task.FromResult(Context.Station.Include("State").ToList());
+        }
+
+        public Task<List<StationDTO>> GetLocalStations()
+        {
+            try
+            {
+                var stations = Context.Station;
+                var stationDto = from s in stations
+                                 join st in Context.State on s.StateId equals st.StateId
+                                 join c in Context.Country on st.CountryId equals c.CountryId
+                                 where c.CountryName == "Nigeria"
+                                select new StationDTO
+                                {
+                                    StationId = s.StationId,
+                                    StationName = s.StationName,
+                                    StationCode = s.StationCode,
+                                    StateId = s.StateId,
+                                    StateName = st.StateName,
+                                    Country = c.CountryName,
+                                    DateCreated = s.DateCreated,
+                                    DateModified = s.DateModified,
+                                    CountryDTO = new CountryDTO
+                                    {
+                                        CountryId = c.CountryId,
+                                        CountryCode = c.CountryCode,
+                                        CountryName = c.CountryName
+                                    }
+                                };
+                return Task.FromResult(stationDto.OrderBy(x => x.StationName).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<StationDTO>> GetInternationalStations()
+        {
+            try
+            {
+                var stations = Context.Station;
+                var stationDto = from s in stations
+                                 join st in Context.State on s.StateId equals st.StateId
+                                 join c in Context.Country on st.CountryId equals c.CountryId
+                                 where c.CountryName != "Nigeria"
+                                 select new StationDTO
+                                 {
+                                     StationId = s.StationId,
+                                     StationName = s.StationName,
+                                     StationCode = s.StationCode,
+                                     StateId = s.StateId,
+                                     StateName = st.StateName,
+                                     Country = c.CountryName,
+                                     DateCreated = s.DateCreated,
+                                     DateModified = s.DateModified,
+                                     CountryDTO = new CountryDTO
+                                    {
+                                        CountryId = c.CountryId,
+                                        CountryCode = c.CountryCode,
+                                        CountryName = c.CountryName
+                                    }
+                                 };
+                return Task.FromResult(stationDto.OrderBy(x => x.StationName).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

@@ -68,7 +68,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.MessagingLog
                 var messageDto = Mapper.Map<IEnumerable<EmailSendLogDTO>>(result);
                 return Task.FromResult(messageDto.OrderByDescending(x => x.DateCreated).ToList());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

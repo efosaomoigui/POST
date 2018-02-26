@@ -7,6 +7,8 @@ namespace GIGLS.Core.IServices.ServiceCentres
     public interface IStationService : IServiceDependencyMarker
     {
         Task<IEnumerable<StationDTO>> GetStations();
+        Task<List<StationDTO>> GetLocalStations();
+        Task<List<StationDTO>> GetInternationalStations();
         Task<StationDTO> GetStationById(int stationId);
         Task<object> AddStation(StationDTO station);
         Task UpdateStation(int stationId, StationDTO station);

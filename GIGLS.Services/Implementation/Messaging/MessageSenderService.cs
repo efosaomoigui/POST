@@ -67,7 +67,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 PrepareMessageFinalBody(messageDTO, obj);
                 await _emailService.SendAsync(messageDTO);
             }
-            catch(Exception ex)
+            catch(Exception)
             {
 
             }
@@ -85,7 +85,7 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 await _sMSService.SendAsync(messageDTO);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
 
             }

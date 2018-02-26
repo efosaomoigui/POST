@@ -10,5 +10,6 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public string StateName { get; set; }
         public int StateId { get; set; }
         public string Country { get; set; }
+        public CountryDTO CountryDTO { get; set; }
     }
 }

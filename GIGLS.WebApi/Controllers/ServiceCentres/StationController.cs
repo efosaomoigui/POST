@@ -38,6 +38,38 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("local")]
+        public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetLocalStations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stations = await _stationService.GetLocalStations();
+                return new ServiceResponse<IEnumerable<StationDTO>>
+                {
+                    Object = stations
+                };
+            });
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("international")]
+        public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetInternationalStations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stations = await _stationService.GetInternationalStations();
+                return new ServiceResponse<IEnumerable<StationDTO>>
+                {
+                    Object = stations
+                };
+            });
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("{stationId:int}")]
         public async Task<IServiceResponse<StationDTO>> GetStationById(int stationId)
         {
