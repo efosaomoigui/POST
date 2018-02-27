@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Aftership-API, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Aftership.5.0.1\lib\net45\Aftership-API.exe</HintPath>
+    </Reference>
     <Reference Include="Audit.EntityFramework, Version=9.0.1.0, Culture=neutral, PublicKeyToken=571d6b80b242c87e, processorArchitecture=MSIL">
       <HintPath>..\packages\Audit.EntityFramework.9.0.1\lib\net45\Audit.EntityFramework.dll</HintPath>
       <Private>True</Private>
