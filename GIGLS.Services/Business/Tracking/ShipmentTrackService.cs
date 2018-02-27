@@ -49,7 +49,7 @@ namespace GIGLS.Services.Business.Tracking
                 //ConnectionAPI connection_api_backup = new ConnectionAPI(key, "https://api-backup.aftership.com/");
 
                 String key = ConfigurationManager.AppSettings["aramex:API_KEY"];
-                ConnectionAPI connection_api = new ConnectionAPI(key, "https://api-backup.aftership.com/");
+                ConnectionAPI connection_api = new ConnectionAPI(key, null);
 
                 //tracking:
                 AftershipAPI.Tracking tracking = new AftershipAPI.Tracking(waybillNumber);
