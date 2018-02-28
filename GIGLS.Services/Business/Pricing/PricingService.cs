@@ -305,14 +305,19 @@ namespace GIGLS.Services.Business.Pricing
 
         public async Task<decimal> GetInternationalPrice(PricingDTO pricingDto)
         {
-            // use currentUser login servicecentre
-            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-            if (serviceCenters.Length > 1)
+            if (pricingDto.DepartureServiceCentreId <= 0)
             {
-                throw new GenericException("This user is assign to more than one(1) Service Centre  ");
-            }
+                // use currentUser login servicecentre
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
-            var serviceCentreDetail = await _centreService.GetServiceCentreByIdForInternational(serviceCenters[0]);
+                if (serviceCenters.Length > 1)
+                {
+                    throw new GenericException("This user is assign to more than one(1) Service Centre  ");
+                }
+                pricingDto.DepartureServiceCentreId = serviceCenters[0];                
+            }            
+
+            var serviceCentreDetail = await _centreService.GetServiceCentreByIdForInternational(pricingDto.DepartureServiceCentreId);
 
             var zone = await _countryrouteMapService.GetZone(serviceCentreDetail.CountryId, pricingDto.DestinationServiceCentreId);
 
