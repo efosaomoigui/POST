@@ -11,5 +11,6 @@ namespace GIGLS.Core.DTO.PaymentTransactions
         public decimal Weight { get; set; }
         public ShipmentType ShipmentType { get; set; }
         public int SpecialPackageId { get; set; }
+        public bool IsInternationalDocument { get; set; }
     }
 }

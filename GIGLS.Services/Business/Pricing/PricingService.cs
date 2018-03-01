@@ -336,7 +336,15 @@ namespace GIGLS.Services.Business.Pricing
             }
             else
             {
-                PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.International);
+                //Check if the weight less than 2.0 Kg and it is Document Shipment (Add this to global Property later)
+                if(pricingDto.Weight <= 2 && pricingDto.IsInternationalDocument)
+                {
+                    PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.InternationalDocument);
+                }
+                else
+                {
+                    PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.International);
+                }
             }
 
             //Get Percentage Charge For International Shipment Service

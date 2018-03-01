@@ -8,6 +8,7 @@
         International,
         InternationalWeightLimit30,
         InternationalWeightLimit70,
-        InternationalWeightLimit100
+        InternationalWeightLimit100,
+        InternationalDocument
     }
 }
