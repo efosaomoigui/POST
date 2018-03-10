@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.Enums;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Shipments;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.IServices.Business
 {
@@ -8,5 +9,6 @@ namespace GIGLS.Core.IServices.Business
     {
         //Task<bool> ScanShipment(string waybillNumber, ShipmentScanStatus scanStatus);
         Task<bool> ScanShipment(ScanDTO scan);
+        Task<bool> ScanMultipleShipment(List<ScanDTO> scanList);
     }
 }

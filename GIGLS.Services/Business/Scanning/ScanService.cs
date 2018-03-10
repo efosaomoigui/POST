@@ -8,6 +8,7 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Core.IServices.Fleets;
+using System.Collections.Generic;
 
 namespace GIGLS.Services.Business.Scanning
 {
@@ -59,13 +60,26 @@ namespace GIGLS.Services.Business.Scanning
         //    return true;
         //}
 
+        public async Task<bool> ScanMultipleShipment(List<ScanDTO> scanList)
+        {
+            bool result = false;
+
+            //loop through and call scan for each item
+            foreach(var item in scanList)
+            {
+                result = await ScanShipment(item);
+            }
+
+            return result;
+        }
+
         public async Task<bool> ScanShipment(ScanDTO scan)
         {
             // check if the waybill number exists in the system
             var shipment = await _shipmentService.GetShipmentForScan(scan.WaybillNumber);
 
             string scanStatus = scan.ShipmentScanStatus.ToString();
-            
+
             /////////////////////////1. Shipment
             if (shipment != null)
             {
@@ -102,7 +116,7 @@ namespace GIGLS.Services.Business.Scanning
                 var groupMappingShipmentList = await _groupService.GetWaybillNumbersInGroup(scan.WaybillNumber);
 
                 var groupShipmentList = groupMappingShipmentList.Shipments;
-                                                
+
                 //In case no shipment attached to the group waybill  
                 if (groupShipmentList.Count > 0)
                 {

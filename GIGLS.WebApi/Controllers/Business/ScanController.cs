@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.WebApi.Filters;
+using System.Collections.Generic;
 
 namespace GIGLS.WebApi.Controllers.Business
 {
@@ -27,6 +28,22 @@ namespace GIGLS.WebApi.Controllers.Business
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _scan.ScanShipment(scanStatus);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("multiple")]
+        public async Task<IServiceResponse<bool>> ScanMultipleShipment(List<ScanDTO> scanList)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _scan.ScanMultipleShipment(scanList);
 
                 return new ServiceResponse<bool>
                 {
