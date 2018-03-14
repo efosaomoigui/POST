@@ -8,8 +8,6 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Account
@@ -48,7 +46,17 @@ namespace GIGLS.Services.Implementation.Account
             {
                 throw new GenericException("GeneralLedger information does not exist");
             }
-            return Mapper.Map<GeneralLedgerDTO>(generalLedger);
+
+            var generalLedgerDto = Mapper.Map<GeneralLedgerDTO>(generalLedger);
+
+            //get user details
+            var user = await _userService.GetUserById(generalLedger.UserId);
+            generalLedgerDto.User = user;
+
+            //var user = await _uow.User.GetUserById(generalLedger.UserId);
+            //generalLedgerDto.UserId = user.FirstName + " " + user.LastName;
+            
+            return generalLedgerDto;
         }
 
         public async Task<object> AddGeneralLedger(GeneralLedgerDTO generalLedgerDto)
