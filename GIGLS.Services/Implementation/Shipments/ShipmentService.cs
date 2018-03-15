@@ -574,7 +574,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var shipmentsBySC = await _uow.Shipment.GetShipments(filterOptionsDto, serviceCenters).Item1;
 
-                // get only paid shipments from Invoice
+                // get only paid shipments from Invoice for Individuals
+                // and allow Ecommerce and Corporate customers to be grouped
                 var paidShipments = new List<ShipmentDTO>();
                 foreach(var shipmentItem in shipmentsBySC)
                 {
@@ -584,6 +585,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         paidShipments.Add(shipmentItem);
                     }
+
+                    if (invoice.PaymentStatus == PaymentStatus.Pending && 
+                        shipmentItem.CustomerType == CustomerType.Company.ToString())
+                    {
+                        paidShipments.Add(shipmentItem);
+                    }
+
                 }
 
                 // get all grouped waybills for that Service Centre
