@@ -225,17 +225,25 @@ namespace GIGLS.Services.Implementation.Shipments
                     var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                     var departureServiceCenterId = serviceCenters[0];
 
-                    //Add new Mapping
-                    var newMapping = new GroupWaybillNumberMapping
+
+                    //check if waybill has not been group 
+                    var isWaybillGroup = await _uow.GroupWaybillNumberMapping.ExistAsync(x => x.GroupWaybillNumber == groupWaybillNumber && x.WaybillNumber == shipmentDTO.Waybill);
+
+                    //if the waybill has not been group, group it
+                    if (!isWaybillGroup)
                     {
-                        GroupWaybillNumber = groupWaybillNumber,
-                        WaybillNumber = shipmentDTO.Waybill,
-                        IsActive = true,
-                        DateMapped = DateTime.Now,
-                        DepartureServiceCentreId = departureServiceCenterId,
-                        DestinationServiceCentreId = serviceCenterId
-                    };
-                    _uow.GroupWaybillNumberMapping.Add(newMapping);
+                        //Add new Mapping
+                        var newMapping = new GroupWaybillNumberMapping
+                        {
+                            GroupWaybillNumber = groupWaybillNumber,
+                            WaybillNumber = shipmentDTO.Waybill,
+                            IsActive = true,
+                            DateMapped = DateTime.Now,
+                            DepartureServiceCentreId = departureServiceCenterId,
+                            DestinationServiceCentreId = serviceCenterId
+                        };
+                        _uow.GroupWaybillNumberMapping.Add(newMapping);
+                    }
                 }
 
                 _uow.Complete();
