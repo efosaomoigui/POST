@@ -163,7 +163,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
 
                     //check if GroupWaybill has not been added to manifest 
-                    var isGroupWaybillMapped = await _uow.ManifestGroupWaybillNumberMapping.ExistAsync(x => x.GroupWaybillNumber == groupWaybillNumber && x.ManifestCode == manifest);
+                    var isGroupWaybillMapped = await _uow.ManifestGroupWaybillNumberMapping.ExistAsync(x => x.ManifestCode == manifest && x.GroupWaybillNumber == groupWaybillNumber);
 
                     //if the waybill has not been added to manifest, add it
                     if (!isGroupWaybillMapped)
