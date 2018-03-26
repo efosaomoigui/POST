@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using GIGLS.CORE.Domain;
 using GIGLS.Core.IServices.User;
 using System.Linq;
+using GIGL.GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -27,6 +28,8 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                object Id = null;
+
                 if (tracking.User == null)
                 {
                     tracking.User = await _userService.GetCurrentUserId();
@@ -39,17 +42,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     tracking.Location = serviceCenter.Name;
                 }
 
-                var newShipmentTracking = new GIGL.GIGLS.Core.Domain.ShipmentTracking
-                {
-                    Waybill = tracking.Waybill,
-                    //TrackingType = (TrackingType)Enum.Parse(typeof(TrackingType), tracking.TrackingType),
-                    Location = tracking.Location,
-                    Status = tracking.Status,
-                    DateTime = DateTime.Now,
-                    UserId = tracking.User
-                };
-                _uow.ShipmentTracking.Add(newShipmentTracking);
-
                 if (scanStatus.Equals(ShipmentScanStatus.ARF))
                 {
                     var newShipmentCollection = new ShipmentCollection
@@ -61,8 +53,28 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.ShipmentCollection.Add(newShipmentCollection);
                 }
 
+                //check if the waybill has not been scan for the status before
+                bool shipmentTracking = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill.Equals(tracking.Waybill) && x.Status.Equals(tracking.Status));
+
+                if (!shipmentTracking)
+                {
+                    var newShipmentTracking = new ShipmentTracking
+                    {
+                        Waybill = tracking.Waybill,
+                        //TrackingType = (TrackingType)Enum.Parse(typeof(TrackingType), tracking.TrackingType),
+                        Location = tracking.Location,
+                        Status = tracking.Status,
+                        DateTime = DateTime.Now,
+                        UserId = tracking.User
+                    };
+                    _uow.ShipmentTracking.Add(newShipmentTracking);
+
+                    Id = newShipmentTracking.ShipmentTrackingId;
+                }
+                
                 await _uow.CompleteAsync();
-                return new { Id = newShipmentTracking.ShipmentTrackingId };
+                return new { Id };
+                //return new { Id = newShipmentTracking.ShipmentTrackingId };
             }
             catch (Exception)
             {
