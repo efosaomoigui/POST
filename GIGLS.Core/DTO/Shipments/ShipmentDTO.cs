@@ -58,10 +58,10 @@ namespace GIGLS.Core.DTO.Shipments
 
         //Invoice parameters: Helps generate invoice for ecomnerce customers  by customerType
         public bool IsCashOnDelivery { get; set; }
-        public decimal? CashOnDeliveryAmount { get; set; }
+        public decimal? CashOnDeliveryAmount { get; set; } = 0;
 
-        public decimal? ExpectedAmountToCollect { get; set; }
-        public decimal? ActualAmountCollected { get; set; }
+        public decimal? ExpectedAmountToCollect { get; set; } = 0;
+        public decimal? ActualAmountCollected { get; set; } = 0;
 
         //General Details comes with role user
         public string UserId { get; set; }
@@ -72,23 +72,23 @@ namespace GIGLS.Core.DTO.Shipments
 
         //
         public bool IsdeclaredVal { get; set; }
-        public decimal? DeclarationOfValueCheck { get; set; }
+        public decimal? DeclarationOfValueCheck { get; set; } = 0;
 
         //discount information
-        public decimal? AppliedDiscount { get; set; }
-        public decimal? DiscountValue { get; set; }
+        public decimal? AppliedDiscount { get; set; } = 0;
+        public decimal? DiscountValue { get; set; } = 0;
 
-        public decimal? Insurance { get; set; }
-        public decimal? Vat { get; set; }
-        public decimal? Total { get; set; }
+        public decimal? Insurance { get; set; } = 0;
+        public decimal? Vat { get; set; } = 0;
+        public decimal? Total { get; set; } = 0;
 
         //wallet information
         public string WalletNumber { get; set; }
 
         //from client
-        public decimal? vatvalue_display { get; set; }
-        public decimal? InvoiceDiscountValue_display { get; set; }
-        public decimal? offInvoiceDiscountvalue_display { get; set; }
+        public decimal? vatvalue_display { get; set; } = 0;
+        public decimal? InvoiceDiscountValue_display { get; set; } = 0;
+        public decimal? offInvoiceDiscountvalue_display { get; set; } = 0;
 
         //ShipmentCollection
         public ShipmentCollectionDTO ShipmentCollection { get; set; }

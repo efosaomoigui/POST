@@ -23,11 +23,12 @@ namespace GIGLS.Core.View
         public string SealNumber { get; set; }
         public decimal Value { get; set; }
         public decimal GrandTotal { get; set; }
-        public decimal DiscountValue { get; set; }
-        public decimal Insurance { get; set; }
-        public decimal Vat { get; set; }
-        public decimal Total { get; set; }
-        public decimal CashOnDeliveryAmount { get; set; }
+        public decimal? DiscountValue { get; set; }
+
+        public decimal? Insurance { get; set; }
+        public decimal? Vat { get; set; }
+        public decimal? Total { get; set; }
+        public decimal? CashOnDeliveryAmount { get; set; }
         public bool IsCancelled { get; set; }
 
         //Customer Information
