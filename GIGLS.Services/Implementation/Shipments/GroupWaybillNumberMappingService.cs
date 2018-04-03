@@ -91,6 +91,38 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+        
+        //Get GroupWaybill Number For WaybillNumber by ServiceCentre
+        public async Task<GroupWaybillNumberDTO> GetGroupForWaybillNumberByServiceCentre(string waybillNumber)
+        {
+            try
+            {
+                var shipmentDTO = await _shipmentService.GetShipment(waybillNumber);
+
+                //filter by SC
+                var serviceCentreIds = await _userService.GetPriviledgeServiceCenters();
+                if (serviceCentreIds.Length > 0)
+                {
+                    if (!serviceCentreIds.Contains(shipmentDTO.DepartureServiceCentreId))
+                    {
+                        throw new GenericException($"This Waybill: {waybillNumber} was not created in this service centre");
+                    }
+                }
+
+                var groupWaybillNumberMapping = await _uow.GroupWaybillNumberMapping.GetAsync(x => x.WaybillNumber == shipmentDTO.Waybill);
+                if (groupWaybillNumberMapping == null)
+                {
+                    throw new GenericException($"No GroupWaybill exists for this Waybill: {waybillNumber}");
+                }
+
+                var groupWaybillNumberDTO = await _groupWaybillNumberService.GetGroupWayBillNumberById(groupWaybillNumberMapping.GroupWaybillNumber);
+                return groupWaybillNumberDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
 
         //Get WaybillNumbers In Group
