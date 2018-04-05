@@ -162,16 +162,23 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException($"No GroupWaybill exists for this number: {groupWaybillNumber}");
                     }
 
-                    //Add new Mapping
-                    var newMapping = new ManifestGroupWaybillNumberMapping
-                    {
-                        ManifestCode = manifest,
-                        GroupWaybillNumber = groupWaybillNumberDTO.GroupWaybillCode,
-                        IsActive = true,
-                        DateMapped = DateTime.Now
-                    };
+                    //check if GroupWaybill has not been added to manifest 
+                    var isGroupWaybillMapped = await _uow.ManifestGroupWaybillNumberMapping.ExistAsync(x => x.ManifestCode == manifest && x.GroupWaybillNumber == groupWaybillNumber);
 
-                    _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+                    //if the waybill has not been added to manifest, add it
+                    if (!isGroupWaybillMapped)
+                    {
+                        //Add new Mapping
+                        var newMapping = new ManifestGroupWaybillNumberMapping
+                        {
+                            ManifestCode = manifest,
+                            GroupWaybillNumber = groupWaybillNumberDTO.GroupWaybillCode,
+                            IsActive = true,
+                            DateMapped = DateTime.Now
+                        };
+
+                        _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+                    }
                 }
 
                 _uow.Complete();

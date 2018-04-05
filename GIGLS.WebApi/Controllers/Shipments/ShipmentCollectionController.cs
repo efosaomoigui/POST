@@ -117,12 +117,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("collected")]
-        public async Task<IServiceResponse<bool>> UpdateShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
+        public async Task<IServiceResponse<bool>> ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
         {
             shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKT;
 
             return await HandleApiOperationAsync(async () => {
-                await _service.UpdateShipmentCollection(shipmentCollection);
+                await _service.ReleaseShipmentForCollection(shipmentCollection);
                 return new ServiceResponse<bool>
                 {
                     Object = true

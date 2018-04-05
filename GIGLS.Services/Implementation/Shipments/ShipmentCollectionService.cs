@@ -192,12 +192,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
                 _uow.GeneralLedger.Add(generalLedger);
             }
-
-
+            
             await _uow.CompleteAsync();
         }
-
-
+        
         //Check if the Shipment has not been collected before Processing Return Shipment
         public async Task CheckShipmentCollection(string waybill)
         {
@@ -215,6 +213,25 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"Shipment with waybill: {waybill} is not available for Return Processing");
             }
         }
+        
 
+        public async Task ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
+        {
+            //check if the shipment has not been Returned
+            var shipmentReturn = await _uow.ShipmentReturn.GetAsync(x => x.WaybillOld.Equals(shipmentCollection.Waybill));
+            if (shipmentReturn != null)
+            {
+                throw new GenericException($"Shipment with waybill: {shipmentCollection.Waybill} has been processed for Return");
+            }
+
+            //check if the shipment has not been Rerouted
+            var shipmentReroute = await _uow.ShipmentReroute.GetAsync(x => x.WaybillOld.Equals(shipmentCollection.Waybill));
+            if (shipmentReroute == null)
+            {
+                throw new GenericException($"Shipment with waybill: {shipmentCollection.Waybill} has been processed for Reroute");
+            }
+
+            await UpdateShipmentCollection(shipmentCollection);
+        }
     }
 }

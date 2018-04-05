@@ -75,7 +75,8 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
 
-                var groupWaybillNumberDTO = await _service.GetGroupForWaybillNumber(waybillNumber);
+                //var groupWaybillNumberDTO = await _service.GetGroupForWaybillNumber(waybillNumber);
+                var groupWaybillNumberDTO = await _service.GetGroupForWaybillNumberByServiceCentre(waybillNumber);
 
                 return new ServiceResponse<GroupWaybillNumberDTO>
                 {
