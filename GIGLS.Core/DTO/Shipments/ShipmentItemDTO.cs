@@ -7,6 +7,7 @@ namespace GIGLS.Core.DTO.Shipments
     {
         public int ShipmentItemId { get; set; }
         public string Description { get; set; }
+        public string Description_s { get; set; }
         public ShipmentType ShipmentType { get; set; }
         public double Weight { get; set; }
         public string Nature { get; set; }
