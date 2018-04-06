@@ -275,6 +275,8 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IShipmentRerouteRepository ShipmentReroute { get; set; }
 
+        [Inject]
+        public IShipmentPackagePriceRepository ShipmentPackagePrice { get; set; }
 
         public int Complete()
         {

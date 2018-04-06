@@ -226,6 +226,9 @@ namespace GIGLS.Core
                 
                 config.CreateMap<ShipmentReroute, ShipmentRerouteDTO>();
                 config.CreateMap<ShipmentRerouteDTO, ShipmentReroute>();
+
+                config.CreateMap<ShipmentPackagePrice, ShipmentPackagePriceDTO>();
+                config.CreateMap<ShipmentPackagePriceDTO, ShipmentPackagePrice>();
             });
 
             isInit = true;

@@ -105,6 +105,7 @@ namespace GIGLS.Core
         ICountryRepository Country { get; set; }
         ICountryRouteZoneMapRepository CountryRouteZoneMap { get; set; }
         IShipmentRerouteRepository ShipmentReroute { get; set; }
+        IShipmentPackagePriceRepository ShipmentPackagePrice { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

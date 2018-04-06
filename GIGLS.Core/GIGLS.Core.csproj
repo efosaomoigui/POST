@@ -155,6 +155,7 @@
     <Compile Include="Domain\MessagingLog\EmailSendLog.cs" />
     <Compile Include="Domain\MessagingLog\SmsSendLog.cs" />
     <Compile Include="Domain\MissingShipment.cs" />
+    <Compile Include="Domain\ShipmentPackagePrice.cs" />
     <Compile Include="Domain\PackingList .cs" />
     <Compile Include="Domain\IndividualCustomer.cs" />
     <Compile Include="Domain\Insurance.cs" />
@@ -279,6 +280,7 @@
     <Compile Include="DTO\Shipments\ShipmentCollectionDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentItemDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentPackagePriceDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentRerouteDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentReturnDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentTrackingDTO.cs" />
@@ -410,6 +412,7 @@
     <Compile Include="IRepositories\Shipments\IShipmentCollectionRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentItemRepository.cs" />
     <Compile Include="IRepositories\Shipments\IMissingShipmentRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentPackagePriceRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentRerouteRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentReturnRepository.cs" />
@@ -500,6 +503,7 @@
     <Compile Include="IServices\Shipments\IMissingShipmentService.cs" />
     <Compile Include="IServices\Shipments\IShipmentCancelService.cs" />
     <Compile Include="IServices\Shipments\IShipmentCollectionService.cs" />
+    <Compile Include="IServices\Shipments\IShipmentPackagePriceService.cs" />
     <Compile Include="IServices\Shipments\IShipmentPackageService.cs" />
     <Compile Include="IServices\Shipments\IShipmentReturnService.cs" />
     <Compile Include="IServices\Shipments\IShipmentRerouteService.cs" />
