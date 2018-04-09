@@ -194,6 +194,7 @@
     <Compile Include="Domain\Store.cs" />
     <Compile Include="Domain\SubNav.cs" />
     <Compile Include="Domain\SubSubNav.cs" />
+    <Compile Include="Domain\TransitWaybillNumber.cs" />
     <Compile Include="Domain\User.cs" />
     <Compile Include="Domain\UserServiceCentreMapping.cs" />
     <Compile Include="Domain\Utility\GlobalProperty.cs" />
@@ -282,6 +283,7 @@
     <Compile Include="DTO\Shipments\ShipmentRerouteDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentReturnDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentTrackingDTO.cs" />
+    <Compile Include="DTO\Shipments\TransitWaybillNumberDTO.cs" />
     <Compile Include="DTO\Shipments\WaybillNumberDTO.cs" />
     <Compile Include="DTO\StateDto.cs" />
     <Compile Include="DTO\Stocks\StockRequestDTO.cs" />
@@ -329,6 +331,7 @@
     <Compile Include="Enums\JobCardStatus.cs" />
     <Compile Include="Enums\JobCardType.cs" />
     <Compile Include="Enums\MaintenanceType.cs" />
+    <Compile Include="Enums\ManifestType.cs" />
     <Compile Include="Enums\MessageType.cs" />
     <Compile Include="Enums\MessagingLogStatus.cs" />
     <Compile Include="Enums\NumberGeneratorType.cs" />
@@ -414,6 +417,7 @@
     <Compile Include="IRepositories\Shipments\IShipmentRerouteRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentReturnRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentTrackingRepository.cs" />
+    <Compile Include="IRepositories\Shipments\ITransitWaybillNumberRepository.cs" />
     <Compile Include="IRepositories\Shipments\IWaybillNumberRepository.cs" />
     <Compile Include="IRepositories\Stocks\IStockRequestPartRepository.cs" />
     <Compile Include="IRepositories\Stocks\IStockRequestRepository.cs" />
@@ -505,6 +509,7 @@
     <Compile Include="IServices\Shipments\IShipmentRerouteService.cs" />
     <Compile Include="IServices\Shipments\IShipmentService.cs" />
     <Compile Include="IServices\Shipments\IShipmentTrackingService.cs" />
+    <Compile Include="IServices\Shipments\ITransitWaybillNumberService.cs" />
     <Compile Include="IServices\Shipments\IWaybillNumberService.cs" />
     <Compile Include="IServices\Stocks\IStockRequestPartService.cs" />
     <Compile Include="IServices\Stocks\IStockRequestService.cs" />

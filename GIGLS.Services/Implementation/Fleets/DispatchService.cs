@@ -42,7 +42,7 @@ namespace GIGLS.Services.Implementation.Fleets
             try
             {
                 //Verify that all waybills are not cancelled
-                VerifyWaybillsInManifest(dispatchDTO.ManifestNumber);
+                await VerifyWaybillsInManifest(dispatchDTO.ManifestNumber);
 
                 // get user login service centre
                 var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
@@ -65,6 +65,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     var manifestEntity = _uow.Manifest.Get(manifestObj.ManifestId);
                     manifestEntity.DispatchedById = currentUserId;
                     manifestEntity.IsDispatched = true;
+                    manifestEntity.ManifestType = dispatchDTO.ManifestType;
                 }
 
                 // update system wallet, by creating a wallet transaction
@@ -158,7 +159,14 @@ namespace GIGLS.Services.Implementation.Fleets
                     throw new GenericException("Information does not Exist");
                 }
 
-                return Mapper.Map<DispatchDTO>(dispatch);
+                var dispatchDTO = Mapper.Map<DispatchDTO>(dispatch);
+
+                //get the ManifestType
+                var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(dispatch.ManifestNumber));
+                dispatchDTO.ManifestType = manifestObj.ManifestType;
+
+                return dispatchDTO;
+
             }
             catch (Exception)
             {
@@ -176,8 +184,14 @@ namespace GIGLS.Services.Implementation.Fleets
                     //throw new GenericException("Information does not Exist");
                     return null;
                 }
-                                
-                return Mapper.Map<DispatchDTO>(dispatch); 
+
+                var dispatchDTO = Mapper.Map<DispatchDTO>(dispatch);
+
+                //get the ManifestType
+                var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
+                dispatchDTO.ManifestType = manifestObj.ManifestType;
+
+                return dispatchDTO;
             }
             catch (Exception)
             {
