@@ -41,9 +41,6 @@ namespace GIGLS.Services.Implementation.Fleets
         {
             try
             {
-                //Verify that all waybills are not cancelled
-                await VerifyWaybillsInManifest(dispatchDTO.ManifestNumber);
-
                 // get user login service centre
                 var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
                 var userServiceCentreId = serviceCenterIds[0];
