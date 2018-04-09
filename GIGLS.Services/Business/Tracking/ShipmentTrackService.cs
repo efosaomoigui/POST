@@ -93,7 +93,7 @@ namespace GIGLS.Services.Business.Tracking
                     shipmentTrackings.Add(newShipmentTrackingDTO);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //do nothing
             }

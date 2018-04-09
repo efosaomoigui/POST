@@ -25,5 +25,11 @@ namespace GIGLS.Services.Implementation.Account
             return expenditures;
         }
 
+        public Task<object> AddExpenditure(GeneralLedgerDTO generalLedger)
+        {
+            generalLedger.CreditDebitType = CreditDebitType.Debit;
+            generalLedger.PaymentServiceType = PaymentServiceType.Miscellaneous;
+            return _generalLedgerService.AddGeneralLedger(generalLedger);
+        }
     }
 }

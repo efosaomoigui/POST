@@ -105,6 +105,7 @@ namespace GIGLS.Core
         ICountryRepository Country { get; set; }
         ICountryRouteZoneMapRepository CountryRouteZoneMap { get; set; }
         IShipmentRerouteRepository ShipmentReroute { get; set; }
+        IShipmentPackagePriceRepository ShipmentPackagePrice { get; set; }
         ITransitWaybillNumberRepository TransitWaybillNumber { get; set; }
 
         int Complete();

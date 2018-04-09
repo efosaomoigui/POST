@@ -173,7 +173,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      Value = r.Value,
                                                      GrandTotal = r.GrandTotal,
                                                      AppliedDiscount = r.AppliedDiscount,
-                                                     DiscountValue = r.DiscountValue      
+                                                     DiscountValue = r.DiscountValue,
+                                                     ShipmentPackagePrice = r.ShipmentPackagePrice     
                                                      //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
                                                  }).ToList();
                 //return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());

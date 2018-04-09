@@ -52,6 +52,9 @@ namespace GIGLS.Services.Implementation.Fleets
                 var currentUserId = await _userService.GetCurrentUserId();
                 var currentUserDetail = await _userService.GetUserById(currentUserId);
 
+                //Verify that all waybills are not cancelled and scan all the waybills in case none was cancelled
+                await VerifyWaybillsInManifest(dispatchDTO.ManifestNumber, currentUserId, userServiceCentreId);
+
                 // create dispatch
                 var newDispatch = Mapper.Map<Dispatch>(dispatchDTO);
                 newDispatch.DispatchedBy  = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
@@ -110,7 +113,7 @@ namespace GIGLS.Services.Implementation.Fleets
         /// are not in the cancelled status.
         /// </summary>
         /// <param name="manifestNumber"></param>
-        private async Task VerifyWaybillsInManifest(string manifestNumber)
+        private async Task VerifyWaybillsInManifest(string manifestNumber, string currentUserId, int userServiceCentreId)
         {
             // manifest -> groupwaybill -> waybill
             //manifest
@@ -128,6 +131,43 @@ namespace GIGLS.Services.Implementation.Fleets
                 var waybills = cancelledWaybills.ToList().ToString();
                 throw new GenericException($"{waybills} : The waybill has been cancelled. " +
                     $"Please remove from the manifest and try again.");
+            }
+            else
+            {
+                //Scan all waybills attached to this manifestNumber
+                await ScanWaybillsInManifest(listOfWaybills.ToList(), currentUserId, userServiceCentreId);
+            }
+        }
+
+        /// <summary>
+        /// This method ensures that all waybills attached to this manifestNumber
+        /// are scan.
+        /// </summary>
+
+        private async Task ScanWaybillsInManifest(List<string> waybills, string currentUserId, int userServiceCentreId)
+        {
+            //Convert Enum Scan Status to 
+            string status = ShipmentScanStatus.DSC.ToString();
+            var serviceCenter = await _uow.ServiceCentre.GetAsync(userServiceCentreId);
+
+            foreach (var item in waybills)
+            {
+                //check if the waybill has not been scan for the status before
+                bool shipmentTracking = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill.Equals(item) && x.Status.Equals(status));
+
+                //scan the waybill
+                if (!shipmentTracking)
+                {
+                    var newShipmentTracking = new GIGL.GIGLS.Core.Domain.ShipmentTracking
+                    {
+                        Waybill = item,
+                        Location = serviceCenter.Name,
+                        Status = status,
+                        DateTime = DateTime.Now,
+                        UserId = currentUserId
+                    };
+                    _uow.ShipmentTracking.Add(newShipmentTracking);
+                }
             }
         }
 
