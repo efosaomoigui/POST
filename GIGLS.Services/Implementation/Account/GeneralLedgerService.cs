@@ -63,6 +63,17 @@ namespace GIGLS.Services.Implementation.Account
         {
             var newGeneralLedger = Mapper.Map<GeneralLedger>(generalLedgerDto);
             newGeneralLedger.DateOfEntry = DateTime.Now;
+            
+            if (generalLedgerDto.UserId == null)
+            {
+                newGeneralLedger.UserId = await _userService.GetCurrentUserId();
+            }
+
+            if (generalLedgerDto.ServiceCentreId < 1)
+            {
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                newGeneralLedger.ServiceCentreId = serviceCenterIds[0];
+            }
 
             _uow.GeneralLedger.Add(newGeneralLedger);
             await _uow.CompleteAsync();

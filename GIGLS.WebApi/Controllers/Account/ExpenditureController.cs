@@ -36,5 +36,20 @@ namespace GIGLS.WebApi.Controllers.Account
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("")]
+        public async Task<IServiceResponse<object>> AddExpenditure(GeneralLedgerDTO generalledgerDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var generalledger = await _expenditureService.AddExpenditure(generalledgerDto);
+
+                return new ServiceResponse<object>
+                {
+                    Object = generalledger
+                };
+            });
+        }
     }
 }

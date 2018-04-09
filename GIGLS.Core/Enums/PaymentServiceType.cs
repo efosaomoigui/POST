@@ -4,6 +4,7 @@
     {
         Shipment,
         CashOnDelivery,
-        Dispatch
+        Dispatch,
+        Miscellaneous
     }
 }
