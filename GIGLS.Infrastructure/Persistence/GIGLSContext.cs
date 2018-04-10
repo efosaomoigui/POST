@@ -8,11 +8,9 @@ using System;
 using GIGLS.Core.Domain.Partnership;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.INFRASTRUCTURE.SoftDeleteHandler;
-using Audit.EntityFramework;
 using GIGLS.Core.Domain.Audit;
 using GIGLS.CORE.Domain;
 using Microsoft.AspNet.Identity.EntityFramework;
-using GIGLS.Infrastructure.Migrations;
 using GIGLS.Core.Domain.MessagingLog;
 using GIGLS.Core.Domain.ShipmentScan;
 using GIGLS.Core.Domain.Utility;
@@ -89,6 +87,10 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<ShipmentCancel> ShipmentCancel { get; set; }
         public DbSet<ShipmentReroute> ShipmentReroute { get; set; }
         public DbSet<ShipmentPackagePrice> ShipmentPackagePrice { get; set; }
+
+        public DbSet<ManifestVisitMonitoring> ManifestVisitMonitoring { get; set; }
+
+        public DbSet<TransitWaybillNumber> TransitWaybillNumber { get; set; }
 
         //customer
         public DbSet<Company> Company { get; set; }
