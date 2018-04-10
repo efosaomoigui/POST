@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.Domain;
+using GIGLS.Core.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -27,5 +28,6 @@ namespace GIGL.GIGLS.Core.Domain
         public bool IsDispatched { get; set; }
         public bool IsReceived { get; set; }
 
+        public ManifestType ManifestType { get; set; }
     }
 }

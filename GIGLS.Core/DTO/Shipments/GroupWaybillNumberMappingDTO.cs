@@ -26,5 +26,9 @@ namespace GIGLS.CORE.DTO.Shipments
 
         public int DestinationServiceCentreId { get; set; }
         public ServiceCentreDTO DestinationServiceCentre { get; set; }
+
+        //Original Information - used for Transit Manifest Tracking
+        public int OriginalDepartureServiceCentreId { get; set; }
+        public virtual ServiceCentre OriginalDepartureServiceCentre { get; set; }
     }
 }

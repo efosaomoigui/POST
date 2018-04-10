@@ -204,6 +204,7 @@
     <Compile Include="Implementation\Shipments\ShipmentReturnService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentTrackingService.cs" />
+    <Compile Include="Implementation\Shipments\TransitWaybillNumberService.cs" />
     <Compile Include="Implementation\Shipments\WaybillNumberService.cs" />
     <Compile Include="Implementation\StateService.cs" />
     <Compile Include="Implementation\Stocks\StockRequestPartService.cs" />

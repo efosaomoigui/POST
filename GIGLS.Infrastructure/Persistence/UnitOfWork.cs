@@ -166,6 +166,9 @@ namespace GIGLS.Infrastructure.Persistence
         public IWaybillNumberRepository WaybillNumber { get; set; }
 
         [Inject]
+        public ITransitWaybillNumberRepository TransitWaybillNumber { get; set; }
+
+        [Inject]
         public IGroupWaybillNumberRepository GroupWaybillNumber { get; set; }
 
         [Inject]

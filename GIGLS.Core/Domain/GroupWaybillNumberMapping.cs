@@ -18,5 +18,9 @@ namespace GIGL.GIGLS.Core.Domain
 
         public int DestinationServiceCentreId { get; set; }
         public virtual ServiceCentre DestinationServiceCentre { get; set; }
+
+        //Original Information - used for Transit Manifest Tracking
+        public int OriginalDepartureServiceCentreId { get; set; }
+        public virtual ServiceCentre OriginalDepartureServiceCentre { get; set; }
     }
 }
