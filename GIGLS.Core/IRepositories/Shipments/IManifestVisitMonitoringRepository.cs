@@ -8,7 +8,7 @@ namespace GIGLS.Core.IRepositories.Shipments
 {
     public interface IManifestVisitMonitoringRepository : IRepository<ManifestVisitMonitoring>
     {
-        Task<List<ManifestVisitMonitoringDTO>> GetManifestVisitMonitorings();
+        Task<List<ManifestVisitMonitoringDTO>> GetManifestVisitMonitorings(int[] serviceCentreIds);
         Task<List<ManifestVisitMonitoringDTO>> GetManifestVisitMonitoringByWaybill(string waybill);
     }
 }

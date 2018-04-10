@@ -27,25 +27,23 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                manifestVisitMonitoringDto.UserId = "15c8eb05-3795-4ca3-ae79-e8915f0b2b1f";
-
                 if (manifestVisitMonitoringDto.UserId == null)
                 {
                     var user = await _userService.GetCurrentUserId();
                     manifestVisitMonitoringDto.UserId = user;
                 }
+                
+                var waybill = await _uow.Shipment.GetAsync(x => x.Waybill == manifestVisitMonitoringDto.Waybill);
 
-                //check if the waybill exist
-                bool waybillExist = await _uow.Shipment.ExistAsync(x => x.Waybill == manifestVisitMonitoringDto.Waybill);
-
-                if (!waybillExist)
+                if(waybill == null)
                 {
                     throw new GenericException($"Waybill: {manifestVisitMonitoringDto.Waybill} does not exist");
                 }
-
+                
                 var newManifest = new ManifestVisitMonitoring
                 {
                     Waybill = manifestVisitMonitoringDto.Waybill,
+                    ServiceCentreId = waybill.DestinationServiceCentreId,
                     Address = manifestVisitMonitoringDto.Address,
                     ReceiverName = manifestVisitMonitoringDto.ReceiverName,
                     ReceiverPhoneNumber = manifestVisitMonitoringDto.ReceiverPhoneNumber,
@@ -111,7 +109,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<List<ManifestVisitMonitoringDTO>> GetManifestVisitMonitorings()
         {
-            return await _uow.ManifestVisitMonitoring.GetManifestVisitMonitorings();
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+
+            return await _uow.ManifestVisitMonitoring.GetManifestVisitMonitorings(serviceCenters);
         }
 
         public async Task UpdateManifestVisitMonitoring(int manifestVisitMonitoringId, ManifestVisitMonitoringDTO manifestDto)

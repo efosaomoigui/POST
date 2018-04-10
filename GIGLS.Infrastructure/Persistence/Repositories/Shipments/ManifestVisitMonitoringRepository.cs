@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.ServiceCentres;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 {
@@ -17,11 +18,16 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             _context = context;
         }
         
-        public Task<List<ManifestVisitMonitoringDTO>> GetManifestVisitMonitorings()
+        public Task<List<ManifestVisitMonitoringDTO>> GetManifestVisitMonitorings(int[] serviceCentreIds)
         {
             try
             {
-                var manifestVisitMonitorings = _context.ManifestVisitMonitoring;
+                var manifestVisitMonitorings = _context.ManifestVisitMonitoring.AsQueryable();
+
+                if(serviceCentreIds.Length > 0)
+                {
+                    manifestVisitMonitorings = manifestVisitMonitorings.Where(s => serviceCentreIds.Contains(s.ServiceCentreId));
+                }
 
                 var manifestVisitMonitoringDto = from r in manifestVisitMonitorings
                                                  select new ManifestVisitMonitoringDTO()
@@ -35,7 +41,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                      Status = r.Status,
                                                      UserId = r.User.FirstName + " " + r.User.LastName,
                                                      DateCreated = r.DateCreated,
-                                                     DateModified = r.DateModified
+                                                     DateModified = r.DateModified,
+                                                     ServiceCentreId = r.ServiceCentreId,
+                                                     ServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.ServiceCentreId).Select(x => new ServiceCentreDTO
+                                                     {
+                                                         Code = x.Code,
+                                                         Name = x.Name
+                                                     }).FirstOrDefault(),
                                                  };
 
                 return Task.FromResult(manifestVisitMonitoringDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -64,7 +76,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                      Status = r.Status,
                                                      UserId = r.User.FirstName + " " + r.User.LastName,
                                                      DateCreated = r.DateCreated,
-                                                     DateModified = r.DateModified
+                                                     DateModified = r.DateModified,
+                                                     ServiceCentreId = r.ServiceCentreId,
+                                                     ServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.ServiceCentreId).Select(x => new ServiceCentreDTO
+                                                     {
+                                                         Code = x.Code,
+                                                         Name = x.Name
+                                                     }).FirstOrDefault(),
                                                  };
 
                 return Task.FromResult(manifestVisitMonitoringDto.OrderByDescending(x => x.DateCreated).ToList());

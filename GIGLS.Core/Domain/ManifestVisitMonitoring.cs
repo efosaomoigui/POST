@@ -13,5 +13,9 @@ namespace GIGLS.Core.Domain
         public string Signature { get; set; }
         public string UserId { get; set; }
         public virtual User User { get; set; }
+
+        //This will be used for better filtering of data 
+        public int ServiceCentreId { get; set; }
+        public virtual ServiceCentre ServiceCentre { get; set; }
     }
 }
