@@ -152,6 +152,7 @@
     <Compile Include="Domain\GroupWaybillNumberMapping.cs" />
     <Compile Include="Domain\Haulage.cs" />
     <Compile Include="Domain\HaulageDistanceMapping.cs" />
+    <Compile Include="Domain\ManifestVisitMonitoring.cs" />
     <Compile Include="Domain\MessagingLog\EmailSendLog.cs" />
     <Compile Include="Domain\MessagingLog\SmsSendLog.cs" />
     <Compile Include="Domain\MissingShipment.cs" />
@@ -274,6 +275,7 @@
     <Compile Include="DTO\Shipments\GroupWaybillNumberMappingDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestGroupWaybillNumberMappingDTO.cs" />
+    <Compile Include="DTO\Shipments\ManifestVisitMonitoringDTO.cs" />
     <Compile Include="DTO\Shipments\MissingShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\ScanDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentCancelDTO.cs" />
@@ -408,6 +410,7 @@
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberRepository.cs" />
     <Compile Include="IRepositories\Shipments\IManifestGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IManifestRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IManifestVisitMonitoringRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentCancelRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentCollectionRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentItemRepository.cs" />
@@ -500,6 +503,7 @@
     <Compile Include="IServices\Shipments\IGroupWaybillNumberService.cs" />
     <Compile Include="IServices\Shipments\IManifestGroupWaybillNumberMappingService.cs" />
     <Compile Include="IServices\Shipments\IManifestService.cs" />
+    <Compile Include="IServices\Shipments\IManifestVisitMonitoringService.cs" />
     <Compile Include="IServices\Shipments\IMissingShipmentService.cs" />
     <Compile Include="IServices\Shipments\IShipmentCancelService.cs" />
     <Compile Include="IServices\Shipments\IShipmentCollectionService.cs" />
