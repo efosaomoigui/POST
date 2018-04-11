@@ -89,6 +89,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<ShipmentPackagePrice> ShipmentPackagePrice { get; set; }
 
         public DbSet<ManifestVisitMonitoring> ManifestVisitMonitoring { get; set; }
+        public DbSet<ManifestWaybillMapping> ManifestWaybillMapping { get; set; }
 
         public DbSet<TransitWaybillNumber> TransitWaybillNumber { get; set; }
 

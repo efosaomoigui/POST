@@ -243,6 +243,7 @@ namespace GIGLS.Services.Business.Scanning
                         //do nothing
                     }
                     else
+
                     {
                         throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
                     }
