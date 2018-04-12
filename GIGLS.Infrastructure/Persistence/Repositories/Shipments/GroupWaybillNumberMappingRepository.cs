@@ -26,9 +26,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var serviceCentreWaybills = new List<string>();
             if (serviceCentreIds.Length > 0)
             {
-                serviceCentreWaybills = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId)).
-                    Select(s => s.Waybill).ToList();
-                groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreWaybills.Contains(s.WaybillNumber));
+                //serviceCentreWaybills = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId)).
+                //    Select(s => s.Waybill).ToList();
+                //groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreWaybills.Contains(s.WaybillNumber));
+                groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
             }
 
             var groupwaybillMappingDto = from gw in groupwaybillMapping
@@ -55,9 +56,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var serviceCentreWaybills = new List<string>();
             if (serviceCentreIds.Length > 0)
             {
-                serviceCentreWaybills = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId)).
-                    Select(s => s.Waybill).ToList();
-                groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreWaybills.Contains(s.WaybillNumber));
+                //serviceCentreWaybills = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId)).
+                //    Select(s => s.Waybill).ToList();
+                //groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreWaybills.Contains(s.WaybillNumber));
+                groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
             }
 
             var groupwaybillMappingDto = (from gw in groupwaybillMapping

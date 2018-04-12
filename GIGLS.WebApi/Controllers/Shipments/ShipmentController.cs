@@ -195,7 +195,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipments = await _service.GetUnGroupedWaybillsForServiceCentre(filterOptionsDto);
+                var shipments = await _service.GetUnGroupedWaybillsForServiceCentre(filterOptionsDto, true);
                 return new ServiceResponse<IEnumerable<ShipmentDTO>>
                 {
                     Object = shipments,

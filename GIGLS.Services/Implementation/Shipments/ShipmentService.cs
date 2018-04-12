@@ -418,7 +418,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private async Task<CustomerDTO> CreateCustomer(ShipmentDTO shipmentDTO)
         {
-            var customerDTO = shipmentDTO.Customer[0];           
+            var customerDTO = shipmentDTO.Customer[0];
             var customerType = shipmentDTO.CustomerType;
 
             //reset rowversion
@@ -564,7 +564,7 @@ namespace GIGLS.Services.Implementation.Shipments
             return shipment;
         }
 
-        public async Task<List<ShipmentDTO>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto)
+        public async Task<List<ShipmentDTO>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto, bool filterByDestinationSC = false)
         {
             try
             {
@@ -577,7 +577,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 // get only paid shipments from Invoice for Individuals
                 // and allow Ecommerce and Corporate customers to be grouped
                 var paidShipments = new List<ShipmentDTO>();
-                foreach(var shipmentItem in shipmentsBySC)
+                foreach (var shipmentItem in shipmentsBySC)
                 {
                     var invoice = await _uow.Invoice.GetAsync(s => s.Waybill == shipmentItem.Waybill);
 
@@ -586,7 +586,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         paidShipments.Add(shipmentItem);
                     }
 
-                    if (invoice.PaymentStatus == PaymentStatus.Pending && 
+                    if (invoice.PaymentStatus == PaymentStatus.Pending &&
                         shipmentItem.CustomerType == CustomerType.Company.ToString())
                     {
                         paidShipments.Add(shipmentItem);
@@ -598,9 +598,55 @@ namespace GIGLS.Services.Implementation.Shipments
                 var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(serviceCenters);
 
                 // filter the two lists
-                var ungroupedWaybills = paidShipments.Where(s => !groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber).Contains(s.Waybill));
+                var ungroupedWaybills = paidShipments.Where(s => !groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber).Contains(s.Waybill)).ToList();
 
-                return ungroupedWaybills.ToList();
+                // Ensure the waybills are in this ServiceCentre from the TransitWaybill entity
+                //var transitWaybillNumberList = _uow.TransitWaybillNumber.GetAll().Where(s => paidShipments.Select(x => x.Waybill).Contains(s.WaybillNumber)).ToList();
+
+
+                // final ungroupedList
+                var finalUngroupedList = new List<ShipmentDTO>();
+                foreach (var item in ungroupedWaybills)
+                {
+                    var tranWaybillObj = _uow.TransitWaybillNumber.SingleOrDefault(s => s.WaybillNumber == item.Waybill);
+                    if (tranWaybillObj != null)
+                    {
+                        if(tranWaybillObj.ServiceCentreId == serviceCenters[0] && tranWaybillObj.IsGrouped == false)
+                        {
+                            finalUngroupedList.Add(item);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        finalUngroupedList.Add(item);
+                    }
+                }
+
+                
+                //added for Transitwaybills
+                var transitWaybillNumberList = _uow.TransitWaybillNumber.GetAll().Where(s =>
+                    serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false).ToList();
+                foreach (var item in transitWaybillNumberList)
+                {
+                    var shipment = await GetShipment(item.WaybillNumber);
+                    if(filterByDestinationSC && shipmentsBySC.Count > 0)
+                    {
+                        var destinationSC = shipmentsBySC[0].DestinationServiceCentreId;
+                        if(shipment.DestinationServiceCentreId == destinationSC)
+                        {
+                            finalUngroupedList.Add(shipment);
+                        }
+                    }
+                    else
+                    {
+                        finalUngroupedList.Add(shipment);
+                    }
+                }
+
+
+
+                return finalUngroupedList;
             }
             catch (Exception)
             {
@@ -721,7 +767,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var serviceCentreDetail = await _centreService.GetServiceCentreById(serviceCenters[0]);
 
-            var zone = await _countryRouteZoneMapService.GetZone(serviceCentreDetail.CountryId, destinationCountry);            
+            var zone = await _countryRouteZoneMapService.GetZone(serviceCentreDetail.CountryId, destinationCountry);
             return zone;
         }
 
@@ -753,7 +799,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var customerDetails = await GetCustomer(item.CustomerId, customerType);
                 item.CustomerDetails = customerDetails;
             }
-            
+
             var dailySalesDTO = new DailySalesDTO()
             {
                 StartDate = (DateTime)accountFilterCriteria.StartDate,
@@ -836,7 +882,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 var invoice = _uow.Invoice.SingleOrDefault(s => s.Waybill == waybill);
-                if (invoice.PaymentStatus == PaymentStatus.Paid) 
+                if (invoice.PaymentStatus == PaymentStatus.Paid)
                 {
                     //2. Reverse accounting entries
                     //2.1 Update shipment to cancelled
@@ -894,7 +940,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 await ScanShipment(new ScanDTO
                 {
                     WaybillNumber = waybill,
-                    ShipmentScanStatus = ShipmentScanStatus.SSC 
+                    ShipmentScanStatus = ShipmentScanStatus.SSC
                 });
 
                 //send message

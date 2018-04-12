@@ -83,6 +83,26 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<TransitWaybillNumberDTO> GetTransitWaybillNumberByCode(string waybillNumber)
+        {
+            try
+            {
+                var transitWaybillNumber = await _uow.TransitWaybillNumber.GetAsync(s => s.WaybillNumber == waybillNumber);
+                if (transitWaybillNumber == null)
+                {
+                    throw new GenericException("TransitWaybillNumber Not Exist");
+                }
+
+                var transitWaybillNumberDto = Mapper.Map<TransitWaybillNumberDTO>(transitWaybillNumber);
+                return transitWaybillNumberDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
         public async Task UpdateTransitWaybillNumber(int transitWaybillNumberId, TransitWaybillNumberDTO transitWaybillNumberDto)
         {
             try
