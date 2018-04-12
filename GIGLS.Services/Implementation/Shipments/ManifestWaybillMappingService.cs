@@ -20,12 +20,14 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUnitOfWork _uow;
         private readonly IManifestService _manifestService;
         private readonly IUserService _userService;
+        private readonly IShipmentService _shipmentService;
 
-        public ManifestWaybillMappingService(IUnitOfWork uow, IManifestService manifestService, IUserService userService)
+        public ManifestWaybillMappingService(IUnitOfWork uow, IManifestService manifestService, IUserService userService, IShipmentService shipmentService)
         {
             _uow = uow;
             _manifestService = manifestService;
             _userService = userService;
+            _shipmentService = shipmentService;
             MapperConfig.Initialize();
         }
 
@@ -51,7 +53,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         DateTime = DateTime.Now,
                         ManifestCode = manifest,
-                        ManifestType = Core.Enums.ManifestType.Delivery
+                        ManifestType = ManifestType.Delivery
                     };
                     _uow.Manifest.Add(newManifest);
                 }
@@ -131,20 +133,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 var manifestWaybillMappingList = await _uow.ManifestWaybillMapping.FindAsync(x => x.ManifestCode == manifestDTO.ManifestCode);
 
                 var manifestWaybillNumberMappingDto = Mapper.Map<List<ManifestWaybillMappingDTO>>(manifestWaybillMappingList.ToList());
-
-                //add to list
-                List<ManifestWaybillMappingDTO> resultList = new List<ManifestWaybillMappingDTO>();
-
+                
                 foreach (var manifestwaybill in manifestWaybillNumberMappingDto)
                 {
                     manifestwaybill.ManifestDetails = manifestDTO;
-                    resultList.Add(manifestwaybill);
+
+                    //get shipment detail 
+                    manifestwaybill.Shipment = await _shipmentService.GetShipment(manifestwaybill.Waybill);
                 }
-
-                var finalResulttest = resultList;
-
+                
                 return manifestWaybillNumberMappingDto;
-                //return resultList;
             }
             catch (Exception)
             {

@@ -13,6 +13,8 @@ namespace GIGLS.Core.DTO.Shipments
         public ManifestDTO ManifestDetails { get; set; }
 
         public string Waybill { get; set; }
+        public ShipmentDTO Shipment { get; set; }
+
         public List<string> Waybills { get; set; }
 
         public int ServiceCentreId { get; set; }
