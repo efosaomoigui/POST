@@ -108,7 +108,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (manifestObj == null)
                 {
-                    throw new GenericException("Manifest information does not exist");
+                    throw new GenericException($"No Manifest exists for this code: {manifest}");
                 }
 
                 var manifestDTO = Mapper.Map<ManifestDTO>(manifestObj);

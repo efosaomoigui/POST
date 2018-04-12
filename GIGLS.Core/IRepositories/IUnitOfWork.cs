@@ -106,7 +106,9 @@ namespace GIGLS.Core
         ICountryRouteZoneMapRepository CountryRouteZoneMap { get; set; }
         IShipmentRerouteRepository ShipmentReroute { get; set; }
         IShipmentPackagePriceRepository ShipmentPackagePrice { get; set; }
+        IManifestVisitMonitoringRepository ManifestVisitMonitoring { get; set; }
         ITransitWaybillNumberRepository TransitWaybillNumber { get; set; }
+        IManifestWaybillMappingRepository ManifestWaybillMapping { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

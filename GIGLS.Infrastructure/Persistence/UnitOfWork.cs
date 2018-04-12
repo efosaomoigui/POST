@@ -24,6 +24,7 @@ using GIGLS.CORE.IRepositories.Nav;
 using GIGLS.Core.IRepositories.Haulage;
 using GIGLS.Core.IRepositories.MessagingLog;
 using GIGLS.Core.IRepositories.ShipmentScan;
+using System;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -280,6 +281,12 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IShipmentPackagePriceRepository ShipmentPackagePrice { get; set; }
+
+        [Inject]
+        public IManifestVisitMonitoringRepository ManifestVisitMonitoring { get; set; }
+
+        [Inject]
+        public IManifestWaybillMappingRepository ManifestWaybillMapping { get; set; }
 
         public int Complete()
         {

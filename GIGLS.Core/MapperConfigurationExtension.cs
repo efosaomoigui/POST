@@ -229,6 +229,12 @@ namespace GIGLS.Core
 
                 config.CreateMap<ShipmentPackagePrice, ShipmentPackagePriceDTO>();
                 config.CreateMap<ShipmentPackagePriceDTO, ShipmentPackagePrice>();
+
+                config.CreateMap<ManifestVisitMonitoring, ManifestVisitMonitoringDTO>();
+                config.CreateMap<ManifestVisitMonitoringDTO, ManifestVisitMonitoring>();
+
+                config.CreateMap<ManifestWaybillMapping, ManifestWaybillMappingDTO>();
+                config.CreateMap<ManifestWaybillMappingDTO, ManifestWaybillMapping>();
             });
 
             isInit = true;
