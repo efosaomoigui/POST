@@ -295,7 +295,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     result.Add(waybillCollection.Waybill);
                 }
 
-                //2. Get shipment details for the service centre that are the collection centre using the waybill and service centre
+                //2. Get shipment details for the service centre that are at the collection centre using the waybill and service centre
                 var shipmentsBySC = await _uow.Shipment.GetShipmentDetailByWaybills(filterOptionsDto, serviceCenters, result).Item1;
 
                 return shipmentsBySC;
