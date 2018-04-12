@@ -33,8 +33,23 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<List<ManifestWaybillMappingDTO>> GetAllManifestWaybillMappings()
         {
-            var serviceIds = await _userService.GetPriviledgeServiceCenters();
-            return await _uow.ManifestWaybillMapping.GetManifestWaybillMappings(serviceIds);
+            //var serviceIds = await _userService.GetPriviledgeServiceCenters();
+            //return await _uow.ManifestWaybillMapping.GetManifestWaybillMappings(serviceIds);
+
+            var resultSet = new HashSet<string>();
+            var result = new List<ManifestWaybillMappingDTO>();
+
+            var serviceIds = _userService.GetPriviledgeServiceCenters().Result;
+            var manifestWaybillMapings = await _uow.ManifestWaybillMapping.GetManifestWaybillMappings(serviceIds);
+            foreach (var item in manifestWaybillMapings)
+            {
+                if (resultSet.Add(item.ManifestCode))
+                {
+                    result.Add(item);
+                }
+            }
+
+            return result.OrderByDescending(x => x.DateCreated).ToList();
         }
 
         //map waybills to Manifest

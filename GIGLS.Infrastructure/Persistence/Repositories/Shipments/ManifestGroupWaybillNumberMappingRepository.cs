@@ -56,7 +56,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      }).FirstOrDefault()
                                                  };
 
-            return await Task.FromResult(manifestGroupwaybillMappingDTO.ToList());
+            return await Task.FromResult(manifestGroupwaybillMappingDTO.OrderByDescending(x => x.DateCreated).ToList());
         }
 
     }
