@@ -9,6 +9,8 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Core.IServices.Fleets;
 using System.Collections.Generic;
+using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core;
 
 namespace GIGLS.Services.Business.Scanning
 {
@@ -23,12 +25,15 @@ namespace GIGLS.Services.Business.Scanning
         private IUserService _userService;
         private readonly IScanStatusService _scanService;
         private readonly IDispatchService _dispatchService;
+        private readonly ITransitWaybillNumberService _transitWaybillNumberService;
+        private readonly IUnitOfWork _uow;
 
 
         public ScanService(IShipmentService shipmentService, IShipmentTrackingService shipmentTrackingService,
             IGroupWaybillNumberMappingService groupService, IGroupWaybillNumberService groupWaybill,
             IManifestService manifestService, IManifestGroupWaybillNumberMappingService groupManifest,
-            IUserService userService, IScanStatusService scanService, IDispatchService dispatchService)
+            IUserService userService, IScanStatusService scanService, IDispatchService dispatchService,
+            ITransitWaybillNumberService transitWaybillNumberService, IUnitOfWork uow)
         {
             _shipmentService = shipmentService;
             _shipmentTrackingService = shipmentTrackingService;
@@ -39,6 +44,8 @@ namespace GIGLS.Services.Business.Scanning
             _userService = userService;
             _scanService = scanService;
             _dispatchService = dispatchService;
+            _transitWaybillNumberService = transitWaybillNumberService;
+            _uow = uow;
         }
 
         //public async Task<bool> ScanShipment(string waybillNumber, ShipmentScanStatus scanStatus)
@@ -65,7 +72,7 @@ namespace GIGLS.Services.Business.Scanning
             bool result = false;
 
             //loop through and call scan for each item
-            foreach(var item in scanList)
+            foreach (var item in scanList)
             {
                 result = await ScanShipment(item);
             }
@@ -150,6 +157,7 @@ namespace GIGLS.Services.Business.Scanning
             /////////////////////////3. Manifest
             // check if the manifest number exists in the system
             var manifest = await _manifestService.GetManifestCodeForScan(scan.WaybillNumber);
+            var waybillsInManifest = new HashSet<string>();
 
             if (manifest != null)
             {
@@ -175,6 +183,7 @@ namespace GIGLS.Services.Business.Scanning
 
                             foreach (var waybill in groupShipment.WaybillNumbers)
                             {
+                                //check already scanned manifest
                                 var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(waybill, scanStatus);
                                 if (!checkTrack)
                                 {
@@ -212,6 +221,9 @@ namespace GIGLS.Services.Business.Scanning
                                         await _dispatchService.UpdateDispatch(dispatch.DispatchId, dispatch);
                                     }
                                 }
+
+                                //add to waybillsInManifest
+                                waybillsInManifest.Add(waybill);
                             }
                         }
                     }
@@ -227,10 +239,14 @@ namespace GIGLS.Services.Business.Scanning
                 throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} does not exist");
             }
 
+
+            //////////////////////4. Check and Create Entries for Transit Manifest
+            await CheckAndCreateEntriesForTransitManifest(scan, manifest, waybillsInManifest);
+
             return true;
         }
 
-        private async Task CheckIfUserIsAtShipmentFinalDestination(ScanDTO scan, int destinationServiceCentreId)
+        private async Task<bool> CheckIfUserIsAtShipmentFinalDestination(ScanDTO scan, int destinationServiceCentreId)
         {
             //1. For Shipment Check if user has rights to this action
             {
@@ -249,7 +265,62 @@ namespace GIGLS.Services.Business.Scanning
                     }
                 }
             }
+            return true;
+        }
 
+        private async Task<bool> CheckAndCreateEntriesForTransitManifest(ScanDTO scan, Manifest manifest, HashSet<string> waybillsInManifest)
+        {
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            var currentUserSercentreId = serviceCenters.Length > 0 ? serviceCenters[0] : 0;
+            var currentUserId = await _userService.GetCurrentUserId();
+
+            //1. Only scan for manifest
+            if (manifest != null)
+            {
+                //2. Check for Scan related to Transit Manifest
+                if (scan.ShipmentScanStatus == ShipmentScanStatus.AST || scan.ShipmentScanStatus == ShipmentScanStatus.APT)
+                {
+                    //3. Create new entries in TransitWaybills or update existing entries
+                    foreach (var waybill in waybillsInManifest)
+                    {
+                        //3a. check if entry exist
+                        var transitWaybillNumber = await _uow.TransitWaybillNumber.GetAsync(s => s.WaybillNumber == waybill);
+
+                        if (transitWaybillNumber == null)
+                        {
+                            //3b. create new entry
+                            await _transitWaybillNumberService.AddTransitWaybillNumber(
+                                new TransitWaybillNumberDTO
+                                {
+                                    WaybillNumber = waybill,
+                                    IsGrouped = true,
+                                    ServiceCentreId = currentUserSercentreId,
+                                    UserId = currentUserId
+                                }
+                            );
+                        }
+                        else
+                        {
+                            //3c. update existing entry
+                            transitWaybillNumber.ServiceCentreId = currentUserSercentreId;
+                            transitWaybillNumber.UserId = currentUserId;
+                            _uow.Complete();
+                        }
+
+                        //4. Update entry in GroupWaybillMapping
+                        var groupWaybillNumberMapping = await _uow.GroupWaybillNumberMapping.GetAsync(s => s.WaybillNumber == waybill && s.IsDeleted == false);
+                        groupWaybillNumberMapping.DepartureServiceCentreId = currentUserSercentreId;
+                        _uow.Complete();
+
+                        //5. Remove entry from ManifestGroupWaybillNumberMappingService
+                        //5.1 Find the groupWaybill attached to the Manifest
+                        var groupWaybill = await _groupService.GetGroupForWaybillNumber(waybill);
+                        await _groupManifest.RemoveGroupWaybillNumberFromManifest(manifest.ManifestCode, groupWaybill.GroupWaybillCode);
+                    }
+                }
+            }
+
+            return true;
         }
     }
 }

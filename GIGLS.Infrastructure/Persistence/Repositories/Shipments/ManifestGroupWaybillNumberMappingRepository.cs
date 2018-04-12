@@ -20,7 +20,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
         public async Task<List<ManifestGroupWaybillNumberMappingDTO>> GetManifestGroupWaybillNumberMappings(int[] serviceCentreIds)
         {
-            var manifestGroupwaybillMapping = Context.ManifestGroupWaybillNumberMapping.AsQueryable();
+            var manifestGroupwaybillMapping = Context.ManifestGroupWaybillNumberMapping.Where(s => s.IsDeleted == false).AsQueryable();
 
             var serviceCentreGroupWaybills = new List<string>();
             if (serviceCentreIds.Length > 0)
