@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Fleets;
+using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
 using System.Collections.Generic;
@@ -24,5 +25,6 @@ namespace GIGLS.Core.DTO.Shipments
         public List<ShipmentDTO> Shipments { get; set; }
         public bool IsDispatched { get; set; }
         public bool IsReceived { get; set; }
+        public ManifestType ManifestType { get; set; }
     }
 }

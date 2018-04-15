@@ -14,7 +14,6 @@ using GIGLS.Core.IServices.CashOnDeliveryAccount;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
-using GIGLS.Services.Implementation.Utility;
 using System.Linq;
 using GIGLS.Core.Domain;
 

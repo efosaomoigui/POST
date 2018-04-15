@@ -25,5 +25,8 @@ namespace GIGLS.Core.DTO.Fleets
         
         public int? DestinationId { get; set; }
         public StationDTO Destination { get; set; }
+
+        //Added for TransitManifest
+        public ManifestType ManifestType { get; set; }
     }
 }

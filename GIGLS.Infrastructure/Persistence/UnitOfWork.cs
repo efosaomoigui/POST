@@ -24,6 +24,7 @@ using GIGLS.CORE.IRepositories.Nav;
 using GIGLS.Core.IRepositories.Haulage;
 using GIGLS.Core.IRepositories.MessagingLog;
 using GIGLS.Core.IRepositories.ShipmentScan;
+using System;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -165,6 +166,9 @@ namespace GIGLS.Infrastructure.Persistence
         public IWaybillNumberRepository WaybillNumber { get; set; }
 
         [Inject]
+        public ITransitWaybillNumberRepository TransitWaybillNumber { get; set; }
+
+        [Inject]
         public IGroupWaybillNumberRepository GroupWaybillNumber { get; set; }
 
         [Inject]
@@ -275,6 +279,14 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IShipmentRerouteRepository ShipmentReroute { get; set; }
 
+        [Inject]
+        public IShipmentPackagePriceRepository ShipmentPackagePrice { get; set; }
+
+        [Inject]
+        public IManifestVisitMonitoringRepository ManifestVisitMonitoring { get; set; }
+
+        [Inject]
+        public IManifestWaybillMappingRepository ManifestWaybillMapping { get; set; }
 
         public int Complete()
         {

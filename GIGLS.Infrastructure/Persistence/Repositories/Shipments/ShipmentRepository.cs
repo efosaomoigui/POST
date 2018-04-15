@@ -12,7 +12,6 @@ using GIGLS.Core.Enums;
 using GIGLS.CORE.Enums;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.DTO.ServiceCentres;
-using AutoMapper;
 using GIGLS.CORE.DTO.Shipments;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
@@ -58,17 +57,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  },
                                                  DeliveryTime = r.DeliveryTime,
                                                  DepartureServiceCentreId = r.DepartureServiceCentreId,
-                                                 DepartureServiceCentre = new ServiceCentreDTO
+                                                 DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
                                                  {
-                                                     Code = r.DepartureServiceCentre.Code,
-                                                     Name = r.DepartureServiceCentre.Name
-                                                 },
+                                                     Code = x.Code,
+                                                     Name = x.Name
+                                                 }).FirstOrDefault(),
                                                  DestinationServiceCentreId = r.DestinationServiceCentreId,
-                                                 DestinationServiceCentre = new ServiceCentreDTO
+                                                 DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
                                                  {
-                                                     Code = r.DestinationServiceCentre.Code,
-                                                     Name = r.DestinationServiceCentre.Name
-                                                 },
+                                                     Code = x.Code,
+                                                     Name = x.Name
+                                                 }).FirstOrDefault(),
                                                  ExpectedDateOfArrival = r.ExpectedDateOfArrival,
                                                  //GroupWaybill = r.GroupWaybill,
                                                  //IdentificationType = r.IdentificationType,
@@ -143,18 +142,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      },
                                                      DeliveryTime = r.DeliveryTime,
                                                      DepartureServiceCentreId = r.DepartureServiceCentreId,
-                                                     DepartureServiceCentre = new ServiceCentreDTO
+                                                     DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
                                                      {
-                                                         Code = r.DepartureServiceCentre.Code,
-                                                         Name = r.DepartureServiceCentre.Name
-                                                     },
+                                                         Code = x.Code,
+                                                         Name = x.Name
+                                                     }).FirstOrDefault(),
                                                      DestinationServiceCentreId = r.DestinationServiceCentreId,
                                                      DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
                                                      {
                                                          Code = x.Code,
                                                          Name = x.Name
                                                      }).FirstOrDefault(),
-
                                                      ExpectedDateOfArrival = r.ExpectedDateOfArrival,
                                                      //GroupWaybill = r.GroupWaybill,
                                                      //IdentificationType = r.IdentificationType,
@@ -173,7 +171,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      Value = r.Value,
                                                      GrandTotal = r.GrandTotal,
                                                      AppliedDiscount = r.AppliedDiscount,
-                                                     DiscountValue = r.DiscountValue      
+                                                     DiscountValue = r.DiscountValue,
+                                                     ShipmentPackagePrice = r.ShipmentPackagePrice     
                                                      //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
                                                  }).ToList();
                 //return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -216,6 +215,222 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 throw;
             }
         }
+
+        public Tuple<Task<List<ShipmentDTO>>, int> GetDestinationShipments(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
+        {
+            try
+            {
+                //filter by destination service center that is not cancelled
+                var shipment = _context.Shipment.AsQueryable().Where(x => x.IsCancelled == false);
+                if (serviceCentreIds.Length > 0)
+                {
+                    shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DestinationServiceCentreId));
+                }
+                
+                //filter by Local or International Shipment
+                if (filterOptionsDto.IsInternational != null)
+                {
+                    shipment = shipment.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
+                }
+
+
+                var count = shipment.ToList().Count();
+
+                List<ShipmentDTO> shipmentDto = (from r in shipment
+                                                 select new ShipmentDTO()
+                                                 {
+                                                     ShipmentId = r.ShipmentId,
+                                                     Waybill = r.Waybill,
+                                                     CustomerId = r.CustomerId,
+                                                     CustomerType = r.CustomerType,
+                                                     ActualDateOfArrival = r.ActualDateOfArrival,
+                                                     DateCreated = r.DateCreated,
+                                                     DateModified = r.DateModified,
+                                                     DeliveryOptionId = r.DeliveryOptionId,
+                                                     DeliveryOption = new DeliveryOptionDTO
+                                                     {
+                                                         Code = r.DeliveryOption.Code,
+                                                         Description = r.DeliveryOption.Description
+                                                     },
+                                                     DeliveryTime = r.DeliveryTime,
+                                                     DepartureServiceCentreId = r.DepartureServiceCentreId,
+                                                     DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                                     {
+                                                         Code = x.Code,
+                                                         Name = x.Name
+                                                     }).FirstOrDefault(),
+                                                     DestinationServiceCentreId = r.DestinationServiceCentreId,
+                                                     DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                                     {
+                                                         Code = x.Code,
+                                                         Name = x.Name
+                                                     }).FirstOrDefault(),
+
+                                                     ExpectedDateOfArrival = r.ExpectedDateOfArrival,
+                                                     PaymentStatus = r.PaymentStatus,
+                                                     ReceiverAddress = r.ReceiverAddress,
+                                                     ReceiverCity = r.ReceiverCity,
+                                                     ReceiverCountry = r.ReceiverCountry,
+                                                     ReceiverEmail = r.ReceiverEmail,
+                                                     ReceiverName = r.ReceiverName,
+                                                     ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                                     ReceiverState = r.ReceiverState,
+                                                     SealNumber = r.SealNumber,
+                                                     UserId = r.UserId,
+                                                     Value = r.Value,
+                                                     GrandTotal = r.GrandTotal,
+                                                     AppliedDiscount = r.AppliedDiscount,
+                                                     DiscountValue = r.DiscountValue,
+                                                     ShipmentPackagePrice = r.ShipmentPackagePrice
+                                                 }).ToList();
+
+                //filter
+                var filter = filterOptionsDto.filter;
+                var filterValue = filterOptionsDto.filterValue;
+                if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
+                {
+                    shipmentDto = shipmentDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)).ToString() == filterValue).ToList();
+                }
+
+                //sort
+                var sortorder = filterOptionsDto.sortorder;
+                var sortvalue = filterOptionsDto.sortvalue;
+
+                if (!string.IsNullOrEmpty(sortorder) && !string.IsNullOrEmpty(sortvalue))
+                {
+                    System.Reflection.PropertyInfo prop = typeof(Shipment).GetProperty(sortvalue);
+
+                    if (sortorder == "0")
+                    {
+                        shipmentDto = shipmentDto.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                    }
+                    else
+                    {
+                        shipmentDto = shipmentDto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                    }
+                }
+
+                shipmentDto = shipmentDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
+
+                return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto.ToList()), count);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        //Get Shipment Detail for list of waybills and filter it by service centre
+        public Tuple<Task<List<ShipmentDTO>>, int> GetShipmentDetailByWaybills(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds, List<string> waybills)
+        {
+            try
+            {
+                //filter by destination service center that is not cancelled
+                var shipment = _context.Shipment.AsQueryable().Where(x => x.IsCancelled == false);
+                
+                if (serviceCentreIds.Length > 0)
+                {
+                    shipment = shipment.Where(s => serviceCentreIds.Contains(s.DestinationServiceCentreId));
+                }
+
+                //filter by Local or International Shipment
+                if (filterOptionsDto.IsInternational != null)
+                {
+                    shipment = shipment.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
+                }
+
+                if (waybills.Count > 0)
+                {
+                    shipment = shipment.Where(s => waybills.Contains(s.Waybill));
+                }
+
+                var count = shipment.ToList().Count();
+
+                List<ShipmentDTO> shipmentDto = (from r in shipment
+                                                 select new ShipmentDTO()
+                                                 {
+                                                     ShipmentId = r.ShipmentId,
+                                                     Waybill = r.Waybill,
+                                                     CustomerId = r.CustomerId,
+                                                     CustomerType = r.CustomerType,
+                                                     ActualDateOfArrival = r.ActualDateOfArrival,
+                                                     DateCreated = r.DateCreated,
+                                                     DateModified = r.DateModified,
+                                                     DeliveryOptionId = r.DeliveryOptionId,
+                                                     DeliveryOption = new DeliveryOptionDTO
+                                                     {
+                                                         Code = r.DeliveryOption.Code,
+                                                         Description = r.DeliveryOption.Description
+                                                     },
+                                                     DeliveryTime = r.DeliveryTime,
+                                                     DepartureServiceCentreId = r.DepartureServiceCentreId,
+                                                     DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                                     {
+                                                         Code = x.Code,
+                                                         Name = x.Name
+                                                     }).FirstOrDefault(),
+                                                     DestinationServiceCentreId = r.DestinationServiceCentreId,
+                                                     DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                                     {
+                                                         Code = x.Code,
+                                                         Name = x.Name
+                                                     }).FirstOrDefault(),
+
+                                                     ExpectedDateOfArrival = r.ExpectedDateOfArrival,
+                                                     PaymentStatus = r.PaymentStatus,
+                                                     ReceiverAddress = r.ReceiverAddress,
+                                                     ReceiverCity = r.ReceiverCity,
+                                                     ReceiverCountry = r.ReceiverCountry,
+                                                     ReceiverEmail = r.ReceiverEmail,
+                                                     ReceiverName = r.ReceiverName,
+                                                     ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                                     ReceiverState = r.ReceiverState,
+                                                     SealNumber = r.SealNumber,
+                                                     UserId = r.UserId,
+                                                     Value = r.Value,
+                                                     GrandTotal = r.GrandTotal,
+                                                     AppliedDiscount = r.AppliedDiscount,
+                                                     DiscountValue = r.DiscountValue,
+                                                     ShipmentPackagePrice = r.ShipmentPackagePrice
+                                                 }).ToList();
+
+                //filter
+                var filter = filterOptionsDto.filter;
+                var filterValue = filterOptionsDto.filterValue;
+                if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
+                {
+                    shipmentDto = shipmentDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)).ToString() == filterValue).ToList();
+                }
+
+                //sort
+                var sortorder = filterOptionsDto.sortorder;
+                var sortvalue = filterOptionsDto.sortvalue;
+
+                if (!string.IsNullOrEmpty(sortorder) && !string.IsNullOrEmpty(sortvalue))
+                {
+                    System.Reflection.PropertyInfo prop = typeof(Shipment).GetProperty(sortvalue);
+
+                    if (sortorder == "0")
+                    {
+                        shipmentDto = shipmentDto.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                    }
+                    else
+                    {
+                        shipmentDto = shipmentDto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                    }
+                }
+
+                shipmentDto = shipmentDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
+
+                return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto.ToList()), count);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
         //public int GetShipmentTotal()
         //{

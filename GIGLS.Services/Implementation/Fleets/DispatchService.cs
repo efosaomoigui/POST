@@ -41,9 +41,6 @@ namespace GIGLS.Services.Implementation.Fleets
         {
             try
             {
-                //Verify that all waybills are not cancelled
-                VerifyWaybillsInManifest(dispatchDTO.ManifestNumber);
-
                 // get user login service centre
                 var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
                 var userServiceCentreId = serviceCenterIds[0];
@@ -51,6 +48,9 @@ namespace GIGLS.Services.Implementation.Fleets
                 //get the login user
                 var currentUserId = await _userService.GetCurrentUserId();
                 var currentUserDetail = await _userService.GetUserById(currentUserId);
+
+                //Verify that all waybills are not cancelled and scan all the waybills in case none was cancelled
+                await VerifyWaybillsInManifest(dispatchDTO.ManifestNumber, currentUserId, userServiceCentreId);
 
                 // create dispatch
                 var newDispatch = Mapper.Map<Dispatch>(dispatchDTO);
@@ -65,6 +65,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     var manifestEntity = _uow.Manifest.Get(manifestObj.ManifestId);
                     manifestEntity.DispatchedById = currentUserId;
                     manifestEntity.IsDispatched = true;
+                    manifestEntity.ManifestType = dispatchDTO.ManifestType;
                 }
 
                 // update system wallet, by creating a wallet transaction
@@ -109,7 +110,7 @@ namespace GIGLS.Services.Implementation.Fleets
         /// are not in the cancelled status.
         /// </summary>
         /// <param name="manifestNumber"></param>
-        private async Task VerifyWaybillsInManifest(string manifestNumber)
+        private async Task VerifyWaybillsInManifest(string manifestNumber, string currentUserId, int userServiceCentreId)
         {
             // manifest -> groupwaybill -> waybill
             //manifest
@@ -127,6 +128,43 @@ namespace GIGLS.Services.Implementation.Fleets
                 var waybills = cancelledWaybills.ToList().ToString();
                 throw new GenericException($"{waybills} : The waybill has been cancelled. " +
                     $"Please remove from the manifest and try again.");
+            }
+            else
+            {
+                //Scan all waybills attached to this manifestNumber
+                await ScanWaybillsInManifest(listOfWaybills.ToList(), currentUserId, userServiceCentreId);
+            }
+        }
+
+        /// <summary>
+        /// This method ensures that all waybills attached to this manifestNumber
+        /// are scan.
+        /// </summary>
+
+        private async Task ScanWaybillsInManifest(List<string> waybills, string currentUserId, int userServiceCentreId)
+        {
+            //Convert Enum Scan Status to 
+            string status = ShipmentScanStatus.DSC.ToString();
+            var serviceCenter = await _uow.ServiceCentre.GetAsync(userServiceCentreId);
+
+            foreach (var item in waybills)
+            {
+                //check if the waybill has not been scan for the status before
+                bool shipmentTracking = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill.Equals(item) && x.Status.Equals(status));
+
+                //scan the waybill
+                if (!shipmentTracking)
+                {
+                    var newShipmentTracking = new GIGL.GIGLS.Core.Domain.ShipmentTracking
+                    {
+                        Waybill = item,
+                        Location = serviceCenter.Name,
+                        Status = status,
+                        DateTime = DateTime.Now,
+                        UserId = currentUserId
+                    };
+                    _uow.ShipmentTracking.Add(newShipmentTracking);
+                }
             }
         }
 
@@ -158,7 +196,14 @@ namespace GIGLS.Services.Implementation.Fleets
                     throw new GenericException("Information does not Exist");
                 }
 
-                return Mapper.Map<DispatchDTO>(dispatch);
+                var dispatchDTO = Mapper.Map<DispatchDTO>(dispatch);
+
+                //get the ManifestType
+                var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(dispatch.ManifestNumber));
+                dispatchDTO.ManifestType = manifestObj.ManifestType;
+
+                return dispatchDTO;
+
             }
             catch (Exception)
             {
@@ -176,8 +221,14 @@ namespace GIGLS.Services.Implementation.Fleets
                     //throw new GenericException("Information does not Exist");
                     return null;
                 }
-                                
-                return Mapper.Map<DispatchDTO>(dispatch); 
+
+                var dispatchDTO = Mapper.Map<DispatchDTO>(dispatch);
+
+                //get the ManifestType
+                var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
+                dispatchDTO.ManifestType = manifestObj.ManifestType;
+
+                return dispatchDTO;
             }
             catch (Exception)
             {
