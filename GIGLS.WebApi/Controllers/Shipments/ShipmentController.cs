@@ -11,6 +11,10 @@ using GIGLS.WebApi.Filters;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System;
+using System.IO;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -290,7 +294,18 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
 
+                string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
+
                 var dailySales = await _service.GetDailySales(accountFilterCriteria);
+
+                //create daily files and store in a folder
+                if (!File.Exists(path))
+                {
+                    // Create a file to write to.
+                    var createText = dailySales.Invoices ;
+                    string json = JsonConvert.SerializeObject(createText);
+                    File.WriteAllText(path, json);
+                }
 
                 return new ServiceResponse<DailySalesDTO>
                 {

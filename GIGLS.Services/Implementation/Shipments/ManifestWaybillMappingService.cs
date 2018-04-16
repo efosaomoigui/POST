@@ -20,19 +20,36 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUnitOfWork _uow;
         private readonly IManifestService _manifestService;
         private readonly IUserService _userService;
+        private readonly IShipmentService _shipmentService;
 
-        public ManifestWaybillMappingService(IUnitOfWork uow, IManifestService manifestService, IUserService userService)
+        public ManifestWaybillMappingService(IUnitOfWork uow, IManifestService manifestService, IUserService userService, IShipmentService shipmentService)
         {
             _uow = uow;
             _manifestService = manifestService;
             _userService = userService;
+            _shipmentService = shipmentService;
             MapperConfig.Initialize();
         }
 
         public async Task<List<ManifestWaybillMappingDTO>> GetAllManifestWaybillMappings()
         {
-            var serviceIds = await _userService.GetPriviledgeServiceCenters();
-            return await _uow.ManifestWaybillMapping.GetManifestWaybillMappings(serviceIds);
+            //var serviceIds = await _userService.GetPriviledgeServiceCenters();
+            //return await _uow.ManifestWaybillMapping.GetManifestWaybillMappings(serviceIds);
+
+            var resultSet = new HashSet<string>();
+            var result = new List<ManifestWaybillMappingDTO>();
+
+            var serviceIds = _userService.GetPriviledgeServiceCenters().Result;
+            var manifestWaybillMapings = await _uow.ManifestWaybillMapping.GetManifestWaybillMappings(serviceIds);
+            foreach (var item in manifestWaybillMapings)
+            {
+                if (resultSet.Add(item.ManifestCode))
+                {
+                    result.Add(item);
+                }
+            }
+
+            return result.OrderByDescending(x => x.DateCreated).ToList();
         }
 
         //map waybills to Manifest
@@ -51,7 +68,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         DateTime = DateTime.Now,
                         ManifestCode = manifest,
-                        ManifestType = Core.Enums.ManifestType.Delivery
+                        ManifestType = ManifestType.Delivery
                     };
                     _uow.Manifest.Add(newManifest);
                 }
@@ -131,20 +148,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 var manifestWaybillMappingList = await _uow.ManifestWaybillMapping.FindAsync(x => x.ManifestCode == manifestDTO.ManifestCode);
 
                 var manifestWaybillNumberMappingDto = Mapper.Map<List<ManifestWaybillMappingDTO>>(manifestWaybillMappingList.ToList());
-
-                //add to list
-                List<ManifestWaybillMappingDTO> resultList = new List<ManifestWaybillMappingDTO>();
-
+                
                 foreach (var manifestwaybill in manifestWaybillNumberMappingDto)
                 {
                     manifestwaybill.ManifestDetails = manifestDTO;
-                    resultList.Add(manifestwaybill);
+
+                    //get shipment detail 
+                    manifestwaybill.Shipment = await _shipmentService.GetShipment(manifestwaybill.Waybill);
                 }
-
-                var finalResulttest = resultList;
-
+                
                 return manifestWaybillNumberMappingDto;
-                //return resultList;
             }
             catch (Exception)
             {
@@ -295,7 +308,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     result.Add(waybillCollection.Waybill);
                 }
 
-                //2. Get shipment details for the service centre that are the collection centre using the waybill and service centre
+                //2. Get shipment details for the service centre that are at the collection centre using the waybill and service centre
                 var shipmentsBySC = await _uow.Shipment.GetShipmentDetailByWaybills(filterOptionsDto, serviceCenters, result).Item1;
 
                 return shipmentsBySC;

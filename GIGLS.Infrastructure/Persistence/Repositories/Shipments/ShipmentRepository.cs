@@ -12,7 +12,6 @@ using GIGLS.Core.Enums;
 using GIGLS.CORE.Enums;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.DTO.ServiceCentres;
-using AutoMapper;
 using GIGLS.CORE.DTO.Shipments;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
@@ -58,17 +57,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  },
                                                  DeliveryTime = r.DeliveryTime,
                                                  DepartureServiceCentreId = r.DepartureServiceCentreId,
-                                                 DepartureServiceCentre = new ServiceCentreDTO
+                                                 DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
                                                  {
-                                                     Code = r.DepartureServiceCentre.Code,
-                                                     Name = r.DepartureServiceCentre.Name
-                                                 },
+                                                     Code = x.Code,
+                                                     Name = x.Name
+                                                 }).FirstOrDefault(),
                                                  DestinationServiceCentreId = r.DestinationServiceCentreId,
-                                                 DestinationServiceCentre = new ServiceCentreDTO
+                                                 DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
                                                  {
-                                                     Code = r.DestinationServiceCentre.Code,
-                                                     Name = r.DestinationServiceCentre.Name
-                                                 },
+                                                     Code = x.Code,
+                                                     Name = x.Name
+                                                 }).FirstOrDefault(),
                                                  ExpectedDateOfArrival = r.ExpectedDateOfArrival,
                                                  //GroupWaybill = r.GroupWaybill,
                                                  //IdentificationType = r.IdentificationType,
@@ -143,18 +142,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      },
                                                      DeliveryTime = r.DeliveryTime,
                                                      DepartureServiceCentreId = r.DepartureServiceCentreId,
-                                                     DepartureServiceCentre = new ServiceCentreDTO
+                                                     DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
                                                      {
-                                                         Code = r.DepartureServiceCentre.Code,
-                                                         Name = r.DepartureServiceCentre.Name
-                                                     },
+                                                         Code = x.Code,
+                                                         Name = x.Name
+                                                     }).FirstOrDefault(),
                                                      DestinationServiceCentreId = r.DestinationServiceCentreId,
                                                      DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
                                                      {
                                                          Code = x.Code,
                                                          Name = x.Name
                                                      }).FirstOrDefault(),
-
                                                      ExpectedDateOfArrival = r.ExpectedDateOfArrival,
                                                      //GroupWaybill = r.GroupWaybill,
                                                      //IdentificationType = r.IdentificationType,
@@ -256,11 +254,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      },
                                                      DeliveryTime = r.DeliveryTime,
                                                      DepartureServiceCentreId = r.DepartureServiceCentreId,
-                                                     DepartureServiceCentre = new ServiceCentreDTO
+                                                     DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
                                                      {
-                                                         Code = r.DepartureServiceCentre.Code,
-                                                         Name = r.DepartureServiceCentre.Name
-                                                     },
+                                                         Code = x.Code,
+                                                         Name = x.Name
+                                                     }).FirstOrDefault(),
                                                      DestinationServiceCentreId = r.DestinationServiceCentreId,
                                                      DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
                                                      {
@@ -333,7 +331,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 
                 if (serviceCentreIds.Length > 0)
                 {
-                    shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DestinationServiceCentreId));
+                    shipment = shipment.Where(s => serviceCentreIds.Contains(s.DestinationServiceCentreId));
                 }
 
                 //filter by Local or International Shipment
@@ -344,7 +342,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
                 if (waybills.Count > 0)
                 {
-                    shipment = _context.Shipment.Where(s => waybills.Contains(s.Waybill));
+                    shipment = shipment.Where(s => waybills.Contains(s.Waybill));
                 }
 
                 var count = shipment.ToList().Count();
@@ -367,11 +365,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      },
                                                      DeliveryTime = r.DeliveryTime,
                                                      DepartureServiceCentreId = r.DepartureServiceCentreId,
-                                                     DepartureServiceCentre = new ServiceCentreDTO
+                                                     DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
                                                      {
-                                                         Code = r.DepartureServiceCentre.Code,
-                                                         Name = r.DepartureServiceCentre.Name
-                                                     },
+                                                         Code = x.Code,
+                                                         Name = x.Name
+                                                     }).FirstOrDefault(),
                                                      DestinationServiceCentreId = r.DestinationServiceCentreId,
                                                      DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
                                                      {
