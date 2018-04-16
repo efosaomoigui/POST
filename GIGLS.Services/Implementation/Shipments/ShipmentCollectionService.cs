@@ -107,7 +107,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var shipmentCollectionDto = Mapper.Map<IEnumerable<ShipmentCollectionDTO>>(shipmentCollection);
 
-            return await Task.FromResult(shipmentCollectionDto);
+            return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateCreated));
         }
 
         public async Task RemoveShipmentCollection(string waybill)
