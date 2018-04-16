@@ -101,11 +101,28 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //filter by SC
                 var serviceCentreIds = await _userService.GetPriviledgeServiceCenters();
+
+                //1. check if waybill is a TransitWaybill
+                var transitWaybillCheck = false;
+                var transitWaybillNumber = await _uow.TransitWaybillNumber.GetAsync(s => s.WaybillNumber == waybillNumber);
+                if (transitWaybillNumber != null)
+                {
+                    transitWaybillCheck = true;
+                    if (!serviceCentreIds.Contains(transitWaybillNumber.ServiceCentreId))
+                    {
+                        throw new GenericException($"This Waybill: {waybillNumber} (Transit) is not located in this service centre");
+                    }
+                }
+
+                //2. 
                 if (serviceCentreIds.Length > 0)
                 {
                     if (!serviceCentreIds.Contains(shipmentDTO.DepartureServiceCentreId))
                     {
-                        throw new GenericException($"This Waybill: {waybillNumber} was not created in this service centre");
+                        if(transitWaybillCheck == false)
+                        {
+                            throw new GenericException($"This Waybill: {waybillNumber} was not created in this service centre");
+                        }
                     }
                 }
 
