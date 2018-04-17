@@ -49,8 +49,17 @@ namespace GIGLS.Services.Implementation.Fleets
                 var currentUserId = await _userService.GetCurrentUserId();
                 var currentUserDetail = await _userService.GetUserById(currentUserId);
 
-                //Verify that all waybills are not cancelled and scan all the waybills in case none was cancelled
-                await VerifyWaybillsInManifest(dispatchDTO.ManifestNumber, currentUserId, userServiceCentreId);
+                //check for the type of delivery manifest to know which type of process to do
+                if(dispatchDTO.ManifestType == ManifestType.Delivery)
+                {
+                    //filter all the ways in the delivery manifest for scanning processing
+                    await FilterWaybillsInDeliveryManifest(dispatchDTO.ManifestNumber, currentUserId, userServiceCentreId);
+                }
+                else
+                {
+                    //Verify that all waybills are not cancelled and scan all the waybills in case none was cancelled
+                    await VerifyWaybillsInGroupWaybillInManifest(dispatchDTO.ManifestNumber, currentUserId, userServiceCentreId);
+                }
 
                 // create dispatch
                 var newDispatch = Mapper.Map<Dispatch>(dispatchDTO);
@@ -67,19 +76,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     manifestEntity.IsDispatched = true;
                     manifestEntity.ManifestType = dispatchDTO.ManifestType;
                 }
-
-                // update system wallet, by creating a wallet transaction
-                //var systemWallet = await _walletService.GetSystemWallet();
-                //var walletTransaction = new WalletTransactionDTO
-                //{
-                //    Amount = dispatch.Amount,
-                //    WalletId = systemWallet.WalletId,
-                //    CreditDebitType = Core.Enums.CreditDebitType.Credit,
-                //    Description = "Debit from Dispatch"
-                //};
-                //await _walletService.UpdateWallet(systemWallet.WalletId, walletTransaction);
-
-                
+                                
                 //update General Ledger
                 var generalLedger = new GeneralLedger()
                 {
@@ -106,11 +103,31 @@ namespace GIGLS.Services.Implementation.Fleets
         }
 
         /// <summary>
-        /// This method ensures that all waybills attached to this manifestNumber
+        /// This method ensures that all waybills attached to the manifestNumber 
+        /// are filter for scanning processing.
+        /// </summary>
+        /// <param name="manifestNumber"></param>
+        private async Task FilterWaybillsInDeliveryManifest(string manifestNumber, string currentUserId, int userServiceCentreId)
+        {
+            // manifest ->  waybill
+            var manifestWaybillMappings = await _uow.ManifestWaybillMapping.FindAsync(s => s.ManifestCode == manifestNumber);
+            var listOfWaybills = manifestWaybillMappings.Select(s => s.Waybill).ToList();
+
+            if(listOfWaybills.Count > 0)
+            {
+                //Scan all waybills attached to this manifestNumber
+                string status = ShipmentScanStatus.WC.ToString();
+                await ScanWaybillsInManifest(listOfWaybills, currentUserId, userServiceCentreId, status);
+            }            
+        }
+
+
+        /// <summary>
+        /// This method ensures that all waybills attached to groupwaybill in the manifestNumber 
         /// are not in the cancelled status.
         /// </summary>
         /// <param name="manifestNumber"></param>
-        private async Task VerifyWaybillsInManifest(string manifestNumber, string currentUserId, int userServiceCentreId)
+        private async Task VerifyWaybillsInGroupWaybillInManifest(string manifestNumber, string currentUserId, int userServiceCentreId)
         {
             // manifest -> groupwaybill -> waybill
             //manifest
@@ -132,7 +149,8 @@ namespace GIGLS.Services.Implementation.Fleets
             else
             {
                 //Scan all waybills attached to this manifestNumber
-                await ScanWaybillsInManifest(listOfWaybills.ToList(), currentUserId, userServiceCentreId);
+                string status = ShipmentScanStatus.DSC.ToString();
+                await ScanWaybillsInManifest(listOfWaybills.ToList(), currentUserId, userServiceCentreId, status);
             }
         }
 
@@ -141,16 +159,14 @@ namespace GIGLS.Services.Implementation.Fleets
         /// are scan.
         /// </summary>
 
-        private async Task ScanWaybillsInManifest(List<string> waybills, string currentUserId, int userServiceCentreId)
+        private async Task ScanWaybillsInManifest(List<string> waybills, string currentUserId, int userServiceCentreId, string scanStatus)
         {
-            //Convert Enum Scan Status to 
-            string status = ShipmentScanStatus.DSC.ToString();
             var serviceCenter = await _uow.ServiceCentre.GetAsync(userServiceCentreId);
 
             foreach (var item in waybills)
             {
                 //check if the waybill has not been scan for the status before
-                bool shipmentTracking = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill.Equals(item) && x.Status.Equals(status));
+                bool shipmentTracking = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill.Equals(item) && x.Status.Equals(scanStatus));
 
                 //scan the waybill
                 if (!shipmentTracking)
@@ -159,7 +175,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     {
                         Waybill = item,
                         Location = serviceCenter.Name,
-                        Status = status,
+                        Status = scanStatus,
                         DateTime = DateTime.Now,
                         UserId = currentUserId
                     };
