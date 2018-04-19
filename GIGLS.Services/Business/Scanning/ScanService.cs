@@ -125,7 +125,6 @@ namespace GIGLS.Services.Business.Scanning
                 }
             }
             
-
             /////////////////////////2. GroupShipment
             // check if the group waybill number exists in the system
             var groupWaybill = await _groupWaybill.GetGroupWayBillNumberForScan(scan.WaybillNumber);
@@ -164,7 +163,6 @@ namespace GIGLS.Services.Business.Scanning
                     throw new GenericException($"No Shipment for Group waybill: {scan.WaybillNumber} ");
                 }
             }
-
 
             /////////////////////////3. Manifest
             // check if the manifest number exists in the system
@@ -238,6 +236,41 @@ namespace GIGLS.Services.Business.Scanning
                                 waybillsInManifest.Add(waybill);
                             }
                         }
+                    }
+                }
+
+                //Delivery Manifest
+                var waybillInManifestList = await _manifestWaybillService.GetWaybillsInManifest(manifest.ManifestCode);
+
+                if(waybillInManifestList.Count > 0)
+                {
+                    //update dispatch to scan for Shipment recieved by Courier for delivery manifest
+                    if (scan.ShipmentScanStatus == ShipmentScanStatus.WC)
+                    {
+                        var dispatch = await _dispatchService.GetDispatchManifestCode(manifest.ManifestCode);
+                        if (dispatch != null && dispatch.ReceivedBy == null)
+                        {
+                            //get the user that login
+                            var userId = await _userService.GetCurrentUserId();
+                            var user = await _userService.GetUserById(userId);
+
+                            string reciever = user.FirstName + " " + user.LastName;
+                            dispatch.ReceivedBy = reciever;
+
+                            //update manifest also
+                            var manifestObj = await _manifestService.GetManifestByCode(manifest.ManifestCode);
+                            if (manifestObj != null && manifestObj.ReceiverBy == null)
+                            {
+                                manifestObj.IsReceived = true;
+                                manifestObj.ReceiverBy = userId;
+                                await _manifestService.UpdateManifest(manifestObj.ManifestId, manifestObj);
+                            }
+                            await _dispatchService.UpdateDispatch(dispatch.DispatchId, dispatch);
+                        }
+                    }
+                    else
+                    {
+                        throw new GenericException($"Scan status is not allow for this Delivery Manifest: {scan.WaybillNumber} ");
                     }
                 }
                 else
