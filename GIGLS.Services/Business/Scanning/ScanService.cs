@@ -268,6 +268,10 @@ namespace GIGLS.Services.Business.Scanning
                             await _dispatchService.UpdateDispatch(dispatch.DispatchId, dispatch);
                         }
                     }
+                    else
+                    {
+                        throw new GenericException($"Scan status is not allow for this Delivery Manifest: {scan.WaybillNumber} ");
+                    }
                 }
                 else
                 {
