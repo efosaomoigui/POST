@@ -33,6 +33,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<DomesticRouteZoneMapDTO> GetZone(int destinationServiceCentre);
         Task<CountryRouteZoneMapDTO> GetCountryZone(int destinationCountry);
         Task<DailySalesDTO> GetDailySales(AccountFilterCriteria accountFilterCriteria);
+        Task<DailySalesDTO> GetDailySalesByServiceCentre(AccountFilterCriteria accountFilterCriteria);
 
         Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType);
         Task<bool> CancelShipment(string waybill);

@@ -813,6 +813,45 @@ namespace GIGLS.Services.Implementation.Shipments
             return dailySalesDTO;
         }
 
+        public async Task<DailySalesDTO> GetDailySalesByServiceCentre(AccountFilterCriteria accountFilterCriteria)
+        {
+            var dailySales = await GetDailySales(accountFilterCriteria);
+
+            var result = new List<DailySalesByServiceCentreDTO>();
+
+            //1. sort by service centre
+            var serviceCentreList = new HashSet<string>();
+            foreach(var item in dailySales.Invoices)
+            {
+                serviceCentreList.Add(item.DepartureServiceCentreName);
+            }
+
+            //2. group by service centre
+            foreach(var serviceCentreName in serviceCentreList)
+            {
+                var invoicesByServiceCentre = dailySales.Invoices.Where(s => s.DepartureServiceCentreName == serviceCentreName).ToList();
+
+                var dailySalesByServiceCentreDTO = new DailySalesByServiceCentreDTO()
+                {
+                    StartDate = (DateTime)accountFilterCriteria.StartDate,
+                    EndDate = (DateTime)accountFilterCriteria.EndDate,
+                    Invoices = invoicesByServiceCentre,
+                    SalesCount = invoicesByServiceCentre.Count,
+                    TotalSales = invoicesByServiceCentre.Sum(s => s.Amount),
+                    DepartureServiceCentreId = invoicesByServiceCentre[0].DepartureServiceCentreId,
+                    DepartureServiceCentreName = serviceCentreName
+                };
+
+                result.Add(dailySalesByServiceCentreDTO);
+            }
+
+            //3. add to parent object
+            dailySales.DailySalesByServiceCentres = result;
+
+            return dailySales;
+        }
+
+
         ///////////
         public async Task<bool> ScanShipment(ScanDTO scan)
         {

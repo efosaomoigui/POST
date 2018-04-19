@@ -299,17 +299,45 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var dailySales = await _service.GetDailySales(accountFilterCriteria);
 
                 //create daily files and store in a folder
-                if (!File.Exists(path))
-                {
-                    // Create a file to write to.
-                    var createText = dailySales.Invoices ;
-                    string json = JsonConvert.SerializeObject(createText);
-                    File.WriteAllText(path, json);
-                }
+                //if (!File.Exists(path))
+                //{
+                //    // Create a file to write to.
+                //    var createText = dailySales.Invoices ;
+                //    string json = JsonConvert.SerializeObject(createText);
+                //    File.WriteAllText(path, json);
+                //}
 
                 return new ServiceResponse<DailySalesDTO>
                 {
                     Object = dailySales
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("dailysalesbyservicecentre")]
+        public async Task<IServiceResponse<DailySalesDTO>> GetDailySalesByServiceCentre(AccountFilterCriteria accountFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                //string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
+
+                var dailySalesByServiceCentre = await _service.GetDailySalesByServiceCentre(accountFilterCriteria);
+
+                //create daily files and store in a folder
+                //if (!File.Exists(path))
+                //{
+                //    // Create a file to write to.
+                //    var createText = dailySales.Invoices;
+                //    string json = JsonConvert.SerializeObject(createText);
+                //    File.WriteAllText(path, json);
+                //}
+
+                return new ServiceResponse<DailySalesDTO>
+                {
+                    Object = dailySalesByServiceCentre
                 };
             });
         }
