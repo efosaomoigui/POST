@@ -12,6 +12,7 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.DTO.ServiceCentres;
 using System.Linq;
+using GIGL.GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Fleets
 {
@@ -165,25 +166,18 @@ namespace GIGLS.Services.Implementation.Fleets
 
             foreach (var item in waybills)
             {
-                //check if the waybill has not been scan for the status before
-                bool shipmentTracking = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill.Equals(item) && x.Status.Equals(scanStatus));
-
-                //scan the waybill
-                if (!shipmentTracking)
+                var newShipmentTracking = new ShipmentTracking
                 {
-                    var newShipmentTracking = new GIGL.GIGLS.Core.Domain.ShipmentTracking
-                    {
-                        Waybill = item,
-                        Location = serviceCenter.Name,
-                        Status = scanStatus,
-                        DateTime = DateTime.Now,
-                        UserId = currentUserId
-                    };
-                    _uow.ShipmentTracking.Add(newShipmentTracking);
-                }
+                    Waybill = item,
+                    Location = serviceCenter.Name,
+                    Status = scanStatus,
+                    DateTime = DateTime.Now,
+                    UserId = currentUserId
+                };
+                _uow.ShipmentTracking.Add(newShipmentTracking);
             }
         }
-
+        
         public async Task DeleteDispatch(int dispatchId)
         {
             try

@@ -165,7 +165,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
         
-        //Get Manifest that a Waybill is mapped to
+        //Get All Manifests that a Waybill has been mapped to
         public async Task<List<ManifestWaybillMappingDTO>> GetManifestForWaybill(string waybill)
         {
             try
@@ -191,6 +191,32 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 
                 return resultList;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //Get active Manifest that a Waybill is mapped to
+        public async Task<ManifestWaybillMappingDTO> GetActiveManifestForWaybill(string waybill)
+        {
+            try
+            {
+                var activeManifest = await _uow.ManifestWaybillMapping.GetAsync(x => x.Waybill == waybill && x.IsActive == true);
+
+                if (activeManifest == null)
+                {
+                    throw new GenericException($"There is no active Manifest for this Waybill {waybill}");
+                }
+                
+                //get the manifest detail for the waybill
+                var manifestDTO = await _manifestService.GetManifestByCode(activeManifest.ManifestCode);
+                
+                var activeManifestDto = Mapper.Map<ManifestWaybillMappingDTO>(activeManifest);
+                activeManifestDto.ManifestDetails = manifestDTO;
+
+                return activeManifestDto;
             }
             catch (Exception)
             {
@@ -235,6 +261,9 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var serviceIds = await _userService.GetPriviledgeServiceCenters();
+                var serviceCenter = await _uow.ServiceCentre.GetAsync(serviceIds[0]);
+                string user = await _userService.GetCurrentUserId();
+                
                 var manifestDTO = await _manifestService.GetManifestByCode(manifest);
 
                 foreach (var waybill in waybills)
@@ -263,16 +292,25 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             //Update shipment collection to make it available at collection centre
                             shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.ARF;
-                        }
+                            
+                            //Add scan status to  the tracking page
+                            var newShipmentTracking = new ShipmentTracking
+                            {
+                                Waybill = waybill,
+                                Location = serviceCenter.Name,
+                                Status = ShipmentScanStatus.SRC.ToString(),
+                                DateTime = DateTime.Now,
+                                UserId = user
+                            };
+                            _uow.ShipmentTracking.Add(newShipmentTracking);
+                        }                        
                     }
                     else
                     {
                         throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
-                    }                   
-                    
-                    //automatic scan all the way also
+                    }                  
                 }
-
+                
                 await _uow.CompleteAsync();
             }
             catch (Exception)
@@ -319,5 +357,6 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
                 
+
     }
 }

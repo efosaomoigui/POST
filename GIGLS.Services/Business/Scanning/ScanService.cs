@@ -26,6 +26,7 @@ namespace GIGLS.Services.Business.Scanning
         private readonly IScanStatusService _scanService;
         private readonly IDispatchService _dispatchService;
         private readonly ITransitWaybillNumberService _transitWaybillNumberService;
+        private readonly IManifestWaybillMappingService _manifestWaybillService;
         private readonly IUnitOfWork _uow;
 
 
@@ -33,7 +34,7 @@ namespace GIGLS.Services.Business.Scanning
             IGroupWaybillNumberMappingService groupService, IGroupWaybillNumberService groupWaybill,
             IManifestService manifestService, IManifestGroupWaybillNumberMappingService groupManifest,
             IUserService userService, IScanStatusService scanService, IDispatchService dispatchService,
-            ITransitWaybillNumberService transitWaybillNumberService, IUnitOfWork uow)
+            ITransitWaybillNumberService transitWaybillNumberService, IManifestWaybillMappingService manifestWaybillService, IUnitOfWork uow)
         {
             _shipmentService = shipmentService;
             _shipmentTrackingService = shipmentTrackingService;
@@ -45,6 +46,7 @@ namespace GIGLS.Services.Business.Scanning
             _scanService = scanService;
             _dispatchService = dispatchService;
             _transitWaybillNumberService = transitWaybillNumberService;
+            _manifestWaybillService = manifestWaybillService;
             _uow = uow;
         }
 
@@ -93,26 +95,36 @@ namespace GIGLS.Services.Business.Scanning
                 ////// ShipmentCheck  - CheckIfUserIsAtShipmentFinalDestination
                 await CheckIfUserIsAtShipmentFinalDestination(scan, shipment.DestinationServiceCentreId);
 
-                //check if the waybill has not been scan for the same status before
-                var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);
-
-                if (!checkTrack)
+                //If the scan status is SRD - Shipment received from Dispatch
+                if (scan.ShipmentScanStatus == ShipmentScanStatus.SRC)
                 {
-                    var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
-                    {
-                        DateTime = DateTime.Now,
-                        Status = scanStatus,
-                        Waybill = scan.WaybillNumber,
-                    }, scan.ShipmentScanStatus);
+                    //Process Shipment Return to Service centre for repackaging
+                    await ProcessReturnWaybillFromDispatch(shipment.Waybill);
                     return true;
                 }
                 else
                 {
-                    var scanResult = await _scanService.GetScanStatusByCode(scanStatus);
-                    throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already scan for { scanResult.Incident }");
+                    //check if the waybill has not been scan for the same status before
+                    var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);
+
+                    if (!checkTrack)
+                    {
+                        var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
+                        {
+                            DateTime = DateTime.Now,
+                            Status = scanStatus,
+                            Waybill = scan.WaybillNumber,
+                        }, scan.ShipmentScanStatus);
+                        return true;
+                    }
+                    else
+                    {
+                        var scanResult = await _scanService.GetScanStatusByCode(scanStatus);
+                        throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already scan for { scanResult.Incident }");
+                    }
                 }
             }
-
+            
 
             /////////////////////////2. GroupShipment
             // check if the group waybill number exists in the system
@@ -238,19 +250,29 @@ namespace GIGLS.Services.Business.Scanning
             {
                 throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} does not exist");
             }
-
-
+            
             //////////////////////4. Check and Create Entries for Transit Manifest
             await CheckAndCreateEntriesForTransitManifest(scan, manifest, waybillsInManifest);
 
             return true;
         }
 
+        private async Task ProcessReturnWaybillFromDispatch(string waybill)
+        {
+            var getManifest = await _manifestWaybillService.GetActiveManifestForWaybill(waybill);
+
+            List<string> waybills = new List<string>();
+            waybills.Add(waybill);
+
+            //call ReturnWaybillsInManifest in ManifestWaybillMappingService
+            await _manifestWaybillService.ReturnWaybillsInManifest(getManifest.ManifestCode, waybills);
+        }
+
         private async Task<bool> CheckIfUserIsAtShipmentFinalDestination(ScanDTO scan, int destinationServiceCentreId)
         {
             //1. For Shipment Check if user has rights to this action
             {
-                if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
+                if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF  || scan.ShipmentScanStatus == ShipmentScanStatus.SRC)
                 {
                     //Check if the user is a staff at final destination
                     var serviceCenters = await _userService.GetPriviledgeServiceCenters();
