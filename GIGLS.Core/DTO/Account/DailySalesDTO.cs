@@ -11,5 +11,6 @@ namespace GIGLS.Core.DTO.Account
         public List<DailySalesByServiceCentreDTO> DailySalesByServiceCentres { get; set; }
         public decimal TotalSales { get; set; }
         public int SalesCount { get; set; }
+        public string Filename { get; set; }
     }
 }

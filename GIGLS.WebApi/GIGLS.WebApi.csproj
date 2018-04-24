@@ -386,6 +386,7 @@
     <Folder Include="Controllers\Stores\" />
     <Folder Include="Controllers\Vendors\" />
     <Folder Include="Controllers\Workshops\" />
+    <Folder Include="ReportTemplate\download\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GIGLS.Core\GIGLS.Core.csproj">

@@ -15,6 +15,7 @@ using System;
 using System.IO;
 using Newtonsoft.Json;
 using System.Text;
+using GIGLS.CORE.IServices.Report;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -23,10 +24,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
     public class ShipmentController : BaseWebApiController
     {
         private readonly IShipmentService _service;
+        private readonly IShipmentReportService _reportService;
 
-        public ShipmentController(IShipmentService service) : base(nameof(ShipmentController))
+        public ShipmentController(IShipmentService service, IShipmentReportService reportService) : base(nameof(ShipmentController))
         {
             _service = service;
+            _reportService = reportService;
         }
 
 
@@ -55,15 +58,15 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
-        public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> GetShipments([FromUri]FilterOptionsDto filterOptionsDto) 
+        public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> GetShipments([FromUri]FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipments =  _service.GetShipments(filterOptionsDto);
+                var shipments = _service.GetShipments(filterOptionsDto);
                 return new ServiceResponse<IEnumerable<ShipmentDTO>>
                 {
                     Object = await shipments.Item1,
-                    Total =  shipments.Item2
+                    Total = shipments.Item2
                 };
             });
         }
@@ -326,6 +329,8 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
                 var dailySalesByServiceCentre = await _service.GetDailySalesByServiceCentre(accountFilterCriteria);
 
+                var reportObject = await _reportService.GetDailySalesByServiceCentreReport(dailySalesByServiceCentre);
+
                 //create daily files and store in a folder
                 //if (!File.Exists(path))
                 //{
@@ -334,6 +339,8 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 //    string json = JsonConvert.SerializeObject(createText);
                 //    File.WriteAllText(path, json);
                 //}
+
+                dailySalesByServiceCentre.Filename = (string)reportObject;
 
                 return new ServiceResponse<DailySalesDTO>
                 {
