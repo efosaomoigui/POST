@@ -23,6 +23,7 @@ namespace GIGLS.Core.DTO.Shipments
         public PaymentStatus PaymentStatus { get; set; }
         public string CustomerType { get; set; }
         public int CustomerId { get; set; }
+        public string CompanyType { get; set; }
 
         //Receivers Information
         public int DepartureServiceCentreId { get; set; }

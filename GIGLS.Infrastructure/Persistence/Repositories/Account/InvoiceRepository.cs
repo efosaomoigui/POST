@@ -142,6 +142,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                 invoices = invoices.Where(x => x.PaymentStatus.Equals(accountFilterCriteria.PaymentStatus));
             }
 
+            //Company Type
+            if (!string.IsNullOrEmpty(accountFilterCriteria.CompanyType))
+            {
+                invoices = invoices.Where(x => x.CustomerType.Equals(accountFilterCriteria.CompanyType));
+            }
+
+
             //service center
             if (accountFilterCriteria.ServiceCentreId > 0)
             {

@@ -10,5 +10,6 @@ namespace GIGLS.CORE.DTO.Report
         public PaymentType? PaymentType { get; set; }
         public DateTime? PaymentDate { get; set; }
         public bool? IsDeferred { get; set; }
+        public string CompanyType { get; set; }
     }
 }

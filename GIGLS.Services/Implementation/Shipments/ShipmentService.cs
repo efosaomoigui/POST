@@ -450,6 +450,24 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDTO.CustomerId = createdObject.IndividualCustomerId;
             }
 
+            //set the actual company type - Corporate, Ecommerce, Individual
+            if (CustomerType.Company.ToString() == customerType)
+            {
+                var company = await _uow.Company.GetAsync(s => s.CompanyId == shipmentDTO.CustomerId);
+                if(company.CompanyType == CompanyType.Corporate)
+                {
+                    shipmentDTO.CompanyType = CompanyType.Corporate.ToString();
+                }
+                else
+                {
+                    shipmentDTO.CompanyType = CompanyType.Ecommerce.ToString();
+                }
+            }
+            else
+            {
+                shipmentDTO.CompanyType = CustomerType.IndividualCustomer.ToString();
+            }
+
             return createdObject;
         }
 
