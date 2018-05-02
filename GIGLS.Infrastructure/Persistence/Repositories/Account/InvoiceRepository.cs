@@ -145,7 +145,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             //Company Type
             if (!string.IsNullOrEmpty(accountFilterCriteria.CompanyType))
             {
-                invoices = invoices.Where(x => x.CustomerType.Equals(accountFilterCriteria.CompanyType));
+                invoices = invoices.Where(x => x.CompanyType.Equals(accountFilterCriteria.CompanyType));
             }
 
 
