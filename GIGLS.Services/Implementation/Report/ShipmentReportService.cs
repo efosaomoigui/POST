@@ -61,7 +61,7 @@ namespace GIGLS.Services.Implementation.Report
 
             //heading
             var heading = $"AGILITY SALES REPORT BETWEEN {dailySalesDTO.StartDate.ToShortDateString()} AND {dailySalesDTO.EndDate.ToShortDateString()}";
-            sl.SetCellValue("E7", heading);
+            sl.SetCellValue("D7", heading);
 
             var serviceCentreRow = 10;
             foreach (var serviceCentre in dailySalesDTO.DailySalesByServiceCentres)
