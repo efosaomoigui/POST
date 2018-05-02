@@ -29,7 +29,7 @@ namespace GIGLS.Services.Implementation.Report
         public async Task<List<GeneralLedgerDTO>> GetExpenditureReports(AccountFilterCriteria accountFilterCriteria)
         {
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            accountFilterCriteria.creditDebitType = Core.Enums.CreditDebitType.Debit;
+            accountFilterCriteria.creditDebitType = CreditDebitType.Debit;
             var generalLedgerDTO = await _uow.GeneralLedger.GetGeneralLedgersAsync(accountFilterCriteria, serviceCenterIds);
 
             foreach (var item in generalLedgerDTO)
@@ -43,7 +43,7 @@ namespace GIGLS.Services.Implementation.Report
         public async Task<List<GeneralLedgerDTO>> GetIncomeReports(AccountFilterCriteria accountFilterCriteria)
         {
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            accountFilterCriteria.creditDebitType = Core.Enums.CreditDebitType.Credit;
+            accountFilterCriteria.creditDebitType = CreditDebitType.Credit;
             var generalLedgerDTO = await _uow.GeneralLedger.GetGeneralLedgersAsync(accountFilterCriteria, serviceCenterIds);
              
             foreach (var item in generalLedgerDTO)

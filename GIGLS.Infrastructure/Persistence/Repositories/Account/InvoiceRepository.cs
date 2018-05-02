@@ -9,8 +9,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using GIGLS.CORE.DTO.Report;
 using System;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.View;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 {
