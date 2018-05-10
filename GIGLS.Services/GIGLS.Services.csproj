@@ -146,6 +146,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Business\CustomerPortal\CustomerPortalService.cs" />
     <Compile Include="Business\PackagingAndShipment\ShipmentPackaging.cs" />
     <Compile Include="Business\Payment\PaymentService.cs" />
     <Compile Include="Business\Pricing\PricingService.cs" />

@@ -14,7 +14,7 @@ namespace GIGLS.WebApi.Controllers
     public class IndividualCustomerController : BaseWebApiController
     {
         private readonly IIndividualCustomerService _service;
-        public IndividualCustomerController(IIndividualCustomerService service):base(nameof(IndividualCustomerController))
+        public IndividualCustomerController(IIndividualCustomerService service) : base(nameof(IndividualCustomerController))
         {
             _service = service;
         }
