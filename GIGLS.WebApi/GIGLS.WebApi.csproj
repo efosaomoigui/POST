@@ -280,6 +280,7 @@
     <Compile Include="Controllers\Business\ShipmentTrackController.cs" />
     <Compile Include="Controllers\Client\ClientNodeController.cs" />
     <Compile Include="Controllers\CountryController.cs" />
+    <Compile Include="Controllers\CustomerPortal\CustomerPortalController.cs" />
     <Compile Include="Controllers\Customers\CompanyContactPersonController.cs" />
     <Compile Include="Controllers\Customers\CompanyController.cs" />
     <Compile Include="Controllers\Customers\CustomerController.cs" />
