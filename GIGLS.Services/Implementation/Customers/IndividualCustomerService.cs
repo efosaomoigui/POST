@@ -12,6 +12,7 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -19,14 +20,17 @@ namespace GIGLS.Services.Implementation.Customers
     {
         private readonly IWalletService _walletService;
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
-
         private readonly IUnitOfWork _uow;
+        private readonly IPasswordGenerator _passwordGenerator;
+        private readonly IUserService _userService;
 
         public IndividualCustomerService(INumberGeneratorMonitorService numberGeneratorMonitorService,
-            IWalletService walletService, IUnitOfWork uow)
+            IWalletService walletService, IPasswordGenerator passwordGenerator, IUserService userService, IUnitOfWork uow)
         {
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
+            _passwordGenerator = passwordGenerator;
+            _userService = userService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -62,6 +66,34 @@ namespace GIGLS.Services.Implementation.Customers
                     CustomerId = newCustomer.IndividualCustomerId,
                     CustomerType = CustomerType.IndividualCustomer
                 });
+
+                // add to user table for login
+                try
+                {
+                    var password = await _passwordGenerator.Generate();
+                    var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
+                    {
+                        ConfirmPassword = password,
+                        Department = CustomerType.IndividualCustomer.ToString(),
+                        DateCreated = DateTime.Now,
+                        Designation = CustomerType.IndividualCustomer.ToString(),
+                        Email = newCustomer.Email,
+                        FirstName = newCustomer.FirstName,
+                        LastName = newCustomer.LastName,
+                        Organisation = CustomerType.IndividualCustomer.ToString(),
+                        Password = password,
+                        PhoneNumber = newCustomer.PhoneNumber,
+                        UserType = UserType.Regular,
+                        Username = newCustomer.CustomerCode,
+                        UserChannelCode = newCustomer.CustomerCode,
+                        UserChannelPassword = password,
+                        UserChannelType = UserChannelType.Customer
+                    });
+                }
+                catch (Exception ex)
+                {
+                    // do nothing
+                }
 
                 return Mapper.Map<IndividualCustomerDTO>(newCustomer);
             }

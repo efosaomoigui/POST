@@ -12,6 +12,7 @@ using AutoMapper;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -19,14 +20,18 @@ namespace GIGLS.Services.Implementation.Customers
     {
         private readonly IWalletService _walletService;
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
+        private readonly IPasswordGenerator _passwordGenerator;
+        private readonly IUserService _userService;
 
         private readonly IUnitOfWork _uow;
 
-        public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService, 
-            IWalletService walletService, IUnitOfWork uow)
+        public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService,
+            IWalletService walletService, IPasswordGenerator passwordGenerator, IUserService userService, IUnitOfWork uow)
         {
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
+            _passwordGenerator = passwordGenerator;
+            _userService = userService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -43,7 +48,7 @@ namespace GIGLS.Services.Implementation.Customers
                 var newCompany = Mapper.Map<Company>(company);
 
                 //generate customer code
-                if(newCompany.CompanyType == CompanyType.Corporate)
+                if (newCompany.CompanyType == CompanyType.Corporate)
                 {
                     var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
                         NumberGeneratorType.CustomerCodeCorporate);
@@ -76,6 +81,35 @@ namespace GIGLS.Services.Implementation.Customers
                     CustomerId = newCompany.CompanyId,
                     CustomerType = CustomerType.Company
                 });
+
+
+                // add to user table for login
+                try
+                {
+                    var password = await _passwordGenerator.Generate();
+                    var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
+                    {
+                        ConfirmPassword = password,
+                        Department = newCompany.CompanyType.ToString(),
+                        DateCreated = DateTime.Now,
+                        Designation = newCompany.CompanyType.ToString(),
+                        Email = newCompany.Email,
+                        FirstName = newCompany.Name,
+                        LastName = newCompany.Name,
+                        Organisation = newCompany.CompanyType.ToString(),
+                        Password = password,
+                        PhoneNumber = newCompany.PhoneNumber,
+                        UserType = UserType.Regular,
+                        Username = newCompany.CustomerCode,
+                        UserChannelCode = newCompany.CustomerCode,
+                        UserChannelPassword = password,
+                        UserChannelType = UserChannelType.Customer
+                    });
+                }
+                catch (Exception ex)
+                {
+                    // do nothing
+                }
 
                 return Mapper.Map<CompanyDTO>(newCompany);
             }
