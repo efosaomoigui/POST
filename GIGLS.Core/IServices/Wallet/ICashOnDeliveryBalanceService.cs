@@ -16,6 +16,7 @@ namespace GIGLS.Core.IServices.CashOnDeliveryBalance
         Task<IEnumerable<CashOnDeliveryBalanceDTO>> GetCashOnDeliveryPaymentSheet();
         Task<IEnumerable<CashOnDeliveryBalanceDTO>> GetPendingCashOnDeliveryPaymentSheet();
         Task<IEnumerable<CashOnDeliveryBalanceDTO>> GetProcessedCashOnDeliveryPaymentSheet();
+        Task<IEnumerable<CashOnDeliveryBalanceDTO>> GetUnprocessedCashOnDeliveryPaymentSheet();
     }
 
 }

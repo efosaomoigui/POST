@@ -71,7 +71,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //calculate balance for code (Unprocessed amounts)
             var CODTransactions =
-                await _uow.CashOnDeliveryAccount.FindAsync(s => s.WalletId == wallet.WalletId && s.CODStatus == CODStatus.Unprocessed);
+                await _uow.CashOnDeliveryAccount.FindAsync(s => s.WalletId == wallet.WalletId && s.CODStatus == CODStatus.Pending);
             decimal balance = 0;
             foreach (var item in CODTransactions)
             {
@@ -79,10 +79,9 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     balance += item.Amount;
                 }
-                //else
-                //{
-                //    balance -= item.Amount;
-                //}
+
+                //update status to processed
+                item.CODStatus = CODStatus.Processed;
             }
 
             accountBalance.Balance = balance;
@@ -101,6 +100,13 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //create entry in WalletTransaction table
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            if (serviceCenterIds.Length <= 0)
+            {
+                serviceCenterIds = new int[] { 0 };
+                var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
+                serviceCenterIds[0] = defaultServiceCenter.ServiceCentreId;
+            }
+
 
             CreditDebitType creditType;
             var description = "";

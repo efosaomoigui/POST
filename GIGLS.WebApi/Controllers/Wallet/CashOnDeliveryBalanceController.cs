@@ -27,7 +27,8 @@ namespace GIGLS.WebApi.Controllers.CashOnDeliveryBalance
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var cashOnDeliveryBalances = await _cashOnDeliveryBalanceService.GetCashOnDeliveryBalances();
+                //var cashOnDeliveryBalances = await _cashOnDeliveryBalanceService.GetCashOnDeliveryBalances();
+                var cashOnDeliveryBalances = await _cashOnDeliveryBalanceService.GetUnprocessedCashOnDeliveryPaymentSheet();
                 return new ServiceResponse<IEnumerable<CashOnDeliveryBalanceDTO>>
                 {
                     Object = cashOnDeliveryBalances
@@ -75,7 +76,7 @@ namespace GIGLS.WebApi.Controllers.CashOnDeliveryBalance
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var cashOnDeliveryBalances = await _cashOnDeliveryBalanceService.GetCashOnDeliveryPaymentSheet();
+                var cashOnDeliveryBalances = await _cashOnDeliveryBalanceService.GetUnprocessedCashOnDeliveryPaymentSheet();
                 return new ServiceResponse<IEnumerable<CashOnDeliveryBalanceDTO>>
                 {
                     Object = cashOnDeliveryBalances

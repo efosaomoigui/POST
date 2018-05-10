@@ -226,7 +226,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //check if the shipment has not been Rerouted
             var shipmentReroute = await _uow.ShipmentReroute.GetAsync(x => x.WaybillOld.Equals(shipmentCollection.Waybill));
-            if (shipmentReroute == null)
+            if (shipmentReroute != null)
             {
                 throw new GenericException($"Shipment with waybill: {shipmentCollection.Waybill} has been processed for Reroute");
             }
