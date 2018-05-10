@@ -11,6 +11,7 @@ using System;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -19,12 +20,15 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
         private readonly IWalletService _walletService;
+        private readonly IGlobalPropertyService _globalPropertyService;
 
-        public PaymentTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService)
+        public PaymentTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService,
+            IGlobalPropertyService globalPropertyService)
         {
             _uow = uow;
             _userService = userService;
             _walletService = walletService;
+            _globalPropertyService = globalPropertyService;
             MapperConfig.Initialize();
         }
 
@@ -38,7 +42,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             if (transactionExist == true)
                 throw new GenericException($"Payment Transaction for {paymentTransaction.Waybill} already exist");
-            
+
             var payment = Mapper.Map<PaymentTransaction>(paymentTransaction);
             _uow.PaymentTransaction.Add(payment);
             //await _uow.CompleteAsync();
@@ -89,7 +93,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             if (paymentTransaction == null)
                 throw new GenericException("Null Input");
-               
+
             // get the current user info
             var currentUserId = await _userService.GetCurrentUserId();
 
@@ -100,13 +104,33 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //settlement by wallet
             if (paymentTransaction.PaymentType == PaymentType.Wallet)
             {
-                //I used transaction code to represent wallet number when process for wallet
+                //I used transaction code to represent wallet number when processing for wallet
                 var wallet = await _walletService.GetWalletById(paymentTransaction.TransactionCode);
 
-                //deduct the price for the wallet and update wallet transaction table
-                if(wallet.Balance < invoiceEntity.Amount)
+                //Additions for Ecommerce customers (Max wallet negative payment limit)
+                var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
+                if (shipment != null && CompanyType.Ecommerce.ToString() == shipment.CompanyType)
                 {
-                    throw new GenericException("Insufficient Balance in the Wallet");
+                    //get max negati ve wallet limit from GlobalProperty
+                    var ecommerceNegativeWalletLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceNegativeWalletLimit);
+                    var ecommerceNegativeWalletLimit = decimal.Parse(ecommerceNegativeWalletLimitObj.Value);
+
+                    //deduct the price for the wallet and update wallet transaction table
+                    if (wallet.Balance - invoiceEntity.Amount < (System.Math.Abs(ecommerceNegativeWalletLimit) * (-1)))
+                    {
+                        throw new GenericException("Ecommerce Customer. Insufficient Balance in the Wallet");
+                    }
+                }
+
+
+                //for other customers
+                //deduct the price for the wallet and update wallet transaction table
+                if (shipment != null && CompanyType.Ecommerce.ToString() != shipment.CompanyType)
+                {
+                    if (wallet.Balance < invoiceEntity.Amount)
+                    {
+                        throw new GenericException("Insufficient Balance in the Wallet");
+                    }
                 }
 
                 wallet.Balance = wallet.Balance - invoiceEntity.Amount;
@@ -125,14 +149,14 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     Waybill = paymentTransaction.Waybill,
                     Description = generalLedgerEntity.Description
                 };
-                
-                _uow.WalletTransaction.Add(newWalletTransaction);                
+
+                _uow.WalletTransaction.Add(newWalletTransaction);
             }
 
             // create payment
             paymentTransaction.UserId = currentUserId;
             paymentTransaction.PaymentStatus = PaymentStatus.Paid;
-            var paymentTransactionId =  await AddPaymentTransaction(paymentTransaction);
+            var paymentTransactionId = await AddPaymentTransaction(paymentTransaction);
 
 
             // update GeneralLedger

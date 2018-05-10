@@ -18,5 +18,6 @@ namespace GIGL.GIGLS.Core.Domain
         public virtual Station Station { get; set; }
         public decimal TargetAmount { get; set; }
         public int TargetOrder { get; set; }
+        public bool IsDefault { get; set; }
     }
 }

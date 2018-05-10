@@ -30,5 +30,6 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public List<ShipmentDTO> Shipments { get; set; }
         public decimal TargetAmount { get; set; }
         public int TargetOrder { get; set; }
+        public bool IsDefault { get; set; }
     }
 }

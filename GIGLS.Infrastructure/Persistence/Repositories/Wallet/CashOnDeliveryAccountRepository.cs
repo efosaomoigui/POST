@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using GIGLS.Core.DTO.Wallet;
 using AutoMapper;
 using System.Linq;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories.Wallet
 {
@@ -32,5 +33,20 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Wallet
                 throw;
             }
         }
+
+        public Task<IEnumerable<CashOnDeliveryAccountDTO>> GetCashOnDeliveryAccountAsync(CODStatus codStatus)
+        {
+            try
+            {
+                var codAccounts = _context.CashOnDeliveryAccount.Include("Wallet").Where(s => s.CODStatus == codStatus).ToList();
+                var codAccountsDto = Mapper.Map<IEnumerable<CashOnDeliveryAccountDTO>>(codAccounts);
+                return Task.FromResult(codAccountsDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

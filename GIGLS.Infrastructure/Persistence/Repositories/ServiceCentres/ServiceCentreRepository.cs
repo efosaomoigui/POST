@@ -40,7 +40,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     TargetOrder = s.TargetOrder,
                                     StationId = s.StationId,
                                     StationName = sc.StationName,
-                                    StationCode = sc.StationCode
+                                    StationCode = sc.StationCode,
+                                    IsDefault = s.IsDefault
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
@@ -75,7 +76,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     StationName = sc.StationName,
                                     StationCode = sc.StationCode,
                                     CountryId = c.CountryId,
-                                    Country = c.CountryName
+                                    Country = c.CountryName,
+                                    IsDefault = s.IsDefault
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
@@ -111,7 +113,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     StationName = sc.StationName,
                                     StationCode = sc.StationCode,
                                     CountryId = c.CountryId,
-                                    Country = c.CountryName
+                                    Country = c.CountryName,
+                                    IsDefault = s.IsDefault
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
@@ -147,7 +150,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     StationName = sc.StationName,
                                     StationCode = sc.StationCode,
                                     CountryId = c.CountryId,
-                                    Country = c.CountryName
+                                    Country = c.CountryName,
+                                    IsDefault = s.IsDefault
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
@@ -182,7 +186,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     StationName = sc.StationName,
                                     StationCode = sc.StationCode,
                                     CountryId = c.CountryId,
-                                    Country = c.CountryName
+                                    Country = c.CountryName,
+                                    IsDefault = s.IsDefault
                                 };
                 return Task.FromResult(centreDto.FirstOrDefault());
             }

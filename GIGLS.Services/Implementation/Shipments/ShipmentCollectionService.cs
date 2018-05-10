@@ -168,7 +168,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         WalletNumber = shipmentCollectionDto.WalletNumber
                     },
                     Description = shipmentCollectionDto.Description,
-                    Waybill = shipmentCollectionDto.Waybill
+                    Waybill = shipmentCollectionDto.Waybill,
+                    CODStatus = CODStatus.Unprocessed
                 });
             }
 

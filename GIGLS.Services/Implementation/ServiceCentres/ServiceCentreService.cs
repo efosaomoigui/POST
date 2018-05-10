@@ -46,12 +46,12 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 _uow.ServiceCentre.Add(newCentre);
                 await _uow.CompleteAsync();
 
-                return new { Id = newCentre.ServiceCentreId};
+                return new { Id = newCentre.ServiceCentreId };
             }
             catch (Exception)
             {
                 throw;
-            } 
+            }
         }
 
         public async Task DeleteServiceCentre(int serviceCentreId)
@@ -71,7 +71,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 throw;
             }
         }
-        
+
         public async Task<ServiceCentreDTO> GetServiceCentreByCode(string serviceCentreCode)
         {
             try
@@ -150,7 +150,29 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 throw;
             }
         }
-        
+
+        public async Task<ServiceCentreDTO> GetDefaultServiceCentre()
+        {
+            try
+            {
+                var centre = await _uow.ServiceCentre.GetAsync(s => s.IsDefault == true, "Station");
+                if (centre == null)
+                {
+                    throw new GenericException("Error: A Default Service Center has not been configured on this system. Please see the administrator.");
+                }
+
+                var centreDto = Mapper.Map<ServiceCentreDTO>(centre);
+                centreDto.StationName = centre.Station.StationName;
+                centreDto.StationCode = centre.Station.StationCode;
+                return centreDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
         public async Task<List<ServiceCentreDTO>> GetLocalServiceCentres()
         {
             try

@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.User;
+﻿using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.User;
 using GIGLS.CORE.Domain;
 using Microsoft.AspNet.Identity;
 using System.Collections.Generic;
@@ -41,6 +42,7 @@ namespace GIGLS.Core.IServices.User
         Task<string> GetCurrentUserId();
         Task<bool> CheckPriviledge();
         Task<int[]> GetPriviledgeServiceCenters();
+        Task<ServiceCentreDTO> GetDefaultServiceCenter();
 
         Task<IdentityResult> ResetPassword(string userid, string password);
         Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword);

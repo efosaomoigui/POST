@@ -97,6 +97,22 @@ namespace GIGLS.WebApi.Controllers.Wallet
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("processToPending")]
+        public async Task<IServiceResponse<bool>> ProcessToPending(List<CashOnDeliveryBalanceDTO> data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _cashOnDeliveryAccountService.ProcessToPending(data);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]

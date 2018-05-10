@@ -11,5 +11,6 @@ namespace GIGLS.Core.Domain.Wallet
         public int WalletId { get; set; }
         public virtual Wallet Wallet { get; set; }
         public string UserId { get; set; }
+        public CODStatus CODStatus { get; set; }
     }
 }

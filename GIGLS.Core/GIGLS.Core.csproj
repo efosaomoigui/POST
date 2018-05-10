@@ -323,6 +323,7 @@
     <Compile Include="DTO\Zone\WeightLimitPriceDTO.cs" />
     <Compile Include="DTO\Zone\ZoneDTO.cs" />
     <Compile Include="Enums\AccountType.cs" />
+    <Compile Include="Enums\CODStatus.cs" />
     <Compile Include="Enums\CompanyStatus.cs" />
     <Compile Include="Enums\CompanyType.cs" />
     <Compile Include="Enums\CustomerType.cs" />
@@ -357,6 +358,7 @@
     <Compile Include="Enums\StockRequestSourceType.cs" />
     <Compile Include="Enums\StockRequestStatus.cs" />
     <Compile Include="Enums\TrackingType.cs" />
+    <Compile Include="Enums\UserChannelType.cs" />
     <Compile Include="Enums\UserStatus.cs" />
     <Compile Include="Enums\UserType.cs" />
     <Compile Include="Enums\VATType.cs" />

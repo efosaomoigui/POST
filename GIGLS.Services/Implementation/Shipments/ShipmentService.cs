@@ -605,7 +605,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
 
                     if (invoice.PaymentStatus == PaymentStatus.Pending &&
-                        shipmentItem.CustomerType == CustomerType.Company.ToString())
+                        shipmentItem.CompanyType == CompanyType.Corporate.ToString())
                     {
                         paidShipments.Add(shipmentItem);
                     }

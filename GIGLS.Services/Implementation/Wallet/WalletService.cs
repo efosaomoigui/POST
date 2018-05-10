@@ -144,8 +144,12 @@ namespace GIGLS.Services.Implementation.Wallet
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             if (serviceCenterIds.Length <= 0)
             {
-                var currentUser = await _userService.GetUserById(walletTransactionDTO.UserId);
-                throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                serviceCenterIds = new int[] { 0 };
+                var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
+                serviceCenterIds[0] = defaultServiceCenter.ServiceCentreId;
+
+                //var currentUser = await _userService.GetUserById(walletTransactionDTO.UserId);
+                //throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
             }
 
 

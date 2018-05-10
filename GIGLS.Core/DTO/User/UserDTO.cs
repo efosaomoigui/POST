@@ -51,5 +51,11 @@ namespace GIGLS.Core.DTO.User
         //for system user
         public string SystemUserId { get; set; }
         public string SystemUserRole { get; set; }
+
+        // UserChannel
+        public string UserChannelCode { get; set; }
+        public string UserChannelPassword { get; set; }
+        public UserChannelType UserChannelType { get; set; }
+
     }
 }

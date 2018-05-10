@@ -13,5 +13,6 @@ namespace GIGLS.Core.DTO.Wallet
         public WalletDTO Wallet { get; set; }
         public string UserId { get; set; }
         public string Waybill { get; set; }
+        public CODStatus CODStatus { get; set; }
     }
 }

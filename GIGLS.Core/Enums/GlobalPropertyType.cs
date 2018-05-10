@@ -13,6 +13,7 @@
         PercentageForInternationalShipment,
         LIBYA,
         SYRIA,
-        YEMEN
+        YEMEN,
+        EcommerceNegativeWalletLimit
     }
 }

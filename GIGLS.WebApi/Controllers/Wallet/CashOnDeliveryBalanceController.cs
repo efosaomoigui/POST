@@ -82,5 +82,36 @@ namespace GIGLS.WebApi.Controllers.CashOnDeliveryBalance
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("pendingpaymentsheet")]
+        public async Task<IServiceResponse<IEnumerable<CashOnDeliveryBalanceDTO>>> GetPendingCashOnDeliveryPaymentSheet()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var cashOnDeliveryBalances = await _cashOnDeliveryBalanceService.GetPendingCashOnDeliveryPaymentSheet();
+                return new ServiceResponse<IEnumerable<CashOnDeliveryBalanceDTO>>
+                {
+                    Object = cashOnDeliveryBalances
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("processedpaymentsheet")]
+        public async Task<IServiceResponse<IEnumerable<CashOnDeliveryBalanceDTO>>> GetProcessedCashOnDeliveryPaymentSheet()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var cashOnDeliveryBalances = await _cashOnDeliveryBalanceService.GetProcessedCashOnDeliveryPaymentSheet();
+                return new ServiceResponse<IEnumerable<CashOnDeliveryBalanceDTO>>
+                {
+                    Object = cashOnDeliveryBalances
+                };
+            });
+        }
+
     }
 }

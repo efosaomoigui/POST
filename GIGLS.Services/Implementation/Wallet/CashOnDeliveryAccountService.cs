@@ -38,15 +38,15 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             //Use wallet Number
             var wallet = await _walletService.GetWalletById(cashOnDeliveryAccountDto.Wallet.WalletNumber);
-            
+
             if (cashOnDeliveryAccountDto.UserId == null)
             {
                 cashOnDeliveryAccountDto.UserId = await _userService.GetCurrentUserId();
             }
-            
+
             var accountBalance = await _uow.CashOnDeliveryBalance.GetAsync(x => x.WalletId == wallet.WalletId);
 
-            if(accountBalance == null)
+            if (accountBalance == null)
             {
                 var newBalance = new CashOnDeliveryBalance
                 {
@@ -64,13 +64,14 @@ namespace GIGLS.Services.Implementation.Wallet
             //create COD Account and all COD Account for the wallet
             cashOnDeliveryAccountDto.Wallet = null;
             var newCODAccount = Mapper.Map<CashOnDeliveryAccount>(cashOnDeliveryAccountDto);
-            newCODAccount.WalletId = wallet.WalletId;           
+            newCODAccount.WalletId = wallet.WalletId;
             newCODAccount.UserId = cashOnDeliveryAccountDto.UserId;
             _uow.CashOnDeliveryAccount.Add(newCODAccount);
             await _uow.CompleteAsync();
 
-            //calculate balance for code
-            var CODTransactions = await _uow.CashOnDeliveryAccount.FindAsync(s => s.WalletId == wallet.WalletId);
+            //calculate balance for code (Unprocessed amounts)
+            var CODTransactions =
+                await _uow.CashOnDeliveryAccount.FindAsync(s => s.WalletId == wallet.WalletId && s.CODStatus == CODStatus.Unprocessed);
             decimal balance = 0;
             foreach (var item in CODTransactions)
             {
@@ -78,10 +79,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     balance += item.Amount;
                 }
-                else
-                {
-                    balance -= item.Amount;
-                }
+                //else
+                //{
+                //    balance -= item.Amount;
+                //}
             }
 
             accountBalance.Balance = balance;
@@ -94,7 +95,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 WalletId = wallet.WalletId,
                 Description = cashOnDeliveryAccountDto.Description,
                 UserId = cashOnDeliveryAccountDto.UserId,
-                Waybill = cashOnDeliveryAccountDto.Waybill                
+                Waybill = cashOnDeliveryAccountDto.Waybill
             });
 
 
@@ -103,7 +104,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             CreditDebitType creditType;
             var description = "";
-            if(cashOnDeliveryAccountDto.CreditDebitType == CreditDebitType.Credit)
+            if (cashOnDeliveryAccountDto.CreditDebitType == CreditDebitType.Credit)
             {
                 creditType = CreditDebitType.Debit;
                 description = "Debit for COD Payment Settlement";
@@ -169,10 +170,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Cash on Delivery Wallet information does not exist");
             }
 
-            var balance =  await _cashOnDeliveryBalanceService.GetCashOnDeliveryBalanceByWalletId(wallet.WalletId);
+            var balance = await _cashOnDeliveryBalanceService.GetCashOnDeliveryBalanceByWalletId(wallet.WalletId);
 
             var accountDto = Mapper.Map<List<CashOnDeliveryAccountDTO>>(account);
-            
+
             return new CashOnDeliveryAccountSummaryDTO
             {
                 CashOnDeliveryAccount = accountDto,
@@ -184,6 +185,12 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             return _uow.CashOnDeliveryAccount.GetCashOnDeliveryAccountAsync();
         }
+
+        public Task<IEnumerable<CashOnDeliveryAccountDTO>> GetCashOnDeliveryAccounts(CODStatus cODStatus)
+        {
+            return _uow.CashOnDeliveryAccount.GetCashOnDeliveryAccountAsync(cODStatus);
+        }
+
 
         public async Task RemoveCashOnDeliveryAccount(int cashOnDeliveryAccountId)
         {
@@ -213,11 +220,36 @@ namespace GIGLS.Services.Implementation.Wallet
             await _uow.CompleteAsync();
         }
 
+
+        public async Task ProcessToPending(List<CashOnDeliveryBalanceDTO> data)
+        {
+            var unprocessedCODAccounts = await _uow.CashOnDeliveryAccount.GetCashOnDeliveryAccountAsync(CODStatus.Unprocessed);
+
+            foreach (var unprocessedAccount in unprocessedCODAccounts)
+            {
+                //1. update status
+                var cashOnDeliveryAccount = await _uow.CashOnDeliveryAccount.GetAsync(unprocessedAccount.CashOnDeliveryAccountId);
+                cashOnDeliveryAccount.CODStatus = CODStatus.Pending;
+
+                //2. update balance
+                var accountBalance = await _uow.CashOnDeliveryBalance.GetAsync(x => x.WalletId == unprocessedAccount.WalletId);
+
+                if (unprocessedAccount.CreditDebitType == CreditDebitType.Credit)
+                {
+                    accountBalance.Balance -= unprocessedAccount.Amount;
+                }
+
+                //3. complete transaction
+                await _uow.CompleteAsync();
+            }
+        }
+
+
         public async Task ProcessCashOnDeliveryPaymentSheet(List<CashOnDeliveryBalanceDTO> data)
         {
-            var listCashOnDeliverys = await _cashOnDeliveryBalanceService.GetCashOnDeliveryPaymentSheet();
+            var listOfPendingCashOnDeliverys = await _cashOnDeliveryBalanceService.GetPendingCashOnDeliveryPaymentSheet();
 
-            foreach (var cashOnDeliveryBalance in listCashOnDeliverys)
+            foreach (var cashOnDeliveryBalance in listOfPendingCashOnDeliverys)
             {
                 var cashOnDeliveryAccount = new CashOnDeliveryAccountDTO
                 {

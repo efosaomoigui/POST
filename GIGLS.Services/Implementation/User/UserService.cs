@@ -13,6 +13,7 @@ using GIGLS.Core.IServices.ServiceCentres;
 using System.Web;
 using GIGLS.Core.Enums;
 using System.Linq;
+using GIGLS.Core.DTO.ServiceCentres;
 
 namespace GIGLS.Services.Implementation.User
 {
@@ -150,6 +151,10 @@ namespace GIGLS.Services.Implementation.User
             user.PhoneNumber = userDto.PhoneNumber;
             user.SystemUserId = userDto.SystemUserId;
             user.SystemUserRole = userDto.SystemUserRole;
+
+            user.UserChannelCode = userDto.UserChannelCode;
+            user.UserChannelPassword = userDto.UserChannelPassword;
+            user.UserChannelType = userDto.UserChannelType;
 
             return await _unitOfWork.User.UpdateUser(userid, user);
 
@@ -494,8 +499,14 @@ namespace GIGLS.Services.Implementation.User
             return serviceCenterIds;
         }
 
-        //change user password by Admin
-        public async Task<IdentityResult> ResetPassword(string userid, string password)
+        public async Task<ServiceCentreDTO> GetDefaultServiceCenter()
+        {
+            var defaultServiceCenter = await _serviceCentreService.GetDefaultServiceCentre();
+            return defaultServiceCenter;
+        }
+
+            //change user password by Admin
+            public async Task<IdentityResult> ResetPassword(string userid, string password)
         {
             var user = await _unitOfWork.User.GetUserById(userid);
 
