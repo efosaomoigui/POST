@@ -43,30 +43,30 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
 
 
-        public async Task<List<ShipmentDTO>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
+        public async Task<List<InvoiceViewDTO>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
         {
-            var shipments = _uow.Shipment.GetAll();
+            var invoices = _uow.Invoice.GetAllFromInvoiceView();
 
             //filter by CustomerId
             if (f_Criteria.CustomerId > 0)
             {
-                shipments = shipments.Where(s => s.CustomerId == f_Criteria.CustomerId);
+                invoices = invoices.Where(s => s.CustomerId == f_Criteria.CustomerId);
             }
 
             //filter by CustomerType
             if (f_Criteria.FilterCustomerType != null)
             {
-                shipments = shipments.Where(s => s.CustomerType == f_Criteria.FilterCustomerType.ToString());
+                invoices = invoices.Where(s => s.CustomerType == f_Criteria.FilterCustomerType.ToString());
             }
 
             //filter by UserId
             if (f_Criteria.UserId != null)
             {
-                shipments = shipments.Where(s => s.UserId == f_Criteria.UserId);
+                invoices = invoices.Where(s => s.UserId == f_Criteria.UserId);
             }
 
-            var shipmentsDto = Mapper.Map<List<ShipmentDTO>>(shipments.ToList());
-            return await Task.FromResult(shipmentsDto);
+            var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
+            return await Task.FromResult(invoicesDto);
         }
 
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactions()
