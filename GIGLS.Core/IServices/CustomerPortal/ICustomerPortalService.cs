@@ -9,9 +9,9 @@ namespace GIGLS.Core.IServices.CustomerPortal
 {
     public interface ICustomerPortalService : IServiceDependencyMarker
     {
-        Task<List<ShipmentDTO>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria);
+        Task<List<InvoiceViewDTO>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria);
         Task<WalletTransactionSummaryDTO> GetWalletTransactions();
-        Task<IEnumerable<InvoiceDTO>> GetInvoices();
+        Task<IEnumerable<InvoiceViewDTO>> GetInvoices();
         Task<InvoiceDTO> GetInvoiceByWaybill(string waybill);
         Task<IEnumerable<ShipmentTrackingDTO>> TrackShipment(string waybillNumber);
         Task<CashOnDeliveryAccountSummaryDTO> GetCashOnDeliveryAccount();

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using GIGLS.CORE.DTO.Report;
 using System;
+using GIGLS.Core.View;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 {
@@ -167,5 +168,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             return Task.FromResult(invoicesResult.OrderByDescending(x => x.DateCreated).ToList());
         }
 
+
+        public IQueryable<InvoiceView> GetAllFromInvoiceView()
+        {
+            var invoices = _GIGLSContextForView.InvoiceView.AsQueryable();
+            return invoices;
+        }
     }
 }

@@ -25,15 +25,15 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         //[GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("transaction")]
-        public async Task<IServiceResponse<List<ShipmentDTO>>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipments = await _portalService.GetShipmentTransactions(f_Criteria);
+                var invoices = await _portalService.GetShipmentTransactions(f_Criteria);
 
-                return new ServiceResponse<List<ShipmentDTO>>
+                return new ServiceResponse<List<InvoiceViewDTO>>
                 {
-                    Object = shipments
+                    Object = invoices
                 };
             });
         }
@@ -57,13 +57,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         //[GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("invoice")]
-        public async Task<IServiceResponse<IEnumerable<InvoiceDTO>>> GetInvoices()
+        public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetInvoices()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var invoice = await _portalService.GetInvoices();
 
-                return new ServiceResponse<IEnumerable<InvoiceDTO>>
+                return new ServiceResponse<IEnumerable<InvoiceViewDTO>>
                 {
                     Object = invoice
                 };

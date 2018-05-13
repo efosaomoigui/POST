@@ -79,7 +79,8 @@ namespace GIGLS.Services.Implementation.Customers
                 await _walletService.AddWallet(new WalletDTO
                 {
                     CustomerId = newCompany.CompanyId,
-                    CustomerType = CustomerType.Company
+                    CustomerType = CustomerType.Company,
+                    CustomerCode = newCompany.CustomerCode
                 });
 
 

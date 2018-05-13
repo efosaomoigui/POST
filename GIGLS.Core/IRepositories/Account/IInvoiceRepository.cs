@@ -1,8 +1,10 @@
 ﻿using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GIGLS.Core.IRepositories.Account
@@ -12,5 +14,6 @@ namespace GIGLS.Core.IRepositories.Account
         Task<IEnumerable<InvoiceDTO>> GetInvoicesAsync(int[] serviceCentreIds);
         Task<List<InvoiceDTO>> GetInvoicesAsync(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
         Task<List<InvoiceViewDTO>> GetInvoicesFromViewAsync(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
+        IQueryable<InvoiceView> GetAllFromInvoiceView();
     }
 }
