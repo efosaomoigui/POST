@@ -3,6 +3,7 @@
     public enum CompanyType
     {
         Corporate,
-        Ecommerce
+        Ecommerce,
+        Client
     }
 }
