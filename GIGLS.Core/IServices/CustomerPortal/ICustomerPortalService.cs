@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.CORE.DTO.Report;
@@ -15,6 +16,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<InvoiceDTO> GetInvoiceByWaybill(string waybill);
         Task<IEnumerable<ShipmentTrackingDTO>> TrackShipment(string waybillNumber);
         Task<CashOnDeliveryAccountSummaryDTO> GetCashOnDeliveryAccount();
-
+        Task<IEnumerable<PaymentPartialTransactionDTO>> GetPartialPaymentTransaction(string waybill);
     }
 }

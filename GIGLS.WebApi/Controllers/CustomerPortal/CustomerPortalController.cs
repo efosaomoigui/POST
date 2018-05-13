@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices;
@@ -114,6 +115,22 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<CashOnDeliveryAccountSummaryDTO>
                 {
                     Object = result
+                };
+            });
+        }
+
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("partialPaymentTransaction/{waybill}")]
+        public async Task<IServiceResponse<IEnumerable<PaymentPartialTransactionDTO>>> GetPartialPaymentTransaction(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var payment = await _portalService.GetPartialPaymentTransaction(waybill);
+
+                return new ServiceResponse<IEnumerable<PaymentPartialTransactionDTO>>
+                {
+                    Object = payment
                 };
             });
         }

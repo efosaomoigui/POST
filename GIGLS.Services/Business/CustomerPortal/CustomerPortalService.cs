@@ -15,6 +15,7 @@ using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.IServices.CashOnDeliveryAccount;
+using GIGLS.Core.DTO.PaymentTransactions;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -83,6 +84,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<InvoiceDTO> GetInvoiceByWaybill(string waybill)
         {
             var invoice = await _invoiceService.GetInvoiceByWaybill(waybill);
+            if(invoice != null)
+            {
+                var shipmentPreparedBy = await _userService.GetUserById(invoice.Shipment.UserId);
+                invoice.Shipment.UserId = shipmentPreparedBy.LastName + " " + shipmentPreparedBy.FirstName; 
+            }
             return invoice;
         }
 
@@ -126,6 +132,12 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             var result = await _iCashOnDeliveryAccountService.GetCashOnDeliveryAccountByWallet(wallet.WalletNumber);
             return result;
+        }
+
+        public async Task<IEnumerable<PaymentPartialTransactionDTO>> GetPartialPaymentTransaction(string waybill)
+        {
+            var transaction = await _uow.PaymentPartialTransaction.FindAsync(x => x.Waybill.Equals(waybill));
+            return Mapper.Map<IEnumerable<PaymentPartialTransactionDTO>>(transaction);
         }
     }
 }
