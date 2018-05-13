@@ -122,7 +122,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 WalletNumber = wallet.WalletNumber,
                 Balance = wallet.Balance,
                 CustomerId = wallet.CustomerId,
-                CustomerType = wallet.CustomerType
+                CustomerType = wallet.CustomerType,
+                CustomerCode = wallet.CustomerCode
             });
             await _uow.CompleteAsync();
         }

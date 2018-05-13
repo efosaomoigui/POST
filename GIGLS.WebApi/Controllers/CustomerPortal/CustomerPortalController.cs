@@ -57,13 +57,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         //[GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("invoice")]
-        public async Task<IServiceResponse<IEnumerable<InvoiceDTO>>> GetInvoices()
+        public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetInvoices()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var invoice = await _portalService.GetInvoices();
 
-                return new ServiceResponse<IEnumerable<InvoiceDTO>>
+                return new ServiceResponse<IEnumerable<InvoiceViewDTO>>
                 {
                     Object = invoice
                 };

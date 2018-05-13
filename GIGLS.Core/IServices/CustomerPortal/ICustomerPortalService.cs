@@ -11,7 +11,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
     {
         Task<List<ShipmentDTO>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria);
         Task<WalletTransactionSummaryDTO> GetWalletTransactions();
-        Task<IEnumerable<InvoiceDTO>> GetInvoices();
+        Task<IEnumerable<InvoiceViewDTO>> GetInvoices();
         Task<InvoiceDTO> GetInvoiceByWaybill(string waybill);
         Task<IEnumerable<ShipmentTrackingDTO>> TrackShipment(string waybillNumber);
         Task<CashOnDeliveryAccountSummaryDTO> GetCashOnDeliveryAccount();

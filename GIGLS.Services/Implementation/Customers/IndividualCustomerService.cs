@@ -64,7 +64,8 @@ namespace GIGLS.Services.Implementation.Customers
                 await _walletService.AddWallet(new WalletDTO
                 {
                     CustomerId = newCustomer.IndividualCustomerId,
-                    CustomerType = CustomerType.IndividualCustomer
+                    CustomerType = CustomerType.IndividualCustomer,
+                    CustomerCode = newCustomer.CustomerCode
                 });
 
                 // add to user table for login
