@@ -12,7 +12,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
-    //[Authorize(Roles = "Admin, ViewAdmin")]
+    [Authorize]
     [RoutePrefix("api/portal")]
     public class CustomerPortalController : BaseWebApiController
     {
@@ -23,7 +23,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             _portalService = portalService;
         }
         
-        //[GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("transaction")]
         public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
@@ -39,7 +38,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
         
-        //[GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("wallet")]
         public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactions()
@@ -55,7 +53,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
         
-        //[GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("invoice")]
         public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetInvoices()
@@ -70,8 +67,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        
         [HttpGet]
         [Route("bywaybill/{waybill}")]
         public async Task<IServiceResponse<InvoiceDTO>> GetInvoiceByWaybill([FromUri]  string waybill)
@@ -86,8 +82,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        
+        [AllowAnonymous]
         [HttpGet]
         [Route("{waybillNumber}")]
         public async Task<IServiceResponse<IEnumerable<ShipmentTrackingDTO>>> TrackShipment(string waybillNumber)
@@ -102,8 +98,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        
         [HttpGet]
         [Route("cod")]
         public async Task<IServiceResponse<CashOnDeliveryAccountSummaryDTO>> GetCashOnDeliveryAccount()
@@ -118,8 +113,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        
         [HttpGet]
         [Route("partialPaymentTransaction/{waybill}")]
         public async Task<IServiceResponse<IEnumerable<PaymentPartialTransactionDTO>>> GetPartialPaymentTransaction(string waybill)
