@@ -65,7 +65,8 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     CustomerId = newCustomer.IndividualCustomerId,
                     CustomerType = CustomerType.IndividualCustomer,
-                    CustomerCode = newCustomer.CustomerCode
+                    CustomerCode = newCustomer.CustomerCode,
+                    CompanyType = CustomerType.IndividualCustomer.ToString()
                 });
 
                 // add to user table for login
@@ -88,7 +89,7 @@ namespace GIGLS.Services.Implementation.Customers
                         Username = newCustomer.CustomerCode,
                         UserChannelCode = newCustomer.CustomerCode,
                         UserChannelPassword = password,
-                        UserChannelType = UserChannelType.Customer
+                        UserChannelType = UserChannelType.IndividualCustomer
                     });
                 }
                 catch (Exception ex)

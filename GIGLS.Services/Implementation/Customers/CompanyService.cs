@@ -47,18 +47,23 @@ namespace GIGLS.Services.Implementation.Customers
 
                 var newCompany = Mapper.Map<Company>(company);
 
+                //get the CompanyType
+                var companyType = "";
+
                 //generate customer code
                 if (newCompany.CompanyType == CompanyType.Corporate)
                 {
                     var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
                         NumberGeneratorType.CustomerCodeCorporate);
                     newCompany.CustomerCode = customerCode;
+                    companyType = CompanyType.Corporate.ToString();
                 }
                 else
                 {
                     var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
                         NumberGeneratorType.CustomerCodeEcommerce);
                     newCompany.CustomerCode = customerCode;
+                    companyType = CompanyType.Ecommerce.ToString();
                 }
 
                 _uow.Company.Add(newCompany);
@@ -80,11 +85,20 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     CustomerId = newCompany.CompanyId,
                     CustomerType = CustomerType.Company,
-                    CustomerCode = newCompany.CustomerCode
+                    CustomerCode = newCompany.CustomerCode,
+                    CompanyType = companyType
                 });
 
 
                 // add to user table for login
+
+                //set the userChannelType
+                var userChannelType = UserChannelType.Corporate;
+                if (newCompany.CompanyType == CompanyType.Ecommerce)
+                {
+                    userChannelType = UserChannelType.Ecommerce;
+                }
+
                 try
                 {
                     var password = await _passwordGenerator.Generate();
@@ -104,7 +118,7 @@ namespace GIGLS.Services.Implementation.Customers
                         Username = newCompany.CustomerCode,
                         UserChannelCode = newCompany.CustomerCode,
                         UserChannelPassword = password,
-                        UserChannelType = UserChannelType.Customer
+                        UserChannelType = userChannelType
                     });
                 }
                 catch (Exception ex)

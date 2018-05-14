@@ -86,7 +86,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  Value = r.Value,
                                                  GrandTotal = r.GrandTotal,
                                                  AppliedDiscount = r.AppliedDiscount,
-                                                 DiscountValue = r.DiscountValue
+                                                 DiscountValue = r.DiscountValue,
+                                                 ShipmentPackagePrice = r.ShipmentPackagePrice,
+                                                 CompanyType = r.CompanyType,
+                                                 CustomerCode = r.CustomerCode
                                                  //DepartureTerminalName = r.DepartureTerminal.Name,
                                                  //DestinationTerminalName = r.DestinationTerminal.Name       
                                                  //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
@@ -172,7 +175,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      GrandTotal = r.GrandTotal,
                                                      AppliedDiscount = r.AppliedDiscount,
                                                      DiscountValue = r.DiscountValue,
-                                                     ShipmentPackagePrice = r.ShipmentPackagePrice     
+                                                     ShipmentPackagePrice = r.ShipmentPackagePrice,
+                                                     CompanyType = r.CompanyType,
+                                                     CustomerCode = r.CustomerCode
                                                      //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
                                                  }).ToList();
                 //return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -281,7 +286,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      GrandTotal = r.GrandTotal,
                                                      AppliedDiscount = r.AppliedDiscount,
                                                      DiscountValue = r.DiscountValue,
-                                                     ShipmentPackagePrice = r.ShipmentPackagePrice
+                                                     ShipmentPackagePrice = r.ShipmentPackagePrice,
+                                                     CompanyType = r.CompanyType,
+                                                     CustomerCode = r.CustomerCode
                                                  }).ToList();
 
                 //filter
@@ -392,7 +399,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      GrandTotal = r.GrandTotal,
                                                      AppliedDiscount = r.AppliedDiscount,
                                                      DiscountValue = r.DiscountValue,
-                                                     ShipmentPackagePrice = r.ShipmentPackagePrice
+                                                     ShipmentPackagePrice = r.ShipmentPackagePrice,
+                                                     CompanyType = r.CompanyType,
+                                                     CustomerCode = r.CustomerCode
                                                  }).ToList();
 
                 //filter
@@ -555,7 +564,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  Value = r.Value,
                                                  GrandTotal = r.GrandTotal,
                                                  AppliedDiscount = r.AppliedDiscount,
-                                                 DiscountValue = r.DiscountValue
+                                                 DiscountValue = r.DiscountValue,
+                                                 ShipmentPackagePrice = r.ShipmentPackagePrice,
+                                                 CompanyType = r.CompanyType,
+                                                 CustomerCode = r.CustomerCode
                                              }).ToList();
             
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -687,7 +699,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  Value = r.Value,
                                                  GrandTotal = r.GrandTotal,
                                                  AppliedDiscount = r.AppliedDiscount,
-                                                 DiscountValue = r.DiscountValue
+                                                 DiscountValue = r.DiscountValue,
+                                                 ShipmentPackagePrice = r.ShipmentPackagePrice,
+                                                 CompanyType = r.CompanyType,
+                                                 CustomerCode = r.CustomerCode
                                              }).ToList();
             
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());

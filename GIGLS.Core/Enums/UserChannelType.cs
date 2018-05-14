@@ -3,7 +3,9 @@
     public enum UserChannelType
     {
         Employee,
-        Customer,
+        Corporate,
+        Ecommerce,
+        IndividualCustomer,
         Partner
     }
 }

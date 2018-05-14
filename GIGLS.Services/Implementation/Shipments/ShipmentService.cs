@@ -468,6 +468,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDTO.CompanyType = CustomerType.IndividualCustomer.ToString();
             }
 
+            //set the customerCode in the shipment
+            var currentCustomerObject = await _customerService.GetCustomer(shipmentDTO.CustomerId, customerDTO.CustomerType);
+            shipmentDTO.CustomerCode = currentCustomerObject.CustomerCode;
+
             return createdObject;
         }
 

@@ -11,5 +11,6 @@ namespace GIGLS.Core.Domain.Wallet
         public CustomerType CustomerType { get; set; }
         public bool IsSystem { get; set; }
         public string CustomerCode { get; set; }
+        public string CompanyType { get; set; }
     }
 }
