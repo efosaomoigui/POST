@@ -70,6 +70,11 @@ namespace GIGLS.Services.Implementation.Customers
                 });
 
                 // add to user table for login
+                //1. If userEmail is null, use CustomerCode
+                if(String.IsNullOrEmpty(newCustomer.Email))
+                {
+                    newCustomer.Email = newCustomer.CustomerCode;
+                }
                 try
                 {
                     var password = await _passwordGenerator.Generate();
