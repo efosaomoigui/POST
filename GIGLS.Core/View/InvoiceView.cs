@@ -36,6 +36,7 @@ namespace GIGLS.Core.View
         public int CustomerId { get; set; }
         public string CustomerType { get; set; }
         public string CompanyType { get; set; }
+        public string CustomerCode { get; set; }
 
         //Receiver Information
         public string ReceiverName { get; set; }

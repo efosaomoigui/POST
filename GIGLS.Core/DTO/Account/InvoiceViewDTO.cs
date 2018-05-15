@@ -33,6 +33,7 @@ namespace GIGLS.Core.DTO.Account
         public int CustomerId { get; set; }
         public string CustomerType { get; set; }
         public string CompanyType { get; set; }
+        public string CustomerCode { get; set; }
         public CustomerDTO CustomerDetails { get; set; }
 
         //Receiver Information

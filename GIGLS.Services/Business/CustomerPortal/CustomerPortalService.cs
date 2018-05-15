@@ -97,21 +97,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
-            var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == currentUser.UserChannelCode);
 
-            //get the customer type
-            var customerType = "";
-            if (wallet.CustomerType == Core.Enums.CustomerType.Company)
-            {
-                customerType = "Company";
-            }
-            else
-            {
-                customerType = "Individual";
-            }
-
-            var invoices = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.CustomerId == wallet.CustomerId &&
-            s.CustomerType == customerType).ToList();
+            var invoices = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.CustomerCode == currentUser.UserChannelCode).ToList();
 
             var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
             return invoicesDto;
