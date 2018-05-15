@@ -90,13 +90,18 @@ namespace GIGLS.Services.Implementation.Customers
                 });
 
 
-                // add to user table for login
-
-                //set the userChannelType
+                //-- add to user table for login
+                //1. set the userChannelType
                 var userChannelType = UserChannelType.Corporate;
                 if (newCompany.CompanyType == CompanyType.Ecommerce)
                 {
                     userChannelType = UserChannelType.Ecommerce;
+                }
+
+                //2. If userEmail is null, use CustomerCode
+                if (String.IsNullOrEmpty(newCompany.Email))
+                {
+                    newCompany.Email = newCompany.CustomerCode;
                 }
 
                 try
