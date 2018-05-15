@@ -164,6 +164,9 @@ namespace GIGLS.Services.Implementation.Customers
 
         public async Task<CompanyDTO> GetCompanyById(int companyId)
         {
+            //Code to add existing companies to the user table
+            //await CodeToAddCorporateUsersToAspNetUsersTable();
+
             try
             {
                 var company = await _uow.Company.GetAsync(companyId);
@@ -265,5 +268,89 @@ namespace GIGLS.Services.Implementation.Customers
         {
             return await _uow.Company.GetCompanies(companyType, searchOption);
         }
+
+        public async Task<int> CodeToAddCorporateUsersToAspNetUsersTable()
+        {
+            var listOfCompanies = await _uow.Company.GetCompanies(); ;
+
+            var listOfUsers = await _userService.GetUsers();
+
+            //only add those companies whose CustomerCode do not exists in AspNet Users table
+            foreach (var company in listOfCompanies)    // Start Foreach loop
+            {
+                if(listOfUsers.Select(s => s.UserChannelCode).Contains(company.CustomerCode))
+                {
+                    //user already in the system
+                    continue;
+                }
+
+                try
+                {
+                    var newCompany = Mapper.Map<Company>(company);
+
+                    //get the CompanyType
+                    var companyType = "";
+
+                    if (newCompany.CompanyType == CompanyType.Corporate)
+                    {
+                        companyType = CompanyType.Corporate.ToString();
+                    }
+                    else
+                    {
+                        companyType = CompanyType.Ecommerce.ToString();
+                    }
+
+                    //-- add to user table for login
+                    //1. set the userChannelType
+                    var userChannelType = UserChannelType.Corporate;
+                    if (newCompany.CompanyType == CompanyType.Ecommerce)
+                    {
+                        userChannelType = UserChannelType.Ecommerce;
+                    }
+
+                    //2. If userEmail is null, use CustomerCode
+                    if (String.IsNullOrEmpty(newCompany.Email))
+                    {
+                        newCompany.Email = newCompany.CustomerCode;
+                    }
+
+                    try
+                    {
+                        var password = await _passwordGenerator.Generate();
+                        var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
+                        {
+                            ConfirmPassword = password,
+                            Department = newCompany.CompanyType.ToString(),
+                            DateCreated = DateTime.Now,
+                            Designation = newCompany.CompanyType.ToString(),
+                            Email = newCompany.Email,
+                            FirstName = newCompany.Name,
+                            LastName = newCompany.Name,
+                            Organisation = newCompany.CompanyType.ToString(),
+                            Password = password,
+                            PhoneNumber = newCompany.PhoneNumber,
+                            UserType = UserType.Regular,
+                            Username = newCompany.CustomerCode,
+                            UserChannelCode = newCompany.CustomerCode,
+                            UserChannelPassword = password,
+                            UserChannelType = userChannelType
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        throw;
+                    }
+
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+
+            }   // End Foreach loop
+
+            return await Task.FromResult(0);
+        }
+
     }
 }
