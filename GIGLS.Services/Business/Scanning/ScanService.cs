@@ -239,6 +239,7 @@ namespace GIGLS.Services.Business.Scanning
                     }
                 }
 
+
                 //Delivery Manifest
                 if(manifest.ManifestType == ManifestType.Delivery)
                 {
@@ -272,7 +273,7 @@ namespace GIGLS.Services.Business.Scanning
                         }
                         else
                         {
-                            throw new GenericException($"Scan status is not allow for this Delivery Manifest: {scan.WaybillNumber} ");
+                            throw new GenericException($"Wrong Waybill Number {scan.WaybillNumber} ");
                         }
                     }
                     else
