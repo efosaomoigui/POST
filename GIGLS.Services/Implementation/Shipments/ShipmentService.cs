@@ -943,13 +943,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
+                //2.1 Update shipment to cancelled
+                var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == waybill);
+                shipment.IsCancelled = true;
+
                 var invoice = _uow.Invoice.SingleOrDefault(s => s.Waybill == waybill);
                 if (invoice.PaymentStatus == PaymentStatus.Paid)
                 {
                     //2. Reverse accounting entries
-                    //2.1 Update shipment to cancelled
-                    var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == waybill);
-                    shipment.IsCancelled = true;
 
                     //2.2 Update shipment to cancelled
                     invoice.PaymentStatus = PaymentStatus.Cancelled;

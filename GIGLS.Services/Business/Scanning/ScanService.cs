@@ -240,43 +240,47 @@ namespace GIGLS.Services.Business.Scanning
                 }
 
                 //Delivery Manifest
-                var waybillInManifestList = await _manifestWaybillService.GetWaybillsInManifest(manifest.ManifestCode);
-
-                if(waybillInManifestList.Count > 0)
+                if(manifest.ManifestType == ManifestType.Delivery)
                 {
-                    //update dispatch to scan for Shipment recieved by Courier for delivery manifest
-                    if (scan.ShipmentScanStatus == ShipmentScanStatus.WC)
+                    var waybillInManifestList = await _manifestWaybillService.GetWaybillsInManifest(manifest.ManifestCode);
+
+                    if (waybillInManifestList.Count > 0)
                     {
-                        var dispatch = await _dispatchService.GetDispatchManifestCode(manifest.ManifestCode);
-                        if (dispatch != null && dispatch.ReceivedBy == null)
+                        //update dispatch to scan for Shipment recieved by Courier for delivery manifest
+                        if (scan.ShipmentScanStatus == ShipmentScanStatus.WC)
                         {
-                            //get the user that login
-                            var userId = await _userService.GetCurrentUserId();
-                            var user = await _userService.GetUserById(userId);
-
-                            string reciever = user.FirstName + " " + user.LastName;
-                            dispatch.ReceivedBy = reciever;
-
-                            //update manifest also
-                            var manifestObj = await _manifestService.GetManifestByCode(manifest.ManifestCode);
-                            if (manifestObj != null && manifestObj.ReceiverBy == null)
+                            var dispatch = await _dispatchService.GetDispatchManifestCode(manifest.ManifestCode);
+                            if (dispatch != null && dispatch.ReceivedBy == null)
                             {
-                                manifestObj.IsReceived = true;
-                                manifestObj.ReceiverBy = userId;
-                                await _manifestService.UpdateManifest(manifestObj.ManifestId, manifestObj);
+                                //get the user that login
+                                var userId = await _userService.GetCurrentUserId();
+                                var user = await _userService.GetUserById(userId);
+
+                                string reciever = user.FirstName + " " + user.LastName;
+                                dispatch.ReceivedBy = reciever;
+
+                                //update manifest also
+                                var manifestObj = await _manifestService.GetManifestByCode(manifest.ManifestCode);
+                                if (manifestObj != null && manifestObj.ReceiverBy == null)
+                                {
+                                    manifestObj.IsReceived = true;
+                                    manifestObj.ReceiverBy = userId;
+                                    await _manifestService.UpdateManifest(manifestObj.ManifestId, manifestObj);
+                                }
+                                await _dispatchService.UpdateDispatch(dispatch.DispatchId, dispatch);
                             }
-                            await _dispatchService.UpdateDispatch(dispatch.DispatchId, dispatch);
+                        }
+                        else
+                        {
+                            throw new GenericException($"Scan status is not allow for this Delivery Manifest: {scan.WaybillNumber} ");
                         }
                     }
                     else
                     {
-                        throw new GenericException($"Scan status is not allow for this Delivery Manifest: {scan.WaybillNumber} ");
+                        throw new GenericException($"No Shipment attached to this Manifest: {scan.WaybillNumber} ");
                     }
                 }
-                else
-                {
-                    throw new GenericException($"No Shipment attached to this Manifest: {scan.WaybillNumber} ");
-                }
+               
             }
 
             if (shipment == null && groupWaybill == null && manifest == null)
