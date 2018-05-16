@@ -11,6 +11,8 @@ namespace GIGLS.Core.IServices.User
     public interface IUserService : IServiceDependencyMarker
     {
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetUsers();
+        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers();
+        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsers();
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetSystemUsers();
         Task<UserDTO> GetUserById(string userId);
         Task<UserDTO> GetUserByEmail(string email);

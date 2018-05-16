@@ -52,6 +52,38 @@ namespace GIGLS.WebApi.Controllers.User
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("api/user/customer")]
+        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetCustomerUsers()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var users = await _userService.GetCustomerUsers();
+                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                {
+                    Object = users
+                };
+
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("api/user/partner")]
+        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetPartnerUsers()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var users = await _userService.GetPartnerUsers();
+                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                {
+                    Object = users
+                };
+
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("api/user/getsystemusers")]
         public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetSystemUsers()
         {
@@ -65,7 +97,7 @@ namespace GIGLS.WebApi.Controllers.User
 
             });
         }
-
+       
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("api/user")]
@@ -466,9 +498,7 @@ namespace GIGLS.WebApi.Controllers.User
                 }
             });
         }
-
-
-        //[GIGLSActivityAuthorize(Activity = "Create")]
+                
         [AllowAnonymous]
         [HttpPost]
         [Route("api/user/login")]

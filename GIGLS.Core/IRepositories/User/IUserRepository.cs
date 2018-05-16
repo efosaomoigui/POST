@@ -1,9 +1,7 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGL.GIGLS.Core.Repositories;
+﻿using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core.DTO.User;
 using GIGLS.CORE.Domain;
 using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -13,6 +11,8 @@ namespace GIGLS.Core.IRepositories.User
     public interface IUserRepository : IAuthRepository<GIGL.GIGLS.Core.Domain.User> //where TEntity:class
     {
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetUsers();
+        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers();
+        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsers();
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetSystemUsers();
         Task<GIGL.GIGLS.Core.Domain.User> GetUserById(string id);
         Task<GIGL.GIGLS.Core.Domain.User> GetUserByEmail(string email);
