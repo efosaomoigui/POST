@@ -13,6 +13,7 @@ using GIGLS.CORE.Enums;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.Core.DTO.Account;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
@@ -115,7 +116,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 shipment = shipment.Where(s => s.IsCancelled == false);
 
                 //filter by Local or International Shipment
-                if(filterOptionsDto.IsInternational != null)
+                if (filterOptionsDto.IsInternational != null)
                 {
                     shipment = shipment.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
                 }
@@ -177,7 +178,19 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      DiscountValue = r.DiscountValue,
                                                      ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                      CompanyType = r.CompanyType,
-                                                     CustomerCode = r.CustomerCode
+                                                     CustomerCode = r.CustomerCode,
+                                                     Invoice = Context.Invoice.Where(c => c.Waybill == r.Waybill).Select(x => new InvoiceDTO
+                                                     {
+                                                         InvoiceId = x.InvoiceId,
+                                                         InvoiceNo = x.InvoiceNo,
+                                                         Amount = x.Amount,
+                                                         PaymentStatus = x.PaymentStatus,
+                                                         PaymentMethod = x.PaymentMethod,
+                                                         PaymentDate = x.PaymentDate,
+                                                         Waybill = x.Waybill,
+                                                         DueDate = x.DueDate,
+                                                         IsInternational = x.IsInternational
+                                                     }).FirstOrDefault()
                                                      //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
                                                  }).ToList();
                 //return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -231,7 +244,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 {
                     shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DestinationServiceCentreId));
                 }
-                
+
                 //filter by Local or International Shipment
                 if (filterOptionsDto.IsInternational != null)
                 {
@@ -335,7 +348,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             {
                 //filter by destination service center that is not cancelled
                 var shipment = _context.Shipment.AsQueryable().Where(x => x.IsCancelled == false);
-                
+
                 if (serviceCentreIds.Length > 0)
                 {
                     shipment = shipment.Where(s => serviceCentreIds.Contains(s.DestinationServiceCentreId));
@@ -569,7 +582,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  CompanyType = r.CompanyType,
                                                  CustomerCode = r.CustomerCode
                                              }).ToList();
-            
+
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
         }
 
@@ -643,7 +656,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
 
             if (f_Criteria.FilterCustomerType.HasValue && f_Criteria.CustomerId > 0)
-            {                
+            {
                 if (f_Criteria.FilterCustomerType.Equals(FilterCustomerType.IndividualCustomer))
                 {
                     shipments = shipments.Where(x => !x.CustomerType.Equals(CustomerType.Company.ToString()) && x.CustomerId == f_Criteria.CustomerId);
@@ -653,7 +666,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                     shipments = shipments.Where(x => x.CustomerType.Equals(CustomerType.Company.ToString()) && x.CustomerId == f_Criteria.CustomerId);
                 }
             }
-            
+
             List<ShipmentDTO> shipmentDto = (from r in shipments
                                              select new ShipmentDTO()
                                              {
@@ -704,7 +717,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  CompanyType = r.CompanyType,
                                                  CustomerCode = r.CustomerCode
                                              }).ToList();
-            
+
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
         }
 

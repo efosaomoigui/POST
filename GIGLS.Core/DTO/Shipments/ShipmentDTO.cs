@@ -6,6 +6,7 @@ using GIGLS.CORE.DTO;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.Core.DTO.Account;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -102,5 +103,8 @@ namespace GIGLS.Core.DTO.Shipments
 
         public bool IsCancelled { get; set; }
         public bool IsInternational { get; set; }
+
+        //Invoice Information
+        public InvoiceDTO Invoice { get; set; }
     }
 }
