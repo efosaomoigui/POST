@@ -335,7 +335,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //1. get all shipments at colletion centre for the service centre which status is ARF
                 var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF);
 
-                if(shipmentCollection == null)
+                if(shipmentCollection.Count() == 0)
                 {
                     return new List<ShipmentDTO>();
                 }
@@ -351,7 +351,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return shipmentsBySC;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 throw;
             }
