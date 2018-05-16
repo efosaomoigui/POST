@@ -46,8 +46,21 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
 
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetUsers()
         {
-            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType != UserType.System).AsEnumerable();
-            //var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType == UserType.Regular).AsEnumerable();
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType != UserType.System 
+                        && x.UserChannelType == UserChannelType.Employee).AsEnumerable();
+            return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
+        }
+
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers()
+        {
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && (x.UserChannelType == UserChannelType.Corporate 
+                        || x.UserChannelType == UserChannelType.Ecommerce || x.UserChannelType == UserChannelType.IndividualCustomer)).AsEnumerable();
+            return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
+        }
+
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsers()
+        {
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserChannelType == UserChannelType.Partner).AsEnumerable();
             return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
         }
 
