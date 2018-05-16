@@ -948,12 +948,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.IsCancelled = true;
 
                 var invoice = _uow.Invoice.SingleOrDefault(s => s.Waybill == waybill);
+                //2.2 Update Invoice PaymentStatus to cancelled
+                invoice.PaymentStatus = PaymentStatus.Cancelled;
+
                 if (invoice.PaymentStatus == PaymentStatus.Paid)
                 {
                     //2. Reverse accounting entries
-
-                    //2.2 Update shipment to cancelled
-                    invoice.PaymentStatus = PaymentStatus.Cancelled;
 
                     //2.3 Create new entry in General Ledger for Invoice amount (debit)
                     var currentUserId = await _userService.GetCurrentUserId();
