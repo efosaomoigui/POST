@@ -333,6 +333,7 @@ namespace GIGLS.Services.Business.Scanning
             var serviceCenters = await _userService.GetPriviledgeServiceCenters();
             var currentUserSercentreId = serviceCenters.Length > 0 ? serviceCenters[0] : 0;
             var currentUserId = await _userService.GetCurrentUserId();
+            var groupWaybillsInManifest = new HashSet<string>();
 
             //1. Only scan for manifest
             if (manifest != null)
@@ -372,11 +373,17 @@ namespace GIGLS.Services.Business.Scanning
                         groupWaybillNumberMapping.DepartureServiceCentreId = currentUserSercentreId;
                         _uow.Complete();
 
-                        //5. Remove entry from ManifestGroupWaybillNumberMappingService
-                        //5.1 Find the groupWaybill attached to the Manifest
-                        var groupWaybill = await _groupService.GetGroupForWaybillNumber(waybill);
-                        await _groupManifest.RemoveGroupWaybillNumberFromManifest(manifest.ManifestCode, groupWaybill.GroupWaybillCode);
+                        //5. Get the GroupWaybill numbers in the manifest
+                        groupWaybillsInManifest.Add(groupWaybillNumberMapping.GroupWaybillNumber);
                     }
+
+                    //6. Remove entry from ManifestGroupWaybillNumberMappingService
+                    //6.1 Find the groupWaybill attached to the Manifest
+                    foreach(var groupWaybill in groupWaybillsInManifest)
+                    {
+                        await _groupManifest.RemoveGroupWaybillNumberFromManifest(manifest.ManifestCode, groupWaybill);
+                    }
+
                 }
             }
 

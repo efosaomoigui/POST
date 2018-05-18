@@ -46,25 +46,11 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<List<InvoiceViewDTO>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
         {
-            var invoices = _uow.Invoice.GetAllFromInvoiceView();
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
 
-            //filter by CustomerId
-            if (f_Criteria.CustomerId > 0)
-            {
-                invoices = invoices.Where(s => s.CustomerId == f_Criteria.CustomerId);
-            }
-
-            //filter by CustomerType
-            if (f_Criteria.FilterCustomerType != null)
-            {
-                invoices = invoices.Where(s => s.CustomerType == f_Criteria.FilterCustomerType.ToString());
-            }
-
-            //filter by UserId
-            if (f_Criteria.UserId != null)
-            {
-                invoices = invoices.Where(s => s.UserId == f_Criteria.UserId);
-            }
+            var invoices = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.CustomerCode == currentUser.UserChannelCode).ToList();
 
             var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
             return await Task.FromResult(invoicesDto);
