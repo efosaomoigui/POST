@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
@@ -128,5 +129,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("dashboard")]
+        public async Task<IServiceResponse<DashboardDTO>> GetDashboard()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var dashboard = await _portalService.GetDashboard();
+
+                return new ServiceResponse<DashboardDTO>
+                {
+                    Object = dashboard
+                };
+            });
+        }
+
     }
 }
