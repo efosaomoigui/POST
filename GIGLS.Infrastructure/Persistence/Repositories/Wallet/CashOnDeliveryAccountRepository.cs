@@ -25,6 +25,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Wallet
             try
             {
                 var codAccounts = _context.CashOnDeliveryAccount.Include("Wallet").ToList();
+                codAccounts = codAccounts.OrderByDescending(x => x.DateCreated).ToList();
                 var codAccountsDto = Mapper.Map<IEnumerable<CashOnDeliveryAccountDTO>>(codAccounts);
                 return Task.FromResult(codAccountsDto);
             }

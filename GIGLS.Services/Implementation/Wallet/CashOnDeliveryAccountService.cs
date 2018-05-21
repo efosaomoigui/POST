@@ -44,22 +44,22 @@ namespace GIGLS.Services.Implementation.Wallet
                 cashOnDeliveryAccountDto.UserId = await _userService.GetCurrentUserId();
             }
 
-            var accountBalance = await _uow.CashOnDeliveryBalance.GetAsync(x => x.WalletId == wallet.WalletId);
+            //var accountBalance = await _uow.CashOnDeliveryBalance.GetAsync(x => x.WalletId == wallet.WalletId);
 
-            if (accountBalance == null)
-            {
-                var newBalance = new CashOnDeliveryBalance
-                {
-                    WalletId = wallet.WalletId,
-                    Balance = 0,
-                    UserId = cashOnDeliveryAccountDto.UserId
-                };
+            //if (accountBalance == null)
+            //{
+            //    var newBalance = new CashOnDeliveryBalance
+            //    {
+            //        WalletId = wallet.WalletId,
+            //        Balance = 0,
+            //        UserId = cashOnDeliveryAccountDto.UserId
+            //    };
 
-                _uow.CashOnDeliveryBalance.Add(newBalance);
-                await _uow.CompleteAsync();
+            //    _uow.CashOnDeliveryBalance.Add(newBalance);
+            //    await _uow.CompleteAsync();
 
-                accountBalance = await _uow.CashOnDeliveryBalance.GetAsync(newBalance.CashOnDeliveryBalanceId);
-            }
+            //    accountBalance = await _uow.CashOnDeliveryBalance.GetAsync(newBalance.CashOnDeliveryBalanceId);
+            //}
 
             //create COD Account and all COD Account for the wallet
             cashOnDeliveryAccountDto.Wallet = null;
@@ -68,23 +68,6 @@ namespace GIGLS.Services.Implementation.Wallet
             newCODAccount.UserId = cashOnDeliveryAccountDto.UserId;
             _uow.CashOnDeliveryAccount.Add(newCODAccount);
             await _uow.CompleteAsync();
-
-            //calculate balance for code (Unprocessed amounts)
-            var CODTransactions =
-                await _uow.CashOnDeliveryAccount.FindAsync(s => s.WalletId == wallet.WalletId && s.CODStatus == CODStatus.Pending);
-            decimal balance = 0;
-            foreach (var item in CODTransactions)
-            {
-                if (item.CreditDebitType == CreditDebitType.Credit)
-                {
-                    balance += item.Amount;
-                }
-
-                //update status to processed
-                item.CODStatus = CODStatus.Processed;
-            }
-
-            accountBalance.Balance = balance;
 
             //add to wallet transaction and wallet
             await _walletService.UpdateWallet(wallet.WalletId, new WalletTransactionDTO
@@ -237,13 +220,13 @@ namespace GIGLS.Services.Implementation.Wallet
                 var cashOnDeliveryAccount = await _uow.CashOnDeliveryAccount.GetAsync(unprocessedAccount.CashOnDeliveryAccountId);
                 cashOnDeliveryAccount.CODStatus = CODStatus.Pending;
 
-                //2. update balance
-                var accountBalance = await _uow.CashOnDeliveryBalance.GetAsync(x => x.WalletId == unprocessedAccount.WalletId);
+                ////2. update balance
+                //var accountBalance = await _uow.CashOnDeliveryBalance.GetAsync(x => x.WalletId == unprocessedAccount.WalletId);
 
-                if (unprocessedAccount.CreditDebitType == CreditDebitType.Credit)
-                {
-                    accountBalance.Balance -= unprocessedAccount.Amount;
-                }
+                //if (unprocessedAccount.CreditDebitType == CreditDebitType.Credit)
+                //{
+                //    accountBalance.Balance -= unprocessedAccount.Amount;
+                //}
 
                 //3. complete transaction
                 await _uow.CompleteAsync();
@@ -257,15 +240,27 @@ namespace GIGLS.Services.Implementation.Wallet
 
             foreach (var cashOnDeliveryBalance in listOfPendingCashOnDeliverys)
             {
+                var walletId = cashOnDeliveryBalance.Wallet.WalletId;
                 var cashOnDeliveryAccount = new CashOnDeliveryAccountDTO
                 {
                     Amount = cashOnDeliveryBalance.Balance,
                     Wallet = cashOnDeliveryBalance.Wallet,
                     CreditDebitType = CreditDebitType.Debit,
-                    Description = "Debit for COD Payment Settlement"
+                    Description = "Debit for COD Payment Settlement",
+                    CODStatus = CODStatus.Processed
                 };
 
                 await AddCashOnDeliveryAccount(cashOnDeliveryAccount);
+
+                //update status to processed
+                var CODTransactions =
+                    await _uow.CashOnDeliveryAccount.FindAsync(s => s.WalletId == walletId && s.CODStatus == CODStatus.Pending);
+                foreach (var item in CODTransactions)
+                {
+                    item.CODStatus = CODStatus.Processed;
+                }
+                await _uow.CompleteAsync();
+
             }
         }
     }
