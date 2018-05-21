@@ -43,6 +43,7 @@ namespace GIGLS.WebApi.Providers
 
             context.Validated();
             return Task.FromResult<object>(null);
+
         }
 
 
@@ -67,6 +68,7 @@ namespace GIGLS.WebApi.Providers
             }
 
             return identity;
+
         }
 
 
@@ -88,11 +90,15 @@ namespace GIGLS.WebApi.Providers
                     return;
                 }
 
-                if (user.SystemUserId == null)
+                if (user.UserChannelType == Core.Enums.UserChannelType.Employee)
                 {
-                    context.SetError("invalid_grant", "The user has not been assigned a role.");
-                    return;
+                    if (user.SystemUserId == null)
+                    {
+                        context.SetError("invalid_grant", "The user has not been assigned a role.");
+                        return;
+                    }
                 }
+
 
                 //if (!user.LockoutEnabled) 
                 //{
@@ -120,38 +126,45 @@ namespace GIGLS.WebApi.Providers
 
                 //get claims for the user
                 var claimsStringArray = "";
-                foreach(var claim in user.Claims)
+
+                foreach (var claim in user.Claims)
                 {
                     claimsStringArray += claim.ClaimValue + ",";
                 }
+
                 authPropDictionary.Add("Claim", claimsStringArray);
 
                 //get roles for the user
                 var roleIds = from ur in user.Roles select ur.RoleId;
                 var roles = _repo._roleManager.Roles.Where(s => roleIds.Contains(s.Id));
                 var rolesStringArray = "";
+
                 foreach (var role in roles)
                 {
                     rolesStringArray += role.Name + ",";
                 }
+
                 authPropDictionary.Add("Role", rolesStringArray);
 
                 var props = new AuthenticationProperties(authPropDictionary);
                 var ticket = new AuthenticationTicket(oAuthIdentity, props);
 
                 context.Validated(ticket);
+
             }
         }
 
 
         public override Task TokenEndpoint(OAuthTokenEndpointContext context)
         {
+
             foreach (KeyValuePair<string, string> property in context.Properties.Dictionary)
             {
                 context.AdditionalResponseParameters.Add(property.Key, property.Value);
             }
 
             return Task.FromResult<object>(null);
+
         }
     }
 }

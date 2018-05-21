@@ -42,6 +42,7 @@ namespace GIGLS.WebApi
                 RequireLowercase = true,
                 RequireUppercase = true,
             };
+
             //manager.SmsService = new Smsservice(); //Not created yet
             var dataProtectionProvider = options.DataProtectionProvider;
 
