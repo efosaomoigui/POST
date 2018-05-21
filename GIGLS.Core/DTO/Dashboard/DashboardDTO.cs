@@ -24,5 +24,6 @@ namespace GIGLS.Core.DTO.Dashboard
         public int TargetOrder { get; set; }
         public List<ShipmentDTO> ShipmentsOrderedByServiceCenter { get; set; }
         public List<ServiceCentreDTO> ServiceCentersForTarget { get; set; }
+        public decimal WalletBalance { get; set; }
     }
 }

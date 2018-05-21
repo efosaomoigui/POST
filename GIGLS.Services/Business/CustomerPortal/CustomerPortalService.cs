@@ -16,6 +16,7 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.IServices.CashOnDeliveryAccount;
 using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.DTO.Dashboard;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -70,10 +71,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<InvoiceDTO> GetInvoiceByWaybill(string waybill)
         {
             var invoice = await _invoiceService.GetInvoiceByWaybill(waybill);
-            if(invoice != null)
+            if (invoice != null)
             {
                 var shipmentPreparedBy = await _userService.GetUserById(invoice.Shipment.UserId);
-                invoice.Shipment.UserId = shipmentPreparedBy.LastName + " " + shipmentPreparedBy.FirstName; 
+                invoice.Shipment.UserId = shipmentPreparedBy.LastName + " " + shipmentPreparedBy.FirstName;
             }
             return invoice;
         }
@@ -112,5 +113,25 @@ namespace GIGLS.Services.Business.CustomerPortal
             var transaction = await _uow.PaymentPartialTransaction.FindAsync(x => x.Waybill.Equals(waybill));
             return Mapper.Map<IEnumerable<PaymentPartialTransactionDTO>>(transaction);
         }
+
+        public async Task<DashboardDTO> GetDashboard()
+        {
+            var dashboardDTO = new DashboardDTO();
+
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+            var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == currentUser.UserChannelCode);
+
+            var invoices = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.CustomerCode == currentUser.UserChannelCode).ToList();
+            var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
+
+            // 
+            dashboardDTO.TotalShipmentOrdered = invoices.Count();
+            dashboardDTO.WalletBalance = wallet.Balance;
+
+            return await Task.FromResult(dashboardDTO);
+        }
+
     }
 }

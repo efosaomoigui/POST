@@ -44,7 +44,7 @@ namespace GIGLS.Services.Implementation.User
             user.Id = Guid.NewGuid().ToString();
             user.DateCreated = DateTime.Now.Date;
             user.DateModified = DateTime.Now.Date;
-            user.UserName = user.Email;
+            user.UserName = (user.UserChannelType == UserChannelType.Employee) ? user.Email: user.UserChannelCode;
 
             var u = await _unitOfWork.User.RegisterUser(user, userDto.Password);
             return u;
