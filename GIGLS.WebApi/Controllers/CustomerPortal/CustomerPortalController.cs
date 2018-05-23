@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Services.Implementation;
@@ -23,10 +24,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
     public class CustomerPortalController : BaseWebApiController
     {
         private readonly ICustomerPortalService _portalService;
+        private readonly IPricingService _pricing;
 
-        public CustomerPortalController(ICustomerPortalService portalService) : base(nameof(CustomerPortalController))
+        public CustomerPortalController(ICustomerPortalService portalService, IPricingService pricingService) : base(nameof(CustomerPortalController))
         {
             _portalService = portalService;
+            _pricing = pricingService;
         }
 
         [HttpPost]
@@ -265,6 +268,36 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<DomesticRouteZoneMapDTO>
                 {
                     Object = zone
+                };
+            });
+        }
+        
+        [HttpPost]
+        [Route("price")]
+        public async Task<IServiceResponse<decimal>> GetPrice(PricingDTO pricingDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var price = await _pricing.GetPrice(pricingDto);
+
+                return new ServiceResponse<decimal>
+                {
+                    Object = price
+                };
+            });
+        }
+        
+        [HttpPost]
+        [Route("haulageprice")]
+        public async Task<IServiceResponse<decimal>> GetHaulagePrice(HaulagePricingDTO haulagePricingDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var price = await _pricing.GetHaulagePrice(haulagePricingDto);
+
+                return new ServiceResponse<decimal>
+                {
+                    Object = price
                 };
             });
         }

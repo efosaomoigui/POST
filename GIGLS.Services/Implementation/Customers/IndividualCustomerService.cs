@@ -97,7 +97,7 @@ namespace GIGLS.Services.Implementation.Customers
                         UserChannelType = UserChannelType.IndividualCustomer
                     });
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // do nothing
                 }
