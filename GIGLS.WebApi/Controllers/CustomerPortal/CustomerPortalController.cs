@@ -8,7 +8,6 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Services.Implementation;
@@ -24,12 +23,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
     public class CustomerPortalController : BaseWebApiController
     {
         private readonly ICustomerPortalService _portalService;
-        private readonly IPricingService _pricing;
 
-        public CustomerPortalController(ICustomerPortalService portalService, IPricingService pricingService) : base(nameof(CustomerPortalController))
+        public CustomerPortalController(ICustomerPortalService portalService) : base(nameof(CustomerPortalController))
         {
             _portalService = portalService;
-            _pricing = pricingService;
         }
 
         [HttpPost]
