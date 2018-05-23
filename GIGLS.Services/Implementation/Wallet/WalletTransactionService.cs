@@ -70,7 +70,7 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 throw new GenericException("Wallet Transaction information does not exist");
             }
-            var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions);
+            var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(s => s.DateCreated));
 
             // get the service centre
             foreach(var item in walletTransactionDTOList)
