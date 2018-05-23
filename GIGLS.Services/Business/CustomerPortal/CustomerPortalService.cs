@@ -1,5 +1,4 @@
 ﻿using GIGLS.Core.IServices.CustomerPortal;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Account;
@@ -21,7 +20,6 @@ using GIGLS.Infrastructure;
 using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO;
 
@@ -182,11 +180,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _uow.DeliveryOption.GetDeliveryOptions();
         }
 
-        public Task<List<CompanyDTO>> GetCompanies()
-        {
-            return _uow.Company.GetCompanies();
-        }
-
         public Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages()
         {
             return Task.FromResult(Mapper.Map<IEnumerable<SpecialDomesticPackage>, IEnumerable<SpecialDomesticPackageDTO>>(_uow.SpecialDomesticPackage.GetAll()));
@@ -198,6 +191,33 @@ namespace GIGLS.Services.Business.CustomerPortal
             return haulages;
         }
 
+        public async Task<IEnumerable<InsuranceDTO>> GetInsurances()
+        {
+            var insurances = await _uow.Insurance.GetInsurancesAsync();
+            return insurances;
+        }
 
+        public async Task<IEnumerable<VATDTO>> GetVATs()
+        {
+            var vats = await _uow.VAT.GetVATsAsync();
+            return vats;
+        }
+
+        public async Task<DomesticRouteZoneMapDTO> GetZone(int departure, int destination)
+        {
+            // get serviceCenters
+            var departureServiceCenter = _uow.ServiceCentre.Get(departure);
+            var destinationServiceCenter = _uow.ServiceCentre.Get(destination);
+
+            // use Stations
+            var routeZoneMap = await _uow.DomesticRouteZoneMap.GetAsync(r =>
+                r.DepartureId == departureServiceCenter.StationId &&
+                r.DestinationId == destinationServiceCenter.StationId, "Zone,Destination,Departure");
+
+            if (routeZoneMap == null)
+                throw new GenericException("The Mapping of Route to Zone does not exist");
+
+            return Mapper.Map<DomesticRouteZoneMapDTO>(routeZoneMap);
+        }
     }
 }

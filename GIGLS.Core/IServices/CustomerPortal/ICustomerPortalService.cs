@@ -1,6 +1,5 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.PaymentTransactions;
@@ -30,8 +29,11 @@ namespace GIGLS.Core.IServices.CustomerPortal
         int GetStatesTotal();
         Task<List<ServiceCentreDTO>> GetLocalServiceCentres();
         Task<IEnumerable<DeliveryOptionDTO>> GetDeliveryOptions();
-        Task<List<CompanyDTO>> GetCompanies();
         Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
         Task<IEnumerable<HaulageDTO>> GetHaulages();
+        Task<IEnumerable<InsuranceDTO>> GetInsurances();
+        Task<IEnumerable<VATDTO>> GetVATs();
+        Task<DomesticRouteZoneMapDTO> GetZone(int departure, int destination);
+
     }
 }

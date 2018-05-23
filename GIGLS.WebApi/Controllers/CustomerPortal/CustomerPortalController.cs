@@ -1,6 +1,5 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.PaymentTransactions;
@@ -13,6 +12,7 @@ using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Services.Implementation;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -168,7 +168,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpGet]
-        [Route("servicecentre/local")]
+        [Route("localservicecentre")]
         public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetLocalServiceCentres()
         {
             return await HandleApiOperationAsync(async () =>
@@ -182,7 +182,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpGet]
-        [Route("")]
+        [Route("deliveryoption")]
         public async Task<IServiceResponse<IEnumerable<DeliveryOptionDTO>>> GetDeliveryOptions()
         {
             return await HandleApiOperationAsync(async () =>
@@ -197,21 +197,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpGet]
-        [Route("")]
-        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompanies()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var companies = await _portalService.GetCompanies();
-                return new ServiceResponse<IEnumerable<CompanyDTO>>
-                {
-                    Object = companies
-                };
-            });
-        }
-
-        [HttpGet]
-        [Route("")]
+        [Route("specialdomesticpackage")]
         public async Task<IServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>> GetSpecialDomesticPackages()
         {
             return await HandleApiOperationAsync(async () =>
@@ -226,7 +212,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpGet]
-        [Route("")]
+        [Route("haulage")]
         public async Task<IServiceResponse<IEnumerable<HaulageDTO>>> GetHaulages()
         {
             return await HandleApiOperationAsync(async () =>
@@ -236,6 +222,49 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<IEnumerable<HaulageDTO>>
                 {
                     Object = haulage
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("vat")]
+        public async Task<IServiceResponse<VATDTO>> GetVATs()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var vat = await _portalService.GetVATs();
+                return new ServiceResponse<VATDTO>
+                {
+                    Object = vat.FirstOrDefault()
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("insurance")]
+        public async Task<IServiceResponse<InsuranceDTO>> GetInsurances()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var insurance = await _portalService.GetInsurances();
+                return new ServiceResponse<InsuranceDTO>
+                {
+                    Object = insurance.FirstOrDefault()
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("{departure:int}/{destination:int}")]
+        public async Task<IServiceResponse<DomesticRouteZoneMapDTO>> GetZone(int departure, int destination)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var zone = await _portalService.GetZone(departure, destination);
+
+                return new ServiceResponse<DomesticRouteZoneMapDTO>
+                {
+                    Object = zone
                 };
             });
         }
