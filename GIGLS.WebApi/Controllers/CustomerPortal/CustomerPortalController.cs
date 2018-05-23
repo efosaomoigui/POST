@@ -278,7 +278,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var price = await _pricing.GetPrice(pricingDto);
+                var price = await _portalService.GetPrice(pricingDto);
 
                 return new ServiceResponse<decimal>
                 {
@@ -293,7 +293,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var price = await _pricing.GetHaulagePrice(haulagePricingDto);
+                var price = await _portalService.GetHaulagePrice(haulagePricingDto);
 
                 return new ServiceResponse<decimal>
                 {

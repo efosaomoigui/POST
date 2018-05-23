@@ -34,10 +34,13 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IUserService _userService;
         private readonly IWalletTransactionService _iWalletTransactionService;
         private readonly ICashOnDeliveryAccountService _iCashOnDeliveryAccountService;
+        private readonly IPricingService _pricing;
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService,
-            IWalletTransactionService iWalletTransactionService, ICashOnDeliveryAccountService iCashOnDeliveryAccountService)
+            IWalletTransactionService iWalletTransactionService, 
+            ICashOnDeliveryAccountService iCashOnDeliveryAccountService,
+            IPricingService pricingService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -45,6 +48,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _userService = userService;
             _iWalletTransactionService = iWalletTransactionService;
             _iCashOnDeliveryAccountService = iCashOnDeliveryAccountService;
+            _pricing = pricingService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -219,5 +223,16 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return Mapper.Map<DomesticRouteZoneMapDTO>(routeZoneMap);
         }
+
+        public async Task<decimal> GetPrice(PricingDTO pricingDto)
+        {
+            return await _pricing.GetPrice(pricingDto);
+        }
+
+        public async Task<decimal> GetHaulagePrice(HaulagePricingDTO haulagePricingDto)
+        {
+            return await _pricing.GetHaulagePrice(haulagePricingDto);
+        }
+
     }
 }

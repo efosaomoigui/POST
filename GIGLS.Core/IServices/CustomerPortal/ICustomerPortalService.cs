@@ -34,6 +34,8 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<IEnumerable<InsuranceDTO>> GetInsurances();
         Task<IEnumerable<VATDTO>> GetVATs();
         Task<DomesticRouteZoneMapDTO> GetZone(int departure, int destination);
+        Task<decimal> GetPrice(PricingDTO pricingDto);
+        Task<decimal> GetHaulagePrice(HaulagePricingDTO pricingDto);
 
     }
 }
