@@ -126,7 +126,7 @@ namespace GIGLS.Services.Implementation.Customers
                         UserChannelType = userChannelType
                     });
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // do nothing
                 }
@@ -336,7 +336,7 @@ namespace GIGLS.Services.Implementation.Customers
                             UserChannelType = userChannelType
                         });
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         throw;
                     }

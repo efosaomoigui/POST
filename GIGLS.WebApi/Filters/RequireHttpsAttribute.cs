@@ -34,7 +34,6 @@ namespace GIGLS.WebApi.Filters
                     actionContext.Response = request.CreateResponse(HttpStatusCode.NotFound);
                     actionContext.Response.Content = new StringContent(requestHtml, Encoding.UTF8, "text/html");
                 }
-
             }
         }
     }

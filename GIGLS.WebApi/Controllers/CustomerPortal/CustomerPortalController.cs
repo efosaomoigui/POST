@@ -1,13 +1,18 @@
-﻿using GIGLS.Core.DTO.Account;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Dashboard;
+using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Services.Implementation;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -17,13 +22,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
     [RoutePrefix("api/portal")]
     public class CustomerPortalController : BaseWebApiController
     {
-        private readonly ICustomerPortalService _portalService; 
-        
+        private readonly ICustomerPortalService _portalService;
+
         public CustomerPortalController(ICustomerPortalService portalService) : base(nameof(CustomerPortalController))
         {
             _portalService = portalService;
         }
-        
+
         [HttpPost]
         [Route("transaction")]
         public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
@@ -38,14 +43,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpGet]
         [Route("wallet")]
         public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactions()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var walletTransactionSummary = await _portalService.GetWalletTransactions(); 
+                var walletTransactionSummary = await _portalService.GetWalletTransactions();
 
                 return new ServiceResponse<WalletTransactionSummaryDTO>
                 {
@@ -53,7 +58,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpGet]
         [Route("invoice")]
         public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetInvoices()
@@ -68,7 +73,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpGet]
         [Route("bywaybill/{waybill}")]
         public async Task<IServiceResponse<InvoiceDTO>> GetInvoiceByWaybill([FromUri]  string waybill)
@@ -83,7 +88,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [AllowAnonymous]
         [HttpGet]
         [Route("{waybillNumber}")]
@@ -99,7 +104,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpGet]
         [Route("cod")]
         public async Task<IServiceResponse<CashOnDeliveryAccountSummaryDTO>> GetCashOnDeliveryAccount()
@@ -114,7 +119,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpGet]
         [Route("partialPaymentTransaction/{waybill}")]
         public async Task<IServiceResponse<IEnumerable<PaymentPartialTransactionDTO>>> GetPartialPaymentTransaction(string waybill)
@@ -141,6 +146,155 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<DashboardDTO>
                 {
                     Object = dashboard
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("state")]
+        public async Task<IServiceResponse<IEnumerable<StateDTO>>> GetStates(int pageSize = 10, int page = 1)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var state = await _portalService.GetStates(pageSize, page);
+                var total = _portalService.GetStatesTotal();
+
+                return new ServiceResponse<IEnumerable<StateDTO>>
+                {
+                    Total = total,
+                    Object = state
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("localservicecentre")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetLocalServiceCentres()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _portalService.GetLocalServiceCentres();
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("deliveryoption")]
+        public async Task<IServiceResponse<IEnumerable<DeliveryOptionDTO>>> GetDeliveryOptions()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var delivery = await _portalService.GetDeliveryOptions();
+
+                return new ServiceResponse<IEnumerable<DeliveryOptionDTO>>
+                {
+                    Object = delivery
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("specialdomesticpackage")]
+        public async Task<IServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>> GetSpecialDomesticPackages()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var packages = await _portalService.GetSpecialDomesticPackages();
+
+                return new ServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>
+                {
+                    Object = packages
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("haulage")]
+        public async Task<IServiceResponse<IEnumerable<HaulageDTO>>> GetHaulages()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var haulage = await _portalService.GetHaulages();
+
+                return new ServiceResponse<IEnumerable<HaulageDTO>>
+                {
+                    Object = haulage
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("vat")]
+        public async Task<IServiceResponse<VATDTO>> GetVATs()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var vat = await _portalService.GetVATs();
+                return new ServiceResponse<VATDTO>
+                {
+                    Object = vat.FirstOrDefault()
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("insurance")]
+        public async Task<IServiceResponse<InsuranceDTO>> GetInsurances()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var insurance = await _portalService.GetInsurances();
+                return new ServiceResponse<InsuranceDTO>
+                {
+                    Object = insurance.FirstOrDefault()
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("{departure:int}/{destination:int}")]
+        public async Task<IServiceResponse<DomesticRouteZoneMapDTO>> GetZone(int departure, int destination)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var zone = await _portalService.GetZone(departure, destination);
+
+                return new ServiceResponse<DomesticRouteZoneMapDTO>
+                {
+                    Object = zone
+                };
+            });
+        }
+        
+        [HttpPost]
+        [Route("price")]
+        public async Task<IServiceResponse<decimal>> GetPrice(PricingDTO pricingDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var price = await _portalService.GetPrice(pricingDto);
+
+                return new ServiceResponse<decimal>
+                {
+                    Object = price
+                };
+            });
+        }
+        
+        [HttpPost]
+        [Route("haulageprice")]
+        public async Task<IServiceResponse<decimal>> GetHaulagePrice(HaulagePricingDTO haulagePricingDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var price = await _portalService.GetHaulagePrice(haulagePricingDto);
+
+                return new ServiceResponse<decimal>
+                {
+                    Object = price
                 };
             });
         }

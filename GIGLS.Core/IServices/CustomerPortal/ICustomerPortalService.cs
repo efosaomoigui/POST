@@ -1,8 +1,12 @@
-﻿using GIGLS.Core.DTO.Account;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Dashboard;
+using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.DTO.Zone;
 using GIGLS.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,5 +23,19 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<CashOnDeliveryAccountSummaryDTO> GetCashOnDeliveryAccount();
         Task<IEnumerable<PaymentPartialTransactionDTO>> GetPartialPaymentTransaction(string waybill);
         Task<DashboardDTO> GetDashboard();
+
+        //For Quick Quotes
+        Task<IEnumerable<StateDTO>> GetStates(int pageSize = 10, int page = 1);
+        int GetStatesTotal();
+        Task<List<ServiceCentreDTO>> GetLocalServiceCentres();
+        Task<IEnumerable<DeliveryOptionDTO>> GetDeliveryOptions();
+        Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
+        Task<IEnumerable<HaulageDTO>> GetHaulages();
+        Task<IEnumerable<InsuranceDTO>> GetInsurances();
+        Task<IEnumerable<VATDTO>> GetVATs();
+        Task<DomesticRouteZoneMapDTO> GetZone(int departure, int destination);
+        Task<decimal> GetPrice(PricingDTO pricingDto);
+        Task<decimal> GetHaulagePrice(HaulagePricingDTO pricingDto);
+
     }
 }

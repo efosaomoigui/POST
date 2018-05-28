@@ -351,7 +351,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return shipmentsBySC;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw;
             }
