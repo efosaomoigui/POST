@@ -11,6 +11,7 @@ using GIGLS.Core.IServices.Fleets;
 using System.Collections.Generic;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
+using GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Business.Scanning
 {
@@ -291,9 +292,10 @@ namespace GIGLS.Services.Business.Scanning
             
             //////////////////////4. Check and Create Entries for Transit Manifest
             await CheckAndCreateEntriesForTransitManifest(scan, manifest, waybillsInManifest);
-
+            
             return true;
         }
+
 
         private async Task ProcessReturnWaybillFromDispatch(string waybill)
         {
@@ -389,5 +391,6 @@ namespace GIGLS.Services.Business.Scanning
 
             return true;
         }
+
     }
 }
