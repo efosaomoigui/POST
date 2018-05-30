@@ -10,6 +10,7 @@ using GIGLS.CORE.Domain;
 using GIGLS.Core.IServices.User;
 using System.Linq;
 using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.IMessageService;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -17,11 +18,13 @@ namespace GIGLS.Services.Implementation.Shipments
     {
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
+        private readonly IMessageSenderService _messageSenderService;
 
-        public ShipmentTrackingService(IUnitOfWork uow, IUserService userService)
+        public ShipmentTrackingService(IUnitOfWork uow, IUserService userService, IMessageSenderService messageSenderService)
         {
             _uow = uow;
             _userService = userService;
+            _messageSenderService = messageSenderService;
         }
 
         public async Task<object> AddShipmentTracking(ShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus)
@@ -38,9 +41,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 if(tracking.Location == null)
                 {
                     var UserServiceCenters = await _userService.GetPriviledgeServiceCenters();
+
+                    //default sc
+                    if (UserServiceCenters.Length <= 0)
+                    {
+                        UserServiceCenters = new int[] { 0 };
+                        var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
+                        UserServiceCenters[0] = defaultServiceCenter.ServiceCentreId;
+                    }
+
                     var serviceCenter = await _uow.ServiceCentre.GetAsync(UserServiceCenters[0]);
                     tracking.Location = serviceCenter.Name;
                 }
+
+
 
                 if (scanStatus.Equals(ShipmentScanStatus.ARF))
                 {
@@ -70,6 +84,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.ShipmentTracking.Add(newShipmentTracking);
 
                     Id = newShipmentTracking.ShipmentTrackingId;
+
+                    //send sms and email
+                    await sendSMSEmail(tracking, scanStatus);
                 }
                 
                 await _uow.CompleteAsync();
@@ -80,6 +97,25 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+
+        private async Task<bool> sendSMSEmail(ShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus)
+        {
+            var messageType = MessageType.ShipmentCreation;
+            foreach(var item in Enum.GetValues(typeof(MessageType)).Cast<MessageType>())
+            {
+                if(item.ToString() == scanStatus.ToString())
+                {
+                    messageType = (MessageType)Enum.Parse(typeof(MessageType), scanStatus.ToString());
+                    break;
+                }
+            }
+
+            //send message
+            await _messageSenderService.SendMessage(messageType, EmailSmsType.All, tracking);
+
+            return true;
         }
 
         public Task DeleteShipmentTracking(int trackingId)
