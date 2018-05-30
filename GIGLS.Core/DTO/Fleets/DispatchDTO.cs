@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 
@@ -13,6 +14,7 @@ namespace GIGLS.Core.DTO.Fleets
         public int RescuedDispatchId { get; set; }
         public DispatchDTO RescuedDispatch { get; set; }
         public string DriverDetail { get; set; }
+        public UserDTO UserDetail { get; set; }         
         public string DispatchedBy { get; set; }
         public string ReceivedBy { get; set; }
         public DispatchCategory DispatchCategory { get; set; }
