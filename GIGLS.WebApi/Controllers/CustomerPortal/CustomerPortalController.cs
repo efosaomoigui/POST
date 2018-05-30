@@ -89,7 +89,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [AllowAnonymous]
         [HttpGet]
         [Route("{waybillNumber}")]
         public async Task<IServiceResponse<IEnumerable<ShipmentTrackingDTO>>> TrackShipment(string waybillNumber)
@@ -97,6 +96,22 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _portalService.TrackShipment(waybillNumber);
+
+                return new ServiceResponse<IEnumerable<ShipmentTrackingDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("public/{waybillNumber}")]
+        public async Task<IServiceResponse<IEnumerable<ShipmentTrackingDTO>>> PublicTrackShipment(string waybillNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.PublicTrackShipment(waybillNumber);
 
                 return new ServiceResponse<IEnumerable<ShipmentTrackingDTO>>
                 {

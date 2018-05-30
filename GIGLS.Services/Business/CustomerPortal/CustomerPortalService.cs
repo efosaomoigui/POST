@@ -123,6 +123,12 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
+        public async Task<IEnumerable<ShipmentTrackingDTO>> PublicTrackShipment(string waybillNumber)
+        {
+            var result = await _iShipmentTrackService.TrackShipment(waybillNumber);            
+            return result;
+        }
+
         public async Task<CashOnDeliveryAccountSummaryDTO> GetCashOnDeliveryAccount()
         {
             //get the current login user 
