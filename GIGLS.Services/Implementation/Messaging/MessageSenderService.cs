@@ -11,6 +11,8 @@ using GIGLS.Core;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.IServices.MessagingLog;
+using GIGLS.Core.DTO.MessagingLog;
 
 namespace GIGLS.Services.Implementation.Messaging
 {
@@ -23,11 +25,14 @@ namespace GIGLS.Services.Implementation.Messaging
         //private readonly IInvoiceService _invoiceService;
         private readonly ICustomerService _customerService;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly ISmsSendLogService _iSmsSendLogService;
+        private readonly IEmailSendLogService _iEmailSendLogService;
 
         public MessageSenderService(IUnitOfWork uow, IEmailService emailService, ISMSService sMSService,
             IMessageService messageService,
             //IInvoiceService invoiceService, 
             ICustomerService customerService,
+            ISmsSendLogService iSmsSendLogService, IEmailSendLogService iEmailSendLogService,
             IGlobalPropertyService globalPropertyService)
         {
             _uow = uow;
@@ -37,6 +42,8 @@ namespace GIGLS.Services.Implementation.Messaging
             //_invoiceService = invoiceService;
             _customerService = customerService;
             _globalPropertyService = globalPropertyService;
+            _iSmsSendLogService = iSmsSendLogService;
+            _iEmailSendLogService = iEmailSendLogService;
         }
 
         public async Task<bool> SendMessage(MessageType messageType, EmailSmsType emailSmsType, object obj)
@@ -73,39 +80,48 @@ namespace GIGLS.Services.Implementation.Messaging
 
         private async Task SendEmailMessage(MessageType messageType, object obj)
         {
+            var messageDTO = new MessageDTO();
+            var result = "";
+
             try
             {
                 var emailMessages = await _messageService.GetEmailAsync();
-                var messageDTO = emailMessages.FirstOrDefault(s => s.MessageType == messageType);
+                messageDTO = emailMessages.FirstOrDefault(s => s.MessageType == messageType);
 
-                //prepare message finalBody
-                await PrepareMessageFinalBody(messageDTO, obj);
-                await _emailService.SendAsync(messageDTO);
+                if (messageDTO != null)
+                {
+                    //prepare message finalBody
+                    await PrepareMessageFinalBody(messageDTO, obj);
+                    result = await _emailService.SendAsync(messageDTO);
+                    await LogEmailMessage(messageDTO, result);
+                }
             }
-            catch(Exception)
+            catch(Exception ex)
             {
-
+                await LogEmailMessage(messageDTO, result, ex.Message);
             }
         }
 
         private async Task<bool> SendSMSMessage(MessageType messageType, object obj)// example obj is dtos
         {
+            var messageDTO = new MessageDTO();
+            var result = "";
             try
             {
                 var smsMessages = await _messageService.GetSmsAsync();
-                var messageDTO = smsMessages.FirstOrDefault(s => s.MessageType == messageType);
+                messageDTO = smsMessages.FirstOrDefault(s => s.MessageType == messageType);
 
                 if(messageDTO != null)
                 {
                     //prepare message finalBody
                     await PrepareMessageFinalBody(messageDTO, obj);
-
-                    await _sMSService.SendAsync(messageDTO);
+                    result = await _sMSService.SendAsync(messageDTO);
+                    await LogSMSMessage(messageDTO, result);
                 }
             }
             catch (Exception ex)
             {
-
+                await LogEmailMessage(messageDTO, result, ex.Message);
             }
             return true;
         }
@@ -194,6 +210,52 @@ namespace GIGLS.Services.Implementation.Messaging
             messageDTO.To = toPhoneNumber;
 
             return await Task.FromResult(true);
+        }
+
+        private async Task<bool> LogEmailMessage(MessageDTO messageDTO, string result, string exceptiomMessage = null)
+        {
+            try
+            {
+                await _iSmsSendLogService.AddSmsSendLog(new SmsSendLogDTO()
+                {
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now,
+                    From = messageDTO.From,
+                    To = messageDTO.To,
+                    Message = messageDTO.FinalBody,
+                    Status = exceptiomMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
+                    ResultStatus = result,
+                    ResultDescription = exceptiomMessage
+                });
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return true;
+        }
+
+        private async Task<bool> LogSMSMessage(MessageDTO messageDTO, string result, string exceptiomMessage = null)
+        {
+            try
+            {
+                await _iEmailSendLogService.AddEmailSendLog(new EmailSendLogDTO()
+                {
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now,
+                    From = messageDTO.From,
+                    To = messageDTO.To,
+                    Message = messageDTO.FinalBody,
+                    Status = exceptiomMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
+                    ResultStatus = result,
+                    ResultDescription = exceptiomMessage
+                });
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return true;
         }
 
     }

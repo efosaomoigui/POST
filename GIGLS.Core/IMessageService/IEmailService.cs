@@ -6,6 +6,6 @@ namespace GIGLS.Core.IMessage
 {
     public interface IEmailService : IServiceDependencyMarker
     {
-        Task SendAsync(MessageDTO message);
+        Task<string> SendAsync(MessageDTO message);
     }
 }

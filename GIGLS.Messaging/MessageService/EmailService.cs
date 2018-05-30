@@ -9,12 +9,13 @@ namespace GIGLS.Messaging.MessageService
 {
     public class EmailService : IEmailService
     {
-        public async Task SendAsync(MessageDTO message)
+        public async Task<string> SendAsync(MessageDTO message)
         {
-            await ConfigSendGridasync(message);
+            var result = await ConfigSendGridasync(message);
+            return result;
         }
 
-        private async Task ConfigSendGridasync(MessageDTO message)
+        private async Task<string> ConfigSendGridasync(MessageDTO message)
         {
             var myMessage = new SendGridMessage();
             var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
@@ -30,6 +31,7 @@ namespace GIGLS.Messaging.MessageService
             var client = new SendGridClient(apiKey);
 
             var response = await client.SendEmailAsync(myMessage);
+            return response.StatusCode.ToString();
         }
 
         // Use NuGet to install SendGrid (Basic C# client lib) 

@@ -65,7 +65,24 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
-        
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("waybillsinmanifestfordispatch")]
+        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetWaybillsInManifestForDispatch()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var groupWaybillNumbersInManifest = await _service.GetWaybillsInManifestForDispatch();
+
+                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                {
+                    Object = groupWaybillNumbersInManifest
+                };
+            });
+        }
+
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("manifestforwaybill/{waybill}")]

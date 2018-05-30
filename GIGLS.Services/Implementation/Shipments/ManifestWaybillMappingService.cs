@@ -164,7 +164,55 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        
+
+        //Get Waybills In Manifest for Dispatch
+        public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch()
+        {
+            try
+            {
+                //get the current user
+                string userId = await _userService.GetCurrentUserId();
+
+                //get the dispatch for the user
+                var userDispatchs = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == userId && s.ReceivedBy == null).ToList();
+
+                //get the active manifest for the dispatch user
+                if(userDispatchs.Count > 1)
+                {
+                    //error, the dispatch user cannot have more than one undelivered dispatch
+                    throw new GenericException("Error: Dispatch User cannot have more than one undelivered dispatch.");
+                }
+
+
+                var currentUserDispatch = userDispatchs.FirstOrDefault();
+                if(currentUserDispatch == null)
+                {
+                    //return an empty list
+                    return new List<ManifestWaybillMappingDTO>();
+                }
+
+                var manifestDTO = await _manifestService.GetManifestByCode(currentUserDispatch.ManifestNumber);
+                var manifestWaybillMappingList = await _uow.ManifestWaybillMapping.FindAsync(x => x.ManifestCode == manifestDTO.ManifestCode);
+
+                var manifestWaybillNumberMappingDto = Mapper.Map<List<ManifestWaybillMappingDTO>>(manifestWaybillMappingList.ToList());
+
+                foreach (var manifestwaybill in manifestWaybillNumberMappingDto)
+                {
+                    manifestwaybill.ManifestDetails = manifestDTO;
+
+                    //get shipment detail 
+                    manifestwaybill.Shipment = await _shipmentService.GetShipment(manifestwaybill.Waybill);
+                }
+
+                return manifestWaybillNumberMappingDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
         //Get All Manifests that a Waybill has been mapped to
         public async Task<List<ManifestWaybillMappingDTO>> GetManifestForWaybill(string waybill)
         {

@@ -11,5 +11,7 @@ namespace GIGLS.Core.DTO.MessagingLog
         public string Message { get; set; }
         public MessagingLogStatus Status { get; set; }
         public string User { get; set; }
+        public string ResultStatus { get; set; }
+        public string ResultDescription { get; set; }
     }
 }

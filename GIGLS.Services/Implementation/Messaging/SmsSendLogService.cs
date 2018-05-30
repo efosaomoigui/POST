@@ -78,6 +78,8 @@ namespace GIGLS.Services.Implementation.Messaging
             message.Status = messageDto.Status;
             message.Message = messageDto.Message;
             message.User = messageDto.User;
+            message.ResultStatus = messageDto.ResultStatus;
+            message.ResultDescription = messageDto.ResultDescription;
 
             await _uow.CompleteAsync();
         }
