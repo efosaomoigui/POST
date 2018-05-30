@@ -13,19 +13,17 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.DTO.ServiceCentres;
 using System.Linq;
 using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO.User;
 
 namespace GIGLS.Services.Implementation.Fleets
 {
     public class DispatchService : IDispatchService
     {
         private readonly IUserService _userService;
-
         private readonly IWalletService _walletService;
-
         private readonly IUnitOfWork _uow;
 
-        public DispatchService(IUserService userService, IWalletService walletService
-            , IUnitOfWork uow)
+        public DispatchService(IUserService userService, IWalletService walletService, IUnitOfWork uow)
         {
             _walletService = walletService;
             _userService = userService;
@@ -245,6 +243,10 @@ namespace GIGLS.Services.Implementation.Fleets
                 }
 
                 var dispatchDTO = Mapper.Map<DispatchDTO>(dispatch);
+
+                //get User detail
+                var user = await _uow.User.GetUserById(dispatch.DriverDetail);
+                dispatchDTO.UserDetail = Mapper.Map<UserDTO>(user);
 
                 //get the ManifestType
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));

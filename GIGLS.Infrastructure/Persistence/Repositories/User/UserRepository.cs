@@ -70,6 +70,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
         }
 
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchCaptains()
+        {
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType != UserType.System
+                        && x.UserChannelType == UserChannelType.Employee).AsEnumerable();
+            return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
+        }
+
         public async Task<IdentityResult> UpdateUser(string userId, GIGL.GIGLS.Core.Domain.User user)
         {
 

@@ -97,7 +97,24 @@ namespace GIGLS.WebApi.Controllers.User
 
             });
         }
-       
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("api/user/dispatchcaptains")]
+        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetDispatchCaptain()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var users = await _userService.GetDispatchCaptains();
+                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                {
+                    Object = users
+                };
+
+            });
+        }
+
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("api/user")]
