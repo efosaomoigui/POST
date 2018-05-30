@@ -51,10 +51,10 @@ namespace GIGLS.Services.Implementation.Fleets
                 var currentUserDetail = await _userService.GetUserById(currentUserId);
 
                 //check for the type of delivery manifest to know which type of process to do
-                if(dispatchDTO.ManifestType == ManifestType.Delivery)
+                if (dispatchDTO.ManifestType == ManifestType.Delivery)
                 {
                     //filter all the ways in the delivery manifest for scanning processing
-                    await FilterWaybillsInDeliveryManifest(dispatchDTO.ManifestNumber, currentUserId, userServiceCentreId);
+                    await FilterWaybillsInDeliveryManifest(dispatchDTO, currentUserId, userServiceCentreId);
                 }
                 else
                 {
@@ -64,20 +64,20 @@ namespace GIGLS.Services.Implementation.Fleets
 
                 // create dispatch
                 var newDispatch = Mapper.Map<Dispatch>(dispatchDTO);
-                newDispatch.DispatchedBy  = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
+                newDispatch.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
                 newDispatch.ServiceCentreId = userServiceCentreId;
                 _uow.Dispatch.Add(newDispatch);
 
                 // update manifest
                 var manifestObj = _uow.Manifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
-                if(manifestObj != null)
+                if (manifestObj != null)
                 {
                     var manifestEntity = _uow.Manifest.Get(manifestObj.ManifestId);
                     manifestEntity.DispatchedById = currentUserId;
                     manifestEntity.IsDispatched = true;
                     manifestEntity.ManifestType = dispatchDTO.ManifestType;
                 }
-                                
+
                 //update General Ledger
                 var generalLedger = new GeneralLedger()
                 {
@@ -108,18 +108,30 @@ namespace GIGLS.Services.Implementation.Fleets
         /// are filter for scanning processing.
         /// </summary>
         /// <param name="manifestNumber"></param>
-        private async Task FilterWaybillsInDeliveryManifest(string manifestNumber, string currentUserId, int userServiceCentreId)
+        private async Task FilterWaybillsInDeliveryManifest(DispatchDTO dispatchDTO, string currentUserId, int userServiceCentreId)
         {
+            //first ensure that the dispatch user does not have any pending DeliveryManifest
+            //get the dispatch for the user
+            var userDispatchs = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == dispatchDTO.DriverDetail && s.ReceivedBy == null).ToList();
+
+            //get the active manifest for the dispatch user
+            if (userDispatchs.Count > 0)
+            {
+                //error, the dispatch user cannot have an undelivered dispatch
+                throw new GenericException($"Error: Dispatch User cannot have an undelivered dispatch. " +
+                    $"Please finalise the following Manifests [{userDispatchs.Select(s => s.ManifestNumber).ToList()}]");
+            }
+
             // manifest ->  waybill
-            var manifestWaybillMappings = await _uow.ManifestWaybillMapping.FindAsync(s => s.ManifestCode == manifestNumber);
+            var manifestWaybillMappings = await _uow.ManifestWaybillMapping.FindAsync(s => s.ManifestCode == dispatchDTO.ManifestNumber);
             var listOfWaybills = manifestWaybillMappings.Select(s => s.Waybill).ToList();
 
-            if(listOfWaybills.Count > 0)
+            if (listOfWaybills.Count > 0)
             {
                 //Scan all waybills attached to this manifestNumber
                 string status = ShipmentScanStatus.WC.ToString();
                 await ScanWaybillsInManifest(listOfWaybills, currentUserId, userServiceCentreId, status);
-            }            
+            }
         }
 
 
@@ -141,7 +153,7 @@ namespace GIGLS.Services.Implementation.Fleets
 
             //waybill - from shipmentCancel entity
             var cancelledWaybills = await _uow.ShipmentCancel.FindAsync(s => listOfWaybills.Contains(s.Waybill));
-            if(cancelledWaybills.ToList().Count > 0)
+            if (cancelledWaybills.ToList().Count > 0)
             {
                 var waybills = cancelledWaybills.ToList().ToString();
                 throw new GenericException($"{waybills} : The waybill has been cancelled. " +
@@ -177,7 +189,7 @@ namespace GIGLS.Services.Implementation.Fleets
                 _uow.ShipmentTracking.Add(newShipmentTracking);
             }
         }
-        
+
         public async Task DeleteDispatch(int dispatchId)
         {
             try
@@ -249,7 +261,7 @@ namespace GIGLS.Services.Implementation.Fleets
         public async Task<List<DispatchDTO>> GetDispatchs()
         {
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            var dispatchs =  await _uow.Dispatch.GetDispatchAsync(serviceCenterIds);
+            var dispatchs = await _uow.Dispatch.GetDispatchAsync(serviceCenterIds);
 
             foreach (var item in dispatchs)
             {
