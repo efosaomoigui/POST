@@ -17,9 +17,10 @@ namespace GIGLS.Messaging.MessageService
 {
     public class SMSService : ISMSService
     {
-        public async Task SendAsync(MessageDTO message)
+        public async Task<string> SendAsync(MessageDTO message)
         {
-            await ConfigSendGridasync(message);
+            var result = await ConfigSendGridasync(message);
+            return result;
         }
 
         // Use Scriptwall Sms
