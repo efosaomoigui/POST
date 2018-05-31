@@ -116,8 +116,9 @@ namespace GIGLS.Services.Implementation.Fleets
             if (userDispatchs.Count > 0)
             {
                 //error, the dispatch user cannot have an undelivered dispatch
+                var waybillArray = userDispatchs.Select(s => s.ManifestNumber).ToList();
                 throw new GenericException($"Error: Dispatch User cannot have an undelivered dispatch. " +
-                    $"Please finalise the following Manifests [{userDispatchs.Select(s => s.ManifestNumber).ToList()}]");
+                    $"Please finalise the following Manifests [{string.Join(", ", waybillArray)}]");
             }
 
             // manifest ->  waybill
