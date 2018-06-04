@@ -90,7 +90,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  DiscountValue = r.DiscountValue,
                                                  ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                  CompanyType = r.CompanyType,
-                                                 CustomerCode = r.CustomerCode
+                                                 CustomerCode = r.CustomerCode,
+                                                 Description = r.Description
                                                  //DepartureTerminalName = r.DepartureTerminal.Name,
                                                  //DestinationTerminalName = r.DestinationTerminal.Name       
                                                  //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
@@ -179,6 +180,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                      CompanyType = r.CompanyType,
                                                      CustomerCode = r.CustomerCode,
+                                                     Description = r.Description,
                                                      Invoice = Context.Invoice.Where(c => c.Waybill == r.Waybill).Select(x => new InvoiceDTO
                                                      {
                                                          InvoiceId = x.InvoiceId,
@@ -301,7 +303,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      DiscountValue = r.DiscountValue,
                                                      ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                      CompanyType = r.CompanyType,
-                                                     CustomerCode = r.CustomerCode
+                                                     CustomerCode = r.CustomerCode,
+                                                     Description = r.Description
                                                  }).ToList();
 
                 //filter
@@ -414,7 +417,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      DiscountValue = r.DiscountValue,
                                                      ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                      CompanyType = r.CompanyType,
-                                                     CustomerCode = r.CustomerCode
+                                                     CustomerCode = r.CustomerCode,
+                                                     Description = r.Description
                                                  }).ToList();
 
                 //filter
@@ -580,7 +584,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  DiscountValue = r.DiscountValue,
                                                  ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                  CompanyType = r.CompanyType,
-                                                 CustomerCode = r.CustomerCode
+                                                 CustomerCode = r.CustomerCode,
+                                                 Description = r.Description
                                              }).ToList();
 
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -715,7 +720,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  DiscountValue = r.DiscountValue,
                                                  ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                  CompanyType = r.CompanyType,
-                                                 CustomerCode = r.CustomerCode
+                                                 CustomerCode = r.CustomerCode,
+                                                 Description = r.Description
                                              }).ToList();
 
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
