@@ -134,6 +134,8 @@
     <Compile Include="Domain\CountryRouteZoneMap.cs" />
     <Compile Include="Domain\DeliveryOption.cs" />
     <Compile Include="Domain\DeliveryOptionPrice.cs" />
+    <Compile Include="Domain\Devices\Device.cs" />
+    <Compile Include="Domain\Devices\DeviceManagement.cs" />
     <Compile Include="Domain\Dispatch.cs" />
     <Compile Include="Domain\DispatchActivity.cs" />
     <Compile Include="Domain\DomesticRouteZoneMap.cs" />
@@ -235,6 +237,8 @@
     <Compile Include="DTO\Dashboard\DashboardDTO.cs" />
     <Compile Include="DTO\Dashboard\GraphDataDTO.cs" />
     <Compile Include="DTO\Dashboard\ShipmentOrderDTO.cs" />
+    <Compile Include="DTO\Devices\DeviceDTO.cs" />
+    <Compile Include="DTO\Devices\DeviceManagementDTO.cs" />
     <Compile Include="DTO\Fleets\DispatchActivityDTO.cs" />
     <Compile Include="DTO\Fleets\DispatchDTO.cs" />
     <Compile Include="DTO\Fleets\FleetDTO.cs" />
@@ -380,6 +384,8 @@
     <Compile Include="IRepositories\Customers\ICompanyContactPersonRepository.cs" />
     <Compile Include="IRepositories\Customers\ICompanyRepository.cs" />
     <Compile Include="IRepositories\Customers\IIndividualCustomerRepository.cs" />
+    <Compile Include="IRepositories\Devices\IDeviceManagementRepository.cs" />
+    <Compile Include="IRepositories\Devices\IDeviceRepository.cs" />
     <Compile Include="IRepositories\Fleets\IDispatchActivityRepository.cs" />
     <Compile Include="IRepositories\Fleets\IDispatchRepository.cs" />
     <Compile Include="IRepositories\Fleets\IFleetMakeRepository.cs" />
@@ -474,6 +480,8 @@
     <Compile Include="IServices\Customers\ICustomerService.cs" />
     <Compile Include="IServices\Customers\IIndividualCustomerService.cs" />
     <Compile Include="IServices\Dashboard\IDashboardService.cs" />
+    <Compile Include="IServices\Devices\IDeviceManagementService.cs" />
+    <Compile Include="IServices\Devices\IDeviceService.cs" />
     <Compile Include="IServices\Fleets\IDispatchActivityService.cs" />
     <Compile Include="IServices\Fleets\IDispatchService.cs" />
     <Compile Include="IServices\Fleets\IFleetMakeService.cs" />

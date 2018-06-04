@@ -26,6 +26,8 @@ using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.Domain.Utility;
 using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.View;
+using GIGLS.Core.Domain.Devices;
+using GIGLS.Core.DTO.Devices;
 
 namespace GIGLS.Core
 {
@@ -53,8 +55,8 @@ namespace GIGLS.Core
                 config.CreateMap<CountryRouteZoneMapDTO, CountryRouteZoneMap>();
                 config.CreateMap<CountryRouteZoneMap, CountryRouteZoneMapDTO>();
 
-                config.CreateMap<ZoneDTO, GIGLS.Core.Domain.Zone>();
-                config.CreateMap<GIGLS.Core.Domain.Zone, ZoneDTO>();
+                config.CreateMap<ZoneDTO, Zone>();
+                config.CreateMap<Zone, ZoneDTO>();
 
                 config.CreateMap<StationDTO, Station>();
                 config.CreateMap<Station, StationDTO>();
@@ -235,6 +237,12 @@ namespace GIGLS.Core
 
                 config.CreateMap<ManifestWaybillMapping, ManifestWaybillMappingDTO>();
                 config.CreateMap<ManifestWaybillMappingDTO, ManifestWaybillMapping>();
+                
+                config.CreateMap<Device, DeviceDTO>();
+                config.CreateMap<DeviceDTO, Device>();
+
+                config.CreateMap<DeviceManagement, DeviceManagementDTO>();
+                config.CreateMap<DeviceManagementDTO, DeviceManagement>();
             });
 
             isInit = true;

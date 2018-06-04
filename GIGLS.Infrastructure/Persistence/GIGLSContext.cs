@@ -14,6 +14,7 @@ using Microsoft.AspNet.Identity.EntityFramework;
 using GIGLS.Core.Domain.MessagingLog;
 using GIGLS.Core.Domain.ShipmentScan;
 using GIGLS.Core.Domain.Utility;
+using GIGLS.Core.Domain.Devices;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -185,6 +186,10 @@ namespace GIGLS.Infrastructure.Persistence
 
         //Global Property
         public DbSet<GlobalProperty> GlobalProperty { get; set; }
+
+        //Device Management
+        public DbSet<Device> Device { get; set; }
+        public DbSet<DeviceManagement> DeviceManagement { get; set; }
 
         #endregion
 

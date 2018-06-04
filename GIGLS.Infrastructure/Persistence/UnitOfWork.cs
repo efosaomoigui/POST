@@ -25,6 +25,7 @@ using GIGLS.Core.IRepositories.Haulage;
 using GIGLS.Core.IRepositories.MessagingLog;
 using GIGLS.Core.IRepositories.ShipmentScan;
 using System;
+using GIGLS.Core.IRepositories.Devices;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -287,6 +288,13 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IManifestWaybillMappingRepository ManifestWaybillMapping { get; set; }
+
+        [Inject]
+        public IDeviceRepository Device { get; set; }
+
+        [Inject]
+        public IDeviceManagementRepository DeviceManagement { get; set; }
+
 
         public int Complete()
         {

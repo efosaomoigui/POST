@@ -166,6 +166,8 @@
     <Compile Include="Implementation\Customers\CustomerService.cs" />
     <Compile Include="Implementation\Customers\IndividualCustomerService.cs" />
     <Compile Include="Implementation\Dashboard\DashboardService.cs" />
+    <Compile Include="Implementation\Devices\DeviceManagementService.cs" />
+    <Compile Include="Implementation\Devices\DeviceService.cs" />
     <Compile Include="Implementation\Fleets\DispatchActivityService.cs" />
     <Compile Include="Implementation\Fleets\DispatchService.cs" />
     <Compile Include="Implementation\Fleets\FleetMakeService.cs" />

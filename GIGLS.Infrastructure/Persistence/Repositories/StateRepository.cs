@@ -14,6 +14,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories
         public StateRepository(GIGLSContext context) : base(context)
         {
         }
+
         
         public Task<List<StateDTO>> GetStatesAsync(int pageSize = 10, int page = 1)
         {

@@ -22,6 +22,7 @@ using GIGLS.CORE.IRepositories.Nav;
 using GIGLS.Core.IRepositories.Haulage;
 using GIGLS.Core.IRepositories.MessagingLog;
 using GIGLS.Core.IRepositories.ShipmentScan;
+using GIGLS.Core.IRepositories.Devices;
 
 namespace GIGLS.Core
 {
@@ -109,6 +110,8 @@ namespace GIGLS.Core
         IManifestVisitMonitoringRepository ManifestVisitMonitoring { get; set; }
         ITransitWaybillNumberRepository TransitWaybillNumber { get; set; }
         IManifestWaybillMappingRepository ManifestWaybillMapping { get; set; }
+        IDeviceRepository Device { get; set; }
+        IDeviceManagementRepository DeviceManagement { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
