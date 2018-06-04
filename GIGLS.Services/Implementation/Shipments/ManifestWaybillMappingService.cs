@@ -404,7 +404,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-                
 
+        public Task SignOffDeliveryManifest(string manifest)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
