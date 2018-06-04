@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using GIGLS.Core.DTO.Fleets;
 using System.Linq;
 using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.User;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
 {
@@ -51,7 +52,19 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
                                       {
                                           Code = r.ServiceCentre.Code,
                                           Name = r.ServiceCentre.Name
-                                      }
+                                      },
+                                      UserDetail = Context.Users.Where(c => c.Id == r.DriverDetail).Select(x => new UserDTO
+                                      {
+                                          FirstName = x.FirstName,
+                                          LastName = x.LastName,
+                                          Department = x.Department,
+                                          Designation = x.Designation,
+                                          Email = x.Email,
+                                          PhoneNumber = x.PhoneNumber,
+                                          Organisation = x.Organisation,
+                                          PictureUrl = x.PictureUrl,
+                                          Gender = x.Gender                                          
+                                      }).FirstOrDefault()
                                   };
                 return Task.FromResult(dispatchDto.ToList());
             }
