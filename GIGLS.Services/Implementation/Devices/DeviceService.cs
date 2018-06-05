@@ -24,7 +24,15 @@ namespace GIGLS.Services.Implementation.Devices
         {
             try
             {
+                //check for unique serial number
+                var device = await _uow.Device.GetAsync(x => x.SerialNumber == deviceDto.SerialNumber);
+                if (device != null)
+                {
+                    throw new GenericException("Device information already exist");
+                }
+
                 var newDevice = Mapper.Map<Device>(deviceDto);
+                newDevice.Active = true;
                 _uow.Device.Add(newDevice);
                 await _uow.CompleteAsync();
                 return new { Id = newDevice.DeviceId };
