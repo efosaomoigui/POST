@@ -54,7 +54,7 @@ namespace GIGLS.WebApi.Controllers.Devices
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
-        [Route("assign")]
+        [Route("{deviceId:int}/assign/{userId}")]
         public async Task<IServiceResponse<object>> AssignDeviceToUser(string userId, int deviceId)
         {
             return await HandleApiOperationAsync(async () =>

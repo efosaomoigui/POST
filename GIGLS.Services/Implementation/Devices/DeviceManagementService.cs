@@ -35,11 +35,11 @@ namespace GIGLS.Services.Implementation.Devices
                 }
 
                 //check if the device has not been assign to someone 
-                var userActive = _uow.DeviceManagement.SingleOrDefault(x => x.IsActive == true && x.UserId == userId && x.DeviceId == deviceId);
+                var userActive = await _uow.DeviceManagement.GetAsync(x => x.IsActive == true && x.DeviceId == deviceId);
 
                 if (userActive != null)
                 {
-                    throw new GenericException($"Device has been assigned to: {userDetail.FirstName} {userDetail.LastName}");
+                    throw new GenericException($"{device.Name} already been assigned to: {userDetail.FirstName} {userDetail.LastName}");
                 }
                 
                 //Add new device management
