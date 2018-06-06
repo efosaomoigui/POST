@@ -10,6 +10,7 @@
         CustomerCodeIndividual = 6,
         CustomerCodeCorporate = 7,
         CustomerCodeEcommerce = 8,
-        Partner = 9
+        Partner = 9,
+        Employee = 10
     }
 }

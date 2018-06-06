@@ -269,7 +269,7 @@ namespace GIGLS.Services.Implementation.Customers
             return await _uow.Company.GetCompanies(companyType, searchOption);
         }
 
-        public async Task<int> CodeToAddCorporateUsersToAspNetUsersTable()
+        private async Task<int> CodeToAddCorporateUsersToAspNetUsersTable()
         {
             var listOfCompanies = await _uow.Company.GetCompanies(); ;
 
@@ -311,7 +311,8 @@ namespace GIGLS.Services.Implementation.Customers
                     //2. If userEmail is null, use CustomerCode
                     if (String.IsNullOrEmpty(newCompany.Email))
                     {
-                        newCompany.Email = newCompany.CustomerCode;
+                        //newCompany.Email = newCompany.CustomerCode;
+                        newCompany.Email = null;
                     }
 
                     try
@@ -338,7 +339,7 @@ namespace GIGLS.Services.Implementation.Customers
                     }
                     catch (Exception)
                     {
-                        throw;
+                        //throw;
                     }
 
                 }

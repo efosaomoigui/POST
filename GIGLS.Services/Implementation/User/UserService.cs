@@ -14,6 +14,7 @@ using System.Web;
 using GIGLS.Core.Enums;
 using System.Linq;
 using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.Services.Implementation.User
 {
@@ -21,11 +22,14 @@ namespace GIGLS.Services.Implementation.User
     {
         private readonly IUnitOfWork _unitOfWork;
         private IServiceCentreService _serviceCentreService;
+        private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
 
-        public UserService(IUnitOfWork uow, IServiceCentreService serviceCentreService)
+        public UserService(IUnitOfWork uow, IServiceCentreService serviceCentreService,
+            INumberGeneratorMonitorService numberGeneratorMonitorService)
         {
             _unitOfWork = uow;
             _serviceCentreService = serviceCentreService;
+            _numberGeneratorMonitorService = numberGeneratorMonitorService;
             MapperConfig.Initialize();
         }
 
@@ -44,7 +48,15 @@ namespace GIGLS.Services.Implementation.User
             user.Id = Guid.NewGuid().ToString();
             user.DateCreated = DateTime.Now.Date;
             user.DateModified = DateTime.Now.Date;
-            user.UserName = (user.UserChannelType == UserChannelType.Employee) ? user.Email: user.UserChannelCode;
+            user.UserName = (user.UserChannelType == UserChannelType.Employee) ? user.Email : user.UserChannelCode;
+
+            //UserChannelCode for employee
+            if (user.UserChannelType == UserChannelType.Employee)
+            {
+                var employeeCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Employee);
+                user.UserChannelCode = employeeCode;
+                user.UserChannelPassword = userDto.Password;
+            }
 
             var u = await _unitOfWork.User.RegisterUser(user, userDto.Password);
             return u;
@@ -180,6 +192,9 @@ namespace GIGLS.Services.Implementation.User
 
         public async Task<IdentityResult> ActivateUser(string userid, bool val)
         {
+            //Code to add existing users to roles and reset password
+            //await CodeToAddUsersToAspNetUserRolesTable();
+            //await CodeToAddUsersToAspNetUserRolesTable_LOCATION();
 
             var user = await _unitOfWork.User.GetUserById(userid);
 
@@ -306,11 +321,11 @@ namespace GIGLS.Services.Implementation.User
             //update all users that belong to this system user
             var usersList = await GetUsers();
             var usersInSystemUsers = usersList.ToList().Where(s => s.SystemUserId == userid);
-            foreach(var userInList in usersInSystemUsers)
+            foreach (var userInList in usersInSystemUsers)
             {
                 await RoleSettings(userid, userInList.Id);
             }
-            
+
             return result;
         }
 
@@ -519,8 +534,8 @@ namespace GIGLS.Services.Implementation.User
             return defaultServiceCenter;
         }
 
-            //change user password by Admin
-            public async Task<IdentityResult> ResetPassword(string userid, string password)
+        //change user password by Admin
+        public async Task<IdentityResult> ResetPassword(string userid, string password)
         {
             var user = await _unitOfWork.User.GetUserById(userid);
 
@@ -530,6 +545,11 @@ namespace GIGLS.Services.Implementation.User
             }
 
             var result = await _unitOfWork.User.ResetPassword(userid, password);
+
+            //update UserChannelPassword
+            user.UserChannelPassword = password;
+            await _unitOfWork.CompleteAsync();
+
             return result;
         }
 
@@ -543,7 +563,295 @@ namespace GIGLS.Services.Implementation.User
             }
 
             var result = await _unitOfWork.User.ChangePassword(userid, currentPassword, newPassword);
+
+            //update UserChannelPassword
+            user.UserChannelPassword = newPassword;
+            await _unitOfWork.CompleteAsync();
+
             return result;
-        }        
+        }
+
+        /// <summary>
+        /// Code for first migration
+        /// 1. Reset the users password
+        /// 2. Add users to roles
+        /// </summary>
+        /// <returns></returns>
+        private async Task<int> CodeToAddUsersToAspNetUserRolesTable()
+        {
+            try
+            {
+
+
+                //1. reset the users password
+                var users = await _unitOfWork.User.GetUsers();
+                var allEmployees = users.Where(s => s.UserType == UserType.Regular && s.UserChannelType == UserChannelType.Employee);
+
+                foreach (var employee in allEmployees)
+                {
+                    if (employee.UserChannelCode == "EMP000900")
+                    {
+                        continue;
+                    }
+
+                    //reset the password
+                    var password = GeneratePassword();
+                    var result = await _unitOfWork.User.ResetPassword(employee.Id, password);
+
+                    //update UserChannelPassword
+                    var user = await _unitOfWork.User.GetUserById(employee.Id);
+                    user.UserChannelPassword = password;
+                    await _unitOfWork.CompleteAsync();
+                }
+
+                //2. Add users to roles
+                var systemUsers = await _unitOfWork.User.GetSystemUsers();
+                foreach (var employee in allEmployees)
+                {
+                    //update SystemUserId and SystemUserRole
+                    if (employee.Designation.Trim() == "Accountant".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Accountant".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Asst. Dispatch Supervisor".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Dispatch Coordinator".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Business Development Exec".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Business Development Executive".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Call Center Agent".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Customer Care".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "CEO, GIGL HOUSTON".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "MD".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Coordinator".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Coordinator".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Customer Care Officer".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Customer Care".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Customer Experience Manger".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Customer Experience Manager".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Director".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Director".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Dispatch Coordinator".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Dispatch Coordinator".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Dispatch Supervisor".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Dispatch Coordinator".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Ecommerce Supervisor".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Supervisors".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Gateway Officer".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Gateway Officer".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Gateway Supervisor".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Gateway Supervisor".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "HR Business Partner".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "HR Business Partner".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Maintenance Supervisor".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Supervisors".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Pick-up Agent".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Dispatch Rider".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Processing Officer/Ecommerce".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Service Center Agent".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Regional Manager".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Regional Manager".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Service Center Agent".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Service Center Agent".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Service Center Agent/ E-commerce".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Service Center Agent".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Service Center Agent/Ecommerce".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Service Center Agent".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Service Center Assistant".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Service Center Agent".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Service Center Assistant/ Ecommerce".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Service Center Agent".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Service Center Supervisor".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Supervisors ".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Snr. Accountant".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Accountant".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Software Developer".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Administrator".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                    else if (employee.Designation.Trim() == "Tracking Officer".Trim())
+                    {
+                        var systemUser = systemUsers.FirstOrDefault(s => s.FirstName.Trim() == "Service Center Agent".Trim());
+                        var user = await _unitOfWork.User.GetUserById(employee.Id);
+                        user.SystemUserId = systemUser.Id;
+                        user.SystemUserRole = systemUser.FirstName;
+                    }
+                }
+                await _unitOfWork.CompleteAsync();
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+
+            return await Task.FromResult(0);
+        }
+
+        private async Task<int> CodeToAddUsersToAspNetUserRolesTable_LOCATION()
+        {
+            try
+            {
+                var users = await _unitOfWork.User.GetUsers();
+                var allEmployees = users.Where(s => s.UserType == UserType.Regular && s.UserChannelType == UserChannelType.Employee);
+
+
+                //1.Add to user to systemRole
+                foreach (var employee in allEmployees)
+                {
+                    if (employee.SystemUserId != null)
+                    {
+                        await RoleSettings(employee.SystemUserId, employee.Id);
+                    }
+                }
+
+
+                //2. Add priviledge for ServiceCentre
+                await _unitOfWork.CompleteAsync();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return await Task.FromResult(0);
+        }
+
+        private static string GeneratePassword(int length = 6)
+        {
+            var strippedText = Guid.NewGuid().ToString().Replace("-", string.Empty);
+            return strippedText.Substring(0, length);
+        }
+
     }
 }
