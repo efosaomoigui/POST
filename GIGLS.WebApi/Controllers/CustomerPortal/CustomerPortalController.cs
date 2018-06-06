@@ -10,6 +10,7 @@ using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
 using System.Collections.Generic;
 using System.Linq;
@@ -313,6 +314,25 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        
+        [HttpPut]
+        [Route("changepassword/{userid}/{currentPassword}/{newPassword}")]
+        public async Task<IServiceResponse<bool>> ChangePassword(string userid, string currentPassword, string newPassword)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ChangePassword(userid, currentPassword, newPassword);
 
+                if (!result.Succeeded)
+                {
+                    throw new GenericException("Operation could not complete update successfully");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
     }
 }

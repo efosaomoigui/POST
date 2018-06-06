@@ -22,6 +22,8 @@ using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO;
+using Microsoft.AspNet.Identity;
+using System;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -240,5 +242,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _pricing.GetHaulagePrice(haulagePricingDto);
         }
 
+        public Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword)
+        {
+            return _userService.ChangePassword(userid, currentPassword, newPassword);
+        }
     }
 }
