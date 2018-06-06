@@ -105,6 +105,7 @@ namespace GIGLS.Services.Implementation.Devices
                 device.SerialNumber = deviceDto.SerialNumber;
                 device.UsbCable = deviceDto.UsbCable;
                 device.SimCardNumber = deviceDto.SimCardNumber;
+                device.NetworkProvider = deviceDto.NetworkProvider;
                 _uow.Complete();
             }
             catch (Exception)

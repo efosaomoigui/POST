@@ -9,6 +9,7 @@
         public bool UsbCable { get; set; }
         public bool PowerAdapter { get; set; }
         public string SimCardNumber { get; set; }
+        public string NetworkProvider { get; set; }
         public string Description { get; set; }
         public bool Active { get; set; }
     }
