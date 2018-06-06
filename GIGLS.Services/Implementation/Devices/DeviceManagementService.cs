@@ -39,7 +39,8 @@ namespace GIGLS.Services.Implementation.Devices
 
                 if (userActive != null)
                 {
-                    throw new GenericException($"{device.Name} already been assigned to: {userDetail.FirstName} {userDetail.LastName}");
+                    var assignedUser = await _uow.User.GetUserById(userActive.UserId);
+                    throw new GenericException($"{device.Name} already been assigned to: {assignedUser.FirstName} {assignedUser.LastName}");
                 }
                 
                 //Add new device management
