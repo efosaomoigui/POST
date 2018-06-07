@@ -233,5 +233,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             var Result = await _userManager.ChangePasswordAsync(userid, currentPassword, newPassword);
             return Result;
         }
+
+        public async Task<bool> CheckPasswordAsync(GIGL.GIGLS.Core.Domain.User user, string password)
+        {
+            if (await _userManager.CheckPasswordAsync(user, password))
+                return true;
+
+            return false;
+        }
     }
 }

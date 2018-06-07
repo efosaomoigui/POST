@@ -39,5 +39,7 @@ namespace GIGLS.Core.IRepositories.User
 
         Task<IdentityResult> ResetPassword(string userid, string password);
         Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword);
+        Task<bool> CheckPasswordAsync(GIGL.GIGLS.Core.Domain.User user, string password);
+
     }
 }

@@ -544,33 +544,26 @@ namespace GIGLS.Services.Implementation.User
                 throw new GenericException("User does not exist!");
             }
 
-            var result = await _unitOfWork.User.ResetPassword(userid, password);
-
-            //update UserChannelPassword
-            user.UserChannelPassword = password;
+            var result = await _unitOfWork.User.ResetPassword(userid, password);            
             await _unitOfWork.CompleteAsync();
-
             return result;
         }
 
         public async Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword)
-        {
-            //login to know if the current password is current
-
-
+        {            
             var user = await _unitOfWork.User.GetUserById(userid);
-
             if (user == null || newPassword == null || newPassword == "")
             {
-                throw new GenericException("User does not exist!");
+                throw new GenericException("Operation could not complete, kindly supply valid credential");
             }
 
-            var result = await _unitOfWork.User.ChangePassword(userid, currentPassword, newPassword);
+            if(!await _unitOfWork.User.CheckPasswordAsync(user, currentPassword))
+            {
+                throw new GenericException("Operation could not complete, kindly supply valid credential");
+            }
 
-            //update UserChannelPassword
-            user.UserChannelPassword = newPassword;
+            var result = await _unitOfWork.User.ChangePassword(userid, currentPassword, newPassword);            
             await _unitOfWork.CompleteAsync();
-
             return result;
         }
 
@@ -584,8 +577,6 @@ namespace GIGLS.Services.Implementation.User
         {
             try
             {
-
-
                 //1. reset the users password
                 var users = await _unitOfWork.User.GetUsers();
                 var allEmployees = users.Where(s => s.UserType == UserType.Regular && s.UserChannelType == UserChannelType.Employee);
