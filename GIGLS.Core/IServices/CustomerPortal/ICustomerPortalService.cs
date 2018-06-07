@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.PaymentTransactions;
@@ -38,6 +39,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<DomesticRouteZoneMapDTO> GetZone(int departure, int destination);
         Task<decimal> GetPrice(PricingDTO pricingDto);
         Task<decimal> GetHaulagePrice(HaulagePricingDTO pricingDto);
+        Task<CustomerDTO> GetCustomer(string userId);
         Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword);
     }
 }

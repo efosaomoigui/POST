@@ -125,6 +125,32 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
+        public async Task<CustomerDTO> GetCustomer(string userChannelCode, UserChannelType userChannelType)
+        {
+            try
+            {
+                if (UserChannelType.Ecommerce.Equals(userChannelType) || UserChannelType.Corporate.Equals(userChannelType))
+                {
+                    var companyDTO = await _companyService.GetCompanyByCode(userChannelCode);
+                    var customerDTO = Mapper.Map<CustomerDTO>(companyDTO);
+                    customerDTO.CustomerType = CustomerType.Company;
+                    return customerDTO;
+                }
+                else if (UserChannelType.IndividualCustomer.Equals(userChannelType))
+                {
+                    var individualCustomerDTO = await _individualCustomerService.GetCustomerByCode(userChannelCode);
+                    var customerDTO = Mapper.Map<CustomerDTO>(individualCustomerDTO);
+                    customerDTO.CustomerType = CustomerType.IndividualCustomer;
+                    return customerDTO;
+                }
+                return new CustomerDTO { };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<CustomerDTO>> GetCustomers(CustomerType customerType)
         {
             try

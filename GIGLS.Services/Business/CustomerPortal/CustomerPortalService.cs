@@ -23,7 +23,8 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO;
 using Microsoft.AspNet.Identity;
-using System;
+using GIGLS.Core.IServices.Customers;
+using GIGLS.Core.DTO.Customers;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -37,12 +38,12 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IWalletTransactionService _iWalletTransactionService;
         private readonly ICashOnDeliveryAccountService _iCashOnDeliveryAccountService;
         private readonly IPricingService _pricing;
+        private readonly ICustomerService _customerService;
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
-            IShipmentTrackService iShipmentTrackService, IUserService userService,
-            IWalletTransactionService iWalletTransactionService, 
-            ICashOnDeliveryAccountService iCashOnDeliveryAccountService,
-            IPricingService pricingService)
+            IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService, 
+            ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService,
+            ICustomerService customerService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -51,6 +52,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _iWalletTransactionService = iWalletTransactionService;
             _iCashOnDeliveryAccountService = iCashOnDeliveryAccountService;
             _pricing = pricingService;
+            _customerService = customerService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -242,9 +244,18 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _pricing.GetHaulagePrice(haulagePricingDto);
         }
 
-        public Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword)
+        public async Task<CustomerDTO> GetCustomer(string userId)
         {
-            return _userService.ChangePassword(userid, currentPassword, newPassword);
+            var user = await _userService.GetUserById(userId);
+            var customer = await _customerService.GetCustomer(user.UserChannelCode, user.UserChannelType);
+            return customer;
         }
+
+        public async Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword)
+        {
+            return await _userService.ChangePassword(userid, currentPassword, newPassword);
+        }
+
+        
     }
 }

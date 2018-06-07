@@ -147,7 +147,6 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
               
-
         public async Task<IndividualCustomerDTO> GetCustomerByPhoneNumber(string phoneNumber)
         {
             try
@@ -220,6 +219,24 @@ namespace GIGLS.Services.Implementation.Customers
         public async Task<List<IndividualCustomerDTO>> GetIndividualCustomers(string searchData)
         {
             return await _uow.IndividualCustomer.GetIndividualCustomers(searchData);
+        }
+
+        public async Task<IndividualCustomerDTO> GetCustomerByCode(string customerCode)
+        {
+            try
+            {
+                var customer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode.ToLower() == customerCode.ToLower());
+                if (customer == null)
+                {
+                    return new IndividualCustomerDTO { };
+                }
+                IndividualCustomerDTO individual = Mapper.Map<IndividualCustomerDTO>(customer);
+                return individual;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

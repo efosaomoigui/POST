@@ -9,6 +9,7 @@ namespace GIGLS.Core.IServices.Customers
     {
         Task<List<CompanyDTO>> GetCompanies();
         Task<CompanyDTO> GetCompanyById(int companyId);
+        Task<CompanyDTO> GetCompanyByCode(string customerCode);
         Task UpdateCompany(int companyId, CompanyDTO company);
         Task<CompanyDTO> AddCompany(CompanyDTO company);
         Task DeleteCompany(int companyId);

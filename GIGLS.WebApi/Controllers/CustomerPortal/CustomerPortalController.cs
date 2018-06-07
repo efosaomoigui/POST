@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.PaymentTransactions;
@@ -315,6 +316,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
         
+        [HttpGet]
+        [Route("user/{userId}")]
+        public async Task<IServiceResponse<CustomerDTO>> GetUser(string userId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var user = await _portalService.GetCustomer(userId);
+                return new ServiceResponse<CustomerDTO>
+                {
+                    Object = user
+                };
+            });
+        }
+
         [HttpPut]
         [Route("changepassword/{userid}/{currentPassword}/{newPassword}")]
         public async Task<IServiceResponse<bool>> ChangePassword(string userid, string currentPassword, string newPassword)

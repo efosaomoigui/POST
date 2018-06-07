@@ -353,5 +353,42 @@ namespace GIGLS.Services.Implementation.Customers
             return await Task.FromResult(0);
         }
 
+        public async Task<CompanyDTO> GetCompanyByCode(string customerCode)
+        {
+            try
+            {
+                var company = await _uow.Company.GetAsync(x => x.CustomerCode.ToLower() == customerCode.ToLower());
+                if (company == null)
+                {
+                    return new CompanyDTO { };
+                }
+
+                CompanyDTO companyDto = Mapper.Map<CompanyDTO>(company);
+
+                var contactPersons = _uow.CompanyContactPerson.Find(x => x.CompanyId == companyDto.CompanyId).ToList();
+
+                if (contactPersons.Any())
+                {
+                    companyDto.ContactPersons = contactPersons.Select(p => new CompanyContactPersonDTO
+                    {
+                        CompanyContactPersonId = p.CompanyContactPersonId,
+                        Designation = p.Designation,
+                        Email = p.Email,
+                        FirstName = p.FirstName,
+                        LastName = p.LastName,
+                        PhoneNumber = p.PhoneNumber,
+                        DateCreated = p.DateCreated,
+                        DateModified = p.DateModified,
+                        CompanyId = p.CompanyId
+                    }).ToList();
+                }
+
+                return companyDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -555,6 +555,9 @@ namespace GIGLS.Services.Implementation.User
 
         public async Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword)
         {
+            //login to know if the current password is current
+
+
             var user = await _unitOfWork.User.GetUserById(userid);
 
             if (user == null || newPassword == null || newPassword == "")
