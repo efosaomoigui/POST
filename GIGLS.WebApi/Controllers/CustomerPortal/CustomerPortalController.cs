@@ -340,7 +340,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                 if (!result.Succeeded)
                 {
-                    throw new GenericException("Operation could not complete update successfully");
+                    throw new GenericException("Operation could not complete successfully");
                 }
 
                 return new ServiceResponse<bool>
