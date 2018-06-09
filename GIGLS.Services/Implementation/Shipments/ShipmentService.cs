@@ -590,7 +590,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //filterOptionsDto.count = 100;
+                filterOptionsDto.count = 1000000;
 
                 // get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
@@ -607,7 +607,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         paidShipments.Add(shipmentItem);
                     }
-
+                    else
                     if (invoice.PaymentStatus == PaymentStatus.Pending &&
                         shipmentItem.CompanyType == CompanyType.Corporate.ToString())
                     {
@@ -682,7 +682,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var filterOptionsDto = new FilterOptionsDto
                 {
-                    count = 1000,
+                    count = 1000000,
                     page = 1,
                     sortorder = "0"
                 };
@@ -708,7 +708,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //filterOptionsDto.count = 100;
+                filterOptionsDto.count = 1000000;
 
                 // get groupedWaybills for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
@@ -745,7 +745,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var filterOptionsDto = new FilterOptionsDto
                 {
-                    count = 1000,
+                    count = 1000000,
                     page = 1,
                     sortorder = "0"
                 };
