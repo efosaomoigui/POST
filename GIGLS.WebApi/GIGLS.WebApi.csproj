@@ -309,6 +309,7 @@
     <Compile Include="Controllers\Partnership\PartnerController.cs" />
     <Compile Include="Controllers\PaymentTransactions\PaymentPartialTransactionController.cs" />
     <Compile Include="Controllers\PaymentTransactions\PaymentTransactionController.cs" />
+    <Compile Include="Controllers\PickUp\PickUpController.cs" />
     <Compile Include="Controllers\Report\ReportsController.cs" />
     <Compile Include="Controllers\ServiceCentres\ServiceCentreController.cs" />
     <Compile Include="Controllers\ServiceCentres\StationController.cs" />
