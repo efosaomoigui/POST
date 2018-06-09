@@ -12,6 +12,7 @@ using AutoMapper;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.Core.IServices.Business;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -22,7 +23,8 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUserService _userService;
         private readonly IShipmentService _shipmentService;
 
-        public ManifestWaybillMappingService(IUnitOfWork uow, IManifestService manifestService, IUserService userService, IShipmentService shipmentService)
+        public ManifestWaybillMappingService(IUnitOfWork uow, IManifestService manifestService,
+            IUserService userService, IShipmentService shipmentService)
         {
             _uow = uow;
             _manifestService = manifestService;
@@ -60,7 +62,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceIds = await _userService.GetPriviledgeServiceCenters();
 
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
-                
+
                 //create the manifest if manifest does not exist
                 if (manifestObj == null)
                 {
@@ -72,12 +74,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                     _uow.Manifest.Add(newManifest);
                 }
-                
+
                 foreach (var waybill in waybills)
                 {
                     //check if the waybill exist
                     var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
-                    if(shipment == null)
+                    if (shipment == null)
                     {
                         throw new GenericException($"No Waybill exists for this number: {waybill}");
                     }
@@ -110,7 +112,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         throw new GenericException($"Waybill {waybill} has already been manifested");
                     }
-                    
+
                     //check if Waybill has not been added to this manifest 
                     var isWaybillMapped = await _uow.ManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
 
@@ -123,7 +125,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             ManifestCode = manifest,
                             Waybill = waybill,
                             IsActive = true,
-                            ServiceCentreId = shipment.DestinationServiceCentreId                            
+                            ServiceCentreId = shipment.DestinationServiceCentreId
                         };
                         _uow.ManifestWaybillMapping.Add(newMapping);
                     }
@@ -148,7 +150,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var manifestWaybillMappingList = await _uow.ManifestWaybillMapping.FindAsync(x => x.ManifestCode == manifestDTO.ManifestCode);
 
                 var manifestWaybillNumberMappingDto = Mapper.Map<List<ManifestWaybillMappingDTO>>(manifestWaybillMappingList.ToList());
-                
+
                 foreach (var manifestwaybill in manifestWaybillNumberMappingDto)
                 {
                     manifestwaybill.ManifestDetails = manifestDTO;
@@ -156,7 +158,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     //get shipment detail 
                     manifestwaybill.Shipment = await _shipmentService.GetShipment(manifestwaybill.Waybill);
                 }
-                
+
                 return manifestWaybillNumberMappingDto;
             }
             catch (Exception)
@@ -177,7 +179,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var userDispatchs = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == userId && s.ReceivedBy == null).ToList();
 
                 //get the active manifest for the dispatch user
-                if(userDispatchs.Count > 1)
+                if (userDispatchs.Count > 1)
                 {
                     //error, the dispatch user cannot have more than one undelivered dispatch
                     throw new GenericException("Error: Dispatch User cannot have more than one undelivered dispatch.");
@@ -185,7 +187,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
 
                 var currentUserDispatch = userDispatchs.FirstOrDefault();
-                if(currentUserDispatch == null)
+                if (currentUserDispatch == null)
                 {
                     //return an empty list
                     return new List<ManifestWaybillMappingDTO>();
@@ -224,7 +226,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException($"Waybill {waybill} has not been mapped to any manifest");
                 }
-                
+
                 //add to list
                 List<ManifestWaybillMappingDTO> resultList = new List<ManifestWaybillMappingDTO>();
 
@@ -237,7 +239,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     resultList.Add(waybillMapping);
                 }
-                
+
                 return resultList;
             }
             catch (Exception)
@@ -257,10 +259,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException($"There is no active Manifest for this Waybill {waybill}");
                 }
-                
+
                 //get the manifest detail for the waybill
                 var manifestDTO = await _manifestService.GetManifestByCode(activeManifest.ManifestCode);
-                
+
                 var activeManifestDto = Mapper.Map<ManifestWaybillMappingDTO>(activeManifest);
                 activeManifestDto.ManifestDetails = manifestDTO;
 
@@ -277,7 +279,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var manifestDTO = await _manifestService.GetManifestByCode(manifest);            
+                var manifestDTO = await _manifestService.GetManifestByCode(manifest);
 
                 var manifestWaybillMapping = await _uow.ManifestWaybillMapping.GetAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
 
@@ -285,7 +287,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException($"Waybill {waybill} does not mapped to the manifest {manifest}");
                 }
-                
+
                 //update shipment collection centre
                 var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.WC);
 
@@ -311,7 +313,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceIds = await _userService.GetPriviledgeServiceCenters();
                 var serviceCenter = await _uow.ServiceCentre.GetAsync(serviceIds[0]);
                 string user = await _userService.GetCurrentUserId();
-                
+
                 var manifestDTO = await _manifestService.GetManifestByCode(manifest);
 
                 foreach (var waybill in waybills)
@@ -340,7 +342,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             //Update shipment collection to make it available at collection centre
                             shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.ARF;
-                            
+
                             //Add scan status to  the tracking page
                             var newShipmentTracking = new ShipmentTracking
                             {
@@ -351,14 +353,14 @@ namespace GIGLS.Services.Implementation.Shipments
                                 UserId = user
                             };
                             _uow.ShipmentTracking.Add(newShipmentTracking);
-                        }                        
+                        }
                     }
                     else
                     {
                         throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
-                    }                  
+                    }
                 }
-                
+
                 await _uow.CompleteAsync();
             }
             catch (Exception)
@@ -370,7 +372,7 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<List<ShipmentDTO>> GetUnMappedWaybillsForDeliveryManifestByServiceCentre()
         {
             try
-            {             
+            {
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
                 var filterOptionsDto = new FilterOptionsDto
@@ -383,7 +385,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //1. get all shipments at colletion centre for the service centre which status is ARF
                 var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF);
 
-                if(shipmentCollection.Count() == 0)
+                if (shipmentCollection.Count() == 0)
                 {
                     return new List<ShipmentDTO>();
                 }
@@ -405,9 +407,5 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public Task SignOffDeliveryManifest(string manifest)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

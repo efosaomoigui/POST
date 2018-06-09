@@ -73,7 +73,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchCaptains()
         {
             var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType != UserType.System
-                        && x.UserChannelType == UserChannelType.Employee).AsEnumerable();
+                        && x.UserChannelType == UserChannelType.Employee
+                        && (x.SystemUserRole == "Dispatch Rider" || x.SystemUserRole == "Captain")).AsEnumerable();
             return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
         }
 

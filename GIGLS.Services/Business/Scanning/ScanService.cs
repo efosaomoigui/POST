@@ -96,7 +96,7 @@ namespace GIGLS.Services.Business.Scanning
                 ////// ShipmentCheck  - CheckIfUserIsAtShipmentFinalDestination
                 await CheckIfUserIsAtShipmentFinalDestination(scan, shipment.DestinationServiceCentreId);
 
-                //If the scan status is SRD - Shipment received from Dispatch
+                //If the scan status is SRC - Shipment received from Dispatch
                 if (scan.ShipmentScanStatus == ShipmentScanStatus.SRC)
                 {
                     //Process Shipment Return to Service centre for repackaging
@@ -248,8 +248,10 @@ namespace GIGLS.Services.Business.Scanning
 
                     if (waybillInManifestList.Count > 0)
                     {
+
                         //update dispatch to scan for Shipment recieved by Courier for delivery manifest
-                        if (scan.ShipmentScanStatus == ShipmentScanStatus.WC)
+                        if (scan.ShipmentScanStatus == ShipmentScanStatus.WC  ||
+                            scan.ShipmentScanStatus == ShipmentScanStatus.SRC)
                         {
                             var dispatch = await _dispatchService.GetDispatchManifestCode(manifest.ManifestCode);
                             if (dispatch != null && dispatch.ReceivedBy == null)
@@ -271,6 +273,17 @@ namespace GIGLS.Services.Business.Scanning
                                 }
                                 await _dispatchService.UpdateDispatch(dispatch.DispatchId, dispatch);
                             }
+
+                            //If the scan status is SRC - Shipment received from Dispatch
+                            foreach (var itemWaybillDTO in waybillInManifestList)
+                            {
+                                if (scan.ShipmentScanStatus == ShipmentScanStatus.SRC)
+                                {
+                                    //Process Shipment Return to Service centre for repackaging
+                                    await ProcessReturnWaybillFromDispatch(itemWaybillDTO.Waybill);
+                                }
+                            }
+
                         }
                         else
                         {
@@ -391,6 +404,28 @@ namespace GIGLS.Services.Business.Scanning
 
             return true;
         }
+
+        /// <summary>
+        /// ///////////SignOffDeliveryManifest
+        /// </summary>
+        /// <param name="manifest"></param>
+        /// <returns></returns>
+        public async Task<bool> ScanSignOffDeliveryManifest(string manifest)
+        {
+            // get waybills in manifest that have not been collected by customer
+            var waybills = await _manifestWaybillService.GetWaybillsInManifest(manifest);
+
+            // scan the Delivery Manifest with the scan code of 'ShipmentScanStatus.SRC'
+            // (Mark the manifest as Received at the final service centre)  - scanning does this
+            var result = await ScanShipment(new ScanDTO()
+            {
+                WaybillNumber = manifest,
+                ShipmentScanStatus = ShipmentScanStatus.SRC
+            });
+
+            return true;
+        }
+
 
     }
 }

@@ -6,6 +6,7 @@ using System.Web.Http;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.WebApi.Filters;
+using GIGLS.Core.IServices.Business;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -14,9 +15,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
     public class ManifestWaybillMappingController : BaseWebApiController
     {
         private readonly IManifestWaybillMappingService _service;
-        public ManifestWaybillMappingController(IManifestWaybillMappingService service) : base(nameof(ManifestWaybillMappingController))
+        private readonly IScanService _scan;
+        public ManifestWaybillMappingController(IManifestWaybillMappingService service, IScanService scan)
+            : base(nameof(ManifestWaybillMappingController))
         {
             _service = service;
+            _scan = scan;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -170,7 +174,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _service.SignOffDeliveryManifest(manifestCode);
+                await _scan.ScanSignOffDeliveryManifest(manifestCode);
 
                 return new ServiceResponse<bool>
                 {
