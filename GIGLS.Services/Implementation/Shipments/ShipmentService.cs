@@ -454,7 +454,7 @@ namespace GIGLS.Services.Implementation.Shipments
             if (CustomerType.Company.ToString() == customerType)
             {
                 var company = await _uow.Company.GetAsync(s => s.CompanyId == shipmentDTO.CustomerId);
-                if(company.CompanyType == CompanyType.Corporate)
+                if (company.CompanyType == CompanyType.Corporate)
                 {
                     shipmentDTO.CompanyType = CompanyType.Corporate.ToString();
                 }
@@ -590,11 +590,26 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                filterOptionsDto.count = 1000000;
+                //filterOptionsDto.count = 1000000;
 
                 // get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var shipmentsBySC = await _uow.Shipment.GetShipments(filterOptionsDto, serviceCenters).Item1;
+                //var shipmentsBySC = await _uow.Shipment.GetShipments(filterOptionsDto, serviceCenters).Item1;
+                var shipments = _uow.Shipment.GetAll().Where(s => s.IsCancelled == false && s.IsDeleted == false);
+
+                //apply filters for Service Centre
+                if (serviceCenters.Length > 0)
+                {
+                    shipments = shipments.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                }
+
+                //filter by Local or International Shipment
+                if (filterOptionsDto.IsInternational != null)
+                {
+                    shipments = shipments.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
+                }
+
+                var shipmentsBySC = Mapper.Map<List<ShipmentDTO>>(shipments.ToList());
 
                 // get only paid shipments from Invoice for Individuals
                 // and allow Ecommerce and Corporate customers to be grouped
@@ -633,7 +648,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var tranWaybillObj = _uow.TransitWaybillNumber.SingleOrDefault(s => s.WaybillNumber == item.Waybill);
                     if (tranWaybillObj != null)
                     {
-                        if(tranWaybillObj.ServiceCentreId == serviceCenters[0] && tranWaybillObj.IsGrouped == false)
+                        if (tranWaybillObj.ServiceCentreId == serviceCenters[0] && tranWaybillObj.IsGrouped == false)
                         {
                             finalUngroupedList.Add(item);
                             break;
@@ -645,17 +660,17 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                
+
                 //added for Transitwaybills
                 var transitWaybillNumberList = _uow.TransitWaybillNumber.GetAll().Where(s =>
                     serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false).ToList();
                 foreach (var item in transitWaybillNumberList)
                 {
                     var shipment = await GetShipment(item.WaybillNumber);
-                    if(filterByDestinationSC && shipmentsBySC.Count > 0)
+                    if (filterByDestinationSC && shipmentsBySC.Count > 0)
                     {
                         var destinationSC = shipmentsBySC[0].DestinationServiceCentreId;
-                        if(shipment.DestinationServiceCentreId == destinationSC)
+                        if (shipment.DestinationServiceCentreId == destinationSC)
                         {
                             finalUngroupedList.Add(shipment);
                         }
@@ -686,6 +701,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     page = 1,
                     sortorder = "0"
                 };
+
                 var ungroupedWaybills = await GetUnGroupedWaybillsForServiceCentre(filterOptionsDto);
 
                 var allServiceCenters = await _centreService.GetServiceCentres();
@@ -708,7 +724,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                filterOptionsDto.count = 1000000;
+                //filterOptionsDto.count = 1000000;
 
                 // get groupedWaybills for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
@@ -843,13 +859,13 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //1. sort by service centre
             var serviceCentreList = new HashSet<string>();
-            foreach(var item in dailySales.Invoices)
+            foreach (var item in dailySales.Invoices)
             {
                 serviceCentreList.Add(item.DepartureServiceCentreName);
             }
 
             //2. group by service centre
-            foreach(var serviceCentreName in serviceCentreList)
+            foreach (var serviceCentreName in serviceCentreList)
             {
                 var invoicesByServiceCentre = dailySales.Invoices.Where(s => s.DepartureServiceCentreName == serviceCentreName).ToList();
 
