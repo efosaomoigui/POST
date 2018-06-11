@@ -41,7 +41,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Devices
                                                SerialNumber = x.SerialNumber,
                                                SimCardNumber = x.SimCardNumber,
                                                UsbCable = x.UsbCable,
-                                               NetworkProvider = x.NetworkProvider
+                                               NetworkProvider = x.NetworkProvider,
+                                               IMEI = x.IMEI,
+                                               IMEI2 = x.IMEI2
                                            }).FirstOrDefault(),
                                            UserId = s.UserId,
                                            User = Context.Users.Where(c => c.Id == s.UserId).Select(x => new UserDTO
@@ -87,7 +89,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Devices
                                                                SerialNumber = x.SerialNumber,
                                                                SimCardNumber = x.SimCardNumber,
                                                                UsbCable = x.UsbCable,
-                                                               NetworkProvider = x.NetworkProvider
+                                                               NetworkProvider = x.NetworkProvider,
+                                                                IMEI = x.IMEI,
+                                                               IMEI2 = x.IMEI2
                                                            }).FirstOrDefault(),
                                                            UserId = s.UserId,
                                                            User = Context.Users.Where(c => c.Id == s.UserId).Select(x => new UserDTO
@@ -132,7 +136,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Devices
                                                          SerialNumber = x.SerialNumber,
                                                          SimCardNumber = x.SimCardNumber,
                                                          UsbCable = x.UsbCable,
-                                                         NetworkProvider = x.NetworkProvider
+                                                         NetworkProvider = x.NetworkProvider,
+                                                         IMEI = x.IMEI,
+                                                         IMEI2 = x.IMEI2
                                                      }).FirstOrDefault(),
                                                      UserId = s.UserId,
                                                      User = Context.Users.Where(c => c.Id == s.UserId).Select(x => new UserDTO
