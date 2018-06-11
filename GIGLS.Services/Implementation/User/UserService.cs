@@ -55,7 +55,7 @@ namespace GIGLS.Services.Implementation.User
             {
                 var employeeCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Employee);
                 user.UserChannelCode = employeeCode;
-                user.UserChannelPassword = userDto.Password;
+                user.UserChannelPassword = GeneratePassword();
             }
 
             var u = await _unitOfWork.User.RegisterUser(user, userDto.Password);
