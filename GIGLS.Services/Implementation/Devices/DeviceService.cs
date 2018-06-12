@@ -7,6 +7,7 @@ using GIGLS.Core;
 using GIGLS.Infrastructure;
 using AutoMapper;
 using GIGLS.Core.Domain.Devices;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Devices
 {
@@ -64,7 +65,7 @@ namespace GIGLS.Services.Implementation.Devices
 
         public Task<IEnumerable<DeviceDTO>> GetDevices()
         {
-            var devices = _uow.Device.GetAll();
+            var devices = _uow.Device.GetAll().OrderBy(x => x.SerialNumber);
             return Task.FromResult(Mapper.Map<IEnumerable<DeviceDTO>>(devices));
         }
 
