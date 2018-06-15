@@ -123,6 +123,7 @@ namespace GIGLS.WebApi.Providers
                     { "LastName", user.LastName},
                     { "Email", user.Email},
                     { "UserChannelType", user.UserChannelType.ToString()},
+                    { "SystemUserRole", user.SystemUserRole},
                 };
 
                 //get claims for the user
