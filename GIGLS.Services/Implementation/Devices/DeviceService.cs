@@ -7,6 +7,7 @@ using GIGLS.Core;
 using GIGLS.Infrastructure;
 using AutoMapper;
 using GIGLS.Core.Domain.Devices;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Devices
 {
@@ -64,7 +65,7 @@ namespace GIGLS.Services.Implementation.Devices
 
         public Task<IEnumerable<DeviceDTO>> GetDevices()
         {
-            var devices = _uow.Device.GetAll();
+            var devices = _uow.Device.GetAll().OrderBy(x => x.SerialNumber);
             return Task.FromResult(Mapper.Map<IEnumerable<DeviceDTO>>(devices));
         }
 
@@ -106,6 +107,8 @@ namespace GIGLS.Services.Implementation.Devices
                 device.UsbCable = deviceDto.UsbCable;
                 device.SimCardNumber = deviceDto.SimCardNumber;
                 device.NetworkProvider = deviceDto.NetworkProvider;
+                device.IMEI = deviceDto.IMEI;
+                device.IMEI2 = deviceDto.IMEI2;
                 _uow.Complete();
             }
             catch (Exception)
