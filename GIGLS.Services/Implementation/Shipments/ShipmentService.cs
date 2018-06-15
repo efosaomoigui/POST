@@ -609,6 +609,19 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipments = shipments.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
                 }
 
+                //filter by DestinationServiceCentreId
+                var filter = filterOptionsDto.filter;
+                var filterValue = filterOptionsDto.filterValue;
+                var boolResult = int.TryParse(filterValue, out int destinationSCId);
+                if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
+                {
+                    if(filter == "DestinationServiceCentreId" && boolResult)
+                    {
+                        shipments = shipments.Where(s => s.DestinationServiceCentreId == destinationSCId);
+                    }
+                }
+
+
                 var shipmentsBySC = Mapper.Map<List<ShipmentDTO>>(shipments.ToList());
 
                 // get only paid shipments from Invoice for Individuals
