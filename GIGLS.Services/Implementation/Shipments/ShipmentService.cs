@@ -696,8 +696,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
 
+                //
+                var finalList = new List<ShipmentDTO>();
+                foreach (var finalUngroupedItem in finalUngroupedList)
+                {
+                    var shipment = await GetShipment(finalUngroupedItem.Waybill);
+                    finalList.Add(shipment);
+                }
 
-                return finalUngroupedList;
+                return finalList;
             }
             catch (Exception)
             {
