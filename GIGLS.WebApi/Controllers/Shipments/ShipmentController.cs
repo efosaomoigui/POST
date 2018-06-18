@@ -16,6 +16,7 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Text;
 using GIGLS.CORE.IServices.Report;
+using GIGLS.Core.View;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -198,12 +199,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("ungroupedwaybillsforservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> GetUnGroupedWaybillsForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<IEnumerable<InvoiceView>>> GetUnGroupedWaybillsForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var shipments = await _service.GetUnGroupedWaybillsForServiceCentre(filterOptionsDto, true);
-                return new ServiceResponse<IEnumerable<ShipmentDTO>>
+                return new ServiceResponse<IEnumerable<InvoiceView>>
                 {
                     Object = shipments,
                     Total = shipments.Count
