@@ -587,7 +587,7 @@ namespace GIGLS.Services.Implementation.Shipments
             return shipment;
         }
 
-        public async Task<List<InvoiceView>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto, bool filterByDestinationSC = false)
+        public async Task<List<InvoiceViewDTO>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto, bool filterByDestinationSC = false)
         {
             try
             {
@@ -701,14 +701,30 @@ namespace GIGLS.Services.Implementation.Shipments
 
 
                 //
-                var finalList = new List<InvoiceView>();
+                var finalList = new List<InvoiceViewDTO>();
                 foreach (var finalUngroupedItem in finalUngroupedList)
                 {
                     //var shipment = await GetShipment(finalUngroupedItem.Waybill);
                     var shipment = allInvoices.FirstOrDefault(s => s.Waybill == finalUngroupedItem.Waybill);
-                    if(shipment != null)
+                    if (shipment != null)
                     {
-                        finalList.Add(shipment);
+                        var invoiceViewDTO = Mapper.Map<InvoiceViewDTO>(shipment);
+                        invoiceViewDTO.DepartureServiceCentre = new ServiceCentreDTO()
+                        {
+                            Name = invoiceViewDTO.DepartureServiceCentreName,
+                            Code = invoiceViewDTO.DepartureServiceCentreCode,
+                            ServiceCentreId = invoiceViewDTO.DepartureServiceCentreId
+                        };
+
+                        invoiceViewDTO.DestinationServiceCentre = new ServiceCentreDTO()
+                        {
+                            Name = invoiceViewDTO.DestinationServiceCentreName,
+                            Code = invoiceViewDTO.DestinationServiceCentreCode,
+                            ServiceCentreId = invoiceViewDTO.DestinationServiceCentreId
+                        };
+
+
+                        finalList.Add(invoiceViewDTO);
                     }
                 }
 

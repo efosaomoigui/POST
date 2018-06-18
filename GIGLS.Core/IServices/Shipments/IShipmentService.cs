@@ -28,7 +28,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task DeleteShipment(string waybill);
         Task<Shipment> GetShipmentForScan(string waybill);
         Task<List<ServiceCentreDTO>> GetUnGroupMappingServiceCentres();
-        Task<List<InvoiceView>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto, bool filterByDestinationSC = false);
+        Task<List<InvoiceViewDTO>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto, bool filterByDestinationSC = false);
         Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentres();
         Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto);
         Task<DomesticRouteZoneMapDTO> GetZone(int destinationServiceCentre);

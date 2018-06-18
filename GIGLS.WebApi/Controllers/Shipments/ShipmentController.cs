@@ -199,12 +199,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("ungroupedwaybillsforservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<InvoiceView>>> GetUnGroupedWaybillsForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetUnGroupedWaybillsForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var shipments = await _service.GetUnGroupedWaybillsForServiceCentre(filterOptionsDto, true);
-                return new ServiceResponse<IEnumerable<InvoiceView>>
+                return new ServiceResponse<IEnumerable<InvoiceViewDTO>>
                 {
                     Object = shipments,
                     Total = shipments.Count
