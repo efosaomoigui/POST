@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
@@ -51,6 +52,7 @@ namespace GIGLS.Core.DTO.Account
         public int DeliveryOptionId { get; set; }
         public string DeliveryOptionCode { get; set; }
         public string DeliveryOptionDescription { get; set; }
+        public DeliveryOptionDTO DeliveryOption { get; set; }
 
         //station
         public int StationId { get; set; }

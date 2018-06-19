@@ -85,17 +85,19 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<ShipmentDTO>> GetIncomingShipments(FilterOptionsDto filterOptionsDto)
+        public async Task<List<GIGLS.Core.DTO.Account.InvoiceViewDTO>> GetIncomingShipments(FilterOptionsDto filterOptionsDto)
         {
             try
             {
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-                var allShipments = _uow.Shipment.GetShipments(filterOptionsDto, new int[] { });
+                //var allShipments = _uow.Shipment.GetShipments(filterOptionsDto, new int[] { });
+                var allShipments = _uow.Invoice.GetAllFromInvoiceView();
 
-                var incomingShipments = new List<ShipmentDTO>();
+                var incomingShipments = new List<GIGLS.Core.DTO.Account.InvoiceViewDTO>();
                 if (serviceCenters.Length > 0)
                 {
-                    incomingShipments = allShipments.Item1.Result.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).ToList();
+                    var shipmentResult = allShipments.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).ToList();
+                    incomingShipments = Mapper.Map<List<GIGLS.Core.DTO.Account.InvoiceViewDTO>>(shipmentResult);
                 }
 
                 //delivered shipments should not be displayed in expected shipments
@@ -104,13 +106,31 @@ namespace GIGLS.Services.Implementation.Shipments
                 !shipmetCollection.Select(a => a.Waybill).Contains(s.Waybill)).ToList();
 
                 //populate the service centres
-                foreach (var shipment in incomingShipments)
+                foreach (var invoiceViewDTO in incomingShipments)
                 {
-                    shipment.DepartureServiceCentre = await _centreService.GetServiceCentreById(shipment.DepartureServiceCentreId);
-                    shipment.DestinationServiceCentre = await _centreService.GetServiceCentreById(shipment.DestinationServiceCentreId);
+                    invoiceViewDTO.DepartureServiceCentre = new ServiceCentreDTO()
+                    {
+                        Name = invoiceViewDTO.DepartureServiceCentreName,
+                        Code = invoiceViewDTO.DepartureServiceCentreCode,
+                        ServiceCentreId = invoiceViewDTO.DepartureServiceCentreId
+                    };
+
+                    invoiceViewDTO.DestinationServiceCentre = new ServiceCentreDTO()
+                    {
+                        Name = invoiceViewDTO.DestinationServiceCentreName,
+                        Code = invoiceViewDTO.DestinationServiceCentreCode,
+                        ServiceCentreId = invoiceViewDTO.DestinationServiceCentreId
+                    };
+
+                    invoiceViewDTO.DeliveryOption = new DeliveryOptionDTO()
+                    {
+                        Code = invoiceViewDTO.DeliveryOptionCode,
+                        Description = invoiceViewDTO.DeliveryOptionDescription,
+                        DeliveryOptionId = invoiceViewDTO.DeliveryOptionId
+                    };
                 }
 
-                return incomingShipments;
+                return await Task.FromResult(incomingShipments);
             }
             catch (Exception)
             {
