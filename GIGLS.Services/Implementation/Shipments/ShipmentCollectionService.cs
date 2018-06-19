@@ -85,8 +85,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //get collected shipment
             var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x =>
-            x.ShipmentScanStatus == ShipmentScanStatus.OKT ||
-            x.ShipmentScanStatus == ShipmentScanStatus.OKC &&
+            (x.ShipmentScanStatus == ShipmentScanStatus.OKT ||
+            x.ShipmentScanStatus == ShipmentScanStatus.OKC) &&
             shipmentsWaybills.Contains(x.Waybill));
 
             var shipmentCollectionDto = Mapper.Map<IEnumerable<ShipmentCollectionDTO>>(shipmentCollection);
