@@ -31,6 +31,7 @@ namespace GIGLS.Core.View
         public decimal? CashOnDeliveryAmount { get; set; }
         public bool IsCancelled { get; set; }
         public decimal ShipmentPackagePrice { get; set; }
+        public bool IsInternational { get; set; }
 
         //Customer Information
         public int CustomerId { get; set; }

@@ -24,6 +24,7 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.View;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -586,7 +587,7 @@ namespace GIGLS.Services.Implementation.Shipments
             return shipment;
         }
 
-        public async Task<List<ShipmentDTO>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto, bool filterByDestinationSC = false)
+        public async Task<List<InvoiceViewDTO>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto, bool filterByDestinationSC = false)
         {
             try
             {
@@ -595,7 +596,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 // get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 //var shipmentsBySC = await _uow.Shipment.GetShipments(filterOptionsDto, serviceCenters).Item1;
-                var shipments = _uow.Shipment.GetAll().Where(s => s.IsCancelled == false && s.IsDeleted == false);
+                //var shipments = _uow.Shipment.Where(s => s.IsCancelled == false && s.IsDeleted == false);
+                var allInvoices = _uow.Invoice.GetAllFromInvoiceView().ToList();
+                //var shipments = _uow.Invoice.GetAllFromInvoiceView();
+                var shipments = allInvoices.Where(s => s.IsCancelled == false && s.IsDeleted == false);
 
                 //apply filters for Service Centre
                 if (serviceCenters.Length > 0)
@@ -616,21 +620,21 @@ namespace GIGLS.Services.Implementation.Shipments
                 var boolResult = int.TryParse(filterValue, out destinationSCId);
                 if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
                 {
-                    if(filter == "DestinationServiceCentreId" && boolResult)
+                    if (filter == "DestinationServiceCentreId" && boolResult)
                     {
                         shipments = shipments.Where(s => s.DestinationServiceCentreId == destinationSCId);
                     }
                 }
 
 
-                var shipmentsBySC = Mapper.Map<List<ShipmentDTO>>(shipments.ToList());
+                var shipmentsBySC = shipments.ToList();  // Mapper.Map<List<ShipmentDTO>>(shipments.ToList());
 
                 // get only paid shipments from Invoice for Individuals
                 // and allow Ecommerce and Corporate customers to be grouped
-                var paidShipments = new List<ShipmentDTO>();
+                var paidShipments = new List<InvoiceView>();
                 foreach (var shipmentItem in shipmentsBySC)
                 {
-                    var invoice = await _uow.Invoice.GetAsync(s => s.Waybill == shipmentItem.Waybill);
+                    var invoice = shipmentItem;     // await _uow.Invoice.GetAsync(s => s.Waybill == shipmentItem.Waybill);
 
                     if (invoice.PaymentStatus == PaymentStatus.Paid)
                     {
@@ -656,7 +660,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
 
                 // final ungroupedList
-                var finalUngroupedList = new List<ShipmentDTO>();
+                var finalUngroupedList = new List<InvoiceView>();
                 foreach (var item in ungroupedWaybills)
                 {
                     var tranWaybillObj = _uow.TransitWaybillNumber.SingleOrDefault(s => s.WaybillNumber == item.Waybill);
@@ -680,11 +684,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false).ToList();
                 foreach (var item in transitWaybillNumberList)
                 {
-                    var shipment = await GetShipment(item.WaybillNumber);
+                    var shipment = allInvoices.FirstOrDefault(s => s.Waybill == item.WaybillNumber);     // await GetShipment(item.WaybillNumber);
                     if (filterByDestinationSC && shipmentsBySC.Count > 0)
                     {
                         var destinationSC = shipmentsBySC[0].DestinationServiceCentreId;
-                        if (shipment.DestinationServiceCentreId == destinationSC)
+                        if (shipment != null && shipment.DestinationServiceCentreId == destinationSC)
                         {
                             finalUngroupedList.Add(shipment);
                         }
@@ -697,11 +701,31 @@ namespace GIGLS.Services.Implementation.Shipments
 
 
                 //
-                var finalList = new List<ShipmentDTO>();
+                var finalList = new List<InvoiceViewDTO>();
                 foreach (var finalUngroupedItem in finalUngroupedList)
                 {
-                    var shipment = await GetShipment(finalUngroupedItem.Waybill);
-                    finalList.Add(shipment);
+                    //var shipment = await GetShipment(finalUngroupedItem.Waybill);
+                    var shipment = allInvoices.FirstOrDefault(s => s.Waybill == finalUngroupedItem.Waybill);
+                    if (shipment != null)
+                    {
+                        var invoiceViewDTO = Mapper.Map<InvoiceViewDTO>(shipment);
+                        invoiceViewDTO.DepartureServiceCentre = new ServiceCentreDTO()
+                        {
+                            Name = invoiceViewDTO.DepartureServiceCentreName,
+                            Code = invoiceViewDTO.DepartureServiceCentreCode,
+                            ServiceCentreId = invoiceViewDTO.DepartureServiceCentreId
+                        };
+
+                        invoiceViewDTO.DestinationServiceCentre = new ServiceCentreDTO()
+                        {
+                            Name = invoiceViewDTO.DestinationServiceCentreName,
+                            Code = invoiceViewDTO.DestinationServiceCentreCode,
+                            ServiceCentreId = invoiceViewDTO.DestinationServiceCentreId
+                        };
+
+
+                        finalList.Add(invoiceViewDTO);
+                    }
                 }
 
                 return finalList;

@@ -5,6 +5,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
+using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using System;
@@ -27,7 +28,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task DeleteShipment(string waybill);
         Task<Shipment> GetShipmentForScan(string waybill);
         Task<List<ServiceCentreDTO>> GetUnGroupMappingServiceCentres();
-        Task<List<ShipmentDTO>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto, bool filterByDestinationSC = false);
+        Task<List<InvoiceViewDTO>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto, bool filterByDestinationSC = false);
         Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentres();
         Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto);
         Task<DomesticRouteZoneMapDTO> GetZone(int destinationServiceCentre);

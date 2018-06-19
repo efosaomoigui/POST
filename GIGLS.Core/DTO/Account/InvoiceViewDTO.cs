@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
@@ -28,6 +29,7 @@ namespace GIGLS.Core.DTO.Account
         public decimal CashOnDeliveryAmount { get; set; }
         public bool IsCancelled { get; set; }
         public decimal ShipmentPackagePrice { get; set; }
+        public bool IsInternational { get; set; }
 
         //Customer Information
         public int CustomerId { get; set; }
@@ -64,10 +66,12 @@ namespace GIGLS.Core.DTO.Account
         public int DepartureServiceCentreId { get; set; }
         public string DepartureServiceCentreCode { get; set; }
         public string DepartureServiceCentreName { get; set; }
+        public ServiceCentreDTO DepartureServiceCentre { get; set; }
 
         public int DestinationServiceCentreId { get; set; }
         public string DestinationServiceCentreCode { get; set; }
         public string DestinationServiceCentreName { get; set; }
+        public ServiceCentreDTO DestinationServiceCentre { get; set; }
 
         //UserId
         public string UserId { get; set; }
