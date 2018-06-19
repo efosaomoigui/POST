@@ -145,7 +145,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     "State",
                     "Address",
                     "Demurrage Day",
-                    "Demurrage Amount"
+                    "Demurrage Amount",
+                    "Receiver Name"
                 };
 
                 var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
@@ -182,6 +183,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[4] = invoice.ReceiverAddress;
                     strArray[5] = demurrageDayCount;
                     strArray[6] = demurragePrice;
+                    strArray[7] = invoice.ReceiverName;
 
                     //populate the message template
                     messageDTO.FinalBody =
