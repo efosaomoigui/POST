@@ -200,24 +200,50 @@ namespace GIGLS.Services.Implementation.Shipments
                 List<string> waybills = new List<string>();
                 var departureServiceCentre = new ServiceCentreDTO();
                 var destinationServiceCentre = new ServiceCentreDTO();
+                var allInvoices = _uow.Invoice.GetAllFromInvoiceView().ToList();
                 foreach (var groupWaybillNumberMapping in groupWaybillNumberMappingList)
                 {
-                    var shipmentDTO = await _shipmentService.GetShipment(groupWaybillNumberMapping.WaybillNumber);
+                    var shipmentDTO = allInvoices.FirstOrDefault(s => s.Waybill == groupWaybillNumberMapping.WaybillNumber);
+                    if(shipmentDTO == null)
+                    {
+                        continue;
+                    }
+
                     resultList.Add(new WaybillNumberDTO { WaybillCode = shipmentDTO.Waybill });
                     shipmentList.Add(new ShipmentDTO
                     {
                         Waybill = shipmentDTO.Waybill,
                         DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId,
-                        DepartureServiceCentre = shipmentDTO.DepartureServiceCentre,
+                        DepartureServiceCentre = new ServiceCentreDTO()
+                        {
+                            Name = shipmentDTO.DepartureServiceCentreName,
+                            Code = shipmentDTO.DepartureServiceCentreCode,
+                            ServiceCentreId = shipmentDTO.DepartureServiceCentreId
+                        },
 
                         DestinationServiceCentreId = shipmentDTO.DestinationServiceCentreId,
-                        DestinationServiceCentre = shipmentDTO.DestinationServiceCentre
+                        DestinationServiceCentre = new ServiceCentreDTO()
+                        {
+                            Name = shipmentDTO.DestinationServiceCentreName,
+                            Code = shipmentDTO.DestinationServiceCentreCode,
+                            ServiceCentreId = shipmentDTO.DestinationServiceCentreId
+                        }
                     });
 
                     waybills.Add(shipmentDTO.Waybill);
 
-                    departureServiceCentre = shipmentDTO.DepartureServiceCentre;
-                    destinationServiceCentre = shipmentDTO.DestinationServiceCentre;
+                    departureServiceCentre = new ServiceCentreDTO()
+                    {
+                        Name = shipmentDTO.DepartureServiceCentreName,
+                        Code = shipmentDTO.DepartureServiceCentreCode,
+                        ServiceCentreId = shipmentDTO.DepartureServiceCentreId
+                    };
+                    destinationServiceCentre = new ServiceCentreDTO()
+                    {
+                        Name = shipmentDTO.DestinationServiceCentreName,
+                        Code = shipmentDTO.DestinationServiceCentreCode,
+                        ServiceCentreId = shipmentDTO.DestinationServiceCentreId
+                    };
                 }
 
                 var groupWaybillNumberMappingDTO = new GroupWaybillNumberMappingDTO
