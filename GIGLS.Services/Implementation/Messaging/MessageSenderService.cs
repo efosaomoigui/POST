@@ -178,7 +178,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     //map the array
                     strArray[0] = customerName;
                     strArray[1] = waybill;
-                    strArray[2] = invoice.DestinationServiceCentreName;
+                    strArray[2] = invoice.DepartureServiceCentreName;
                     strArray[3] = invoice.DestinationServiceCentreName;
                     strArray[4] = invoice.ReceiverAddress;
                     strArray[5] = demurrageDayCount;
@@ -189,9 +189,19 @@ namespace GIGLS.Services.Implementation.Messaging
                     messageDTO.FinalBody =
                         string.Format(messageDTO.Body, strArray);
 
-                    messageDTO.To = invoice.ReceiverPhoneNumber;
-
-                }
+                    if ("CUSTOMER" == messageDTO.To.Trim())
+                    {
+                        messageDTO.To = customerObj.PhoneNumber;
+                    }
+                    else if ("RECEIVER" == messageDTO.To.Trim())
+                    {
+                        messageDTO.To = invoice.ReceiverPhoneNumber;
+                    }
+                    else {
+                        messageDTO.To = invoice.ReceiverPhoneNumber;
+                    }
+                    //messageDTO.To = invoice.ReceiverPhoneNumber;
+                                    }
             }
 
             //resolve phone numbers to +2347011111111
