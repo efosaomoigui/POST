@@ -96,7 +96,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     await LogEmailMessage(messageDTO, result);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await LogEmailMessage(messageDTO, result, ex.Message);
             }
@@ -111,7 +111,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 var smsMessages = await _messageService.GetSmsAsync();
                 messageDTO = smsMessages.FirstOrDefault(s => s.MessageType == messageType);
 
-                if(messageDTO != null)
+                if (messageDTO != null)
                 {
                     //prepare message finalBody
                     await PrepareMessageFinalBody(messageDTO, obj);
@@ -128,16 +128,16 @@ namespace GIGLS.Services.Implementation.Messaging
 
         private async Task<bool> PrepareMessageFinalBody(MessageDTO messageDTO, object obj)
         {
-            if(obj is ShipmentDTO)
-            {
-                var shipmentDTO = (ShipmentDTO)obj;
-                messageDTO.FinalBody = string.Format(messageDTO.Body, shipmentDTO.Customer[0].CustomerName, shipmentDTO.Waybill);
-                messageDTO.To = shipmentDTO.Customer[0].PhoneNumber;
-            }
+            //if (obj is ShipmentDTO)
+            //{
+            //    var shipmentDTO = (ShipmentDTO)obj;
+            //    messageDTO.FinalBody = string.Format(messageDTO.Body, shipmentDTO.Customer[0].CustomerName, shipmentDTO.Waybill);
+            //    messageDTO.To = shipmentDTO.Customer[0].PhoneNumber;
+            //}
 
             if (obj is ShipmentTrackingDTO)
             {
-                var strArray = new string[] 
+                var strArray = new string[]
                 {
                     "Customer Name",
                     "Waybill",
@@ -197,11 +197,12 @@ namespace GIGLS.Services.Implementation.Messaging
                     {
                         messageDTO.To = invoice.ReceiverPhoneNumber;
                     }
-                    else {
+                    else
+                    {
                         messageDTO.To = invoice.ReceiverPhoneNumber;
                     }
                     //messageDTO.To = invoice.ReceiverPhoneNumber;
-                                    }
+                }
             }
 
             //resolve phone numbers to +2347011111111
