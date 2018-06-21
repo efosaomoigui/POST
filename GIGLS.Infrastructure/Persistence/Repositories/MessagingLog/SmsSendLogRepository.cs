@@ -28,7 +28,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.MessagingLog
                 //If No Date Supply
                 if (!filter.StartDate.HasValue && !filter.EndDate.HasValue)
                 {
-                    var Today = DateTime.Today;
+                    var Today = DateTime.Today.AddDays(-1);
                     var nextDay = DateTime.Today.AddDays(1).Date;
                     messages = messages.Where(x => x.DateCreated >= Today && x.DateCreated < nextDay);
                 }

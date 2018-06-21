@@ -23,6 +23,16 @@ namespace GIGLS.WebApi.Controllers.User
         [Route("api/login")]
         public async Task<IServiceResponse<JObject>> Login(UserloginDetailsModel userLoginModel)
         {
+            //trim
+            if(userLoginModel.username != null)
+            {
+                userLoginModel.username = userLoginModel.username.Trim();
+            }
+
+            if (userLoginModel.Password != null)
+            {
+                userLoginModel.Password = userLoginModel.Password.Trim();
+            }
 
             //const string apiBaseUri = "http://localhost/GIGLS.WebApi/";
             const string apiBaseUri = "http://giglsresourceapi.azurewebsites.net/api/";

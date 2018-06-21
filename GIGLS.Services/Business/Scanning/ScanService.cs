@@ -86,6 +86,10 @@ namespace GIGLS.Services.Business.Scanning
         public async Task<bool> ScanShipment(ScanDTO scan)
         {
             // check if the waybill number exists in the system
+            if(scan.WaybillNumber != null)
+            {
+                scan.WaybillNumber = scan.WaybillNumber.Trim();
+            }
             var shipment = await _shipmentService.GetShipmentForScan(scan.WaybillNumber);
 
             string scanStatus = scan.ShipmentScanStatus.ToString();
