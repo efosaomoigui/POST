@@ -121,7 +121,7 @@ namespace GIGLS.Services.Implementation.Messaging
             }
             catch (Exception ex)
             {
-                await LogEmailMessage(messageDTO, result, ex.Message);
+                await LogSMSMessage(messageDTO, result, ex.Message);
             }
             return true;
         }
