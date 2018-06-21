@@ -65,7 +65,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     case EmailSmsType.All:
                         {
                             await SendSMSMessage(messageType, obj);
-                            await SendEmailMessage(messageType, obj);
+                            //await SendEmailMessage(messageType, obj);
                             break;
                         }
                 }
