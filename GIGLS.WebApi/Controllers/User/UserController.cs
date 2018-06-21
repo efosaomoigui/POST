@@ -472,6 +472,16 @@ namespace GIGLS.WebApi.Controllers.User
         [Route("api/user/login2")]
         public async Task<IServiceResponse<JObject>> Login2(string username, string password)
         {
+            //trim
+            if (username != null)
+            {
+                username = username.Trim();
+            }
+
+            if (password != null)
+            {
+                password = password.Trim();
+            }
 
             string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
             //const string apiBaseUri = "http://giglsresourceapi.azurewebsites.net/api/";
@@ -521,6 +531,16 @@ namespace GIGLS.WebApi.Controllers.User
         [Route("api/user/login")]
         public async Task<IServiceResponse<JObject>> Login(UserloginDetailsModel userLoginModel)
         {
+            //trim
+            if (userLoginModel.username != null)
+            {
+                userLoginModel.username = userLoginModel.username.Trim();
+            }
+
+            if (userLoginModel.Password != null)
+            {
+                userLoginModel.Password = userLoginModel.Password.Trim();
+            }
 
             string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
             //const string apiBaseUri = "http://giglsresourceapi.azurewebsites.net/api/";
