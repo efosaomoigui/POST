@@ -159,14 +159,14 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Cash on Delivery Wallet information does not exist");
             }
 
-            var balance = await _cashOnDeliveryBalanceService.GetCashOnDeliveryBalanceByWalletId(wallet.WalletId);
+            //var balance = await _cashOnDeliveryBalanceService.GetCashOnDeliveryBalanceByWalletId(wallet.WalletId);
 
             var accountDto = Mapper.Map<List<CashOnDeliveryAccountDTO>>(account);
 
             return new CashOnDeliveryAccountSummaryDTO
             {
                 CashOnDeliveryAccount = accountDto,
-                CashOnDeliveryDetail = balance
+                //CashOnDeliveryDetail = balance
             };
         }
 
