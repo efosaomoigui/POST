@@ -80,5 +80,9 @@ namespace GIGLS.Core.DTO.Account
         public string UserName { get; set; }
 
         public string Description { get; set; }
+
+        //PickUp Options
+        public PickupOptions PickupOptions { get; set; }
+
     }
 }

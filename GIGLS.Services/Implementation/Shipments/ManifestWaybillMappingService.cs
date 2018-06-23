@@ -13,6 +13,8 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.IServices.Business;
+using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.DTO.ServiceCentres;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -375,12 +377,12 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
-                var filterOptionsDto = new FilterOptionsDto
-                {
-                    count = 500,
-                    page = 1,
-                    sortorder = "0"
-                };
+                //var filterOptionsDto = new FilterOptionsDto
+                //{
+                //    count = 500,
+                //    page = 1,
+                //    sortorder = "0"
+                //};
 
                 //1. get all shipments at colletion centre for the service centre which status is ARF
                 var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF);
@@ -390,14 +392,91 @@ namespace GIGLS.Services.Implementation.Shipments
                     return new List<ShipmentDTO>();
                 }
 
-                var result = new List<string>();
+                var waybills = new List<string>();
                 foreach (var waybillCollection in shipmentCollection)
                 {
-                    result.Add(waybillCollection.Waybill);
+                    waybills.Add(waybillCollection.Waybill);
                 }
 
                 //2. Get shipment details for the service centre that are at the collection centre using the waybill and service centre
-                var shipmentsBySC = await _uow.Shipment.GetShipmentDetailByWaybills(filterOptionsDto, serviceCenters, result).Item1;
+                //var shipmentsBySC = await _uow.Shipment.GetShipmentDetailByWaybills(filterOptionsDto, serviceCenters, result).Item1;
+                var InvoicesBySC = _uow.Invoice.GetAllFromInvoiceView();
+
+                //filter by destination service center that is not cancelled and it is home delivery
+                InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && x.PickupOptions == PickupOptions.HOMEDELIVERY);
+
+                if (serviceCenters.Length > 0)
+                {
+                    InvoicesBySC = InvoicesBySC.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId));
+                }
+
+                //filter by Local or International Shipment
+                //if (filterOptionsDto.IsInternational != null)
+                //{
+                //    InvoicesBySC = InvoicesBySC.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
+                //}
+
+
+                ////final list
+                var InvoicesBySCList = InvoicesBySC.ToList();
+                if (waybills.Count > 0)
+                {
+                    InvoicesBySCList = InvoicesBySCList.Where(s => waybills.Contains(s.Waybill)).ToList();
+                }
+
+                List<ShipmentDTO> shipmentsBySC = (from r in InvoicesBySCList
+                                                   select new ShipmentDTO()
+                                                 {
+                                                     ShipmentId = r.ShipmentId,
+                                                     Waybill = r.Waybill,
+                                                     CustomerId = r.CustomerId,
+                                                     CustomerType = r.CustomerType,
+                                                     //ActualDateOfArrival = r.ActualDateOfArrival,
+                                                     DateCreated = r.DateCreated,
+                                                     DateModified = r.DateModified,
+                                                     DeliveryOptionId = r.DeliveryOptionId,
+                                                     DeliveryOption = new DeliveryOptionDTO
+                                                     {
+                                                         Code = r.DeliveryOptionCode,
+                                                         Description = r.DeliveryOptionDescription
+                                                     },
+                                                     //DeliveryTime = r.DeliveryTime,
+                                                     DepartureServiceCentreId = r.DepartureServiceCentreId,
+                                                     DepartureServiceCentre = new ServiceCentreDTO()
+                                                     {
+                                                         Code = r.DepartureServiceCentreCode,
+                                                         Name = r.DepartureServiceCentreName
+                                                     },
+                                                     DestinationServiceCentreId = r.DestinationServiceCentreId,
+                                                     DestinationServiceCentre = new ServiceCentreDTO()
+                                                     {
+                                                         Code = r.DestinationServiceCentreCode,
+                                                         Name = r.DestinationServiceCentreName
+                                                     },
+
+                                                       //ExpectedDateOfArrival = r.ExpectedDateOfArrival,
+                                                     PaymentStatus = r.PaymentStatus,
+                                                     ReceiverAddress = r.ReceiverAddress,
+                                                     ReceiverCity = r.ReceiverCity,
+                                                     ReceiverCountry = r.ReceiverCountry,
+                                                     ReceiverEmail = r.ReceiverEmail,
+                                                     ReceiverName = r.ReceiverName,
+                                                     ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                                     ReceiverState = r.ReceiverState,
+                                                     SealNumber = r.SealNumber,
+                                                     UserId = r.UserId,
+                                                     Value = r.Value,
+                                                     GrandTotal = r.GrandTotal,
+                                                     //AppliedDiscount = r.AppliedDiscount,
+                                                     DiscountValue = r.DiscountValue,
+                                                     ShipmentPackagePrice = r.ShipmentPackagePrice,
+                                                     CompanyType = r.CompanyType,
+                                                     CustomerCode = r.CustomerCode,
+                                                     Description = r.Description
+                                                 }).ToList();
+
+
+                //var shipmentsBySC = await _uow.Shipment.GetShipmentDetailByWaybills(filterOptionsDto, serviceCenters, result).Item1;
 
                 return shipmentsBySC;
             }

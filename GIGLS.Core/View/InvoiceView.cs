@@ -76,5 +76,10 @@ namespace GIGLS.Core.View
         public string UserId { get; set; }
         public string UserName { get; set; }
 
+        public string Description { get; set; }
+
+        //PickUp Options
+        public PickupOptions PickupOptions { get; set; }
+
     }
 }
