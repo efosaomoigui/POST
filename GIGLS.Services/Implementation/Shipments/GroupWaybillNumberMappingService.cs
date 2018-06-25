@@ -288,6 +288,17 @@ namespace GIGLS.Services.Implementation.Shipments
                     await _uow.CompleteAsync();
                 }
 
+                //ensure that the Manifest containing the Groupwaybill has not been dispatched
+                var manifestGroupWaybillNumberMapping = _uow.ManifestGroupWaybillNumberMapping.SingleOrDefault(x => x.GroupWaybillNumber == groupWaybillNumber);
+                if (manifestGroupWaybillNumberMapping != null)
+                {
+                    var manifestObject = _uow.Manifest.SingleOrDefault(x => x.ManifestCode == manifestGroupWaybillNumberMapping.ManifestCode);
+                    if (manifestObject != null && manifestObject.IsDispatched)
+                    {
+                        throw new GenericException($"Error: The Manifest: {manifestObject.ManifestCode} assigned to this waybill has already been dispatched.");
+                    }
+                }
+
                 foreach (var waybillNumber in waybillNumberList)
                 {
                     var shipmentDTO = await _shipmentService.GetShipment(waybillNumber);
@@ -301,7 +312,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var departureServiceCenterId = serviceCenters[0];
 
 
-                    //check if waybill has not been group 
+                    //check if waybill has not been grouped 
                     var isWaybillGroup = await _uow.GroupWaybillNumberMapping.ExistAsync(x => x.GroupWaybillNumber == groupWaybillNumber && x.WaybillNumber == shipmentDTO.Waybill);
 
                     //if the waybill has not been grouped, group it
@@ -353,6 +364,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (shipmentDTO == null)
                 {
                     throw new GenericException($"No Shipment exists for this : {waybillNumber}");
+                }
+
+                //ensure that the Manifest containing the Groupwaybill has not been dispatched
+                var manifestGroupWaybillNumberMapping = _uow.ManifestGroupWaybillNumberMapping.SingleOrDefault(x => x.GroupWaybillNumber == groupWaybillNumber);
+                if(manifestGroupWaybillNumberMapping !=  null)
+                {
+                    var manifestObject = _uow.Manifest.SingleOrDefault(x => x.ManifestCode == manifestGroupWaybillNumberMapping.ManifestCode);
+                    if(manifestObject != null && manifestObject.IsDispatched)
+                    {
+                        throw new GenericException($"Error: The Manifest: {manifestObject.ManifestCode} assigned to this waybill has already been dispatched.");
+                    }
                 }
 
                 var groupWaybillNumberMapping = _uow.GroupWaybillNumberMapping.SingleOrDefault(x => (x.GroupWaybillNumber == groupWaybillNumber) && (x.WaybillNumber == waybillNumber));
