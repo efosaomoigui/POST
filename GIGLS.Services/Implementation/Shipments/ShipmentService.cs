@@ -243,10 +243,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDto.Customer.Add(shipmentDto.CustomerDetails);
 
                 //get wallet number
-                var wallets = await _walletService.GetWallets();
-                var customerWallet = wallets.ToList().FirstOrDefault(
+                //var wallets = await _walletService.GetWallets();
+                var customerWallet = _uow.Wallet.SingleOrDefault(
                     s => s.CustomerId == shipmentDto.CustomerId && s.CustomerType == customerType);
-                shipmentDto.WalletNumber = customerWallet.WalletNumber;
+                shipmentDto.WalletNumber = customerWallet?.WalletNumber;
 
                 //get ShipmentCollection if it exists
                 var shipmentCollection = _uow.ShipmentCollection.
