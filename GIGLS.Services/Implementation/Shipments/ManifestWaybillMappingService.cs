@@ -193,6 +193,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         //error, the dispatch user cannot have more than one undelivered dispatch
                         throw new GenericException("Error: Dispatch User cannot have more than one undelivered Manifest Dispatch.");
                     }
+
+                    //update userDispatchs
+                    var deliveryManifestCodeArray = manifestObjects.Select(s => s.ManifestCode).ToList();
+                    userDispatchs = userDispatchs.Where(s => 
+                    deliveryManifestCodeArray.Contains(s.ManifestNumber)).ToList();
                 }
 
 
