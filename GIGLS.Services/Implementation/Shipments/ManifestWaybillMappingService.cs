@@ -183,8 +183,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 //get the active manifest for the dispatch user
                 if (userDispatchs.Count > 1)
                 {
-                    //error, the dispatch user cannot have more than one undelivered dispatch
-                    throw new GenericException("Error: Dispatch User cannot have more than one undelivered dispatch.");
+                    //error, the dispatch user cannot have an undelivered dispatch
+                    var manifestCodeArray = userDispatchs.Select(s => s.ManifestNumber).ToList();
+                    var manifestObjects = _uow.Manifest.GetAll().Where(s =>
+                    manifestCodeArray.Contains(s.ManifestCode) && s.ManifestType == ManifestType.Delivery).ToList();
+
+                    if (manifestObjects.Count > 0)
+                    {
+                        //error, the dispatch user cannot have more than one undelivered dispatch
+                        throw new GenericException("Error: Dispatch User cannot have more than one undelivered Manifest Dispatch.");
+                    }
                 }
 
 
