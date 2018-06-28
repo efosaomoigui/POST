@@ -65,7 +65,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     case EmailSmsType.All:
                         {
                             await SendSMSMessage(messageType, obj);
-                            //await SendEmailMessage(messageType, obj);
+                            await SendEmailMessage(messageType, obj);
                             break;
                         }
                 }
@@ -225,7 +225,7 @@ namespace GIGLS.Services.Implementation.Messaging
             return await Task.FromResult(true);
         }
 
-        private async Task<bool> LogEmailMessage(MessageDTO messageDTO, string result, string exceptiomMessage = null)
+        private async Task<bool> LogSMSMessage(MessageDTO messageDTO, string result, string exceptiomMessage = null)
         {
             try
             {
@@ -248,7 +248,7 @@ namespace GIGLS.Services.Implementation.Messaging
             return true;
         }
 
-        private async Task<bool> LogSMSMessage(MessageDTO messageDTO, string result, string exceptiomMessage = null)
+        private async Task<bool> LogEmailMessage(MessageDTO messageDTO, string result, string exceptiomMessage = null)
         {
             try
             {
