@@ -69,16 +69,16 @@ namespace GIGLS.Services.Implementation.Wallet
             _uow.CashOnDeliveryAccount.Add(newCODAccount);
             await _uow.CompleteAsync();
 
-            //add to wallet transaction and wallet
-            await _walletService.UpdateWallet(wallet.WalletId, new WalletTransactionDTO
-            {
-                Amount = cashOnDeliveryAccountDto.Amount,
-                CreditDebitType = cashOnDeliveryAccountDto.CreditDebitType,
-                WalletId = wallet.WalletId,
-                Description = cashOnDeliveryAccountDto.Description,
-                UserId = cashOnDeliveryAccountDto.UserId,
-                Waybill = cashOnDeliveryAccountDto.Waybill
-            });
+            ////add to wallet transaction and wallet
+            //await _walletService.UpdateWallet(wallet.WalletId, new WalletTransactionDTO
+            //{
+            //    Amount = cashOnDeliveryAccountDto.Amount,
+            //    CreditDebitType = cashOnDeliveryAccountDto.CreditDebitType,
+            //    WalletId = wallet.WalletId,
+            //    Description = cashOnDeliveryAccountDto.Description,
+            //    UserId = cashOnDeliveryAccountDto.UserId,
+            //    Waybill = cashOnDeliveryAccountDto.Waybill
+            //});
 
 
             //create entry in WalletTransaction table
