@@ -15,6 +15,7 @@ namespace GIGLS.Core.IServices.Wallet
         Task RemoveWallet(int walletId);
         Task<WalletNumber> GenerateNextValidWalletNumber();
         Task<WalletDTO> GetSystemWallet();
+        Task<List<WalletDTO>> SearchForWallets(WalletSearchOption searchOption);
     }
 
 }

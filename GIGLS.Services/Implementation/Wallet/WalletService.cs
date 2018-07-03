@@ -3,9 +3,11 @@ using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
+using GIGLS.CORE.Enums;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -17,12 +19,10 @@ namespace GIGLS.Services.Implementation.Wallet
     public class WalletService : IWalletService
     {
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
-
         private readonly IUserService _userService;
         private readonly IUnitOfWork _uow;
 
-        public WalletService(IUserService userService,
-            INumberGeneratorMonitorService numberGeneratorMonitorService, IUnitOfWork uow)
+        public WalletService(IUserService userService, INumberGeneratorMonitorService numberGeneratorMonitorService, IUnitOfWork uow)
         {
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _userService = userService;
@@ -94,7 +94,7 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 throw new GenericException("Wallet does not exist");
             }
-            
+
             return wallet;
         }
 
@@ -216,6 +216,50 @@ namespace GIGLS.Services.Implementation.Wallet
                 WalletPan = numberStr,
                 IsActive = true
             };
+        }
+
+        public async Task<List<WalletDTO>> SearchForWallets(WalletSearchOption searchOption)
+        {
+            try
+            {
+                var walletsQueryable = _uow.Wallet.GetWalletsAsQueryable();
+
+                //If searchOption.SearchData is not empty
+                if (!string.IsNullOrWhiteSpace(searchOption.SearchData))
+                {
+                    walletsQueryable = walletsQueryable.Where(x =>
+                        x.CustomerCode.Contains(searchOption.SearchData) ||
+                        x.WalletNumber.Contains(searchOption.SearchData));
+                }
+
+                // handle Individual customers
+                if (FilterCustomerType.IndividualCustomer.Equals(searchOption.CustomerType))
+                {
+                    walletsQueryable = walletsQueryable.Where(x => x.CustomerType == CustomerType.IndividualCustomer);
+                    var walletsDto = Mapper.Map<List<WalletDTO>>(walletsQueryable.ToList());
+                    return await Task.FromResult(walletsDto);
+                }
+                else
+                {
+                    CompanyType companyType;
+
+                    if (FilterCustomerType.Corporate.Equals(searchOption.CustomerType))
+                    {
+                        companyType = CompanyType.Corporate;
+                    }
+                    else
+                    {
+                        companyType = CompanyType.Ecommerce;
+                    }
+                    walletsQueryable = walletsQueryable.Where(x => x.CompanyType == companyType.ToString());
+                    var walletsDto = Mapper.Map<List<WalletDTO>>(walletsQueryable.ToList());
+                    return await Task.FromResult(walletsDto);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
     }

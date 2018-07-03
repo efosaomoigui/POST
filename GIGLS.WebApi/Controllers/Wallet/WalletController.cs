@@ -14,7 +14,7 @@ namespace GIGLS.WebApi.Controllers.Wallet
     public class WalletController : BaseWebApiController
     {
         private readonly IWalletService _walletService;
-        public WalletController(IWalletService walletService) :base(nameof(WalletController))
+        public WalletController(IWalletService walletService) : base(nameof(WalletController))
         {
             _walletService = walletService;
         }
@@ -112,5 +112,23 @@ namespace GIGLS.WebApi.Controllers.Wallet
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("searchwallets")]
+        public async Task<IServiceResponse<List<WalletDTO>>> SearchForWallets(WalletSearchOption searchOption)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                var walletsObj = await _walletService.SearchForWallets(searchOption);
+
+                return new ServiceResponse<List<WalletDTO>>
+                {
+                    Object = walletsObj
+                };
+            });
+        }
+
     }
 }

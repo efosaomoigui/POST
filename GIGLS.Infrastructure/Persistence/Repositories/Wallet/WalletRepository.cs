@@ -33,5 +33,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                 throw;
             }
         }
+
+        public IQueryable<Core.Domain.Wallet.Wallet> GetWalletsAsQueryable()
+        {
+            var wallets = _context.Wallets.AsQueryable();
+            return wallets;
+        }
+
     }
 }
