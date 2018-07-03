@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System.Collections.Generic;
 
@@ -19,5 +20,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         public int ServiceCentreId { get; set; }
         public ServiceCentreDTO ServiceCentre { get; set; }
+
+        public ShipmentScanStatus ShipmentScanStatus { get; set; }
     }
 }

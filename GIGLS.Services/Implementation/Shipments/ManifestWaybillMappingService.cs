@@ -219,6 +219,13 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //get shipment detail 
                     manifestwaybill.Shipment = await _shipmentService.GetShipment(manifestwaybill.Waybill);
+
+                    //get from ShipmentCollection
+                    var shipmentCollectionObj = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == manifestwaybill.Waybill);
+                    if(shipmentCollectionObj != null)
+                    {
+                        manifestwaybill.ShipmentScanStatus = shipmentCollectionObj.ShipmentScanStatus;
+                    }
                 }
 
                 return manifestWaybillNumberMappingDto;
