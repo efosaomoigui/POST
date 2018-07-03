@@ -9,7 +9,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
-    //[Authorize(Roles = "Shipment")]
+    [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/manifestvisitmonitoring")]
     public class ManifestVisitMonitoringController : BaseWebApiController
     {
@@ -20,7 +20,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             _service = service;
         }
 
-       // [GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
         public async Task<IServiceResponse<IEnumerable<ManifestVisitMonitoringDTO>>> GetManifestVisitMonitorings()
@@ -36,7 +36,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
-       // [GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{manifestVisitMonitoringId:int}")]
         public async Task<IServiceResponse<ManifestVisitMonitoringDTO>> GetManifestVisitMonitoringById(int manifestVisitMonitoringId)
@@ -52,7 +52,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
-       // [GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{waybill}")]
         public async Task<IServiceResponse<IEnumerable<ManifestVisitMonitoringDTO>>> GetManifestVisitMonitorings(string waybill)
@@ -68,7 +68,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
         
-       // [GIGLSActivityAuthorize(Activity = "Create")]
+        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]
         public async Task<IServiceResponse<object>> AddManifest(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO)
@@ -83,7 +83,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
-      //  [GIGLSActivityAuthorize(Activity = "Delete")]
+        [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("{manifestVisitMonitoringId:int}")]
         public async Task<IServiceResponse<bool>> DeleteManifestById(int manifestVisitMonitoringId)
@@ -98,7 +98,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
-      //  [GIGLSActivityAuthorize(Activity = "Update")]
+        [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("{manifestVisitMonitoringId:int}")]
         public async Task<IServiceResponse<bool>> UpdateManifestById(int manifestVisitMonitoringId, ManifestVisitMonitoringDTO manifestVisitMonitoringDTO)
