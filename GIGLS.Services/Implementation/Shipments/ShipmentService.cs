@@ -1029,8 +1029,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.IsCancelled = true;
 
                 var invoice = _uow.Invoice.SingleOrDefault(s => s.Waybill == waybill);
-                //2.2 Update Invoice PaymentStatus to cancelled
-                invoice.PaymentStatus = PaymentStatus.Cancelled;
 
                 if (invoice.PaymentStatus == PaymentStatus.Paid)
                 {
@@ -1079,6 +1077,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                     _uow.WalletTransaction.Add(newWalletTransaction);
                 }
+
+                //2.2 Update Invoice PaymentStatus to cancelled
+                invoice.PaymentStatus = PaymentStatus.Cancelled;
 
                 //2.5 Scan the Shipment for cancellation
                 await ScanShipment(new ScanDTO
