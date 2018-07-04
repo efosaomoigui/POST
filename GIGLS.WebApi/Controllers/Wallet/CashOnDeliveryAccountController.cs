@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.CashOnDeliveryAccount;
 using GIGLS.Services.Implementation;
@@ -111,9 +112,7 @@ namespace GIGLS.WebApi.Controllers.Wallet
                 };
             });
         }
-
-
-
+        
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("processpaymentsheet")]
@@ -128,5 +127,22 @@ namespace GIGLS.WebApi.Controllers.Wallet
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{walletNumber}/statussummary/{status}")]
+        public async Task<IServiceResponse<CashOnDeliveryAccountSummaryDTO>> GetCashOnDeliveryAccountByStatus(string walletNumber, CODStatus status)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _cashOnDeliveryAccountService.GetCashOnDeliveryAccountByStatus(walletNumber, status);
+
+                return new ServiceResponse<CashOnDeliveryAccountSummaryDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }
