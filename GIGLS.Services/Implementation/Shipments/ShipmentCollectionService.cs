@@ -217,6 +217,14 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
         {
+            //check if the shipment has not been collected
+            var shipmentCollected = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(shipmentCollection.Waybill) && x.ShipmentScanStatus.Equals(shipmentCollection.ShipmentScanStatus));
+
+            if (shipmentCollected != null)
+            {
+                throw new GenericException($"Shipment with waybill: {shipmentCollection.Waybill} has been collected");
+            }
+
             //check if the shipment has not been Returned
             var shipmentReturn = await _uow.ShipmentReturn.GetAsync(x => x.WaybillOld.Equals(shipmentCollection.Waybill));
             if (shipmentReturn != null)

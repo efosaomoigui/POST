@@ -192,6 +192,48 @@ namespace GIGLS.Services.Implementation.Wallet
             };
         }
 
+        
+        public async Task<CashOnDeliveryAccountSummaryDTO> GetCashOnDeliveryAccountByStatus(string walletNumber, CODStatus status)
+        {
+            var wallet = await _walletService.GetWalletById(walletNumber);
+
+            var account = await _uow.CashOnDeliveryAccount.FindAsync(c => c.WalletId == wallet.WalletId && c.CODStatus == status);
+
+            if (account == null)
+            {
+                throw new GenericException("Cash on Delivery Wallet information does not exist");
+            }
+
+            var accountDto = Mapper.Map<List<CashOnDeliveryAccountDTO>>(account);
+            var walletDto = Mapper.Map<WalletDTO>(wallet);
+
+            //set the customer name
+            // handle Company customers
+            if (CustomerType.Company.Equals(wallet.CustomerType))
+            {
+                var companyDTO = await _uow.Company.GetAsync(s => s.CompanyId == wallet.CustomerId);
+                walletDto.CustomerName = companyDTO.Name;
+            }
+            else
+            {
+                // handle IndividualCustomers
+                var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(s => s.IndividualCustomerId == wallet.CustomerId);
+                walletDto.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
+            }
+
+            var balance = new CashOnDeliveryBalanceDTO
+            {
+                Balance = wallet.Balance,
+                Wallet = walletDto
+            };
+
+            return new CashOnDeliveryAccountSummaryDTO
+            {
+                CashOnDeliveryAccount = accountDto,
+                CashOnDeliveryDetail = balance
+            };
+        }
+
         public Task<IEnumerable<CashOnDeliveryAccountDTO>> GetCashOnDeliveryAccounts()
         {
             return _uow.CashOnDeliveryAccount.GetCashOnDeliveryAccountAsync();
