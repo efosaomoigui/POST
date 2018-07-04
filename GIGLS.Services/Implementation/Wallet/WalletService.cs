@@ -3,7 +3,6 @@ using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
@@ -222,6 +221,7 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             try
             {
+                List<WalletDTO> walletsDto = new List<WalletDTO>();
                 var walletsQueryable = _uow.Wallet.GetWalletsAsQueryable();
 
                 //If searchOption.SearchData is not empty
@@ -236,8 +236,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (FilterCustomerType.IndividualCustomer.Equals(searchOption.CustomerType))
                 {
                     walletsQueryable = walletsQueryable.Where(x => x.CustomerType == CustomerType.IndividualCustomer);
-                    var walletsDto = Mapper.Map<List<WalletDTO>>(walletsQueryable.ToList());
-                    return await Task.FromResult(walletsDto);
+                    walletsDto = Mapper.Map<List<WalletDTO>>(walletsQueryable.ToList());
                 }
                 else
                 {
@@ -252,9 +251,29 @@ namespace GIGLS.Services.Implementation.Wallet
                         companyType = CompanyType.Ecommerce;
                     }
                     walletsQueryable = walletsQueryable.Where(x => x.CompanyType == companyType.ToString());
-                    var walletsDto = Mapper.Map<List<WalletDTO>>(walletsQueryable.ToList());
-                    return await Task.FromResult(walletsDto);
+                    walletsDto = Mapper.Map<List<WalletDTO>>(walletsQueryable.ToList());
                 }
+                
+                ////set the customer name
+                foreach (var item in walletsDto)
+                {
+                    // handle Company customers
+                    if (CustomerType.Company.Equals(item.CustomerType))
+                    {
+                        var companyDTO = await _uow.Company.GetAsync(s => s.CompanyId == item.CustomerId);
+                        item.CustomerName = companyDTO.Name;
+                    }
+                    else
+                    {
+                        // handle IndividualCustomers
+                        var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
+                            s => s.IndividualCustomerId == item.CustomerId);
+                        item.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " +
+                            $"{individualCustomerDTO.LastName}");
+                    }
+                } 
+                
+                return walletsDto.OrderBy(x => x.CustomerName).ToList();
             }
             catch (Exception)
             {

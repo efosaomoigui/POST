@@ -254,8 +254,7 @@ namespace GIGLS.Services.Business.Scanning
                     {
 
                         //update dispatch to scan for Shipment recieved by Courier for delivery manifest
-                        if (scan.ShipmentScanStatus == ShipmentScanStatus.WC  ||
-                            scan.ShipmentScanStatus == ShipmentScanStatus.SRC)
+                        if (scan.ShipmentScanStatus == ShipmentScanStatus.SRC ) // ||scan.ShipmentScanStatus == ShipmentScanStatus.WC )
                         {
                             var dispatch = await _dispatchService.GetDispatchManifestCode(manifest.ManifestCode);
                             if (dispatch != null && dispatch.ReceivedBy == null)

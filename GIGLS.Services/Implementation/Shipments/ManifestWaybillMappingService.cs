@@ -11,8 +11,6 @@ using System.Linq;
 using AutoMapper;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Core.IServices.Business;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.DTO.ServiceCentres;
 
