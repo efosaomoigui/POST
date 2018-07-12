@@ -266,7 +266,26 @@ namespace GIGLS.Services.Business.Pricing
 
             return shipmentTotalPrice;
         }
-        
+
+        private async Task<decimal> GetEcommerceReturnPriceOverflow(decimal weight, decimal activeWeightLimit, int zoneId)
+        {
+            //Price for Active Weight Limit Pending the time we have Ecommerce weight limit
+            var activeZone = await _weightLimitPrice.GetWeightLimitPriceByZoneId(zoneId, RegularEcommerceType.Regular);
+
+            decimal weightlimitZonePrice = activeZone.Price; //Limit Price addition base on zone
+            decimal additionalWeight = activeZone.Weight; //Addtional Weight Divisor
+
+            decimal weightDifferent = weight - activeWeightLimit;
+
+            decimal weightLimitPrice = (weightDifferent / additionalWeight) * weightlimitZonePrice;
+
+            decimal PackagePrice = await _regular.GetDomesticZonePrice(zoneId, activeWeightLimit, RegularEcommerceType.ReturnForEcommerce);
+
+            decimal shipmentTotalPrice = PackagePrice + weightLimitPrice;
+
+            return shipmentTotalPrice;
+        }
+
         public async Task<decimal> GetEcommerceReturnPrice(PricingDTO pricingDto)
         {
             if (pricingDto.DepartureServiceCentreId <= 0)
@@ -292,11 +311,11 @@ namespace GIGLS.Services.Business.Pricing
 
             if (pricingDto.Weight > weightLimit)
             {
-                PackagePrice = await GetEcommercePriceOverflow(pricingDto.Weight, weightLimit, zone.ZoneId);
+                PackagePrice = await GetEcommerceReturnPriceOverflow(pricingDto.Weight, weightLimit, zone.ZoneId);
             }
             else
             {
-                PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Ecommerce);
+                PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.ReturnForEcommerce);
             }
             
             return PackagePrice + deliveryOptionPrice;
