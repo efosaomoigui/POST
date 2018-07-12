@@ -11,12 +11,7 @@ using GIGLS.WebApi.Filters;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using System;
-using System.IO;
-using Newtonsoft.Json;
-using System.Text;
 using GIGLS.CORE.IServices.Report;
-using GIGLS.Core.View;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {

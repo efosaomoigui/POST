@@ -230,7 +230,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 shipmentDto.DepartureServiceCentre = departureServiceCentre;
                 shipmentDto.DestinationServiceCentre = destinationServiceCentre;
-
+                
                 //get CustomerDetails
                 if (shipmentDto.CustomerType.Contains("Individual"))
                 {
@@ -254,8 +254,23 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipmentCollectionDTO = Mapper.Map<ShipmentCollectionDTO>(shipmentCollection);
                 shipmentDto.ShipmentCollection = shipmentCollectionDTO;
 
-                //get Demurrage information
-                GetDemurrageInformation(shipmentDto);
+                //Demurage should be exclude from Ecommerce and Corporate customer. Only individual customer should have demurage
+
+                if(customerType == CustomerType.Company)
+                {
+                    //set Default Demurrage info in ShipmentDTO for Company customer
+                    shipmentDto.Demurrage = new DemurrageDTO
+                    {
+                        Amount = 0,
+                        DayCount = 0,
+                        WaybillNumber = shipmentDto.Waybill
+                    };
+                }
+                else
+                {
+                    //get Demurrage information for Individual customer
+                    GetDemurrageInformation(shipmentDto);
+                }
 
                 return shipmentDto;
             }
@@ -782,9 +797,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
-
-
+        
         public async Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto)
         {
             try
