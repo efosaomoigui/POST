@@ -12,6 +12,7 @@ using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Account;
 using GIGLS.Core.DTO.Account;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -159,7 +160,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Cash on Delivery Wallet information does not exist");
             }
 
-            var accountDto = Mapper.Map<List<CashOnDeliveryAccountDTO>>(account);
+            var accountDto = Mapper.Map<List<CashOnDeliveryAccountDTO>>(account.OrderByDescending(x => x.DateCreated));
 
             //var balance = await _cashOnDeliveryBalanceService.GetCashOnDeliveryBalanceByWalletId(wallet.WalletId);
 
@@ -204,7 +205,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Cash on Delivery Wallet information does not exist");
             }
 
-            var accountDto = Mapper.Map<List<CashOnDeliveryAccountDTO>>(account);
+            var accountDto = Mapper.Map<List<CashOnDeliveryAccountDTO>>(account.OrderByDescending(x => x.DateCreated));
             var walletDto = Mapper.Map<WalletDTO>(wallet);
 
             //set the customer name
