@@ -72,6 +72,12 @@ namespace GIGLS.Services.Implementation.User
         {
             return _unitOfWork.User.GetCustomerUsers();
         }
+
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCorporateCustomerUsers()
+        {
+            return _unitOfWork.User.GetCorporateCustomerUsers();
+        }
+
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsers()
         {
             return _unitOfWork.User.GetPartnerUsers();

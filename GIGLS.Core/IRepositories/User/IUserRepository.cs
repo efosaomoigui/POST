@@ -12,6 +12,7 @@ namespace GIGLS.Core.IRepositories.User
     {
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetUsers();
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers();
+        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCorporateCustomerUsers();
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsers();
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetSystemUsers();
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchCaptains();        

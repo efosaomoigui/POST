@@ -58,6 +58,14 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
         }
 
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCorporateCustomerUsers()
+        {
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && (x.UserChannelType == UserChannelType.Corporate
+                        || x.UserChannelType == UserChannelType.Ecommerce)).AsEnumerable();
+            return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
+        }
+
+
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsers()
         {
             var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserChannelType == UserChannelType.Partner).AsEnumerable();

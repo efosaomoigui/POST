@@ -57,7 +57,7 @@ namespace GIGLS.WebApi.Controllers.User
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var users = await _userService.GetCustomerUsers();
+                var users = await _userService.GetCorporateCustomerUsers();
                 return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
                 {
                     Object = users
