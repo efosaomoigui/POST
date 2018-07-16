@@ -14,6 +14,8 @@
         LIBYA,
         SYRIA,
         YEMEN,
-        EcommerceNegativeWalletLimit
+        EcommerceNegativeWalletLimit,
+        EcommercePremiumNegativeWalletLimit,
+        EcommerceGoldNegativeWalletLimit
     }
 }
