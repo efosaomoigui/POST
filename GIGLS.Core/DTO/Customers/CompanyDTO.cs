@@ -27,6 +27,7 @@ namespace GIGLS.Core.DTO.Customers
         public decimal Discount { get; set; }
         public int SettlementPeriod { get; set; }
         public string CustomerCode { get; set; }
+        public CustomerCategory CustomerCategory { get; set; }
 
         public List<CompanyContactPersonDTO> ContactPersons { get; set; }
         public List<ShipmentDTO> CompanyShipments { get; set; }

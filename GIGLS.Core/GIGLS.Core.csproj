@@ -332,6 +332,7 @@
     <Compile Include="Enums\CODStatus.cs" />
     <Compile Include="Enums\CompanyStatus.cs" />
     <Compile Include="Enums\CompanyType.cs" />
+    <Compile Include="Enums\CustomerCategory.cs" />
     <Compile Include="Enums\CustomerType.cs" />
     <Compile Include="Enums\DebitCreditFlag.cs" />
     <Compile Include="Enums\DispatchCategory.cs" />

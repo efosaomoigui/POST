@@ -223,6 +223,7 @@ namespace GIGLS.Services.Implementation.Customers
                 company.CompanyStatus = companyDto.CompanyStatus;
                 company.State = companyDto.State;
                 company.SettlementPeriod = companyDto.SettlementPeriod;
+                company.CustomerCategory = companyDto.CustomerCategory;
 
                 if (companyDto.ContactPersons.Any())
                 {

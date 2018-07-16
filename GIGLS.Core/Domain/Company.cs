@@ -31,7 +31,6 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal Discount { get; set; }
         public int SettlementPeriod { get; set; }
         public virtual ICollection<CompanyContactPerson> CompanyContactPersons { get; set; }
-
-
+        public CustomerCategory CustomerCategory { get; set; }
     }
 }
