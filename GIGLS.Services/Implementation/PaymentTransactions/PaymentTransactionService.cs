@@ -12,6 +12,7 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.IServices.Utility;
+using GIGL.GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -111,9 +112,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
                 if (shipment != null && CompanyType.Ecommerce.ToString() == shipment.CompanyType)
                 {
-                    //get max negati ve wallet limit from GlobalProperty
-                    var ecommerceNegativeWalletLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceNegativeWalletLimit);
-                    var ecommerceNegativeWalletLimit = decimal.Parse(ecommerceNegativeWalletLimitObj.Value);
+                    //Gets the customer wallet limit for ecommerce
+                    decimal ecommerceNegativeWalletLimit = await GetEcommerceWalletLimit(shipment);
 
                     //deduct the price for the wallet and update wallet transaction table
                     if (wallet.Balance - invoiceEntity.Amount < (System.Math.Abs(ecommerceNegativeWalletLimit) * (-1)))
@@ -175,5 +175,42 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             return result;
         }
 
+        private async Task<decimal> GetEcommerceWalletLimit(Shipment shipment)
+        {
+            decimal ecommerceNegativeWalletLimit = 0;
+
+            //Get the Customer Wallet Limit Category
+            var companyObj = await _uow.Company.GetAsync(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower());
+            var customerWalletLimitCategory = companyObj.CustomerCategory;
+
+            switch (customerWalletLimitCategory)
+            {
+                case CustomerCategory.Gold:
+                    {
+                        //get max negati ve wallet limit from GlobalProperty
+                        var ecommerceNegativeWalletLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceGoldNegativeWalletLimit);
+                        ecommerceNegativeWalletLimit = decimal.Parse(ecommerceNegativeWalletLimitObj.Value);
+                        break;
+                    }
+                case CustomerCategory.Premium:
+                    {
+                        //get max negati ve wallet limit from GlobalProperty
+                        var ecommerceNegativeWalletLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommercePremiumNegativeWalletLimit);
+                        ecommerceNegativeWalletLimit = decimal.Parse(ecommerceNegativeWalletLimitObj.Value);
+                        break;
+                    }
+                case CustomerCategory.Normal:
+                    {
+                        //get max negati ve wallet limit from GlobalProperty
+                        var ecommerceNegativeWalletLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceNegativeWalletLimit);
+                        ecommerceNegativeWalletLimit = decimal.Parse(ecommerceNegativeWalletLimitObj.Value);
+                        break;
+                    }
+                default:
+                    break;
+            }
+
+            return ecommerceNegativeWalletLimit;
+        }
     }
 }
