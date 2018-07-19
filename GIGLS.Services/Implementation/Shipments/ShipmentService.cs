@@ -230,7 +230,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 shipmentDto.DepartureServiceCentre = departureServiceCentre;
                 shipmentDto.DestinationServiceCentre = destinationServiceCentre;
-                
+
                 //get CustomerDetails
                 if (shipmentDto.CustomerType.Contains("Individual"))
                 {
@@ -256,7 +256,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Demurage should be exclude from Ecommerce and Corporate customer. Only individual customer should have demurage
 
-                if(customerType == CustomerType.Company)
+                if (customerType == CustomerType.Company)
                 {
                     //set Default Demurrage info in ShipmentDTO for Company customer
                     shipmentDto.Demurrage = new DemurrageDTO
@@ -797,7 +797,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        
+
         public async Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto)
         {
             try
@@ -913,7 +913,19 @@ namespace GIGLS.Services.Implementation.Shipments
                     item.CustomerType = CustomerType.IndividualCustomer.ToString();
                 }
                 CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), item.CustomerType);
-                var customerDetails = await GetCustomer(item.CustomerId, customerType);
+                //var customerDetails = await GetCustomer(item.CustomerId, customerType);
+                var customerDetails = new CustomerDTO()
+                {
+                    CustomerType = customerType,
+                    CustomerCode = item.CustomerCode,
+                    Email = item.Email,
+                    PhoneNumber = item.PhoneNumber,
+                    CompanyId = item.CompanyId.GetValueOrDefault(),
+                    Name = item.Name,
+                    IndividualCustomerId = item.IndividualCustomerId.GetValueOrDefault(),
+                    FirstName = item.FirstName,
+                    LastName = item.LastName
+                };
                 item.CustomerDetails = customerDetails;
             }
 

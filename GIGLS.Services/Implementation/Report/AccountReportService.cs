@@ -10,6 +10,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.Enums;
 using System;
+using GIGLS.Core.DTO.Customers;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -84,7 +85,19 @@ namespace GIGLS.Services.Implementation.Report
                 }
 
                 CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), item.CustomerType);
-                var customerDetails = await _shipmentService.GetCustomer(item.CustomerId, customerType);
+                //var customerDetails = await _shipmentService.GetCustomer(item.CustomerId, customerType);
+                var customerDetails = new CustomerDTO()
+                {
+                    CustomerType = customerType,
+                    CustomerCode = item.CustomerCode,
+                    Email = item.Email,
+                    PhoneNumber = item.PhoneNumber,
+                    CompanyId = item.CompanyId.GetValueOrDefault(),
+                    Name = item.Name,
+                    IndividualCustomerId = item.IndividualCustomerId.GetValueOrDefault(),
+                    FirstName = item.FirstName,
+                    LastName = item.LastName
+                };
 
                 item.CustomerDetails = customerDetails;
             }
