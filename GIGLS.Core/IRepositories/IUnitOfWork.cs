@@ -92,8 +92,8 @@ namespace GIGLS.Core
         IHaulageRepository Haulage { get; set; }
         IHaulageDistanceMappingRepository HaulageDistanceMapping { get; set; }
         IHaulageDistanceMappingPriceRepository HaulageDistanceMappingPrice { get; set; }
-        IPackingListRepository PackingList { get; set;}
-        ICashOnDeliveryAccountRepository CashOnDeliveryAccount { get; set; }        
+        IPackingListRepository PackingList { get; set; }
+        ICashOnDeliveryAccountRepository CashOnDeliveryAccount { get; set; }
         ICashOnDeliveryBalanceRepository CashOnDeliveryBalance { get; set; }
         IDispatchRepository Dispatch { get; set; }
         IDispatchActivityRepository DispatchActivity { get; set; }
@@ -112,6 +112,7 @@ namespace GIGLS.Core
         IManifestWaybillMappingRepository ManifestWaybillMapping { get; set; }
         IDeviceRepository Device { get; set; }
         IDeviceManagementRepository DeviceManagement { get; set; }
+        IShimpmentDeliveryOptionMappingRepository ShimpmentDeliveryOptionMapping {get; set;}
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

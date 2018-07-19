@@ -243,6 +243,10 @@ namespace GIGLS.Core
 
                 config.CreateMap<DeviceManagement, DeviceManagementDTO>();
                 config.CreateMap<DeviceManagementDTO, DeviceManagement>();
+
+                config.CreateMap<ShimpmentDeliveryOptionMapping, ShimpmentDeliveryOptionMappingDTO>();
+                config.CreateMap<ShimpmentDeliveryOptionMappingDTO, ShimpmentDeliveryOptionMapping>();
+
             });
 
             isInit = true;

@@ -295,6 +295,8 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IDeviceManagementRepository DeviceManagement { get; set; }
 
+        [Inject]
+        public IShimpmentDeliveryOptionMappingRepository ShimpmentDeliveryOptionMapping { get; set; }
 
         public int Complete()
         {
