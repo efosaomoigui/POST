@@ -81,5 +81,13 @@ namespace GIGLS.Core.View
         //PickUp Options
         public PickupOptions PickupOptions { get; set; }
 
+        //Customer
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
+        public int? CompanyId { get; set; }
+        public string Name { get; set; }
+        public int? IndividualCustomerId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
     }
 }
