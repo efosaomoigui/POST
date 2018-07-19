@@ -239,6 +239,13 @@ namespace GIGLS.Services.Implementation.Customers
                     }
                 }
 
+                // update customer wallet
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == company.CustomerCode);
+                if (wallet != null)
+                {
+                    wallet.CompanyType = companyDto.CompanyType.ToString();
+                }
+
                 _uow.Complete();
             }
             catch (Exception)
