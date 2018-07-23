@@ -572,12 +572,12 @@ namespace GIGLS.Services.Implementation.Shipments
             //save into DeliveryOptionMapping table
             foreach(var deliveryOptionId in deliveryOptionIds)
             {
-                var deliveryOptionMapping = new ShimpmentDeliveryOptionMapping()
+                var deliveryOptionMapping = new ShipmentDeliveryOptionMapping()
                 {
                     Waybill = newShipment.Waybill,
                     DeliveryOptionId = deliveryOptionId
                 };
-                _uow.ShimpmentDeliveryOptionMapping.Add(deliveryOptionMapping);
+                _uow.ShipmentDeliveryOptionMapping.Add(deliveryOptionMapping);
             }
 
             return shipmentDTO;

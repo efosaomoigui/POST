@@ -323,7 +323,7 @@
     <Compile Include="Controllers\Shipments\ManifestGroupWaybillNumberMappingController.cs" />
     <Compile Include="Controllers\Shipments\ManifestVisitMonitoringController.cs" />
     <Compile Include="Controllers\Shipments\MissingShipmentController.cs" />
-    <Compile Include="Controllers\Shipments\ShimpmentDeliveryOptionMappingController.cs" />
+    <Compile Include="Controllers\Shipments\ShipmentDeliveryOptionMappingController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentCancelController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentCollectionController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentController.cs" />

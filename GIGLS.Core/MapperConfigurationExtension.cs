@@ -244,8 +244,8 @@ namespace GIGLS.Core
                 config.CreateMap<DeviceManagement, DeviceManagementDTO>();
                 config.CreateMap<DeviceManagementDTO, DeviceManagement>();
 
-                config.CreateMap<ShimpmentDeliveryOptionMapping, ShimpmentDeliveryOptionMappingDTO>();
-                config.CreateMap<ShimpmentDeliveryOptionMappingDTO, ShimpmentDeliveryOptionMapping>();
+                config.CreateMap<ShipmentDeliveryOptionMapping, ShipmentDeliveryOptionMappingDTO>();
+                config.CreateMap<ShipmentDeliveryOptionMappingDTO, ShipmentDeliveryOptionMapping>();
 
             });
 
