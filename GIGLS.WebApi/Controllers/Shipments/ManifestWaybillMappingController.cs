@@ -53,7 +53,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
-        
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("mapmultiplemobile")]
+        public async Task<IServiceResponse<bool>> MappingManifestToWaybillsMobile(ManifestWaybillMappingDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.MappingManifestToWaybillsMobile(data.ManifestCode, data.Waybills);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("waybillsinmanifest/{manifest}")]
