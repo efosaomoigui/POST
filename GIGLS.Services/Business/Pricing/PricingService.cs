@@ -95,7 +95,13 @@ namespace GIGLS.Services.Business.Pricing
 
             decimal PackagePrice = await _special.GetSpecialZonePrice(pricingDto.SpecialPackageId, zone.ZoneId);
 
-            decimal deliveryOptionPrice = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId);
+            //get the deliveryOptionPrice from an array
+            decimal deliveryOptionPriceTemp = 0;
+            foreach (var deliveryOptionId in pricingDto.DeliveryOptionIds)
+            {
+                deliveryOptionPriceTemp += await _optionPrice.GetDeliveryOptionPrice(deliveryOptionId, zone.ZoneId);
+            }
+            decimal deliveryOptionPrice = deliveryOptionPriceTemp;
 
             decimal shipmentTotalPrice = deliveryOptionPrice + PackagePrice;
 
@@ -116,7 +122,14 @@ namespace GIGLS.Services.Business.Pricing
             }
 
             var zone = await _routeZone.GetZone(pricingDto.DepartureServiceCentreId, pricingDto.DestinationServiceCentreId);
-            decimal deliveryOptionPrice = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId);
+
+            //get the deliveryOptionPrice from an array
+            decimal deliveryOptionPriceTemp = 0;
+            foreach (var deliveryOptionId in pricingDto.DeliveryOptionIds)
+            {
+                deliveryOptionPriceTemp += await _optionPrice.GetDeliveryOptionPrice(deliveryOptionId, zone.ZoneId);
+            }
+            decimal deliveryOptionPrice = deliveryOptionPriceTemp;
 
             //This is our limit weight.
             var activeWeightLimit = await _weightLimit.GetActiveWeightLimits();
@@ -227,7 +240,15 @@ namespace GIGLS.Services.Business.Pricing
             }
             
             var zone = await _routeZone.GetZone(pricingDto.DepartureServiceCentreId, pricingDto.DestinationServiceCentreId);
-            decimal deliveryOptionPrice = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId);
+
+            //get the deliveryOptionPrice from an array
+            decimal deliveryOptionPriceTemp = 0;
+            foreach (var deliveryOptionId in pricingDto.DeliveryOptionIds)
+            {
+                deliveryOptionPriceTemp += await _optionPrice.GetDeliveryOptionPrice(deliveryOptionId, zone.ZoneId);
+            }
+            decimal deliveryOptionPrice = deliveryOptionPriceTemp;
+
 
             //Get Ecommerce limit weight from GlobalProperty
             var ecommerceWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceWeightLimit);
