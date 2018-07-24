@@ -33,6 +33,7 @@ namespace GIGLS.Services.Business.Pricing
         private readonly ICountryRouteZoneMapService _countryrouteMapService;
         private readonly IServiceCentreService _centreService;
         private readonly IShipmentService _shipmentService;
+        private readonly IShipmentDeliveryOptionMappingService _shipmentDeliveryOptionMappingService;
 
         public PricingService(IDomesticRouteZoneMapService zoneService, IDeliveryOptionPriceService optionPriceService,
             IDomesticZonePriceService regular, ISpecialDomesticZonePriceService special,
@@ -41,6 +42,7 @@ namespace GIGLS.Services.Business.Pricing
             IHaulageDistanceMappingPriceService haulageDistanceMappingPriceService, IServiceCentreService centreService,
             IHaulageService haulageService, IGlobalPropertyService globalPropertyService, 
             ICountryRouteZoneMapService countryrouteMapService, IShipmentService shipmentService,
+            IShipmentDeliveryOptionMappingService shipmentDeliveryOptionMappingService,
             IUnitOfWork uow)
         {
             _routeZone = zoneService;
@@ -57,6 +59,7 @@ namespace GIGLS.Services.Business.Pricing
             _countryrouteMapService = countryrouteMapService;
             _centreService = centreService;
             _shipmentService = shipmentService;
+            _shipmentDeliveryOptionMappingService = shipmentDeliveryOptionMappingService;
             _uow = uow;
         }
 
@@ -498,12 +501,18 @@ namespace GIGLS.Services.Business.Pricing
                     }
                 }
 
+                //get ShipmentDeliveryOptionMapping
+                var shipmentDeliveryOptionMapping =
+                    await _shipmentDeliveryOptionMappingService.GetDeliveryOptionInWaybill(waybill);
+                var deliveryOptionIds = shipmentDeliveryOptionMapping.Select(s => s.DeliveryOptionId).ToList();
+
                 //unit price per item
                 var itemPrice = await GetPrice(new PricingDTO()
                 {
                     DepartureServiceCentreId = departureServiceCentreId,
                     DestinationServiceCentreId = destinationServiceCentreId,
                     DeliveryOptionId = shipment.DeliveryOptionId,
+                    DeliveryOptionIds = deliveryOptionIds,
                     ShipmentType = item.ShipmentType,
                     SpecialPackageId = specialPackageId,
                     Weight = decimal.Parse(item.Weight.ToString())                    
