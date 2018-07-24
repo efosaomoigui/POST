@@ -517,7 +517,12 @@ namespace GIGLS.Services.Implementation.Shipments
             await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
             await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
 
-            // 
+            // get deliveryOptionIds and set the first value in shipment
+            var deliveryOptionIds = shipmentDTO.DeliveryOptionIds;
+            if(deliveryOptionIds.Count > 0)
+            {
+                shipmentDTO.DeliveryOptionId = deliveryOptionIds[0];
+            }
 
             // get the current user info
             var currentUserId = await _userService.GetCurrentUserId();
@@ -563,6 +568,17 @@ namespace GIGLS.Services.Implementation.Shipments
 
             _uow.Shipment.Add(newShipment);
             //await _uow.CompleteAsync();
+
+            //save into DeliveryOptionMapping table
+            foreach(var deliveryOptionId in deliveryOptionIds)
+            {
+                var deliveryOptionMapping = new ShipmentDeliveryOptionMapping()
+                {
+                    Waybill = newShipment.Waybill,
+                    DeliveryOptionId = deliveryOptionId
+                };
+                _uow.ShipmentDeliveryOptionMapping.Add(deliveryOptionMapping);
+            }
 
             return shipmentDTO;
         }

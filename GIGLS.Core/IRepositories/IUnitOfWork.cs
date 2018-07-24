@@ -112,7 +112,7 @@ namespace GIGLS.Core
         IManifestWaybillMappingRepository ManifestWaybillMapping { get; set; }
         IDeviceRepository Device { get; set; }
         IDeviceManagementRepository DeviceManagement { get; set; }
-        IShimpmentDeliveryOptionMappingRepository ShimpmentDeliveryOptionMapping {get; set;}
+        IShipmentDeliveryOptionMappingRepository ShipmentDeliveryOptionMapping {get; set;}
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

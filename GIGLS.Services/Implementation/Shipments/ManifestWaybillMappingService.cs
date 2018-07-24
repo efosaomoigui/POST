@@ -141,6 +141,78 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+
+        //map waybills to Manifest from Mobile
+        public async Task MappingManifestToWaybillsMobile(string manifest, List<string> waybills)
+        {
+            try
+            {
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                
+                //1. get all shipments at colletion centre for the service centre which status is ARF
+                var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF);
+
+                if (shipmentCollection.Count() == 0)
+                {
+                    throw new GenericException($"None of the waybills is at the Final Service Centre");
+                }
+
+                //extrack waybills into a list from shipment collection
+                var extrackedWaybills = new List<string>();
+                foreach (var waybillCollection in shipmentCollection)
+                {
+                    extrackedWaybills.Add(waybillCollection.Waybill);
+                }
+
+                //2. Get shipment details for the service centre that are at the collection centre using the waybill and service centre
+                var InvoicesBySC = _uow.Invoice.GetAllFromInvoiceView();
+
+                //filter by destination service center that is not cancelled and it is home delivery
+                InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && x.PickupOptions == PickupOptions.HOMEDELIVERY);
+
+                if (serviceCenters.Length > 0)
+                {
+                    InvoicesBySC = InvoicesBySC.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId));
+                }
+
+                if (extrackedWaybills.Count > 0)
+                {
+                    InvoicesBySC = InvoicesBySC.Where(s => extrackedWaybills.Contains(s.Waybill));
+                }
+
+                ////final list of home delivery waybills
+                var InvoicesBySCList = InvoicesBySC.ToList();
+
+                //check if the waybills to manifested contain in the HomeDelivery Waybills
+                if(waybills.Count > 0)
+                {
+                    //filter only the waybills in the invoiceList 
+                    var homeDeliveryWaybills = new List<string>();
+                    foreach (var item in InvoicesBySCList)
+                    {
+                        homeDeliveryWaybills.Add(item.Waybill);
+                    }
+
+                    var result = waybills.Where(x => !homeDeliveryWaybills.Contains(x));
+
+                    if(result.Count() > 0)
+                    {
+                        throw new GenericException($"Error: Delivery Manifest cannot be created. " +
+                            $"The follwoing waybills are not Home Delivery [{string.Join(", ", result.ToList())}]");
+                    }
+                    else
+                    {
+                        await MappingManifestToWaybills(manifest, waybills);
+                    }
+                }
+                
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //Get Waybills In Manifest
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifest(string manifestcode)
         {

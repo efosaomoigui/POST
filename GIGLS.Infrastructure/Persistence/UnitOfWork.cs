@@ -296,7 +296,7 @@ namespace GIGLS.Infrastructure.Persistence
         public IDeviceManagementRepository DeviceManagement { get; set; }
 
         [Inject]
-        public IShimpmentDeliveryOptionMappingRepository ShimpmentDeliveryOptionMapping { get; set; }
+        public IShipmentDeliveryOptionMappingRepository ShipmentDeliveryOptionMapping { get; set; }
 
         public int Complete()
         {

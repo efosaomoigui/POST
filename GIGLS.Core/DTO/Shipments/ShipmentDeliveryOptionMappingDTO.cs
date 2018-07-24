@@ -3,9 +3,9 @@ using GIGLS.CORE.DTO;
 
 namespace GIGLS.Core.DTO.Shipments
 {
-    public class ShimpmentDeliveryOptionMappingDTO : BaseDomainDTO
+    public class ShipmentDeliveryOptionMappingDTO : BaseDomainDTO
     {
-        public int ShimpmentDeliveryOptionMappingId { get; set; }
+        public int ShipmentDeliveryOptionMappingId { get; set; }
         
         public string Waybill { get; set; }
         

@@ -10,12 +10,12 @@ using System.Web.Http;
 namespace GIGLS.WebApi.Controllers.Shipments
 {
     [Authorize(Roles = "Admin, ViewAdmin")]
-    [RoutePrefix("api/shimpmentdeliveryoptionmapping")]
-    public class ShimpmentDeliveryOptionMappingController : BaseWebApiController
+    [RoutePrefix("api/shipmentdeliveryoptionmapping")]
+    public class ShipmentDeliveryOptionMappingController : BaseWebApiController
     {
-        private readonly IShimpmentDeliveryOptionMappingService _service;
+        private readonly IShipmentDeliveryOptionMappingService _service;
 
-        public ShimpmentDeliveryOptionMappingController(IShimpmentDeliveryOptionMappingService service) : base(nameof(ShimpmentDeliveryOptionMappingController))
+        public ShipmentDeliveryOptionMappingController(IShipmentDeliveryOptionMappingService service) : base(nameof(ShipmentDeliveryOptionMappingController))
         {
             _service = service;
         }
@@ -23,12 +23,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
-        public async Task<IServiceResponse<List<ShimpmentDeliveryOptionMappingDTO>>> GetShimpmentDeliveryOptionMappings()
+        public async Task<IServiceResponse<List<ShipmentDeliveryOptionMappingDTO>>> GetShipmentDeliveryOptionMappings()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var mappings = await _service.GetAllShimpmentDeliveryOptionMappings();
-                return new ServiceResponse<List<ShimpmentDeliveryOptionMappingDTO>>
+                var mappings = await _service.GetAllShipmentDeliveryOptionMappings();
+                return new ServiceResponse<List<ShipmentDeliveryOptionMappingDTO>>
                 {
                     Object = mappings
                 };
@@ -39,12 +39,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{waybill}")]
-        public async Task<IServiceResponse<List<ShimpmentDeliveryOptionMappingDTO>>> GetShimpmentDeliveryOptionMappings(string waybill)
+        public async Task<IServiceResponse<List<ShipmentDeliveryOptionMappingDTO>>> GetShipmentDeliveryOptionMappings(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var mappings = await _service.GetAllShimpmentDeliveryOptionMappings();
-                return new ServiceResponse<List<ShimpmentDeliveryOptionMappingDTO>>
+                var mappings = await _service.GetAllShipmentDeliveryOptionMappings();
+                return new ServiceResponse<List<ShipmentDeliveryOptionMappingDTO>>
                 {
                     Object = mappings
                 };

@@ -94,7 +94,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         public DbSet<TransitWaybillNumber> TransitWaybillNumber { get; set; }
 
-        public DbSet<ShimpmentDeliveryOptionMapping> ShimpmentDeliveryOptionMapping { get; set; }
+        public DbSet<ShipmentDeliveryOptionMapping> ShipmentDeliveryOptionMapping { get; set; }
 
         //customer
         public DbSet<Company> Company { get; set; }

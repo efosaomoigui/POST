@@ -8,6 +8,7 @@ namespace GIGLS.Core.IServices.Shipments
     {
         Task<List<ManifestWaybillMappingDTO>> GetAllManifestWaybillMappings();
         Task MappingManifestToWaybills(string manifest, List<string> Waybills);
+        Task MappingManifestToWaybillsMobile(string manifest, List<string> waybills);
         Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifest(string manifestcode);
         Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch();
         Task<List<ManifestWaybillMappingDTO>> GetManifestForWaybill(string waybill);

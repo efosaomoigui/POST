@@ -10,22 +10,22 @@ using GIGLS.Core.DTO.Zone;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 {
-    public class ShimpmentDeliveryOptionMappingRepository : Repository<ShimpmentDeliveryOptionMapping, GIGLSContext>, IShimpmentDeliveryOptionMappingRepository
+    public class ShipmentDeliveryOptionMappingRepository : Repository<ShipmentDeliveryOptionMapping, GIGLSContext>, IShipmentDeliveryOptionMappingRepository
     {
         private GIGLSContext _context;
-        public ShimpmentDeliveryOptionMappingRepository(GIGLSContext context) : base(context)
+        public ShipmentDeliveryOptionMappingRepository(GIGLSContext context) : base(context)
         {
             _context = context;
         }
 
-        public Task<List<ShimpmentDeliveryOptionMappingDTO>> GetAllShimpmentDeliveryOptionMappings()
+        public Task<List<ShipmentDeliveryOptionMappingDTO>> GetAllShipmentDeliveryOptionMappings()
         {
-            var mappings = _context.ShimpmentDeliveryOptionMapping.AsQueryable();
+            var mappings = _context.ShipmentDeliveryOptionMapping.AsQueryable();
 
-            List<ShimpmentDeliveryOptionMappingDTO> result = (from m in mappings
-                                                              select new ShimpmentDeliveryOptionMappingDTO
+            List<ShipmentDeliveryOptionMappingDTO> result = (from m in mappings
+                                                              select new ShipmentDeliveryOptionMappingDTO
                                                               {
-                                                                  ShimpmentDeliveryOptionMappingId = m.ShimpmentDeliveryOptionMappingId,
+                                                                  ShipmentDeliveryOptionMappingId = m.ShipmentDeliveryOptionMappingId,
                                                                   Waybill = m.Waybill,
                                                                   DeliveryOptionId = m.DeliveryOptionId,
                                                                   DateCreated = m.DateCreated,
@@ -41,14 +41,14 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             return Task.FromResult(result);
         }
 
-        public Task<List<ShimpmentDeliveryOptionMappingDTO>> GetDeliveryOptionInWaybill(string waybill)
+        public Task<List<ShipmentDeliveryOptionMappingDTO>> GetDeliveryOptionInWaybill(string waybill)
         {
-            var mappings = _context.ShimpmentDeliveryOptionMapping.Where(x => x.Waybill == waybill).AsQueryable();
+            var mappings = _context.ShipmentDeliveryOptionMapping.Where(x => x.Waybill == waybill).AsQueryable();
 
-            List<ShimpmentDeliveryOptionMappingDTO> result = (from m in mappings
-                                                              select new ShimpmentDeliveryOptionMappingDTO
+            List<ShipmentDeliveryOptionMappingDTO> result = (from m in mappings
+                                                              select new ShipmentDeliveryOptionMappingDTO
                                                               {
-                                                                  ShimpmentDeliveryOptionMappingId = m.ShimpmentDeliveryOptionMappingId,
+                                                                  ShipmentDeliveryOptionMappingId = m.ShipmentDeliveryOptionMappingId,
                                                                   Waybill = m.Waybill,
                                                                   DeliveryOptionId = m.DeliveryOptionId,
                                                                   DateCreated = m.DateCreated,

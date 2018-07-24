@@ -4,10 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGLS.Core.Domain
 {
-    public class ShimpmentDeliveryOptionMapping : BaseDomain, IAuditable
+    public class ShipmentDeliveryOptionMapping : BaseDomain, IAuditable
     {
         [Key]
-        public int ShimpmentDeliveryOptionMappingId { get; set; }
+        public int ShipmentDeliveryOptionMappingId { get; set; }
 
         [MaxLength(100), MinLength(5)]
         [Index]
