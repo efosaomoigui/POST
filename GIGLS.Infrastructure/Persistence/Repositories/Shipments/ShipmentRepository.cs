@@ -202,7 +202,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 var filterValue = filterOptionsDto.filterValue;
                 if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
                 {
-                    shipmentDto = shipmentDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)).ToString() == filterValue).ToList();
+                    shipmentDto = shipmentDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
                 }
 
                 //sort
