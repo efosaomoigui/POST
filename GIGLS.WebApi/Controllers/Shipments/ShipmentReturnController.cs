@@ -38,6 +38,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("search")]
+        public async Task<IServiceResponse<IEnumerable<ShipmentReturnDTO>>> GetAllShipmentReturns([FromUri]FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentReturnTuple = _service.GetShipmentReturns(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<ShipmentReturnDTO>>
+                {
+                    Object = await shipmentReturnTuple.Item1,
+                    Total = shipmentReturnTuple.Item2
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("{waybill}")]
         public async Task<IServiceResponse<ShipmentReturnDTO>> GetShipmentReturnByWaybill(string waybill)
         {

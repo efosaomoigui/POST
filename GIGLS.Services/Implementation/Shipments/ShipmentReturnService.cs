@@ -206,6 +206,63 @@ namespace GIGLS.Services.Implementation.Shipments
             //return Task.FromResult(shipmentReturnsDto);
         }
 
+        public Tuple<Task<List<ShipmentReturnDTO>>, int> GetShipmentReturns(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                //get all shipments by servicecentre
+                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                var shipments = _uow.Shipment.FindAsync(s => serviceCenters.Contains(s.DepartureServiceCentreId)).Result;
+                var shipmentsWaybills = shipments.ToList().Select(a => a.Waybill).AsEnumerable();
+
+                //get collected shipment
+                var shipmentReturns = _uow.ShipmentReturn.FindAsync(x => shipmentsWaybills.Contains(x.WaybillNew)).Result;
+                var shipmentReturnsDto = Mapper.Map<IEnumerable<ShipmentReturnDTO>>(shipmentReturns);
+                shipmentReturnsDto = shipmentReturnsDto.OrderByDescending(x => x.DateCreated);
+
+                var count = shipmentReturnsDto.ToList().Count();
+
+                if (filterOptionsDto != null)
+                {
+                    //filter
+                    var filter = filterOptionsDto.filter;
+                    var filterValue = filterOptionsDto.filterValue;
+                    if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
+                    {
+                        shipmentReturnsDto = shipmentReturnsDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
+                    }
+
+                    //sort
+                    var sortorder = filterOptionsDto.sortorder;
+                    var sortvalue = filterOptionsDto.sortvalue;
+
+                    if (!string.IsNullOrEmpty(sortorder) && !string.IsNullOrEmpty(sortvalue))
+                    {
+                        System.Reflection.PropertyInfo prop = typeof(ShipmentReturn).GetProperty(sortvalue);
+
+                        if (sortorder == "0")
+                        {
+                            shipmentReturnsDto = shipmentReturnsDto.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                        }
+                        else
+                        {
+                            shipmentReturnsDto = shipmentReturnsDto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                        }
+                    }
+
+                    shipmentReturnsDto = shipmentReturnsDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
+                }
+
+                return new Tuple<Task<List<ShipmentReturnDTO>>, int>(Task.FromResult(shipmentReturnsDto.ToList()), count);
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
         public async Task RemoveShipmentReturn(string waybill)
         {
             var shipmentReturn = await _uow.ShipmentReturn.GetAsync(x => x.WaybillNew.Equals(waybill));
