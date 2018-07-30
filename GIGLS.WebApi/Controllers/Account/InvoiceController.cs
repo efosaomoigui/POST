@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
+using GIGLS.CORE.DTO.Shipments;
 
 namespace GIGLS.WebApi.Controllers.Account
 {
@@ -32,6 +33,22 @@ namespace GIGLS.WebApi.Controllers.Account
                 return new ServiceResponse<IEnumerable<InvoiceDTO>>
                 {
                     Object = invoice
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("search")]
+        public async Task<IServiceResponse<IEnumerable<InvoiceDTO>>> GetInvoices([FromUri]FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var invoiceTuple = _invoiceService.GetInvoices(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<InvoiceDTO>>
+                {
+                    Object = await invoiceTuple.Item1,
+                    Total = invoiceTuple.Item2
                 };
             });
         }

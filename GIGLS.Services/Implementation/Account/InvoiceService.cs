@@ -9,7 +9,9 @@ using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,6 +43,57 @@ namespace GIGLS.Services.Implementation.Account
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var invoices = await _uow.Invoice.GetInvoicesAsync(serviceCenterIds);
             return invoices.ToList().OrderByDescending(x => x.DateCreated);
+        }
+
+        public Tuple<Task<List<InvoiceDTO>>, int> GetInvoices(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                //get all invoices by servicecentre
+                var serviceCenterIds = _userService.GetPriviledgeServiceCenters().Result;
+                var invoicesDto = _uow.Invoice.GetInvoicesAsync(serviceCenterIds).Result;
+                invoicesDto = invoicesDto.OrderByDescending(x => x.DateCreated);
+
+                var count = invoicesDto.ToList().Count();
+
+                if (filterOptionsDto != null)
+                {
+                    //filter
+                    var filter = filterOptionsDto.filter;
+                    var filterValue = filterOptionsDto.filterValue;
+                    if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
+                    {
+                        invoicesDto = invoicesDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
+                    }
+
+                    //sort
+                    var sortorder = filterOptionsDto.sortorder;
+                    var sortvalue = filterOptionsDto.sortvalue;
+
+                    if (!string.IsNullOrEmpty(sortorder) && !string.IsNullOrEmpty(sortvalue))
+                    {
+                        System.Reflection.PropertyInfo prop = typeof(Invoice).GetProperty(sortvalue);
+
+                        if (sortorder == "0")
+                        {
+                            invoicesDto = invoicesDto.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                        }
+                        else
+                        {
+                            invoicesDto = invoicesDto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                        }
+                    }
+
+                    invoicesDto = invoicesDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
+                }
+
+                return new Tuple<Task<List<InvoiceDTO>>, int>(Task.FromResult(invoicesDto.ToList()), count);
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task<InvoiceDTO> GetInvoiceById(int invoiceId)
