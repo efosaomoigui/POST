@@ -8,6 +8,8 @@ using GIGLS.Core.Domain.MessagingLog;
 using AutoMapper;
 using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.User;
+using GIGLS.CORE.DTO.Shipments;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Messaging
 {
@@ -39,6 +41,57 @@ namespace GIGLS.Services.Implementation.Messaging
             var messages = _uow.EmailSendLog.GetEmailSendLogsAsync(filter);
             return messages;
         }
+
+        public Tuple<Task<List<EmailSendLogDTO>>, int> GetEmailSendLogAsync(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                var emailCollection = _uow.EmailSendLog.FindAsync(s => s.IsDeleted == false).Result;
+                var emailCollectionDto = Mapper.Map<IEnumerable<EmailSendLogDTO>>(emailCollection);
+                emailCollectionDto = emailCollectionDto.OrderByDescending(x => x.DateCreated);
+
+                var count = emailCollectionDto.ToList().Count();
+
+                if (filterOptionsDto != null)
+                {
+                    //filter
+                    var filter = filterOptionsDto.filter;
+                    var filterValue = filterOptionsDto.filterValue;
+                    if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
+                    {
+                        emailCollectionDto = emailCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
+                    }
+
+                    //sort
+                    var sortorder = filterOptionsDto.sortorder;
+                    var sortvalue = filterOptionsDto.sortvalue;
+
+                    if (!string.IsNullOrEmpty(sortorder) && !string.IsNullOrEmpty(sortvalue))
+                    {
+                        System.Reflection.PropertyInfo prop = typeof(EmailSendLog).GetProperty(sortvalue);
+
+                        if (sortorder == "0")
+                        {
+                            emailCollectionDto = emailCollectionDto.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                        }
+                        else
+                        {
+                            emailCollectionDto = emailCollectionDto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                        }
+                    }
+
+                    emailCollectionDto = emailCollectionDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
+                }
+
+                return new Tuple<Task<List<EmailSendLogDTO>>, int>(Task.FromResult(emailCollectionDto.ToList()), count);
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
         public async Task<EmailSendLogDTO> GetEmailSendLogById(int messageId)
         {

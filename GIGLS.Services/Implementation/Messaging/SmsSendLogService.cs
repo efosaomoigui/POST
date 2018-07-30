@@ -7,6 +7,9 @@ using GIGLS.Core.Domain.MessagingLog;
 using AutoMapper;
 using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.User;
+using GIGLS.CORE.DTO.Shipments;
+using System.Linq;
+using System;
 
 namespace GIGLS.Services.Implementation.Messaging
 {
@@ -39,6 +42,56 @@ namespace GIGLS.Services.Implementation.Messaging
         {
             var messages = _uow.SmsSendLog.GetSmsSendLogsAsync(filter);
             return messages;
+        }
+
+        public Tuple<Task<List<SmsSendLogDTO>>, int> GetSmsSendLogAsync(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                var smsCollection = _uow.SmsSendLog.FindAsync(s => s.IsDeleted == false).Result;
+                var smsCollectionDto = Mapper.Map<IEnumerable<SmsSendLogDTO>>(smsCollection);
+                smsCollectionDto = smsCollectionDto.OrderByDescending(x => x.DateCreated);
+
+                var count = smsCollectionDto.ToList().Count();
+
+                if (filterOptionsDto != null)
+                {
+                    //filter
+                    var filter = filterOptionsDto.filter;
+                    var filterValue = filterOptionsDto.filterValue;
+                    if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
+                    {
+                        smsCollectionDto = smsCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
+                    }
+
+                    //sort
+                    var sortorder = filterOptionsDto.sortorder;
+                    var sortvalue = filterOptionsDto.sortvalue;
+
+                    if (!string.IsNullOrEmpty(sortorder) && !string.IsNullOrEmpty(sortvalue))
+                    {
+                        System.Reflection.PropertyInfo prop = typeof(SmsSendLog).GetProperty(sortvalue);
+
+                        if (sortorder == "0")
+                        {
+                            smsCollectionDto = smsCollectionDto.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                        }
+                        else
+                        {
+                            smsCollectionDto = smsCollectionDto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                        }
+                    }
+
+                    smsCollectionDto = smsCollectionDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
+                }
+
+                return new Tuple<Task<List<SmsSendLogDTO>>, int>(Task.FromResult(smsCollectionDto.ToList()), count);
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task<SmsSendLogDTO> GetSmsSendLogById(int messageId)

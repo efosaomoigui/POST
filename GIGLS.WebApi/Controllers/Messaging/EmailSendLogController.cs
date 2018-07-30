@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.MessagingLog;
+using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
 using System.Collections.Generic;
@@ -33,6 +34,22 @@ namespace GIGLS.WebApi.Controllers.Messaging
                 return new ServiceResponse<IEnumerable<EmailSendLogDTO>>
                 {
                     Object = email
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("search")]
+        public async Task<IServiceResponse<IEnumerable<EmailSendLogDTO>>> GetEmailSendLogs([FromUri]FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var smsTuple = _messageService.GetEmailSendLogAsync(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<EmailSendLogDTO>>
+                {
+                    Object = await smsTuple.Item1,
+                    Total = smsTuple.Item2
                 };
             });
         }
