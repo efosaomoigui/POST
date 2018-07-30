@@ -8,6 +8,7 @@ namespace GIGLS.CORE.IServices.Shipments
     public interface IShipmentCollectionService : IServiceDependencyMarker
     {
         Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentCollections();
+        System.Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentCollections(FilterOptionsDto filterOptionsDto);
         Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentWaitingForCollection();
         System.Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollection(FilterOptionsDto filterOptionsDto);
         Task<ShipmentCollectionDTO> GetShipmentCollectionById(string waybill);
