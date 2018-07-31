@@ -121,7 +121,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     var filterValue = filterOptionsDto.filterValue;
                     if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
                     {
-                        shipmentCollectionDto = shipmentCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
+                        shipmentCollectionDto = shipmentCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null  
+                            && (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
                     }
 
                     //sort
@@ -196,7 +197,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     var filterValue = filterOptionsDto.filterValue;
                     if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
                     {
-                        shipmentCollectionDto = shipmentCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
+                        shipmentCollectionDto = shipmentCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null 
+                            && (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
                     }
 
                     //sort

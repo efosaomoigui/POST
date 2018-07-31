@@ -61,7 +61,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     var filterValue = filterOptionsDto.filterValue;
                     if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
                     {
-                        smsCollectionDto = smsCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
+                        smsCollectionDto = smsCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null
+                            && (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
                     }
 
                     //sort
