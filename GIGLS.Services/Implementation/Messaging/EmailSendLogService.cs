@@ -81,7 +81,7 @@ namespace GIGLS.Services.Implementation.Messaging
                         }
                     }
 
-                    emailCollectionDto = emailCollectionDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
+                    emailCollectionDto = emailCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
                 return new Tuple<Task<List<EmailSendLogDTO>>, int>(Task.FromResult(emailCollectionDto.ToList()), count);

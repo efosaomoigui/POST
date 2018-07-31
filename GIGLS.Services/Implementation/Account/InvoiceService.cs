@@ -85,7 +85,7 @@ namespace GIGLS.Services.Implementation.Account
                         }
                     }
 
-                    invoicesDto = invoicesDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
+                    invoicesDto = invoicesDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
                 return new Tuple<Task<List<InvoiceDTO>>, int>(Task.FromResult(invoicesDto.ToList()), count);

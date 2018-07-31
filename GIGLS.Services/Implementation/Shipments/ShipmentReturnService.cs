@@ -251,7 +251,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
 
-                    shipmentReturnsDto = shipmentReturnsDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
+                    shipmentReturnsDto = shipmentReturnsDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
                 return new Tuple<Task<List<ShipmentReturnDTO>>, int>(Task.FromResult(shipmentReturnsDto.ToList()), count);

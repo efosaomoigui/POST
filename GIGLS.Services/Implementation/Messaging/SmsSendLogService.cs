@@ -83,7 +83,7 @@ namespace GIGLS.Services.Implementation.Messaging
                         }
                     }
 
-                    smsCollectionDto = smsCollectionDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
+                    smsCollectionDto = smsCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
                 return new Tuple<Task<List<SmsSendLogDTO>>, int>(Task.FromResult(smsCollectionDto.ToList()), count);
