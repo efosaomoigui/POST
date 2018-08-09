@@ -185,6 +185,18 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[6] = demurragePrice;
                     strArray[7] = invoice.ReceiverName;
 
+                    //added for HomeDelivery sms
+                    if(invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
+                    {
+                        var smsMessages = await _messageService.GetSmsAsync();
+                        var homeDeliveryMessageDTO = smsMessages.FirstOrDefault(s => s.MessageType == MessageType.GOP);
+
+                        if(homeDeliveryMessageDTO != null)
+                        {
+                            messageDTO = homeDeliveryMessageDTO;
+                        }
+                    }
+
                     //populate the message template
                     messageDTO.FinalBody =
                         string.Format(messageDTO.Body, strArray);
