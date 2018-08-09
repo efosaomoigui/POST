@@ -190,7 +190,7 @@ namespace GIGLS.Services.Implementation.Messaging
                         invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
                     {
                         var smsMessages = await _messageService.GetSmsAsync();
-                        var homeDeliveryMessageDTO = smsMessages.FirstOrDefault(s => s.MessageType == MessageType.GOP);
+                        var homeDeliveryMessageDTO = smsMessages.FirstOrDefault(s => s.MessageType == MessageType.AHD);
 
                         if(homeDeliveryMessageDTO != null)
                         {
