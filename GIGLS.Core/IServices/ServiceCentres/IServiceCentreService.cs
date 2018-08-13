@@ -8,6 +8,7 @@ namespace GIGLS.Core.IServices.ServiceCentres
     {
         Task<IEnumerable<ServiceCentreDTO>> GetServiceCentres();
         Task<ServiceCentreDTO> GetServiceCentreById(int serviceCentreId);
+        Task<ServiceCentreDTO> GetServiceCentreForHomeDelivery(int serviceCentreId);
         Task<ServiceCentreDTO> GetServiceCentreByCode(string serviceCentreCode);
         Task<object> AddServiceCentre(ServiceCentreDTO service);
         Task UpdateServiceCentre(int serviceCentreId, ServiceCentreDTO service);

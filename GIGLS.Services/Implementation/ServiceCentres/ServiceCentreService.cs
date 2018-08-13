@@ -7,16 +7,20 @@ using GIGL.GIGLS.Core.Domain;
 using AutoMapper;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Infrastructure;
+using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Services.IServices.ServiceCentres
 {
     public class ServiceCentreService : IServiceCentreService
     {
+        private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IUnitOfWork _uow;
 
-        public ServiceCentreService(IUnitOfWork uow)
+        public ServiceCentreService(IGlobalPropertyService globalPropertyService, IUnitOfWork uow)
         {
             _uow = uow;
+            _globalPropertyService = globalPropertyService;
             MapperConfig.Initialize();
         }
 
@@ -242,5 +246,37 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 throw;
             }
         }
+
+        public async Task<ServiceCentreDTO> GetServiceCentreForHomeDelivery(int serviceCentreId)
+        {
+            try
+            {
+                //Get input service centre
+                var inputServiceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == serviceCentreId, "Station");
+                if (inputServiceCentre == null)
+                {
+                    throw new GenericException("Service Centre does not exist");
+                }
+                var stationCode = inputServiceCentre.Station.StationCode;
+
+                //Get the global property for station code
+                GlobalPropertyType globalPropertyType = 
+                    (GlobalPropertyType)Enum.Parse(typeof(GlobalPropertyType), stationCode);
+
+                //Get Service Centre Code from GlobalProperty
+                var globalPropertyObj = await _globalPropertyService.GetGlobalProperty(globalPropertyType);
+
+                //Get Service Centre from Code
+                var serviceCentreCode = globalPropertyObj.Value;
+                var serviceCentreForHomeDelivery = await GetServiceCentreByCode(serviceCentreCode);
+
+                return serviceCentreForHomeDelivery;
+            }
+            catch (Exception)
+            {
+                throw new GenericException("ServiceCentreForHomeDelivery has not been configured for the Input Service Centre.");
+            }
+        }
+
     }
 }
