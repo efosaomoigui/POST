@@ -14,11 +14,13 @@ using GIGLS.Infrastructure;
 using GIGLS.Core.DTO.Shipments;
 using System.Collections.Generic;
 using GIGLS.Services.Implementation.Utility;
+using AutoMapper;
 
 namespace GIGLS.Services.Implementation.Dashboard
 {
     public class DashboardService : IDashboardService
     {
+        private readonly IUnitOfWork _uow;
         private IShipmentService _shipmentService;
         private IUserService _userService;
         private IShipmentTrackingService _shipmentTrackingService;
@@ -28,7 +30,7 @@ namespace GIGLS.Services.Implementation.Dashboard
         private ICompanyService _companyService;
         private ICustomerService _customerService;
 
-        public DashboardService(
+        public DashboardService(IUnitOfWork uow,
             IShipmentService shipmentService, IUserService userService,
             IShipmentTrackingService shipmentTrackingService,
             IServiceCentreService serviceCenterService,
@@ -38,6 +40,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             ICustomerService customerService
             )
         {
+            _uow = uow;
             _shipmentService = shipmentService;
             _userService = userService;
             _shipmentTrackingService = shipmentTrackingService;
@@ -112,7 +115,9 @@ namespace GIGLS.Services.Implementation.Dashboard
             int[] serviceCenterIds = new int[] { serviceCenterId };
             // get the service centre
             var serviceCentre = await _serviceCenterService.GetServiceCentreById(serviceCenterId);
-            var serviceCentreShipments = await _shipmentService.GetShipments(serviceCenterIds);
+            //var serviceCentreShipments = await _shipmentService.GetShipments(serviceCenterIds);
+            var allShipments = _uow.Shipment.GetAllAsQueryable();
+            var serviceCentreShipments = allShipments.Where(s => serviceCenterId == s.DepartureServiceCentreId).ToList();
 
             //set for TargetAmount and TargetOrder
             dashboardDTO.TargetOrder = serviceCentre.TargetOrder;
@@ -120,7 +125,8 @@ namespace GIGLS.Services.Implementation.Dashboard
 
 
             // get shipment delivered - global
-            var shipmentTrackings = await _shipmentTrackingService.GetShipmentTrackings();
+            //var shipmentTrackings = await _shipmentTrackingService.GetShipmentTrackings();
+            var shipmentTrackings = _uow.ShipmentTracking.GetAllAsQueryable();
             var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.ARF.ToString()).ToList();
             //var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASP) || s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASD)).ToList();
             var shipmentsDeliveredByServiceCenter =
@@ -132,8 +138,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             //var shipmentsOrderedByServiceCenter =
             //        serviceCentreShipments.Where(s => shipmentsOrdered.Select(d => d.Waybill).Contains(s.Waybill));
             // var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == EnumHelper.GetDescription(ShipmentScanStatus.ASP) || s.Status == EnumHelper.GetDescription(ShipmentScanStatus.ASPD)).ToList();
-            var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.CRT.ToString()).ToList();
-            var shipmentsOrderedByServiceCenter = serviceCentreShipments;
+            //var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.CRT.ToString()).ToList();
+            var shipmentsOrderedByServiceCenter = Mapper.Map<List<ShipmentDTO>>(serviceCentreShipments);
             dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
 
             // get all customers - individual and company
@@ -194,14 +200,18 @@ namespace GIGLS.Services.Implementation.Dashboard
             // get the service centre
             var serviceCentres = await _serviceCenterService.GetServiceCentres();
             var serviceCenterIds = serviceCentres.Where(s => s.StationId == stationId).Select(s => s.ServiceCentreId).ToArray();
-            var serviceCentreShipments = await _shipmentService.GetShipments(serviceCenterIds);
+            //var serviceCentreShipments = await _shipmentService.GetShipments(serviceCenterIds);
+            var allShipments = _uow.Shipment.GetAllAsQueryable();
+            var serviceCentreShipments = allShipments.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
+
 
             //set for TargetAmount and TargetOrder
             dashboardDTO.TargetOrder = serviceCentres.Where(s => s.StationId == stationId).Sum(s => s.TargetOrder);
             dashboardDTO.TargetAmount = serviceCentres.Where(s => s.StationId == stationId).Sum(s => s.TargetAmount);
 
             // get shipment delivered - global
-            var shipmentTrackings = await _shipmentTrackingService.GetShipmentTrackings();
+            //var shipmentTrackings = await _shipmentTrackingService.GetShipmentTrackings();
+            var shipmentTrackings = _uow.ShipmentTracking.GetAllAsQueryable();
             var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.ARF.ToString()).ToList();
             //var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASP) || s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASD)).ToList();
             var shipmentsDeliveredByServiceCenter =
@@ -213,8 +223,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             //var shipmentsOrderedByServiceCenter =
             //        serviceCentreShipments.Where(s => shipmentsOrdered.Select(d => d.Waybill).Contains(s.Waybill));
             //var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == EnumHelper.GetDescription(ShipmentScanStatus.ASP) || s.Status == EnumHelper.GetDescription(ShipmentScanStatus.ASPD)).ToList();
-            var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.CRT.ToString()).ToList();
-            var shipmentsOrderedByServiceCenter = serviceCentreShipments;
+            //var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.CRT.ToString()).ToList();
+            var shipmentsOrderedByServiceCenter = Mapper.Map<List<ShipmentDTO>>(serviceCentreShipments);
             dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
 
             // get all customers - individual and company
@@ -275,7 +285,9 @@ namespace GIGLS.Services.Implementation.Dashboard
             var dashboardDTO = new DashboardDTO();
 
             int[] serviceCenterIds = { };   //empty array
-            var serviceCentreShipments = await _shipmentService.GetShipments(serviceCenterIds);
+            //var serviceCentreShipments = await _shipmentService.GetShipments(serviceCenterIds);
+            var allShipments = _uow.Shipment.GetAllAsQueryable();
+            var serviceCentreShipments = allShipments.ToList();
 
             //set for TargetAmount and TargetOrder
             var serviceCentres = await _serviceCenterService.GetServiceCentres();
@@ -284,13 +296,14 @@ namespace GIGLS.Services.Implementation.Dashboard
 
 
             // get shipment delivered
-            var shipmentTrackings = await _shipmentTrackingService.GetShipmentTrackings();
+            //var shipmentTrackings = await _shipmentTrackingService.GetShipmentTrackings();
+            var shipmentTrackings = _uow.ShipmentTracking.GetAllAsQueryable();
             var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.ARF.ToString()).ToList();
             //var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASP) || s.Status == EnumHelper.GetDescription(ShipmentScanStatus.DASD)).ToList();
 
             // get shipment ordered
             //var shipmentsOrdered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.Recieved.ToString()).ToList();
-            var shipmentsOrderedByServiceCenter = serviceCentreShipments;
+            var shipmentsOrderedByServiceCenter = Mapper.Map<List<ShipmentDTO>>(serviceCentreShipments);
             dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
 
             // get all customers - individual and company

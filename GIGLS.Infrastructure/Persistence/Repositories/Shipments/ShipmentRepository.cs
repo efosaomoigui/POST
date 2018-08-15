@@ -727,5 +727,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
         }
 
+        public IQueryable<Shipment> ShipmentsAsQueryable()
+        {
+            var shipments = _context.Shipment.AsQueryable();
+            return shipments;
+        }
+
     }
 }

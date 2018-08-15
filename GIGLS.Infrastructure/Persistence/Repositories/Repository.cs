@@ -52,6 +52,11 @@ namespace GIGLS.Infrastructure.Persistence.Repository
             return Context.Set<TEntity>().ToList().AsQueryable();
         }
 
+        public IQueryable<TEntity> GetAllAsQueryable()
+        {
+            return Context.Set<TEntity>().AsQueryable();
+        }
+
         //public IEnumerable<TEntity> GetAll()
         //{
         //    return Context.Set<TEntity>().ToList();

@@ -10,6 +10,7 @@ namespace GIGL.GIGLS.Core.Repositories
     {
         TEntity Get(int id);
         IQueryable<TEntity> GetAll();
+        IQueryable<TEntity> GetAllAsQueryable();
         /// <summary>
         /// Gets all entries for this entity
         /// </summary>

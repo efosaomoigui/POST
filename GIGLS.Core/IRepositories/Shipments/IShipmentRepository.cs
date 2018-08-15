@@ -5,6 +5,7 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GIGLS.Core.IRepositories.Shipments
@@ -17,5 +18,6 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<List<ShipmentDTO>> GetShipments(ShipmentFilterCriteria queryDto, int[] serviceCentreIds);
         Task<List<ShipmentDTO>> GetShipments(int[] serviceCentreIds);
         Task<List<ShipmentDTO>> GetCustomerShipments(ShipmentFilterCriteria f_Criteria);
+        IQueryable<Shipment> ShipmentsAsQueryable();
     }
 }
