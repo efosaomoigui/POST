@@ -78,18 +78,6 @@ namespace GIGLS.Services.Implementation.Customers
                     }
                 }
 
-                _uow.Complete();
-
-                // add customer to a wallet
-                await _walletService.AddWallet(new WalletDTO
-                {
-                    CustomerId = newCompany.CompanyId,
-                    CustomerType = CustomerType.Company,
-                    CustomerCode = newCompany.CustomerCode,
-                    CompanyType = companyType
-                });
-
-
                 //-- add to user table for login
                 //1. set the userChannelType
                 var userChannelType = UserChannelType.Corporate;
@@ -104,32 +92,38 @@ namespace GIGLS.Services.Implementation.Customers
                     newCompany.Email = newCompany.CustomerCode;
                 }
 
-                try
+                var password = await _passwordGenerator.Generate();
+                var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
                 {
-                    var password = await _passwordGenerator.Generate();
-                    var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
-                    {
-                        ConfirmPassword = password,
-                        Department = newCompany.CompanyType.ToString(),
-                        DateCreated = DateTime.Now,
-                        Designation = newCompany.CompanyType.ToString(),
-                        Email = newCompany.Email,
-                        FirstName = newCompany.Name,
-                        LastName = newCompany.Name,
-                        Organisation = newCompany.CompanyType.ToString(),
-                        Password = password,
-                        PhoneNumber = newCompany.PhoneNumber,
-                        UserType = UserType.Regular,
-                        Username = newCompany.CustomerCode,
-                        UserChannelCode = newCompany.CustomerCode,
-                        UserChannelPassword = password,
-                        UserChannelType = userChannelType
-                    });
-                }
-                catch (Exception)
+                    ConfirmPassword = password,
+                    Department = newCompany.CompanyType.ToString(),
+                    DateCreated = DateTime.Now,
+                    Designation = newCompany.CompanyType.ToString(),
+                    Email = newCompany.Email,
+                    FirstName = newCompany.Name,
+                    LastName = newCompany.Name,
+                    Organisation = newCompany.CompanyType.ToString(),
+                    Password = password,
+                    PhoneNumber = newCompany.PhoneNumber,
+                    UserType = UserType.Regular,
+                    Username = newCompany.CustomerCode,
+                    UserChannelCode = newCompany.CustomerCode,
+                    UserChannelPassword = password,
+                    UserChannelType = userChannelType
+                });
+
+                //complete
+                _uow.Complete();
+
+                // add customer to a wallet
+                await _walletService.AddWallet(new WalletDTO
                 {
-                    // do nothing
-                }
+                    CustomerId = newCompany.CompanyId,
+                    CustomerType = CustomerType.Company,
+                    CustomerCode = newCompany.CustomerCode,
+                    CompanyType = companyType
+                });
+
 
                 return Mapper.Map<CompanyDTO>(newCompany);
             }
@@ -286,7 +280,7 @@ namespace GIGLS.Services.Implementation.Customers
             //only add those companies whose CustomerCode do not exists in AspNet Users table
             foreach (var company in listOfCompanies)    // Start Foreach loop
             {
-                if(listOfUsers.Select(s => s.UserChannelCode).Contains(company.CustomerCode))
+                if (listOfUsers.Select(s => s.UserChannelCode).Contains(company.CustomerCode))
                 {
                     //user already in the system
                     continue;
