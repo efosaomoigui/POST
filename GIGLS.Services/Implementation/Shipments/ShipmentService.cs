@@ -93,6 +93,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 //var allShipments = _uow.Shipment.GetShipments(filterOptionsDto, new int[] { });
                 var allShipments = _uow.Invoice.GetAllFromInvoiceView();
 
+                //added for GWA and GWARIMPA service centres
+                {
+                    if(serviceCenters.Length == 1)
+                    {
+                        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                        {
+                            serviceCenters = new int[] {4, 294};
+                        }
+                    }
+                }
+
                 var incomingShipments = new List<GIGLS.Core.DTO.Account.InvoiceViewDTO>();
                 if (serviceCenters.Length > 0)
                 {
