@@ -100,6 +100,18 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //get all shipments by servicecentre
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+
+                //added for GWA and GWARIMPA service centres
+                {
+                    if (serviceCenters.Length == 1)
+                    {
+                        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                        {
+                            serviceCenters = new int[] { 4, 294 };
+                        }
+                    }
+                }
+
                 var shipments = _uow.Shipment.FindAsync(s => serviceCenters.Contains(s.DestinationServiceCentreId)).Result;
                 var shipmentsWaybills = shipments.ToList().Select(a => a.Waybill).AsEnumerable();
 
@@ -160,6 +172,18 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             //get all shipments by servicecentre
             var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+
+            //added for GWA and GWARIMPA service centres
+            {
+                if (serviceCenters.Length == 1)
+                {
+                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                    {
+                        serviceCenters = new int[] { 4, 294 };
+                    }
+                }
+            }
+
             var shipments = await _uow.Shipment.FindAsync(s => serviceCenters.Contains(s.DestinationServiceCentreId));
             var shipmentsWaybills = shipments.ToList().Select(a => a.Waybill).AsEnumerable();
 
