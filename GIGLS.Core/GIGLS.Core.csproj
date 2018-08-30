@@ -546,6 +546,7 @@
     <Compile Include="IServices\Stocks\IStockRequestService.cs" />
     <Compile Include="IServices\Stocks\IStockSupplyDetailsService.cs" />
     <Compile Include="IServices\Stores\IStoreService.cs" />
+	<Compile Include="IServices\ThirdPartyAPI\IThirdPartyAPIService.cs" />
     <Compile Include="IServices\User\IUserService.cs" />
     <Compile Include="IServices\Utility\IGlobalPropertyService.cs" />
     <Compile Include="IServices\Utility\INumberGeneratorMonitorService.cs" />
