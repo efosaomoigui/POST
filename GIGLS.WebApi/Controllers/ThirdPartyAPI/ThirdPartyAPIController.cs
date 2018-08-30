@@ -70,7 +70,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         //Capture Shipment API
         //[GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
-        [Route("")]
+        [Route("captureshipment")]
         public async Task<IServiceResponse<ShipmentDTO>> AddShipment(ShipmentDTO ShipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
