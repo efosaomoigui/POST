@@ -332,6 +332,7 @@
     <Compile Include="Controllers\Shipments\ShipmentReturnController.cs" />
     <Compile Include="Controllers\Shipments\WaybillNumberController.cs" />
     <Compile Include="Controllers\StateController.cs" />
+	<Compile Include="Controllers\ThirdPartyAPI\ThirdPartyAPIController.cs" />
     <Compile Include="Controllers\User\LoginController.cs" />
     <Compile Include="Controllers\User\UserController.cs" />
     <Compile Include="Controllers\Utility\GlobalPropertyController.cs" />
