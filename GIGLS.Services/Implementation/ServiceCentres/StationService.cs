@@ -39,7 +39,8 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             {
                 StationName = station.StationName,
                 StationCode = station.StationCode,
-                StateId = station.StateId
+                StateId = station.StateId,
+                SuperServiceCentreId = station.SuperServiceCentreId
             };
 
             _uow.Station.Add(newStation);
@@ -67,6 +68,8 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             {
                 throw new GenericException("STATION INFORMATION DOES NOT EXIST");
             }
+
+            var serviceCentre = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == station.SuperServiceCentreId);
             return new StationDTO
             {
                 StationId = station.StationId,
@@ -74,7 +77,13 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 StationCode = station.StationCode,
                 StateId = station.StateId,
                 StateName = station.State.StateName,
-                Country = station.State.CountryId.ToString()
+                Country = station.State.CountryId.ToString(),
+                SuperServiceCentreId = station.SuperServiceCentreId,
+                SuperServiceCentreDTO = new ServiceCentreDTO()
+                {
+                    Code = serviceCentre?.Code,
+                    Name = serviceCentre?.Name
+                }
             };
         }
         
@@ -92,6 +101,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             station.StationName = stationDto.StationName.Trim();
             station.StationCode = stationDto.StationCode.Trim();
             station.StateId = stationDto.StateId;
+            station.SuperServiceCentreId = stationDto.SuperServiceCentreId;
             await _uow.CompleteAsync();
         }
 
@@ -103,13 +113,26 @@ namespace GIGLS.Services.Implementation.ServiceCentres
 
             foreach (var st in stations)
             {
+                var serviceCentre = _uow.ServiceCentre.SingleOrDefault(s => s.ServiceCentreId == st.SuperServiceCentreId);
+                ServiceCentreDTO superServiceCentreDTO = null;
+                if (serviceCentre != null)
+                {
+                    superServiceCentreDTO = new ServiceCentreDTO()
+                    {
+                        Code = serviceCentre?.Code,
+                        Name = serviceCentre?.Name
+                    };
+                }
+
                 stationDto.Add(new StationDTO
                 {
                     StationId = st.StationId,
                     StationCode = st.StationCode,
                     StationName = st.StationName,
                     StateId = st.StateId,
-                    StateName = st.State.StateName
+                    StateName = st.State.StateName,
+                    SuperServiceCentreId = st.SuperServiceCentreId,
+                    SuperServiceCentreDTO = superServiceCentreDTO
                 });
             }
             return stationDto.OrderBy(x => x.StationName).ToList();

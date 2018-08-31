@@ -19,6 +19,8 @@ namespace GIGLS.Core.Domain
         public int StateId { get; set; }
         public virtual State State { get; set; }
 
+        public int SuperServiceCentreId { get; set; }
+
         public virtual ICollection<ServiceCentre> ServiceCentres { get; set; }
     }
 }

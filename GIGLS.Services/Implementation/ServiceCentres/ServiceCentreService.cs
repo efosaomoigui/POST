@@ -257,18 +257,17 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 {
                     throw new GenericException("Service Centre does not exist");
                 }
-                var stationCode = inputServiceCentre.Station.StationCode;
 
-                //Get the global property for station code
-                GlobalPropertyType globalPropertyType = 
-                    (GlobalPropertyType)Enum.Parse(typeof(GlobalPropertyType), stationCode);
-
-                //Get Service Centre Code from GlobalProperty
-                var globalPropertyObj = await _globalPropertyService.GetGlobalProperty(globalPropertyType);
-
-                //Get Service Centre from Code
-                var serviceCentreCode = globalPropertyObj.Value;
-                var serviceCentreForHomeDelivery = await GetServiceCentreByCode(serviceCentreCode);
+                //Get Service Centre from SuperServiceCentreId
+                ServiceCentreDTO serviceCentreForHomeDelivery = null;
+                if (inputServiceCentre.Station.SuperServiceCentreId > 0)
+                {
+                    serviceCentreForHomeDelivery = await GetServiceCentreById(inputServiceCentre.Station.SuperServiceCentreId);
+                }
+                else
+                {
+                    serviceCentreForHomeDelivery = Mapper.Map<ServiceCentreDTO>(inputServiceCentre);
+                };
 
                 return serviceCentreForHomeDelivery;
             }

@@ -1,4 +1,5 @@
-﻿using GIGLS.CORE.DTO;
+﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.CORE.DTO;
 
 namespace GIGLS.Core.DTO.ServiceCentres
 {
@@ -11,5 +12,8 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public int StateId { get; set; }
         public string Country { get; set; }
         public CountryDTO CountryDTO { get; set; }
+
+        public int SuperServiceCentreId { get; set; }
+        public ServiceCentreDTO SuperServiceCentreDTO { get; set; }
     }
 }

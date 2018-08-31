@@ -16,9 +16,6 @@
         YEMEN,
         EcommerceNegativeWalletLimit,
         EcommercePremiumNegativeWalletLimit,
-        EcommerceGoldNegativeWalletLimit,
-        ABV,
-        LOS,
-        PHC
+        EcommerceGoldNegativeWalletLimit
     }
 }

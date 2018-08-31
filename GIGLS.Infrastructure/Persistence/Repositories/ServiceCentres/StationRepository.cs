@@ -46,7 +46,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                         CountryId = c.CountryId,
                                         CountryCode = c.CountryCode,
                                         CountryName = c.CountryName
-                                    }
+                                    },
+                                    SuperServiceCentreId = s.SuperServiceCentreId,
+                                    SuperServiceCentreDTO = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.SuperServiceCentreId).Select(x => new ServiceCentreDTO
+                                    {
+                                        Code = x.Code,
+                                        Name = x.Name
+                                    }).FirstOrDefault()
                                 };
                 return Task.FromResult(stationDto.OrderBy(x => x.StationName).ToList());
             }
@@ -80,7 +86,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                         CountryId = c.CountryId,
                                         CountryCode = c.CountryCode,
                                         CountryName = c.CountryName
-                                    }
+                                    },
+                                     SuperServiceCentreId = s.SuperServiceCentreId,
+                                     SuperServiceCentreDTO = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.SuperServiceCentreId).Select(x => new ServiceCentreDTO
+                                     {
+                                         Code = x.Code,
+                                         Name = x.Name
+                                     }).FirstOrDefault()
                                  };
                 return Task.FromResult(stationDto.OrderBy(x => x.StationName).ToList());
             }
