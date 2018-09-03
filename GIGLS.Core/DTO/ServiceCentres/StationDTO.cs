@@ -13,7 +13,7 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public string Country { get; set; }
         public CountryDTO CountryDTO { get; set; }
 
-        public int SuperServiceCentreId { get; set; }
+        public int SuperServiceCentreId { get; set; } 
         public ServiceCentreDTO SuperServiceCentreDTO { get; set; }
     }
 }
