@@ -151,7 +151,7 @@
     <Compile Include="Business\Payment\PaymentService.cs" />
     <Compile Include="Business\Pricing\PricingService.cs" />
     <Compile Include="Business\Scanning\ScanService.cs" />
-	<Compile Include="Business\ThirdPartyAPI\ThirdPartyAPIService.cs" />
+    <Compile Include="Business\ThirdPartyAPI\ThirdPartyAPIService.cs" />
     <Compile Include="Business\Tracking\ShipmentTrackService.cs" />
     <Compile Include="Implementation\Account\ExpenditureService.cs" />
     <Compile Include="Implementation\Account\GeneralLedgerService.cs" />
@@ -160,6 +160,8 @@
     <Compile Include="Implementation\Account\InvoiceService.cs" />
     <Compile Include="Implementation\Account\InvoiceShipmentService.cs" />
     <Compile Include="Implementation\Account\VATService.cs" />
+    <Compile Include="Implementation\BankSettlement\BankShipmentSettlementService.cs" />
+    <Compile Include="Implementation\BankSettlement\CODSettlementSheetService.cs" />
     <Compile Include="Implementation\Client\ClientNodeService.cs" />
     <Compile Include="Implementation\CountryService.cs" />
     <Compile Include="Implementation\Customers\CompanyContactPersonService.cs" />

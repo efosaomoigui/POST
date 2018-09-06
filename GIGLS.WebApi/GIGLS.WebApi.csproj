@@ -274,6 +274,7 @@
     <Compile Include="Controllers\Account\InvoiceController.cs" />
     <Compile Include="Controllers\Account\InvoiceShipmentController.cs" />
     <Compile Include="Controllers\Account\VATController.cs" />
+    <Compile Include="Controllers\BankSettlement\CODSettlementSheetController.cs" />
     <Compile Include="Controllers\BaseWebApiController.cs" />
     <Compile Include="Controllers\Business\PaymentController.cs" />
     <Compile Include="Controllers\Business\PricingController.cs" />
@@ -332,11 +333,12 @@
     <Compile Include="Controllers\Shipments\ShipmentReturnController.cs" />
     <Compile Include="Controllers\Shipments\WaybillNumberController.cs" />
     <Compile Include="Controllers\StateController.cs" />
-	<Compile Include="Controllers\ThirdPartyAPI\ThirdPartyAPIController.cs" />
+    <Compile Include="Controllers\ThirdPartyAPI\ThirdPartyAPIController.cs" />
     <Compile Include="Controllers\User\LoginController.cs" />
     <Compile Include="Controllers\User\UserController.cs" />
     <Compile Include="Controllers\Utility\GlobalPropertyController.cs" />
     <Compile Include="Controllers\Wallet\CashOnDeliveryAccountController.cs" />
+    <Compile Include="Controllers\BankSettlement\BankShipmentSettlementController.cs" />
     <Compile Include="Controllers\Wallet\CashOnDeliveryBalanceController.cs" />
     <Compile Include="Controllers\Wallet\WalletController.cs" />
     <Compile Include="Controllers\Wallet\WalletTransactionController.cs" />

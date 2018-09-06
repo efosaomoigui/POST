@@ -23,6 +23,7 @@ using GIGLS.Core.IRepositories.Haulage;
 using GIGLS.Core.IRepositories.MessagingLog;
 using GIGLS.Core.IRepositories.ShipmentScan;
 using GIGLS.Core.IRepositories.Devices;
+using GIGLS.Core.IRepositories.BankSettlement;
 
 namespace GIGLS.Core
 {
@@ -113,6 +114,7 @@ namespace GIGLS.Core
         IDeviceRepository Device { get; set; }
         IDeviceManagementRepository DeviceManagement { get; set; }
         IShipmentDeliveryOptionMappingRepository ShipmentDeliveryOptionMapping {get; set;}
+        ICODSettlementSheetRepository CODSettlementSheet { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

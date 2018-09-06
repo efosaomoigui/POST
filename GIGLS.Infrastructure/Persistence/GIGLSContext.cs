@@ -15,6 +15,7 @@ using GIGLS.Core.Domain.MessagingLog;
 using GIGLS.Core.Domain.ShipmentScan;
 using GIGLS.Core.Domain.Utility;
 using GIGLS.Core.Domain.Devices;
+using GIGLS.Core.Domain.BankSettlement;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -192,6 +193,9 @@ namespace GIGLS.Infrastructure.Persistence
         //Device Management
         public DbSet<Device> Device { get; set; }
         public DbSet<DeviceManagement> DeviceManagement { get; set; }
+
+        //BankSettlement
+        public DbSet<CODSettlementSheet> CODSettlementSheet { get; set; }
 
         #endregion
 

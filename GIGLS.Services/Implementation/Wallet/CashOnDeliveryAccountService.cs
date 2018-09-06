@@ -13,6 +13,9 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Account;
 using GIGLS.Core.DTO.Account;
 using System.Linq;
+using GIGLS.Core.IServices.BankSettlement;
+using GIGLS.Core.DTO.BankSettlement;
+using System;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -23,15 +26,18 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly ICashOnDeliveryBalanceService _cashOnDeliveryBalanceService;
         private readonly IUserService _userService;
         private readonly IGeneralLedgerService _generalLedgerService;
+        private readonly ICODSettlementSheetService _codSettlementSheetService;
 
         public CashOnDeliveryAccountService(IUnitOfWork uow, IWalletService walletService, IGeneralLedgerService generalLedgerService,
-            ICashOnDeliveryBalanceService cashOnDeliveryBalanceService, IUserService userService)
+            ICashOnDeliveryBalanceService cashOnDeliveryBalanceService, IUserService userService,
+            ICODSettlementSheetService codSettlementSheetService)
         {
             _uow = uow;
             _walletService = walletService;
             _cashOnDeliveryBalanceService = cashOnDeliveryBalanceService;
             _userService = userService;
             _generalLedgerService = generalLedgerService;
+            _codSettlementSheetService = codSettlementSheetService;
             MapperConfig.Initialize();
         }
 
@@ -45,22 +51,15 @@ namespace GIGLS.Services.Implementation.Wallet
                 cashOnDeliveryAccountDto.UserId = await _userService.GetCurrentUserId();
             }
 
-            //var accountBalance = await _uow.CashOnDeliveryBalance.GetAsync(x => x.WalletId == wallet.WalletId);
+            //Added for COD Settlement
+            await _codSettlementSheetService.AddCODSettlementSheet(new CODSettlementSheetDTO()
+            {
+                Waybill = cashOnDeliveryAccountDto.Waybill,
+                Amount = cashOnDeliveryAccountDto.Amount,
+                ReceivedCOD = false,
+                ReceiverAgentId = cashOnDeliveryAccountDto.UserId
+            });
 
-            //if (accountBalance == null)
-            //{
-            //    var newBalance = new CashOnDeliveryBalance
-            //    {
-            //        WalletId = wallet.WalletId,
-            //        Balance = 0,
-            //        UserId = cashOnDeliveryAccountDto.UserId
-            //    };
-
-            //    _uow.CashOnDeliveryBalance.Add(newBalance);
-            //    await _uow.CompleteAsync();
-
-            //    accountBalance = await _uow.CashOnDeliveryBalance.GetAsync(newBalance.CashOnDeliveryBalanceId);
-            //}
 
             //create COD Account and all COD Account for the wallet
             cashOnDeliveryAccountDto.Wallet = null;

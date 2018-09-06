@@ -28,6 +28,8 @@ using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.View;
 using GIGLS.Core.Domain.Devices;
 using GIGLS.Core.DTO.Devices;
+using GIGLS.Core.Domain.BankSettlement;
+using GIGLS.Core.DTO.BankSettlement;
 
 namespace GIGLS.Core
 {
@@ -246,6 +248,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<ShipmentDeliveryOptionMapping, ShipmentDeliveryOptionMappingDTO>();
                 config.CreateMap<ShipmentDeliveryOptionMappingDTO, ShipmentDeliveryOptionMapping>();
+
+                config.CreateMap<CODSettlementSheet, CODSettlementSheetDTO>();
+                config.CreateMap<CODSettlementSheetDTO, CODSettlementSheet>();
 
             });
 

@@ -26,6 +26,7 @@ using GIGLS.Core.IRepositories.MessagingLog;
 using GIGLS.Core.IRepositories.ShipmentScan;
 using System;
 using GIGLS.Core.IRepositories.Devices;
+using GIGLS.Core.IRepositories.BankSettlement;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -297,6 +298,10 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IShipmentDeliveryOptionMappingRepository ShipmentDeliveryOptionMapping { get; set; }
+
+        [Inject]
+        public ICODSettlementSheetRepository CODSettlementSheet { get; set; }
+
 
         public int Complete()
         {
