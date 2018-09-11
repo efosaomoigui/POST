@@ -142,70 +142,139 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
 
+        //map waybills to Manifest for Mobile
+        private async Task MappingManifestToWaybillsMobile(string manifest, List<string> waybills, int[] serviceIds)
+        {
+            try
+            {
+                //1. check if the waybill has been mapped to a manifest 
+                // and it has not been process for return in case it was not delivered (i.e still active) that day
+                var isWaybillMappedActive = _uow.ManifestWaybillMapping.GetAllAsQueryable();
+                isWaybillMappedActive = isWaybillMappedActive.Where(x => x.IsActive == true && waybills.Contains(x.Waybill));
+
+                var isWaybillsMappedActiveResult = isWaybillMappedActive.Select(x => x.Waybill).Distinct().ToList();
+
+                if (isWaybillsMappedActiveResult.Count() > 0)
+                {
+                    throw new GenericException($"Error: Delivery Manifest cannot be created. " +
+                               $"The follwoing waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
+                }
+                
+                var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
+                //create the manifest if manifest does not exist
+                if (manifestObj == null)
+                {
+                    var newManifest = new Manifest
+                    {
+                        DateTime = DateTime.Now,
+                        ManifestCode = manifest,
+                        ManifestType = ManifestType.Delivery
+                    };
+                    _uow.Manifest.Add(newManifest);
+                }
+                                
+                foreach (var waybill in waybills)
+                {
+                    //check if the shipment is at the final destination with a scan of ARF (WHEN SHIPMENT ARRIVED FINAL DESTINATION)
+                    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.Waybill == waybill);
+                    if (shipmentCollection == null)
+                    {
+                        throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
+                    }
+                    else
+                    {
+                        //WC -- SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO RECEIVER
+                        shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.WC;
+                    }
+                    
+                    //check if Waybill has not been added to this manifest 
+                    var isWaybillMapped = await _uow.ManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
+
+                    //if the waybill has not been added to this manifest, add it
+                    if (!isWaybillMapped)
+                    {
+                        //Add new Mapping
+                        var newMapping = new ManifestWaybillMapping
+                        {
+                            ManifestCode = manifest,
+                            Waybill = waybill,
+                            IsActive = true,
+                            ServiceCentreId = serviceIds[0]
+                        };
+                        _uow.ManifestWaybillMapping.Add(newMapping);
+                    }                    
+                }
+
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
         //map waybills to Manifest from Mobile
         public async Task MappingManifestToWaybillsMobile(string manifest, List<string> waybills)
         {
             try
             {
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                
-                //1. get all shipments at colletion centre for the service centre which status is ARF
-                var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF);
 
-                if (shipmentCollection.Count() == 0)
-                {
-                    throw new GenericException($"None of the waybills is at the Final Service Centre");
-                }
+                //1a. Get the shipment status of the waybills we want to manifest
+                var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable();
+                shipmentCollection = shipmentCollection.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && waybills.Contains(x.Waybill));
 
                 //extrack waybills into a list from shipment collection
-                var extrackedWaybills = new List<string>();
-                foreach (var waybillCollection in shipmentCollection)
+                var shipmentCollectionList = shipmentCollection.Select(x => x.Waybill).Distinct().ToList();
+
+                //1b. check if all the waybills has the same status (ARF)
+                if (shipmentCollectionList.Count() == 0)
                 {
-                    extrackedWaybills.Add(waybillCollection.Waybill);
+                    throw new GenericException($"None of the waybills is not available for Processing");
                 }
 
-                //2. Get shipment details for the service centre that are at the collection centre using the waybill and service centre
+                if(shipmentCollectionList.Count() != waybills.Count())
+                {
+                    var result = waybills.Where(x => !shipmentCollectionList.Contains(x));
+
+                    if (result.Count() > 0)
+                    {
+                        throw new GenericException($"Error: Delivery Manifest cannot be created. " +
+                            $"The follwoing waybills [{string.Join(", ", result.ToList())}] are not available for Processing");
+                    }
+                }
+                
+                //2. Get the shipment details of all the waybills that we want to manifest again by 
+                // check if the waybill is not cancelled, Home Delivery and the user that want to manifest it is at the final service centre of the waybills  
                 var InvoicesBySC = _uow.Invoice.GetAllFromInvoiceView();
-
-                //filter by destination service center that is not cancelled and it is home delivery
-                InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && x.PickupOptions == PickupOptions.HOMEDELIVERY);
-
+                InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && x.PickupOptions == PickupOptions.HOMEDELIVERY && waybills.Contains(x.Waybill));
+                
+                //filter if the shipment is at the final service centre
                 if (serviceCenters.Length > 0)
                 {
                     InvoicesBySC = InvoicesBySC.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId));
                 }
 
-                if (extrackedWaybills.Count > 0)
-                {
-                    InvoicesBySC = InvoicesBySC.Where(s => extrackedWaybills.Contains(s.Waybill));
-                }
-
                 ////final list of home delivery waybills
-                var InvoicesBySCList = InvoicesBySC.ToList();
+                var InvoicesBySCList = InvoicesBySC.Select(x => x.Waybill).Distinct().ToList();
 
-                //check if the waybills to manifested contain in the HomeDelivery Waybills
-                if(waybills.Count > 0)
+                //1b. check if all the waybills are equal to our home delivery 
+                if (InvoicesBySCList.Count() != waybills.Count())
                 {
-                    //filter only the waybills in the invoiceList 
-                    var homeDeliveryWaybills = new List<string>();
-                    foreach (var item in InvoicesBySCList)
-                    {
-                        homeDeliveryWaybills.Add(item.Waybill);
-                    }
+                    var result = waybills.Where(x => !InvoicesBySCList.Contains(x));
 
-                    var result = waybills.Where(x => !homeDeliveryWaybills.Contains(x));
-
-                    if(result.Count() > 0)
+                    if (result.Count() > 0)
                     {
                         throw new GenericException($"Error: Delivery Manifest cannot be created. " +
-                            $"The follwoing waybills are not Home Delivery [{string.Join(", ", result.ToList())}]");
-                    }
-                    else
-                    {
-                        await MappingManifestToWaybills(manifest, waybills);
+                            $"The follwoing waybills [{string.Join(", ", result.ToList())}] are not available for Processing. " +
+                            "The login user is not at the final Destination or waybills not Home Delivery");
                     }
                 }
-                
+                else
+                {
+                    await MappingManifestToWaybillsMobile(manifest, waybills, serviceCenters);
+                }
             }
             catch (Exception)
             {
