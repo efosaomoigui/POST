@@ -303,6 +303,19 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //get basic shipment details
+        public async Task<ShipmentDTO> GetBasicShipmentDetail(string waybill)
+        {
+            try
+            {
+                return await _uow.Shipment.GetBasicShipmentDetail(waybill);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         private async Task GetDemurrageInformation(ShipmentDTO shipmentDto)
         {
             var price = 0;
@@ -1162,7 +1175,6 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
-        }
-
+        }       
     }
 }

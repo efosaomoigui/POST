@@ -811,5 +811,61 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return shipments;
         }
 
+        //Basic shipment details
+        public Task<ShipmentDTO> GetBasicShipmentDetail(string waybill)
+        {
+            var shipment = _context.Shipment.Where(x => x.Waybill == waybill);
+
+            ShipmentDTO shipmentDto = (from r in shipment
+                                       select new ShipmentDTO
+                                       {
+                                           ShipmentId = r.ShipmentId,
+                                           Waybill = r.Waybill,
+                                           CustomerId = r.CustomerId,
+                                           CustomerType = r.CustomerType,
+                                           DateCreated = r.DateCreated,
+                                           DateModified = r.DateModified,
+                                           DeliveryOptionId = r.DeliveryOptionId,
+                                           DeliveryOption = new DeliveryOptionDTO
+                                           {
+                                               Code = r.DeliveryOption.Code,
+                                               Description = r.DeliveryOption.Description
+                                           },
+                                           DepartureServiceCentreId = r.DepartureServiceCentreId,
+                                           DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                           {
+                                               Code = x.Code,
+                                               Name = x.Name
+                                           }).FirstOrDefault(),
+                                           DestinationServiceCentreId = r.DestinationServiceCentreId,
+                                           DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == r.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                           {
+                                               Code = x.Code,
+                                               Name = x.Name
+                                           }).FirstOrDefault(),
+                                           PaymentStatus = r.PaymentStatus,
+                                           ReceiverAddress = r.ReceiverAddress,
+                                           ReceiverCity = r.ReceiverCity,
+                                           ReceiverCountry = r.ReceiverCountry,
+                                           ReceiverEmail = r.ReceiverEmail,
+                                           ReceiverName = r.ReceiverName,
+                                           ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                           ReceiverState = r.ReceiverState,
+                                           SealNumber = r.SealNumber,
+                                           UserId = r.UserId,
+                                           Value = r.Value,
+                                           GrandTotal = r.GrandTotal,
+                                           AppliedDiscount = r.AppliedDiscount,
+                                           DiscountValue = r.DiscountValue,
+                                           ShipmentPackagePrice = r.ShipmentPackagePrice,
+                                           CompanyType = r.CompanyType,
+                                           CustomerCode = r.CustomerCode,
+                                           Description = r.Description,
+                                           PickupOptions = r.PickupOptions,
+                                           IsInternational = r.IsInternational,
+                                           Total = r.Total
+                                       }).FirstOrDefault();            
+            return Task.FromResult(shipmentDto);
+        }
     }
 }
