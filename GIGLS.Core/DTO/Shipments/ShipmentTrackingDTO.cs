@@ -14,11 +14,5 @@ namespace GIGLS.Core.DTO.Shipments
         public string User { get; set; }
         public string Waybill { get; set; }
         public ScanStatusDTO ScanStatus { get; set; }
-
-        public string Destination { get; set; }
-        public string Departure { get; set; }
-        public string DeliveryOptions { get; set; }
-        public string PickupOptions { get; set; }
-        public decimal Amount { get; set; }        
     }
 }

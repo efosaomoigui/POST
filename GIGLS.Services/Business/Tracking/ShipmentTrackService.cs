@@ -16,41 +16,24 @@ namespace GIGLS.Services.Business.Tracking
     {
         private readonly IShipmentTrackingService _shipmentTrackingService;
         private readonly IUnitOfWork _uow;
-        private readonly IShipmentService _shipmentService;
 
-        public ShipmentTrackService(IShipmentTrackingService shipmentTrackingService, IUnitOfWork uow, IShipmentService shipmentService)
+        public ShipmentTrackService(IShipmentTrackingService shipmentTrackingService, IUnitOfWork uow)
         {
             _shipmentTrackingService = shipmentTrackingService;
             _uow = uow;
-            _shipmentService = shipmentService;
         }
 
         public async Task<IEnumerable<ShipmentTrackingDTO>> TrackShipment(string waybillNumber)
         {
             var result = await _shipmentTrackingService.GetShipmentTrackings(waybillNumber);
 
-            if(result.Count() > 0)
+            //check for international
+            var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == waybillNumber);
+            if (shipment != null && shipment.IsInternational)
             {
-                //get shipment Details
-                var shipment = await _shipmentService.GetBasicShipmentDetail(waybillNumber);
-                //var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == waybillNumber);
-                
-                foreach(var track in result)
-                {
-                    track.Amount = shipment.GrandTotal;
-                    track.Destination = shipment.DestinationServiceCentre.Name;
-                    track.Departure = shipment.DepartureServiceCentre.Name;
-                    track.PickupOptions = shipment.PickupOptions.ToString();
-                    track.DeliveryOptions = shipment.DeliveryOption.Description;
-                }
-
-                //check for international
-                if (shipment != null && shipment.IsInternational)
-                {
-                    var internationResult = await TrackShipmentForInternational(waybillNumber);
-                    result.ToList().AddRange(internationResult);
-                }
-            }            
+                var internationResult = await TrackShipmentForInternational(waybillNumber);
+                result.ToList().AddRange(internationResult);
+            }
 
             return result;
         }
