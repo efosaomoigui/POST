@@ -51,14 +51,15 @@ namespace GIGLS.Services.Implementation.Wallet
                 cashOnDeliveryAccountDto.UserId = await _userService.GetCurrentUserId();
             }
 
+            //it cause error when initiate to process payment sheet for COD settlement  
             //Added for COD Settlement
-            await _codSettlementSheetService.AddCODSettlementSheet(new CODSettlementSheetDTO()
-            {
-                Waybill = cashOnDeliveryAccountDto.Waybill,
-                Amount = cashOnDeliveryAccountDto.Amount,
-                ReceivedCOD = false,
-                ReceiverAgentId = cashOnDeliveryAccountDto.UserId
-            });
+            //await _codSettlementSheetService.AddCODSettlementSheet(new CODSettlementSheetDTO()
+            //{
+            //    Waybill = cashOnDeliveryAccountDto.Waybill,
+            //    Amount = cashOnDeliveryAccountDto.Amount,
+            //    ReceivedCOD = false,
+            //    ReceiverAgentId = cashOnDeliveryAccountDto.UserId
+            //});
 
 
             //create COD Account and all COD Account for the wallet

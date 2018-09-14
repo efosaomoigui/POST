@@ -61,6 +61,20 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var serviceIds = await _userService.GetPriviledgeServiceCenters();
 
+                //1. check if any of the waybills has not been mapped to a manifest 
+                // and has not been process for return in case it was not delivered (i.e still active) that day
+                var isWaybillMappedActive = _uow.ManifestWaybillMapping.GetAllAsQueryable();
+                isWaybillMappedActive = isWaybillMappedActive.Where(x => x.IsActive == true && waybills.Contains(x.Waybill));
+
+                var isWaybillsMappedActiveResult = isWaybillMappedActive.Select(x => x.Waybill).Distinct().ToList();
+
+                if (isWaybillsMappedActiveResult.Count() > 0)
+                {
+                    throw new GenericException($"Error: Delivery Manifest cannot be created. " +
+                               $"The follwoing waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
+                }
+
+
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
 
                 //create the manifest if manifest does not exist
@@ -107,11 +121,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //check if the waybill has been mapped to a manifest 
                     //and it has not been process for return in case it was not delivered (i.e still active) that day
-                    var isWaybillMappedActive = await _uow.ManifestWaybillMapping.ExistAsync(x => x.Waybill == waybill && x.IsActive == true);
-                    if (isWaybillMappedActive)
-                    {
-                        throw new GenericException($"Waybill {waybill} has already been manifested");
-                    }
+                    //var isWaybillMappedActive = await _uow.ManifestWaybillMapping.ExistAsync(x => x.Waybill == waybill && x.IsActive == true);
+                    //if (isWaybillMappedActive)
+                    //{
+                    //    throw new GenericException($"Waybill {waybill} has already been manifested");
+                    //}
 
                     //check if Waybill has not been added to this manifest 
                     var isWaybillMapped = await _uow.ManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
