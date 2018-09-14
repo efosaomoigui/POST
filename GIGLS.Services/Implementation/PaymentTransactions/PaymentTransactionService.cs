@@ -98,18 +98,20 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             // get the current user info
             var currentUserId = await _userService.GetCurrentUserId();
 
-            //get Ledger and Invoice
+            //get Ledger, Invoice, shipment
             var generalLedgerEntity = await _uow.GeneralLedger.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
             var invoiceEntity = await _uow.Invoice.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
-
+            var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
+            
+            //all account customers payment should be settle by wallet automatically
             //settlement by wallet
-            if (paymentTransaction.PaymentType == PaymentType.Wallet)
+            if (shipment.CustomerType == CustomerType.Company.ToString() ||  paymentTransaction.PaymentType == PaymentType.Wallet)
             {
                 //I used transaction code to represent wallet number when processing for wallet
                 var wallet = await _walletService.GetWalletById(paymentTransaction.TransactionCode);
 
                 //Additions for Ecommerce customers (Max wallet negative payment limit)
-                var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
+                //var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
                 if (shipment != null && CompanyType.Ecommerce.ToString() == shipment.CompanyType)
                 {
                     //Gets the customer wallet limit for ecommerce
