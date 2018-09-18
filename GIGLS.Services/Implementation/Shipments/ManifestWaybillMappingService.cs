@@ -311,7 +311,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     manifestwaybill.ManifestDetails = manifestDTO;
 
                     //get shipment detail 
-                    manifestwaybill.Shipment = await _shipmentService.GetShipment(manifestwaybill.Waybill);
+                    manifestwaybill.Shipment = await _shipmentService.GetBasicShipmentDetail(manifestwaybill.Waybill);
 
                     //get from ShipmentCollection
                     var shipmentCollectionObj = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == manifestwaybill.Waybill);
