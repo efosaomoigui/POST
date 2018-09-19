@@ -134,6 +134,13 @@ namespace GIGLS.Services.Business.Pricing
             }
             decimal deliveryOptionPrice = deliveryOptionPriceTemp;
 
+            //check for volumetric weight
+            if (pricingDto.IsVolumetric)
+            {
+                decimal volume = (pricingDto.Length * pricingDto.Height * pricingDto.Width) / 5000;
+                pricingDto.Weight = pricingDto.Weight > volume ? pricingDto.Weight : volume;
+            }
+
             //This is our limit weight.
             var activeWeightLimit = await _weightLimit.GetActiveWeightLimits();
 

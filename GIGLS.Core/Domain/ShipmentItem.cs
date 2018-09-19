@@ -15,6 +15,12 @@ namespace GIGL.GIGLS.Core.Domain
         public int Quantity { get; set; }
         public int SerialNumber { get; set; }
 
+        //To handle volumetric weight
+        public bool IsVolumetric { get; set; }
+        public double Length { get; set; }
+        public double Width { get; set; }
+        public double Height { get; set; }
+
         //Foreign key information
         public int ShipmentId { get; set; }
         public virtual Shipment Shipment { get; set; }
