@@ -356,6 +356,7 @@
     <Compile Include="Filters\GIGLSActivityAuthorizeAttribute.cs" />
     <Compile Include="Filters\GIGLSRoleAuthorizeAttribute.cs" />
     <Compile Include="Filters\RequireHttpsAttribute.cs" />
+    <Compile Include="Filters\ThirdPartyActivityAuthorizeAttribute.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
