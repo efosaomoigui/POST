@@ -14,5 +14,11 @@ namespace GIGLS.Core.DTO.PaymentTransactions
         public ShipmentType ShipmentType { get; set; }
         public int SpecialPackageId { get; set; }
         public bool IsInternationalDocument { get; set; }
+        
+        //To handle volumetric weight
+        public bool IsVolumetric { get; set; }
+        public decimal Length { get; set; } = 0;
+        public decimal Width { get; set; } = 0;
+        public decimal Height { get; set; } = 0;
     }
 }

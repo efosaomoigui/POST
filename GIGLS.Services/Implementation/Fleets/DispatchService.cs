@@ -254,7 +254,12 @@ namespace GIGLS.Services.Implementation.Fleets
 
                 //get User detail
                 var user = await _uow.User.GetUserById(dispatch.DriverDetail);
-                dispatchDTO.UserDetail = Mapper.Map<UserDTO>(user);
+
+                if(user != null)
+                {
+                    dispatchDTO.UserDetail = Mapper.Map<UserDTO>(user);
+                    dispatchDTO.DriverDetail = user.FirstName + " " + user.LastName;
+                }
 
                 //get the ManifestType
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));

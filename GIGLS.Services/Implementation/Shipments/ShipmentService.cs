@@ -97,7 +97,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<GIGLS.Core.DTO.Account.InvoiceViewDTO>> GetIncomingShipments(FilterOptionsDto filterOptionsDto)
+        public async Task<List<InvoiceViewDTO>> GetIncomingShipments(FilterOptionsDto filterOptionsDto)
         {
             try
             {
@@ -116,11 +116,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                var incomingShipments = new List<GIGLS.Core.DTO.Account.InvoiceViewDTO>();
+                var incomingShipments = new List<InvoiceViewDTO>();
                 if (serviceCenters.Length > 0)
                 {
                     var shipmentResult = allShipments.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).ToList();
-                    incomingShipments = Mapper.Map<List<GIGLS.Core.DTO.Account.InvoiceViewDTO>>(shipmentResult);
+                    incomingShipments = Mapper.Map<List<InvoiceViewDTO>>(shipmentResult);
                 }
 
                 //delivered shipments should not be displayed in expected shipments
