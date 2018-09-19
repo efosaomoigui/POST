@@ -344,8 +344,11 @@ namespace GIGLS.Services.Business.Scanning
                             {
                                 if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
                                 {
-                                    serviceCenters = new int[] { 4, 294 };
-                                    return true;
+                                    if(serviceCenters[0] == destinationServiceCentreId)
+                                    {
+                                        serviceCenters = new int[] { 4, 294 };
+                                        return true;
+                                    }
                                 }
                             }
                         }
