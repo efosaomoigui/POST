@@ -353,6 +353,7 @@
     <Compile Include="Controllers\Zone\WeightLimitController.cs" />
     <Compile Include="Controllers\Zone\WeightLimitPriceController.cs" />
     <Compile Include="Controllers\Zone\ZoneController.cs" />
+    <Compile Include="Filters\ThirdPartyActivityAuthorizeAttribute.cs" />
     <Compile Include="Filters\GIGLSActivityAuthorizeAttribute.cs" />
     <Compile Include="Filters\GIGLSRoleAuthorizeAttribute.cs" />
     <Compile Include="Filters\RequireHttpsAttribute.cs" />
