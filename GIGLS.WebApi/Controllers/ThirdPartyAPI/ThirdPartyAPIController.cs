@@ -13,6 +13,7 @@ using GIGLS.Core.IServices.ThirdPartyAPI;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
+using GIGLS.WebApi.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,8 +25,8 @@ using System.Web.Http;
 namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
 {
 
-    [Authorize]
-    [RoutePrefix("api/thirdpartyapi")]
+    [Authorize(Roles = "ThirdParty")]
+    [RoutePrefix("api/thirdparty")]
     public class ThirdPartyAPIController : BaseWebApiController
     {
         private readonly IThirdPartyAPIService _thirdPartyAPIService;
@@ -36,6 +37,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         }
 
         //Price API
+        [ThirdPartyActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("price")]
         public async Task<IServiceResponse<decimal>> GetPrice(PricingDTO pricingDto)
@@ -51,6 +53,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        [ThirdPartyActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("haulageprice")]
         public async Task<IServiceResponse<decimal>> GetHaulagePrice(HaulagePricingDTO haulagePricingDto)
@@ -68,7 +71,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
 
 
         //Capture Shipment API
-        //[GIGLSActivityAuthorize(Activity = "Create")]
+        [ThirdPartyActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("captureshipment")]
         public async Task<IServiceResponse<ShipmentDTO>> AddShipment(ShipmentDTO ShipmentDTO)
@@ -87,6 +90,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
 
 
         //Track API
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{waybillNumber}")]
         public async Task<IServiceResponse<IEnumerable<ShipmentTrackingDTO>>> TrackShipment(string waybillNumber)
@@ -119,6 +123,8 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         }
 
         //Invoice API
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        //[AllowAnonymous]
         [HttpGet]
         [Route("invoice")]
         public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetInvoices()
@@ -134,6 +140,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("bywaybill/{waybill}")]
         public async Task<IServiceResponse<InvoiceDTO>> GetInvoiceByWaybill([FromUri]  string waybill)
@@ -151,6 +158,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
 
 
         //Transaction History API
+        [ThirdPartyActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("transaction")]
         public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
@@ -168,6 +176,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
 
 
         //General API
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("dashboard")]
         public async Task<IServiceResponse<DashboardDTO>> GetDashboard()
@@ -184,6 +193,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         }
 
         //For Quick Quotes
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("wallet")]
         public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactions()
@@ -201,7 +211,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
 
 
 
-
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("cod")]
         public async Task<IServiceResponse<CashOnDeliveryAccountSummaryDTO>> GetCashOnDeliveryAccount()
@@ -217,6 +227,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("partialPaymentTransaction/{waybill}")]
         public async Task<IServiceResponse<IEnumerable<PaymentPartialTransactionDTO>>> GetPartialPaymentTransaction(string waybill)
@@ -232,6 +243,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("state")]
         public async Task<IServiceResponse<IEnumerable<StateDTO>>> GetStates(int pageSize = 10, int page = 1)
@@ -249,6 +261,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("localservicecentre")]
         public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetLocalServiceCentres()
@@ -263,6 +276,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("deliveryoption")]
         public async Task<IServiceResponse<IEnumerable<DeliveryOptionDTO>>> GetDeliveryOptions()
@@ -278,6 +292,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("specialdomesticpackage")]
         public async Task<IServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>> GetSpecialDomesticPackages()
@@ -293,6 +308,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("haulage")]
         public async Task<IServiceResponse<IEnumerable<HaulageDTO>>> GetHaulages()
@@ -308,6 +324,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("vat")]
         public async Task<IServiceResponse<VATDTO>> GetVATs()
@@ -322,6 +339,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("insurance")]
         public async Task<IServiceResponse<InsuranceDTO>> GetInsurances()
@@ -336,6 +354,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{departure:int}/{destination:int}")]
         public async Task<IServiceResponse<DomesticRouteZoneMapDTO>> GetZone(int departure, int destination)
@@ -351,7 +370,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
- 
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("user/{userId}")]
         public async Task<IServiceResponse<CustomerDTO>> GetUser(string userId)
@@ -366,6 +385,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        [ThirdPartyActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("changepassword/{userid}/{currentPassword}/{newPassword}")]
         public async Task<IServiceResponse<bool>> ChangePassword(string userid, string currentPassword, string newPassword)
