@@ -123,8 +123,7 @@ namespace GIGLS.Services.Implementation.Customers
                     CustomerCode = newCompany.CustomerCode,
                     CompanyType = companyType
                 });
-
-
+                
                 return Mapper.Map<CompanyDTO>(newCompany);
             }
             catch (Exception)
@@ -170,6 +169,11 @@ namespace GIGLS.Services.Implementation.Customers
                 }
 
                 CompanyDTO companyDto = Mapper.Map<CompanyDTO>(company);
+                var serviceCentre = await _uow.ServiceCentre.GetAsync(company.ReturnServiceCentre);
+                if(serviceCentre != null)
+                {
+                    companyDto.ReturnServiceCentreName = serviceCentre.Name;
+                }
 
                 var contactPersons = _uow.CompanyContactPerson.Find(x => x.CompanyId == companyDto.CompanyId).ToList();
 
@@ -218,6 +222,9 @@ namespace GIGLS.Services.Implementation.Customers
                 company.State = companyDto.State;
                 company.SettlementPeriod = companyDto.SettlementPeriod;
                 company.CustomerCategory = companyDto.CustomerCategory;
+                company.ReturnOption = companyDto.ReturnOption;
+                company.ReturnServiceCentre = companyDto.ReturnServiceCentre;
+                company.ReturnAddress = companyDto.ReturnAddress;
 
                 if (companyDto.ContactPersons.Any())
                 {
@@ -231,15 +238,7 @@ namespace GIGLS.Services.Implementation.Customers
                         person.PhoneNumber = personDto.PhoneNumber;
                         person.CompanyId = personDto.CompanyId;
                     }
-                }
-
-                // update customer wallet
-                //var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == company.CustomerCode);
-                //if (wallet != null)
-                //{
-                //    wallet.CompanyType = companyDto.CompanyType.ToString();
-                //}
-
+                }                
                 _uow.Complete();
             }
             catch (Exception)

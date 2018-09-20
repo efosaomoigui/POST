@@ -32,5 +32,9 @@ namespace GIGL.GIGLS.Core.Domain
         public int SettlementPeriod { get; set; }
         public virtual ICollection<CompanyContactPerson> CompanyContactPersons { get; set; }
         public CustomerCategory CustomerCategory { get; set; }
+        
+        public string ReturnOption { get; set; }
+        public int ReturnServiceCentre { get; set; }
+        public string ReturnAddress { get; set; }
     }
 }

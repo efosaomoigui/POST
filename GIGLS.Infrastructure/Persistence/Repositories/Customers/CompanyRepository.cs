@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using GIGLS.Infrastructure.Persistence.Repository;
 using GIGLS.Core.IRepositories.Customers;
