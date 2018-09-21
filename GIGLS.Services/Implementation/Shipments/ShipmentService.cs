@@ -117,17 +117,22 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 var incomingShipments = new List<InvoiceViewDTO>();
+
                 if (serviceCenters.Length > 0)
                 {
+                    //Get shipments coming to the service centre 
                     var shipmentResult = allShipments.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).ToList();
+                    List<string> destinationShipment = shipmentResult.Select(x => x.Waybill).ToList();
+
+                    //Get all waybills of incoming shipments to the service centre that are at the collection centre
+                    var shipmentCollectQuery = _uow.ShipmentCollection.GetAllAsQueryable();
+                    List<string> shipmetCollection = shipmentCollectQuery.Where(s => destinationShipment.Contains(s.Waybill)).Select(w => w.Waybill).Distinct().ToList();
+
+                    //remove all the waybills that at the collection center from the income shipments
+                    shipmentResult = shipmentResult.Where(s => !shipmetCollection.Contains(s.Waybill)).ToList();
                     incomingShipments = Mapper.Map<List<InvoiceViewDTO>>(shipmentResult);
                 }
-
-                //delivered shipments should not be displayed in expected shipments
-                var shipmetCollection = _uow.ShipmentCollection.GetAll().ToList();
-                incomingShipments = incomingShipments.Where(s =>
-                !shipmetCollection.Select(a => a.Waybill).Contains(s.Waybill)).ToList();
-
+                                
                 //populate the service centres
                 foreach (var invoiceViewDTO in incomingShipments)
                 {
