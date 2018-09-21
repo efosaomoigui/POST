@@ -213,9 +213,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
                 }
-
-                var shipments = _uow.Shipment.FindAsync(s => serviceCenters.Contains(s.DestinationServiceCentreId)).Result;
-                var shipmentsWaybills = shipments.ToList().Select(a => a.Waybill).AsEnumerable();
+                
+                var shipments = _uow.Shipment.GetAllAsQueryable();
+                List<string> shipmentsWaybills = shipments.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
                 var shipmentCollection = _uow.ShipmentCollection.FindAsync(x =>
                 x.ShipmentScanStatus == ShipmentScanStatus.ARF &&
