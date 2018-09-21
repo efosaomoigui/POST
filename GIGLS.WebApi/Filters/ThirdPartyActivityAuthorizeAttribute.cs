@@ -8,6 +8,7 @@ using System.Web.Http.Controllers;
 
 namespace GIGLS.WebApi.Filters
 {
+
     public class ThirdPartyActivityAuthorizeAttribute : AuthorizeAttribute
     {
 
