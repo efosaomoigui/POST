@@ -115,6 +115,8 @@ namespace GIGLS.Core
         IDeviceManagementRepository DeviceManagement { get; set; }
         IShipmentDeliveryOptionMappingRepository ShipmentDeliveryOptionMapping {get; set;}
         ICODSettlementSheetRepository CODSettlementSheet { get; set; }
+        IPreShipmentItemRepository PreShipmentItem { get; set; }
+        IPreShipmentRepository PreShipment { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

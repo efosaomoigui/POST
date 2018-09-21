@@ -197,6 +197,10 @@ namespace GIGLS.Infrastructure.Persistence
         //BankSettlement
         public DbSet<CODSettlementSheet> CODSettlementSheet { get; set; }
 
+        //PreShipment
+        public DbSet<PreShipment> PreShipment { get; set; }
+        public DbSet<PreShipmentItem> PreShipmentItem { get; set; }
+
         #endregion
 
 

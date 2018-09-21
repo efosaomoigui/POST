@@ -160,7 +160,9 @@
     <Compile Include="Domain\MessagingLog\EmailSendLog.cs" />
     <Compile Include="Domain\MessagingLog\SmsSendLog.cs" />
     <Compile Include="Domain\MissingShipment.cs" />
+    <Compile Include="Domain\PreShipment.cs" />
     <Compile Include="Domain\ShipmentDeliveryOptionMapping.cs" />
+    <Compile Include="Domain\PreShipmentItem.cs" />
     <Compile Include="Domain\ShipmentPackagePrice.cs" />
     <Compile Include="Domain\PackingList .cs" />
     <Compile Include="Domain\IndividualCustomer.cs" />
@@ -293,7 +295,9 @@
     <Compile Include="DTO\Shipments\ShipmentDeliveryOptionMappingDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentCancelDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentCollectionDTO.cs" />
+    <Compile Include="DTO\Shipments\PreShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentDTO.cs" />
+    <Compile Include="DTO\Shipments\PreShipmentItemDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentItemDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentPackagePriceDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentRerouteDTO.cs" />
@@ -437,9 +441,11 @@
     <Compile Include="IRepositories\Shipments\IShipmentDeliveryOptionMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentCancelRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentCollectionRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IPreShipmentItemRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentItemRepository.cs" />
     <Compile Include="IRepositories\Shipments\IMissingShipmentRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentPackagePriceRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IPreShipmentRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentRerouteRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentReturnRepository.cs" />
@@ -542,6 +548,7 @@
     <Compile Include="IServices\Shipments\IShipmentPackageService.cs" />
     <Compile Include="IServices\Shipments\IShipmentReturnService.cs" />
     <Compile Include="IServices\Shipments\IShipmentRerouteService.cs" />
+    <Compile Include="IServices\Shipments\IPreShipmentService.cs" />
     <Compile Include="IServices\Shipments\IShipmentService.cs" />
     <Compile Include="IServices\Shipments\IShipmentTrackingService.cs" />
     <Compile Include="IServices\Shipments\ITransitWaybillNumberService.cs" />
