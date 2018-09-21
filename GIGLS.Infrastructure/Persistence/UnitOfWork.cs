@@ -302,6 +302,11 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public ICODSettlementSheetRepository CODSettlementSheet { get; set; }
 
+        [Inject]
+        public IPreShipmentItemRepository PreShipmentItem { get; set; }
+
+        [Inject]
+        public IPreShipmentRepository PreShipment { get; set; }
 
         public int Complete()
         {
