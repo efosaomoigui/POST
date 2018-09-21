@@ -70,12 +70,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("incomingshipments")]
-        public async Task<IServiceResponse<IEnumerable<GIGLS.Core.DTO.Account.InvoiceViewDTO>>> GetIncomingShipments([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetIncomingShipments([FromUri]FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var shipments = await _service.GetIncomingShipments(filterOptionsDto);
-                return new ServiceResponse<IEnumerable<GIGLS.Core.DTO.Account.InvoiceViewDTO>>
+                return new ServiceResponse<IEnumerable<InvoiceViewDTO>>
                 {
                     Object = shipments,
                     Total = shipments.Count

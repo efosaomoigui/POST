@@ -102,8 +102,6 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-                //var allShipments = _uow.Shipment.GetShipments(filterOptionsDto, new int[] { });
-                var allShipments = _uow.Invoice.GetAllFromInvoiceView();
 
                 //added for GWA and GWARIMPA service centres
                 {
@@ -114,23 +112,23 @@ namespace GIGLS.Services.Implementation.Shipments
                             serviceCenters = new int[] {4, 294};
                         }
                     }
-                }
+                }                
 
+                //var allShipments = _uow.Shipment.GetShipments(filterOptionsDto, new int[] { });
+                var allShipments = _uow.Invoice.GetAllFromInvoiceView();
                 var incomingShipments = new List<InvoiceViewDTO>();
 
                 if (serviceCenters.Length > 0)
                 {
                     //Get shipments coming to the service centre 
                     var shipmentResult = allShipments.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).ToList();
-                    List<string> destinationShipment = shipmentResult.Select(x => x.Waybill).ToList();
-
-                    //Get all waybills of incoming shipments to the service centre that are at the collection centre
-                    var shipmentCollectQuery = _uow.ShipmentCollection.GetAllAsQueryable();
-                    List<string> shipmetCollection = shipmentCollectQuery.Where(s => destinationShipment.Contains(s.Waybill)).Select(w => w.Waybill).Distinct().ToList();
+                    
+                    //delivered shipments should not be displayed in expected shipments
+                    List<string> shipmetCollection = _uow.ShipmentCollection.GetAllAsQueryable().Select(w => w.Waybill).ToList();
 
                     //remove all the waybills that at the collection center from the income shipments
                     shipmentResult = shipmentResult.Where(s => !shipmetCollection.Contains(s.Waybill)).ToList();
-                    incomingShipments = Mapper.Map<List<InvoiceViewDTO>>(shipmentResult);
+                    incomingShipments = Mapper.Map<List<InvoiceViewDTO>>(shipmentResult);                    
                 }
                                 
                 //populate the service centres
