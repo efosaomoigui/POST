@@ -297,6 +297,7 @@ namespace GIGLS.Services.Business.Scanning
                     {
                         throw new GenericException($"No Shipment attached to this Manifest: {scan.WaybillNumber} ");
                     }
+                    return true;
                 }
                
             }
