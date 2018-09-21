@@ -259,6 +259,12 @@ namespace GIGLS.Services.Business.Pricing
             }
             decimal deliveryOptionPrice = deliveryOptionPriceTemp;
 
+            //check for volumetric weight
+            if (pricingDto.IsVolumetric)
+            {
+                decimal volume = (pricingDto.Length * pricingDto.Height * pricingDto.Width) / 5000;
+                pricingDto.Weight = pricingDto.Weight > volume ? pricingDto.Weight : volume;
+            }
 
             //Get Ecommerce limit weight from GlobalProperty
             var ecommerceWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceWeightLimit);
@@ -338,6 +344,13 @@ namespace GIGLS.Services.Business.Pricing
             var ecommerceWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceReturnWeightLimit);
             decimal weightLimit = decimal.Parse(ecommerceWeightLimitObj.Value);
 
+            //check for volumetric weight
+            if (pricingDto.IsVolumetric)
+            {
+                decimal volume = (pricingDto.Length * pricingDto.Height * pricingDto.Width) / 5000;
+                pricingDto.Weight = pricingDto.Weight > volume ? pricingDto.Weight : volume;
+            }
+
             decimal PackagePrice;
 
             if (pricingDto.Weight > weightLimit)
@@ -409,8 +422,7 @@ namespace GIGLS.Services.Business.Pricing
             // return PackagePrice + deliveryOptionPrice;
             return (PackagePrice + percentagePrice + warSurchargePrice);
         }
-
-
+        
         // War Surcharge calculation
         private async Task<decimal> WarSurcharge(int countryId)
         {
@@ -522,7 +534,11 @@ namespace GIGLS.Services.Business.Pricing
                     DeliveryOptionIds = deliveryOptionIds,
                     ShipmentType = item.ShipmentType,
                     SpecialPackageId = specialPackageId,
-                    Weight = decimal.Parse(item.Weight.ToString())                    
+                    Weight = decimal.Parse(item.Weight.ToString()),
+                    Width = decimal.Parse(item.Width.ToString()),
+                    Length = decimal.Parse(item.Length.ToString()),
+                    Height = decimal.Parse(item.Height.ToString()),
+                    IsVolumetric = item.IsVolumetric
                 });
 
                 //unit price based on quantity
@@ -544,8 +560,7 @@ namespace GIGLS.Services.Business.Pricing
             shipment.DepartureServiceCentre = await _centreService.GetServiceCentreByIdForInternational(departureServiceCentreId);
             shipment.DestinationServiceCentreId = destinationServiceCentreId;
             shipment.DestinationServiceCentre = await _centreService.GetServiceCentreByIdForInternational(destinationServiceCentreId);
-
-
+            
             return shipment;
         }
     }

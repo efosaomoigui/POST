@@ -13,6 +13,7 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -62,11 +63,25 @@ namespace GIGLS.Services.Implementation.Shipments
                 await _collectionService.CheckShipmentCollection(waybill);
 
                 //Get Existing Shipment information and swap departure and destination
-                var shipment = await _shipmentService.GetShipment(waybill);
+                var shipment = await _shipmentService.GetShipment(waybill);      
                 int originalDestinationId = shipment.DestinationServiceCentreId;
                 int departure = shipment.DepartureServiceCentreId;
                 shipment.DepartureServiceCentreId = shipment.DestinationServiceCentreId;
                 shipment.DestinationServiceCentreId = departure;
+
+                //change ecommerce customer destination address to their return address
+                if (shipment.CustomerDetails.CompanyType == CompanyType.Ecommerce)
+                {
+                    if (shipment.CustomerDetails.ReturnOption != null)
+                    {
+                        shipment.PickupOptions = (PickupOptions)Enum.Parse(typeof(PickupOptions), shipment.CustomerDetails.ReturnOption);
+                    }
+
+                    if (shipment.CustomerDetails.ReturnServiceCentre > 0)
+                    {
+                        shipment.DestinationServiceCentreId = shipment.CustomerDetails.ReturnServiceCentre;
+                    }
+                }
 
                 //Check if the user is a staff at final destination
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
@@ -87,7 +102,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //update shipment collection status to Returnstatus
                 var shipmentCollection = await _collectionService.GetShipmentCollectionById(waybill);
-                shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.SSR;
+                shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.SSR;
                 await _collectionService.UpdateShipmentCollection(shipmentCollection);
 
                 //Create new shipment
@@ -116,7 +131,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             shipment.ReceiverName = shipment.CustomerDetails.Name;
             shipment.ReceiverPhoneNumber = shipment.CustomerDetails.PhoneNumber;
-            shipment.ReceiverAddress = shipment.CustomerDetails.Address;
+            shipment.ReceiverAddress = shipment.CustomerDetails.ReturnAddress == null ? shipment.CustomerDetails.Address : shipment.CustomerDetails.ReturnAddress;
             shipment.ReceiverEmail = shipment.CustomerDetails.Email;
             shipment.ReceiverCity = shipment.CustomerDetails.City;
             shipment.ReceiverState = shipment.CustomerDetails.State;
@@ -127,21 +142,21 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<int> UpdatePriceForReturnedShipment(ShipmentDTO shipment)
         {
             // IndividualCustomer
-            if (shipment.CustomerDetails.CustomerType == Core.Enums.CustomerType.IndividualCustomer)
+            if (shipment.CustomerDetails.CustomerType == CustomerType.IndividualCustomer)
             {
 
             }
 
             // Corporate
-            if (shipment.CustomerDetails.CustomerType == Core.Enums.CustomerType.Company &&
-                shipment.CustomerDetails.CompanyType == Core.Enums.CompanyType.Corporate)
+            if (shipment.CustomerDetails.CustomerType == CustomerType.Company &&
+                shipment.CustomerDetails.CompanyType == CompanyType.Corporate)
             {
 
             }
 
             // Ecommerce
-            if (shipment.CustomerDetails.CustomerType == Core.Enums.CustomerType.Company &&
-                shipment.CustomerDetails.CompanyType == Core.Enums.CompanyType.Ecommerce)
+            if (shipment.CustomerDetails.CustomerType == CustomerType.Company &&
+                shipment.CustomerDetails.CompanyType == CompanyType.Ecommerce)
             {
                 //get shipment items
                 decimal totalPrice = 0;
@@ -153,7 +168,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         DestinationServiceCentreId = shipment.DestinationServiceCentreId,
                         ShipmentType = item.ShipmentType,
                         Weight = decimal.Parse(item.Weight.ToString()),
-                        DeliveryOptionId = shipment.DeliveryOptionId
+                        DeliveryOptionId = shipment.DeliveryOptionId,
+                        IsVolumetric = item.IsVolumetric,
+                        Width = decimal.Parse(item.Width.ToString()),
+                        Length = decimal.Parse(item.Length.ToString()),
+                        Height = decimal.Parse(item.Height.ToString())
                     });
 
                     item.Price = itemPrice;
@@ -173,7 +192,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.CashOnDeliveryAmount = 0;
                 shipment.IsCashOnDelivery = false;
             }
-
 
             return await Task.FromResult(0);
         }
