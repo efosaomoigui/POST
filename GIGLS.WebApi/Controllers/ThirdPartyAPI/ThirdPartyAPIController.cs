@@ -14,11 +14,8 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -74,12 +71,12 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         [ThirdPartyActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("captureshipment")]
-        public async Task<IServiceResponse<ShipmentDTO>> AddShipment(ShipmentDTO ShipmentDTO)
+        public async Task<IServiceResponse<PreShipmentDTO>> AddPreShipment(PreShipmentDTO preShipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipment = await _thirdPartyAPIService.AddShipment(ShipmentDTO);
-                return new ServiceResponse<ShipmentDTO>
+                var shipment = await _thirdPartyAPIService.AddPreShipment(preShipmentDTO);
+                return new ServiceResponse<PreShipmentDTO>
                 {
                     Object = shipment
                 };

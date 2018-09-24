@@ -252,6 +252,11 @@ namespace GIGLS.Core
                 config.CreateMap<CODSettlementSheet, CODSettlementSheetDTO>();
                 config.CreateMap<CODSettlementSheetDTO, CODSettlementSheet>();
 
+                config.CreateMap<PreShipmentItem, PreShipmentItemDTO>();
+                config.CreateMap<PreShipmentItemDTO, PreShipmentItem>();
+
+                config.CreateMap<PreShipment, PreShipmentDTO>();
+                config.CreateMap<PreShipmentDTO, PreShipment>();
             });
 
             isInit = true;

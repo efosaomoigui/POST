@@ -12,7 +12,7 @@ namespace GIGLS.Core.IRepositories.Shipments
 {
     public interface IPreShipmentRepository : IRepository<PreShipment>
     {
-        Tuple<Task<List<PreShipmentDTO>>, int> GetPreShipments(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds);
+        Tuple<Task<List<PreShipmentDTO>>, int> GetPreShipments(FilterOptionsDto filterOptionsDto);
         IQueryable<PreShipment> PreShipmentsAsQueryable();
     }
 }

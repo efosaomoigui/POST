@@ -40,7 +40,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]
-        public async Task<IServiceResponse<PreShipmentDTO>> AddShipment(PreShipmentDTO preShipmentDTO)
+        public async Task<IServiceResponse<PreShipmentDTO>> AddPreShipment(PreShipmentDTO preShipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -146,6 +146,67 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
 
+        //Management API
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("NewPreShipment")]
+        public async Task<IServiceResponse<IEnumerable<PreShipmentDTO>>> GetNewPreShipments(FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preShipments = await _service.GetNewPreShipments(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<PreShipmentDTO>>
+                {
+                    Object = preShipments
+                };
+            });
+        }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("ValidPreShipment")]
+        public async Task<IServiceResponse<IEnumerable<PreShipmentDTO>>> GetValidPreShipments(FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preShipments = await _service.GetValidPreShipments(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<PreShipmentDTO>>
+                {
+                    Object = preShipments
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("ValidatePreShipment/{waybill}")]
+        public async Task<IServiceResponse<bool>> ValidatePreShipment(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.ValidatePreShipment(waybill);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("CreateShipmentFromPreShipment/{waybill}")]
+        public async Task<IServiceResponse<bool>> CreateShipmentFromPreShipment(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.CreateShipmentFromPreShipment(waybill);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
     }
 }

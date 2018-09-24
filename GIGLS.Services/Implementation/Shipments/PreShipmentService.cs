@@ -31,6 +31,7 @@ namespace GIGLS.Services.Implementation.Shipments
     public class PreShipmentService : IPreShipmentService
     {
         private readonly IUnitOfWork _uow;
+        private readonly IShipmentService _shipmentService;
         private readonly IDeliveryOptionService _deliveryService;
         private readonly IServiceCentreService _centreService;
         private readonly IUserServiceCentreMappingService _userServiceCentre;
@@ -45,7 +46,8 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
 
-        public PreShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
+        public PreShipmentService(IUnitOfWork uow, IShipmentService shipmentService, 
+            IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
             INumberGeneratorMonitorService numberGeneratorMonitorService,
             ICustomerService customerService, IUserService userService,
@@ -56,6 +58,7 @@ namespace GIGLS.Services.Implementation.Shipments
             )
         {
             _uow = uow;
+            _shipmentService = shipmentService;
             _deliveryService = deliveryService;
             _centreService = centreService;
             _userServiceCentre = userServiceCentre;
@@ -78,7 +81,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
-                return _uow.PreShipment.GetPreShipments(filterOptionsDto, serviceCenters);
+                return _uow.PreShipment.GetPreShipments(filterOptionsDto);
             }
             catch (Exception)
             {
@@ -180,10 +183,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 preShipment.ReceiverCountry = preShipmentDto.ReceiverCountry;
                 preShipment.ReceiverCity = preShipmentDto.ReceiverCity;
                 preShipment.PaymentStatus = preShipmentDto.PaymentStatus;
-                //shipment.IsDomestic = shipmentDto.IsDomestic;
-                //shipment.IndentificationUrl = shipmentDto.IndentificationUrl;
-                //shipment.IdentificationType = shipmentDto.IdentificationType;
-                //shipment.GroupWaybill = shipmentDto.GroupWaybill;
                 preShipment.ExpectedDateOfArrival = preShipmentDto.ExpectedDateOfArrival;
                 preShipment.DestinationServiceCentreId = preShipmentDto.DestinationServiceCentreId;
                 preShipment.DepartureServiceCentreId = preShipmentDto.DepartureServiceCentreId;
@@ -191,9 +190,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 preShipment.DeliveryOptionId = preShipmentDto.DeliveryOptionId;
                 preShipment.CustomerType = preShipmentDto.CustomerType;
                 preShipment.CustomerId = preShipmentDto.CustomerId;
-                //shipment.Comments = shipmentDto.Comments;
-                //shipment.ActualreceiverPhone = shipmentDto.ActualreceiverPhone;
-                //shipment.ActualReceiverName = shipmentDto.ActualReceiverName;
                 preShipment.ActualDateOfArrival = preShipmentDto.ActualDateOfArrival;
 
                 await _uow.CompleteAsync();
@@ -374,6 +370,94 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
-        }       
+        }
+
+
+        //Management API
+        public async Task<List<PreShipmentDTO>> GetNewPreShipments(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                 var query = _uow.PreShipment.PreShipmentsAsQueryable();
+                query = query.Where(s => s.Status == PreShipmentStatus.New);
+
+                var preShipments = query.ToList();
+                var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
+
+                return await Task.FromResult(preShipmentDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<PreShipmentDTO>> GetValidPreShipments(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                var query = _uow.PreShipment.PreShipmentsAsQueryable();
+                query = query.Where(s => s.Status == PreShipmentStatus.Valid);
+
+                var preShipments = query.ToList();
+                var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
+
+                return await Task.FromResult(preShipmentDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> ValidatePreShipment(string waybill)
+        {
+            try
+            {
+                var preShipment = await _uow.PreShipment.GetAsync(x => x.Waybill.Equals(waybill));
+                if (preShipment == null)
+                {
+                    throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
+                }
+
+                preShipment.Status = PreShipmentStatus.Valid;
+
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> CreateShipmentFromPreShipment(string waybill)
+        {
+            try
+            {
+                var preShipment = await _uow.PreShipment.GetAsync(x => x.Waybill.Equals(waybill));
+                if (preShipment == null)
+                {
+                    throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
+                }
+
+                //shipment items
+                var shipmentItems = Mapper.Map<List<ShipmentItemDTO>>(preShipment.PreShipmentItems);
+                var shipmentDTO = Mapper.Map<ShipmentDTO>(preShipment);
+                shipmentDTO.ShipmentItems = shipmentItems;
+
+                //create shipment
+                await _shipmentService.AddShipment(shipmentDTO);
+
+                preShipment.Status = PreShipmentStatus.Completed;
+
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
