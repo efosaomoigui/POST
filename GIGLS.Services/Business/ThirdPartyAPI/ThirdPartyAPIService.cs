@@ -33,7 +33,7 @@ namespace GIGLS.Services.Business.CustomerPortal
     public class ThirdPartyAPIService : IThirdPartyAPIService
     {
         private readonly IUnitOfWork _uow;
-        private readonly IShipmentService _shipmentService;
+        private readonly IPreShipmentService _preShipmentService;
         private readonly IInvoiceService _invoiceService;
         private readonly IShipmentTrackService _iShipmentTrackService;
         private readonly IUserService _userService;
@@ -42,12 +42,12 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IPricingService _pricing;
         private readonly ICustomerService _customerService;
 
-        public ThirdPartyAPIService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
+        public ThirdPartyAPIService(IUnitOfWork uow, IPreShipmentService preShipmentService, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService, 
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService,
             ICustomerService customerService)
         {
-            _shipmentService = shipmentService;
+            _preShipmentService = preShipmentService;
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
             _userService = userService;
@@ -70,13 +70,13 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _pricing.GetHaulagePrice(haulagePricingDto);
         }
 
-        //Capture Shipment API
-        public async Task<ShipmentDTO> AddShipment(ShipmentDTO shipmentDTO)
+        //Capture PreShipment API
+        public async Task<PreShipmentDTO> AddPreShipment(PreShipmentDTO preShipmentDTO)
         {
             try
             {
-                var newShipment = await _shipmentService.AddShipment(shipmentDTO);
-                return newShipment;
+                var newPreShipment = await _preShipmentService.AddPreShipment(preShipmentDTO);
+                return newPreShipment;
             }
             catch (Exception)
             {

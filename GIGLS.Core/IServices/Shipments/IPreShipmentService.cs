@@ -17,5 +17,11 @@ namespace GIGLS.Core.IServices.Shipments
         Task DeletePreShipment(int shipmentId);
         Task DeletePreShipment(string waybill);
         Task<bool> CancelPreShipment(string waybill);
+
+        //Management API
+        Task<List<PreShipmentDTO>> GetNewPreShipments(FilterOptionsDto filterOptionsDto);
+        Task<List<PreShipmentDTO>> GetValidPreShipments(FilterOptionsDto filterOptionsDto);
+        Task<bool> ValidatePreShipment(string waybill);
+        Task<bool> CreateShipmentFromPreShipment(string waybill);
     }
 }

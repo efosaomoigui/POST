@@ -93,5 +93,7 @@ namespace GIGL.GIGLS.Core.Domain
         public bool IsInternational { get; set; }
 
         public string Description { get; set; }
+
+        public PreShipmentStatus Status { get; set; }
     }
 }

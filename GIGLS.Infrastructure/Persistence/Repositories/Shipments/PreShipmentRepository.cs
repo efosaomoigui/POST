@@ -25,17 +25,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             _context = context;
         }
 
-        public Tuple<Task<List<PreShipmentDTO>>, int> GetPreShipments(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
+        public Tuple<Task<List<PreShipmentDTO>>, int> GetPreShipments(FilterOptionsDto filterOptionsDto)
         {
             try
             {
-                //filter by service center
                 var preShipment = _context.PreShipment.AsQueryable();
-                if (serviceCentreIds.Length > 0)
-                {
-                    preShipment = _context.PreShipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
-                }
-                ////
 
                 //filter by cancelled preshipments
                 preShipment = preShipment.Where(s => s.IsCancelled == false);
@@ -46,10 +40,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                     preShipment = preShipment.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
                 }
 
-
                 var count = preShipment.Count();
-                //shipment = shipment.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count);
-
 
                 List<PreShipmentDTO> preShipmentDto = new List<PreShipmentDTO>();
                 //filter
@@ -213,17 +204,15 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
                 if (!string.IsNullOrEmpty(sortorder) && !string.IsNullOrEmpty(sortvalue))
                 {
-                    System.Reflection.PropertyInfo prop = typeof(Shipment).GetProperty(sortvalue);
+                    System.Reflection.PropertyInfo prop = typeof(PreShipment).GetProperty(sortvalue);
 
                     if (sortorder == "0")
                     {
                         preShipmentDto = preShipmentDto.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
-                        //shipment = shipment.OrderBy(x => prop.Name); ;
                     }
                     else
                     {
                         preShipmentDto = preShipmentDto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
-                        //shipment = shipment.OrderByDescending(x => prop.Name); 
                     }
 
                 }
