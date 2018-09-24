@@ -213,18 +213,18 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
                 }
+                
+                var shipments = _uow.Shipment.GetAllAsQueryable();
+                List<string> shipmentsWaybills = shipments.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
-                var shipments = _uow.Shipment.FindAsync(s => serviceCenters.Contains(s.DestinationServiceCentreId)).Result;
-                var shipmentsWaybills = shipments.ToList().Select(a => a.Waybill).AsEnumerable();
+                var shipmentCollectionQuery = _uow.ShipmentCollection.GetAllAsQueryable();
+                var shipmentCollection = shipmentCollectionQuery.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).ToList();
+                shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).ToList();
 
-                var shipmentCollection = _uow.ShipmentCollection.FindAsync(x =>
-                x.ShipmentScanStatus == ShipmentScanStatus.ARF &&
-                shipmentsWaybills.Contains(x.Waybill)).Result;
-
+                var count = shipmentCollection.Count();
+                
                 var shipmentCollectionDto = Mapper.Map<IEnumerable<ShipmentCollectionDTO>>(shipmentCollection);
                 shipmentCollectionDto = shipmentCollectionDto.OrderByDescending(x => x.DateCreated);
-
-                var count = shipmentCollection.ToList().Count();
 
                 if (filterOptionsDto != null)
                 {
@@ -259,7 +259,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto.ToList()), count);
-
             }
             catch (Exception)
             {

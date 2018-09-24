@@ -35,21 +35,17 @@ namespace GIGLS.Core.DTO.Customers
         public CompanyType CompanyType { get; set; }
         public CompanyStatus CompanyStatus { get; set; }
         public decimal Discount { get; set; }
+        public string ReturnOption { get; set; }
+        public int ReturnServiceCentre { get; set; }
+        public string ReturnAddress { get; set; }
 
         // IndividualCustomerDTO
         public int IndividualCustomerId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public Gender Gender { get; set; }
-        //public string Email { get; set; }
-        //public string City { get; set; }
-        //public string State { get; set; }
-        //public string Address { get; set; }
-        //public string PhoneNumber { get; set; }
         public string PictureUrl { get; set; }
         public string PicData { get; set; }
-        //public DateTime DateCreated { get; set; }
-        //public DateTime DateModified { get; set; }
         public string WalletNumber { get; set; }
         public string CustomerCode { get; set; }
     }

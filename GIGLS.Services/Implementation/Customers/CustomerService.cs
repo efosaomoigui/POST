@@ -29,7 +29,6 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
-
                 // handle Company customers
                 if (CustomerType.Company.Equals(customerDTO.CustomerType))
                 {

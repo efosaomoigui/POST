@@ -1,7 +1,6 @@
 ﻿using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
-using System;
 using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Customers
@@ -28,6 +27,11 @@ namespace GIGLS.Core.DTO.Customers
         public int SettlementPeriod { get; set; }
         public string CustomerCode { get; set; }
         public CustomerCategory CustomerCategory { get; set; }
+        
+        public string ReturnOption { get; set; }
+        public int ReturnServiceCentre { get; set; }
+        public string ReturnServiceCentreName { get; set; }
+        public string ReturnAddress { get; set; }
 
         public List<CompanyContactPersonDTO> ContactPersons { get; set; }
         public List<ShipmentDTO> CompanyShipments { get; set; }
