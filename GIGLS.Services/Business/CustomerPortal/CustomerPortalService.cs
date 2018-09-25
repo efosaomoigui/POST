@@ -25,6 +25,8 @@ using GIGLS.Core.DTO;
 using Microsoft.AspNet.Identity;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.DTO.Customers;
+using System;
+using GIGLS.CORE.DTO.Shipments;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -256,6 +258,23 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _userService.ChangePassword(userid, currentPassword, newPassword);
         }
 
-        
+        public async Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                //get the current login user 
+                var currentUserId = await _userService.GetCurrentUserId();
+
+                var preShipmentsQuery = _uow.PreShipment.PreShipmentsAsQueryable();
+                preShipmentsQuery = preShipmentsQuery.Where(s => s.UserId == currentUserId);
+                var preShipments = preShipmentsQuery.ToList();
+                var preShipmentsDTO = Mapper.Map<List<PreShipmentDTO>>(preShipments);
+                return preShipmentsDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

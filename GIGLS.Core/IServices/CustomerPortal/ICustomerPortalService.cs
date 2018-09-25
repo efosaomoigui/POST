@@ -9,7 +9,9 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.CORE.DTO.Shipments;
 using Microsoft.AspNet.Identity;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -41,5 +43,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<decimal> GetHaulagePrice(HaulagePricingDTO pricingDto);
         Task<CustomerDTO> GetCustomer(string userId);
         Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword);
+
+        Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto);
     }
 }

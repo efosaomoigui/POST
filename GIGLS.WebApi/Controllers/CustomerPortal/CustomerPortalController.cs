@@ -11,6 +11,7 @@ using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
 using System.Collections.Generic;
@@ -346,6 +347,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<bool>
                 {
                     Object = true
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("PreShipments")]
+        public async Task<IServiceResponse<IEnumerable<PreShipmentDTO>>> GetPreShipments([FromUri]FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preShipments = await _portalService.GetPreShipments(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<PreShipmentDTO>>
+                {
+                    Object = preShipments
                 };
             });
         }
