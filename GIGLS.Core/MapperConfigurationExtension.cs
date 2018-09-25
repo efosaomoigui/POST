@@ -257,6 +257,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<PreShipment, PreShipmentDTO>();
                 config.CreateMap<PreShipmentDTO, PreShipment>();
+
+                config.CreateMap<PreShipmentManifestMapping, PreShipmentManifestMappingDTO>();
+                config.CreateMap<PreShipmentManifestMappingDTO, PreShipmentManifestMapping>();
             });
 
             isInit = true;

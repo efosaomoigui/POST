@@ -117,6 +117,7 @@ namespace GIGLS.Core
         ICODSettlementSheetRepository CODSettlementSheet { get; set; }
         IPreShipmentItemRepository PreShipmentItem { get; set; }
         IPreShipmentRepository PreShipment { get; set; }
+        IPreShipmentManifestMappingRepository PreShipmentManifestMapping { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

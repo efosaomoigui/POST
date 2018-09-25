@@ -308,6 +308,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IPreShipmentRepository PreShipment { get; set; }
 
+        [Inject]
+        public IPreShipmentManifestMappingRepository PreShipmentManifestMapping { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();
