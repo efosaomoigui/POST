@@ -496,11 +496,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 var preShipments = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
                     && s.ProcessingStatus == PreShipmentProcessingStatus.Valid).ToList();
 
-                var unmappedStations = preShipments.Select(s => s.DepartureStation.StationCode).Distinct();
+                var unmappedStations = preShipments.Select(s => s.DepartureServiceCentreId).Distinct();
 
                 //Get list of StationDTO
                 var stationsObject = _uow.Station.GetAllAsQueryable().
-                    Where(s => unmappedStations.Contains(s.StationCode)).ToList();
+                    Where(s => unmappedStations.Contains(s.StationId)).ToList();
 
                 var result = Mapper.Map<List<StationDTO>>(stationsObject);
 
