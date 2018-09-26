@@ -243,7 +243,8 @@ namespace GIGLS.Services.Implementation.Fleets
         {
             try
             {
-                var dispatch = await _uow.Dispatch.GetAsync(x => x.ManifestNumber.Equals(manifest));
+                var dispatchResult = await _uow.Dispatch.FindAsync(x => x.ManifestNumber.Equals(manifest));
+                var dispatch = dispatchResult.FirstOrDefault();
                 if (dispatch == null)
                 {
                     //throw new GenericException("Information does not Exist");
