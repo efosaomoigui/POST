@@ -96,5 +96,12 @@ namespace GIGL.GIGLS.Core.Domain
 
         public PreShipmentRequestStatus RequestStatus { get; set; }
         public PreShipmentProcessingStatus ProcessingStatus { get; set; }
+
+        //Receivers Information
+        public int DepartureStationId { get; set; }
+        public virtual Station DepartureStation { get; set; }
+
+        public int DestinationStationId { get; set; }
+        public virtual Station DestinationStation { get; set; }
     }
 }

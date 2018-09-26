@@ -112,5 +112,12 @@ namespace GIGLS.Core.DTO.Shipments
 
         public PreShipmentRequestStatus RequestStatus { get; set; }
         public PreShipmentProcessingStatus ProcessingStatus { get; set; }
+
+        //Receivers Information
+        public int DepartureStationId { get; set; }
+        public StationDTO DepartureStation { get; set; }
+
+        public int DestinationStationId { get; set; }
+        public StationDTO DestinationStation { get; set; }
     }
 }

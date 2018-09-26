@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.CORE.DTO.Shipments;
@@ -212,12 +213,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("unmappedmanifeststations")]
-        public async Task<IServiceResponse<IEnumerable<string>>> GetUnmappedManifestStations()
+        public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetUnmappedManifestStations()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var centres = await _service.GetUnmappedManifestStations();
-                return new ServiceResponse<IEnumerable<string>>
+                return new ServiceResponse<IEnumerable<StationDTO>>
                 {
                     Object = centres
                 };

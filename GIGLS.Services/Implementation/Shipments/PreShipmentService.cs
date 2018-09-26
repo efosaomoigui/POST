@@ -287,7 +287,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //Generate Waybill Number(serviceCentreCode, userId, servicecentreId)
             //var waybill = await _waybillService.GenerateWaybillNumber(loginUserServiceCentre.Code, shipmentDTO.UserId, loginUserServiceCentre.ServiceCentreId);
-            //var departureServiceCentre = await _centreService.GetServiceCentreById(preShipmentDTO.DepartureServiceCentreId);
             var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
 
             preShipmentDTO.Waybill = waybill;
@@ -301,10 +300,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 serialNumber++;
             }
 
-            //do not save the child objects
-            newShipment.DepartureServiceCentre = null;
-            newShipment.DestinationServiceCentre = null;
-            newShipment.DeliveryOption = null;
+            //service centres from station
+            var departureServiceCentre = _uow.ServiceCentre.GetAll().Where(s => s.StationId == preShipmentDTO.DepartureStationId).ToList().FirstOrDefault();
+            var destinationServiceCentre = _uow.ServiceCentre.GetAll().Where(s => s.StationId == preShipmentDTO.DestinationStationId).ToList().FirstOrDefault();
+
+            //delivery options - Ecommerce
+            var deliveryOption = _uow.DeliveryOption.GetAllAsQueryable().
+                Where(s => s.Code == "ECC").FirstOrDefault();
+
+            newShipment.DepartureServiceCentreId = departureServiceCentre.ServiceCentreId;
+            newShipment.DestinationServiceCentreId = destinationServiceCentre.ServiceCentreId;
+            newShipment.DeliveryOptionId = deliveryOption.DeliveryOptionId;
 
             //save the display value of Insurance and Vat
             newShipment.Vat = preShipmentDTO.vatvalue_display;
@@ -397,7 +403,8 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var query = _uow.PreShipment.PreShipmentsAsQueryable();
-                query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid);
+                query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
+                && s.ProcessingStatus == PreShipmentProcessingStatus.Valid);
 
                 var preShipments = query.ToList();
                 var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
@@ -467,16 +474,22 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<string>> GetUnmappedManifestStations()
+        public async Task<List<StationDTO>> GetUnmappedManifestStations()
         {
             try
             {
                 var query = _uow.PreShipment.GetAllAsQueryable();
                 var preShipments = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid).ToList();
-                var preShipmentsGroup = preShipments.GroupBy(s => s.DestinationServiceCentre?.Station?.StationName);
+                var preShipmentsGroup = preShipments.GroupBy(s => s.DestinationServiceCentre?.Station?.StationCode);
                 var unmappedStations = preShipmentsGroup.Select(s => s.Key).ToList();
 
-                return await Task.FromResult(unmappedStations);
+                //Get list of StationDTO
+                var stationsObject = _uow.Station.GetAllAsQueryable().
+                    Where(s => unmappedStations.Contains(s.StationCode)).ToList();
+
+                var result = Mapper.Map<List<StationDTO>>(stationsObject);
+
+                return await Task.FromResult(result);
             }
             catch (Exception)
             {
