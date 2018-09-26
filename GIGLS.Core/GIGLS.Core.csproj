@@ -156,6 +156,7 @@
     <Compile Include="Domain\Haulage.cs" />
     <Compile Include="Domain\HaulageDistanceMapping.cs" />
     <Compile Include="Domain\ManifestVisitMonitoring.cs" />
+    <Compile Include="Domain\PreShipmentManifestMapping.cs" />
     <Compile Include="Domain\ManifestWaybillMapping.cs" />
     <Compile Include="Domain\MessagingLog\EmailSendLog.cs" />
     <Compile Include="Domain\MessagingLog\SmsSendLog.cs" />
@@ -289,6 +290,7 @@
     <Compile Include="DTO\Shipments\ManifestDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestGroupWaybillNumberMappingDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestVisitMonitoringDTO.cs" />
+    <Compile Include="DTO\Shipments\PreShipmentManifestMappingDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestWaybillMappingDTO.cs" />
     <Compile Include="DTO\Shipments\MissingShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\ScanDTO.cs" />
@@ -435,6 +437,7 @@
     <Compile Include="IRepositories\ShipmentScan\IScanStatusRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IPreShipmentManifestMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IManifestWaybillMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IManifestGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IManifestRepository.cs" />
@@ -537,6 +540,7 @@
     <Compile Include="IServices\ShipmentScan\IScanStatusService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberMappingService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberService.cs" />
+    <Compile Include="IServices\Shipments\IPreShipmentManifestMappingService.cs" />
     <Compile Include="IServices\Shipments\IManifestWaybillMappingService.cs" />
     <Compile Include="IServices\Shipments\IManifestGroupWaybillNumberMappingService.cs" />
     <Compile Include="IServices\Shipments\IManifestService.cs" />

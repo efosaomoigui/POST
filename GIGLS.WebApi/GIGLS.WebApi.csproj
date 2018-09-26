@@ -320,6 +320,7 @@
     <Compile Include="Controllers\Shipments\GroupWaybillNumberController.cs" />
     <Compile Include="Controllers\Shipments\GroupWaybillNumberMappingController.cs" />
     <Compile Include="Controllers\Shipments\ManifestController.cs" />
+    <Compile Include="Controllers\Shipments\PreShipmentManifestMappingController.cs" />
     <Compile Include="Controllers\Shipments\ManifestWaybillMappingController.cs" />
     <Compile Include="Controllers\Shipments\ManifestGroupWaybillNumberMappingController.cs" />
     <Compile Include="Controllers\Shipments\ManifestVisitMonitoringController.cs" />
