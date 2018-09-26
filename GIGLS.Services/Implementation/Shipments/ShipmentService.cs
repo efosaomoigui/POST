@@ -1142,13 +1142,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     wallet.Balance = wallet.Balance + invoice.Amount;
 
                     //2.4.2 Update customers wallet's Transaction (credit)
-                    var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                    //var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
                     var newWalletTransaction = new WalletTransaction
                     {
                         WalletId = wallet.WalletId,
                         Amount = invoice.Amount,
                         DateOfEntry = DateTime.Now,
-                        ServiceCentreId = serviceCenterIds[0],
+                        ServiceCentreId = shipment.DepartureServiceCentreId,
                         UserId = currentUserId,
                         CreditDebitType = CreditDebitType.Credit,
                         PaymentType = PaymentType.Wallet,
