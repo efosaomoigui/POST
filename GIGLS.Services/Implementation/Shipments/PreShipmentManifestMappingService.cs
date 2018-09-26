@@ -38,11 +38,12 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //map waybills to Manifest
-        public async Task MappingManifestToWaybills(string manifest, List<string> waybills)
+        public async Task MappingManifestToWaybills(PreShipmentManifestMappingDTO data)
         {
+            //string manifest, List< string > waybills;
             try
             {
-                var manifestObj = await _uow.PreShipmentManifestMapping.GetAsync(x => x.ManifestCode.Equals(manifest));
+                var manifestObj = await _uow.PreShipmentManifestMapping.GetAsync(x => x.ManifestCode.Equals(data.ManifestCode));
 
 
             }

@@ -46,7 +46,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _service.MappingManifestToWaybills(data.ManifestCode, data.Waybills);
+                await _service.MappingManifestToWaybills(data);
                 return new ServiceResponse<bool>
                 {
                     Object = true
@@ -136,8 +136,8 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("unmappedwaybillfordeliverymanifest")]
-        public async Task<IServiceResponse<List<PreShipmentDTO>>> GetUnmappedManifestForDeliveryServiceCentres()
+        [Route("unmappedwaybillforpickupmanifest")]
+        public async Task<IServiceResponse<List<PreShipmentDTO>>> GetUnMappedWaybillsForPickupManifest()
         {
             return await HandleApiOperationAsync(async () =>
             {

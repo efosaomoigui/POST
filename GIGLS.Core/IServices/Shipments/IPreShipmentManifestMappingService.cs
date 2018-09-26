@@ -12,7 +12,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<PreShipmentManifestMappingDTO> GetManifestForWaybill(string waybill);
         Task<List<PreShipmentDTO>> GetUnMappedWaybillsForPickupManifest();
 
-        Task MappingManifestToWaybills(string manifest, List<string> Waybills);
+        Task MappingManifestToWaybills(PreShipmentManifestMappingDTO data);
         Task RemoveWaybillFromManifest(string manifest, string waybill);
         Task ReturnWaybillsInManifest(string manifest, List<string> Waybills);
     }
