@@ -180,12 +180,44 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
-        [Route("ValidatePreShipment/{waybill}/{valid}")]
-        public async Task<IServiceResponse<bool>> ValidatePreShipment(string waybill, bool valid)
+        [Route("ValidatePreShipment/{waybill}")]
+        public async Task<IServiceResponse<bool>> ValidatePreShipment(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _service.ValidatePreShipment(waybill, valid);
+                await _service.ValidatePreShipment(waybill);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        //[GIGLSActivityAuthorize(Activity = "Update")]
+        //[HttpPut]
+        //[Route("ValidatePreShipment/{waybill}")]
+        //public async Task<IServiceResponse<bool>> ValidatePreShipment(string waybill)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        await _service.ValidatePreShipment(waybill);
+
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Object = true
+        //        };
+        //    });
+        //}
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("DeclinePreShipment/{waybill}")]
+        public async Task<IServiceResponse<bool>> DeclinePreShipment(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.DeclinePreShipment(waybill);
 
                 return new ServiceResponse<bool>
                 {

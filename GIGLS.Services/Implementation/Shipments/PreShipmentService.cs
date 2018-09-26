@@ -46,7 +46,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
 
-        public PreShipmentService(IUnitOfWork uow, IShipmentService shipmentService, 
+        public PreShipmentService(IUnitOfWork uow, IShipmentService shipmentService,
             IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
             INumberGeneratorMonitorService numberGeneratorMonitorService,
@@ -164,7 +164,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-         public async Task UpdatePreShipment(int preShipmentId, PreShipmentDTO preShipmentDto)
+        public async Task UpdatePreShipment(int preShipmentId, PreShipmentDTO preShipmentDto)
         {
             try
             {
@@ -322,7 +322,7 @@ namespace GIGLS.Services.Implementation.Shipments
             return preShipmentDTO;
         }
 
-  
+
         //This is used because I don't want an Exception to be thrown when calling it
         private async Task<PreShipment> GetPreShipmentForScan(string waybill)
         {
@@ -384,7 +384,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                 var query = _uow.PreShipment.PreShipmentsAsQueryable();
+                var query = _uow.PreShipment.PreShipmentsAsQueryable();
                 query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.New);
 
                 var preShipments = query.ToList();
@@ -417,7 +417,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<bool> ValidatePreShipment(string waybill, bool valid)
+        public async Task<bool> ValidatePreShipment(string waybill)
         {
             try
             {
@@ -427,14 +427,28 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
                 }
 
-                if(valid)
+                preShipment.RequestStatus = PreShipmentRequestStatus.Valid;
+
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> DeclinePreShipment(string waybill)
+        {
+            try
+            {
+                var preShipment = await _uow.PreShipment.GetAsync(x => x.Waybill.Equals(waybill));
+                if (preShipment == null)
                 {
-                    preShipment.RequestStatus = PreShipmentRequestStatus.Valid;
+                    throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
                 }
-                else
-                {
-                    preShipment.RequestStatus = PreShipmentRequestStatus.Declined;
-                }
+
+                preShipment.RequestStatus = PreShipmentRequestStatus.Declined;
 
                 await _uow.CompleteAsync();
                 return true;
@@ -479,9 +493,10 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var query = _uow.PreShipment.GetAllAsQueryable();
-                var preShipments = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid).ToList();
-                var preShipmentsGroup = preShipments.GroupBy(s => s.DestinationServiceCentre?.Station?.StationCode);
-                var unmappedStations = preShipmentsGroup.Select(s => s.Key).ToList();
+                var preShipments = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
+                    && s.ProcessingStatus == PreShipmentProcessingStatus.Valid).ToList();
+
+                var unmappedStations = preShipments.Select(s => s.DepartureStation.StationCode).Distinct();
 
                 //Get list of StationDTO
                 var stationsObject = _uow.Station.GetAllAsQueryable().
