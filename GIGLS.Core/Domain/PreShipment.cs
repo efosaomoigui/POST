@@ -94,6 +94,7 @@ namespace GIGL.GIGLS.Core.Domain
 
         public string Description { get; set; }
 
-        public PreShipmentStatus Status { get; set; }
+        public PreShipmentRequestStatus RequestStatus { get; set; }
+        public PreShipmentProcessingStatus ProcessingStatus { get; set; }
     }
 }

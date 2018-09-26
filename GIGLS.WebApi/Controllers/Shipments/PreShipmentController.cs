@@ -179,12 +179,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
-        [Route("ValidatePreShipment/{waybill}")]
-        public async Task<IServiceResponse<bool>> ValidatePreShipment(string waybill)
+        [Route("ValidatePreShipment/{waybill}/{valid}")]
+        public async Task<IServiceResponse<bool>> ValidatePreShipment(string waybill, bool valid)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _service.ValidatePreShipment(waybill);
+                await _service.ValidatePreShipment(waybill, valid);
 
                 return new ServiceResponse<bool>
                 {
@@ -205,6 +205,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<bool>
                 {
                     Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("unmappedmanifeststations")]
+        public async Task<IServiceResponse<IEnumerable<string>>> GetUnmappedManifestStations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.GetUnmappedManifestStations();
+                return new ServiceResponse<IEnumerable<string>>
+                {
+                    Object = centres
                 };
             });
         }

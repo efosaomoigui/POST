@@ -21,7 +21,8 @@ namespace GIGLS.Core.IServices.Shipments
         //Management API
         Task<List<PreShipmentDTO>> GetNewPreShipments(FilterOptionsDto filterOptionsDto);
         Task<List<PreShipmentDTO>> GetValidPreShipments(FilterOptionsDto filterOptionsDto);
-        Task<bool> ValidatePreShipment(string waybill);
+        Task<bool> ValidatePreShipment(string waybill, bool valid);
         Task<bool> CreateShipmentFromPreShipment(string waybill);
+        Task<List<string>> GetUnmappedManifestStations();
     }
 }

@@ -379,7 +379,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                  var query = _uow.PreShipment.PreShipmentsAsQueryable();
-                query = query.Where(s => s.Status == PreShipmentStatus.New);
+                query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.New);
 
                 var preShipments = query.ToList();
                 var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
@@ -397,7 +397,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var query = _uow.PreShipment.PreShipmentsAsQueryable();
-                query = query.Where(s => s.Status == PreShipmentStatus.Valid);
+                query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid);
 
                 var preShipments = query.ToList();
                 var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
@@ -410,7 +410,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<bool> ValidatePreShipment(string waybill)
+        public async Task<bool> ValidatePreShipment(string waybill, bool valid)
         {
             try
             {
@@ -420,7 +420,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
                 }
 
-                preShipment.Status = PreShipmentStatus.Valid;
+                if(valid)
+                {
+                    preShipment.RequestStatus = PreShipmentRequestStatus.Valid;
+                }
+                else
+                {
+                    preShipment.RequestStatus = PreShipmentRequestStatus.Declined;
+                }
 
                 await _uow.CompleteAsync();
                 return true;
@@ -449,10 +456,27 @@ namespace GIGLS.Services.Implementation.Shipments
                 //create shipment
                 await _shipmentService.AddShipment(shipmentDTO);
 
-                preShipment.Status = PreShipmentStatus.Completed;
+                preShipment.ProcessingStatus = PreShipmentProcessingStatus.Completed;
 
                 await _uow.CompleteAsync();
                 return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<string>> GetUnmappedManifestStations()
+        {
+            try
+            {
+                var query = _uow.PreShipment.GetAllAsQueryable();
+                var preShipments = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid).ToList();
+                var preShipmentsGroup = preShipments.GroupBy(s => s.DestinationServiceCentre?.Station?.StationName);
+                var unmappedStations = preShipmentsGroup.Select(s => s.Key).ToList();
+
+                return await Task.FromResult(unmappedStations);
             }
             catch (Exception)
             {

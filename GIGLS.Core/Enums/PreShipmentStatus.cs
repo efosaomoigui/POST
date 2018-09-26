@@ -1,10 +1,9 @@
 ﻿namespace GIGLS.Core.Enums
 {
-    public enum PreShipmentStatus
+    public enum PreShipmentRequestStatus
     {
         New,
         Valid,
-        Completed,
-        Cancelled
+        Declined
     }
 }

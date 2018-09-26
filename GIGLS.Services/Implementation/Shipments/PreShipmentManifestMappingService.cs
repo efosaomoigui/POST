@@ -74,7 +74,9 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var manifestWaybillMappingList = await _uow.PreShipmentManifestMapping.FindAsync(x => x.PreShipment.Status == PreShipmentStatus.Valid);
+                var manifestWaybillMappingList = await _uow.PreShipmentManifestMapping.
+                    FindAsync(x => x.PreShipment.RequestStatus == PreShipmentRequestStatus.Valid
+                    && x.PreShipment.ProcessingStatus == PreShipmentProcessingStatus.Valid);
                 var manifestWaybillNumberMappingDto = Mapper.Map<List<PreShipmentManifestMappingDTO>>(manifestWaybillMappingList.ToList());
 
                 return manifestWaybillNumberMappingDto;
