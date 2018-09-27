@@ -452,7 +452,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("api/user/login")]
+        [Route("user/login")]
         public async Task<IServiceResponse<JObject>> Login(UserloginDetailsModel userLoginModel)
         {
             //trim
