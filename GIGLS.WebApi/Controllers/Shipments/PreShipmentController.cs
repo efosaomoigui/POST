@@ -178,6 +178,36 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("CompletedPreShipment")]
+        public async Task<IServiceResponse<IEnumerable<PreShipmentDTO>>> GetCompletedPreShipments(FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preShipments = await _service.GetCompletedPreShipments(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<PreShipmentDTO>>
+                {
+                    Object = preShipments
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("FailedPreShipment")]
+        public async Task<IServiceResponse<IEnumerable<PreShipmentDTO>>> GetFailedPreShipments(FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preShipments = await _service.GetFailedPreShipments(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<PreShipmentDTO>>
+                {
+                    Object = preShipments
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("ValidatePreShipment/{waybill}")]
@@ -193,22 +223,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
-
-        //[GIGLSActivityAuthorize(Activity = "Update")]
-        //[HttpPut]
-        //[Route("ValidatePreShipment/{waybill}")]
-        //public async Task<IServiceResponse<bool>> ValidatePreShipment(string waybill)
-        //{
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-        //        await _service.ValidatePreShipment(waybill);
-
-        //        return new ServiceResponse<bool>
-        //        {
-        //            Object = true
-        //        };
-        //    });
-        //}
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]

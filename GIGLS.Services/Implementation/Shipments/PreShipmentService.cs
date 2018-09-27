@@ -417,6 +417,44 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<List<PreShipmentDTO>> GetCompletedPreShipments(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                var query = _uow.PreShipment.PreShipmentsAsQueryable();
+                query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
+                && s.ProcessingStatus == PreShipmentProcessingStatus.Completed);
+
+                var preShipments = query.ToList();
+                var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
+
+                return await Task.FromResult(preShipmentDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<PreShipmentDTO>> GetFailedPreShipments(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                var query = _uow.PreShipment.PreShipmentsAsQueryable();
+                query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
+                && s.ProcessingStatus == PreShipmentProcessingStatus.Failed);
+
+                var preShipments = query.ToList();
+                var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
+
+                return await Task.FromResult(preShipmentDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<bool> ValidatePreShipment(string waybill)
         {
             try
