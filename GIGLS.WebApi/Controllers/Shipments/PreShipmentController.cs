@@ -289,7 +289,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("UnmappedPreShipmentsInStation")]
+        [Route("UnmappedPreShipmentsInStation/{stationId:int}")]
         public async Task<IServiceResponse<IEnumerable<PreShipmentDTO>>> GetUnmappedPreShipmentsInStation(int stationId)
         {
             return await HandleApiOperationAsync(async () =>
