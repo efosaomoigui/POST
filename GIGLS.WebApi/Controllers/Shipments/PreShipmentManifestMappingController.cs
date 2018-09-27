@@ -30,11 +30,11 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var manifestGroupWayBillNumberMappings = await _service.GetAllManifestWaybillMappings();
+                var manifestMappings = await _service.GetAllManifestWaybillMappings();
 
                 return new ServiceResponse<List<PreShipmentManifestMappingDTO>>
                 {
-                    Object = manifestGroupWayBillNumberMappings
+                    Object = manifestMappings
                 };
             });
         }
@@ -111,21 +111,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 await _service.RemoveWaybillFromManifest(manifest, waybill);
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
-
-        [GIGLSActivityAuthorize(Activity = "Update")]
-        [HttpPut]
-        [Route("returnwaybillsinManifest")]
-        public async Task<IServiceResponse<bool>> ReturnWaybillsInManifest(PreShipmentManifestMappingDTO data)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _service.ReturnWaybillsInManifest(data.ManifestCode, data.Waybills);
                 return new ServiceResponse<bool>
                 {
                     Object = true

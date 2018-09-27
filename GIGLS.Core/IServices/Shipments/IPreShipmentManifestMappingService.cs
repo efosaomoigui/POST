@@ -14,6 +14,5 @@ namespace GIGLS.Core.IServices.Shipments
 
         Task MappingManifestToWaybills(PreShipmentManifestMappingDTO data);
         Task RemoveWaybillFromManifest(string manifest, string waybill);
-        Task ReturnWaybillsInManifest(string manifest, List<string> Waybills);
     }
 }

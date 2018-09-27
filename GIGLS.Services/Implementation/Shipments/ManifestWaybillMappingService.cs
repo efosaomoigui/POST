@@ -467,7 +467,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (manifestWaybillMapping == null)
                 {
-                    throw new GenericException($"Waybill {waybill} does not mapped to the manifest {manifest}");
+                    throw new GenericException($"Waybill {waybill} is not mapped to the manifest {manifest}");
                 }
 
                 //update shipment collection centre

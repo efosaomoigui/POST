@@ -119,5 +119,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         public int DestinationStationId { get; set; }
         public StationDTO DestinationStation { get; set; }
+
+        public bool IsMapped { get; set; }
     }
 }

@@ -270,5 +270,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("UnmappedPreShipmentsInStation")]
+        public async Task<IServiceResponse<IEnumerable<PreShipmentDTO>>> GetUnmappedPreShipmentsInStation(int stationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preShipments = await _service.GetUnmappedPreShipmentsInStation(stationId);
+                return new ServiceResponse<IEnumerable<PreShipmentDTO>>
+                {
+                    Object = preShipments
+                };
+            });
+        }
     }
 }

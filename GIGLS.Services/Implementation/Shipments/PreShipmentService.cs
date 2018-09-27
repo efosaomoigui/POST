@@ -549,5 +549,25 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        public async Task<List<PreShipmentDTO>> GetUnmappedPreShipmentsInStation(int stationId)
+        {
+            try
+            {
+                var query = _uow.PreShipment.PreShipmentsAsQueryable();
+                query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
+                && s.ProcessingStatus == PreShipmentProcessingStatus.Valid);
+                query = query.Where(s => s.IsMapped == false && s.DepartureStationId == stationId);
+
+                var preShipments = query.ToList();
+                var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
+
+                return await Task.FromResult(preShipmentDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

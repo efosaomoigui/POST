@@ -28,5 +28,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> DeclinePreShipment(string waybill);
         Task<bool> CreateShipmentFromPreShipment(string waybill);
         Task<List<StationDTO>> GetUnmappedManifestStations();
+        Task<List<PreShipmentDTO>> GetUnmappedPreShipmentsInStation(int stationId);
+        
     }
 }

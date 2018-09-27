@@ -103,5 +103,7 @@ namespace GIGL.GIGLS.Core.Domain
 
         public int DestinationStationId { get; set; }
         public virtual Station DestinationStation { get; set; }
+
+        public bool IsMapped { get; set; }
     }
 }
