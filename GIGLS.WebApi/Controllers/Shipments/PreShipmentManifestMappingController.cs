@@ -136,7 +136,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "Create")]
-        [HttpPost]
+        [HttpGet]
         [Route("generateMaifestCode")]
         public async Task<IServiceResponse<string>> GenerateManifestCode()
         {
