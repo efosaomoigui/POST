@@ -62,7 +62,29 @@ namespace GIGLS.Services.Business.CustomerPortal
         //Price API
         public async Task<decimal> GetPrice(PricingDTO pricingDto)
         {
-            return await _pricing.GetPrice(pricingDto);
+            //service centres from station
+            var departureServiceCentre = _uow.ServiceCentre.GetAll().Where(s => s.StationId == pricingDto.DepartureStationId).ToList().FirstOrDefault();
+            var destinationServiceCentre = _uow.ServiceCentre.GetAll().Where(s => s.StationId == pricingDto.DestinationStationId).ToList().FirstOrDefault();
+
+            //delivery options - Ecommerce
+            var deliveryOption = _uow.DeliveryOption.GetAllAsQueryable().
+                Where(s => s.Code == "ECC").FirstOrDefault();
+
+
+            var newPricingDTO = new PricingDTO()
+            {
+                DepartureServiceCentreId = departureServiceCentre.ServiceCentreId,
+                DestinationServiceCentreId = destinationServiceCentre.ServiceCentreId,
+                DeliveryOptionId = deliveryOption.DeliveryOptionId,
+                Weight = pricingDto.Weight,
+                IsVolumetric = pricingDto.IsVolumetric,
+                Length = pricingDto.Length,
+                Width = pricingDto.Width,
+                Height = pricingDto.Height,
+                ShipmentType = Core.Enums.ShipmentType.Ecommerce
+            };
+
+            return await _pricing.GetPrice(newPricingDTO);
         }
 
         public async Task<decimal> GetHaulagePrice(HaulagePricingDTO haulagePricingDto)
@@ -283,6 +305,16 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _userService.ChangePassword(userid, currentPassword, newPassword);
         }
 
-        
+        public async Task<IEnumerable<StationDTO>> GetLocalStations()
+        {
+            var localStations = await _uow.Station.GetLocalStations();
+            return localStations.OrderBy(x => x.StationName).ToList();
+        }
+
+        public async Task<IEnumerable<StationDTO>> GetInternationalStations()
+        {
+            var internationalStations = await _uow.Station.GetInternationalStations();
+            return internationalStations.OrderBy(x => x.StationName).ToList();
+        }
     }
 }

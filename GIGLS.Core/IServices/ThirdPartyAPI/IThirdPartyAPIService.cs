@@ -57,5 +57,8 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
 
         Task<CustomerDTO> GetCustomer(string userId);
         Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword);
+        Task<IEnumerable<StationDTO>> GetLocalStations();
+        Task<IEnumerable<StationDTO>> GetInternationalStations();
+
     }
 }
