@@ -70,12 +70,14 @@ namespace GIGLS.Services.Business.CustomerPortal
             var deliveryOption = _uow.DeliveryOption.GetAllAsQueryable().
                 Where(s => s.Code == "ECC").FirstOrDefault();
 
+            var deliveryOptionIds = new int[] { deliveryOption.DeliveryOptionId };
 
             var newPricingDTO = new PricingDTO()
             {
                 DepartureServiceCentreId = departureServiceCentre.ServiceCentreId,
                 DestinationServiceCentreId = destinationServiceCentre.ServiceCentreId,
                 DeliveryOptionId = deliveryOption.DeliveryOptionId,
+                DeliveryOptionIds = deliveryOptionIds.ToList(),
                 Weight = pricingDto.Weight,
                 IsVolumetric = pricingDto.IsVolumetric,
                 Length = pricingDto.Length,
@@ -93,10 +95,29 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
 
         //Capture PreShipment API
-        public async Task<PreShipmentDTO> AddPreShipment(PreShipmentDTO preShipmentDTO)
+        public async Task<PreShipmentDTO> AddPreShipment(ThirdPartyPreShipmentDTO thirdPartyPreShipmentDTO)
         {
             try
             {
+
+
+                //1. convert thirdPartyPreShipmentDTO to PreShipmentDTO
+                var preShipmentDTO = Mapper.Map<PreShipmentDTO>(thirdPartyPreShipmentDTO);
+
+                //2. convert the shipment items
+                var preShipmentItemDTOList = new List<PreShipmentItemDTO>();
+                foreach (var thirdPartyPreShipmentItem in thirdPartyPreShipmentDTO.PreShipmentItems)
+                {
+                    var preShipmentItemDTO = Mapper.Map<PreShipmentItemDTO>(thirdPartyPreShipmentItem);
+                    preShipmentItemDTOList.Add(preShipmentItemDTO);
+                }
+                preShipmentDTO.PreShipmentItems = preShipmentItemDTOList;
+
+
+                //3. set other default values
+
+
+
                 var newPreShipment = await _preShipmentService.AddPreShipment(preShipmentDTO);
                 return newPreShipment;
             }

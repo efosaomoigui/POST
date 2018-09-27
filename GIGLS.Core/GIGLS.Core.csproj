@@ -290,6 +290,8 @@
     <Compile Include="DTO\Shipments\ManifestDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestGroupWaybillNumberMappingDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestVisitMonitoringDTO.cs" />
+    <Compile Include="DTO\Shipments\ThirdPartyPreShipmentItemDTO.cs" />
+    <Compile Include="DTO\Shipments\ThirdPartyPreShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentManifestMappingDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestWaybillMappingDTO.cs" />
     <Compile Include="DTO\Shipments\MissingShipmentDTO.cs" />

@@ -22,7 +22,7 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         Task<decimal> GetHaulagePrice(HaulagePricingDTO pricingDto);
 
         //Capture PreShipment API
-        Task<PreShipmentDTO> AddPreShipment(PreShipmentDTO preShipment);
+        Task<PreShipmentDTO> AddPreShipment(ThirdPartyPreShipmentDTO thirdPartyPreShipmentDTO);
 
         //Route API
 

@@ -27,6 +27,13 @@ namespace GIGLS.Core.DTO.Shipments
         public string CompanyType { get; set; }
         public string CustomerCode { get; set; }
 
+        //PickUp' Information
+        public string PickUpPhoneNumber { get; set; }
+        public string PickUpAddress { get; set; }
+        public string PickUpCity { get; set; }
+        public string PickUpState { get; set; }
+        public string PickUpCountry { get; set; }
+
         //Receivers Information
         public int DepartureServiceCentreId { get; set; }
         public ServiceCentreDTO DepartureServiceCentre { get; set; }

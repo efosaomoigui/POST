@@ -373,21 +373,21 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         [ThirdPartyActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("captureshipment")]
-        public async Task<IServiceResponse<PreShipmentDTO>> AddPreShipment(PreShipmentDTO preShipmentDTO)
+        public async Task<IServiceResponse<bool>> AddPreShipment(ThirdPartyPreShipmentDTO thirdPartyPreShipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipment = await _thirdPartyAPIService.AddPreShipment(preShipmentDTO);
-                return new ServiceResponse<PreShipmentDTO>
+                var shipment = await _thirdPartyAPIService.AddPreShipment(thirdPartyPreShipmentDTO);
+                return new ServiceResponse<bool>
                 {
-                    Object = shipment
+                    Object = true
                 };
             });
         }
 
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("{waybillNumber}")]
+        [Route("TrackShipment/{waybillNumber}")]
         public async Task<IServiceResponse<IEnumerable<ShipmentTrackingDTO>>> TrackShipment(string waybillNumber)
         {
             return await HandleApiOperationAsync(async () =>
@@ -403,7 +403,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
 
         [AllowAnonymous]
         [HttpGet]
-        [Route("public/{waybillNumber}")]
+        [Route("TrackShipmentPublic/{waybillNumber}")]
         public async Task<IServiceResponse<IEnumerable<ShipmentTrackingDTO>>> PublicTrackShipment(string waybillNumber)
         {
             return await HandleApiOperationAsync(async () =>
