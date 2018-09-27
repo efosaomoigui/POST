@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO;
+﻿using EfeAuthen.Models;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
@@ -14,8 +15,13 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -443,5 +449,64 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("api/user/login")]
+        public async Task<IServiceResponse<JObject>> Login(UserloginDetailsModel userLoginModel)
+        {
+            //trim
+            if (userLoginModel.username != null)
+            {
+                userLoginModel.username = userLoginModel.username.Trim();
+            }
+
+            if (userLoginModel.Password != null)
+            {
+                userLoginModel.Password = userLoginModel.Password.Trim();
+            }
+
+            string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+            string getTokenResponse;
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                using (var client = new HttpClient())
+                {
+                    //setup client
+                    client.BaseAddress = new Uri(apiBaseUri);
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    //setup login data
+                    var formContent = new FormUrlEncodedContent(new[]
+                    {
+                         new KeyValuePair<string, string>("grant_type", "password"),
+                         new KeyValuePair<string, string>("Username", userLoginModel.username),
+                         new KeyValuePair<string, string>("Password", userLoginModel.Password),
+                     });
+
+                    //setup login data
+                    HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
+
+                    //get access token from response body
+                    var responseJson = await responseMessage.Content.ReadAsStringAsync();
+                    var jObject = JObject.Parse(responseJson);
+
+                    getTokenResponse = jObject.GetValue("access_token").ToString();
+
+                    if (!responseMessage.IsSuccessStatusCode)
+                    {
+                        throw new GenericException("Operation could not complete login successfully:");
+                    }
+
+                    return new ServiceResponse<JObject>
+                    {
+                        Object = jObject
+                    };
+                }
+            });
+        }
+
     }
 }
