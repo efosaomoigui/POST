@@ -20,5 +20,9 @@ namespace GIGLS.Core.DTO.PaymentTransactions
         public decimal Length { get; set; } = 0;
         public decimal Width { get; set; } = 0;
         public decimal Height { get; set; } = 0;
+
+        //Added for ThirdParty API
+        public int DepartureStationId { get; set; }
+        public int DestinationStationId { get; set; }
     }
 }
