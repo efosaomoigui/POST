@@ -242,6 +242,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
+        [Route("FailPreShipment/{waybill}")]
+        public async Task<IServiceResponse<bool>> FailPreShipment(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.FailPreShipment(waybill);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
         [Route("CreateShipmentFromPreShipment/{waybill}")]
         public async Task<IServiceResponse<bool>> CreateShipmentFromPreShipment(string waybill)
         {

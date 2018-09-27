@@ -26,6 +26,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<PreShipmentDTO>> GetFailedPreShipments(FilterOptionsDto filterOptionsDto);
         Task<bool> ValidatePreShipment(string waybill);
         Task<bool> DeclinePreShipment(string waybill);
+        Task<bool> FailPreShipment(string waybill);
         Task<bool> CreateShipmentFromPreShipment(string waybill);
         Task<List<StationDTO>> GetUnmappedManifestStations();
         Task<List<PreShipmentDTO>> GetUnmappedPreShipmentsInStation(int stationId);

@@ -135,5 +135,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("generateMaifestCode")]
+        public async Task<IServiceResponse<string>> GenerateManifestCode()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestCode = await _service.GenerateManifestCode();
+
+                return new ServiceResponse<string>
+                {
+                    Object = manifestCode
+                };
+            });
+        }
+
     }
 }

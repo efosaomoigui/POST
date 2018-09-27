@@ -1,18 +1,16 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using AutoMapper;
 using GIGLS.Core;
-using System.Collections.Generic;
-using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Domain;
-using GIGLS.Core.IServices.User;
-using System.Linq;
-using AutoMapper;
-using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.IServices.User;
+using GIGLS.Core.IServices.Utility;
+using GIGLS.Infrastructure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -21,13 +19,16 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
         private readonly IPreShipmentService _preShipmentService;
+        private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
 
         public PreShipmentManifestMappingService(IUnitOfWork uow,
-            IUserService userService, IPreShipmentService preShipmentService)
+            IUserService userService, IPreShipmentService preShipmentService,
+            INumberGeneratorMonitorService numberGeneratorMonitorService)
         {
             _uow = uow;
             _userService = userService;
             _preShipmentService = preShipmentService;
+            _numberGeneratorMonitorService = numberGeneratorMonitorService;
             MapperConfig.Initialize();
         }
 
@@ -175,5 +176,17 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<string> GenerateManifestCode()
+        {
+            try
+            {
+                var manifestCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Manifest);
+                return manifestCode;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

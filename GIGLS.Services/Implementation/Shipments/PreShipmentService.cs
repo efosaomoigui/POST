@@ -497,6 +497,27 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<bool> FailPreShipment(string waybill)
+        {
+            try
+            {
+                var preShipment = await _uow.PreShipment.GetAsync(x => x.Waybill.Equals(waybill));
+                if (preShipment == null)
+                {
+                    throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
+                }
+
+                preShipment.ProcessingStatus = PreShipmentProcessingStatus.Failed;
+
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<bool> CreateShipmentFromPreShipment(string waybill)
         {
             try
@@ -569,5 +590,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
     }
 }
