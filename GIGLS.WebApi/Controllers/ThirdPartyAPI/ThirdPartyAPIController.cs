@@ -353,6 +353,12 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
 
         //////////////////////////////PUBLIC API//////////////////////////////////////////////////////////////////
         //Price API
+
+        /// <summary>
+        /// This api is used to get the price for Shipment Items
+        /// </summary>
+        /// <param name="pricingDto"></param>
+        /// <returns></returns>
         [ThirdPartyActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("price")]
@@ -370,6 +376,11 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         }
 
         //Capture Shipment API
+        /// <summary>
+        /// This api is used to register a shipment
+        /// </summary>
+        /// <param name="thirdPartyPreShipmentDTO"></param>
+        /// <returns></returns>
         [ThirdPartyActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("captureshipment")]
@@ -385,6 +396,11 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        /// <summary>
+        /// This api is used to track shipment created by the user
+        /// </summary>
+        /// <param name="waybillNumber"></param>
+        /// <returns></returns>
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("TrackShipment/{waybillNumber}")]
@@ -401,6 +417,11 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        /// <summary>
+        /// This api is used to track all shipments
+        /// </summary>
+        /// <param name="waybillNumber"></param>
+        /// <returns></returns>
         [AllowAnonymous]
         [HttpGet]
         [Route("TrackShipmentPublic/{waybillNumber}")]
@@ -417,7 +438,10 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
-
+        /// <summary>
+        /// This api is used to get all local stations
+        /// </summary>
+        /// <returns></returns>
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("LocalStations")]
@@ -434,6 +458,10 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        /// <summary>
+        /// This api is used to get all international stations
+        /// </summary>
+        /// <returns></returns>
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("InternationalStations")]
@@ -450,6 +478,12 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+        /// <summary>
+        /// This api is used to login and acquire token for subsequent calls
+        /// </summary>
+        /// <description>This api is used to login and acquire token for subsequent calls</description>
+        /// <param name="userLoginModel"></param>
+        /// <returns></returns>
         [AllowAnonymous]
         [HttpPost]
         [Route("user/login")]
