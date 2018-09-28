@@ -429,6 +429,26 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<List<PreShipmentDTO>> GetDeclinedPreShipments(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                var query = _uow.PreShipment.PreShipmentsAsQueryable();
+                query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Declined
+                && s.ProcessingStatus == PreShipmentProcessingStatus.Valid);
+
+                var preShipments = query.ToList();
+                var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
+
+                return await Task.FromResult(preShipmentDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
         public async Task<List<PreShipmentDTO>> GetFailedPreShipments(FilterOptionsDto filterOptionsDto)
         {
             try
@@ -469,7 +489,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<bool> DeclinePreShipment(string waybill)
+        public async Task<bool> DeclinePreShipment(string waybill, string reason)
         {
             try
             {
@@ -480,6 +500,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 preShipment.RequestStatus = PreShipmentRequestStatus.Declined;
+                preShipment.DeclinedReason = reason;
 
                 await _uow.CompleteAsync();
                 return true;

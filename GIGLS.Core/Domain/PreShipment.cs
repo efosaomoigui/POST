@@ -105,5 +105,6 @@ namespace GIGL.GIGLS.Core.Domain
         public virtual Station DestinationStation { get; set; }
 
         public bool IsMapped { get; set; }
+        public string DeclinedReason { get; set; }
     }
 }

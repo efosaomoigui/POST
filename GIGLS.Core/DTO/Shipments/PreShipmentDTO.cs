@@ -128,5 +128,6 @@ namespace GIGLS.Core.DTO.Shipments
         public StationDTO DestinationStation { get; set; }
 
         public bool IsMapped { get; set; }
+        public string DeclinedReason { get; set; }
     }
 }

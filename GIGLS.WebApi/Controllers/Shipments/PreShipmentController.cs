@@ -195,6 +195,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("DeclinedPreShipment")]
+        public async Task<IServiceResponse<IEnumerable<PreShipmentDTO>>> GetDeclinedPreShipments(FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preShipments = await _service.GetDeclinedPreShipments(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<PreShipmentDTO>>
+                {
+                    Object = preShipments
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("FailedPreShipment")]
         public async Task<IServiceResponse<IEnumerable<PreShipmentDTO>>> GetFailedPreShipments(FilterOptionsDto filterOptionsDto)
         {
@@ -226,12 +241,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
-        [Route("DeclinePreShipment/{waybill}")]
-        public async Task<IServiceResponse<bool>> DeclinePreShipment(string waybill)
+        [Route("DeclinePreShipment/{waybill}/{reason}")]
+        public async Task<IServiceResponse<bool>> DeclinePreShipment(string waybill, string reason)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _service.DeclinePreShipment(waybill);
+                await _service.DeclinePreShipment(waybill, reason);
 
                 return new ServiceResponse<bool>
                 {
