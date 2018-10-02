@@ -16,7 +16,7 @@ namespace GIGLS.Infrastructure.Persistence
         }
 
         public DbSet<InvoiceView> InvoiceView { get; set; }
-        //public DbSet<CustomerView> CustomerView { get; set; }
+        public DbSet<CustomerView> CustomerView { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

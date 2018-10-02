@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
@@ -150,13 +151,36 @@ namespace GIGLS.Services.Implementation.Shipments
                 var preShipmentDto = Mapper.Map<PreShipmentDTO>(preShipment);
 
                 //get customer info
-                var customerCode = preShipmentDto.CustomerCode;
+                var customerQuery = _uow.Invoice.GetAllFromCustomerView();
+                var customerView = customerQuery.Where(s => s.CustomerCode == preShipmentDto.CustomerCode).FirstOrDefault();
+
+
+                var customerId = 0;
+                var customerType = CustomerType.Company;
+                if (customerView.CompanyId != null && customerView.CompanyId > 0)
+                {
+                    //company
+                    customerId = customerView.CompanyId.GetValueOrDefault();
+                    customerType = CustomerType.Company;
+                }
+                else
+                {
+                    //individual
+                    customerId = customerView.IndividualCustomerId.GetValueOrDefault();
+                    customerType = CustomerType.IndividualCustomer;
+                }
+
+                var customerDTO = await _customerService.GetCustomer(customerId, customerType);
+
+                preShipmentDto.CustomerCode = customerView.CustomerCode;
+                preShipmentDto.CustomerDetails = customerDTO;
+                preShipmentDto.CustomerType = customerDTO.CustomerType.ToString();
 
 
 
                 return preShipmentDto;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -388,9 +412,22 @@ namespace GIGLS.Services.Implementation.Shipments
                 query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.New);
 
                 var preShipments = query.ToList();
-                var preShipmentDto = Mapper.Map<List<PreShipmentDTO>>(preShipments);
+                var preShipmentList = Mapper.Map<List<PreShipmentDTO>>(preShipments);
 
-                return await Task.FromResult(preShipmentDto);
+                //get customers info
+                foreach(var preShipmentDto in preShipmentList)
+                {
+                    var customerView = _uow.Invoice.GetAllFromCustomerView().FirstOrDefault(s => s.CustomerCode == preShipmentDto.CustomerCode);
+
+                    if(customerView != null)
+                    {
+                        var customerDto = Mapper.Map<CustomerDTO>(customerView);
+                        preShipmentDto.CustomerDetails = customerDto;
+                    }
+                }
+
+
+                return await Task.FromResult(preShipmentList);
             }
             catch (Exception)
             {
