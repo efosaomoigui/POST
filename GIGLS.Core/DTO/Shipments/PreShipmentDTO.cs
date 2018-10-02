@@ -129,5 +129,8 @@ namespace GIGLS.Core.DTO.Shipments
 
         public bool IsMapped { get; set; }
         public string DeclinedReason { get; set; }
+
+        //Agility Validations
+        public decimal? CalculatedTotal { get; set; } = 0;
     }
 }

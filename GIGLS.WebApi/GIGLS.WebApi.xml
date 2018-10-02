@@ -26,11 +26,11 @@
             </summary>
             <param name="kernel">The kernel.</param>
         </member>
-        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetPrice(GIGLS.Core.DTO.PaymentTransactions.PricingDTO)">
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetPrice(GIGLS.Core.DTO.PaymentTransactions.ThirdPartyPricingDTO)">
             <summary>
             This api is used to get the price for Shipment Items
             </summary>
-            <param name="pricingDto"></param>
+            <param name="thirdPartyPricingDto"></param>
             <returns></returns>
         </member>
         <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.AddPreShipment(GIGLS.Core.DTO.Shipments.ThirdPartyPreShipmentDTO)">

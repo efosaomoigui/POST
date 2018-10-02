@@ -24,5 +24,9 @@ namespace GIGL.GIGLS.Core.Domain
         //Foreign key information
         public int PreShipmentId { get; set; }
         public virtual PreShipment PreShipment { get; set; }
+
+        //Agility Calculations
+        public decimal CalculatedPrice { get; set; }
+
     }
 }
