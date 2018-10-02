@@ -149,6 +149,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var preShipmentDto = Mapper.Map<PreShipmentDTO>(preShipment);
 
+                //get customer info
+                var customerCode = preShipmentDto.CustomerCode;
+
+
+
                 return preShipmentDto;
             }
             catch (Exception)
@@ -283,13 +288,13 @@ namespace GIGLS.Services.Implementation.Shipments
             var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
 
             preShipmentDTO.Waybill = waybill;
-            var newShipment = Mapper.Map<Shipment>(preShipmentDTO);
+            var newPreShipment = Mapper.Map<PreShipment>(preShipmentDTO);
 
             // add serial numbers to the ShipmentItems
             var serialNumber = 1;
-            foreach (var shipmentItem in newShipment.ShipmentItems)
+            foreach (var preShipmentItem in newPreShipment.PreShipmentItems)
             {
-                shipmentItem.SerialNumber = serialNumber;
+                preShipmentItem.SerialNumber = serialNumber;
                 serialNumber++;
             }
 
@@ -301,15 +306,15 @@ namespace GIGLS.Services.Implementation.Shipments
             var deliveryOption = _uow.DeliveryOption.GetAllAsQueryable().
                 Where(s => s.Code == "ECC").FirstOrDefault();
 
-            newShipment.DepartureServiceCentreId = departureServiceCentre.ServiceCentreId;
-            newShipment.DestinationServiceCentreId = destinationServiceCentre.ServiceCentreId;
-            newShipment.DeliveryOptionId = deliveryOption.DeliveryOptionId;
+            newPreShipment.DepartureServiceCentreId = departureServiceCentre.ServiceCentreId;
+            newPreShipment.DestinationServiceCentreId = destinationServiceCentre.ServiceCentreId;
+            newPreShipment.DeliveryOptionId = deliveryOption.DeliveryOptionId;
 
             //save the display value of Insurance and Vat
-            newShipment.Vat = preShipmentDTO.vatvalue_display;
-            newShipment.DiscountValue = preShipmentDTO.InvoiceDiscountValue_display;
+            newPreShipment.Vat = preShipmentDTO.vatvalue_display;
+            newPreShipment.DiscountValue = preShipmentDTO.InvoiceDiscountValue_display;
 
-            _uow.Shipment.Add(newShipment);
+            _uow.PreShipment.Add(newPreShipment);
             //await _uow.CompleteAsync();
 
             return preShipmentDTO;
@@ -328,6 +333,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             // verify the waybill number exists in the system
             var preShipment = await GetPreShipmentForScan(scan.WaybillNumber);
+            var departureServiceCentre = _uow.ServiceCentre.GetAll().Where(s => s.StationId == preShipment.DepartureStationId).ToList().FirstOrDefault();
 
             string scanStatus = scan.ShipmentScanStatus.ToString();
 
@@ -338,7 +344,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     DateTime = DateTime.Now,
                     Status = scanStatus,
                     Waybill = scan.WaybillNumber,
-                }, scan.ShipmentScanStatus);
+                    Location = departureServiceCentre.Name
+            }, scan.ShipmentScanStatus);
             }
 
             return true;

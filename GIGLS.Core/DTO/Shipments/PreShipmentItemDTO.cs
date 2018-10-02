@@ -24,5 +24,9 @@ namespace GIGLS.Core.DTO.Shipments
         //Foreign key information
         public int PreShipmentId { get; set; }
 
+        //Agility Calculations
+        public decimal CalculatedPrice { get; set; }
+
+
     }
 }

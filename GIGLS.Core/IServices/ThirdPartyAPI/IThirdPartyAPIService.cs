@@ -18,7 +18,7 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
     public interface IThirdPartyAPIService : IServiceDependencyMarker
     {
         //Price API
-        Task<decimal> GetPrice(PricingDTO pricingDto);
+        Task<decimal> GetPrice(ThirdPartyPricingDTO thirdPartyPricingDto);
         Task<decimal> GetHaulagePrice(HaulagePricingDTO pricingDto);
 
         //Capture PreShipment API
