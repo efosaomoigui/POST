@@ -266,6 +266,10 @@ namespace GIGLS.Core
 
                 config.CreateMap<PreShipmentItemDTO, ThirdPartyPreShipmentItemDTO>();
                 config.CreateMap<ThirdPartyPreShipmentItemDTO, PreShipmentItemDTO>();
+
+                config.CreateMap<CustomerView, CustomerDTO>();
+                config.CreateMap<CustomerDTO, CustomerView>();
+
             });
 
             isInit = true;

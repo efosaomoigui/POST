@@ -357,16 +357,16 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         /// <summary>
         /// This api is used to get the price for Shipment Items
         /// </summary>
-        /// <param name="pricingDto"></param>
+        /// <param name="thirdPartyPricingDto"></param>
         /// <returns></returns>
         [ThirdPartyActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("price")]
-        public async Task<IServiceResponse<decimal>> GetPrice(PricingDTO pricingDto)
+        public async Task<IServiceResponse<decimal>> GetPrice(ThirdPartyPricingDTO thirdPartyPricingDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var price = await _thirdPartyAPIService.GetPrice(pricingDto);
+                var price = await _thirdPartyAPIService.GetPrice(thirdPartyPricingDto);
 
                 return new ServiceResponse<decimal>
                 {

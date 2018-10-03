@@ -60,11 +60,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
 
         //Price API
-        public async Task<decimal> GetPrice(PricingDTO pricingDto)
+        public async Task<decimal> GetPrice(ThirdPartyPricingDTO thirdPartyPricingDto)
         {
             //service centres from station
-            var departureServiceCentre = _uow.ServiceCentre.GetAll().Where(s => s.StationId == pricingDto.DepartureStationId).ToList().FirstOrDefault();
-            var destinationServiceCentre = _uow.ServiceCentre.GetAll().Where(s => s.StationId == pricingDto.DestinationStationId).ToList().FirstOrDefault();
+            var departureServiceCentre = _uow.ServiceCentre.GetAll().Where(s => s.StationId == thirdPartyPricingDto.DepartureStationId).ToList().FirstOrDefault();
+            var destinationServiceCentre = _uow.ServiceCentre.GetAll().Where(s => s.StationId == thirdPartyPricingDto.DestinationStationId).ToList().FirstOrDefault();
 
             //delivery options - Ecommerce
             var deliveryOption = _uow.DeliveryOption.GetAllAsQueryable().
@@ -78,11 +78,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                 DestinationServiceCentreId = destinationServiceCentre.ServiceCentreId,
                 DeliveryOptionId = deliveryOption.DeliveryOptionId,
                 DeliveryOptionIds = deliveryOptionIds.ToList(),
-                Weight = pricingDto.Weight,
-                IsVolumetric = pricingDto.IsVolumetric,
-                Length = pricingDto.Length,
-                Width = pricingDto.Width,
-                Height = pricingDto.Height,
+                Weight = thirdPartyPricingDto.Weight,
+                IsVolumetric = thirdPartyPricingDto.IsVolumetric,
+                Length = thirdPartyPricingDto.Length,
+                Width = thirdPartyPricingDto.Width,
+                Height = thirdPartyPricingDto.Height,
                 ShipmentType = Core.Enums.ShipmentType.Ecommerce
             };
 
@@ -104,19 +104,27 @@ namespace GIGLS.Services.Business.CustomerPortal
                 //1. convert thirdPartyPreShipmentDTO to PreShipmentDTO
                 var preShipmentDTO = Mapper.Map<PreShipmentDTO>(thirdPartyPreShipmentDTO);
 
+                decimal totalPrice = 0.0M;
                 //2. convert the shipment items
                 var preShipmentItemDTOList = new List<PreShipmentItemDTO>();
                 foreach (var thirdPartyPreShipmentItem in thirdPartyPreShipmentDTO.PreShipmentItems)
                 {
                     var preShipmentItemDTO = Mapper.Map<PreShipmentItemDTO>(thirdPartyPreShipmentItem);
                     preShipmentItemDTOList.Add(preShipmentItemDTO);
+                    totalPrice += preShipmentItemDTO.Price;
                 }
                 preShipmentDTO.PreShipmentItems = preShipmentItemDTOList;
 
 
                 //3. set other default values
+                //3.1 price
+                preShipmentDTO.Total = totalPrice;
+                preShipmentDTO.GrandTotal = totalPrice;
 
-
+                //3.2 customer info
+                var currentUserId = await _userService.GetCurrentUserId();
+                var currentUser = await _userService.GetUserById(currentUserId);
+                preShipmentDTO.CustomerCode = currentUser.UserChannelCode;
 
                 var newPreShipment = await _preShipmentService.AddPreShipment(preShipmentDTO);
                 return newPreShipment;

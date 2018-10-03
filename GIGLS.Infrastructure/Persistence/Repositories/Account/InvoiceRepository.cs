@@ -174,5 +174,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             var invoices = _GIGLSContextForView.InvoiceView.AsQueryable();
             return invoices;
         }
+
+        public IQueryable<CustomerView> GetAllFromCustomerView()
+        {
+            var customers = _GIGLSContextForView.CustomerView.AsQueryable();
+            return customers;
+        }
+
     }
 }

@@ -275,6 +275,7 @@
     <Compile Include="DTO\PaymentTransactions\PaymentPartialTransactionDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PaymentPartialTransactionProcessDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PaymentTransactionDTO.cs" />
+    <Compile Include="DTO\PaymentTransactions\ThirdPartyPricingDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PricingDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\ReroutePricingDTO.cs" />
     <Compile Include="DTO\Report\AccountFilterCriteria.cs" />
@@ -591,6 +592,7 @@
     <Compile Include="IServices\Zone\IZoneService.cs" />
     <Compile Include="MapperConfigurationExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="View\CustomerView.cs" />
     <Compile Include="View\InvoiceView.cs" />
   </ItemGroup>
   <ItemGroup>
