@@ -17,8 +17,8 @@ namespace GIGLS.Core.View
         public string RcNumber { get; set; }
 
         public string Industry { get; set; }
-        public CompanyType CompanyType { get; set; }
-        public CompanyStatus CompanyStatus { get; set; }
+        public CompanyType? CompanyType { get; set; }
+        public CompanyStatus? CompanyStatus { get; set; }
         public decimal Discount { get; set; }
         public int SettlementPeriod { get; set; }
 
