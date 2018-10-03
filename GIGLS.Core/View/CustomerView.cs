@@ -19,8 +19,8 @@ namespace GIGLS.Core.View
         public string Industry { get; set; }
         public CompanyType? CompanyType { get; set; }
         public CompanyStatus? CompanyStatus { get; set; }
-        public decimal Discount { get; set; }
-        public int SettlementPeriod { get; set; }
+        public decimal? Discount { get; set; } = 0;
+        public int? SettlementPeriod { get; set; } = 0;
 
         //public string ReturnOption { get; set; }
         //public int ReturnServiceCentre { get; set; }

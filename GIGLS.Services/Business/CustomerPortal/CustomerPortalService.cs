@@ -276,5 +276,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw;
             }
         }
+
+        public Task<PreShipmentDTO> GetPreShipment(string waybill)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -364,5 +364,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        
+        [HttpGet]
+        [Route("PreShipments/{waybill}")]
+        public async Task<IServiceResponse<PreShipmentDTO>> GetPreShipment(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preShipment = await _portalService.GetPreShipment(waybill);
+                return new ServiceResponse<PreShipmentDTO>
+                {
+                    Object = preShipment
+                };
+            });
+        }
     }
 }

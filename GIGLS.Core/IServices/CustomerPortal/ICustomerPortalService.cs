@@ -45,5 +45,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword);
 
         Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto);
+        Task<PreShipmentDTO> GetPreShipment(string waybill);
     }
 }
