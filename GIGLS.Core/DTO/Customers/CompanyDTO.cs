@@ -32,6 +32,7 @@ namespace GIGLS.Core.DTO.Customers
         public int ReturnServiceCentre { get; set; }
         public string ReturnServiceCentreName { get; set; }
         public string ReturnAddress { get; set; }
+        public decimal WalletBalance { get; set; }
 
         public List<CompanyContactPersonDTO> ContactPersons { get; set; }
         public List<ShipmentDTO> CompanyShipments { get; set; }

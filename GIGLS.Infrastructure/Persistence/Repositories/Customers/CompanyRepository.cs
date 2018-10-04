@@ -23,9 +23,38 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
         {
             try
             {
-                var companies = Context.Company.ToList();
-                var companiesDto = Mapper.Map<List<CompanyDTO>>(companies);
-                return Task.FromResult(companiesDto);
+                //var companies = Context.Company.ToList();
+                //var companiesDto = Mapper.Map<List<CompanyDTO>>(companies);
+                //return Task.FromResult(companiesDto);
+
+                var companies = Context.Company;
+                var companiesDto = from c in companies
+                                   join w in Context.Wallets on c.CustomerCode equals w.CustomerCode
+                                   select new CompanyDTO
+                                   {
+                                       CompanyId = c.CompanyId,
+                                       Name = c.Name,
+                                       RcNumber = c.RcNumber,
+                                       Email = c.Email,
+                                       City = c.City,
+                                       State = c.State,
+                                       Address = c.Address,
+                                       PhoneNumber = c.PhoneNumber,
+                                       Industry = c.Industry,
+                                       CompanyType = c.CompanyType,
+                                       CompanyStatus = c.CompanyStatus,
+                                       Discount = c.Discount,
+                                       SettlementPeriod = c.SettlementPeriod,
+                                       CustomerCode = c.CustomerCode,
+                                       CustomerCategory = c.CustomerCategory,
+                                       ReturnOption = c.ReturnOption,
+                                       ReturnServiceCentre = c.ReturnServiceCentre,
+                                       ReturnAddress = c.ReturnAddress,
+                                       DateCreated = c.DateCreated,
+                                       DateModified = c.DateModified,
+                                       WalletBalance = w.Balance
+                                   };
+                return Task.FromResult(companiesDto.ToList());
             }
             catch (Exception)
             {

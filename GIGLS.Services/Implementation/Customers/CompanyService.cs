@@ -46,6 +46,7 @@ namespace GIGLS.Services.Implementation.Customers
                 }
 
                 var newCompany = Mapper.Map<Company>(company);
+                newCompany.CompanyStatus = CompanyStatus.Pending;
 
                 //get the CompanyType
                 var companyType = "";
