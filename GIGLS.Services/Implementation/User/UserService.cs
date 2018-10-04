@@ -508,7 +508,7 @@ namespace GIGLS.Services.Implementation.User
 
                 if (claimValue[0] == "Global")
                 {
-                    serviceCenterIds = new int[] { };
+                    serviceCenterIds = new int[] { }; 
                 }
                 else if (claimValue[0] == "Station")
                 {
@@ -520,6 +520,10 @@ namespace GIGLS.Services.Implementation.User
                 {
                     int serviceCenterId = int.Parse(claimValue[1]);
                     serviceCenterIds = new int[] { serviceCenterId };
+                }
+                else if (claimValue[0] == "Public")
+                {
+                    serviceCenterIds = new int[] { };
                 }
                 else
                 {
