@@ -41,11 +41,13 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ICashOnDeliveryAccountService _iCashOnDeliveryAccountService;
         private readonly IPricingService _pricing;
         private readonly ICustomerService _customerService;
+        private readonly IPreShipmentService _preShipmentService;
+        
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService, 
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService,
-            ICustomerService customerService)
+            ICustomerService customerService, IPreShipmentService preShipmentService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -55,6 +57,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _iCashOnDeliveryAccountService = iCashOnDeliveryAccountService;
             _pricing = pricingService;
             _customerService = customerService;
+            _preShipmentService = preShipmentService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -277,9 +280,18 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
-        public Task<PreShipmentDTO> GetPreShipment(string waybill)
+        public async Task<PreShipmentDTO> GetPreShipment(string waybill)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var preShipmentDTO = await _preShipmentService.GetPreShipment(waybill);
+                return preShipmentDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
         }
     }
 }
