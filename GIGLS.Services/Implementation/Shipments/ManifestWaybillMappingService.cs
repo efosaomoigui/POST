@@ -416,8 +416,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     //get the manifest detail for the waybill
                     var manifestDTO = await _manifestService.GetManifestByCode(waybillmapped.ManifestCode);
+                    var dispatch = await _uow.Dispatch.GetAsync(d => d.ManifestNumber == waybillmapped.ManifestCode);
+
                     var waybillMapping = Mapper.Map<ManifestWaybillMappingDTO>(waybillmapped);
                     waybillMapping.ManifestDetails = manifestDTO;
+                    waybillMapping.ManifestDetails.DispatchedBy = dispatch.DispatchedBy;
+                    waybillMapping.ManifestDetails.ReceiverBy = dispatch.ReceivedBy;
 
                     resultList.Add(waybillMapping);
                 }
@@ -442,11 +446,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException($"There is no active Manifest for this Waybill {waybill}");
                 }
 
-                //get the manifest detail for the waybill
+                //get the manifest and dispatch detail for the waybill
                 var manifestDTO = await _manifestService.GetManifestByCode(activeManifest.ManifestCode);
+                var dispatch = await _uow.Dispatch.GetAsync(d => d.ManifestNumber == activeManifest.ManifestCode);
 
                 var activeManifestDto = Mapper.Map<ManifestWaybillMappingDTO>(activeManifest);
                 activeManifestDto.ManifestDetails = manifestDTO;
+                activeManifestDto.ManifestDetails.DispatchedBy = dispatch.DispatchedBy;
+                activeManifestDto.ManifestDetails.ReceiverBy = dispatch.ReceivedBy;
 
                 return activeManifestDto;
             }
