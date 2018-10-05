@@ -132,5 +132,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getmanifestforwaybill/{waybill}")]
+        public async Task<IServiceResponse<ManifestGroupWaybillNumberMappingDTO>> GetManifestForWaybill(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestforWaybill = await _service.GetManifestForWaybill(waybill);
+
+                return new ServiceResponse<ManifestGroupWaybillNumberMappingDTO>
+                {
+                    Object = manifestforWaybill
+                };
+            });
+        }
     }
 }

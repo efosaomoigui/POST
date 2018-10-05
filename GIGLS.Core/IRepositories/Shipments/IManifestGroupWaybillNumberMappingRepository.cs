@@ -9,5 +9,6 @@ namespace GIGLS.Core.IRepositories.Shipments
     public interface IManifestGroupWaybillNumberMappingRepository : IRepository<ManifestGroupWaybillNumberMapping>
     {
         Task<List<ManifestGroupWaybillNumberMappingDTO>> GetManifestGroupWaybillNumberMappings(int[] serviceCentreIds);
+        Task<ManifestGroupWaybillNumberMappingDTO> GetManifestGroupWaybillNumberMappingsUsingGroupWaybill(string groupWaybill);
     }
 }

@@ -13,5 +13,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<GroupWaybillNumberDTO>> GetGroupWaybillNumbersInManifest(int manifestId);
         Task<List<GroupWaybillNumberDTO>> GetGroupWaybillNumbersInManifest(string manifest);
         Task RemoveGroupWaybillNumberFromManifest(string manifest, string groupWaybillNumber);
+        Task<ManifestGroupWaybillNumberMappingDTO> GetManifestForWaybill(string waybill);
+
     }
 }

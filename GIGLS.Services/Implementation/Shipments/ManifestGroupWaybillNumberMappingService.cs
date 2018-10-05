@@ -225,25 +225,50 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var resultSet = new HashSet<string>();
-                var result = new List<ManifestGroupWaybillNumberMappingDTO>();
-
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
                 var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters);
-                foreach (var item in manifestGroupWaybillMapings)
-                {
-                    if (resultSet.Add(item.ManifestCode))
-                    {
-                        result.Add(item);
-                    }
-                }
-
-                return result.OrderByDescending(x => x.DateCreated);
+                return manifestGroupWaybillMapings.OrderByDescending(x => x.DateCreated);
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        //Get Manifest For GroupWaybillNumber
+        public async Task<ManifestGroupWaybillNumberMappingDTO> GetManifestForWaybill(string waybill)
+        {
+            //1. Get waybill in a Group Waybill
+            var groupWaybillNumberMapping = await _uow.GroupWaybillNumberMapping.FindAsync(x => x.WaybillNumber == waybill);
+            if (groupWaybillNumberMapping == null)
+            {
+                throw new GenericException($"No Manifest exists for this Waybill: {waybill}");
+            }
+            
+            //check if the user is at the service centre
+            var serviceCentreIds = await _userService.GetPriviledgeServiceCenters();
+            string groupwaybill = null;
+
+            if(serviceCentreIds.Length > 0)
+            {
+                foreach(var s in groupWaybillNumberMapping.ToList())
+                {
+                    if (serviceCentreIds.Contains(s.DepartureServiceCentreId))
+                    {
+                        groupwaybill = s.GroupWaybillNumber.ToString();
+                    }
+                }
+            }
+            
+            //2. Use the Groupwaybill to get manifest
+            var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappingsUsingGroupWaybill(groupwaybill);
+
+            if (manifestGroupWaybillMapings == null)
+            {
+                throw new GenericException($"No Manifest exists for this Waybill in your service centre: {waybill}");
+            }
+
+            return manifestGroupWaybillMapings;
         }
     }
 }

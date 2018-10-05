@@ -59,5 +59,38 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return await Task.FromResult(manifestGroupwaybillMappingDTO.OrderByDescending(x => x.DateCreated).ToList());
         }
 
+        public async Task<ManifestGroupWaybillNumberMappingDTO> GetManifestGroupWaybillNumberMappingsUsingGroupWaybill(string groupWaybill)
+        {
+            var manifestGroupwaybillMapping = Context.ManifestGroupWaybillNumberMapping.Where(s => s.GroupWaybillNumber == groupWaybill).AsQueryable();
+            
+            var manifestGroupwaybillMappingDTO = from mgw in manifestGroupwaybillMapping
+                                                 select new ManifestGroupWaybillNumberMappingDTO
+                                                 {
+                                                     ManifestGroupWaybillNumberMappingId = mgw.ManifestGroupWaybillNumberMappingId,
+                                                     ManifestCode = mgw.ManifestCode,
+                                                     GroupWaybillNumber = mgw.GroupWaybillNumber,
+                                                     IsActive = mgw.IsActive,
+                                                     DateMapped = mgw.DateMapped,
+                                                     DateCreated = mgw.DateCreated,
+                                                     DateModified = mgw.DateModified,
+                                                     IsDeleted = mgw.IsDeleted,
+                                                     RowVersion = mgw.RowVersion,
+                                                     ManifestDetails = Context.Manifest.Where(x => x.ManifestCode == mgw.ManifestCode).
+                                                     Select(p => new ManifestDTO
+                                                     {
+                                                         DateCreated = p.DateCreated,
+                                                         DateModified = p.DateModified,
+                                                         ManifestCode = p.ManifestCode,
+                                                         ManifestType = p.ManifestType,
+                                                         DateTime = p.DateTime,
+                                                         IsDispatched = p.IsDispatched,
+                                                         IsReceived = p.IsReceived,
+                                                         DispatchedBy = Context.Users.Where(d => d.Id == p.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
+                                                         ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault()
+                                                     }).FirstOrDefault()
+                                                 };
+
+            return await Task.FromResult(manifestGroupwaybillMappingDTO.FirstOrDefault());
+        }
     }
 }

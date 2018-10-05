@@ -402,7 +402,10 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var waybillMappingList = await _uow.ManifestWaybillMapping.FindAsync(x => x.Waybill == waybill);
+                //check if the user is at the service centre
+                var serviceCentreIds = await _userService.GetPriviledgeServiceCenters();
+
+                var waybillMappingList = await _uow.ManifestWaybillMapping.FindAsync(x => x.Waybill == waybill && serviceCentreIds.Contains(x.ServiceCentreId));
 
                 if (waybillMappingList == null)
                 {
@@ -420,8 +423,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     var waybillMapping = Mapper.Map<ManifestWaybillMappingDTO>(waybillmapped);
                     waybillMapping.ManifestDetails = manifestDTO;
-                    waybillMapping.ManifestDetails.DispatchedBy = dispatch.DispatchedBy;
-                    waybillMapping.ManifestDetails.ReceiverBy = dispatch.ReceivedBy;
+
+                    if (dispatch != null)
+                    {
+                        waybillMapping.ManifestDetails.DispatchedBy = dispatch.DispatchedBy;
+                        waybillMapping.ManifestDetails.ReceiverBy = dispatch.ReceivedBy;
+                    }
 
                     resultList.Add(waybillMapping);
                 }
@@ -439,7 +446,10 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var activeManifest = await _uow.ManifestWaybillMapping.GetAsync(x => x.Waybill == waybill && x.IsActive == true);
+                //check if the user is at the service centre
+                var serviceCentreIds = await _userService.GetPriviledgeServiceCenters();
+
+                var activeManifest = await _uow.ManifestWaybillMapping.GetAsync(x => x.Waybill == waybill && x.IsActive == true && serviceCentreIds.Contains(x.ServiceCentreId));
 
                 if (activeManifest == null)
                 {
@@ -452,8 +462,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var activeManifestDto = Mapper.Map<ManifestWaybillMappingDTO>(activeManifest);
                 activeManifestDto.ManifestDetails = manifestDTO;
-                activeManifestDto.ManifestDetails.DispatchedBy = dispatch.DispatchedBy;
-                activeManifestDto.ManifestDetails.ReceiverBy = dispatch.ReceivedBy;
+
+                if (dispatch != null)
+                {
+                    activeManifestDto.ManifestDetails.DispatchedBy = dispatch.DispatchedBy;
+                    activeManifestDto.ManifestDetails.ReceiverBy = dispatch.ReceivedBy;
+                }
 
                 return activeManifestDto;
             }
