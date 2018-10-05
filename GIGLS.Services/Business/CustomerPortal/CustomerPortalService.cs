@@ -83,6 +83,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             var currentUser = await _userService.GetUserById(currentUserId);
             var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == currentUser.UserChannelCode);
 
+            if(wallet == null)
+            {
+                throw new GenericException("Wallet does not exist");
+            }
+
             var walletTransactionSummary = await _iWalletTransactionService.GetWalletTransactionByWalletId(wallet.WalletId);
             return walletTransactionSummary;
         }
