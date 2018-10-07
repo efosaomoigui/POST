@@ -458,11 +458,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //get the manifest and dispatch detail for the waybill
                 var manifestDTO = await _manifestService.GetManifestByCode(activeManifest.ManifestCode);
-                var dispatch = await _uow.Dispatch.GetAsync(d => d.ManifestNumber == activeManifest.ManifestCode);
-
                 var activeManifestDto = Mapper.Map<ManifestWaybillMappingDTO>(activeManifest);
                 activeManifestDto.ManifestDetails = manifestDTO;
 
+                var dispatchList = await _uow.Dispatch.FindAsync(d => d.ManifestNumber == activeManifest.ManifestCode);
+                var dispatch = dispatchList.FirstOrDefault();
                 if (dispatch != null)
                 {
                     activeManifestDto.ManifestDetails.DispatchedBy = dispatch.DispatchedBy;
@@ -536,7 +536,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         manifestWaybillMapping.IsActive = false;
 
                         //3. check if the waybill has not been delivered 
-                        var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.WC);
+                        //var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.WC);
+                        var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill);
                         if (shipmentCollection == null)
                         {
                             throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
