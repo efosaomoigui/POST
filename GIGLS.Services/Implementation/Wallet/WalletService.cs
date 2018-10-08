@@ -128,7 +128,8 @@ namespace GIGLS.Services.Implementation.Wallet
             await _uow.CompleteAsync();
         }
 
-        public async Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
+        public async Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO,
+            bool hasServiceCentre = true)
         {
             var wallet = await _uow.Wallet.GetAsync(walletId);
             if (wallet == null)
@@ -141,8 +142,14 @@ namespace GIGLS.Services.Implementation.Wallet
                 walletTransactionDTO.UserId = await _userService.GetCurrentUserId();
             }
 
-            //create entry in WalletTransaction table
-            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            ////////////
+            var serviceCenterIds = new int[] { };
+            if (hasServiceCentre == true)
+            {
+                serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            }
+            ///////////////
+
             if (serviceCenterIds.Length <= 0)
             {
                 serviceCenterIds = new int[] { 0 };
@@ -152,7 +159,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 //var currentUser = await _userService.GetUserById(walletTransactionDTO.UserId);
                 //throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
             }
-
 
             var newWalletTransaction = Mapper.Map<WalletTransaction>(walletTransactionDTO);
             newWalletTransaction.WalletId = walletId;
@@ -253,7 +259,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     walletsQueryable = walletsQueryable.Where(x => x.CompanyType == companyType.ToString());
                     walletsDto = Mapper.Map<List<WalletDTO>>(walletsQueryable.ToList());
                 }
-                
+
                 ////set the customer name
                 foreach (var item in walletsDto)
                 {
@@ -271,8 +277,8 @@ namespace GIGLS.Services.Implementation.Wallet
                         item.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " +
                             $"{individualCustomerDTO.LastName}");
                     }
-                } 
-                
+                }
+
                 return walletsDto.OrderBy(x => x.CustomerName).ToList();
             }
             catch (Exception)

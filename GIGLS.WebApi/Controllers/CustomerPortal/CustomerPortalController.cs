@@ -47,6 +47,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpPut]
+        [Route("wallet/{walletId:int}")]
+        public async Task<IServiceResponse<object>> UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _portalService.UpdateWallet(walletId, walletTransactionDTO);
+                return new ServiceResponse<object>
+                {
+                    Object = true
+                };
+            });
+        }
+
         [HttpGet]
         [Route("wallet")]
         public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactions()

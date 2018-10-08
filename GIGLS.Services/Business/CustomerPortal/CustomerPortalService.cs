@@ -42,12 +42,13 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IPricingService _pricing;
         private readonly ICustomerService _customerService;
         private readonly IPreShipmentService _preShipmentService;
-        
+        private readonly IWalletService _walletService;
+
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService, 
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService,
-            ICustomerService customerService, IPreShipmentService preShipmentService)
+            ICustomerService customerService, IPreShipmentService preShipmentService, IWalletService walletService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -59,6 +60,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _customerService = customerService;
             _preShipmentService = preShipmentService;
             _uow = uow;
+            _walletService = walletService;
             MapperConfig.Initialize();
         }
 
@@ -74,6 +76,12 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
             return await Task.FromResult(invoicesDto);
+        }
+
+        public async Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
+        {
+            await _walletService.UpdateWallet(walletId, walletTransactionDTO, false);
+
         }
 
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactions()
