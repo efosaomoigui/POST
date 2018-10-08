@@ -521,6 +521,14 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 foreach (var waybill in waybills)
                 {
+                    //1a. check and return only delivered shipments
+                    var shipmentCollectionDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.OKT);
+                    if(shipmentCollectionDelivered != null)
+                    {
+                        continue;
+                    }
+
+
                     //1. check if the waybill is in the manifest 
                     var manifestWaybillMapping = await _uow.ManifestWaybillMapping.GetAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
 
@@ -536,8 +544,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         manifestWaybillMapping.IsActive = false;
 
                         //3. check if the waybill has not been delivered 
-                        //var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.WC);
-                        var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill);
+                        var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.WC);
+                        //var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill);
                         if (shipmentCollection == null)
                         {
                             throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
