@@ -43,6 +43,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<decimal> GetHaulagePrice(HaulagePricingDTO pricingDto);
         Task<CustomerDTO> GetCustomer(string userId);
         Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword);
+        Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO);
 
         Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto);
         Task<PreShipmentDTO> GetPreShipment(string waybill);
