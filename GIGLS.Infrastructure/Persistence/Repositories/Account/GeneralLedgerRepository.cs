@@ -105,6 +105,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                 generalLedgers = generalLedgers.Where(x => x.IsDeferred == accountFilterCriteria.IsDeferred);
             }
 
+            if (accountFilterCriteria.PaymentServiceType.HasValue)
+            {
+                generalLedgers = generalLedgers.Where(x => x.PaymentServiceType == accountFilterCriteria.PaymentServiceType);
+                //generalLedgers = generalLedgers.Where(x => x.Description.Contains("demurrage"));
+            }
+
             var result = generalLedgers.ToList();
             var generalLedgersResult = Mapper.Map<IEnumerable<GeneralLedgerDTO>>(result);    
             return Task.FromResult(generalLedgersResult.OrderByDescending(x => x.DateOfEntry).ToList());

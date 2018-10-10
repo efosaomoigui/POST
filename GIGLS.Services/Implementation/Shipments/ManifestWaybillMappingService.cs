@@ -245,7 +245,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //1b. check if all the waybills has the same status (ARF)
                 if (shipmentCollectionList.Count() == 0)
                 {
-                    throw new GenericException($"None of the waybills is not available for Processing");
+                    throw new GenericException($"None of the waybills is available for Processing");
                 }
 
                 if(shipmentCollectionList.Count() != waybills.Count())

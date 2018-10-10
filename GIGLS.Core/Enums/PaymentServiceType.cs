@@ -5,6 +5,7 @@
         Shipment,
         CashOnDelivery,
         Dispatch,
-        Miscellaneous
+        Miscellaneous,
+        Demurage
     }
 }

@@ -293,7 +293,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
 
-                string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
+               // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
 
                 var dailySales = await _service.GetDailySales(accountFilterCriteria);
 

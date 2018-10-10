@@ -9,6 +9,7 @@ namespace GIGLS.CORE.IServices.Report
     public interface IAccountReportService : IServiceDependencyMarker
     {
         Task<List<GeneralLedgerDTO>> GetIncomeReports(AccountFilterCriteria accountFilterCriteria);
+        Task<List<GeneralLedgerDTO>> GetDemurageReports(AccountFilterCriteria accountFilterCriteria);
         Task<List<GeneralLedgerDTO>> GetExpenditureReports(AccountFilterCriteria accountFilterCriteria);
         Task<List<InvoiceDTO>> GetInvoiceReports(AccountFilterCriteria accountFilterCriteria);
         Task<List<InvoiceViewDTO>> GetInvoiceReportsFromView(AccountFilterCriteria accountFilterCriteria);

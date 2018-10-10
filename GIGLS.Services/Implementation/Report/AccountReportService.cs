@@ -55,6 +55,20 @@ namespace GIGLS.Services.Implementation.Report
             return generalLedgerDTO;
         }
 
+        public async Task<List<GeneralLedgerDTO>> GetDemurageReports(AccountFilterCriteria accountFilterCriteria)
+        {
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            accountFilterCriteria.PaymentServiceType = PaymentServiceType.Demurage;
+            var generalLedgerDTO = await _uow.GeneralLedger.GetGeneralLedgersAsync(accountFilterCriteria, serviceCenterIds);
+
+            foreach (var item in generalLedgerDTO)
+            {
+                var user = await _uow.User.GetUserById(item.UserId);
+                item.UserId = user.FirstName + " " + user.LastName;
+            }
+            return generalLedgerDTO;
+        }
+
         public async Task<List<InvoiceDTO>> GetInvoiceReports(AccountFilterCriteria accountFilterCriteria)
         {
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();

@@ -75,6 +75,22 @@ namespace GIGLS.WebApi.Controllers.Report
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
+        [Route("demurage")]
+        public async Task<IServiceResponse<List<GeneralLedgerDTO>>> GetDemurage(AccountFilterCriteria accountFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var incomes = await _accountService.GetDemurageReports(accountFilterCriteria);
+
+                return new ServiceResponse<List<GeneralLedgerDTO>>
+                {
+                    Object = incomes
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
         [Route("expenditure")]
         public async Task<IServiceResponse<List<GeneralLedgerDTO>>> GetExpenditure(AccountFilterCriteria accountFilterCriteria)
         {
