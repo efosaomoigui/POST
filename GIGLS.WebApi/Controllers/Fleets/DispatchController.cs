@@ -9,7 +9,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.dispatchs
 {
-    [Authorize(Roles = "Shipment")]
+    [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/dispatch")]
     public class DispatchController : BaseWebApiController
     {

@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
 
@@ -13,6 +14,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string TrackingType { get; set; }
         public string User { get; set; }
         public string Waybill { get; set; }
+        public string Manifest { get; set; }
+        public string ManifestType { get; set; }
         public ScanStatusDTO ScanStatus { get; set; }
     }
 }

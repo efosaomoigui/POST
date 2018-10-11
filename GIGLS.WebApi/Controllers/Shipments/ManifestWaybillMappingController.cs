@@ -10,7 +10,7 @@ using GIGLS.Core.IServices.Business;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
-    [Authorize(Roles = "Shipment")]
+    [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/manifestwaybillmapping")]
     public class ManifestWaybillMappingController : BaseWebApiController
     {

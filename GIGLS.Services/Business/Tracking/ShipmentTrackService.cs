@@ -2,6 +2,7 @@
 using GIGLS.Core;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.Shipments;
 using System;
@@ -15,11 +16,13 @@ namespace GIGLS.Services.Business.Tracking
     public class ShipmentTrackService : IShipmentTrackService
     {
         private readonly IShipmentTrackingService _shipmentTrackingService;
+        private readonly IShipmentService _shipmentService;
         private readonly IUnitOfWork _uow;
 
-        public ShipmentTrackService(IShipmentTrackingService shipmentTrackingService, IUnitOfWork uow)
+        public ShipmentTrackService(IShipmentTrackingService shipmentTrackingService, IShipmentService shipmentService, IUnitOfWork uow)
         {
             _shipmentTrackingService = shipmentTrackingService;
+            _shipmentService = shipmentService;
             _uow = uow;
         }
 
@@ -27,13 +30,92 @@ namespace GIGLS.Services.Business.Tracking
         {
             var result = await _shipmentTrackingService.GetShipmentTrackings(waybillNumber);
 
-            //check for international
-            var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == waybillNumber);
-            if (shipment != null && shipment.IsInternational)
+            if (result.Count() > 0)
             {
-                var internationResult = await TrackShipmentForInternational(waybillNumber);
-                result.ToList().AddRange(internationResult);
+                //get shipment Details
+                var shipment = await _shipmentService.GetBasicShipmentDetail(waybillNumber);
+                string manifest = null;
+                string ManifestTypeValue = ManifestType.Delivery.ToString(); //Default
+
+                //Get Manifest Details
+                if (shipment != null)
+                {
+                    if (shipment.PickupOptions == PickupOptions.HOMEDELIVERY)
+                    {
+                        //get home delivery manifest
+                        var manifestQuery = _uow.ManifestWaybillMapping.GetAllAsQueryable();
+                        var manifestResult = manifestQuery.Where(x => x.Waybill == waybillNumber).ToList();
+                        
+                        if(manifestResult.Count() > 0)
+                        {
+                            foreach (var query in manifestResult)
+                            {
+                                if (query.IsActive)
+                                {
+                                    manifest = query.ManifestCode;
+                                    break;
+                                }
+                                else
+                                {
+                                    manifest = query.ManifestCode;
+                                }
+                            }
+                        }
+                    }
+
+                    if (manifest == null)
+                    {
+                        //1. Get Group Waybill for the waybill
+                        var groupWaybillNumberMapping = _uow.GroupWaybillNumberMapping.GetAllAsQueryable();
+                        var groupWaybillResult = groupWaybillNumberMapping.Where(w => w.WaybillNumber == waybillNumber).Select(x => x.GroupWaybillNumber).Distinct().ToList();
+
+                        if(groupWaybillResult.Count() > 0)
+                        {
+                            string groupWaybill = null;
+                            foreach(string s in groupWaybillResult)
+                            {
+                                groupWaybill = s;
+                            }
+
+                            //Get the manifest the group waybill
+                            //var manifestGroupwaybillMapping = await _uow.ManifestGroupWaybillNumberMapping.Where(s => s.GroupWaybillNumber == groupWaybill).AsQueryable();
+                            var manifestGroupwaybillMapping = await _uow.ManifestGroupWaybillNumberMapping.GetAsync(x => x.GroupWaybillNumber == groupWaybill);
+                            if(manifestGroupwaybillMapping != null)
+                            {
+                                manifest = manifestGroupwaybillMapping.ManifestCode;
+                                ManifestTypeValue = ManifestType.External.ToString();
+                            }
+                        }
+                    }
+                }
+
+                foreach (var track in result)
+                {
+                    track.Manifest = manifest;
+                    track.ManifestType = ManifestTypeValue;
+
+                    //track.Amount = shipment.GrandTotal;
+                    //track.Destination = shipment.DestinationServiceCentre.Name;
+                    //track.Departure = shipment.DepartureServiceCentre.Name;
+                    //track.PickupOptions = shipment.PickupOptions.ToString();
+                    //track.DeliveryOptions = shipment.DeliveryOption.Description;
+                }
+
+                ////check for international
+                if (shipment != null && shipment.IsInternational)
+                {
+                    var internationResult = await TrackShipmentForInternational(waybillNumber);
+                    result.ToList().AddRange(internationResult);
+                }
             }
+
+            //check for international
+            //var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == waybillNumber);
+            //if (shipment != null && shipment.IsInternational)
+            //{
+            //    var internationResult = await TrackShipmentForInternational(waybillNumber);
+            //    result.ToList().AddRange(internationResult);
+            //}
 
             return result;
         }

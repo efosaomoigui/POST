@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
-    [Authorize(Roles = "Shipment")]
+    [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/manifestgroupwaybillnumbermapping")]
     public class ManifestGroupWaybillNumberMappingController : BaseWebApiController
     {
