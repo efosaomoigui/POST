@@ -166,7 +166,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var isWaybillMappedActive = _uow.ManifestWaybillMapping.GetAllAsQueryable();
                 isWaybillMappedActive = isWaybillMappedActive.Where(x => x.IsActive == true && waybills.Contains(x.Waybill));
 
-                var isWaybillsMappedActiveResult = isWaybillMappedActive.Select(x => x.Waybill).Distinct().ToList();
+                List<string> isWaybillsMappedActiveResult = isWaybillMappedActive.Select(x => x.Waybill).Distinct().ToList();
 
                 if (isWaybillsMappedActiveResult.Count() > 0)
                 {
@@ -235,17 +235,18 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
-                //1a. Get the shipment status of the waybills we want to manifest
+                //1a. Get the shipment status of the waybills we want to manifest               
                 var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable();
                 shipmentCollection = shipmentCollection.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && waybills.Contains(x.Waybill));
-
-                //extrack waybills into a list from shipment collection
                 var shipmentCollectionList = shipmentCollection.Select(x => x.Waybill).Distinct().ToList();
+
+                //1a. Get the shipment status of the waybills we want to manifest && extrack waybills into a list from shipment collection
+                //List<string> shipmentCollectionList = _uow.ShipmentCollection.GetAllAsQueryable().Where(s => s.ShipmentScanStatus == ShipmentScanStatus.ARF && waybills.Contains(s.Waybill)).Select(x => x.Waybill).Distinct().ToList();
 
                 //1b. check if all the waybills has the same status (ARF)
                 if (shipmentCollectionList.Count() == 0)
                 {
-                    throw new GenericException($"None of the waybills is available for Processing");
+                    throw new GenericException($"No waybill available for Processing");
                 }
 
                 if(shipmentCollectionList.Count() != waybills.Count())

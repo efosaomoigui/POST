@@ -80,7 +80,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             //get all shipments by servicecentre
             var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-            var shipments = await _uow.Shipment.FindAsync(s => serviceCenters.Contains(s.DestinationServiceCentreId));
+            var shipments = await _uow.Shipment.FindAsync(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId));
             var shipmentsWaybills = shipments.ToList().Select(a => a.Waybill).AsEnumerable();
 
             //get collected shipment
@@ -111,20 +111,17 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
                 }
-
-                var shipments = _uow.Shipment.FindAsync(s => serviceCenters.Contains(s.DestinationServiceCentreId)).Result;
-                var shipmentsWaybills = shipments.ToList().Select(a => a.Waybill).AsEnumerable();
-
+                
+                List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
+                
                 //get collected shipment
-                var shipmentCollection = _uow.ShipmentCollection.FindAsync(x =>
-                (x.ShipmentScanStatus == ShipmentScanStatus.OKT ||
-                x.ShipmentScanStatus == ShipmentScanStatus.OKC) &&
-                shipmentsWaybills.Contains(x.Waybill)).Result;
+                var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC).ToList();
+                
+                //extras the current login staff shipment from the shipment collection
+                shipmentCollection = shipmentCollection.Where(x => shipmentsWaybills.Contains(x.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
+                int count = shipmentCollection.Count();
 
-                var shipmentCollectionDto = Mapper.Map<IEnumerable<ShipmentCollectionDTO>>(shipmentCollection);
-                shipmentCollectionDto = shipmentCollectionDto.OrderByDescending(x => x.DateModified);
-
-                var count = shipmentCollection.ToList().Count();
+                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
 
                 if (filterOptionsDto != null)
                 {
@@ -158,8 +155,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentCollectionDto = shipmentCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
-                return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto.ToList()), count);
-
+                return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), count);
             }
             catch (Exception)
             {
@@ -183,15 +179,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
             }
+            
+            List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
+            
+            var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).ToList();
+            shipmentCollection = shipmentCollection.Where(x => shipmentsWaybills.Contains(x.Waybill)).ToList();
 
-            var shipments = await _uow.Shipment.FindAsync(s => serviceCenters.Contains(s.DestinationServiceCentreId));
-            var shipmentsWaybills = shipments.ToList().Select(a => a.Waybill).AsEnumerable();
-
-            var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x =>
-            x.ShipmentScanStatus == ShipmentScanStatus.ARF &&
-            shipmentsWaybills.Contains(x.Waybill));
-
-            var shipmentCollectionDto = Mapper.Map<IEnumerable<ShipmentCollectionDTO>>(shipmentCollection);
+            var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
 
             return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateCreated));
         }
@@ -214,17 +208,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
                 
-                var shipments = _uow.Shipment.GetAllAsQueryable();
-                List<string> shipmentsWaybills = shipments.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
+                List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
-                var shipmentCollectionQuery = _uow.ShipmentCollection.GetAllAsQueryable();
-                var shipmentCollection = shipmentCollectionQuery.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).ToList();
-                shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).ToList();
+                var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).ToList();
+                shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
 
-                var count = shipmentCollection.Count();
+                int count = shipmentCollection.Count();
                 
-                var shipmentCollectionDto = Mapper.Map<IEnumerable<ShipmentCollectionDTO>>(shipmentCollection);
-                shipmentCollectionDto = shipmentCollectionDto.OrderByDescending(x => x.DateCreated);
+                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
 
                 if (filterOptionsDto != null)
                 {
@@ -258,7 +249,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentCollectionDto = shipmentCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
-                return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto.ToList()), count);
+                return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), count);
             }
             catch (Exception)
             {
