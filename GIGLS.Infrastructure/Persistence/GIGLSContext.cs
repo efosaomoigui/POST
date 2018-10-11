@@ -29,7 +29,7 @@ namespace GIGLS.Infrastructure.Persistence
             Configuration.LazyLoadingEnabled = false;
             Configuration.ProxyCreationEnabled = false;
 
-            Database.Log = s => System.Diagnostics.Debug.WriteLine(s);
+            //Database.Log = s => System.Diagnostics.Debug.WriteLine(s);
         }
 
         public static GIGLSContext Create()
