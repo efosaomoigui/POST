@@ -86,7 +86,7 @@ namespace GIGLS.Services.Business.Scanning
         public async Task<bool> ScanShipment(ScanDTO scan)
         {
             // check if the waybill number exists in the system
-            if(scan.WaybillNumber != null)
+            if (scan.WaybillNumber != null)
             {
                 scan.WaybillNumber = scan.WaybillNumber.Trim();
             }
@@ -129,7 +129,7 @@ namespace GIGLS.Services.Business.Scanning
                     }
                 }
             }
-            
+
             /////////////////////////2. GroupShipment
             // check if the group waybill number exists in the system
             var groupWaybill = await _groupWaybill.GetGroupWayBillNumberForScan(scan.WaybillNumber);
@@ -246,7 +246,7 @@ namespace GIGLS.Services.Business.Scanning
 
 
                 //Delivery Manifest
-                if(manifest.ManifestType == ManifestType.Delivery)
+                if (manifest.ManifestType == ManifestType.Delivery)
                 {
                     var waybillInManifestList = await _manifestWaybillService.GetWaybillsInManifest(manifest.ManifestCode);
 
@@ -254,9 +254,17 @@ namespace GIGLS.Services.Business.Scanning
                     {
 
                         //update dispatch to scan for Shipment recieved by Courier for delivery manifest
-                        if (scan.ShipmentScanStatus == ShipmentScanStatus.SRC ) // ||scan.ShipmentScanStatus == ShipmentScanStatus.WC )
+                        if (scan.ShipmentScanStatus == ShipmentScanStatus.SRC) // ||scan.ShipmentScanStatus == ShipmentScanStatus.WC )
                         {
                             var dispatch = await _dispatchService.GetDispatchManifestCode(manifest.ManifestCode);
+
+                            //verify the delivery manifest has been signed off
+                            if (dispatch != null && dispatch.ReceivedBy != null)
+                            {
+                                throw new GenericException($"This Manifest has already been signed off.");
+                            }
+
+
                             if (dispatch != null && dispatch.ReceivedBy == null)
                             {
                                 //get the user that login
@@ -299,17 +307,17 @@ namespace GIGLS.Services.Business.Scanning
                     }
                     return true;
                 }
-               
+
             }
 
             if (shipment == null && groupWaybill == null && manifest == null)
             {
                 throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} does not exist");
             }
-            
+
             //////////////////////4. Check and Create Entries for Transit Manifest
             await CheckAndCreateEntriesForTransitManifest(scan, manifest, waybillsInManifest);
-            
+
             return true;
         }
 
@@ -329,7 +337,7 @@ namespace GIGLS.Services.Business.Scanning
         {
             //1. For Shipment Check if user has rights to this action
             {
-                if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF  || scan.ShipmentScanStatus == ShipmentScanStatus.SRC)
+                if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF || scan.ShipmentScanStatus == ShipmentScanStatus.SRC)
                 {
                     //Check if the user is a staff at final destination
                     var serviceCenters = await _userService.GetPriviledgeServiceCenters();
@@ -345,7 +353,7 @@ namespace GIGLS.Services.Business.Scanning
                             {
                                 if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
                                 {
-                                    if(serviceCenters[0] == destinationServiceCentreId)
+                                    if (serviceCenters[0] == destinationServiceCentreId)
                                     {
                                         serviceCenters = new int[] { 4, 294 };
                                         return true;
@@ -412,7 +420,7 @@ namespace GIGLS.Services.Business.Scanning
 
                     //6. Remove entry from ManifestGroupWaybillNumberMappingService
                     //6.1 Find the groupWaybill attached to the Manifest
-                    foreach(var groupWaybill in groupWaybillsInManifest)
+                    foreach (var groupWaybill in groupWaybillsInManifest)
                     {
                         await _groupManifest.RemoveGroupWaybillNumberFromManifest(manifest.ManifestCode, groupWaybill);
                     }
