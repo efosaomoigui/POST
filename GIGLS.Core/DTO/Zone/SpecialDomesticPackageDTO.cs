@@ -7,5 +7,6 @@ namespace GIGLS.Core.DTO.Zone
         public int SpecialDomesticPackageId { get; set; }
         public string Name { get; set; }
         public bool Status { get; set; }
+        public decimal Weight { get; set; }
     }
 }
