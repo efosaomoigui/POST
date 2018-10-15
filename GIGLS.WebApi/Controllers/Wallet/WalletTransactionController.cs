@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Wallet;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
 using System.Collections.Generic;
@@ -28,6 +29,21 @@ namespace GIGLS.WebApi.Controllers.Wallet
             {
                 var walletTransactions = await _walletTransactionService.GetWalletTransactions();
                 return new ServiceResponse<IEnumerable<WalletTransactionDTO>>
+                {
+                    Object = walletTransactions
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("credit")]
+        public async Task<IServiceResponse<List<WalletTransactionDTO>>> GetWalletTransactionsCredit(AccountFilterCriteria accountFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var walletTransactions = await _walletTransactionService.GetWalletTransactionsCredit(accountFilterCriteria);
+                return new ServiceResponse<List<WalletTransactionDTO>>
                 {
                     Object = walletTransactions
                 };
