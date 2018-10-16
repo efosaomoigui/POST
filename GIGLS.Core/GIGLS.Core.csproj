@@ -156,6 +156,7 @@
     <Compile Include="Domain\Haulage.cs" />
     <Compile Include="Domain\HaulageDistanceMapping.cs" />
     <Compile Include="Domain\ManifestVisitMonitoring.cs" />
+    <Compile Include="Domain\Notification.cs" />
     <Compile Include="Domain\PreShipmentManifestMapping.cs" />
     <Compile Include="Domain\ManifestWaybillMapping.cs" />
     <Compile Include="Domain\MessagingLog\EmailSendLog.cs" />
@@ -269,6 +270,7 @@
     <Compile Include="DTO\Nav\MainNavDTO.cs" />
     <Compile Include="DTO\Nav\SubNavDTO.cs" />
     <Compile Include="DTO\Nav\SubSubNavDTO.cs" />
+    <Compile Include="DTO\NotificationDTO.cs" />
     <Compile Include="DTO\Partnership\PartnerApplicationDto.cs" />
     <Compile Include="DTO\Partnership\PartnerDto.cs" />
     <Compile Include="DTO\PaymentTransactions\HaulagePricingDTO.cs" />
@@ -420,6 +422,7 @@
     <Compile Include="IRepositories\IAuthRepository.cs" />
     <Compile Include="IRepositories\ICountryRepository.cs" />
     <Compile Include="IRepositories\IMessageRepository.cs" />
+    <Compile Include="IRepositories\INotificationRepository.cs" />
     <Compile Include="IRepositories\IRepository.cs" />
     <Compile Include="IRepositories\IStateRepository.cs" />
     <Compile Include="IRepositories\IUnitOfWork.cs" />
@@ -521,6 +524,7 @@
     <Compile Include="IServices\Haulage\IPackingListService.cs" />
     <Compile Include="IServices\ICountryService.cs" />
     <Compile Include="IServices\IMessageService.cs" />
+    <Compile Include="IServices\INotificationService.cs" />
     <Compile Include="IServices\IServiceDependencyMarker.cs" />
     <Compile Include="IServices\IServiceReponse.cs" />
     <Compile Include="IServices\IStateService.cs" />

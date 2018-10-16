@@ -118,6 +118,7 @@ namespace GIGLS.Core
         IPreShipmentItemRepository PreShipmentItem { get; set; }
         IPreShipmentRepository PreShipment { get; set; }
         IPreShipmentManifestMappingRepository PreShipmentManifestMapping { get; set; }
+        INotificationRepository Notification { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

@@ -203,7 +203,9 @@ namespace GIGLS.Infrastructure.Persistence
 
         //PreShipmentManifestMapping
         public DbSet<PreShipmentManifestMapping> PreShipmentManifestMapping { get; set; }
-        
+
+        public DbSet<Notification> Notification { get; set; }
+
         #endregion
 
 

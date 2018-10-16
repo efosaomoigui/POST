@@ -148,6 +148,7 @@
     <Compile Include="Persistence\Repositories\Nav\MainNavRepository.cs" />
     <Compile Include="Persistence\Repositories\Nav\SubNavRepository.cs" />
     <Compile Include="Persistence\Repositories\Nav\SubSubNavRepository.cs" />
+    <Compile Include="Persistence\Repositories\NotificationRepository.cs" />
     <Compile Include="Persistence\Repositories\Partnership\PartnerApplicationRepository.cs" />
     <Compile Include="Persistence\Repositories\Partnership\PartnerRepository.cs" />
     <Compile Include="Persistence\Repositories\PaymentTransactions\PaymentPartialTransactionRepository.cs" />

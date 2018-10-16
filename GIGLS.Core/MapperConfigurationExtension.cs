@@ -270,6 +270,8 @@ namespace GIGLS.Core
                 config.CreateMap<CustomerView, CustomerDTO>();
                 config.CreateMap<CustomerDTO, CustomerView>();
 
+                config.CreateMap<Notification, NotificationDTO>();
+                config.CreateMap<NotificationDTO, Notification>();
             });
 
             isInit = true;

@@ -190,6 +190,7 @@
     <Compile Include="Implementation\Messaging\EmailSendLogService.cs" />
     <Compile Include="Implementation\Messaging\MessageService.cs" />
     <Compile Include="Implementation\Messaging\MessageSenderService.cs" />
+    <Compile Include="Implementation\Messaging\NotificationService.cs" />
     <Compile Include="Implementation\Messaging\SmsSendLogService.cs" />
     <Compile Include="Implementation\Nav\MainNavService.cs" />
     <Compile Include="Implementation\Nav\SubNavService.cs" />

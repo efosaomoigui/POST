@@ -307,6 +307,7 @@
     <Compile Include="Controllers\Haulage\PackingListController.cs" />
     <Compile Include="Controllers\Messaging\EmailSendLogController.cs" />
     <Compile Include="Controllers\Messaging\MessageController.cs" />
+    <Compile Include="Controllers\Messaging\NotificationController.cs" />
     <Compile Include="Controllers\Messaging\SmsSendLogController.cs" />
     <Compile Include="Controllers\Nav\MainNavController.cs" />
     <Compile Include="Controllers\Nav\SubNavController.cs" />

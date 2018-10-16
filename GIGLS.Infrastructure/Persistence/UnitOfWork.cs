@@ -311,6 +311,10 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IPreShipmentManifestMappingRepository PreShipmentManifestMapping { get; set; }
 
+        [Inject]
+        public INotificationRepository Notification { get; set; }
+
+
         public int Complete()
         {
             return _context.SaveChanges();
