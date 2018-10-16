@@ -6,6 +6,7 @@ using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -49,6 +50,13 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var walletTransactions = await _uow.WalletTransaction.GetWalletTransactionAsync(serviceCenterIds);
+            return walletTransactions;
+        }
+
+        public async Task<List<WalletTransactionDTO>> GetWalletTransactionsCredit(AccountFilterCriteria accountFilterCriteria)
+        {
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var walletTransactions = await _uow.WalletTransaction.GetWalletTransactionCreditAsync(serviceCenterIds, accountFilterCriteria);
             return walletTransactions;
         }
 
