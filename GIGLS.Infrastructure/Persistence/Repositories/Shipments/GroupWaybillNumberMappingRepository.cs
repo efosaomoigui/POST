@@ -7,6 +7,7 @@ using GIGLS.Infrastructure.Persistence.Repository;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using GIGLS.Core.DTO.ServiceCentres;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 {
@@ -26,9 +27,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var serviceCentreWaybills = new List<string>();
             if (serviceCentreIds.Length > 0)
             {
-                //serviceCentreWaybills = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId)).
-                //    Select(s => s.Waybill).ToList();
-                //groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreWaybills.Contains(s.WaybillNumber));
                 groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
             }
 
@@ -43,7 +41,19 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                              DateCreated = gw.DateCreated,
                                              DateModified = gw.DateModified,
                                              DepartureServiceCentreId = gw.DepartureServiceCentreId,
-                                             DestinationServiceCentreId = gw.DestinationServiceCentreId
+                                             DestinationServiceCentreId = gw.DestinationServiceCentreId,
+                                             DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                             {
+                                                 ServiceCentreId = gw.DepartureServiceCentreId,
+                                                 Code = x.Code,
+                                                 Name = x.Name
+                                             }).FirstOrDefault(),
+                                             DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                             {
+                                                 ServiceCentreId = gw.DestinationServiceCentreId,
+                                                 Code = x.Code,
+                                                 Name = x.Name
+                                             }).FirstOrDefault()
                                          };
             return Task.FromResult(groupwaybillMappingDto.ToList());
         }
@@ -73,7 +83,19 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               DateCreated = gw.DateCreated,
                                               DateModified = gw.DateModified,
                                               DepartureServiceCentreId = gw.DepartureServiceCentreId,
-                                              DestinationServiceCentreId = gw.DestinationServiceCentreId
+                                              DestinationServiceCentreId = gw.DestinationServiceCentreId,
+                                              DepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
+                                              {
+                                                  ServiceCentreId = gw.DepartureServiceCentreId,
+                                                  Code = x.Code,
+                                                  Name = x.Name
+                                              }).FirstOrDefault(),
+                                              DestinationServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == gw.DestinationServiceCentreId).Select(x => new ServiceCentreDTO
+                                              {
+                                                  ServiceCentreId = gw.DestinationServiceCentreId,
+                                                  Code = x.Code,
+                                                  Name = x.Name
+                                              }).FirstOrDefault()
                                           }).ToList();
 
 

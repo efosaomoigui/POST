@@ -52,17 +52,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (resultSet.Add(item.GroupWaybillNumber))
                     {
                         result.Add(item);
-
-                        // get the service cenre
-                        var departureSC = await _uow.ServiceCentre.GetAsync(item.DepartureServiceCentreId);
-                        var destinationSC = await _uow.ServiceCentre.GetAsync(item.DestinationServiceCentreId);
-
-                        item.DepartureServiceCentre = Mapper.Map<ServiceCentreDTO>(departureSC);
-                        item.DestinationServiceCentre = Mapper.Map<ServiceCentreDTO>(destinationSC);
                     }
                 }
 
-                return result.ToList().OrderByDescending(x => x.DateCreated);
+                return result.ToList().OrderByDescending(x => x.DateCreated).Take(100);
             }
             catch (Exception)
             {

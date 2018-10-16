@@ -681,26 +681,21 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //filterOptionsDto.count = 1000000;
-
                 // get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                //var shipmentsBySC = await _uow.Shipment.GetShipments(filterOptionsDto, serviceCenters).Item1;
-                //var shipments = _uow.Shipment.Where(s => s.IsCancelled == false && s.IsDeleted == false);
-                var allInvoices = _uow.Invoice.GetAllFromInvoiceView().ToList();
-                //var shipments = _uow.Invoice.GetAllFromInvoiceView();
-                var shipments = allInvoices.Where(s => s.IsCancelled == false && s.IsDeleted == false);
+                var allInvoicesQueryable = _uow.Invoice.GetAllFromInvoiceView();
+                var shipmentsQueryable = allInvoicesQueryable.Where(s => s.IsCancelled == false && s.IsDeleted == false);
 
                 //apply filters for Service Centre
                 if (serviceCenters.Length > 0)
                 {
-                    shipments = shipments.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                    shipmentsQueryable = shipmentsQueryable.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
                 }
 
                 //filter by Local or International Shipment
                 if (filterOptionsDto.IsInternational != null)
                 {
-                    shipments = shipments.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
+                    shipmentsQueryable = shipmentsQueryable.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
                 }
 
                 //filter by DestinationServiceCentreId
@@ -712,19 +707,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     if (filter == "DestinationServiceCentreId" && boolResult)
                     {
-                        shipments = shipments.Where(s => s.DestinationServiceCentreId == destinationSCId);
+                        shipmentsQueryable = shipmentsQueryable.Where(s => s.DestinationServiceCentreId == destinationSCId);
                     }
                 }
 
-
-                var shipmentsBySC = shipments.ToList();  // Mapper.Map<List<ShipmentDTO>>(shipments.ToList());
+                var shipmentsBySC = shipmentsQueryable.ToList();
 
                 // get only paid shipments from Invoice for Individuals
                 // and allow Ecommerce and Corporate customers to be grouped
                 var paidShipments = new List<InvoiceView>();
                 foreach (var shipmentItem in shipmentsBySC)
                 {
-                    var invoice = shipmentItem;     // await _uow.Invoice.GetAsync(s => s.Waybill == shipmentItem.Waybill);
+                    var invoice = shipmentItem;
 
                     if (invoice.PaymentStatus == PaymentStatus.Paid)
                     {
@@ -774,7 +768,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false).ToList();
                 foreach (var item in transitWaybillNumberList)
                 {
-                    var shipment = allInvoices.FirstOrDefault(s => s.Waybill == item.WaybillNumber);     // await GetShipment(item.WaybillNumber);
+                    var shipment = allInvoicesQueryable.FirstOrDefault(s => s.Waybill == item.WaybillNumber);     // await GetShipment(item.WaybillNumber);
                     if (filterByDestinationSC && shipmentsBySC.Count > 0)
                     {
                         var destinationSC = shipmentsBySC[0].DestinationServiceCentreId;
@@ -795,7 +789,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 foreach (var finalUngroupedItem in finalUngroupedList)
                 {
                     //var shipment = await GetShipment(finalUngroupedItem.Waybill);
-                    var shipment = allInvoices.FirstOrDefault(s => s.Waybill == finalUngroupedItem.Waybill);
+                    var shipment = allInvoicesQueryable.FirstOrDefault(s => s.Waybill == finalUngroupedItem.Waybill);
                     if (shipment != null)
                     {
                         var invoiceViewDTO = Mapper.Map<InvoiceViewDTO>(shipment);
