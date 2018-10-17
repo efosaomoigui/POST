@@ -116,8 +116,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             int[] serviceCenterIds = new int[] { serviceCenterId };
             // get the service centre
             var serviceCentre = await _serviceCenterService.GetServiceCentreById(serviceCenterId);
-            var allShipments = _uow.Invoice.GetAllFromInvoiceView();
-            var serviceCentreShipments = allShipments.Where(s => serviceCenterId == s.DepartureServiceCentreId);
+            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceView();
+            var serviceCentreShipments = allShipmentsQueryable.Where(s => serviceCenterId == s.DepartureServiceCentreId);
 
             //set for TargetAmount and TargetOrder
             dashboardDTO.TargetOrder = serviceCentre.TargetOrder;
@@ -125,14 +125,14 @@ namespace GIGLS.Services.Implementation.Dashboard
 
 
             // get shipment delivered - global
-            var shipmentTrackings = _uow.ShipmentTracking.GetAllAsQueryable();
-            var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.ARF.ToString());
+            //var shipmentTrackings = _uow.ShipmentTracking.GetAllAsQueryable();
+            //var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.ARF.ToString());
             //var shipmentsDeliveredByServiceCenter =
             //    serviceCentreShipments.Where(s => shipmentsDelivered.Select(d => d.Waybill).Contains(s.Waybill));
 
 
             // get shipment ordered
-            var shipmentsOrderedByServiceCenter = serviceCentreShipments;
+            var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
             dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
 
             var totalCustomers = GetTotalCutomersCount(shipmentsOrderedByServiceCenter);
