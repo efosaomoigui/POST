@@ -205,7 +205,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
 
             // get shipment ordered
-            var shipmentsOrderedByServiceCenter = serviceCentreShipments;
+            var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
             dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
 
             // get all customers - individual and company
