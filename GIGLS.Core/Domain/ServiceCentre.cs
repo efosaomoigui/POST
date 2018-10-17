@@ -1,14 +1,23 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.Domain;
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGL.GIGLS.Core.Domain
 {
     public class ServiceCentre : BaseDomain, IAuditable
     {
         public int ServiceCentreId { get; set; }
+
+        [MaxLength(100), MinLength(5)]
+        [Index(IsUnique = true)]
         public string Name { get; set; }
+
+        [MaxLength(100), MinLength(5)]
+        [Index(IsUnique = true)]
         public string Code { get; set; }
+
         public string Address { get; set; }
         public string City { get; set; }
         public string PhoneNumber { get; set; }
