@@ -263,7 +263,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             var dashboardDTO = new DashboardDTO();
 
             int[] serviceCenterIds = { };   //empty array
-            var serviceCentreShipments = _uow.Invoice.GetAllFromInvoiceView();
+            var serviceCentreShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceView();
 
             //set for TargetAmount and TargetOrder
             var serviceCentres = await _serviceCenterService.GetServiceCentres();
@@ -276,7 +276,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             //var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.ARF.ToString());
 
             // get shipment ordered
-            var shipmentsOrderedByServiceCenter = serviceCentreShipments;
+            var shipmentsOrderedByServiceCenter = serviceCentreShipmentsQueryable.ToList().AsQueryable();
             dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
 
             // get all customers - individual and company
@@ -291,7 +291,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // MostRecentOrder
             var mostRecentOrder =
-                serviceCentreShipments.
+                serviceCentreShipmentsQueryable.
                 OrderByDescending(s => s.DateCreated).Take(5).ToList();
 
             dashboardDTO.MostRecentOrder = (from s in mostRecentOrder
@@ -372,7 +372,7 @@ namespace GIGLS.Services.Implementation.Dashboard
         {
             var count = (from shipment in shipmentsOrderedByServiceCenter select shipment).
                 GroupBy(g => new { g.CustomerType, g.CustomerId }).Count();
-
+            
             return count;
         }
 
