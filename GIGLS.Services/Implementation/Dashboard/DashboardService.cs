@@ -272,8 +272,8 @@ namespace GIGLS.Services.Implementation.Dashboard
 
 
             // get shipment delivered
-            //var shipmentTrackings = _uow.ShipmentTracking.GetAllAsQueryable();
-            //var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.ARF.ToString());
+            var shipmentTrackings = _uow.ShipmentTracking.GetAllAsQueryable();
+            var shipmentsDelivered = shipmentTrackings.Where(s => s.Status == ShipmentScanStatus.ARF.ToString());
 
             // get shipment ordered
             var shipmentsOrderedByServiceCenter = serviceCentreShipmentsQueryable.ToList().AsQueryable();
@@ -285,7 +285,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // set properties
             //dashboardDTO.ServiceCentre = serviceCentreDTO;
-            //dashboardDTO.TotalShipmentDelivered = shipmentsDelivered.Count;
+            dashboardDTO.TotalShipmentDelivered = shipmentsDelivered.Count();
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
             dashboardDTO.TotalCustomers = totalCustomers;
 
