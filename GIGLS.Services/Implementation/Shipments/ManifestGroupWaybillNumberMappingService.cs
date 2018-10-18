@@ -227,7 +227,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
                 var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters);
-                return manifestGroupWaybillMapings.OrderByDescending(x => x.DateCreated);
+                return manifestGroupWaybillMapings.OrderByDescending(x => x.DateCreated).Take(200);
             }
             catch (Exception)
             {
