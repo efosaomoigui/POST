@@ -105,14 +105,14 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //added for GWA and GWARIMPA service centres
                 {
-                    if(serviceCenters.Length == 1)
+                    if (serviceCenters.Length == 1)
                     {
                         if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
                         {
-                            serviceCenters = new int[] {4, 294};
+                            serviceCenters = new int[] { 4, 294 };
                         }
                     }
-                }                
+                }
 
                 //var allShipments = _uow.Shipment.GetShipments(filterOptionsDto, new int[] { });
                 var allShipments = _uow.Invoice.GetAllFromInvoiceView();
@@ -122,15 +122,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     //Get shipments coming to the service centre 
                     var shipmentResult = allShipments.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).ToList();
-                    
+
                     //delivered shipments should not be displayed in expected shipments
                     List<string> shipmetCollection = _uow.ShipmentCollection.GetAllAsQueryable().Select(w => w.Waybill).ToList();
 
                     //remove all the waybills that at the collection center from the income shipments
                     shipmentResult = shipmentResult.Where(s => !shipmetCollection.Contains(s.Waybill)).ToList();
-                    incomingShipments = Mapper.Map<List<InvoiceViewDTO>>(shipmentResult);                    
+                    incomingShipments = Mapper.Map<List<InvoiceViewDTO>>(shipmentResult);
                 }
-                                
+
                 //populate the service centres
                 foreach (var invoiceViewDTO in incomingShipments)
                 {
@@ -558,7 +558,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             // get deliveryOptionIds and set the first value in shipment
             var deliveryOptionIds = shipmentDTO.DeliveryOptionIds;
-            if(deliveryOptionIds.Count > 0)
+            if (deliveryOptionIds.Count > 0)
             {
                 shipmentDTO.DeliveryOptionId = deliveryOptionIds[0];
             }
@@ -609,7 +609,7 @@ namespace GIGLS.Services.Implementation.Shipments
             //await _uow.CompleteAsync();
 
             //save into DeliveryOptionMapping table
-            foreach(var deliveryOptionId in deliveryOptionIds)
+            foreach (var deliveryOptionId in deliveryOptionIds)
             {
                 var deliveryOptionMapping = new ShipmentDeliveryOptionMapping()
                 {
@@ -681,7 +681,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                // get shipments for that Service Centre
+                //1. get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var allInvoicesQueryable = _uow.Invoice.GetAllFromInvoiceView();
                 var shipmentsQueryable = allInvoicesQueryable.Where(s => s.IsCancelled == false && s.IsDeleted == false);
@@ -713,7 +713,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var shipmentsBySC = shipmentsQueryable.ToList();
 
-                // get only paid shipments from Invoice for Individuals
+                //2. get only paid shipments from Invoice for Individuals
                 // and allow Ecommerce and Corporate customers to be grouped
                 var paidShipments = new List<InvoiceView>();
                 foreach (var shipmentItem in shipmentsBySC)
@@ -733,21 +733,26 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 }
 
-                // get all grouped waybills for that Service Centre
+                //3. get all grouped waybills for that Service Centre
                 var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(serviceCenters);
 
-                // filter the two lists
-                var ungroupedWaybills = paidShipments.Where(s => !groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber).Contains(s.Waybill)).ToList();
+                //4. filter the two lists
+                var groupedWaybillsAsStringList = groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber);
+                var groupedWaybillsAsHashSet = new HashSet<string>(groupedWaybillsAsStringList);
 
-                // Ensure the waybills are in this ServiceCentre from the TransitWaybill entity
-                //var transitWaybillNumberList = _uow.TransitWaybillNumber.GetAll().Where(s => paidShipments.Select(x => x.Waybill).Contains(s.WaybillNumber)).ToList();
+                var ungroupedWaybills = paidShipments.Where(s => !groupedWaybillsAsHashSet.Contains(s.Waybill)).ToList();
 
+
+                //5. Ensure the waybills are in this ServiceCentre from the TransitWaybill entity
+                
+                //Get TransitWaybillNumber as a querable list
+                var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable().ToList();
 
                 // final ungroupedList
                 var finalUngroupedList = new List<InvoiceView>();
                 foreach (var item in ungroupedWaybills)
                 {
-                    var tranWaybillObj = _uow.TransitWaybillNumber.SingleOrDefault(s => s.WaybillNumber == item.Waybill);
+                    var tranWaybillObj = allTransitWaybillNumberList.SingleOrDefault(s => s.WaybillNumber == item.Waybill);
                     if (tranWaybillObj != null)
                     {
                         if (tranWaybillObj.ServiceCentreId == serviceCenters[0] && tranWaybillObj.IsGrouped == false)
@@ -763,8 +768,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
 
-                //added for Transitwaybills
-                var transitWaybillNumberList = _uow.TransitWaybillNumber.GetAll().Where(s =>
+                //6.added for Transitwaybills
+                var transitWaybillNumberList = allTransitWaybillNumberList.Where(s =>
                     serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false).ToList();
                 foreach (var item in transitWaybillNumberList)
                 {
@@ -784,12 +789,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
 
-                //
+                //7.
                 var finalList = new List<InvoiceViewDTO>();
                 foreach (var finalUngroupedItem in finalUngroupedList)
                 {
-                    //var shipment = await GetShipment(finalUngroupedItem.Waybill);
-                    var shipment = allInvoicesQueryable.FirstOrDefault(s => s.Waybill == finalUngroupedItem.Waybill);
+                    var shipment = finalUngroupedItem;
                     if (shipment != null)
                     {
                         var invoiceViewDTO = Mapper.Map<InvoiceViewDTO>(shipment);
@@ -810,6 +814,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                         finalList.Add(invoiceViewDTO);
                     }
+
                 }
 
                 return finalList;
@@ -1172,6 +1177,6 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
-        }       
+        }
     }
 }
