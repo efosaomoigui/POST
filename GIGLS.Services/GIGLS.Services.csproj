@@ -208,6 +208,7 @@
     <Compile Include="Implementation\ShipmentScan\ScanStatusService.cs" />
     <Compile Include="Implementation\Shipments\GroupWaybillNumberMappingService.cs" />
     <Compile Include="Implementation\Shipments\GroupWaybillNumberService.cs" />
+    <Compile Include="Implementation\Shipments\LogVisitReasonService.cs" />
     <Compile Include="Implementation\Shipments\PreShipmentManifestMappingService.cs" />
     <Compile Include="Implementation\Shipments\ManifestWaybillMappingService.cs" />
     <Compile Include="Implementation\Shipments\ManifestVisitMonitoringService.cs" />

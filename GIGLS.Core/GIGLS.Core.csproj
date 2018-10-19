@@ -155,6 +155,7 @@
     <Compile Include="Domain\GroupWaybillNumberMapping.cs" />
     <Compile Include="Domain\Haulage.cs" />
     <Compile Include="Domain\HaulageDistanceMapping.cs" />
+    <Compile Include="Domain\LogVisitReason.cs" />
     <Compile Include="Domain\ManifestVisitMonitoring.cs" />
     <Compile Include="Domain\Notification.cs" />
     <Compile Include="Domain\PreShipmentManifestMapping.cs" />
@@ -290,6 +291,7 @@
     <Compile Include="DTO\Shipments\FilterOptionsDto.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberDTO.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberMappingDTO.cs" />
+    <Compile Include="DTO\Shipments\LogVisitReasonDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestGroupWaybillNumberMappingDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestVisitMonitoringDTO.cs" />
@@ -444,6 +446,7 @@
     <Compile Include="IRepositories\ShipmentScan\IScanStatusRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberRepository.cs" />
+    <Compile Include="IRepositories\Shipments\ILogVisitReasonRepository.cs" />
     <Compile Include="IRepositories\Shipments\IPreShipmentManifestMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IManifestWaybillMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IManifestGroupWaybillNumberMappingRepository.cs" />
@@ -548,6 +551,7 @@
     <Compile Include="IServices\ShipmentScan\IScanStatusService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberMappingService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberService.cs" />
+    <Compile Include="IServices\Shipments\ILogVisitReasonService.cs" />
     <Compile Include="IServices\Shipments\IPreShipmentManifestMappingService.cs" />
     <Compile Include="IServices\Shipments\IManifestWaybillMappingService.cs" />
     <Compile Include="IServices\Shipments\IManifestGroupWaybillNumberMappingService.cs" />

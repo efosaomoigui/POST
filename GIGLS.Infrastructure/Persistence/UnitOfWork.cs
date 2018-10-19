@@ -314,6 +314,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public INotificationRepository Notification { get; set; }
 
+        [Inject]
+        public ILogVisitReasonRepository LogVisitReason { get; set; }
+
 
         public int Complete()
         {

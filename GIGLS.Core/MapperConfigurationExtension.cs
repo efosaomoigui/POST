@@ -272,6 +272,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<Notification, NotificationDTO>();
                 config.CreateMap<NotificationDTO, Notification>();
+
+                config.CreateMap<LogVisitReason, LogVisitReasonDTO>();
+                config.CreateMap<LogVisitReasonDTO, LogVisitReason>();
             });
 
             isInit = true;
