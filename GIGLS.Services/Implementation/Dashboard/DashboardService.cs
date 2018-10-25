@@ -262,7 +262,7 @@ namespace GIGLS.Services.Implementation.Dashboard
         {
             var dashboardDTO = new DashboardDTO();
 
-            int[] serviceCenterIds = { };   //empty array
+            int[] serviceCenterIds = { };   // empty array
             var serviceCentreShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceView();
 
             //set for TargetAmount and TargetOrder
