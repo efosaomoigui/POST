@@ -161,6 +161,7 @@
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\LogVisitReasonRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\OverdueShipmentRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\PreShipmentManifestMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ManifestWaybillMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ManifestGroupWaybillNumberMappingRepository.cs" />
@@ -192,6 +193,7 @@
     <Compile Include="Persistence\Repositories\Wallet\CashOnDeliveryAccountRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\CashOnDeliveryBalanceRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\WalletNumberRepository.cs" />
+    <Compile Include="Persistence\Repositories\Wallet\WalletPaymentLogRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\WalletRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\WalletTransactionRepository.cs" />
     <Compile Include="Persistence\Repositories\Workshops\WorkshopRepository.cs" />

@@ -317,6 +317,11 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public ILogVisitReasonRepository LogVisitReason { get; set; }
 
+        [Inject]
+        public IWalletPaymentLogRepository WalletPaymentLog { get; set; }
+
+        [Inject]
+        public IOverdueShipmentRepository OverdueShipment { get; set; }
 
         public int Complete()
         {

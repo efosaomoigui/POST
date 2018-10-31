@@ -158,6 +158,7 @@
     <Compile Include="Domain\LogVisitReason.cs" />
     <Compile Include="Domain\ManifestVisitMonitoring.cs" />
     <Compile Include="Domain\Notification.cs" />
+    <Compile Include="Domain\OverdueShipment.cs" />
     <Compile Include="Domain\PreShipmentManifestMapping.cs" />
     <Compile Include="Domain\ManifestWaybillMapping.cs" />
     <Compile Include="Domain\MessagingLog\EmailSendLog.cs" />
@@ -218,6 +219,7 @@
     <Compile Include="Domain\Wallet\CashOnDeliveryBalance.cs" />
     <Compile Include="Domain\Wallet\Wallet.cs" />
     <Compile Include="Domain\Wallet\WalletNumber.cs" />
+    <Compile Include="Domain\Wallet\WalletPaymentLog.cs" />
     <Compile Include="Domain\Wallet\WalletTransaction.cs" />
     <Compile Include="Domain\WaybillNumber.cs" />
     <Compile Include="Domain\WeightLimit.cs" />
@@ -295,6 +297,7 @@
     <Compile Include="DTO\Shipments\ManifestDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestGroupWaybillNumberMappingDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestVisitMonitoringDTO.cs" />
+    <Compile Include="DTO\Shipments\OverdueShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\ThirdPartyPreShipmentItemDTO.cs" />
     <Compile Include="DTO\Shipments\ThirdPartyPreShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentManifestMappingDTO.cs" />
@@ -330,6 +333,7 @@
     <Compile Include="DTO\Wallet\CashOnDeliveryBalanceDTO.cs" />
     <Compile Include="DTO\Wallet\WalletDto.cs" />
     <Compile Include="DTO\Wallet\WalletNumberDto.cs" />
+    <Compile Include="DTO\Wallet\WalletPaymentLogDTO.cs" />
     <Compile Include="DTO\Wallet\WalletSearchOption.cs" />
     <Compile Include="DTO\Wallet\WalletTransactionDto.cs" />
     <Compile Include="DTO\Wallet\WalletTransactionSummaryDTO.cs" />
@@ -367,6 +371,7 @@
     <Compile Include="Enums\MessageType.cs" />
     <Compile Include="Enums\MessagingLogStatus.cs" />
     <Compile Include="Enums\NumberGeneratorType.cs" />
+    <Compile Include="Enums\OverdueShipmentStatus.cs" />
     <Compile Include="Enums\PartnerApplicationStatus.cs" />
     <Compile Include="Enums\PartnerType.cs" />
     <Compile Include="Enums\PaymentServiceType.cs" />
@@ -447,6 +452,7 @@
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberRepository.cs" />
     <Compile Include="IRepositories\Shipments\ILogVisitReasonRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IOverdueShipmentRepository.cs" />
     <Compile Include="IRepositories\Shipments\IPreShipmentManifestMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IManifestWaybillMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IManifestGroupWaybillNumberMappingRepository.cs" />
@@ -477,6 +483,7 @@
     <Compile Include="IRepositories\Wallet\ICashOnDeliveryBalanceRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletNumberRepository.cs" />
     <Compile Include="IRepositories\Wallet\ICashOnDeliveryAccountRepository.cs" />
+    <Compile Include="IRepositories\Wallet\IWalletPaymentLogRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletTransactionRepository.cs" />
     <Compile Include="IRepositories\Workshops\IWorkshopRepository.cs" />
@@ -552,6 +559,7 @@
     <Compile Include="IServices\Shipments\IGroupWaybillNumberMappingService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberService.cs" />
     <Compile Include="IServices\Shipments\ILogVisitReasonService.cs" />
+    <Compile Include="IServices\Shipments\IOverdueShipmentService.cs" />
     <Compile Include="IServices\Shipments\IPreShipmentManifestMappingService.cs" />
     <Compile Include="IServices\Shipments\IManifestWaybillMappingService.cs" />
     <Compile Include="IServices\Shipments\IManifestGroupWaybillNumberMappingService.cs" />
@@ -584,6 +592,7 @@
     <Compile Include="IServices\Wallet\IWalletNumberService.cs" />
     <Compile Include="IServices\Wallet\ICashOnDeliveryBalanceService.cs" />
     <Compile Include="IServices\Wallet\ICashOnDeliveryAccountService.cs" />
+    <Compile Include="IServices\Wallet\IWalletPaymentLogService.cs" />
     <Compile Include="IServices\Wallet\IWalletService.cs" />
     <Compile Include="IServices\Wallet\IWalletTransactionService.cs" />
     <Compile Include="IServices\Workshops\IWorkshopService.cs" />

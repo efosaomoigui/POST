@@ -275,6 +275,12 @@ namespace GIGLS.Core
 
                 config.CreateMap<LogVisitReason, LogVisitReasonDTO>();
                 config.CreateMap<LogVisitReasonDTO, LogVisitReason>();
+
+                config.CreateMap<WalletPaymentLog, WalletPaymentLogDTO>();
+                config.CreateMap<WalletPaymentLogDTO, WalletPaymentLog>();
+
+                config.CreateMap<OverdueShipment, OverdueShipmentDTO>();
+                config.CreateMap<OverdueShipmentDTO, OverdueShipment>();
             });
 
             isInit = true;

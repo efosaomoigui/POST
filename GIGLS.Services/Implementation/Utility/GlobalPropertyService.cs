@@ -141,7 +141,7 @@ namespace GIGLS.Services.Implementation.Utility
             }
             catch (Exception)
             {
-                throw;
+                throw new GenericException($"Global Property '{globalPropertyType.ToString()}' does not exist");
             }
         }
     }

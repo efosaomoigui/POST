@@ -16,6 +16,7 @@ using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
 using System.Linq;
 using GIGLS.Core.Domain;
+using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -25,14 +26,18 @@ namespace GIGLS.Services.Implementation.Shipments
         private IUserService _userService;
         private ICashOnDeliveryAccountService _cashOnDeliveryAccountService;
         private readonly IShipmentTrackingService _shipmentTrackingService;
+        private readonly IGlobalPropertyService _globalPropertyService;
 
         public ShipmentCollectionService(IUnitOfWork uow, IUserService userService,
-            ICashOnDeliveryAccountService cashOnDeliveryAccountService, IShipmentTrackingService shipmentTrackingService)
+            ICashOnDeliveryAccountService cashOnDeliveryAccountService, 
+            IShipmentTrackingService shipmentTrackingService,
+            IGlobalPropertyService globalPropertyService)
         {
             _uow = uow;
             _userService = userService;
             _cashOnDeliveryAccountService = cashOnDeliveryAccountService;
             _shipmentTrackingService = shipmentTrackingService;
+            _globalPropertyService = globalPropertyService;
             MapperConfig.Initialize();
         }
 
@@ -390,5 +395,88 @@ namespace GIGLS.Services.Implementation.Shipments
 
             await UpdateShipmentCollection(shipmentCollection);
         }
+
+        public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetOverDueShipments(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                //get all shipments by servicecentre
+                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+
+                //added for GWA and GWARIMPA service centres
+                {
+                    if (serviceCenters.Length == 1)
+                    {
+                        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                        {
+                            serviceCenters = new int[] { 4, 294 };
+                        }
+                    }
+                }
+
+                List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
+
+                // filter by global property for OverDueShipments
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount).Result;
+                var overDueDaysCount = overDueDaysCountObj.Value;
+                int globalProp = int.Parse(overDueDaysCount);
+                var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
+                var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().
+                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate)).ToList();
+                shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
+
+                //ensure that already grouped waybills don't appear with this list
+                var overdueShipment = _uow.OverdueShipment.GetAllAsQueryable().
+                    Where(s => s.OverdueShipmentStatus == OverdueShipmentStatus.Grouped).ToList();
+
+                //filter the two lists
+                shipmentCollection =
+                    shipmentCollection.Where(s => !overdueShipment.Select(d => d.Waybill).Contains(s.Waybill)).ToList();
+
+
+                int count = shipmentCollection.Count();
+
+                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
+
+                if (filterOptionsDto != null)
+                {
+                    //filter
+                    var filter = filterOptionsDto.filter;
+                    var filterValue = filterOptionsDto.filterValue;
+                    if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
+                    {
+                        shipmentCollectionDto = shipmentCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null
+                            && (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
+                    }
+
+                    //sort
+                    var sortorder = filterOptionsDto.sortorder;
+                    var sortvalue = filterOptionsDto.sortvalue;
+
+                    if (!string.IsNullOrEmpty(sortorder) && !string.IsNullOrEmpty(sortvalue))
+                    {
+                        System.Reflection.PropertyInfo prop = typeof(ShipmentCollection).GetProperty(sortvalue);
+
+                        if (sortorder == "0")
+                        {
+                            shipmentCollectionDto = shipmentCollectionDto.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                        }
+                        else
+                        {
+                            shipmentCollectionDto = shipmentCollectionDto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                        }
+                    }
+
+                    shipmentCollectionDto = shipmentCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
+                }
+
+                return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), count);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

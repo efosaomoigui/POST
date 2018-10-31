@@ -16,6 +16,8 @@
         YEMEN,
         EcommerceNegativeWalletLimit,
         EcommercePremiumNegativeWalletLimit,
-        EcommerceGoldNegativeWalletLimit
+        EcommerceGoldNegativeWalletLimit,
+        OverDueDaysCount,
+        WarehouseServiceCentre
     }
 }

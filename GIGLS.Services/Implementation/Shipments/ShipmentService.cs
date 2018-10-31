@@ -1178,5 +1178,32 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        public async Task<List<ServiceCentreDTO>> GetAllWarehouseServiceCenters()
+        {
+            try
+            {
+                string[] warehouseServiceCentres = { };
+                // filter by global property for warehouse service centre
+                var warehouseServiceCentreObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.WarehouseServiceCentre).Result;
+                if(warehouseServiceCentreObj != null)
+                {
+                    var warehouseServiceCentre = warehouseServiceCentreObj.Value;
+                    warehouseServiceCentres = warehouseServiceCentre.Split(',');
+                    warehouseServiceCentres = warehouseServiceCentres.Select(s => s.Trim()).ToArray();
+                }
+
+                //get all warehouse service centre
+                var allServiceCenters = await _centreService.GetServiceCentres();
+                allServiceCenters = allServiceCenters.Where(s => warehouseServiceCentres.Contains(s.Code));
+
+                return allServiceCenters.ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

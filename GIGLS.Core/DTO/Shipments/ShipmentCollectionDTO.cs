@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 
 namespace GIGLS.CORE.DTO.Shipments
@@ -26,5 +27,9 @@ namespace GIGLS.CORE.DTO.Shipments
 
         //Who processed the collection
         public string UserId { get; set; }
+
+        //original service centres
+        public ServiceCentreDTO OriginalDepartureServiceCentre { get; set; }
+        public ServiceCentreDTO OriginalDestinationServiceCentre { get; set; }
     }
 }

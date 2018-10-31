@@ -345,5 +345,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("warehouseservicecentre")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetAllWarehouseServiceCenters()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.GetAllWarehouseServiceCenters();
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
     }
 }

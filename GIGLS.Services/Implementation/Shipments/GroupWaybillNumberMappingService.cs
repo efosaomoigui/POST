@@ -13,6 +13,8 @@ using GIGLS.Core.DTO.ServiceCentres;
 using AutoMapper;
 using GIGLS.Core.Domain;
 using GIGLS.Core.IServices.ServiceCentres;
+using GIGLS.CORE.IServices.Shipments;
+using GIGLS.CORE.Domain;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -21,11 +23,13 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUnitOfWork _uow;
         private readonly IGroupWaybillNumberService _groupWaybillNumberService;
         private readonly IShipmentService _shipmentService;
+        private readonly IOverdueShipmentService _overdueShipment;
         private readonly IUserService _userService;
         private readonly IServiceCentreService _centreService;
 
         public GroupWaybillNumberMappingService(IUnitOfWork uow,
             IGroupWaybillNumberService groupWaybillNumberService,
+            IOverdueShipmentService overdueShipment,
             IShipmentService shipmentService, IServiceCentreService centreService,
             IUserService userService)
         {
@@ -33,6 +37,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _groupWaybillNumberService = groupWaybillNumberService;
             _shipmentService = shipmentService;
             _centreService = centreService;
+            _overdueShipment = overdueShipment;
             _userService = userService;
             MapperConfig.Initialize();
         }
@@ -193,7 +198,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 List<string> waybills = new List<string>();
                 var departureServiceCentre = new ServiceCentreDTO();
                 var destinationServiceCentre = new ServiceCentreDTO();
-                var allInvoices = _uow.Invoice.GetAllFromInvoiceView().ToList();
+                var allInvoices = _uow.Invoice.GetAllFromInvoiceView();
                 foreach (var groupWaybillNumberMapping in groupWaybillNumberMappingList)
                 {
                     var shipmentDTO = allInvoices.FirstOrDefault(s => s.Waybill == groupWaybillNumberMapping.WaybillNumber);
@@ -384,6 +389,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     transitWaybill.IsGrouped = false;
                 }
 
+                //check for OverdueShipment 
+                var overdueShipment = _uow.OverdueShipment.SingleOrDefault(x => (x.Waybill == waybillNumber));
+                if (overdueShipment != null)
+                {
+                    overdueShipment.OverdueShipmentStatus = Core.Enums.OverdueShipmentStatus.UnGrouped;
+                }
+
                 _uow.Complete();
             }
             catch (Exception)
@@ -392,6 +404,44 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //map waybillNumber to groupWaybillNumber for Overdue
+        public async Task MappingWaybillNumberToGroupForOverdue(string groupWaybillNumber, List<string> waybillNumberList)
+        {
+            try
+            {
+                //1. call existing api
+                await MappingWaybillNumberToGroup(groupWaybillNumber, waybillNumberList);
+
+                //2. Save into OverdueShipment as grouped status
+                var currentUserId = await _userService.GetCurrentUserId();
+                foreach (var waybill in waybillNumberList)
+                {
+                    var overdueShipment = _uow.OverdueShipment.FindAsync(s => s.Waybill == waybill).Result.FirstOrDefault();
+                    if (overdueShipment == null)
+                    {
+                        //save
+                        var overdueShipmentNew = new OverdueShipment()
+                        {
+                            Waybill = waybill,
+                            DateCreated = DateTime.Now,
+                            OverdueShipmentStatus = Core.Enums.OverdueShipmentStatus.Grouped,
+                            UserId = currentUserId
+                        };
+                        _uow.OverdueShipment.Add(overdueShipmentNew);
+                    }
+                    else
+                    {
+                        //update status
+                        overdueShipment.OverdueShipmentStatus = Core.Enums.OverdueShipmentStatus.Grouped;
+                    }
+                }
+                await _uow.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
     }
 }

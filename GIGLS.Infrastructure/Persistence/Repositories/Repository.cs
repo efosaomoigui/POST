@@ -49,7 +49,7 @@ namespace GIGLS.Infrastructure.Persistence.Repository
 
         public IQueryable<TEntity> GetAll()
         {
-            return Context.Set<TEntity>().ToList().AsQueryable();
+            return Context.Set<TEntity>().AsQueryable();
         }
 
         public IQueryable<TEntity> GetAllAsQueryable()

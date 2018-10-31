@@ -50,6 +50,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("mapmultipleForOverdue")]
+        public async Task<IServiceResponse<bool>> MappingWaybillNumberToGroupForOverdue(GroupWaybillNumberMappingDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.MappingWaybillNumberToGroupForOverdue(data.GroupWaybillNumber, data.WaybillNumbers);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
 
         //[HttpGet]
         //[Route("groupforwaybillnumber/id/{waybillNumberId}")]

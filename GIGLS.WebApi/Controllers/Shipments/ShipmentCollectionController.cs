@@ -145,6 +145,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("overdueshipment")]
+        public async Task<IServiceResponse<IEnumerable<ShipmentCollectionDTO>>> GetOverDueShipments([FromUri]FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentCollectionTuple = _service.GetOverDueShipments(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
+                {
+                    Object = await shipmentCollectionTuple.Item1,
+                    Total = shipmentCollectionTuple.Item2
+                };
+            });
+        }
+
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]

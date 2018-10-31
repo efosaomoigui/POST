@@ -120,6 +120,8 @@ namespace GIGLS.Core
         IPreShipmentManifestMappingRepository PreShipmentManifestMapping { get; set; }
         INotificationRepository Notification { get; set; }
         ILogVisitReasonRepository LogVisitReason { get; set; }
+        IWalletPaymentLogRepository WalletPaymentLog { get; set; }
+        IOverdueShipmentRepository OverdueShipment { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

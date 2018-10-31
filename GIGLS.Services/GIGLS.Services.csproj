@@ -209,6 +209,7 @@
     <Compile Include="Implementation\Shipments\GroupWaybillNumberMappingService.cs" />
     <Compile Include="Implementation\Shipments\GroupWaybillNumberService.cs" />
     <Compile Include="Implementation\Shipments\LogVisitReasonService.cs" />
+    <Compile Include="Implementation\Shipments\OverdueShipmentService.cs" />
     <Compile Include="Implementation\Shipments\PreShipmentManifestMappingService.cs" />
     <Compile Include="Implementation\Shipments\ManifestWaybillMappingService.cs" />
     <Compile Include="Implementation\Shipments\ManifestVisitMonitoringService.cs" />
@@ -240,6 +241,7 @@
     <Compile Include="Implementation\Vendors\VendorService.cs" />
     <Compile Include="Implementation\Wallet\CashOnDeliveryAccountService.cs" />
     <Compile Include="Implementation\Wallet\CashOnDeliveryBalanceService.cs" />
+    <Compile Include="Implementation\Wallet\WalletPaymentLogService.cs" />
     <Compile Include="Implementation\Wallet\WalletService.cs" />
     <Compile Include="Implementation\Wallet\WalletTransactionService.cs" />
     <Compile Include="Implementation\Workshops\WorkshopService.cs" />
