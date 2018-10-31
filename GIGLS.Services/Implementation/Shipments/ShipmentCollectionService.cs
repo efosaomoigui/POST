@@ -29,7 +29,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IGlobalPropertyService _globalPropertyService;
 
         public ShipmentCollectionService(IUnitOfWork uow, IUserService userService,
-            ICashOnDeliveryAccountService cashOnDeliveryAccountService, 
+            ICashOnDeliveryAccountService cashOnDeliveryAccountService,
             IShipmentTrackingService shipmentTrackingService,
             IGlobalPropertyService globalPropertyService)
         {
@@ -116,12 +116,12 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
                 }
-                
+
                 List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
-                
+
                 //get collected shipment
                 var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC).ToList();
-                
+
                 //extras the current login staff shipment from the shipment collection
                 shipmentCollection = shipmentCollection.Where(x => shipmentsWaybills.Contains(x.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
                 int count = shipmentCollection.Count();
@@ -135,7 +135,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var filterValue = filterOptionsDto.filterValue;
                     if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
                     {
-                        shipmentCollectionDto = shipmentCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null  
+                        shipmentCollectionDto = shipmentCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null
                             && (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
                     }
 
@@ -184,9 +184,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
             }
-            
+
             List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
-            
+
             var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).ToList();
             shipmentCollection = shipmentCollection.Where(x => shipmentsWaybills.Contains(x.Waybill)).ToList();
 
@@ -212,14 +212,14 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
                 }
-                
+
                 List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
                 var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).ToList();
                 shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
 
                 int count = shipmentCollection.Count();
-                
+
                 var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
 
                 if (filterOptionsDto != null)
@@ -229,7 +229,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var filterValue = filterOptionsDto.filterValue;
                     if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
                     {
-                        shipmentCollectionDto = shipmentCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null 
+                        shipmentCollectionDto = shipmentCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null
                             && (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
                     }
 
@@ -346,10 +346,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
                 _uow.GeneralLedger.Add(generalLedger);
             }
-            
+
             await _uow.CompleteAsync();
         }
-        
+
         //Check if the Shipment has not been collected before Processing Return Shipment
         public async Task CheckShipmentCollection(string waybill)
         {
@@ -367,7 +367,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"Shipment with waybill: {waybill} is not available for Return Processing");
             }
         }
-        
+
 
         public async Task ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
         {
@@ -418,6 +418,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 // filter by global property for OverDueShipments
                 var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount).Result;
+                if (overDueDaysCountObj == null)
+                {
+                    throw new GenericException($"The Global property 'Over Due Days Count' has not been set. Kindly contact admin.");
+                }
                 var overDueDaysCount = overDueDaysCountObj.Value;
                 int globalProp = int.Parse(overDueDaysCount);
                 var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
