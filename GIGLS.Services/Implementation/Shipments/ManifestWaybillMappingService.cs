@@ -264,7 +264,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 // check if the waybill is not cancelled, Home Delivery and the user that want to manifest it is at the final service centre of the waybills  
                 var InvoicesBySC = _uow.Invoice.GetAllFromInvoiceView();
                 //InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && x.PickupOptions == PickupOptions.HOMEDELIVERY && waybills.Contains(x.Waybill));
-                InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && waybills.Contains(x.Waybill));
+                InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && waybills.Contains(x.Waybill)); 
 
                 //filter if the shipment is at the final service centre
                 if (serviceCenters.Length > 0)
