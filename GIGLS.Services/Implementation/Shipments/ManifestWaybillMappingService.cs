@@ -71,7 +71,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (isWaybillsMappedActiveResult.Count() > 0)
                 {
                     throw new GenericException($"Error: Delivery Manifest cannot be created. " +
-                               $"The follwoing waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
+                               $"The following waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
                 }
 
 
@@ -171,7 +171,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (isWaybillsMappedActiveResult.Count() > 0)
                 {
                     throw new GenericException($"Error: Delivery Manifest cannot be created. " +
-                               $"The follwoing waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
+                               $"The following waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
                 }
                 
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
@@ -256,15 +256,16 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (result.Count() > 0)
                     {
                         throw new GenericException($"Error: Delivery Manifest cannot be created. " +
-                            $"The follwoing waybills [{string.Join(", ", result.ToList())}] are not available for Processing");
+                            $"The following waybills [{string.Join(", ", result.ToList())}] are not available for Processing");
                     }
                 }
                 
                 //2. Get the shipment details of all the waybills that we want to manifest again by 
                 // check if the waybill is not cancelled, Home Delivery and the user that want to manifest it is at the final service centre of the waybills  
                 var InvoicesBySC = _uow.Invoice.GetAllFromInvoiceView();
-                InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && x.PickupOptions == PickupOptions.HOMEDELIVERY && waybills.Contains(x.Waybill));
-                
+                //InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && x.PickupOptions == PickupOptions.HOMEDELIVERY && waybills.Contains(x.Waybill));
+                InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && waybills.Contains(x.Waybill));
+
                 //filter if the shipment is at the final service centre
                 if (serviceCenters.Length > 0)
                 {
@@ -282,7 +283,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (result.Count() > 0)
                     {
                         throw new GenericException($"Error: Delivery Manifest cannot be created. " +
-                            $"The follwoing waybills [{string.Join(", ", result.ToList())}] are not available for Processing. " +
+                            $"The following waybills [{string.Join(", ", result.ToList())}] are not available for Processing. " +
                             "The login user is not at the final Destination or waybills not Home Delivery");
                     }
                 }
