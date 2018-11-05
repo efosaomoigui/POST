@@ -8,6 +8,8 @@ using GIGLS.Infrastructure;
 using AutoMapper;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.Domain;
+using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -51,8 +53,20 @@ namespace GIGLS.Services.Implementation.Shipments
                     Status = manifestVisitMonitoringDto.Status,
                     UserId = manifestVisitMonitoringDto.UserId                    
                 };
+                                
+                //add attempt delivery scan to the waybilll
+                var serviceCenter = await _uow.ServiceCentre.GetAsync(waybill.DestinationServiceCentreId);
+                var newShipmentTracking = new ShipmentTracking
+                {
+                    Waybill = manifestVisitMonitoringDto.Waybill,
+                    Location = serviceCenter.Name,
+                    Status = ShipmentScanStatus.ATD.ToString(),
+                    DateTime = DateTime.Now,
+                    UserId = manifestVisitMonitoringDto.UserId
+                };
 
                 _uow.ManifestVisitMonitoring.Add(newManifest);
+                _uow.ShipmentTracking.Add(newShipmentTracking);
                 await _uow.CompleteAsync();
                 return new { id = newManifest.ManifestVisitMonitoringId };
             }
