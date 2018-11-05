@@ -52,12 +52,12 @@ namespace GIGLS.Services.Implementation.Fleets
                 if (dispatchDTO.ManifestType == ManifestType.Delivery)
                 {
                     //filter all the ways in the delivery manifest for scanning processing
-                    await FilterWaybillsInDeliveryManifest(dispatchDTO, currentUserId, userServiceCentreId);
+                    var ret = await FilterWaybillsInDeliveryManifest(dispatchDTO, currentUserId, userServiceCentreId);
                 }
                 else
                 {
                     //Verify that all waybills are not cancelled and scan all the waybills in case none was cancelled
-                    await VerifyWaybillsInGroupWaybillInManifest(dispatchDTO.ManifestNumber, currentUserId, userServiceCentreId);
+                    var ret2 = await VerifyWaybillsInGroupWaybillInManifest(dispatchDTO.ManifestNumber, currentUserId, userServiceCentreId);
                 }
 
                 // create dispatch
@@ -106,7 +106,7 @@ namespace GIGLS.Services.Implementation.Fleets
         /// are filter for scanning processing.
         /// </summary>
         /// <param name="manifestNumber"></param>
-        private async Task FilterWaybillsInDeliveryManifest(DispatchDTO dispatchDTO, string currentUserId, int userServiceCentreId)
+        private async Task<int> FilterWaybillsInDeliveryManifest(DispatchDTO dispatchDTO, string currentUserId, int userServiceCentreId)
         {
             //first ensure that the dispatch user does not have any pending DeliveryManifest
             //get the dispatch for the user
@@ -138,6 +138,8 @@ namespace GIGLS.Services.Implementation.Fleets
                 string status = ShipmentScanStatus.WC.ToString();
                 await ScanWaybillsInManifest(listOfWaybills, currentUserId, userServiceCentreId, status);
             }
+
+            return 0;
         }
 
 
@@ -146,7 +148,7 @@ namespace GIGLS.Services.Implementation.Fleets
         /// are not in the cancelled status.
         /// </summary>
         /// <param name="manifestNumber"></param>
-        private async Task VerifyWaybillsInGroupWaybillInManifest(string manifestNumber, string currentUserId, int userServiceCentreId)
+        private async Task<int> VerifyWaybillsInGroupWaybillInManifest(string manifestNumber, string currentUserId, int userServiceCentreId)
         {
             // manifest -> groupwaybill -> waybill
             //manifest
@@ -171,6 +173,7 @@ namespace GIGLS.Services.Implementation.Fleets
                 string status = ShipmentScanStatus.DSC.ToString();
                 await ScanWaybillsInManifest(listOfWaybills.ToList(), currentUserId, userServiceCentreId, status);
             }
+            return 0;
         }
 
         /// <summary>
