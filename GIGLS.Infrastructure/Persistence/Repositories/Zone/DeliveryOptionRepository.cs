@@ -6,7 +6,6 @@ using GIGLS.Infrastructure.Persistence.Repository;
 using System.Linq;
 using GIGLS.Core.IRepositories.Zone;
 using GIGLS.Core.DTO.Zone;
-using System;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories
 {
@@ -29,6 +28,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories
                                 IsActive = r.IsActive,
                                 DateCreated = r.DateCreated,
                                 DateModified = r.DateModified,
+                                CustomerType = r.CustomerType
                                 //UserName = r.User.FirstName + " " + r.User.LastName,
                             };
             return Task.FromResult(optionDto.ToList());
@@ -47,6 +47,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories
                                  IsActive = r.IsActive,                               
                                  DateCreated = r.DateCreated,
                                  DateModified = r.DateModified,
+                                 CustomerType = r.CustomerType
                                  //UserName = r.User.FirstName + " " + r.User.LastName,
                              };
             return Task.FromResult(optionDto.ToList());

@@ -31,6 +31,7 @@ namespace GIGLS.Services.Implementation.Zone
                     Code = option.Code,
                     IsActive = false,                    
                     Description = option.Description,
+                    CustomerType = option.CustomerType
                     //UserId = option.UserId                 
                     //UserId = logged in user details                    
                 };
@@ -77,7 +78,8 @@ namespace GIGLS.Services.Implementation.Zone
                     Code = option.Code,
                     Description = option.Description,
                     IsActive = option.IsActive,
-                    DateModified = option.DateModified                    
+                    DateModified = option.DateModified,
+                    CustomerType = option.CustomerType                 
                 };
             }
             catch (Exception)
@@ -123,6 +125,7 @@ namespace GIGLS.Services.Implementation.Zone
                 option.Description = optionDto.Description;
                 option.Code = optionDto.Code;
                 option.IsActive = true;
+                option.CustomerType = optionDto.CustomerType;
                 //UserId = logged in user details  
                 _uow.Complete();
             }

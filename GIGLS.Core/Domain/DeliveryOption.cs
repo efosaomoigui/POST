@@ -1,6 +1,6 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.Domain;
-using System;
+using GIGLS.CORE.Enums;
 
 namespace GIGL.GIGLS.Core.Domain
 {
@@ -10,5 +10,6 @@ namespace GIGL.GIGLS.Core.Domain
         public string Code { get; set; }
         public string Description { get; set; }
         public bool IsActive { get; set; }
+        public FilterCustomerType CustomerType { get; set; }
     }
 }

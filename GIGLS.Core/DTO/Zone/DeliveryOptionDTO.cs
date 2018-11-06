@@ -1,6 +1,6 @@
 ﻿using GIGLS.Core.DTO.User;
 using GIGLS.CORE.DTO;
-using System;
+using GIGLS.CORE.Enums;
 using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Zone
@@ -15,11 +15,11 @@ namespace GIGLS.Core.DTO.Zone
         public string Code { get; set; }
         public string Description { get; set; }
         public bool IsActive { get; set; }
+        public FilterCustomerType CustomerType { get; set; }
 
         public string UserId { get; set; }
         public string UserName { get; set; }
 
         public List<UserDTO> UserDetail { get; set; }
     }
-
 }
