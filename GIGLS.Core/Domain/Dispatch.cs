@@ -1,14 +1,20 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGLS.Core.Domain
 {
     public class Dispatch : BaseDomain, IAuditable
     {
+        [Key]
         public int DispatchId { get; set; }
         public string RegistrationNumber { get; set; }
+
+        [MaxLength(50), MinLength(5)]
+        [Index(IsUnique = true)]
         public string ManifestNumber { get; set; }
+
         public decimal Amount { get; set; }
         public int RescuedDispatchId { get; set; }
         public string DriverDetail { get; set; }
