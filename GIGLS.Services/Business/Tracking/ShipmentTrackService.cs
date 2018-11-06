@@ -94,6 +94,11 @@ namespace GIGLS.Services.Business.Tracking
                     track.Manifest = manifest;
                     track.ManifestType = ManifestTypeValue;
 
+                    track.DepartureServiceCentreId = shipment.DepartureServiceCentreId;
+                    track.DestinationServiceCentre = shipment.DestinationServiceCentre;
+                    track.DestinationServiceCentreId = shipment.DestinationServiceCentreId;
+                    track.DestinationServiceCentre = shipment.DestinationServiceCentre;
+
                     //track.Amount = shipment.GrandTotal;
                     //track.Destination = shipment.DestinationServiceCentre.Name;
                     //track.Departure = shipment.DepartureServiceCentre.Name;
