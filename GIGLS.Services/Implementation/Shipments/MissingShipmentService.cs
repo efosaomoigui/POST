@@ -28,6 +28,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException($"Shipment with waybill: {missingShipment.Waybill} already exist");
                 }
                 var newMissingShipment = Mapper.Map<MissingShipment>(missingShipment);
+                newMissingShipment.Status = "Pending";
                 _uow.MissingShipment.Add(newMissingShipment);
                 await _uow.CompleteAsync();
                 return new { Id = newMissingShipment.MissingShipmentId };
@@ -92,7 +93,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 missingShipment.Waybill = missingShipmentDto.Waybill;
                 missingShipment.SettlementAmount = missingShipmentDto.SettlementAmount;
-                missingShipment.Comment = missingShipmentDto.Comment;                       
+                missingShipment.Comment = missingShipmentDto.Comment;
+                missingShipment.Reason = missingShipmentDto.Reason;                   
+                missingShipment.Status = missingShipmentDto.Status;
                 _uow.Complete();
             }
             catch (Exception)
