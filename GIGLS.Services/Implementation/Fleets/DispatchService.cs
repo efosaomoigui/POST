@@ -38,7 +38,7 @@ namespace GIGLS.Services.Implementation.Fleets
         /// <returns></returns>
         public async Task<object> AddDispatch(DispatchDTO dispatchDTO)
         {
-            try
+            //try
             {
                 // get user login service centre
                 var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
@@ -115,10 +115,10 @@ namespace GIGLS.Services.Implementation.Fleets
                 await _uow.CompleteAsync();
                 return new { Id = newDispatch.DispatchId };
             }
-            catch (Exception)
-            {
-                throw;
-            }
+            //catch (Exception)
+            //{
+            //    throw;
+            //}
         }
 
         /// <summary>
@@ -259,7 +259,7 @@ namespace GIGLS.Services.Implementation.Fleets
                 //get User detail
                 var user = await _uow.User.GetUserById(dispatch.DriverDetail);
 
-                if(user != null)
+                if (user != null)
                 {
                     dispatchDTO.UserDetail = Mapper.Map<UserDTO>(user);
                     dispatchDTO.DriverDetail = user.FirstName + " " + user.LastName;
