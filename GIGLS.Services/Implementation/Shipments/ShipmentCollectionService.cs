@@ -341,7 +341,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     Description = "Payment for Demurrage",
                     IsDeferred = false,
                     Waybill = shipmentCollectionDto.Waybill,
-                    PaymentServiceType = PaymentServiceType.Demurage
+                    PaymentServiceType = PaymentServiceType.Demurage,
+                    PaymentType = shipmentCollectionDto.PaymentType
                     //ClientNodeId = shipment.c
                 };
                 _uow.GeneralLedger.Add(generalLedger);

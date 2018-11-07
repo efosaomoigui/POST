@@ -31,5 +31,7 @@ namespace GIGLS.CORE.DTO.Shipments
         //original service centres
         public ServiceCentreDTO OriginalDepartureServiceCentre { get; set; }
         public ServiceCentreDTO OriginalDestinationServiceCentre { get; set; }
+
+        public PaymentType PaymentType { get; set; }
     }
 }
