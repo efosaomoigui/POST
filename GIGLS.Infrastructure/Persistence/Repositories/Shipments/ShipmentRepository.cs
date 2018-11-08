@@ -863,7 +863,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            Description = r.Description,
                                            PickupOptions = r.PickupOptions,
                                            IsInternational = r.IsInternational,
-                                           Total = r.Total
+                                           Total = r.Total,
+                                           CashOnDeliveryAmount = r.CashOnDeliveryAmount,
+                                           IsCashOnDelivery = r.IsCashOnDelivery
                                        }).FirstOrDefault();            
             return Task.FromResult(shipmentDto);
         }
