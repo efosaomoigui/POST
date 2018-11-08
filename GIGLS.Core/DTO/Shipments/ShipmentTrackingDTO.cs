@@ -25,5 +25,9 @@ namespace GIGLS.Core.DTO.Shipments
 
         public int DestinationServiceCentreId { get; set; }
         public ServiceCentreDTO DestinationServiceCentre { get; set; }
+
+        public decimal Amount { get; set; }
+        public string PickupOptions { get; set; }
+        public string DeliveryOptions { get; set; }
     }
 }
