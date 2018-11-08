@@ -10,6 +10,8 @@ using System.Web;
 using SpreadsheetLight;
 using System.IO;
 using GIGLS.Core.Enums;
+using GIGLS.Core.View;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -139,6 +141,13 @@ namespace GIGLS.Services.Implementation.Report
             sl.SaveAs(fileToSave);
 
             return await Task.FromResult(filename);
+        }
+
+        public async Task<List<ShipmentTrackingView>> GetShipmentTrackingFromView(ScanTrackFilterCriteria f_Criteria)
+        {
+            var queryable = _uow.ShipmentTracking.GetShipmentTrackingsFromViewAsync(f_Criteria);
+            var result = await Task.FromResult(queryable.ToList());
+            return result;
         }
     }
 }

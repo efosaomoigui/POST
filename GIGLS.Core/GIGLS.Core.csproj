@@ -285,6 +285,7 @@
     <Compile Include="DTO\PaymentTransactions\ReroutePricingDTO.cs" />
     <Compile Include="DTO\Report\AccountFilterCriteria.cs" />
     <Compile Include="DTO\Report\BaseFilterCriteria.cs" />
+    <Compile Include="DTO\Report\ScanTrackFilterCriteria.cs" />
     <Compile Include="DTO\Report\ShipmentFilterCriteria.cs" />
     <Compile Include="DTO\ServiceCentres\ServiceCentreDTO.cs" />
     <Compile Include="DTO\ServiceCentres\StationDTO.cs" />
@@ -611,6 +612,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="View\CustomerView.cs" />
     <Compile Include="View\InvoiceView.cs" />
+    <Compile Include="View\ShipmentTrackingView.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">

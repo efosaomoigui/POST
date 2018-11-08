@@ -281,8 +281,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDto.ShipmentCollection = shipmentCollectionDTO;
 
                 //Demurage should be exclude from Ecommerce and Corporate customer. Only individual customer should have demurage
-
-                if (customerType == CustomerType.Company)
+                //HomeDelivery shipments should not have demurrage for Individual Shipments
+                if (customerType == CustomerType.Company || 
+                    shipmentDto.PickupOptions == PickupOptions.HOMEDELIVERY)
                 {
                     //set Default Demurrage info in ShipmentDTO for Company customer
                     shipmentDto.Demurrage = new DemurrageDTO
