@@ -95,15 +95,13 @@ namespace GIGLS.Services.Business.Tracking
                     track.ManifestType = ManifestTypeValue;
 
                     track.DepartureServiceCentreId = shipment.DepartureServiceCentreId;
-                    track.DestinationServiceCentre = shipment.DestinationServiceCentre;
+                    track.DepartureServiceCentre = shipment.DepartureServiceCentre;
                     track.DestinationServiceCentreId = shipment.DestinationServiceCentreId;
                     track.DestinationServiceCentre = shipment.DestinationServiceCentre;
 
-                    //track.Amount = shipment.GrandTotal;
-                    //track.Destination = shipment.DestinationServiceCentre.Name;
-                    //track.Departure = shipment.DepartureServiceCentre.Name;
-                    //track.PickupOptions = shipment.PickupOptions.ToString();
-                    //track.DeliveryOptions = shipment.DeliveryOption.Description;
+                    track.Amount = shipment.GrandTotal;
+                    track.PickupOptions = shipment.PickupOptions.ToString();
+                    track.DeliveryOptions = shipment.DeliveryOption.Description;
                 }
 
                 ////check for international
