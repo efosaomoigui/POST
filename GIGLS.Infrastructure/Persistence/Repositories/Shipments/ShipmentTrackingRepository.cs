@@ -2,11 +2,14 @@
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IRepositories.Shipments;
+using GIGLS.Core.View;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
@@ -14,10 +17,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
     public class ShipmentTrackingRepository : Repository<ShipmentTracking, GIGLSContext>, IShipmentTrackingRepository
     {
         private GIGLSContext _context;
+        private GIGLSContextForView _GIGLSContextForView;
         public ShipmentTrackingRepository(GIGLSContext context)
             : base(context)
         {
             _context = context;
+            _GIGLSContextForView = new GIGLSContextForView();
         }
 
         public Task<List<ShipmentTrackingDTO>> GetShipmentTrackingsAsync()
@@ -65,10 +70,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               Status = shipmentTracking.Status,
                                               ScanStatus = Context.ScanStatus.Where(c => c.Code == shipmentTracking.Status).Select(x => new ScanStatusDTO
                                               {
-                                                Code = x.Code,
-                                                Incident = x.Incident,
-                                                Reason = x.Reason,
-                                                Comment = x.Comment
+                                                  Code = x.Code,
+                                                  Incident = x.Incident,
+                                                  Reason = x.Reason,
+                                                  Comment = x.Comment
                                               }).FirstOrDefault(),
                                           };
                 return Task.FromResult(shipmentTrackingDto.ToList().OrderByDescending(x => x.DateTime).ToList());
@@ -78,6 +83,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 throw;
             }
 
+        }
+
+        public IQueryable<ShipmentTrackingView> GetShipmentTrackingsFromViewAsync(ScanTrackFilterCriteria f_Criteria)
+        {
+            var scanTrackingView = _GIGLSContextForView.ScanTrackingView.AsQueryable();
+            scanTrackingView = f_Criteria.GetQueryFromParameters(scanTrackingView);
+            return scanTrackingView;
         }
 
     }
