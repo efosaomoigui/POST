@@ -88,7 +88,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         public IQueryable<ShipmentTrackingView> GetShipmentTrackingsFromViewAsync(ScanTrackFilterCriteria f_Criteria)
         {
             var scanTrackingView = _GIGLSContextForView.ScanTrackingView.AsQueryable();
-            scanTrackingView = f_Criteria.GetQueryFromParameters(scanTrackingView);
+            if(f_Criteria != null)
+            {
+                scanTrackingView = f_Criteria.GetQueryFromParameters(scanTrackingView);
+            }
             return scanTrackingView;
         } 
 

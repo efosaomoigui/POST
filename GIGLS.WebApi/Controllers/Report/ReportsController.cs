@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IServices;
 using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
@@ -158,13 +159,13 @@ namespace GIGLS.WebApi.Controllers.Report
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("ShipmentTrackingFromView")]
-        public async Task<IServiceResponse<List<ShipmentTrackingView>>> GetShipmentTrackingFromView(ScanTrackFilterCriteria f_Criteria)
+        public async Task<IServiceResponse<List<ScanStatusReportDTO>>> GetShipmentTrackingFromView(ScanTrackFilterCriteria f_Criteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipmentTrackings = await _shipmentService.GetShipmentTrackingFromView(f_Criteria);
+                var shipmentTrackings = await _shipmentService.GetShipmentTrackingFromViewReport(f_Criteria);
 
-                return new ServiceResponse<List<ShipmentTrackingView>>
+                return new ServiceResponse<List<ScanStatusReportDTO>>
                 {
                     Object = shipmentTrackings
                 };

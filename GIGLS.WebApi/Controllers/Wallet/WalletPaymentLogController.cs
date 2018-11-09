@@ -85,12 +85,12 @@ namespace GIGLS.WebApi.Controllers.Wallet
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
-        [Route("{walletPaymentLogId:int}")]
-        public async Task<IServiceResponse<bool>> UpdateWalletPaymentLog(int walletPaymentLogId, WalletPaymentLogDTO walletPaymentLogDTO)
+        [Route("{reference}")]
+        public async Task<IServiceResponse<bool>> UpdateWalletPaymentLog(string reference, WalletPaymentLogDTO walletPaymentLogDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _walletPaymentLogService.UpdateWalletPaymentLog(walletPaymentLogId, walletPaymentLogDTO);
+                await _walletPaymentLogService.UpdateWalletPaymentLog(reference, walletPaymentLogDTO);
 
                 return new ServiceResponse<bool>
                 {

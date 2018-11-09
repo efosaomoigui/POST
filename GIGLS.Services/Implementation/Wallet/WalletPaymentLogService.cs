@@ -66,15 +66,19 @@ namespace GIGLS.Services.Implementation.Wallet
             await _uow.CompleteAsync();
         }
 
-        public async Task UpdateWalletPaymentLog(int walletPaymentLogId, WalletPaymentLogDTO walletPaymentLogDto)
+        public async Task UpdateWalletPaymentLog(string reference, WalletPaymentLogDTO walletPaymentLogDto)
         {
-            var walletPaymentLog = await _uow.WalletPaymentLog.GetAsync(walletPaymentLogId);
+            var walletPaymentLogList = await _uow.WalletPaymentLog.FindAsync(s => s.Reference == reference);
+            var walletPaymentLog = walletPaymentLogList.FirstOrDefault();
 
             if (walletPaymentLog == null)
             {
-                throw new GenericException("Wallet Payment Log Information does not exist");
+                throw new GenericException($"Wallet Payment Log Information does not exist for this reference: {reference}.");
             }
-            //do nothing
+
+            walletPaymentLog.IsWalletCredited = walletPaymentLogDto.IsWalletCredited;
+            walletPaymentLogDto.TransactionStatus = walletPaymentLogDto.TransactionStatus;
+            await _uow.CompleteAsync();
         }
     }
 

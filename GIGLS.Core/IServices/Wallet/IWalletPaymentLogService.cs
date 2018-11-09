@@ -10,7 +10,7 @@ namespace GIGLS.Core.IServices.Wallet
         Task<IEnumerable<WalletPaymentLogDTO>> GetWalletPaymentLogs();
         Task<WalletPaymentLogDTO> GetWalletPaymentLogById(int walletPaymentLogId);
         Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLog);
-        Task UpdateWalletPaymentLog(int walletTransactionId, WalletPaymentLogDTO walletPaymentLog);
+        Task UpdateWalletPaymentLog(string reference, WalletPaymentLogDTO walletPaymentLog);
         Task RemoveWalletPaymentLog(int walletPaymentLogId);
     }
 }

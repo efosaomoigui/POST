@@ -95,9 +95,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<object> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
-            await _wallepaymenttlogService.UpdateWalletPaymentLog(
-                walletPaymentLogDto.WalletPaymentLogId, walletPaymentLogDto);
-            return 0;
+            await _wallepaymenttlogService.UpdateWalletPaymentLog(walletPaymentLogDto.Reference, walletPaymentLogDto);
+            return walletPaymentLogDto;
 
         }
 

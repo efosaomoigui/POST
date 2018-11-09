@@ -290,6 +290,7 @@
     <Compile Include="DTO\ServiceCentres\ServiceCentreDTO.cs" />
     <Compile Include="DTO\ServiceCentres\StationDTO.cs" />
     <Compile Include="DTO\ShipmentScan\ScanStatusDTO.cs" />
+    <Compile Include="DTO\ShipmentScan\ScanStatusReportDTO.cs" />
     <Compile Include="DTO\Shipments\DemurrageDTO.cs" />
     <Compile Include="DTO\Shipments\FilterOptionsDto.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberDTO.cs" />
