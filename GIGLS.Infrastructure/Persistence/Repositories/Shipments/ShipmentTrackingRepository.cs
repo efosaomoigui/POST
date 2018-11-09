@@ -90,7 +90,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var scanTrackingView = _GIGLSContextForView.ScanTrackingView.AsQueryable();
             scanTrackingView = f_Criteria.GetQueryFromParameters(scanTrackingView);
             return scanTrackingView;
-        }
+        } 
 
     }
 }
