@@ -100,10 +100,19 @@ namespace GIGLS.Services.Business.Pricing
 
             //get the deliveryOptionPrice from an array
             decimal deliveryOptionPriceTemp = 0;
-            foreach (var deliveryOptionId in pricingDto.DeliveryOptionIds)
+
+            if (pricingDto.DeliveryOptionIds.Count() == 0)
             {
-                deliveryOptionPriceTemp += await _optionPrice.GetDeliveryOptionPrice(deliveryOptionId, zone.ZoneId);
+                throw new GenericException("Delivery Option can not be empty");
             }
+            else
+            {
+                foreach (var deliveryOptionId in pricingDto.DeliveryOptionIds)
+                {
+                    deliveryOptionPriceTemp += await _optionPrice.GetDeliveryOptionPrice(deliveryOptionId, zone.ZoneId);
+                }
+            }
+
             decimal deliveryOptionPrice = deliveryOptionPriceTemp;
 
             decimal shipmentTotalPrice = deliveryOptionPrice + PackagePrice;
@@ -128,10 +137,19 @@ namespace GIGLS.Services.Business.Pricing
 
             //get the deliveryOptionPrice from an array
             decimal deliveryOptionPriceTemp = 0;
-            foreach (var deliveryOptionId in pricingDto.DeliveryOptionIds)
+
+            if (pricingDto.DeliveryOptionIds.Count() == 0)
             {
-                deliveryOptionPriceTemp += await _optionPrice.GetDeliveryOptionPrice(deliveryOptionId, zone.ZoneId);
+                throw new GenericException("Delivery Option can not be empty");
             }
+            else
+            {
+                foreach (var deliveryOptionId in pricingDto.DeliveryOptionIds)
+                {
+                    deliveryOptionPriceTemp += await _optionPrice.GetDeliveryOptionPrice(deliveryOptionId, zone.ZoneId);
+                }
+            }
+            
             decimal deliveryOptionPrice = deliveryOptionPriceTemp;
 
             //check for volumetric weight
@@ -197,7 +215,6 @@ namespace GIGLS.Services.Business.Pricing
                 throw new GenericException("The Tonne specified has not been mapped");
             }
 
-
             //ensure departureServiceCentreId is set
             if (departureServiceCentreId <= 0)
             {
@@ -253,10 +270,19 @@ namespace GIGLS.Services.Business.Pricing
 
             //get the deliveryOptionPrice from an array
             decimal deliveryOptionPriceTemp = 0;
-            foreach (var deliveryOptionId in pricingDto.DeliveryOptionIds)
+
+            if (pricingDto.DeliveryOptionIds.Count() == 0)
             {
-                deliveryOptionPriceTemp += await _optionPrice.GetDeliveryOptionPrice(deliveryOptionId, zone.ZoneId);
+                throw new GenericException("Delivery Option can not be empty");
             }
+            else
+            {
+                foreach (var deliveryOptionId in pricingDto.DeliveryOptionIds)
+                {
+                    deliveryOptionPriceTemp += await _optionPrice.GetDeliveryOptionPrice(deliveryOptionId, zone.ZoneId);
+                }
+            }
+
             decimal deliveryOptionPrice = deliveryOptionPriceTemp;
 
             //check for volumetric weight
