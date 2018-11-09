@@ -46,6 +46,12 @@ namespace GIGLS.Services.Implementation.Messaging
 
         public Tuple<Task<List<SmsSendLogDTO>>, int> GetSmsSendLogAsync(FilterOptionsDto filterOptionsDto)
         {
+            var messages = _uow.SmsSendLog.GetSmsSendLogsAsync(filterOptionsDto);
+            return messages;
+        }
+
+        public Tuple<Task<List<SmsSendLogDTO>>, int> GetSmsSendLogAsync_OLD(FilterOptionsDto filterOptionsDto)
+        {
             try
             {
                 var smsCollection = _uow.SmsSendLog.FindAsync(s => s.IsDeleted == false).Result;
