@@ -10,6 +10,7 @@ using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.CustomerPortal;
+using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
@@ -57,6 +58,36 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<object>
                 {
                     Object = true
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("addwalletpaymentlog")]
+        public async Task<IServiceResponse<object>> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var walletPaymentLog = await _portalService.AddWalletPaymentLog(walletPaymentLogDTO);
+
+                return new ServiceResponse<object>
+                {
+                    Object = walletPaymentLog
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("updatewalletpaymentlog")]
+        public async Task<IServiceResponse<object>> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var walletPaymentLog = await _portalService.UpdateWalletPaymentLog(walletPaymentLogDTO);
+
+                return new ServiceResponse<object>
+                {
+                    Object = walletPaymentLog
                 };
             });
         }

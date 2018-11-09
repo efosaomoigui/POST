@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO;
+﻿using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
@@ -44,6 +45,8 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<CustomerDTO> GetCustomer(string userId);
         Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword);
         Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO);
+        Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO);
+        Task<object> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO);
 
         Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto);
         Task<PreShipmentDTO> GetPreShipment(string waybill);
