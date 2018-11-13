@@ -82,7 +82,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             walletPaymentLog.IsWalletCredited = walletPaymentLogDto.IsWalletCredited;
-            walletPaymentLogDto.TransactionStatus = walletPaymentLogDto.TransactionStatus;
+            walletPaymentLog.TransactionStatus = walletPaymentLogDto.TransactionStatus;
             await _uow.CompleteAsync();
         }
     }
