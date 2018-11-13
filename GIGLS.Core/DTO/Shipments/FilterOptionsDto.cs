@@ -2,7 +2,7 @@
 {
     public class FilterOptionsDto
     {
-        public static int DefaultCount { get; } = 10;
+        public static int DefaultCount { get; } = 20;
         public static int DefaultPageNumber { get; } = 1;
         public int count { get; set; }
         public int page { get; set; }

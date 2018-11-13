@@ -32,5 +32,21 @@ namespace GIGLS.Core.View
         public int? IndividualCustomerId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+
+        //CystomerName
+        public string CustomerName
+        {
+            get
+            {
+                if (CustomerType.Equals(CustomerType.Company))
+                {
+                    return Name;
+                }
+                else
+                {
+                    return string.Format($"{FirstName} {LastName}");
+                }
+            }
+        }
     }
 }
