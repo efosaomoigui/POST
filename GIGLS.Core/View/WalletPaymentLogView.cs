@@ -29,7 +29,6 @@ namespace GIGLS.Core.View
         public string PhoneNumber { get; set; }
         public int? CompanyId { get; set; }
         public string Name { get; set; }
-        public string RcNumber { get; set; }
         public int? IndividualCustomerId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
