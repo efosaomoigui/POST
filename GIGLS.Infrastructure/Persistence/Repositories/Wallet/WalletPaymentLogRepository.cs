@@ -62,14 +62,14 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
             try
             {
                 var walletPaymentLogDto = new List<WalletPaymentLogDTO>();
-                var pageNumber = filterOptionsDto.page;
-                var pageSize = filterOptionsDto.count;
+                var pageNumber = filterOptionsDto?.page ?? FilterOptionsDto.DefaultPageNumber;
+                var pageSize = filterOptionsDto?.count ?? FilterOptionsDto.DefaultCount;
 
                 //build query
                 var queryable = GetAllFromWalletPaymentLogView();
 
-                var filter = filterOptionsDto.filter;
-                var filterValue = filterOptionsDto.filterValue;
+                var filter = filterOptionsDto?.filter ?? null;
+                var filterValue = filterOptionsDto?.filterValue ?? null;
                 if (!string.IsNullOrWhiteSpace(filter) && !string.IsNullOrWhiteSpace(filterValue))
                 {
                     var caseObject = new WalletPaymentLogView();
