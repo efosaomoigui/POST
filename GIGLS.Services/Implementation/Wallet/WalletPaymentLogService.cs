@@ -36,6 +36,11 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
+            if (walletPaymentLogDto.UserId == null)
+            {
+                walletPaymentLogDto.UserId = await _userService.GetCurrentUserId();
+            }
+
             var walletPaymentLog = Mapper.Map<WalletPaymentLog>(walletPaymentLogDto);
             _uow.WalletPaymentLog.Add(walletPaymentLog);
             await _uow.CompleteAsync();
