@@ -14,6 +14,7 @@ using GIGLS.Core.View;
 using System.Linq;
 using GIGLS.Core.Domain.ShipmentScan;
 using GIGLS.Core.DTO.ShipmentScan;
+using System;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -155,6 +156,11 @@ namespace GIGLS.Services.Implementation.Report
         public async Task<List<ScanStatusReportDTO>> GetShipmentTrackingFromViewReport(ScanTrackFilterCriteria f_Criteria)
         {
             var queryable = _uow.ShipmentTracking.GetShipmentTrackingsFromViewAsync(f_Criteria);
+
+            //use 1/10/2018 to 7/10/2018 as test
+            var fromDate = new DateTime(2018, 10, 1);
+            var toDate = new DateTime(2018, 10, 7);
+            queryable = queryable.Where(s => s.DateTime >= fromDate && s.DateTime <= toDate);
 
             //1. Group by Service Centre
             var scanStatusReportList = new List<ScanStatusReportDTO>();

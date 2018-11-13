@@ -614,6 +614,7 @@
     <Compile Include="View\CustomerView.cs" />
     <Compile Include="View\InvoiceView.cs" />
     <Compile Include="View\ShipmentTrackingView.cs" />
+    <Compile Include="View\WalletPaymentLogView.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">

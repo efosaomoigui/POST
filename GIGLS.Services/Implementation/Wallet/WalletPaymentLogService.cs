@@ -6,6 +6,8 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
+using GIGLS.Core.View;
+using GIGLS.CORE.DTO.Shipments;
 using GIGLS.CORE.Enums;
 using GIGLS.Infrastructure;
 using System;
@@ -32,6 +34,12 @@ namespace GIGLS.Services.Implementation.Wallet
             var walletPaymentLog = await _uow.WalletPaymentLog.GetWalletPaymentLogs();
             var walletPaymentLogDto = Mapper.Map<IEnumerable<WalletPaymentLogDTO>>(walletPaymentLog);
             return walletPaymentLogDto;
+        }
+
+        public Tuple<Task<List<WalletPaymentLogView>>, int> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto)
+        {
+            var walletPaymentLogView = _uow.WalletPaymentLog.GetWalletPaymentLogs(filterOptionsDto);
+            return walletPaymentLogView;
         }
 
         public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
