@@ -50,6 +50,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             var walletPaymentLog = Mapper.Map<WalletPaymentLog>(walletPaymentLogDto);
+            walletPaymentLog.Wallet = null;
             _uow.WalletPaymentLog.Add(walletPaymentLog);
             await _uow.CompleteAsync();
             return new { id = walletPaymentLog.WalletPaymentLogId };
