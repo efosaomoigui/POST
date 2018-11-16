@@ -527,12 +527,12 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                     var responseJson = await responseMessage.Content.ReadAsStringAsync();
                     var jObject = JObject.Parse(responseJson);
 
-                    getTokenResponse = jObject.GetValue("access_token").ToString();
-
                     if (!responseMessage.IsSuccessStatusCode)
                     {
                         throw new GenericException("Operation could not complete login successfully:");
                     }
+
+                    getTokenResponse = jObject.GetValue("access_token").ToString();
 
                     return new ServiceResponse<JObject>
                     {
