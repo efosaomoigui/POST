@@ -48,6 +48,7 @@ namespace GIGLS.Services.Implementation.User
             user.Id = Guid.NewGuid().ToString();
             user.DateCreated = DateTime.Now.Date;
             user.DateModified = DateTime.Now.Date;
+            user.PasswordExpireDate = DateTime.Now;
             user.UserName = (user.UserChannelType == UserChannelType.Employee) ? user.Email : user.UserChannelCode;
 
             //UserChannelCode for employee
@@ -554,6 +555,7 @@ namespace GIGLS.Services.Implementation.User
                 throw new GenericException("User does not exist!");
             }
 
+            user.PasswordExpireDate = DateTime.Now;
             var result = await _unitOfWork.User.ResetPassword(userid, password);            
             await _unitOfWork.CompleteAsync();
             return result;
@@ -572,6 +574,7 @@ namespace GIGLS.Services.Implementation.User
                 throw new GenericException("Operation could not complete, kindly supply valid credential");
             }
 
+            user.PasswordExpireDate = DateTime.Now;
             var result = await _unitOfWork.User.ChangePassword(userid, currentPassword, newPassword);            
             await _unitOfWork.CompleteAsync();
             return result;

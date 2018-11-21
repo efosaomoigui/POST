@@ -35,6 +35,8 @@ namespace GIGL.GIGLS.Core.Domain
         public string SystemUserId { get; set; }
         public string SystemUserRole { get; set; }
 
+        public DateTime PasswordExpireDate { get; set; }
+
         //public async Task GenerateUserIdentityAsync(Microsoft.AspNet.Identity.UserManager manager)
         //{
         //    return await GenerateUserIdentityAsync(manager, DefaultAuthenticationTypes.ApplicationCookie);
