@@ -70,7 +70,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //check if the waybill has not been scan for the status before
                 bool shipmentTracking = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill.Equals(tracking.Waybill) && x.Status.Equals(tracking.Status));
 
-                if (!shipmentTracking)
+                if (!shipmentTracking || scanStatus.Equals(ShipmentScanStatus.AD))
                 {
                     var newShipmentTracking = new ShipmentTracking
                     {
