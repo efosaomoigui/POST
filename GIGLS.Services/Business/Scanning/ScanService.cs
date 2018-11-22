@@ -112,7 +112,7 @@ namespace GIGLS.Services.Business.Scanning
                     //check if the waybill has not been scan for the same status before
                     var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);
 
-                    if (!checkTrack)
+                    if (!checkTrack || scanStatus.Equals(ShipmentScanStatus.AD))
                     {
                         var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                         {
@@ -200,7 +200,7 @@ namespace GIGLS.Services.Business.Scanning
                             {
                                 //check already scanned manifest
                                 var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(waybill, scanStatus);
-                                if (!checkTrack)
+                                if (!checkTrack || scanStatus.Equals(ShipmentScanStatus.AD))
                                 {
                                     await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                                     {
