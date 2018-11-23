@@ -580,6 +580,25 @@ namespace GIGLS.Services.Implementation.User
             return result;
         }
 
+        public async Task<IdentityResult> ResetExpiredPassword(string email, string currentPassword, string newPassword)
+        {
+            var user = await _unitOfWork.User.GetUserByEmail(email);
+            if (user == null || newPassword == null || newPassword == "")
+            {
+                throw new GenericException("Operation could not complete, kindly supply valid credential");
+            }
+
+            if (!await _unitOfWork.User.CheckPasswordAsync(user, currentPassword))
+            {
+                throw new GenericException("Operation could not complete, kindly supply valid credential");
+            }
+
+            user.PasswordExpireDate = DateTime.Now;
+            var result = await _unitOfWork.User.ChangePassword(user.Id, currentPassword, newPassword);
+            await _unitOfWork.CompleteAsync();
+            return result;
+        }
+
         /// <summary>
         /// Code for first migration
         /// 1. Reset the users password
