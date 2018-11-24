@@ -9,7 +9,7 @@ namespace GIGLS.Core.DTO.InternationalShipmentDetails
 {
     public class InternationalRequestReceiverDTO : BaseDomainDTO
     {
-        public int Id { get; set; }
+        public int IdInternationalRequestReceiverId { get; set; }
         public string CustomerId { get; set; }
         public string GenerateCode { get; set; }
         public string Name { get; set; }

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GIGLS.Core.Domain
+﻿namespace GIGLS.Core.Domain
 {
     public class InternationalRequestReceiverItem : BaseDomain, IAuditable
     {
-        public string ReceiverId { get; set; }
+        public int InternationalRequestReceiverItemId { get; set; }
+
+        public int InternationalRequestReceiverId { get; set; }
         public virtual InternationalRequestReceiver InternationalRequestReceiver { get; set; }
 
         public string Description { get; set; }
@@ -17,8 +13,6 @@ namespace GIGLS.Core.Domain
         public string Width { get; set; }
         public string Length { get; set; }
         public string Height { get; set; }
-        public string Value { get; set; }
-
-        
+        public string Value { get; set; }        
     }
 }
