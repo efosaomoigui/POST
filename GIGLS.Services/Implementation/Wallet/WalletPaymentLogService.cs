@@ -6,6 +6,8 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
+using GIGLS.Core.View;
+using GIGLS.CORE.DTO.Shipments;
 using GIGLS.CORE.Enums;
 using GIGLS.Infrastructure;
 using System;
@@ -34,9 +36,21 @@ namespace GIGLS.Services.Implementation.Wallet
             return walletPaymentLogDto;
         }
 
+        public Tuple<Task<List<WalletPaymentLogView>>, int> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto)
+        {
+            var walletPaymentLogView = _uow.WalletPaymentLog.GetWalletPaymentLogs(filterOptionsDto);
+            return walletPaymentLogView;
+        }
+
         public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
+            if (walletPaymentLogDto.UserId == null)
+            {
+                walletPaymentLogDto.UserId = await _userService.GetCurrentUserId();
+            }
+
             var walletPaymentLog = Mapper.Map<WalletPaymentLog>(walletPaymentLogDto);
+            walletPaymentLog.Wallet = null;
             _uow.WalletPaymentLog.Add(walletPaymentLog);
             await _uow.CompleteAsync();
             return new { id = walletPaymentLog.WalletPaymentLogId };
@@ -66,15 +80,19 @@ namespace GIGLS.Services.Implementation.Wallet
             await _uow.CompleteAsync();
         }
 
-        public async Task UpdateWalletPaymentLog(int walletPaymentLogId, WalletPaymentLogDTO walletPaymentLogDto)
+        public async Task UpdateWalletPaymentLog(string reference, WalletPaymentLogDTO walletPaymentLogDto)
         {
-            var walletPaymentLog = await _uow.WalletPaymentLog.GetAsync(walletPaymentLogId);
+            var walletPaymentLogList = await _uow.WalletPaymentLog.FindAsync(s => s.Reference == reference);
+            var walletPaymentLog = walletPaymentLogList.FirstOrDefault();
 
             if (walletPaymentLog == null)
             {
-                throw new GenericException("Wallet Payment Log Information does not exist");
+                throw new GenericException($"Wallet Payment Log Information does not exist for this reference: {reference}.");
             }
-            //do nothing
+
+            walletPaymentLog.IsWalletCredited = walletPaymentLogDto.IsWalletCredited;
+            walletPaymentLog.TransactionStatus = walletPaymentLogDto.TransactionStatus;
+            await _uow.CompleteAsync();
         }
     }
 

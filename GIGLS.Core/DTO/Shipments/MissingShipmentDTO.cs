@@ -10,5 +10,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string Comment { get; set; }
         public string Reason { get; set; }
         public string Status { get; set; }
+        public string Feedback { get; set; }
     }
 }

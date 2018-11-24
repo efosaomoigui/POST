@@ -46,7 +46,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var missingShipment = await _uow.MissingShipment.GetAsync(missingShipmentId);
                 if (missingShipment == null)
                 {
-                    throw new GenericException("Missing Shipment does not exist");
+                    throw new GenericException("Incident report information does not exist");
                 }
                 _uow.MissingShipment.Remove(missingShipment);
                 _uow.Complete();
@@ -64,7 +64,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var missingShipment = await _uow.MissingShipment.GetAsync(missingShipmentId);
                 if (missingShipment == null)
                 {
-                    throw new GenericException("Missing Shipment does not exist");
+                    throw new GenericException("Incident report information does not exist");
                 }
                 var missingShipmentDTO = Mapper.Map<MissingShipmentDTO>(missingShipment);
                 return missingShipmentDTO;
@@ -89,13 +89,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 var missingShipment = await _uow.MissingShipment.GetAsync(missingShipmentId);
                 if (missingShipment == null || missingShipmentDto.MissingShipmentId != missingShipmentId)
                 {
-                    throw new GenericException("Missing Shipment does not exist");
+                    throw new GenericException("Incident report information does not exist");
                 }
                 missingShipment.Waybill = missingShipmentDto.Waybill;
                 missingShipment.SettlementAmount = missingShipmentDto.SettlementAmount;
                 missingShipment.Comment = missingShipmentDto.Comment;
                 missingShipment.Reason = missingShipmentDto.Reason;                   
                 missingShipment.Status = missingShipmentDto.Status;
+                missingShipment.Feedback = missingShipmentDto.Feedback;
                 _uow.Complete();
             }
             catch (Exception)

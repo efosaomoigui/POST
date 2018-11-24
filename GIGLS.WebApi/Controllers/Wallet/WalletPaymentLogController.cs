@@ -1,6 +1,8 @@
 ﻿using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Wallet;
+using GIGLS.Core.View;
+using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
 using System.Collections.Generic;
@@ -22,15 +24,15 @@ namespace GIGLS.WebApi.Controllers.Wallet
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
-        public async Task<IServiceResponse<IEnumerable<WalletPaymentLogDTO>>> GetWalletPaymentLogs()
+        public async Task<IServiceResponse<IEnumerable<WalletPaymentLogView>>> GetWalletPaymentLogs([FromUri]FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var walletPaymentLog = await _walletPaymentLogService.GetWalletPaymentLogs();
-
-                return new ServiceResponse<IEnumerable<WalletPaymentLogDTO>>
+                var walletTuple = _walletPaymentLogService.GetWalletPaymentLogs(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<WalletPaymentLogView>>
                 {
-                    Object = walletPaymentLog
+                    Object = await walletTuple.Item1,
+                    Total = walletTuple.Item2
                 };
             });
         }
@@ -85,12 +87,12 @@ namespace GIGLS.WebApi.Controllers.Wallet
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
-        [Route("{walletPaymentLogId:int}")]
-        public async Task<IServiceResponse<bool>> UpdateWalletPaymentLog(int walletPaymentLogId, WalletPaymentLogDTO walletPaymentLogDTO)
+        [Route("{reference}")]
+        public async Task<IServiceResponse<bool>> UpdateWalletPaymentLog(string reference, WalletPaymentLogDTO walletPaymentLogDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _walletPaymentLogService.UpdateWalletPaymentLog(walletPaymentLogId, walletPaymentLogDTO);
+                await _walletPaymentLogService.UpdateWalletPaymentLog(reference, walletPaymentLogDTO);
 
                 return new ServiceResponse<bool>
                 {

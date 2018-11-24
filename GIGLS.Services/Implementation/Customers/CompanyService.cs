@@ -110,7 +110,8 @@ namespace GIGLS.Services.Implementation.Customers
                     Username = newCompany.CustomerCode,
                     UserChannelCode = newCompany.CustomerCode,
                     UserChannelPassword = password,
-                    UserChannelType = userChannelType
+                    UserChannelType = userChannelType,
+                    PasswordExpireDate = DateTime.Now
                 });
 
                 //complete

@@ -43,12 +43,13 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ICustomerService _customerService;
         private readonly IPreShipmentService _preShipmentService;
         private readonly IWalletService _walletService;
+        private readonly IWalletPaymentLogService _wallepaymenttlogService;  
 
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService, 
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService,
-            ICustomerService customerService, IPreShipmentService preShipmentService, IWalletService walletService)
+            ICustomerService customerService, IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -61,6 +62,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _preShipmentService = preShipmentService;
             _uow = uow;
             _walletService = walletService;
+            _wallepaymenttlogService = wallepaymenttlogService;
             MapperConfig.Initialize();
         }
 
@@ -81,6 +83,20 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
         {
             await _walletService.UpdateWallet(walletId, walletTransactionDTO, false);
+
+        }
+
+        public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
+        {
+            var walletPaymentLog = await _wallepaymenttlogService.AddWalletPaymentLog(walletPaymentLogDto);
+            return walletPaymentLog;
+
+        }
+
+        public async Task<object> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
+        {
+            await _wallepaymenttlogService.UpdateWalletPaymentLog(walletPaymentLogDto.Reference, walletPaymentLogDto);
+            return walletPaymentLogDto;
 
         }
 

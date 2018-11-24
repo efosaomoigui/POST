@@ -12,6 +12,9 @@ using System.IO;
 using GIGLS.Core.Enums;
 using GIGLS.Core.View;
 using System.Linq;
+using GIGLS.Core.Domain.ShipmentScan;
+using GIGLS.Core.DTO.ShipmentScan;
+using System;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -147,6 +150,42 @@ namespace GIGLS.Services.Implementation.Report
         {
             var queryable = _uow.ShipmentTracking.GetShipmentTrackingsFromViewAsync(f_Criteria);
             var result = await Task.FromResult(queryable.ToList());
+            return result;
+        }
+
+        public async Task<List<ScanStatusReportDTO>> GetShipmentTrackingFromViewReport(ScanTrackFilterCriteria f_Criteria)
+        {
+            var queryable = _uow.ShipmentTracking.GetShipmentTrackingsFromViewAsync(f_Criteria);
+
+            //use 1/10/2018 to 7/10/2018 as test
+            var fromDate = new DateTime(2018, 10, 1);
+            var toDate = new DateTime(2018, 10, 7);
+            queryable = queryable.Where(s => s.DateTime >= fromDate && s.DateTime <= toDate);
+
+            //1. Group by Service Centre
+            var scanStatusReportList = new List<ScanStatusReportDTO>();
+            var allServiceCentreNames = _uow.ServiceCentre.GetAllAsQueryable().Select(s => s.Name).ToList();
+            var allScanStatus = _uow.ScanStatus.GetAllAsQueryable().ToList();
+            foreach(var scName in allServiceCentreNames)
+            {
+                //1.1 Group by Scan Status
+                //CRT
+                var count_CRT = queryable.Where(s => s.Status == ShipmentScanStatus.CRT.ToString() &&
+                    s.Location == scName).Count();
+                scanStatusReportList.Add(new ScanStatusReportDTO() {
+                    Code = ShipmentScanStatus.CRT.ToString(),
+                    Location = scName,
+                    Count = count_CRT
+                });
+
+            }
+
+
+
+
+            
+            //return resultList
+            var result = await Task.FromResult(scanStatusReportList);
             return result;
         }
     }
