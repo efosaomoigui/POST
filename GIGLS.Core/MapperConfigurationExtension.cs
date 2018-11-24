@@ -30,6 +30,7 @@ using GIGLS.Core.Domain.Devices;
 using GIGLS.Core.DTO.Devices;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.BankSettlement;
+using GIGLS.Core.DTO.InternationalShipmentDetails;
 
 namespace GIGLS.Core
 {
@@ -281,6 +282,13 @@ namespace GIGLS.Core
 
                 config.CreateMap<OverdueShipment, OverdueShipmentDTO>();
                 config.CreateMap<OverdueShipmentDTO, OverdueShipment>();
+
+                config.CreateMap<InternationalRequestReceiver, InternationalRequestReceiverDTO>();
+                config.CreateMap<InternationalRequestReceiverDTO, InternationalRequestReceiver>();
+
+                config.CreateMap<InternationalRequestReceiverItem, InternationalRequestReceiverItemDTO>();
+                config.CreateMap<InternationalRequestReceiverItemDTO, InternationalRequestReceiverItem>();
+
             });
 
             isInit = true;

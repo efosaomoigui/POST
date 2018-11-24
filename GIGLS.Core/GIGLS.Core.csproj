@@ -165,6 +165,8 @@
     <Compile Include="Domain\MessagingLog\SmsSendLog.cs" />
     <Compile Include="Domain\MissingShipment.cs" />
     <Compile Include="Domain\PreShipment.cs" />
+    <Compile Include="Domain\InternationalRequestReceiver.cs" />
+    <Compile Include="Domain\InternationalRequestReceiverItem.cs" />
     <Compile Include="Domain\ShipmentDeliveryOptionMapping.cs" />
     <Compile Include="Domain\PreShipmentItem.cs" />
     <Compile Include="Domain\ShipmentPackagePrice.cs" />
@@ -263,6 +265,8 @@
     <Compile Include="DTO\Haulage\HaulageDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDistanceMappingPriceDTO.cs" />
     <Compile Include="DTO\Haulage\PackingListDTO.cs" />
+    <Compile Include="DTO\InternationalShipmentDetails\InternationalRequestReceiverDTO.cs" />
+    <Compile Include="DTO\InternationalShipmentDetails\InternationalRequestReceiverItemDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardManagementDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardManagementPartDTO.cs" />
@@ -431,6 +435,7 @@
     <Compile Include="IRepositories\ICountryRepository.cs" />
     <Compile Include="IRepositories\IMessageRepository.cs" />
     <Compile Include="IRepositories\INotificationRepository.cs" />
+    <Compile Include="IRepositories\InternationalRequest\IInternationalRequestReceiverRepository.cs" />
     <Compile Include="IRepositories\IRepository.cs" />
     <Compile Include="IRepositories\IStateRepository.cs" />
     <Compile Include="IRepositories\IUnitOfWork.cs" />
@@ -536,6 +541,7 @@
     <Compile Include="IServices\ICountryService.cs" />
     <Compile Include="IServices\IMessageService.cs" />
     <Compile Include="IServices\INotificationService.cs" />
+    <Compile Include="IServices\InternationalRequest\IInternationalRequestReceiverService.cs" />
     <Compile Include="IServices\IServiceDependencyMarker.cs" />
     <Compile Include="IServices\IServiceReponse.cs" />
     <Compile Include="IServices\IStateService.cs" />

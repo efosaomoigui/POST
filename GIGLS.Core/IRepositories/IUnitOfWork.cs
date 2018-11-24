@@ -24,6 +24,7 @@ using GIGLS.Core.IRepositories.MessagingLog;
 using GIGLS.Core.IRepositories.ShipmentScan;
 using GIGLS.Core.IRepositories.Devices;
 using GIGLS.Core.IRepositories.BankSettlement;
+using GIGLS.Core.IRepositories.InternationalRequest;
 
 namespace GIGLS.Core
 {
@@ -122,6 +123,7 @@ namespace GIGLS.Core
         ILogVisitReasonRepository LogVisitReason { get; set; }
         IWalletPaymentLogRepository WalletPaymentLog { get; set; }
         IOverdueShipmentRepository OverdueShipment { get; set; }
+        IInternationalRequestReceiverRepository InternationalRequestReceiver { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

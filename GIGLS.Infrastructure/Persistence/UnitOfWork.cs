@@ -27,6 +27,8 @@ using GIGLS.Core.IRepositories.ShipmentScan;
 using System;
 using GIGLS.Core.IRepositories.Devices;
 using GIGLS.Core.IRepositories.BankSettlement;
+using GIGLS.Infrastructure.Persistence.Repositories.InternationalRequest;
+using GIGLS.Core.IRepositories.InternationalRequest;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -322,6 +324,9 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IOverdueShipmentRepository OverdueShipment { get; set; }
+
+        [Inject]
+        public IInternationalRequestReceiverRepository InternationalRequestReceiver { get; set; }
 
         public int Complete()
         {

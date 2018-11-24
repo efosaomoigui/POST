@@ -210,6 +210,11 @@ namespace GIGLS.Infrastructure.Persistence
 
         public DbSet<OverdueShipment> OverdueShipment { get; set; }
 
+        //international request
+        public DbSet<InternationalRequestReceiver> InternationalRequestReceivers { get; set; }
+        public DbSet<InternationalRequestReceiverItem> InternationalRequestReceiverItems { get; set; }
+
+
         #endregion
 
 

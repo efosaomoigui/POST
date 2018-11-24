@@ -305,6 +305,7 @@
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingController.cs" />
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingPriceController.cs" />
     <Compile Include="Controllers\Haulage\PackingListController.cs" />
+    <Compile Include="Controllers\InternationalRequest\InternationalRequestController.cs" />
     <Compile Include="Controllers\Messaging\EmailSendLogController.cs" />
     <Compile Include="Controllers\Messaging\MessageController.cs" />
     <Compile Include="Controllers\Messaging\NotificationController.cs" />
