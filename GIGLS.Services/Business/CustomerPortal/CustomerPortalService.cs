@@ -43,11 +43,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ICustomerService _customerService;
         private readonly IPreShipmentService _preShipmentService;
         private readonly IWalletService _walletService;
-        private readonly IWalletPaymentLogService _wallepaymenttlogService;  
+        private readonly IWalletPaymentLogService _wallepaymenttlogService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
-            IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService, 
+            IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService,
             ICustomerService customerService, IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService)
         {
@@ -95,6 +95,37 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<object> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
+
+            //1.check to prevent multiple entries
+            var walletLogObject = _uow.WalletPaymentLog.GetAllAsQueryable().SingleOrDefault(s => 
+                s.Reference == walletPaymentLogDto.Reference && s.IsWalletCredited == true);
+            if(walletLogObject == null)
+            {
+                //wallet already updated
+                return false;
+            }
+
+            //2. update wallet for user
+            if (walletPaymentLogDto.TransactionStatus.Equals("success"))
+            {
+                await UpdateWallet(walletPaymentLogDto.WalletId, new WalletTransactionDTO()
+                {
+                    WalletId = walletPaymentLogDto.WalletId,
+                    Amount = walletPaymentLogDto.Amount
+                }
+             );
+            }
+
+            //3. update wallet log
+            if (walletPaymentLogDto.TransactionStatus.Equals("success"))
+            {
+                walletPaymentLogDto.IsWalletCredited = true;
+            }
+            else
+            {
+                walletPaymentLogDto.IsWalletCredited = false;
+            }
+
             await _wallepaymenttlogService.UpdateWalletPaymentLog(walletPaymentLogDto.Reference, walletPaymentLogDto);
             return walletPaymentLogDto;
 
@@ -107,7 +138,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var currentUser = await _userService.GetUserById(currentUserId);
             var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == currentUser.UserChannelCode);
 
-            if(wallet == null)
+            if (wallet == null)
             {
                 throw new GenericException("Wallet does not exist");
             }
@@ -163,7 +194,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<IEnumerable<ShipmentTrackingDTO>> PublicTrackShipment(string waybillNumber)
         {
-            var result = await _iShipmentTrackService.TrackShipment(waybillNumber);            
+            var result = await _iShipmentTrackService.TrackShipment(waybillNumber);
             return result;
         }
 

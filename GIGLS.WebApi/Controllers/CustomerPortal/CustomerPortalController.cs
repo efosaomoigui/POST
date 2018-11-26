@@ -16,6 +16,7 @@ using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -27,10 +28,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
     public class CustomerPortalController : BaseWebApiController
     {
         private readonly ICustomerPortalService _portalService;
+        private readonly IPaystackPaymentService _paymentService; 
 
-        public CustomerPortalController(ICustomerPortalService portalService) : base(nameof(CustomerPortalController))
+        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService) : base(nameof(CustomerPortalController))
         {
             _portalService = portalService;
+            _paymentService = paymentService;
         }
 
         [HttpPost]
@@ -73,6 +76,36 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<object>
                 {
                     Object = walletPaymentLog
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("paywithpaystack")]
+        public async Task<IServiceResponse<object>> PaywithPaystack(WalletPaymentLogDTO paymentinfo)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                //Add wallet payment log
+                var walletPaymentLog = await _portalService.AddWalletPaymentLog(paymentinfo);
+
+                //initialize the secret key from paystack
+                var testOrLiveSecret = ConfigurationManager.AppSettings["PayStackSecret"];
+
+                //Call the paystack class implementation to do the payment
+                var result = await _paymentService.MakePayment(testOrLiveSecret, paymentinfo);
+                var updateresult = new object();
+
+                if (result)
+                {
+                    paymentinfo.TransactionStatus = "Success";
+                    updateresult = await _portalService.UpdateWalletPaymentLog(paymentinfo); 
+                }
+
+                return new ServiceResponse<object>
+                {
+                    Object = updateresult 
                 };
             });
         }

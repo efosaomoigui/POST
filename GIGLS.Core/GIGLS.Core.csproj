@@ -92,6 +92,10 @@
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="PayStack.Net, Version=0.6.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PayStack.Net.0.6.6\lib\net45\PayStack.Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.configuration" />
@@ -122,6 +126,10 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="XtremeIT.Library.Pins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5f275dd942b1b995, processorArchitecture=MSIL">
+      <HintPath>..\packages\PayStack.Net.0.6.6\lib\net45\XtremeIT.Library.Pins.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Domain\AppRole.cs" />
@@ -335,6 +343,7 @@
     <Compile Include="DTO\Wallet\CashOnDeliveryBalanceDTO.cs" />
     <Compile Include="DTO\Wallet\WalletDto.cs" />
     <Compile Include="DTO\Wallet\WalletNumberDto.cs" />
+    <Compile Include="DTO\Wallet\TransactionResult.cs" />
     <Compile Include="DTO\Wallet\WalletPaymentLogDTO.cs" />
     <Compile Include="DTO\Wallet\WalletSearchOption.cs" />
     <Compile Include="DTO\Wallet\WalletTransactionDto.cs" />
@@ -594,6 +603,7 @@
     <Compile Include="IServices\Wallet\IWalletNumberService.cs" />
     <Compile Include="IServices\Wallet\ICashOnDeliveryBalanceService.cs" />
     <Compile Include="IServices\Wallet\ICashOnDeliveryAccountService.cs" />
+    <Compile Include="IServices\Wallet\IPaystackPaymentService.cs" />
     <Compile Include="IServices\Wallet\IWalletPaymentLogService.cs" />
     <Compile Include="IServices\Wallet\IWalletService.cs" />
     <Compile Include="IServices\Wallet\IWalletTransactionService.cs" />
