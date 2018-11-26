@@ -192,6 +192,7 @@
     <Compile Include="Implementation\Haulage\HaulageDistanceMappingPriceService.cs" />
     <Compile Include="Implementation\Haulage\HaulageService.cs" />
     <Compile Include="Implementation\Haulage\PackingListService.cs" />
+    <Compile Include="Implementation\InternationalRequest\InternationalRequestReceiverService.cs" />
     <Compile Include="Implementation\JobCards\JobCardManagementPartService.cs" />
     <Compile Include="Implementation\JobCards\JobCardManagementService.cs" />
     <Compile Include="Implementation\JobCards\JobCardService.cs" />

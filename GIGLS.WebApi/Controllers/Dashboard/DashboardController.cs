@@ -33,6 +33,5 @@ namespace GIGLS.WebApi.Controllers.Dashboard
                 };
             });
         }
-
     }
 }
