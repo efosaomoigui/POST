@@ -97,13 +97,13 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
 
             //1.check to prevent multiple entries
-            var walletLogObject = _uow.WalletPaymentLog.GetAllAsQueryable().SingleOrDefault(s => 
-                s.Reference == walletPaymentLogDto.Reference && s.IsWalletCredited == true);
-            if(walletLogObject == null)
-            {
-                //wallet already updated
-                return false;
-            }
+            //var walletLogObject = _uow.WalletPaymentLog.GetAllAsQueryable().SingleOrDefault(s => 
+            //    s.Reference == walletPaymentLogDto.Reference && s.IsWalletCredited == false);
+            //if(walletLogObject == null)
+            //{
+            //    //wallet already updated
+            //    return false;
+            //}
 
             //2. update wallet for user
             if (walletPaymentLogDto.TransactionStatus.Equals("success"))
@@ -111,7 +111,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                 await UpdateWallet(walletPaymentLogDto.WalletId, new WalletTransactionDTO()
                 {
                     WalletId = walletPaymentLogDto.WalletId,
-                    Amount = walletPaymentLogDto.Amount
+                    Amount = walletPaymentLogDto.Amount,
+                    Description = walletPaymentLogDto.Description,
+                    PaymentTypeReference = walletPaymentLogDto.Reference
                 }
              );
             }

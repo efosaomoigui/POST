@@ -166,6 +166,15 @@ namespace GIGLS.Services.Implementation.Wallet
             newWalletTransaction.ServiceCentreId = serviceCenterIds[0];
             newWalletTransaction.UserId = walletTransactionDTO.UserId;
 
+            //Check if transaction exist before updating the wallet
+            //to prevent duplicate entry
+            var transactionExist = _uow.WalletTransaction.GetAsync(s => s.PaymentTypeReference == walletTransactionDTO.PaymentTypeReference);
+
+            if (transactionExist != null)
+            {
+                throw new GenericException("Wallet transaction done already");
+            }
+
             _uow.WalletTransaction.Add(newWalletTransaction);
             await _uow.CompleteAsync();
 
