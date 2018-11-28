@@ -7,6 +7,7 @@
         Online,
         Wallet,
         Transfer,
-        Partial
+        Partial,
+        Waiver
     }
 }

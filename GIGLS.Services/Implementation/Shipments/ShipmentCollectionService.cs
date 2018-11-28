@@ -281,7 +281,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentCollection == null)
             {
-                throw new GenericException("Shipment does not exist");
+                throw new GenericException("Shipment information does not exist");
             }
 
             if (shipmentCollectionDto.UserId == null)
