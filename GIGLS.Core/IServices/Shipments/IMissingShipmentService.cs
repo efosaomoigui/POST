@@ -6,7 +6,7 @@ namespace GIGLS.Core.IServices.Shipments
 {
     public interface IMissingShipmentService : IServiceDependencyMarker
     {
-        Task<IEnumerable<MissingShipmentDTO>> GetMissingShipments();
+        Task<List<MissingShipmentDTO>> GetMissingShipments();
         Task<MissingShipmentDTO> GetMissingShipmentById(int missingShipmentId);
         Task<object> AddMissingShipment(MissingShipmentDTO missingShipment);
         Task UpdateMissingShipment(int missingShipmentId, MissingShipmentDTO missingShipment);

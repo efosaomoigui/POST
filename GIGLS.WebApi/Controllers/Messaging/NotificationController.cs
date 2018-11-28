@@ -8,7 +8,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Messaging
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/notification")]
     public class NotificationController : BaseWebApiController
     {

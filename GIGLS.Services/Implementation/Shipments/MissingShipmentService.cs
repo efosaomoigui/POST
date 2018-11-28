@@ -7,15 +7,19 @@ using GIGLS.Core;
 using GIGLS.Infrastructure;
 using GIGLS.Core.Domain;
 using AutoMapper;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
     public class MissingShipmentService : IMissingShipmentService
     {
         private readonly IUnitOfWork _uow;
-        public MissingShipmentService(IUnitOfWork uow)
+        private readonly IUserService _userService;
+
+        public MissingShipmentService(IUnitOfWork uow, IUserService userService)
         {
             _uow = uow;
+            _userService = userService;
             MapperConfig.Initialize();
         }
 
@@ -23,12 +27,23 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                if (!await _uow.Shipment.ExistAsync(c => c.Waybill == missingShipment.Waybill))
+                {
+                    throw new GenericException($"Waybill: {missingShipment.Waybill} Information does not exist");
+                }
+
                 if (await _uow.MissingShipment.ExistAsync(c => c.Waybill == missingShipment.Waybill))
                 {
-                    throw new GenericException($"Shipment with waybill: {missingShipment.Waybill} already exist");
+                    throw new GenericException($"Incident report for the waybill {missingShipment.Waybill}  already exist");
                 }
+
+                var user = await _userService.GetCurrentUserId();
+                var serviceCentre = await _userService.GetPriviledgeServiceCenters();
+
                 var newMissingShipment = Mapper.Map<MissingShipment>(missingShipment);
                 newMissingShipment.Status = "Pending";
+                newMissingShipment.CreatedBy = user;
+                newMissingShipment.ServiceCentreId = serviceCentre[0];
                 _uow.MissingShipment.Add(newMissingShipment);
                 await _uow.CompleteAsync();
                 return new { Id = newMissingShipment.MissingShipmentId };
@@ -46,7 +61,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var missingShipment = await _uow.MissingShipment.GetAsync(missingShipmentId);
                 if (missingShipment == null)
                 {
-                    throw new GenericException("Incident report information does not exist");
+                    throw new GenericException("Incident Report information does not exist");
                 }
                 _uow.MissingShipment.Remove(missingShipment);
                 _uow.Complete();
@@ -61,25 +76,24 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var missingShipment = await _uow.MissingShipment.GetAsync(missingShipmentId);
-                if (missingShipment == null)
-                {
-                    throw new GenericException("Incident report information does not exist");
-                }
-                var missingShipmentDTO = Mapper.Map<MissingShipmentDTO>(missingShipment);
-                return missingShipmentDTO;
+                return await _uow.MissingShipment.GetMissingShipmentById(missingShipmentId);
             }
             catch (Exception)
             {
                 throw;
             }
         }
-
-        public Task<IEnumerable<MissingShipmentDTO>> GetMissingShipments()
+                
+        public async Task<List<MissingShipmentDTO>> GetMissingShipments()
         {
-            var missingShipment = _uow.MissingShipment.GetAll();
-            var missingShipmentDto = Mapper.Map<IEnumerable<MissingShipmentDTO>>(missingShipment);
-            return Task.FromResult(missingShipmentDto);
+            try
+            {
+                return await _uow.MissingShipment.GetMissingShipments();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task UpdateMissingShipment(int missingShipmentId, MissingShipmentDTO missingShipmentDto)
@@ -91,12 +105,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Incident report information does not exist");
                 }
-                missingShipment.Waybill = missingShipmentDto.Waybill;
+                
+                var user = await _userService.GetCurrentUserId();
+
+                //missingShipment.Waybill = missingShipmentDto.Waybill;
+                //missingShipment.Comment = missingShipmentDto.Comment;
+                //missingShipment.Reason = missingShipmentDto.Reason;
                 missingShipment.SettlementAmount = missingShipmentDto.SettlementAmount;
-                missingShipment.Comment = missingShipmentDto.Comment;
-                missingShipment.Reason = missingShipmentDto.Reason;                   
                 missingShipment.Status = missingShipmentDto.Status;
                 missingShipment.Feedback = missingShipmentDto.Feedback;
+                missingShipment.ResolvedBy = user;
                 _uow.Complete();
             }
             catch (Exception)
@@ -104,5 +122,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
     }
 }
