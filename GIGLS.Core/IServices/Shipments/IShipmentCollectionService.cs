@@ -18,5 +18,6 @@ namespace GIGLS.CORE.IServices.Shipments
         Task RemoveShipmentCollection(string waybill);
         Task CheckShipmentCollection(string waybill);
         System.Tuple<Task<List<ShipmentCollectionDTO>>, int> GetOverDueShipments(FilterOptionsDto filterOptionsDto);
+        System.Tuple<Task<List<ShipmentCollectionDTO>>, int> GetEcommerceOverDueShipments(FilterOptionsDto filterOptionsDto);
     }
 }
