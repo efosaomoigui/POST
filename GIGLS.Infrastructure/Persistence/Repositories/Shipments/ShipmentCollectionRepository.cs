@@ -35,7 +35,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      IndentificationUrl = shipmentCollection.IndentificationUrl,
                                                      ShipmentScanStatus = shipmentCollection.ShipmentScanStatus,
                                                      UserId = shipmentCollection.UserId,
-
+                                                     DateCreated = shipmentCollection.DateCreated,
                                                      OriginalDepartureServiceCentre = Context.ServiceCentre.Where(c => c.ServiceCentreId == shipment.DepartureServiceCentreId).Select(x => new ServiceCentreDTO
                                                      {
                                                          Code = x.Code,

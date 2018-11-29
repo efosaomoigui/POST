@@ -197,7 +197,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         //---Added for global customer care and ecommerce
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("overdueshipmentGLOBAL")]
+        [Route("overdueshipmentglobal")]
         public async Task<IServiceResponse<IEnumerable<ShipmentCollectionDTO>>> GetOverDueShipmentsGLOBAL([FromUri]FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
@@ -213,7 +213,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("overdueshipmentecommerceGLOBAL")]
+        [Route("overdueshipmentecommerceglobal")]
         public async Task<IServiceResponse<IEnumerable<ShipmentCollectionDTO>>> GetOverDueShipmentEcommerceGLOBAL([FromUri]FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
