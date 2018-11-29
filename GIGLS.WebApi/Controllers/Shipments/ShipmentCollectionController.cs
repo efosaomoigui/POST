@@ -194,5 +194,38 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        //---Added for global customer care and ecommerce
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("overdueshipmentGLOBAL")]
+        public async Task<IServiceResponse<IEnumerable<ShipmentCollectionDTO>>> GetOverDueShipmentsGLOBAL([FromUri]FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentCollectionTuple = _service.GetOverDueShipmentsGLOBAL(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
+                {
+                    Object = await shipmentCollectionTuple.Item1,
+                    Total = shipmentCollectionTuple.Item2
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("overdueshipmentecommerceGLOBAL")]
+        public async Task<IServiceResponse<IEnumerable<ShipmentCollectionDTO>>> GetOverDueShipmentEcommerceGLOBAL([FromUri]FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentCollectionTuple = _service.GetEcommerceOverDueShipmentsGLOBAL(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
+                {
+                    Object = await shipmentCollectionTuple.Item1,
+                    Total = shipmentCollectionTuple.Item2
+                };
+            });
+        }
+
     }
 }

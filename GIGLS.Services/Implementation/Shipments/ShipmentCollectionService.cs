@@ -569,5 +569,149 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        
+        //---Added for global customer care and ecommerce
+        public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetOverDueShipmentsGLOBAL(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                // filter by global property for OverDueShipments
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount).Result;
+                if (overDueDaysCountObj == null)
+                {
+                    throw new GenericException($"The Global property 'Over Due Days Count' has not been set. Kindly contact admin.");
+                }
+                var overDueDaysCount = overDueDaysCountObj.Value;
+                int globalProp = int.Parse(overDueDaysCount);
+                var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
+                var shipmentCollection = _uow.ShipmentCollection.ShipmentCollectionsForEcommerceAsQueryable(false).
+                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate)).ToList();
+                shipmentCollection = shipmentCollection.OrderByDescending(x => x.DateCreated).ToList();
+
+                //ensure that already grouped waybills don't appear with this list
+                var overdueShipment = _uow.OverdueShipment.GetAllAsQueryable().
+                    Where(s => s.OverdueShipmentStatus == OverdueShipmentStatus.Grouped).ToList();
+
+                //filter the two lists
+                shipmentCollection =
+                    shipmentCollection.Where(s => !overdueShipment.Select(d => d.Waybill).Contains(s.Waybill)).ToList();
+
+
+                int count = shipmentCollection.Count();
+
+                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
+
+                if (filterOptionsDto != null)
+                {
+                    //filter
+                    var filter = filterOptionsDto.filter;
+                    var filterValue = filterOptionsDto.filterValue;
+                    if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
+                    {
+                        shipmentCollectionDto = shipmentCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null
+                            && (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
+                    }
+
+                    //sort
+                    var sortorder = filterOptionsDto.sortorder;
+                    var sortvalue = filterOptionsDto.sortvalue;
+
+                    if (!string.IsNullOrEmpty(sortorder) && !string.IsNullOrEmpty(sortvalue))
+                    {
+                        System.Reflection.PropertyInfo prop = typeof(ShipmentCollection).GetProperty(sortvalue);
+
+                        if (sortorder == "0")
+                        {
+                            shipmentCollectionDto = shipmentCollectionDto.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                        }
+                        else
+                        {
+                            shipmentCollectionDto = shipmentCollectionDto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                        }
+                    }
+
+                    shipmentCollectionDto = shipmentCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
+                }
+
+                return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), count);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetEcommerceOverDueShipmentsGLOBAL(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                // filter by global property for OverDueShipments
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount).Result;
+                if (overDueDaysCountObj == null)
+                {
+                    throw new GenericException($"The Global property 'Over Due Days Count for Ecommerce customer' has not been set. Kindly contact admin.");
+                }
+                var overDueDaysCount = overDueDaysCountObj.Value;
+                int globalProp = int.Parse(overDueDaysCount);
+                var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
+                var shipmentCollection = _uow.ShipmentCollection.ShipmentCollectionsForEcommerceAsQueryable(true).
+                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate)).ToList();
+                shipmentCollection = shipmentCollection.OrderByDescending(x => x.DateCreated).ToList();
+
+                //ensure that already grouped waybills don't appear with this list
+                var overdueShipment = _uow.OverdueShipment.GetAllAsQueryable().
+                    Where(s => s.OverdueShipmentStatus == OverdueShipmentStatus.Grouped).ToList();
+
+                //filter the two lists
+                shipmentCollection =
+                    shipmentCollection.Where(s => !overdueShipment.Select(d => d.Waybill).Contains(s.Waybill)).ToList();
+
+
+                int count = shipmentCollection.Count();
+
+                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
+
+                if (filterOptionsDto != null)
+                {
+                    //filter
+                    var filter = filterOptionsDto.filter;
+                    var filterValue = filterOptionsDto.filterValue;
+                    if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
+                    {
+                        shipmentCollectionDto = shipmentCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null
+                            && (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
+                    }
+
+                    //sort
+                    var sortorder = filterOptionsDto.sortorder;
+                    var sortvalue = filterOptionsDto.sortvalue;
+
+                    if (!string.IsNullOrEmpty(sortorder) && !string.IsNullOrEmpty(sortvalue))
+                    {
+                        System.Reflection.PropertyInfo prop = typeof(ShipmentCollection).GetProperty(sortvalue);
+
+                        if (sortorder == "0")
+                        {
+                            shipmentCollectionDto = shipmentCollectionDto.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                        }
+                        else
+                        {
+                            shipmentCollectionDto = shipmentCollectionDto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                        }
+                    }
+
+                    shipmentCollectionDto = shipmentCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
+                }
+
+                return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), count);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }
