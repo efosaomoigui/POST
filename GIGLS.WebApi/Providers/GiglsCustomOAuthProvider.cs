@@ -8,6 +8,7 @@ using GIGL.GIGLS.Core.Domain;
 using Microsoft.AspNet.Identity.Owin;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace GIGLS.WebApi.Providers
 {
@@ -84,9 +85,23 @@ namespace GIGLS.WebApi.Providers
             {
                 User user = await _repo._userManager.FindAsync(context.UserName, context.Password);
 
+                //check for password expiry
+                var LastUpdatePasswordDate = user.PasswordExpireDate;
+                DateTime TodayDate = DateTime.Now.Date;
+                var DayDifferent = (TodayDate - LastUpdatePasswordDate).Days;
+
+                //if (DayDifferent >= 30)
+                //{
+                //    //Redirect to user reset page
+                //    context.SetError("invalid_grant", "The user account is expired.");
+                //    return;
+                //}
+
                 if (user == null)
                 {
-                    context.SetError("invalid_grant", "The user name or password is incorrect.");
+                    context.Rejected();
+                    //context.SetError("invalid_grant", "The user name or password is incorrect.");
+                    context.SetError("invalid_client", Newtonsoft.Json.JsonConvert.SerializeObject(new { result = false, message = "The user name or password is incorrect!" }));
                     return;
                 }
 
@@ -94,7 +109,9 @@ namespace GIGLS.WebApi.Providers
                 {
                     if (user.SystemUserId == null)
                     {
-                        context.SetError("invalid_grant", "The user has not been assigned a role.");
+                        context.Rejected();
+                        context.SetError("invalid_client", Newtonsoft.Json.JsonConvert.SerializeObject(new { result = false, message = "The user has not been assigned a role!" }));
+                        //context.SetError("invalid_grant", "The user has not been assigned a role.");
                         return;
                     }
                 }
@@ -108,6 +125,7 @@ namespace GIGLS.WebApi.Providers
 
                 if (!user.IsActive)
                 {
+                    context.Rejected();
                     context.SetError("invalid_grant", "Your account has not been activated!");
                     return;
                 }
