@@ -82,6 +82,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
         {
+
             await _walletService.UpdateWallet(walletId, walletTransactionDTO, false);
 
         }
@@ -108,6 +109,16 @@ namespace GIGLS.Services.Business.CustomerPortal
             //2. update wallet for user
             if (walletPaymentLogDto.TransactionStatus.Equals("success"))
             {
+
+                //Check if transaction exist before updating the wallet
+                //to prevent duplicate entry
+                var transactionExist =_uow.WalletTransaction.GetAllAsQueryable().SingleOrDefault(s => s.PaymentTypeReference == walletPaymentLogDto.Reference);
+
+                if (transactionExist != null)
+                {
+                    throw new GenericException("Wallet transaction done already");
+                }
+
                 await UpdateWallet(walletPaymentLogDto.WalletId, new WalletTransactionDTO()
                 {
                     WalletId = walletPaymentLogDto.WalletId,
