@@ -13,6 +13,7 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.IServices.Customers;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -21,14 +22,16 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUnitOfWork _uow;
         private readonly IManifestService _manifestService;
         private readonly IUserService _userService;
+        private readonly ICustomerService _customerService;
         private readonly IShipmentService _shipmentService;
 
         public ManifestWaybillMappingService(IUnitOfWork uow, IManifestService manifestService,
-            IUserService userService, IShipmentService shipmentService)
+            IUserService userService, ICustomerService customerService, IShipmentService shipmentService)
         {
             _uow = uow;
             _manifestService = manifestService;
             _userService = userService;
+            _customerService = customerService;
             _shipmentService = shipmentService;
             MapperConfig.Initialize();
         }
@@ -314,6 +317,25 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //get shipment detail 
                     manifestwaybill.Shipment = await _shipmentService.GetBasicShipmentDetail(manifestwaybill.Waybill);
+
+                    //convert customer type to enum customer type
+                    //CustomerType customerType; 
+                    //Enum.TryParse(manifestwaybill.Shipment.CustomerType, out customerType);
+
+                    CustomerType customerType;
+
+                    if(manifestwaybill.Shipment.CustomerType == CustomerType.Company.ToString())
+                    {
+                        customerType = CustomerType.Company;
+                    }
+                    else
+                    {
+                        customerType = CustomerType.IndividualCustomer;
+                    }
+                    
+                    //Get  customer detail
+                    var currentCustomerObject = await _customerService.GetCustomer(manifestwaybill.Shipment.CustomerId, customerType);
+                    manifestwaybill.Shipment.CustomerDetails = currentCustomerObject;
 
                     //get from ShipmentCollection
                     var shipmentCollectionObj = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == manifestwaybill.Waybill);

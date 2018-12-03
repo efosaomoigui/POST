@@ -19,6 +19,7 @@
         EcommerceGoldNegativeWalletLimit,
         OverDueDaysCount,
         WarehouseServiceCentre,
-        PasswordExpireDaysCount
+        PasswordExpireDaysCount,
+        EcommerceOverDueDaysCount
     }
 }
