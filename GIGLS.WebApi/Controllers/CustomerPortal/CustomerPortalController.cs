@@ -6,6 +6,7 @@ using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices;
@@ -425,6 +426,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<bool>
                 {
                     Object = true
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("register")]
+        public async Task<IServiceResponse<UserDTO>> Register(UserDTO user)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var registerUser = await _portalService.Register(user);
+                return new ServiceResponse<UserDTO>
+                {
+                    Object = registerUser
                 };
             });
         }

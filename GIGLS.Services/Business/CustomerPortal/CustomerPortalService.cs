@@ -27,6 +27,7 @@ using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.DTO.Customers;
 using System;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.Core.DTO.User;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -365,6 +366,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw;
             }
 
+        }
+
+        public Task<UserDTO> Register(UserDTO user)
+        {
+            throw new NotImplementedException();
         }
     }
 }

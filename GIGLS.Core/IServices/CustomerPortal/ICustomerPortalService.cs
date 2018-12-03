@@ -7,6 +7,7 @@ using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.CORE.DTO.Report;
@@ -50,5 +51,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
 
         Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto);
         Task<PreShipmentDTO> GetPreShipment(string waybill);
+        Task<UserDTO> Register(UserDTO user);
     }
 }
