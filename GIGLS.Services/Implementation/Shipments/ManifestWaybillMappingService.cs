@@ -317,13 +317,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //get shipment detail 
                     manifestwaybill.Shipment = await _shipmentService.GetBasicShipmentDetail(manifestwaybill.Waybill);
-
-                    //convert customer type to enum customer type
-                    //CustomerType customerType; 
-                    //Enum.TryParse(manifestwaybill.Shipment.CustomerType, out customerType);
-
+                    
                     CustomerType customerType;
-
                     if(manifestwaybill.Shipment.CustomerType == CustomerType.Company.ToString())
                     {
                         customerType = CustomerType.Company;
