@@ -102,7 +102,7 @@ namespace GIGLS.WebApi.Providers
                     context.Rejected();
                     //context.SetError("invalid_grant", "The user name or password is incorrect.");
                     context.SetError("invalid_client", Newtonsoft.Json.JsonConvert.SerializeObject(new { result = false, message = "The user name or password is incorrect!" }));
-                    return;
+                    return;  
                 }
 
                 if (user.UserChannelType == Core.Enums.UserChannelType.Employee)
