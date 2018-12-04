@@ -161,6 +161,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                 invoices = invoices.Where(s => s.DepartureStationId == accountFilterCriteria.StationId);
             }
 
+            //IsCashOnDelivery
+            if (accountFilterCriteria.IsCashOnDelivery == true)
+            {
+                invoices = invoices.Where(s => s.CashOnDeliveryAmount > 0);
+            }
+
             var result = invoices.ToList();
             var invoicesResult = Mapper.Map<IEnumerable<InvoiceViewDTO>>(result);
 
