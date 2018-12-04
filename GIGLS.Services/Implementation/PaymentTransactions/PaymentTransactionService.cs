@@ -91,6 +91,23 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         public async Task<bool> ProcessPaymentTransaction(PaymentTransactionDTO paymentTransaction)
         {
             var result = false;
+            var returnWaybill = await _uow.ShipmentReturn.GetAsync(x => x.WaybillNew == paymentTransaction.Waybill);
+
+            if(returnWaybill != null)
+            {
+                result = await ProcessReturnPaymentTransaction(paymentTransaction);
+            }
+            else
+            {
+                result = await ProcessNewPaymentTransaction(paymentTransaction);
+            }           
+
+            return result;
+        }
+
+        public async Task<bool> ProcessNewPaymentTransaction(PaymentTransactionDTO paymentTransaction)
+        {
+            var result = false;
 
             if (paymentTransaction == null)
                 throw new GenericException("Null Input");
@@ -102,10 +119,10 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var generalLedgerEntity = await _uow.GeneralLedger.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
             var invoiceEntity = await _uow.Invoice.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
             var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
-            
+
             //all account customers payment should be settle by wallet automatically
             //settlement by wallet
-            if (shipment.CustomerType == CustomerType.Company.ToString() ||  paymentTransaction.PaymentType == PaymentType.Wallet)
+            if (shipment.CustomerType == CustomerType.Company.ToString() || paymentTransaction.PaymentType == PaymentType.Wallet)
             {
                 //I used transaction code to represent wallet number when processing for wallet
                 var wallet = await _walletService.GetWalletById(paymentTransaction.TransactionCode);
@@ -123,6 +140,94 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                         throw new GenericException("Ecommerce Customer. Insufficient Balance in the Wallet");
                     }
                 }
+                
+                //for other customers
+                //deduct the price for the wallet and update wallet transaction table
+                if (shipment != null && CompanyType.Ecommerce.ToString() != shipment.CompanyType)
+                {
+                    if (wallet.Balance < invoiceEntity.Amount)
+                    {
+                        throw new GenericException("Insufficient Balance in the Wallet");
+                    }
+                }
+
+                wallet.Balance = wallet.Balance - invoiceEntity.Amount;
+
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
+                var newWalletTransaction = new WalletTransaction
+                {
+                    WalletId = wallet.WalletId,
+                    Amount = invoiceEntity.Amount,
+                    DateOfEntry = DateTime.Now,
+                    ServiceCentreId = serviceCenterIds[0],
+                    UserId = currentUserId,
+                    CreditDebitType = CreditDebitType.Debit,
+                    PaymentType = PaymentType.Wallet,
+                    Waybill = paymentTransaction.Waybill,
+                    Description = generalLedgerEntity.Description
+                };
+
+                _uow.WalletTransaction.Add(newWalletTransaction);
+            }
+
+            // create payment
+            paymentTransaction.UserId = currentUserId;
+            paymentTransaction.PaymentStatus = PaymentStatus.Paid;
+            var paymentTransactionId = await AddPaymentTransaction(paymentTransaction);
+
+
+            // update GeneralLedger
+            generalLedgerEntity.IsDeferred = false;
+            generalLedgerEntity.PaymentType = paymentTransaction.PaymentType;
+            generalLedgerEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
+
+            //update invoice
+            invoiceEntity.PaymentDate = DateTime.Now;
+            invoiceEntity.PaymentMethod = paymentTransaction.PaymentType.ToString();
+            invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
+
+            await _uow.CompleteAsync();
+            result = true;
+
+            return result;
+        }
+
+        public async Task<bool> ProcessReturnPaymentTransaction(PaymentTransactionDTO paymentTransaction)
+        {
+            var result = false;
+
+            if (paymentTransaction == null)
+                throw new GenericException("Null Input");
+
+            // get the current user info
+            var currentUserId = await _userService.GetCurrentUserId();
+
+            //get Ledger, Invoice, shipment
+            var generalLedgerEntity = await _uow.GeneralLedger.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
+            var invoiceEntity = await _uow.Invoice.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
+            var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
+
+            //all account customers payment should be settle by wallet automatically
+            //settlement by wallet
+            if (shipment.CustomerType == CustomerType.Company.ToString() || paymentTransaction.PaymentType == PaymentType.Wallet)
+            {
+                //I used transaction code to represent wallet number when processing for wallet
+                var wallet = await _walletService.GetWalletById(paymentTransaction.TransactionCode);
+
+                //Additions for Ecommerce customers (Max wallet negative payment limit)
+                //var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
+                //if (shipment != null && CompanyType.Ecommerce.ToString() == shipment.CompanyType)
+                //{
+                //    //Gets the customer wallet limit for ecommerce
+                //    decimal ecommerceNegativeWalletLimit = await GetEcommerceWalletLimit(shipment);
+
+                //    //deduct the price for the wallet and update wallet transaction table
+                //    if (wallet.Balance - invoiceEntity.Amount < (System.Math.Abs(ecommerceNegativeWalletLimit) * (-1)))
+                //    {
+                //        throw new GenericException("Ecommerce Customer. Insufficient Balance in the Wallet");
+                //    }
+                //}
 
 
                 //for other customers
