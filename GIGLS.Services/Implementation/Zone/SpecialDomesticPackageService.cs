@@ -42,7 +42,8 @@ namespace GIGLS.Services.Implementation.Zone
             {
                 Name = specialDomestic.Name,
                 Status = true,
-                Weight = specialDomestic.Weight
+                Weight = specialDomestic.Weight,
+                SpecialDomesticPackageType = specialDomestic.SpecialDomesticPackageType                
             };
 
             _uow.SpecialDomesticPackage.Add(newPackage);
@@ -93,6 +94,7 @@ namespace GIGLS.Services.Implementation.Zone
             package.Name = specialDomestic.Name;
             package.Status = specialDomestic.Status;
             package.Weight = specialDomestic.Weight;
+            package.SpecialDomesticPackageType = specialDomestic.SpecialDomesticPackageType;
 
             await _uow.CompleteAsync();
 

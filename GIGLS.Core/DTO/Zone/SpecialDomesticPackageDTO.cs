@@ -1,4 +1,5 @@
-﻿using GIGLS.CORE.DTO;
+﻿using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO;
 
 namespace GIGLS.Core.DTO.Zone
 {
@@ -8,5 +9,6 @@ namespace GIGLS.Core.DTO.Zone
         public string Name { get; set; }
         public bool Status { get; set; }
         public decimal Weight { get; set; }
+        public SpecialDomesticPackageType SpecialDomesticPackageType { get; set; }
     }
 }

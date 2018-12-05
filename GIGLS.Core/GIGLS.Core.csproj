@@ -400,6 +400,7 @@
     <Compile Include="Enums\ShipmentRerouteInitiator.cs" />
     <Compile Include="Enums\ShipmentScanStatus.cs" />
     <Compile Include="Enums\ShipmentType.cs" />
+    <Compile Include="Enums\SpecialDomesticPackageType.cs" />
     <Compile Include="Enums\StockRequestDestinationType.cs" />
     <Compile Include="Enums\StockRequestSourceType.cs" />
     <Compile Include="Enums\StockRequestStatus.cs" />
