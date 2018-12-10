@@ -142,18 +142,29 @@ namespace GIGLS.Services.Implementation.Zone
             }
         }
 
-        public async Task<decimal> GetSpecialZonePrice(int package, int zone)
+        public async Task<decimal> GetSpecialZonePrice(int package, int zone, decimal weight = 0)
         {
             try
             {
                 await _zoneService.GetZoneById(zone);
 
-                await _packageService.GetSpecialDomesticPackageById(package);
+                var specialPackage = await _packageService.GetSpecialDomesticPackageById(package);
 
                 var specialDomestic = await _uow.SpecialDomesticZonePrice.GetAsync(s => s.SpecialDomesticPackageId == package && s.ZoneId == zone);
                 if (specialDomestic == null)
                 {
                     throw new GenericException("Special Zone Price not yet set for selected parameters");
+                }
+
+                //Calculate Price for Special Shipment whose weight are greater than 30 KG
+                if (specialPackage.SpecialDomesticPackageType == Core.Enums.SpecialDomesticPackageType.Special)
+                {
+                    if(specialPackage.Weight > weight)
+                    {
+                        throw new GenericException("Kindly supply correct weight for the package or select another package");
+                    }
+
+                    specialDomestic.Price = specialDomestic.Price * weight;
                 }
 
                 return specialDomestic.Price;

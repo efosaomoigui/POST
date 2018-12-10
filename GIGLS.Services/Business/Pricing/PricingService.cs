@@ -96,7 +96,7 @@ namespace GIGLS.Services.Business.Pricing
 
             var zone = await _routeZone.GetZone(pricingDto.DepartureServiceCentreId, pricingDto.DestinationServiceCentreId);
 
-            decimal PackagePrice = await _special.GetSpecialZonePrice(pricingDto.SpecialPackageId, zone.ZoneId);
+            decimal PackagePrice = await _special.GetSpecialZonePrice(pricingDto.SpecialPackageId, zone.ZoneId, pricingDto.Weight);
 
             //get the deliveryOptionPrice from an array
             decimal deliveryOptionPriceTemp = 0;
