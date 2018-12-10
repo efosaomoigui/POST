@@ -9,8 +9,8 @@ namespace GIGLS.CORE.DTO.Report
         public string Waybill { get; set; }
         public string Location { get; set; }
         public string Status { get; set; }
-        public DateTime FromDateTime { get; set; }
-        public DateTime ToDateTime { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public string UserId { get; set; }
 
         //ScanStatus
@@ -78,13 +78,13 @@ namespace GIGLS.CORE.DTO.Report
             }
 
             //Date Range
-            if (default(DateTime) != FromDateTime)
+            if (default(DateTime) != StartDate)
             {
-                queryable = queryable.Where(s => s.DateTime >= FromDateTime);
+                queryable = queryable.Where(s => s.DateTime >= StartDate);
             }
-            if (default(DateTime) != ToDateTime)
+            if (default(DateTime) != EndDate)
             {
-                queryable = queryable.Where(s => s.DateTime <= ToDateTime);
+                queryable = queryable.Where(s => s.DateTime <= EndDate);
             }
 
             return queryable;

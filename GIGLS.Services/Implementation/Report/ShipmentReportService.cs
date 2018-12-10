@@ -109,12 +109,12 @@ namespace GIGLS.Services.Implementation.Report
                     //insert row and add styles
                     sl.InsertRow(row + 1, 1);
                     sl.SetRowHeight(row + 1, sl.GetRowHeight(row));
-                    for(int col = 4; col <= 23; col++)
+                    for (int col = 4; col <= 23; col++)
                     {
                         var style = sl.GetCellStyle(row, col);
                         sl.SetCellStyle(row + 1, col, style);
                     }
-                    
+
                     row++;
                 }
 
@@ -153,40 +153,63 @@ namespace GIGLS.Services.Implementation.Report
             return result;
         }
 
+        /// <summary>
+        /// This method gets the Shipment Tracking Report from based on filter parameters
+        /// </summary>
+        /// <param name="f_Criteria">Criteria used for filtering</param>
+        /// <returns>List of ScanStatusReport objects</returns>
         public async Task<List<ScanStatusReportDTO>> GetShipmentTrackingFromViewReport(ScanTrackFilterCriteria f_Criteria)
         {
             var queryable = _uow.ShipmentTracking.GetShipmentTrackingsFromViewAsync(f_Criteria);
-
-            //use 1/10/2018 to 7/10/2018 as test
-            var fromDate = new DateTime(2018, 10, 1);
-            var toDate = new DateTime(2018, 10, 7);
-            queryable = queryable.Where(s => s.DateTime >= fromDate && s.DateTime <= toDate);
+            var queryableList = queryable.Select(s =>
+            new ShipmentTrackingDTO
+            {
+                Status = s.Status,
+                Location = s.Location,
+                ShipmentTrackingId = s.ShipmentTrackingId
+            }).ToList();
 
             //1. Group by Service Centre
             var scanStatusReportList = new List<ScanStatusReportDTO>();
             var allServiceCentreNames = _uow.ServiceCentre.GetAllAsQueryable().Select(s => s.Name).ToList();
             var allScanStatus = _uow.ScanStatus.GetAllAsQueryable().ToList();
-            foreach(var scName in allServiceCentreNames)
+            foreach (var scName in allServiceCentreNames)
             {
+                var scanStatusReportDTO = new ScanStatusReportDTO
+                {
+                    StartDate = f_Criteria.StartDate,
+                    EndDate = f_Criteria.EndDate,
+                    Location = scName
+                };
+
                 //1.1 Group by Scan Status
-                //CRT
-                var count_CRT = queryable.Where(s => s.Status == ShipmentScanStatus.CRT.ToString() &&
-                    s.Location == scName).Count();
-                scanStatusReportList.Add(new ScanStatusReportDTO() {
-                    Code = ShipmentScanStatus.CRT.ToString(),
-                    Location = scName,
-                    Count = count_CRT
-                });
+                PopulateScanStatusReport(scanStatusReportDTO, queryableList, scName);
 
+                //1.2 Add to report list
+                scanStatusReportList.Add(scanStatusReportDTO);
             }
-
-
-
-
             
-            //return resultList
             var result = await Task.FromResult(scanStatusReportList);
             return result;
+        }
+
+        /// <summary>
+        /// This helper method populates the Scan Status Report
+        /// </summary>
+        /// <param name="scanStatusReportDTO"></param>
+        /// <param name="queryableList"></param>
+        /// <param name="serviceCentreName"></param>
+        private void PopulateScanStatusReport(ScanStatusReportDTO scanStatusReportDTO,
+            List<ShipmentTrackingDTO> queryableList, string serviceCentreName)
+        {
+            var shipmentScanStatusValues = Enum.GetNames(typeof(ShipmentScanStatus));
+
+            foreach (var shipmentScanStatusName in shipmentScanStatusValues)
+            {
+                var count_status = queryableList.Where(s => s.Status == shipmentScanStatusName &&
+                    s.Location == serviceCentreName).Select(x => x.ShipmentTrackingId).Count();
+                scanStatusReportDTO.StatusCountMap.Add(shipmentScanStatusName, count_status);
+            }
         }
     }
 }

@@ -38,13 +38,13 @@ namespace GIGLS.Infrastructure.Persistence.Repository
 
         public Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> predicate)
         {
-            return Context.Set<TEntity>().SingleOrDefaultAsync(predicate);
+            return Context.Set<TEntity>().FirstOrDefaultAsync(predicate);
         }
         public Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> predicate, string includeProperties = "")
         {
             IQueryable<TEntity> query = Context.Set<TEntity>();
             query = _IncludeProperties(query, includeProperties);
-            return query.SingleOrDefaultAsync(predicate);
+            return query.FirstOrDefaultAsync(predicate);
         }
 
         public IQueryable<TEntity> GetAll()
