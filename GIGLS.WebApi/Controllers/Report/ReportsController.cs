@@ -2,7 +2,6 @@
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IServices;
-using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.IServices.Report;
 using GIGLS.Services.Implementation;
@@ -158,8 +157,8 @@ namespace GIGLS.WebApi.Controllers.Report
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
-        [Route("ShipmentTrackingFromView")]
-        public async Task<IServiceResponse<List<ScanStatusReportDTO>>> GetShipmentTrackingFromView(ScanTrackFilterCriteria f_Criteria)
+        [Route("scanstatusFromView")]
+        public async Task<IServiceResponse<List<ScanStatusReportDTO>>> GetScanStatusFromView(ScanTrackFilterCriteria f_Criteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
