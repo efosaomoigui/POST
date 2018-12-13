@@ -198,5 +198,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("manifestwaitingforsignoff")]
+        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetManifestWaitingForSignOff()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestGroupWayBillNumberMappings = await _service.GetManifestWaitingForSignOff();
+
+                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                {
+                    Object = manifestGroupWayBillNumberMappings
+                };
+            });
+        }
+
     }
 }

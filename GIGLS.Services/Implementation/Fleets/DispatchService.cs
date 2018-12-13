@@ -53,23 +53,23 @@ namespace GIGLS.Services.Implementation.Fleets
                 {
                     //first ensure that the dispatch user does not have any pending DeliveryManifest
                     //get the dispatch for the user
-                    var userDispatchs = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == dispatchDTO.DriverDetail && s.ReceivedBy == null).ToList();
+                    //var userDispatchs = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == dispatchDTO.DriverDetail && s.ReceivedBy == null).ToList();
 
                     //get the active manifest for the dispatch user
-                    if (userDispatchs.Count > 0)
-                    {
-                        //error, the dispatch user cannot have an undelivered dispatch
-                        var manifestCodeArray = userDispatchs.Select(s => s.ManifestNumber).ToList();
-                        var manifestObjects = _uow.Manifest.GetAll().Where(s =>
-                        manifestCodeArray.Contains(s.ManifestCode) && s.ManifestType == ManifestType.Delivery).ToList();
+                    //if (userDispatchs.Count > 0)
+                    //{
+                    //    //error, the dispatch user cannot have an undelivered dispatch
+                    //    var manifestCodeArray = userDispatchs.Select(s => s.ManifestNumber).ToList();
+                    //    var manifestObjects = _uow.Manifest.GetAll().Where(s =>
+                    //    manifestCodeArray.Contains(s.ManifestCode) && s.ManifestType == ManifestType.Delivery).ToList();
 
-                        if (manifestObjects.Count > 0)
-                        {
-                            var deliveryManifestCodeArray = manifestObjects.Select(s => s.ManifestCode).ToList();
-                            throw new GenericException($"Error: Dispatch User cannot have an undelivered dispatch. " +
-                                $"Please finalise the following Delivery Manifests [{string.Join(", ", deliveryManifestCodeArray)}]");
-                        }
-                    }
+                    //    if (manifestObjects.Count > 0)
+                    //    {
+                    //        var deliveryManifestCodeArray = manifestObjects.Select(s => s.ManifestCode).ToList();
+                    //        throw new GenericException($"Error: Dispatch User cannot have an undelivered dispatch. " +
+                    //            $"Please finalise the following Delivery Manifests [{string.Join(", ", deliveryManifestCodeArray)}]");
+                    //    }
+                    //}
 
                     //filter all the ways in the delivery manifest for scanning processing
                     var ret = await FilterWaybillsInDeliveryManifest(dispatchDTO, currentUserId, userServiceCentreId);
