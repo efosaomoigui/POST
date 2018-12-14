@@ -350,7 +350,7 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Get Waybills In Manifest for Dispatch
-        public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch()
+        public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatchOld()
         {
             try
             {
@@ -407,6 +407,88 @@ namespace GIGLS.Services.Implementation.Shipments
                         manifestwaybill.ShipmentScanStatus = shipmentCollectionObj.ShipmentScanStatus;
                     }
                 }
+
+                return manifestWaybillNumberMappingDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch()
+        {
+            try
+            {
+                //get the current user
+                string userId = await _userService.GetCurrentUserId();
+
+                //get the dispatch for the user
+                var userDispatchs = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == userId && s.ReceivedBy == null).ToList();
+                int userDispatchsCount = userDispatchs.Count;
+
+                if (userDispatchsCount == 0)
+                {
+                    //return an empty list
+                    return new List<ManifestWaybillMappingDTO>();
+                }
+                else
+                {
+                    //get the active manifest for the dispatch user
+                    //error, the dispatch user can have an undelivered dispatch
+                    var manifestCodeArray = userDispatchs.Select(s => s.ManifestNumber).ToList();
+                    var manifestObjects = _uow.Manifest.GetAll().Where(s =>
+                    manifestCodeArray.Contains(s.ManifestCode) && s.ManifestType == ManifestType.Delivery).ToList();
+                    
+                    //update userDispatchs
+                    var deliveryManifestCodeArray = manifestObjects.Select(s => s.ManifestCode).ToList();
+                    userDispatchs = userDispatchs.Where(s =>
+                    deliveryManifestCodeArray.Contains(s.ManifestNumber)).ToList();
+                }                               
+
+                List<ManifestWaybillMappingDTO> manifestWaybillNumberMappingDto = new List<ManifestWaybillMappingDTO>();                              
+
+                foreach (var manifestcode in userDispatchs)
+                {
+                    //Get all waybills mapped to a manifest
+                    var manifestWaybillMappingList = await _uow.ManifestWaybillMapping.FindAsync(x => x.ManifestCode == manifestcode.ManifestNumber);
+
+                    //Get manifest detail
+                    var manifestDTO = await _manifestService.GetManifestByCode(manifestcode.ManifestNumber);
+
+                    //map the data to the DTO
+                    var manifestMappingDto = Mapper.Map<List<ManifestWaybillMappingDTO>>(manifestWaybillMappingList.ToList());
+                    
+                    //add manifest details to the dto
+                    foreach(var waybill in manifestMappingDto)
+                    {
+                        waybill.ManifestDetails = manifestDTO;
+                    }
+
+                    //add it to range of array
+                    manifestWaybillNumberMappingDto.AddRange(manifestMappingDto);
+                }
+                
+                //get shipment detail for the manifest
+                foreach (var manifestwaybill in manifestWaybillNumberMappingDto)
+                {
+                    //get shipment detail 
+                    manifestwaybill.Shipment = await _shipmentService.GetShipment(manifestwaybill.Waybill);
+
+                    //get from ShipmentCollection
+                    var shipmentCollectionObj = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == manifestwaybill.Waybill);
+                    if (shipmentCollectionObj != null)
+                    {
+                        manifestwaybill.ShipmentScanStatus = shipmentCollectionObj.ShipmentScanStatus;
+                    }
+                }
+
+                //[{string.Join(", ", deliveryManifestCodeArray)}]");
+                // var deliveryManifestCodeArray = manifestObjects.Select(s => s.ManifestCode).ToList();
+
+                //map all the manifest code to the first in the list 
+                var userDispatchsArray = userDispatchs.Select(u => u.ManifestNumber).ToList();
+                manifestWaybillNumberMappingDto[0].ManifestCode = string.Join(", ", userDispatchsArray);
 
                 return manifestWaybillNumberMappingDto;
             }

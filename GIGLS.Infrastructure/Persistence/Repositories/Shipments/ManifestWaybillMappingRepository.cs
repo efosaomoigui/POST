@@ -105,7 +105,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                     IsReceived = p.IsReceived,
                                                     DispatchedBy = Context.Users.Where(d => d.Id == p.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
                                                     ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault()
-                                                }).FirstOrDefault()
+                                                }).FirstOrDefault(),
+                                                DispatchRider = Context.Users.Where(u => u.Id == Context.Dispatch.Where(m => m.ManifestNumber == mgw.ManifestCode).Select(c => c.DriverDetail).FirstOrDefault()).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault()
                                             };
 
             return await Task.FromResult(manifestWaybillMappingDTO.OrderByDescending(x => x.DateCreated).ToList());
