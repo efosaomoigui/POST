@@ -548,6 +548,7 @@ namespace GIGLS.WebApi.Controllers.User
 
             return await HandleApiOperationAsync(async () =>
             {
+                
                 using (var client = new HttpClient())
                 {
                     //setup client

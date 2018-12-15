@@ -13,9 +13,17 @@ using Microsoft.AspNet.Identity;
 using GIGLS.WebApi.Models;
 //using Audit.WebApi;
 using System.Collections.Generic;
+using System.ServiceModel;
+using Microsoft.Owin;
+using Newtonsoft.Json;
+using System.IO;
+using System.Text;
 
 namespace GIGLS.WebApi.Controllers
+
+
 {
+
     //[AuditApi]
     public class BaseWebApiController : ApiController
     {
@@ -172,7 +180,6 @@ namespace GIGLS.WebApi.Controllers
             catch (GenericException giglsex)
             {
                 //logger.Warn($"L{lineNo} - {gmgex.ErrorCode}: {gmgex.Message}");
-
                 apiResponse.ShortDescription = giglsex.Message;
                 apiResponse.Code = giglsex.ErrorCode;
 
@@ -229,4 +236,6 @@ namespace GIGLS.WebApi.Controllers
             return null;
         }
     }
+
+
 }
