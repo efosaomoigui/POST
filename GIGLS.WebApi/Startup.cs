@@ -6,6 +6,7 @@ using Owin;
 using System.Web.Http;
 using System.Net.Http.Formatting;
 using Newtonsoft.Json.Serialization;
+using GIGLS.WebApi.Providers;
 
 [assembly: OwinStartup(typeof(GIGLS.WebApi.Startup))]
 
@@ -28,7 +29,7 @@ namespace GIGLS.WebApi
             ConfigureOAuthTokenConsumption(app);
 
             //ConfigureWebApi(config);
-
+            app.Use<CustomAuthenticationMiddleware>();
             app.UseCors(Microsoft.Owin.Cors.CorsOptions.AllowAll);
 
             app.UseWebApi(config);

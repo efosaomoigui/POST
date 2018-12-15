@@ -9,6 +9,7 @@ using Microsoft.AspNet.Identity.Owin;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.Net;
 
 namespace GIGLS.WebApi.Providers
 {
@@ -85,23 +86,32 @@ namespace GIGLS.WebApi.Providers
             {
                 User user = await _repo._userManager.FindAsync(context.UserName, context.Password);
 
-                //check for password expiry
-                var LastUpdatePasswordDate = user.PasswordExpireDate;
-                DateTime TodayDate = DateTime.Now.Date;
-                var DayDifferent = (TodayDate - LastUpdatePasswordDate).Days;
 
-                //if (DayDifferent >= 30)
-                //{
-                //    //Redirect to user reset page
-                //    context.SetError("invalid_grant", "The user account is expired.");
-                //    return;
-                //}
+                if (user != null)
+                {
+                    //check for password expiry
+                    var LastUpdatePasswordDate = user.PasswordExpireDate;
+                    DateTime TodayDate = DateTime.Now.Date;
+                    var DayDifferent = (TodayDate - LastUpdatePasswordDate).Days;
+
+                    if (DayDifferent >= 0 && DayDifferent >= 30)
+                    {
+                        //Redirect to user reset page
+                        context.SetError("password_expired", "The user account has expired.");
+                        context.Response.Headers.Add("AuthorizationResponse", new[] { "expireduser" });
+                        return;
+                    }
+
+                }
 
                 if (user == null)
                 {
-                    context.Rejected();
-                    //context.SetError("invalid_grant", "The user name or password is incorrect.");
-                    context.SetError("invalid_client", Newtonsoft.Json.JsonConvert.SerializeObject(new { result = false, message = "The user name or password is incorrect!" }));
+                    context.SetError("invalid_user", "The user name or password is incorrect.");
+                    //context.SetError("invalid_client", Newtonsoft.Json.JsonConvert.SerializeObject(new { result = false, message = "The user name or password is incorrect!" }));
+                    context.Response.Headers.Add("AuthorizationResponse", new[] { "wronguser" });
+                    //Add your flag to the header of the response
+                    //context.Response.Headers.Add(ServerGlobalVariables.OwinChallengeFlag, new[] { ((int)HttpStatusCode.Unauthorized).ToString() });
+
                     return;  
                 }
 
@@ -109,8 +119,7 @@ namespace GIGLS.WebApi.Providers
                 {
                     if (user.SystemUserId == null)
                     {
-                        context.Rejected();
-                        context.SetError("invalid_client", Newtonsoft.Json.JsonConvert.SerializeObject(new { result = false, message = "The user has not been assigned a role!" }));
+                        context.SetError("invalid_access", Newtonsoft.Json.JsonConvert.SerializeObject(new { result = false, message = "The user has not been assigned a role!" }));
                         //context.SetError("invalid_grant", "The user has not been assigned a role.");
                         return;
                     }
@@ -125,8 +134,7 @@ namespace GIGLS.WebApi.Providers
 
                 if (!user.IsActive)
                 {
-                    context.Rejected();
-                    context.SetError("invalid_grant", "Your account has not been activated!");
+                    context.SetError("deactivated", "Your account has not been activated!");
                     return;
                 }
 
