@@ -29,6 +29,7 @@ using GIGLS.Core.IRepositories.Devices;
 using GIGLS.Core.IRepositories.BankSettlement;
 using GIGLS.Infrastructure.Persistence.Repositories.InternationalRequest;
 using GIGLS.Core.IRepositories.InternationalRequest;
+using GIGLS.Core.IRepositories.Sla;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -328,6 +329,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IInternationalRequestReceiverRepository InternationalRequestReceiver { get; set; }
 
+        [Inject]
+        public ISLARepository SLA { get; set; }
+        
         public int Complete()
         {
             return _context.SaveChanges();

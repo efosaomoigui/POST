@@ -207,6 +207,7 @@
     <Compile Include="Domain\ShipmentReturn.cs" />
     <Compile Include="Domain\ShipmentScan\ScanStatus.cs" />
     <Compile Include="Domain\ShipmentTracking.cs" />
+    <Compile Include="Domain\SLA\SLA.cs" />
     <Compile Include="Domain\SpecialDomesticPackage.cs" />
     <Compile Include="Domain\SpecialDomesticZonePrice.cs" />
     <Compile Include="Domain\State.cs" />
@@ -331,6 +332,7 @@
     <Compile Include="DTO\Shipments\ShipmentTrackingDTO.cs" />
     <Compile Include="DTO\Shipments\TransitWaybillNumberDTO.cs" />
     <Compile Include="DTO\Shipments\WaybillNumberDTO.cs" />
+    <Compile Include="DTO\SLA\SLADTO.cs" />
     <Compile Include="DTO\StateDto.cs" />
     <Compile Include="DTO\Stocks\StockRequestDTO.cs" />
     <Compile Include="DTO\Stocks\StockRequestPartDTO.cs" />
@@ -400,6 +402,7 @@
     <Compile Include="Enums\ShipmentRerouteInitiator.cs" />
     <Compile Include="Enums\ShipmentScanStatus.cs" />
     <Compile Include="Enums\ShipmentType.cs" />
+    <Compile Include="Enums\SLAType.cs" />
     <Compile Include="Enums\SpecialDomesticPackageType.cs" />
     <Compile Include="Enums\StockRequestDestinationType.cs" />
     <Compile Include="Enums\StockRequestSourceType.cs" />
@@ -489,6 +492,7 @@
     <Compile Include="IRepositories\Shipments\IShipmentTrackingRepository.cs" />
     <Compile Include="IRepositories\Shipments\ITransitWaybillNumberRepository.cs" />
     <Compile Include="IRepositories\Shipments\IWaybillNumberRepository.cs" />
+    <Compile Include="IRepositories\Sla\ISLARepository.cs" />
     <Compile Include="IRepositories\Stocks\IStockRequestPartRepository.cs" />
     <Compile Include="IRepositories\Stocks\IStockRequestRepository.cs" />
     <Compile Include="IRepositories\Stocks\IStockSupplyDetailsRepository.cs" />
@@ -596,6 +600,7 @@
     <Compile Include="IServices\Shipments\IShipmentTrackingService.cs" />
     <Compile Include="IServices\Shipments\ITransitWaybillNumberService.cs" />
     <Compile Include="IServices\Shipments\IWaybillNumberService.cs" />
+    <Compile Include="IServices\Sla\ISLAService.cs" />
     <Compile Include="IServices\Stocks\IStockRequestPartService.cs" />
     <Compile Include="IServices\Stocks\IStockRequestService.cs" />
     <Compile Include="IServices\Stocks\IStockSupplyDetailsService.cs" />

@@ -237,6 +237,7 @@
     <Compile Include="Implementation\Shipments\ShipmentTrackingService.cs" />
     <Compile Include="Implementation\Shipments\TransitWaybillNumberService.cs" />
     <Compile Include="Implementation\Shipments\WaybillNumberService.cs" />
+    <Compile Include="Implementation\Sla\SLAService.cs" />
     <Compile Include="Implementation\StateService.cs" />
     <Compile Include="Implementation\Stocks\StockRequestPartService.cs" />
     <Compile Include="Implementation\Stocks\StockRequestService.cs" />

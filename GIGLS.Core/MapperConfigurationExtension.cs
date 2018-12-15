@@ -31,6 +31,8 @@ using GIGLS.Core.DTO.Devices;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.BankSettlement;
 using GIGLS.Core.DTO.InternationalShipmentDetails;
+using GIGLS.Core.DTO.SLA;
+using GIGLS.Core.Domain.SLA;
 
 namespace GIGLS.Core
 {
@@ -289,6 +291,8 @@ namespace GIGLS.Core
                 config.CreateMap<InternationalRequestReceiverItem, InternationalRequestReceiverItemDTO>();
                 config.CreateMap<InternationalRequestReceiverItemDTO, InternationalRequestReceiverItem>();
 
+                config.CreateMap<SLA, SLADTO>();
+                config.CreateMap<SLADTO, SLA>();
             });
 
             isInit = true;
