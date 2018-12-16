@@ -31,7 +31,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             if (serviceCentreIds.Length > 0)
             {
                 shipmentContext = Context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
-                
+
                 //filter by cancelled shipments
                 shipmentContext = shipmentContext.Where(s => s.IsCancelled == false);
 
@@ -111,6 +111,18 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             var invoicesResult = Mapper.Map<IEnumerable<InvoiceDTO>>(result);
 
             return Task.FromResult(invoicesResult.OrderByDescending(x => x.DateCreated).ToList());
+        }
+
+        public Task<List<Invoice>> GetExpiredInvoicesAsync(DateTime contextTime)
+        {
+
+            // get all invoices that has expiry date greater than parameter date
+            IQueryable<Invoice> invoices = new List<Invoice>().AsQueryable();
+            invoices = invoices.Where(x => x.DueDate >= contextTime);
+
+            var result = invoices.ToList();
+            return Task.FromResult(result);
+
         }
 
         public Task<List<InvoiceViewDTO>> GetInvoicesFromViewAsync(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
