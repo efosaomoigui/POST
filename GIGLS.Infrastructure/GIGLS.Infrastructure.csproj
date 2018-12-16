@@ -182,6 +182,7 @@
     <Compile Include="Persistence\Repositories\Shipments\ShipmentTrackingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\TransitWaybillNumberRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\WaybillNumberRepository.cs" />
+    <Compile Include="Persistence\Repositories\Sla\SLARepository.cs" />
     <Compile Include="Persistence\Repositories\StateRepository.cs" />
     <Compile Include="Persistence\Repositories\Stocks\StockRequestPartRepository.cs" />
     <Compile Include="Persistence\Repositories\Stocks\StockRequestRepository.cs" />

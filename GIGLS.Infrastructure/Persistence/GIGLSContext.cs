@@ -16,6 +16,7 @@ using GIGLS.Core.Domain.ShipmentScan;
 using GIGLS.Core.Domain.Utility;
 using GIGLS.Core.Domain.Devices;
 using GIGLS.Core.Domain.BankSettlement;
+using GIGLS.Core.Domain.SLA;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -38,8 +39,6 @@ namespace GIGLS.Infrastructure.Persistence
         }
 
         #region Entities
-        //public DbSet<User> User { get; set; }
-        //public DbSet<AppRole> AppRole { get; set; } 
 
         public DbSet<AuditTrailEvent> AuditTrailEvent { get; set; }
 
@@ -214,6 +213,8 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<InternationalRequestReceiver> InternationalRequestReceivers { get; set; }
         public DbSet<InternationalRequestReceiverItem> InternationalRequestReceiverItems { get; set; }
 
+        //SLA
+        public DbSet<SLA> SLAs { get; set; }
 
         #endregion
 
