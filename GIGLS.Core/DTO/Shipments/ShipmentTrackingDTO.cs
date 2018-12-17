@@ -1,8 +1,8 @@
 ﻿using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.ShipmentScan;
-using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -31,5 +31,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string DeliveryOptions { get; set; }
 
         public int ServiceCentreId { get; set; }
+
+        //Manifest Visit Monitoring
+        public IEnumerable<ManifestVisitMonitoringDTO> ManifestVisitMonitorings { get; set; }
     }
 }

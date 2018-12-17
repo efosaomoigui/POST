@@ -10,6 +10,7 @@ using GIGLS.WebApi.Filters;
 namespace GIGLS.WebApi.Controllers.Partnership
 {
     [Authorize(Roles = "Admin")]
+    [RoutePrefix("api/partnerapplication")]
     public class PartnerApplicationController : BaseWebApiController
     {
         private readonly IPartnerApplicationService _partnerApplicationService;
