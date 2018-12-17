@@ -284,6 +284,7 @@
     <Compile Include="Controllers\Account\InsuranceController.cs" />
     <Compile Include="Controllers\Account\InvoiceController.cs" />
     <Compile Include="Controllers\Account\InvoiceShipmentController.cs" />
+    <Compile Include="Controllers\Account\ReminderController.cs" />
     <Compile Include="Controllers\Account\VATController.cs" />
     <Compile Include="Controllers\BankSettlement\BankShipmentSettlementController.cs" />
     <Compile Include="Controllers\BankSettlement\CODSettlementSheetController.cs" />
@@ -411,6 +412,7 @@
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy.pubxml" />
     <Content Include="ReportTemplate\dailysales.xlsx" />
+    <Content Include="Properties\webjobs-list.json" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -425,6 +427,8 @@
     <Folder Include="Controllers\Stores\" />
     <Folder Include="Controllers\Vendors\" />
     <Folder Include="Controllers\Workshops\" />
+    <Folder Include="Views\InvoiceReminder\" />
+    <Folder Include="Views\Reminder\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GIGLS.Core\GIGLS.Core.csproj">
@@ -473,6 +477,7 @@
     <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props'))" />
     <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
+  <Import Project="..\packages\Microsoft.Web.WebJobs.Publish.1.0.9\tools\webjobs.targets" Condition="Exists('..\packages\Microsoft.Web.WebJobs.Publish.1.0.9\tools\webjobs.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

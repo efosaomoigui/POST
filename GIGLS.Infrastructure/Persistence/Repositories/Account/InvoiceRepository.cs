@@ -113,17 +113,38 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             return Task.FromResult(invoicesResult.OrderByDescending(x => x.DateCreated).ToList());
         }
 
-        public Task<List<Invoice>> GetExpiredInvoicesAsync(DateTime contextTime)
+        public Task<List<InvoiceView>> GetInvoicesForReminderAsync(double rangeofdays)  
         {
 
-            // get all invoices that has expiry date greater than parameter date
-            IQueryable<Invoice> invoices = new List<Invoice>().AsQueryable();
-            invoices = invoices.Where(x => x.DueDate >= contextTime);
+            //get all invoices from InvoiceView Table
+            var invoices = _GIGLSContextForView.InvoiceView.AsQueryable();
 
-            var result = invoices.ToList();
+            //filter by paymentstatus of non paid
+            invoices = invoices.Where(s => s.PaymentStatus == 0 && s.CompanyType == "Corporate" );
+
+            //get todays date
+            DateTime dayfromtoday = DateTime.Now.AddDays(rangeofdays); 
+
+            //create a new invoiceview object to collect the filtered view
+            var allinvoiceintherange = new List<InvoiceView>();
+
+            //filter some more to get all invoices that meets the range of day to duedate
+            //
+            foreach (var invoice in invoices) 
+            {
+                var duedate = invoice.DueDate;
+
+                if (dayfromtoday.Date == duedate.Date)
+                {
+                    allinvoiceintherange.Add(invoice);
+                }
+            }
+
+            //a filter list of people to send reminder to
+            var result = allinvoiceintherange.ToList();
+
             return Task.FromResult(result);
-
-        }
+    }
 
         public Task<List<InvoiceViewDTO>> GetInvoicesFromViewAsync(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
         {
