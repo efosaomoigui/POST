@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Account;
+using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,5 +15,6 @@ namespace GIGLS.Core.IServices.Account
         Task<object> AddInvoice(InvoiceDTO invoice);
         Task UpdateInvoice(int invoiceId, InvoiceDTO invoice);
         Task RemoveInvoice(int invoiceId);
+        Task<IEnumerable<InvoiceView>> GetInvoicesForReminder(double daystoduedate);
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.Core.View;
 
 namespace GIGLS.WebApi.Controllers.Account
 {
@@ -132,5 +133,6 @@ namespace GIGLS.WebApi.Controllers.Account
                 };
             });
         }
+
     }
 }

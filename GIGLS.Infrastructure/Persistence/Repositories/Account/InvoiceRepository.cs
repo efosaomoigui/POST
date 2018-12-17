@@ -31,7 +31,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             if (serviceCentreIds.Length > 0)
             {
                 shipmentContext = Context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
-                
+
                 //filter by cancelled shipments
                 shipmentContext = shipmentContext.Where(s => s.IsCancelled == false);
 
@@ -112,6 +112,39 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             return Task.FromResult(invoicesResult.OrderByDescending(x => x.DateCreated).ToList());
         }
+
+        public Task<List<InvoiceView>> GetInvoicesForReminderAsync(double rangeofdays)  
+        {
+
+            //get all invoices from InvoiceView Table
+            var invoices = _GIGLSContextForView.InvoiceView.AsQueryable();
+
+            //filter by paymentstatus of non paid
+            invoices = invoices.Where(s => s.PaymentStatus == 0 && s.CompanyType == "Corporate" );
+
+            //get todays date
+            DateTime dayfromtoday = DateTime.Now.AddDays(rangeofdays); 
+
+            //create a new invoiceview object to collect the filtered view
+            var allinvoiceintherange = new List<InvoiceView>();
+
+            //filter some more to get all invoices that meets the range of day to duedate
+            //
+            foreach (var invoice in invoices) 
+            {
+                var duedate = invoice.DueDate;
+
+                if (dayfromtoday.Date == duedate.Date)
+                {
+                    allinvoiceintherange.Add(invoice);
+                }
+            }
+
+            //a filter list of people to send reminder to
+            var result = allinvoiceintherange.ToList();
+
+            return Task.FromResult(result);
+    }
 
         public Task<List<InvoiceViewDTO>> GetInvoicesFromViewAsync(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
         {

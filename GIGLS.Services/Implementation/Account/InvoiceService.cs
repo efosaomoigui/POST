@@ -9,6 +9,7 @@ using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
 using System;
@@ -43,6 +44,12 @@ namespace GIGLS.Services.Implementation.Account
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var invoices = await _uow.Invoice.GetInvoicesAsync(serviceCenterIds);
             return invoices.ToList().OrderByDescending(x => x.DateCreated);
+        }
+
+        public async Task<IEnumerable<InvoiceView>> GetInvoicesForReminder(double daystoduedate)  
+        {
+            var invoices = await _uow.Invoice.GetInvoicesForReminderAsync(daystoduedate);
+            return invoices;
         }
 
         public Tuple<Task<List<InvoiceDTO>>, int> GetInvoices(FilterOptionsDto filterOptionsDto)
