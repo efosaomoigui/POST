@@ -28,6 +28,9 @@ using GIGLS.Core.DTO.Customers;
 using System;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.DTO.User;
+using GIGLS.Core.DTO.SLA;
+using GIGLS.Core.IServices.Sla;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -45,12 +48,13 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IPreShipmentService _preShipmentService;
         private readonly IWalletService _walletService;
         private readonly IWalletPaymentLogService _wallepaymenttlogService;
+        private readonly ISLAService _slaService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
-            ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService,
-            ICustomerService customerService, IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService)
+            ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService,ICustomerService customerService, 
+            IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService, ISLAService slaService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -64,6 +68,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _uow = uow;
             _walletService = walletService;
             _wallepaymenttlogService = wallepaymenttlogService;
+            _slaService = slaService;
             MapperConfig.Initialize();
         }
 
@@ -371,6 +376,33 @@ namespace GIGLS.Services.Business.CustomerPortal
         public Task<UserDTO> Register(UserDTO user)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<SLADTO> GetSLA()
+        {
+            //1. get the user channel type
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(userId);
+
+            UserChannelType channelType = user.UserChannelType;
+            SLAType SLAType;
+
+            //2. Use the channel type to display the SLA type for the user
+            switch (channelType)
+            {
+                case UserChannelType.Corporate:
+                    SLAType = SLAType.Corporate;
+                    break;
+                case UserChannelType.Ecommerce:
+                    SLAType = SLAType.Ecommerce;
+                    break;
+                default:
+                    SLAType = SLAType.Reseller;
+                    break;
+            }
+
+            var sla = await _slaService.GetSLAByType(SLAType);
+            return sla;
         }
     }
 }
