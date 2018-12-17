@@ -488,5 +488,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("sla/{slaId:int}")]
+        public async Task<IServiceResponse<object>> SignSLA(int slaId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var sla = await _portalService.SignSLA(slaId);
+
+                return new ServiceResponse<object>
+                {
+                    Object = sla
+                };
+            });
+        }
     }
 }

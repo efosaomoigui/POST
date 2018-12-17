@@ -402,7 +402,21 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
 
             var sla = await _slaService.GetSLAByType(SLAType);
+
+            //check if the SLA has been signed by the user
+            var userSla = await _uow.SLASignedUser.FindAsync(x => x.UserId == userId);
+            if (userSla.Count() > 0)
+            {
+                sla.IsSigned = true;
+            }
+
             return sla;
+        }
+
+        public async Task<object> SignSLA(int slaId)
+        {
+            var signed = await _slaService.UserSignedSLA(slaId);
+            return signed;
         }
     }
 }

@@ -7,16 +7,20 @@ using GIGLS.Core;
 using AutoMapper;
 using GIGLS.Core.Domain.SLA;
 using GIGLS.Infrastructure;
+using System;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.Sla
 {
     public class SLAService : ISLAService
     {
         private readonly IUnitOfWork _uow;
+        private readonly IUserService _userService;
 
-        public SLAService(IUnitOfWork uow)
+        public SLAService(IUnitOfWork uow, IUserService userService)
         {
             _uow = uow;
+            _userService = userService;
         }
 
         public async Task<object> AddSLA(SLADTO slaDto)
@@ -80,6 +84,34 @@ namespace GIGLS.Services.Implementation.Sla
             sla.Content = slaDto.Content;
             sla.SLAType = slaDto.SLAType;
             await _uow.CompleteAsync();
-        }        
+        }
+
+
+        //Add user and SLA to User Signed Table
+        public async Task<object> UserSignedSLA(int slaId)
+        {
+            //1. Get the user login
+            var user = await _userService.GetCurrentUserId();
+
+            //2. Get SLA Detail
+            var sla = await _uow.SLA.GetAsync(slaId);
+
+            if (sla == null)
+            {
+                throw new GenericException("SLA INFORMATION DOES NOT EXIST");
+            }
+
+            //2. add user to signed table
+            var userAssign = new SLASignedUser
+            {
+                SLA = sla,
+                UserId = user
+            };
+
+             _uow.SLASignedUser.Add(userAssign);
+            await _uow.CompleteAsync();
+
+            return new { id = userAssign.SLASignedUserId };
+        }
     }
 }

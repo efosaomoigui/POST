@@ -54,5 +54,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
 
         //SLA
         Task<SLADTO> GetSLA();
+
+        Task<object> SignSLA(int slaId);
     }
 }

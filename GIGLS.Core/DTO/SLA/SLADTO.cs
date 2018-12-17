@@ -8,5 +8,6 @@ namespace GIGLS.Core.DTO.SLA
         public int SLAId { get; set; }
         public string Content { get; set; }
         public SLAType SLAType { get; set; }
+        public bool IsSigned { get; set; }
     }
 }
