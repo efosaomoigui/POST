@@ -20,7 +20,6 @@ namespace GIGLS.WebApi.Controllers.Account
         }
 
         [System.Web.Http.HttpGet]
-        [System.Web.Http.Route("")]
         public async Task<IServiceResponse<IEnumerable<InvoiceDTO>>> GetInvoices()
         {
             return await HandleApiOperationAsync(async () =>
