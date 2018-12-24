@@ -735,12 +735,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //3. get all grouped waybills for that Service Centre
-                var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(serviceCenters);
+                var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappingWaybills(serviceCenters);
 
                 //4. filter the two lists
-                var groupedWaybillsAsStringList = groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber);
-                var groupedWaybillsAsHashSet = new HashSet<string>(groupedWaybillsAsStringList);
-
+                //var groupedWaybillsAsStringList = groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber);
+                var groupedWaybillsAsHashSet = new HashSet<string>(groupWayBillNumberMappings);
                 var ungroupedWaybills = paidShipments.Where(s => !groupedWaybillsAsHashSet.Contains(s.Waybill)).ToList();
 
 

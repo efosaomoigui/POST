@@ -10,5 +10,6 @@ namespace GIGLS.Core.IRepositories.Shipments
     {
         Task<List<GroupWaybillNumberMappingDTO>> GetGroupWaybillMappings(int[] serviceCentreIds);
         Task<List<GroupWaybillNumberMappingDTO>> GetGroupWaybillMappings(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds);
+        Task<List<string>> GetGroupWaybillMappingWaybills(int[] serviceCentreIds);
     }
 }

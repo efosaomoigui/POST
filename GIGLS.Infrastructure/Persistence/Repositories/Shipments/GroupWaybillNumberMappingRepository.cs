@@ -131,5 +131,20 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             return Task.FromResult(groupwaybillMappingDto.ToList());
         }
 
+        public Task<List<string>> GetGroupWaybillMappingWaybills(int[] serviceCentreIds)
+        {
+            var groupwaybillMapping = Context.GroupWaybillNumberMapping.AsQueryable();
+
+            var serviceCentreWaybills = new List<string>();
+            if (serviceCentreIds.Length > 0)
+            {
+                groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+            }
+
+
+            var groupwaybillMappingDto = groupwaybillMapping.Select(x => x.WaybillNumber).Distinct().ToList();
+
+            return Task.FromResult(groupwaybillMappingDto);
+        }
     }
 }

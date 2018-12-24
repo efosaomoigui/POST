@@ -222,7 +222,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (groupwaybill == null)
                 {
-                    throw new GenericException("GroupWaybill Not Exist");
+                    throw new GenericException("Group Waybill does not exist");
                 }
                 _uow.GroupWaybillNumber.Remove(groupwaybill);
                 await _uow.CompleteAsync();
@@ -241,7 +241,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (groupwaybill == null)
                 {
-                    throw new GenericException("GroupWaybill Not Exist");
+                    throw new GenericException("Group Waybill does not exist");
                 }
                 groupwaybill.IsActive = false;
                 _uow.Complete();
