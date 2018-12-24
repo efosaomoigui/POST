@@ -373,9 +373,43 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         }
 
-        public Task<UserDTO> Register(UserDTO user)
+        public async Task<UserDTO> Register(UserDTO user)
         {
-            throw new NotImplementedException();
+            CustomerType customerType = CustomerType.IndividualCustomer;
+            CompanyType companyType = CompanyType.Client;
+
+            if(user.UserChannelType == UserChannelType.Ecommerce)
+            {
+                customerType = CustomerType.Company;
+                companyType = CompanyType.Ecommerce;
+            }
+            else
+            {
+                customerType = CustomerType.IndividualCustomer;
+            }
+
+
+            //1. convert user data to customer data
+            var customer = new CustomerDTO
+            {
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Name = user.FirstName,
+                CustomerType = customerType,
+                CompanyType = companyType
+            };
+
+            //2. Create customer data
+            var result = await _customerService.CreateCustomer(customer);
+            
+            if(result != null)
+            {
+                user.UserChannelCode = result.CustomerCode;
+            }
+
+            return user;
         }
 
         public async Task<SLADTO> GetSLA()
