@@ -208,6 +208,7 @@
     <Compile Include="Domain\ShipmentScan\ScanStatus.cs" />
     <Compile Include="Domain\ShipmentTracking.cs" />
     <Compile Include="Domain\SLA\SLA.cs" />
+    <Compile Include="Domain\SLA\SLASignedUser.cs" />
     <Compile Include="Domain\SpecialDomesticPackage.cs" />
     <Compile Include="Domain\SpecialDomesticZonePrice.cs" />
     <Compile Include="Domain\State.cs" />
@@ -333,6 +334,7 @@
     <Compile Include="DTO\Shipments\TransitWaybillNumberDTO.cs" />
     <Compile Include="DTO\Shipments\WaybillNumberDTO.cs" />
     <Compile Include="DTO\SLA\SLADTO.cs" />
+    <Compile Include="DTO\SLA\SLASignedUserDTO.cs" />
     <Compile Include="DTO\StateDto.cs" />
     <Compile Include="DTO\Stocks\StockRequestDTO.cs" />
     <Compile Include="DTO\Stocks\StockRequestPartDTO.cs" />
@@ -493,6 +495,7 @@
     <Compile Include="IRepositories\Shipments\ITransitWaybillNumberRepository.cs" />
     <Compile Include="IRepositories\Shipments\IWaybillNumberRepository.cs" />
     <Compile Include="IRepositories\Sla\ISLARepository.cs" />
+    <Compile Include="IRepositories\Sla\ISLASignedUserRepository.cs" />
     <Compile Include="IRepositories\Stocks\IStockRequestPartRepository.cs" />
     <Compile Include="IRepositories\Stocks\IStockRequestRepository.cs" />
     <Compile Include="IRepositories\Stocks\IStockSupplyDetailsRepository.cs" />

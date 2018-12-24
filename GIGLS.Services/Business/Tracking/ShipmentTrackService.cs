@@ -15,15 +15,17 @@ namespace GIGLS.Services.Business.Tracking
 {
     public class ShipmentTrackService : IShipmentTrackService
     {
+        private readonly IUnitOfWork _uow;
         private readonly IShipmentTrackingService _shipmentTrackingService;
         private readonly IShipmentService _shipmentService;
-        private readonly IUnitOfWork _uow;
+        private readonly IManifestVisitMonitoringService _monitoringService;
 
-        public ShipmentTrackService(IShipmentTrackingService shipmentTrackingService, IShipmentService shipmentService, IUnitOfWork uow)
+        public ShipmentTrackService(IShipmentTrackingService shipmentTrackingService, IShipmentService shipmentService, IUnitOfWork uow, IManifestVisitMonitoringService monitoringService)
         {
             _shipmentTrackingService = shipmentTrackingService;
             _shipmentService = shipmentService;
             _uow = uow;
+            _monitoringService = monitoringService;
         }
 
         public async Task<IEnumerable<ShipmentTrackingDTO>> TrackShipment(string waybillNumber)
@@ -110,6 +112,14 @@ namespace GIGLS.Services.Business.Tracking
                     var internationResult = await TrackShipmentForInternational(waybillNumber);
                     result.ToList().AddRange(internationResult);
                 }
+
+                ///Add Log Visit Reasons for the waybill to the first element
+                var logVisits = await _monitoringService.GetManifestVisitMonitoringByWaybill(waybillNumber);
+
+                if(logVisits.Count() > 0)
+                {
+                    result.ElementAt(0).ManifestVisitMonitorings = logVisits;
+                }
             }
 
             //check for international
@@ -119,7 +129,6 @@ namespace GIGLS.Services.Business.Tracking
             //    var internationResult = await TrackShipmentForInternational(waybillNumber);
             //    result.ToList().AddRange(internationResult);
             //}
-
             return result;
         }
 

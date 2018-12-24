@@ -1,5 +1,4 @@
-﻿using GIGLS.Core.Domain.Wallet;
-using GIGLS.Core.DTO;
+﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
@@ -7,13 +6,13 @@ using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.SLA;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using Microsoft.AspNet.Identity;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -52,5 +51,10 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto);
         Task<PreShipmentDTO> GetPreShipment(string waybill);
         Task<UserDTO> Register(UserDTO user);
+
+        //SLA
+        Task<SLADTO> GetSLA();
+
+        Task<object> SignSLA(int slaId);
     }
 }

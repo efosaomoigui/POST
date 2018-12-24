@@ -332,6 +332,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public ISLARepository SLA { get; set; }
         
+        [Inject]
+        public ISLASignedUserRepository SLASignedUser { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

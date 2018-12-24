@@ -6,6 +6,7 @@ using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.SLA;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
@@ -469,6 +470,36 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<PreShipmentDTO>
                 {
                     Object = preShipment
+                };
+            });
+        }
+        
+        [HttpGet]
+        [Route("sla")]
+        public async Task<IServiceResponse<SLADTO>> GetSLA()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var sla = await _portalService.GetSLA();
+
+                return new ServiceResponse<SLADTO>
+                {
+                    Object = sla
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("sla/{slaId:int}")]
+        public async Task<IServiceResponse<object>> SignSLA(int slaId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var sla = await _portalService.SignSLA(slaId);
+
+                return new ServiceResponse<object>
+                {
+                    Object = sla
                 };
             });
         }

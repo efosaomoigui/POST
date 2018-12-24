@@ -293,6 +293,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<SLA, SLADTO>();
                 config.CreateMap<SLADTO, SLA>();
+
+                config.CreateMap<SLASignedUser, SLASignedUserDTO>();
+                config.CreateMap<SLASignedUserDTO, SLASignedUser>();
             });
 
             isInit = true;

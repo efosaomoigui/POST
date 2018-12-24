@@ -215,6 +215,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         //SLA
         public DbSet<SLA> SLAs { get; set; }
+        public DbSet<SLASignedUser> SLASignedUsers { get; set; }
 
         #endregion
 

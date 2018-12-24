@@ -126,6 +126,7 @@ namespace GIGLS.Core
         IOverdueShipmentRepository OverdueShipment { get; set; }
         IInternationalRequestReceiverRepository InternationalRequestReceiver { get; set; }
         ISLARepository SLA { get; set; }
+        ISLASignedUserRepository SLASignedUser { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

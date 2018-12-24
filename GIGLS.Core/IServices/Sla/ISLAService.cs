@@ -13,5 +13,6 @@ namespace GIGLS.Core.IServices.Sla
         Task<object> AddSLA(SLADTO sla);
         Task UpdateSLA(int id, SLADTO sla);
         Task RemoveSLA(int id);
+        Task<object> UserSignedSLA(int slaId);
     }
 }
