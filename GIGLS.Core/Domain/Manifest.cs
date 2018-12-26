@@ -27,7 +27,7 @@ namespace GIGL.GIGLS.Core.Domain
 
         public bool IsDispatched { get; set; }
         public bool IsReceived { get; set; }
-
+        public int ServiceCentreId { get; set; }
         public ManifestType ManifestType { get; set; }
     }
 }

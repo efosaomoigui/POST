@@ -19,6 +19,7 @@ namespace GIGLS.Core.Domain
         public DateTime PaymentDate { get; set; }
         public string Waybill { get; set; }
         public DateTime DueDate { get; set; }
+        public int ServiceCentreId { get; set; }
         public bool IsInternational { get; set; }
     }
 }

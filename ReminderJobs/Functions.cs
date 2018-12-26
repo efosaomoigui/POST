@@ -38,12 +38,15 @@ namespace ReminderJobs
 
             // List data response.
             HttpResponseMessage response = client.GetAsync(urlParameters).Result;
-              
+            JToken invoices = null;
+
+
             if (response.IsSuccessStatusCode)
             {
                 // Parse the response body.
                 var responseJson = await response.Content.ReadAsStringAsync();
                 invoiceview = JObject.Parse(responseJson);
+                invoices = invoiceview.GetValue("Object");
             }
 
 
@@ -51,7 +54,7 @@ namespace ReminderJobs
             EmailService _emailservice = new EmailService();
             int countmessages = 0;
 
-            foreach (var invoice in invoiceview)
+            foreach (var invoice in invoices)
             {
                 //prepare the message for reminder
                 MessageDTO messageDto = new MessageDTO();

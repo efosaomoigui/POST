@@ -7,7 +7,6 @@ namespace GIGLS.Core.Domain
         public int ManifestGroupWaybillNumberMappingId { get; set; }
         public DateTime DateMapped { get; set; }
         public bool IsActive { get; set; }
-
         public string ManifestCode { get; set; }
         public string GroupWaybillNumber { get; set; }
     }
