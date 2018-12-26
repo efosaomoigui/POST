@@ -869,5 +869,50 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        }).FirstOrDefault();            
             return Task.FromResult(shipmentDto);
         }
+
+
+        //Get Shipment sales
+        public Task<List<InvoiceViewDTO>> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
+        {
+            DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
+            DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
+
+            // filter by cancelled shipments
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false);
+
+            //filter by service center of the login user
+            if (serviceCentreIds.Length > 0)
+            {
+                shipments = shipments.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
+            }
+            
+            //get startDate and endDate
+            var queryDate = accountFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+            shipments = shipments.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate);
+
+            List<InvoiceViewDTO> result = (from s in shipments
+                                           join i in Context.Invoice on s.Waybill equals i.Waybill
+                                           join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
+                                           join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                                           join u in Context.Users on s.UserId equals u.Id                                           
+                                           select new InvoiceViewDTO
+                                           {
+                                               Waybill = s.Waybill,                              
+                                               DepartureServiceCentreId = s.DepartureServiceCentreId,
+                                               DestinationServiceCentreId = s.DestinationServiceCentreId,
+                                               DepartureServiceCentreName = dept.Name,               
+                                               DestinationServiceCentreName = dest.Name,
+                                               Amount = i.Amount,
+                                               PaymentMethod = i.PaymentMethod,
+                                               PaymentStatus = i.PaymentStatus,
+                                               DateCreated = i.DateCreated,
+                                               UserName = u.FirstName + " " + u.LastName,
+                                               CompanyType = s.CompanyType
+                                           }).ToList();
+            var resultDto = result.OrderByDescending(x => x.DateCreated).ToList();
+            return Task.FromResult(resultDto);
+        }
     }
 }

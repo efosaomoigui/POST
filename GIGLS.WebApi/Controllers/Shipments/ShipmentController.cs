@@ -313,6 +313,24 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+
+        //This is use to solve time out from service centre
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("dailysalesforservicecentre")]
+        public async Task<IServiceResponse<DailySalesDTO>> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var dailySales = await _service.GetSalesForServiceCentre(accountFilterCriteria);
+                
+                return new ServiceResponse<DailySalesDTO>
+                {
+                    Object = dailySales
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("dailysalesbyservicecentre")]

@@ -995,6 +995,34 @@ namespace GIGLS.Services.Implementation.Shipments
             return dailySalesDTO;
         }
 
+        public async Task<DailySalesDTO> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria)
+        {
+            //set defaults
+            if (accountFilterCriteria.StartDate == null)
+            {
+                accountFilterCriteria.StartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+            }
+
+            if (accountFilterCriteria.EndDate == null)
+            {
+                accountFilterCriteria.EndDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+            }
+
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var invoices = await _uow.Shipment.GetSalesForServiceCentre(accountFilterCriteria, serviceCenterIds);
+            
+            var dailySalesDTO = new DailySalesDTO()
+            {
+                StartDate = (DateTime)accountFilterCriteria.StartDate,
+                EndDate = (DateTime)accountFilterCriteria.EndDate,
+                Invoices = invoices,
+                SalesCount = invoices.Count,
+                TotalSales = invoices.Sum(s => s.Amount)
+            };
+
+            return dailySalesDTO;
+        }
+
         public async Task<DailySalesDTO> GetDailySalesByServiceCentre(AccountFilterCriteria accountFilterCriteria)
         {
             var dailySales = await GetDailySales(accountFilterCriteria);

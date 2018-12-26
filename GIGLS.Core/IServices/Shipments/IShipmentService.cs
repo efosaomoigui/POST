@@ -41,5 +41,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> CancelShipment(string waybill);
 
         Task<List<ServiceCentreDTO>> GetAllWarehouseServiceCenters();
+        Task<DailySalesDTO> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria);
     }
 }

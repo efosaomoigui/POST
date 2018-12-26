@@ -1,5 +1,6 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGL.GIGLS.Core.Repositories;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
@@ -20,5 +21,6 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<List<ShipmentDTO>> GetCustomerShipments(ShipmentFilterCriteria f_Criteria);
         IQueryable<Shipment> ShipmentsAsQueryable();
         Task<ShipmentDTO> GetBasicShipmentDetail(string waybill);
+        Task<List<InvoiceViewDTO>> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
     }
 }
