@@ -266,7 +266,6 @@
   <ItemGroup>
     <Content Include="GIGLS.WebApi.xml" />
     <Content Include="Global.asax" />
-    <Content Include="ReportTemplate\download\ghg.txt" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -399,10 +398,12 @@
     <Content Include="app.manifest">
       <SubType>Designer</SubType>
     </Content>
+    <None Include="Properties\PublishProfiles\agilitysystemapidev - FTP %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %2812%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %2813%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %2814%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %2815%29.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm - Web Deploy %282%29.pubxml" />
@@ -427,6 +428,7 @@
     <Folder Include="Controllers\Stores\" />
     <Folder Include="Controllers\Vendors\" />
     <Folder Include="Controllers\Workshops\" />
+    <Folder Include="ReportTemplate\download\" />
     <Folder Include="Views\InvoiceReminder\" />
     <Folder Include="Views\Reminder\" />
   </ItemGroup>
