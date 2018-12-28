@@ -197,9 +197,9 @@ namespace GIGLS.Services.Implementation.Dashboard
             
             // set properties
             dashboardDTO.ServiceCentre = serviceCentre;
-            dashboardDTO.TotalShipmentDelivered = 0; // shipmentsDeliveredByServiceCenter.Count();
-            dashboardDTO.TotalShipmentOrdered = 0; //shipmentsOrderedByServiceCenter.Count();
-            dashboardDTO.TotalCustomers = 0; //totalCustomers;
+            dashboardDTO.TotalShipmentDelivered = 0; 
+            dashboardDTO.TotalShipmentOrdered = 0; 
+            dashboardDTO.TotalCustomers = 0; 
 
             // MostRecentOrder
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
@@ -213,7 +213,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             return dashboardDTO;
         }
 
-        private async Task<DashboardDTO> GetDashboardForStation(int stationId)
+        private async Task<DashboardDTO> GetDashboardForStationOld(int stationId)
         {
             var dashboardDTO = new DashboardDTO();
 
@@ -288,8 +288,41 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             return dashboardDTO;
         }
+        
+        private async Task<DashboardDTO> GetDashboardForStation(int stationId)
+        {
+            var dashboardDTO = new DashboardDTO();
 
-        private async Task<DashboardDTO> GetDashboardForGlobal()
+            //get the station
+            var stationDTO = await _stationService.GetStationById(stationId);
+            dashboardDTO.Station = stationDTO;
+
+            // get the service centre
+            //var serviceCentres = await _serviceCenterService.GetServiceCentresByStationId(stationId);
+            //int[] serviceCenterIds = serviceCentres.Select(s => s.ServiceCentreId).ToArray();
+
+
+            //set for TargetAmount and TargetOrder
+            dashboardDTO.TargetOrder = 0; //serviceCentres.Sum(s => s.TargetOrder);
+            dashboardDTO.TargetAmount = 0; //serviceCentres.Sum(s => s.TargetAmount);
+                      
+            dashboardDTO.TotalShipmentDelivered = 0; 
+            dashboardDTO.TotalShipmentOrdered = 0; 
+            dashboardDTO.TotalCustomers = 0; 
+
+            // MostRecentOrder
+            dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
+            
+            // populate graph data
+            dashboardDTO.GraphData = new List<GraphDataDTO> { };
+            
+            // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
+            dashboardDTO.ShipmentsOrderedByServiceCenter = null;
+
+            return dashboardDTO;
+        }
+
+        private async Task<DashboardDTO> GetDashboardForGlobalOld()
         {
             var dashboardDTO = new DashboardDTO();
 
@@ -352,6 +385,33 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // populate graph data
             await PopulateGraphData(dashboardDTO);
+
+            // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
+            dashboardDTO.ShipmentsOrderedByServiceCenter = null;
+
+            return dashboardDTO;
+        }
+
+        private async Task<DashboardDTO> GetDashboardForGlobal()
+        {
+            var dashboardDTO = new DashboardDTO();
+
+            int[] serviceCenterIds = { };   // empty array
+
+            //set for TargetAmount and TargetOrder
+            dashboardDTO.TargetOrder = 0; 
+            dashboardDTO.TargetAmount = 0;
+                        
+            // set properties
+            dashboardDTO.TotalShipmentDelivered = 0; 
+            dashboardDTO.TotalShipmentOrdered = 0; 
+            dashboardDTO.TotalCustomers = 0; 
+
+            // MostRecentOrder
+            dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
+            
+            // populate graph data
+            dashboardDTO.GraphData = new List<GraphDataDTO> { };
 
             // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
             dashboardDTO.ShipmentsOrderedByServiceCenter = null;

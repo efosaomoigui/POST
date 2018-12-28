@@ -18,5 +18,6 @@ namespace GIGLS.Core.IServices.ServiceCentres
         Task<List<ServiceCentreDTO>> GetInternationalServiceCentres();
         Task<ServiceCentreDTO> GetServiceCentreByIdForInternational(int serviceCentreId);
         Task<ServiceCentreDTO> GetDefaultServiceCentre();
+        Task<IEnumerable<ServiceCentreDTO>> GetServiceCentresByStationId(int stationId);
     }
 }

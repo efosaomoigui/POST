@@ -277,5 +277,16 @@ namespace GIGLS.Services.IServices.ServiceCentres
             }
         }
 
+        public async Task<IEnumerable<ServiceCentreDTO>> GetServiceCentresByStationId(int stationId)
+        {
+            try
+            {
+                return await _uow.ServiceCentre.GetServiceCentresByStationId(stationId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
