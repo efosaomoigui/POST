@@ -681,11 +681,9 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<List<InvoiceViewDTO>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto, bool filterByDestinationSC = false)
         {
             try
-            {
-                //1. get shipments for that Service Centre
+            {//1. get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var allInvoicesQueryable = _uow.Invoice.GetAllFromInvoiceView();
-                var shipmentsQueryable = allInvoicesQueryable.Where(s => s.IsCancelled == false && s.IsDeleted == false);
+                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments();
 
                 //apply filters for Service Centre
                 if (serviceCenters.Length > 0)
@@ -744,7 +742,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
 
                 //5. Ensure the waybills are in this ServiceCentre from the TransitWaybill entity
-                
+
                 //Get TransitWaybillNumber as a querable list
                 var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable().ToList();
 
@@ -773,7 +771,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false).ToList();
                 foreach (var item in transitWaybillNumberList)
                 {
-                    var shipment = allInvoicesQueryable.FirstOrDefault(s => s.Waybill == item.WaybillNumber);     // await GetShipment(item.WaybillNumber);
+                    var shipment = shipmentsQueryable.FirstOrDefault(s => s.Waybill == item.WaybillNumber);     // await GetShipment(item.WaybillNumber);
                     if (filterByDestinationSC && shipmentsBySC.Count > 0)
                     {
                         var destinationSC = shipmentsBySC[0].DestinationServiceCentreId;
@@ -787,34 +785,35 @@ namespace GIGLS.Services.Implementation.Shipments
                         finalUngroupedList.Add(shipment);
                     }
                 }
-
-
+                
                 //7.
                 var finalList = new List<InvoiceViewDTO>();
+
+                var allServiceCenters = await _centreService.GetServiceCentres();
+
                 foreach (var finalUngroupedItem in finalUngroupedList)
                 {
                     var shipment = finalUngroupedItem;
                     if (shipment != null)
                     {
                         var invoiceViewDTO = Mapper.Map<InvoiceViewDTO>(shipment);
-                        invoiceViewDTO.DepartureServiceCentre = new ServiceCentreDTO()
+
+                        invoiceViewDTO.DepartureServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == shipment.DepartureServiceCentreId).Select(s => new ServiceCentreDTO
                         {
-                            Name = invoiceViewDTO.DepartureServiceCentreName,
-                            Code = invoiceViewDTO.DepartureServiceCentreCode,
-                            ServiceCentreId = invoiceViewDTO.DepartureServiceCentreId
-                        };
+                            Name = s.Name,
+                            Code = s.Code,
+                            ServiceCentreId = s.ServiceCentreId
+                        }).FirstOrDefault();
 
-                        invoiceViewDTO.DestinationServiceCentre = new ServiceCentreDTO()
+                        invoiceViewDTO.DestinationServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == shipment.DestinationServiceCentreId).Select(s => new ServiceCentreDTO
                         {
-                            Name = invoiceViewDTO.DestinationServiceCentreName,
-                            Code = invoiceViewDTO.DestinationServiceCentreCode,
-                            ServiceCentreId = invoiceViewDTO.DestinationServiceCentreId
-                        };
-
-
+                            Name = s.Name,
+                            Code = s.Code,
+                            ServiceCentreId = s.ServiceCentreId
+                        }).FirstOrDefault();
+                        
                         finalList.Add(invoiceViewDTO);
                     }
-
                 }
 
                 return finalList;
