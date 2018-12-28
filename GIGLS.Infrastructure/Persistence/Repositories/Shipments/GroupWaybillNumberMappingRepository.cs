@@ -139,8 +139,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             {
                 groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
             }
-
-
+            
             var groupwaybillMappingDto = groupwaybillMapping.Select(x => x.WaybillNumber).Distinct().ToList();
 
             return Task.FromResult(groupwaybillMappingDto);

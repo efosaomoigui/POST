@@ -17,6 +17,7 @@ namespace GIGLS.Core.View
         public DateTime PaymentDate { get; set; }
         public string Waybill { get; set; }
         public DateTime DueDate { get; set; }
+        public bool IsShipmentCollected { get; set; }
 
         //Shipment Information
         public int ShipmentId { get; set; }

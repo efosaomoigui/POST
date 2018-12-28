@@ -18,6 +18,7 @@ namespace GIGLS.Core.DTO.Account
         public string Waybill { get; set; }
         public DateTime DueDate { get; set; }
         public bool IsInternational { get; set; }
+        public bool IsShipmentCollected { get; set; }
 
         //public virtual List<Shipment> Shipments { get; set; }
         public ShipmentDTO Shipment { get; set; }

@@ -230,11 +230,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                           select new InvoiceView
                           {
                               PaymentStatus = i.PaymentStatus,
+                              IsShipmentCollected = i.IsShipmentCollected,
                               Waybill = s.Waybill,
                               DepartureServiceCentreId = s.DepartureServiceCentreId,
                               DestinationServiceCentreId = s.DestinationServiceCentreId,
                               CompanyType = s.CompanyType,
-                              IsInternational = s.IsInternational
+                              IsInternational = s.IsInternational                            
                           });
             return result;
         }

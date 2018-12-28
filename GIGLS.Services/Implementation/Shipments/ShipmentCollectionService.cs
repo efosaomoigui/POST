@@ -348,6 +348,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 _uow.GeneralLedger.Add(generalLedger);
             }
 
+            //update invoice as shipment collected
+            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill.Equals(shipmentCollectionDto.Waybill));
+            invoice.IsShipmentCollected = true;
+
             await _uow.CompleteAsync();
         }
 

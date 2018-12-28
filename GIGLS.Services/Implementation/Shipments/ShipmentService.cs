@@ -683,7 +683,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {//1. get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments();
+                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false);
 
                 //apply filters for Service Centre
                 if (serviceCenters.Length > 0)
@@ -831,7 +831,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //1. get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments();
+                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false);
 
                 //apply filters for Service Centre
                 if (serviceCenters.Length > 0)
