@@ -220,5 +220,23 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             return customers;
         }
 
+        public IQueryable<InvoiceView> GetAllFromInvoiceAndShipments()
+        {
+            // filter by cancelled shipments
+            var shipments = Context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false);
+
+            var result = (from s in shipments
+                          join i in Context.Invoice on s.Waybill equals i.Waybill
+                          select new InvoiceView
+                          {
+                              PaymentStatus = i.PaymentStatus,
+                              Waybill = s.Waybill,
+                              DepartureServiceCentreId = s.DepartureServiceCentreId,
+                              DestinationServiceCentreId = s.DestinationServiceCentreId,
+                              CompanyType = s.CompanyType,
+                              IsInternational = s.IsInternational
+                          });
+            return result;
+        }
     }
 }

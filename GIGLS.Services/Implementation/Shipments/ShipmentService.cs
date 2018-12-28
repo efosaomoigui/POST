@@ -825,6 +825,125 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+
+        public async Task<List<InvoiceView>> GetUnGroupedWaybillsForServiceCentreDropDown(FilterOptionsDto filterOptionsDto, bool filterByDestinationSC = false)
+        {
+            try
+            {
+                //1. get shipments for that Service Centre
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments();
+
+                //apply filters for Service Centre
+                if (serviceCenters.Length > 0)
+                {
+                    shipmentsQueryable = shipmentsQueryable.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                }
+
+                //filter by Local or International Shipment
+                if (filterOptionsDto.IsInternational != null)
+                {
+                    shipmentsQueryable = shipmentsQueryable.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
+                }
+
+                //filter by DestinationServiceCentreId
+                var filter = filterOptionsDto.filter;
+                var filterValue = filterOptionsDto.filterValue;
+                int destinationSCId = 0;
+                var boolResult = int.TryParse(filterValue, out destinationSCId);
+                if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
+                {
+                    if (filter == "DestinationServiceCentreId" && boolResult)
+                    {
+                        shipmentsQueryable = shipmentsQueryable.Where(s => s.DestinationServiceCentreId == destinationSCId);
+                    }
+                }
+
+                var shipmentsBySC = shipmentsQueryable.ToList();
+
+                //2. get only paid shipments from Invoice for Individuals
+                // and allow Ecommerce and Corporate customers to be grouped
+                var paidShipments = new List<InvoiceView>();
+                foreach (var shipmentItem in shipmentsBySC)
+                {
+                    var invoice = shipmentItem;
+
+                    if (invoice.PaymentStatus == PaymentStatus.Paid)
+                    {
+                        paidShipments.Add(shipmentItem);
+                    }
+                    else
+                    if (invoice.PaymentStatus == PaymentStatus.Pending &&
+                        shipmentItem.CompanyType == CompanyType.Corporate.ToString())
+                    {
+                        paidShipments.Add(shipmentItem);
+                    }
+
+                }
+
+                //3. get all grouped waybills for that Service Centre
+                var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappingWaybills(serviceCenters);
+
+                //4. filter the two lists
+                //var groupedWaybillsAsStringList = groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber);
+                var groupedWaybillsAsHashSet = new HashSet<string>(groupWayBillNumberMappings);
+                var ungroupedWaybills = paidShipments.Where(s => !groupedWaybillsAsHashSet.Contains(s.Waybill)).ToList();
+
+
+                //5. Ensure the waybills are in this ServiceCentre from the TransitWaybill entity
+
+                //Get TransitWaybillNumber as a querable list
+                var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable().ToList();
+
+                // final ungroupedList
+                var finalUngroupedList = new List<InvoiceView>();
+                foreach (var item in ungroupedWaybills)
+                {
+                    var tranWaybillObj = allTransitWaybillNumberList.SingleOrDefault(s => s.WaybillNumber == item.Waybill);
+                    if (tranWaybillObj != null)
+                    {
+                        if (tranWaybillObj.ServiceCentreId == serviceCenters[0] && tranWaybillObj.IsGrouped == false)
+                        {
+                            finalUngroupedList.Add(item);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        finalUngroupedList.Add(item);
+                    }
+                }
+
+
+                //6.added for Transitwaybills
+                var transitWaybillNumberList = allTransitWaybillNumberList.Where(s =>
+                    serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false).ToList();
+                foreach (var item in transitWaybillNumberList)
+                {
+                    var shipment = shipmentsQueryable.FirstOrDefault(s => s.Waybill == item.WaybillNumber);     // await GetShipment(item.WaybillNumber);
+                    if (filterByDestinationSC && shipmentsBySC.Count > 0)
+                    {
+                        var destinationSC = shipmentsBySC[0].DestinationServiceCentreId;
+                        if (shipment != null && shipment.DestinationServiceCentreId == destinationSC)
+                        {
+                            finalUngroupedList.Add(shipment);
+                        }
+                    }
+                    else
+                    {
+                        finalUngroupedList.Add(shipment);
+                    }
+                }
+                
+
+                return finalUngroupedList;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<ServiceCentreDTO>> GetUnGroupMappingServiceCentres()
         {
             try
@@ -835,8 +954,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     page = 1,
                     sortorder = "0"
                 };
-
-                var ungroupedWaybills = await GetUnGroupedWaybillsForServiceCentre(filterOptionsDto);
+                
+                //var ungroupedWaybills = await GetUnGroupedWaybillsForServiceCentre(filterOptionsDto);
+                var ungroupedWaybills = await GetUnGroupedWaybillsForServiceCentreDropDown(filterOptionsDto);
 
                 var allServiceCenters = await _centreService.GetServiceCentres();
 

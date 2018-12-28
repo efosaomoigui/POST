@@ -134,8 +134,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         public Task<List<string>> GetGroupWaybillMappingWaybills(int[] serviceCentreIds)
         {
             var groupwaybillMapping = Context.GroupWaybillNumberMapping.AsQueryable();
-
-            var serviceCentreWaybills = new List<string>();
+            
             if (serviceCentreIds.Length > 0)
             {
                 groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
