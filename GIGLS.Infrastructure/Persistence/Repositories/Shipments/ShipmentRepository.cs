@@ -203,7 +203,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
                                    }).OrderByDescending(x => x.DateCreated).Take(20).ToList();
 
-                    return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto.ToList()), count);
+                    return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto), count);
                 }
 
                 shipmentDto = (from r in shipment
@@ -306,7 +306,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
                 shipmentDto = shipmentDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
 
-                return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto.ToList()), count);
+                return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto), count);
             }
             catch (Exception)
             {

@@ -643,7 +643,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 Waybill = shipmentDTO.Waybill,
                 PaymentDate = DateTime.Now,
                 DueDate = DateTime.Now.AddDays(settlementPeriod),
-                IsInternational = shipmentDTO.IsInternational
+                IsInternational = shipmentDTO.IsInternational,
+                ServiceCentreId = departureServiceCentre.ServiceCentreId
             };
 
             _uow.Invoice.Add(invoice);
