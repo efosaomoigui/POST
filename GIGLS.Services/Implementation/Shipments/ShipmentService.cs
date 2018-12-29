@@ -960,9 +960,22 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var allServiceCenters = await _centreService.GetServiceCentres();
 
+                //var ungroupedServiceCentres = allServiceCenters.ToList().Where(
+                //    s => ungroupedWaybills.Select(
+                //        a => a.DestinationServiceCentreId).Contains(s.ServiceCentreId)).ToList();
+
+                var grp = new List<int>();
+
+                foreach (var item in ungroupedWaybills)
+                {
+                    if (item?.DestinationServiceCentreId > 0)
+                    {
+                        grp.Add(item.DestinationServiceCentreId);
+                    }
+                }
+
                 var ungroupedServiceCentres = allServiceCenters.ToList().Where(
-                    s => ungroupedWaybills.Select(
-                        a => a.DestinationServiceCentreId).Contains(s.ServiceCentreId)).ToList();
+                    s => grp.Contains(s.ServiceCentreId)).ToList();
 
                 return ungroupedServiceCentres;
             }
