@@ -451,13 +451,12 @@ namespace GIGLS.Services.Implementation.Dashboard
         {
             var graphDataList = new List<GraphDataDTO>();
             var shipmentsOrderedByServiceCenter = dashboardDTO.ShipmentsOrderedByServiceCenter;
-            //Correct once
-            //var currentYear = DateTime.Now.Year;
-            //var currentMonth = DateTime.Now.Month;
+            int currentYear = DateTime.Now.Year;
+            int currentMonth = DateTime.Now.Month;
 
-            //Only to solve last year report 
-            int currentYear = DateTime.Now.Year - 1;
-            int currentMonth = DateTime.Now.AddMonths(-1).Month;
+            ////Only to solve last year report 
+            //int currentYear = DateTime.Now.Year - 1;
+            //int currentMonth = DateTime.Now.AddMonths(-1).Month;
 
             // filter shipments by current year
             var thisYearShipments = shipmentsOrderedByServiceCenter.Where(
