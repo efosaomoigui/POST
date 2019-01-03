@@ -8,13 +8,9 @@ using System.Threading.Tasks;
 using System.Linq;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.DTO.ServiceCentres;
 using System;
 using GIGLS.Infrastructure;
-using GIGLS.Core.DTO.Shipments;
 using System.Collections.Generic;
-using GIGLS.Services.Implementation.Utility;
-using AutoMapper;
 using GIGLS.Core.View;
 
 namespace GIGLS.Services.Implementation.Dashboard
