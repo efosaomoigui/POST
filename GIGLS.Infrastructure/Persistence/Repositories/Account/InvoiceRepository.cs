@@ -231,11 +231,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                           {
                               PaymentStatus = i.PaymentStatus,
                               IsShipmentCollected = i.IsShipmentCollected,
+                              GrandTotal = i.Amount,
                               Waybill = s.Waybill,
                               DepartureServiceCentreId = s.DepartureServiceCentreId,
                               DestinationServiceCentreId = s.DestinationServiceCentreId,
                               CompanyType = s.CompanyType,
-                              IsInternational = s.IsInternational                            
+                              IsInternational = s.IsInternational,
+                              DateCreated = s.DateCreated                        
                           });
             return result;
         }
