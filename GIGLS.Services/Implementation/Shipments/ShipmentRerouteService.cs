@@ -118,12 +118,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     ShipmentRerouteInitiator = initiator
                 };
                 _uow.ShipmentReroute.Add(newShipmentReroute);
-
-                //Update Invoice to show the waybill has completed its process
-                var invoice = await _uow.Invoice.GetAsync(x => x.Waybill.Equals(shipmentDTO.Waybill));
-                invoice.IsShipmentCollected = true;
-
-                //complete transaction
+                 //complete transaction
                 await _uow.CompleteAsync();
 
                 ////7. return new shipment 
