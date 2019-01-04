@@ -58,8 +58,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException($"Shipment with waybill: {shipmentDTO.Waybill} already been rerouted.");
                 }
-
-
+                
                 ////2. check if Shipment has been collected
                 await _collectionService.CheckShipmentCollection(shipmentDTO.Waybill);
 
@@ -120,9 +119,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
                 _uow.ShipmentReroute.Add(newShipmentReroute);
 
+                //Update Invoice to show the waybill has completed its process
+                var invoice = await _uow.Invoice.GetAsync(x => x.Waybill.Equals(shipmentDTO.Waybill));
+                invoice.IsShipmentCollected = true;
+
                 //complete transaction
                 await _uow.CompleteAsync();
-
 
                 ////7. return new shipment 
                 return newShipment;
