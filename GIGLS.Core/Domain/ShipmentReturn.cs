@@ -18,5 +18,6 @@ namespace GIGLS.CORE.Domain
 
         public decimal Discount { get; set; }
         public decimal OriginalPayment { get; set; }
+        public int ServiceCentreId { get; set; }
     }
 }

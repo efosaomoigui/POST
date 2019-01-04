@@ -114,6 +114,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     WaybillNew = newShipment.Waybill,
                     WaybillOld = waybill,
                     OriginalPayment = newShipment.GrandTotal,
+                    ServiceCentreId = newShipment.DepartureServiceCentreId
                     //Discount =                
                 };
                 _uow.ShipmentReturn.Add(newShipmentReturn);
@@ -229,12 +230,8 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 //get all shipments by servicecentre
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-                var shipments = _uow.Shipment.FindAsync(s => serviceCenters.Contains(s.DepartureServiceCentreId)).Result;
-                var shipmentsWaybills = shipments.ToList().Select(a => a.Waybill).AsEnumerable();
-
-                //get collected shipment
-                var shipmentReturns = _uow.ShipmentReturn.FindAsync(x => shipmentsWaybills.Contains(x.WaybillNew)).Result;
+                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;        
+                var shipmentReturns = _uow.ShipmentReturn.FindAsync(s => serviceCenters.Contains(s.ServiceCentreId)).Result;
                 var shipmentReturnsDto = Mapper.Map<IEnumerable<ShipmentReturnDTO>>(shipmentReturns);
                 shipmentReturnsDto = shipmentReturnsDto.OrderByDescending(x => x.DateCreated);
 
