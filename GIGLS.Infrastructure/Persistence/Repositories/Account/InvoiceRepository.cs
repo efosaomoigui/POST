@@ -237,7 +237,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               DestinationServiceCentreId = s.DestinationServiceCentreId,
                               CompanyType = s.CompanyType,
                               IsInternational = s.IsInternational,
-                              DateCreated = s.DateCreated                        
+                              DateCreated = s.DateCreated,
+                              DeliveryOptionId = s.DeliveryOptionId                        
                           });
             return result;
         }

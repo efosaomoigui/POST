@@ -113,9 +113,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
                 }
-
-                //var allShipments = _uow.Shipment.GetShipments(filterOptionsDto, new int[] { });
-                var allShipments = _uow.Invoice.GetAllFromInvoiceView();
+                
+                var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false);
                 var incomingShipments = new List<InvoiceViewDTO>();
 
                 if (serviceCenters.Length > 0)
@@ -123,37 +122,28 @@ namespace GIGLS.Services.Implementation.Shipments
                     //Get shipments coming to the service centre 
                     var shipmentResult = allShipments.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).ToList();
 
-                    //delivered shipments should not be displayed in expected shipments
-                    List<string> shipmetCollection = _uow.ShipmentCollection.GetAllAsQueryable().Select(w => w.Waybill).ToList();
+                    //For waybill to be collected it must have satisfy the follwoing Shipment Scan Status
+                    //Collected by customer (OKC & OKT), Return (SSR), Reroute (SRR) : All status satisfy IsShipmentCollected above
+                    //shipments that have arrived destination service centre should not be displayed in expected shipments
+                    List<string> shipmetCollection = _uow.ShipmentCollection.GetAllAsQueryable()
+                        .Where(x => !(x.ShipmentScanStatus == ShipmentScanStatus.OKC && x.ShipmentScanStatus == ShipmentScanStatus.OKT 
+                        && x.ShipmentScanStatus == ShipmentScanStatus.SSR && x.ShipmentScanStatus == ShipmentScanStatus.SRR)).Select(w => w.Waybill).ToList();
 
                     //remove all the waybills that at the collection center from the income shipments
                     shipmentResult = shipmentResult.Where(s => !shipmetCollection.Contains(s.Waybill)).ToList();
                     incomingShipments = Mapper.Map<List<InvoiceViewDTO>>(shipmentResult);
                 }
 
+                //Use to populate service centre 
+                var allServiceCentres = await _centreService.GetServiceCentres();
+                var deliveryOptions = await _deliveryService.GetDeliveryOptions();
+
                 //populate the service centres
                 foreach (var invoiceViewDTO in incomingShipments)
                 {
-                    invoiceViewDTO.DepartureServiceCentre = new ServiceCentreDTO()
-                    {
-                        Name = invoiceViewDTO.DepartureServiceCentreName,
-                        Code = invoiceViewDTO.DepartureServiceCentreCode,
-                        ServiceCentreId = invoiceViewDTO.DepartureServiceCentreId
-                    };
-
-                    invoiceViewDTO.DestinationServiceCentre = new ServiceCentreDTO()
-                    {
-                        Name = invoiceViewDTO.DestinationServiceCentreName,
-                        Code = invoiceViewDTO.DestinationServiceCentreCode,
-                        ServiceCentreId = invoiceViewDTO.DestinationServiceCentreId
-                    };
-
-                    invoiceViewDTO.DeliveryOption = new DeliveryOptionDTO()
-                    {
-                        Code = invoiceViewDTO.DeliveryOptionCode,
-                        Description = invoiceViewDTO.DeliveryOptionDescription,
-                        DeliveryOptionId = invoiceViewDTO.DeliveryOptionId
-                    };
+                    invoiceViewDTO.DepartureServiceCentre = allServiceCentres.SingleOrDefault(x => x.ServiceCentreId == invoiceViewDTO.DepartureServiceCentreId);
+                    invoiceViewDTO.DestinationServiceCentre = allServiceCentres.SingleOrDefault(x => x.ServiceCentreId == invoiceViewDTO.DestinationServiceCentreId);
+                    invoiceViewDTO.DeliveryOption = deliveryOptions.SingleOrDefault(x => x.DeliveryOptionId == invoiceViewDTO.DeliveryOptionId);                    
                 }
 
                 return await Task.FromResult(incomingShipments);
