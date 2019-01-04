@@ -180,6 +180,7 @@ namespace GIGLS.Services.Implementation.Dashboard
         
         private async Task<DashboardDTO> GetDashboardForServiceCentre(int serviceCenterId)
         {
+            int currentYear = DateTime.Now.Year;
             var dashboardDTO = new DashboardDTO();
 
             int[] serviceCenterIds = new int[] { serviceCenterId };
@@ -189,8 +190,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             //set for TargetAmount and TargetOrder
             dashboardDTO.TargetOrder = serviceCentre.TargetOrder;
             dashboardDTO.TargetAmount = serviceCentre.TargetAmount;
-            
-            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments();
+
+            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated.Year == currentYear);
             var serviceCentreShipments = allShipmentsQueryable.Where(s => serviceCenterId == s.DepartureServiceCentreId);
                         
             // get shipment ordered
@@ -199,9 +200,13 @@ namespace GIGLS.Services.Implementation.Dashboard
             
             // set properties
             dashboardDTO.ServiceCentre = serviceCentre;
-            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && serviceCenterId == s.DepartureServiceCentreId).Count();
+            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.DateCreated.Year == currentYear && serviceCenterId == s.DepartureServiceCentreId).Count();
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
-            dashboardDTO.TotalCustomers = 0;
+
+            //get customer 
+            int accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated.Year == currentYear).Count();
+            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated.Year == currentYear).Count();
+            dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
 
             // MostRecentOrder
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
@@ -296,6 +301,7 @@ namespace GIGLS.Services.Implementation.Dashboard
         
         private async Task<DashboardDTO> GetDashboardForStation(int stationId)
         {
+            int currentYear = DateTime.Now.Year;
             var dashboardDTO = new DashboardDTO();
             
             //get the station
@@ -306,7 +312,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             var serviceCentres = await _serviceCenterService.GetServiceCentresByStationId(stationId);
             int[] serviceCenterIds = serviceCentres.Select(s => s.ServiceCentreId).ToArray();
             
-            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
+            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated.Year == currentYear);
             var serviceCentreShipments = allShipments.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId));
             
             //set for TargetAmount and TargetOrder
@@ -318,9 +324,13 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
             
             // set properties
-            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && serviceCenterIds.Contains(s.DepartureServiceCentreId)).Count();            
+            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.DateCreated.Year == currentYear && serviceCenterIds.Contains(s.DepartureServiceCentreId)).Count();            
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
-            dashboardDTO.TotalCustomers = 0;
+
+            //customers
+            int accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated.Year == currentYear).Count();
+            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated.Year == currentYear).Count();
+            dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
 
             // MostRecentOrder
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
@@ -409,10 +419,11 @@ namespace GIGLS.Services.Implementation.Dashboard
         
         private async Task<DashboardDTO> GetDashboardForGlobal()
         {
+            int currentYear = DateTime.Now.Year;
             var dashboardDTO = new DashboardDTO();
 
             int[] serviceCenterIds = { };   // empty array
-            var serviceCentreShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments();
+            var serviceCentreShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated.Year == currentYear);
 
             //set for TargetAmount and TargetOrder
             var serviceCentres = await _serviceCenterService.GetServiceCentres();
@@ -424,9 +435,13 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
             
             // set properties
-            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true).Count();
+            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.DateCreated.Year == currentYear).Count();
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
-            dashboardDTO.TotalCustomers = 0;
+            
+            //customers
+            int accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated.Year == currentYear).Count();
+            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated.Year == currentYear).Count();
+            dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
 
             // MostRecentOrder
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
