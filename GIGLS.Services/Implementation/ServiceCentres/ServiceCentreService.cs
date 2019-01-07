@@ -229,6 +229,18 @@ namespace GIGLS.Services.IServices.ServiceCentres
                     throw new GenericException("Service Centre does not exist");
                 }
 
+                //1. update the old service centre code to the new one in Number Generator Monitor if they are different
+                if(centre.Code.ToLower() != service.Code.ToLower())
+                {
+                    var numberGenerator = await _uow.NumberGeneratorMonitor.FindAsync(x => x.ServiceCentreCode == centre.Code);
+
+                    foreach (var number in numberGenerator)
+                    {
+                        number.ServiceCentreCode = service.Code;
+                    }
+                }
+
+                //2. Update the service centre details
                 centre.Name = service.Name;
                 centre.PhoneNumber = service.PhoneNumber;
                 centre.Address = service.Address;
