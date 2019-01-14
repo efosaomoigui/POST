@@ -551,6 +551,11 @@ namespace GIGLS.Services.Business.Pricing
                     await _shipmentDeliveryOptionMappingService.GetDeliveryOptionInWaybill(waybill);
                 var deliveryOptionIds = shipmentDeliveryOptionMapping.Select(s => s.DeliveryOptionId).ToList();
 
+                if(shipment.CompanyType == CompanyType.Ecommerce.ToString())
+                {
+                    item.ShipmentType = ShipmentType.Ecommerce;
+                }
+
                 //unit price per item
                 var itemPrice = await GetPrice(new PricingDTO()
                 {
