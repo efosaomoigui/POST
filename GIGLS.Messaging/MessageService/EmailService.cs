@@ -4,6 +4,7 @@ using SendGrid.Helpers.Mail;
 using System.Configuration;
 using GIGLS.Core.IMessage;
 using GIGLS.Core.DTO;
+using System.Collections.Generic;
 
 namespace GIGLS.Messaging.MessageService
 {
@@ -18,14 +19,22 @@ namespace GIGLS.Messaging.MessageService
         private async Task<string> ConfigSendGridasync(MessageDTO message)
         {
             var myMessage = new SendGridMessage();
+            myMessage.TemplateId = "d-2b2fda4a71974084b1166c4eac1d6569";
             var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
             var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
 
-            myMessage.AddTo(message.To);
+            myMessage.AddTo(message.ToEmail);
             myMessage.From = new SendGrid.Helpers.Mail.EmailAddress(fromEmail, fromName);
             myMessage.Subject = message.Subject;
             myMessage.PlainTextContent = message.FinalBody;
             myMessage.HtmlContent = message.FinalBody;
+            myMessage.CustomArgs = new Dictionary<string, string>
+            {
+                { "Sender_Name", fromName },
+                { "[Sender_Name]", fromName },
+                { "<%Sender_Name%>", fromName }
+            };
+
 
             var apiKey = ConfigurationManager.AppSettings["emailService:API_KEY"];
             var client = new SendGridClient(apiKey);

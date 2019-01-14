@@ -205,14 +205,17 @@ namespace GIGLS.Services.Implementation.Messaging
                     if ("CUSTOMER" == messageDTO.To.Trim())
                     {
                         messageDTO.To = customerObj.PhoneNumber;
+                        messageDTO.ToEmail = customerObj.Email;
                     }
                     else if ("RECEIVER" == messageDTO.To.Trim())
                     {
                         messageDTO.To = invoice.ReceiverPhoneNumber;
+                        messageDTO.ToEmail = invoice.ReceiverEmail;
                     }
                     else
                     {
                         messageDTO.To = invoice.ReceiverPhoneNumber;
+                        messageDTO.ToEmail = invoice.ReceiverEmail;
                     }
                     //messageDTO.To = invoice.ReceiverPhoneNumber;
                 }
