@@ -12,6 +12,7 @@ using System;
 using GIGLS.Infrastructure;
 using System.Collections.Generic;
 using GIGLS.Core.View;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Dashboard
 {
@@ -104,7 +105,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             return dashboardDTO;
         }
-
+        
         private async Task<DashboardDTO> GetDashboardForServiceCentreOld(int serviceCenterId)
         {
             var dashboardDTO = new DashboardDTO();
@@ -222,7 +223,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             return dashboardDTO;
         }
-
+        
         private async Task<DashboardDTO> GetDashboardForStationOld(int stationId)
         {
             var dashboardDTO = new DashboardDTO();
@@ -501,7 +502,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             await Task.FromResult(0);
         }
-
+        
         private int GetTotalCutomersCount(IQueryable<InvoiceView> shipmentsOrderedByServiceCenter)
         {
             var count = (from shipment in shipmentsOrderedByServiceCenter select shipment).
@@ -601,6 +602,259 @@ namespace GIGLS.Services.Implementation.Dashboard
             }
 
             return serviceCenterIds;
+        }
+        
+        public async Task<DashboardDTO> GetDashboard(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            var dashboardDTO = new DashboardDTO();
+
+            // get current user
+            try
+            {
+                var currentUserId = await _userService.GetCurrentUserId();
+                var currentUser = await _userService.GetUserById(currentUserId);
+                var userClaims = await _userService.GetClaimsAsync(currentUserId);
+
+                string[] claimValue = null;
+                foreach (var claim in userClaims)
+                {
+                    if (claim.Type == "Privilege")
+                    {
+                        claimValue = claim.Value.Split(':');   // format stringName:stringValue
+                    }
+                }
+                if (claimValue == null)
+                {
+                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                }
+
+
+                if (claimValue[0] == "Public")
+                {
+                    dashboardDTO = new DashboardDTO()
+                    {
+                        Public = "Public"
+                    };
+                }
+                else if (claimValue[0] == "Global")
+                {
+                    dashboardDTO = await GetDashboardForGlobal(dashboardFilterCriteria);
+                }
+                else if (claimValue[0] == "Station")
+                {
+                    dashboardDTO = await GetDashboardForStation(int.Parse(claimValue[1]), dashboardFilterCriteria);
+                }
+                else if (claimValue[0] == "ServiceCentre")
+                {
+                    dashboardDTO = await GetDashboardForServiceCentre(int.Parse(claimValue[1]), dashboardFilterCriteria);
+                }
+                else
+                {
+                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return dashboardDTO;
+        }
+
+        private async Task<DashboardDTO> GetDashboardForServiceCentre(int serviceCenterId, DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            var dashboardDTO = new DashboardDTO();
+
+            int[] serviceCenterIds = new int[] { serviceCenterId };
+            // get the service centre
+            var serviceCentre = await _serviceCenterService.GetServiceCentreById(serviceCenterId);
+
+            //set for TargetAmount and TargetOrder
+            dashboardDTO.TargetOrder = serviceCentre.TargetOrder;
+            dashboardDTO.TargetAmount = serviceCentre.TargetAmount;
+
+            //get startDate and endDate
+            var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+            var serviceCentreShipments = allShipmentsQueryable.Where(s => serviceCenterId == s.DepartureServiceCentreId);
+
+            // get shipment ordered
+            var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
+            dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
+
+            // set properties
+            dashboardDTO.ServiceCentre = serviceCentre;
+            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && serviceCenterId == s.DepartureServiceCentreId && s.DateCreated >= startDate && s.DateCreated < endDate).Count();
+            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
+
+            //get customer 
+            int accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated >= startDate && c.DateCreated < endDate).Count();
+            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated >= startDate && i.DateCreated < endDate).Count();
+            dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
+
+            // MostRecentOrder
+            dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
+
+            // populate graph data
+            await PopulateGraphDataByDate(dashboardDTO);
+
+            // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
+            dashboardDTO.ShipmentsOrderedByServiceCenter = null;
+
+            return dashboardDTO;
+        }
+
+        private async Task<DashboardDTO> GetDashboardForStation(int stationId, DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            var dashboardDTO = new DashboardDTO();
+
+            //get the station
+            var stationDTO = await _stationService.GetStationById(stationId);
+            dashboardDTO.Station = stationDTO;
+
+            // get the service centre
+            var serviceCentres = await _serviceCenterService.GetServiceCentresByStationId(stationId);
+            int[] serviceCenterIds = serviceCentres.Select(s => s.ServiceCentreId).ToArray();
+
+            //get startDate and endDate
+            var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+            var serviceCentreShipments = allShipments.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId));
+
+            //set for TargetAmount and TargetOrder
+            dashboardDTO.TargetOrder = serviceCentres.Where(s => s.StationId == stationId).Sum(s => s.TargetOrder);
+            dashboardDTO.TargetAmount = serviceCentres.Where(s => s.StationId == stationId).Sum(s => s.TargetAmount);
+
+            // get shipment ordered
+            var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
+            dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
+
+            // set properties
+            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.DateCreated >= startDate && s.DateCreated < endDate && serviceCenterIds.Contains(s.DepartureServiceCentreId)).Count();
+            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
+
+            //customers
+            int accountCustomer = _uow.Company.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).Count();
+            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated >= startDate && i.DateCreated < endDate).Count();
+            dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
+
+            // MostRecentOrder
+            dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
+
+            // populate customer
+            //await PopulateCustomer(dashboardDTO);
+
+            // populate graph data
+            await PopulateGraphDataByDate(dashboardDTO);
+
+            // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
+            dashboardDTO.ShipmentsOrderedByServiceCenter = null;
+
+            return dashboardDTO;
+        }
+
+        private async Task<DashboardDTO> GetDashboardForGlobal(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            var dashboardDTO = new DashboardDTO();
+
+            //get startDate and endDate
+            var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            int[] serviceCenterIds = { };   // empty array
+            var serviceCentreShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+
+            //set for TargetAmount and TargetOrder
+            var serviceCentres = await _serviceCenterService.GetServiceCentres();
+            dashboardDTO.TargetOrder = serviceCentres.Sum(s => s.TargetOrder);
+            dashboardDTO.TargetAmount = serviceCentres.Sum(s => s.TargetAmount);
+
+            // get shipment ordered
+            var shipmentsOrderedByServiceCenter = serviceCentreShipmentsQueryable.ToList().AsQueryable();
+            dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
+
+            // set properties
+            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.DateCreated >= startDate && s.DateCreated < endDate).Count();
+            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
+
+            //customers
+            int accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated >= startDate && c.DateCreated < endDate).Count();
+            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated >= startDate && i.DateCreated < endDate).Count();
+            dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
+
+            // MostRecentOrder
+            dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
+
+            // populate customer
+            //await PopulateCustomer(dashboardDTO);
+
+            // populate graph data
+            await PopulateGraphDataByDate(dashboardDTO);
+
+            // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
+            dashboardDTO.ShipmentsOrderedByServiceCenter = null;
+
+            return dashboardDTO;
+        }
+
+        private async Task PopulateGraphDataByDate(DashboardDTO dashboardDTO)
+        {
+            var graphDataList = new List<GraphDataDTO>();
+            var shipmentsOrderedByServiceCenter = dashboardDTO.ShipmentsOrderedByServiceCenter;
+            int currentMonth = DateTime.Now.Month;
+
+            //use this date as the next year of when we launched Agility to cater for
+            //month we have not launch agility that will be empty
+            int year = 2018;
+            
+            // fill GraphDataDTO by month
+            for (int month = 1; month <= 12; month++)
+            {
+                var thisMonthShipments = shipmentsOrderedByServiceCenter.Where(
+                    s => s.DateCreated.Month == month);
+                
+                var firstDataToGetYear = thisMonthShipments.FirstOrDefault();
+                if(firstDataToGetYear != null)
+                {
+                    year = firstDataToGetYear.DateCreated.Year;
+                }
+                else if (dashboardDTO.ServiceCentre != null && firstDataToGetYear == null)
+                {
+                    year = dashboardDTO.ServiceCentre.DateCreated.Year;
+                }
+                else if (dashboardDTO.Station != null && dashboardDTO.ServiceCentre == null && firstDataToGetYear == null)
+                {
+                    year = dashboardDTO.Station.DateCreated.Year;
+                }
+
+                var graphData = new GraphDataDTO
+                {
+                    CalculationDay = 1,
+                    ShipmentMonth = month,
+                    ShipmentYear = year,
+                    TotalShipmentByMonth = thisMonthShipments.Count(),
+                    TotalSalesByMonth = (from a in thisMonthShipments
+                                         select a.GrandTotal).DefaultIfEmpty(0).Sum()
+                };
+                graphDataList.Add(graphData);
+
+                // set the current month graphData
+                if (currentMonth == month)
+                {
+                    dashboardDTO.CurrentMonthGraphData = graphData;
+                }
+            }
+
+            dashboardDTO.GraphData = graphDataList;
+
+            await Task.FromResult(0);
         }
     }
 }
