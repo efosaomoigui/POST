@@ -2,7 +2,6 @@
 using GIGLS.Services.Implementation;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.WebApi.Filters;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.IServices.Dashboard;
 using GIGLS.Core.DTO.Report;
