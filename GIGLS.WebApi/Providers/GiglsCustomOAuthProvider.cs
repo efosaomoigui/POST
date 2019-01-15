@@ -9,7 +9,7 @@ using Microsoft.AspNet.Identity.Owin;
 using System.Collections.Generic;
 using System.Linq;
 using System;
-using System.Net;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.WebApi.Providers
 {
@@ -85,16 +85,20 @@ namespace GIGLS.WebApi.Providers
             using (var _repo = new AuthRepository<User, GIGLSContext>(new GIGLSContext()))
             {
                 User user = await _repo._userManager.FindAsync(context.UserName, context.Password);
-
+                
 
                 if (user != null)
                 {
+                    //Global Property PasswordExpireDaysCount
+                    var expiredDayCount = _repo._globalProperty.SingleOrDefault(s => s.Key == GlobalPropertyType.PasswordExpireDaysCount.ToString());
+
+
                     //check for password expiry
                     var LastUpdatePasswordDate = user.PasswordExpireDate;
                     DateTime TodayDate = DateTime.Now.Date;
                     var DayDifferent = (TodayDate - LastUpdatePasswordDate).Days;
 
-                    if (DayDifferent >= 0 && DayDifferent >= 30)
+                    if (DayDifferent >= Convert.ToInt32(expiredDayCount.Value))
                     {
                         //Redirect to user reset page
                         context.SetError("password_expired", "The user account has expired.");

@@ -1,6 +1,7 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core;
+using GIGLS.Core.Domain.Utility;
 using GIGLS.CORE.Domain;
 using GIGLS.Infrastructure.IdentityInfrastrure;
 using Microsoft.AspNet.Identity;
@@ -138,26 +139,25 @@ namespace GIGLS.Infrastructure.Persistence.Repository
         public RoleManager<AppRole> _roleManager; 
         public Repository<User, TContext> _repo;
         public Repository<AppRole, TContext> _repoRole;
+        public Repository<GlobalProperty, TContext> _globalProperty;
         //private TContext context { get; set; }
         //public UserStore<User, AppRole, string, IdentityUserLogin, IdentityUserRole, AppUserClaim> _userManager3;
-
-
+        
         public AuthRepository(TContext context)
         {
             _userManager = new UserManager<User>(new GiglsUserStore<User>(context));
             _roleManager = new RoleManager<AppRole>(new RoleStore<AppRole>(context)); 
             _repo = new Repository<User, TContext>(context);
+            _globalProperty = new Repository<GlobalProperty, TContext>(context);
             //_repoRole = new Repository<AppRole, TContext>(context); 
             //this.context = context;
             //_userManager3 = new GiglsUserStore<User>(context);
         }
-
-
+        
         public void Dispose()
         {
             _userManager.Dispose();
             //_roleManager.Dispose();
-
         }
 
     }
