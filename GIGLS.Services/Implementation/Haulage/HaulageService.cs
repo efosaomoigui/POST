@@ -51,7 +51,10 @@ namespace GIGLS.Services.Implementation
             var newHaulage = new Core.Domain.Haulage
             {
                 Tonne = haulageDto.Tonne,
-                Status = true
+                Status = true,
+                FixedRate = haulageDto.FixedRate,
+                AdditionalRate = haulageDto.AdditionalRate,
+                Description = haulageDto.Description
             };
 
             _uow.Haulage.Add(newHaulage);
@@ -70,6 +73,9 @@ namespace GIGLS.Services.Implementation
 
             haulage.Tonne = haulageDto.Tonne;
             haulage.Status = haulageDto.Status;
+            haulage.FixedRate = haulageDto.FixedRate;
+            haulage.AdditionalRate = haulageDto.AdditionalRate;
+            haulage.Description = haulageDto.Description;
             await _uow.CompleteAsync();
         }
 
