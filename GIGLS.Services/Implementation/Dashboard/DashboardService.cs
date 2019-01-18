@@ -627,8 +627,7 @@ namespace GIGLS.Services.Implementation.Dashboard
                 {
                     throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
                 }
-
-
+                
                 if (claimValue[0] == "Public")
                 {
                     dashboardDTO = new DashboardDTO()

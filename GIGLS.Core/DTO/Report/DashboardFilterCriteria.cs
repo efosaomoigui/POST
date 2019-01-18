@@ -59,7 +59,7 @@ namespace GIGLS.Core.DTO.Report
                 endDate = new DateTime(tempEndDate.Year, tempEndDate.Month, tempEndDate.Day);
             }
 
-            return new Tuple<DateTime, DateTime>(startDate, endDate.AddDays(-1));
+            return new Tuple<DateTime, DateTime>(startDate, endDate.AddDays(1));
         }
     }
 }
