@@ -20,6 +20,7 @@
         OverDueDaysCount,
         WarehouseServiceCentre,
         PasswordExpireDaysCount,
-        EcommerceOverDueDaysCount
+        EcommerceOverDueDaysCount,
+        HaulageMaximumFixedDistance
     }
 }

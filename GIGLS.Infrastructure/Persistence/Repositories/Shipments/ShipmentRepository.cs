@@ -878,7 +878,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
 
             // filter by cancelled shipments
-            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false);
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false);
 
             //filter by service center of the login user
             if (serviceCentreIds.Length > 0)

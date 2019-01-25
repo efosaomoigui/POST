@@ -187,7 +187,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     StationCode = sc.StationCode,
                                     CountryId = c.CountryId,
                                     Country = c.CountryName,
-                                    IsDefault = s.IsDefault
+                                    IsDefault = s.IsDefault,
+                                    DateCreated = s.DateCreated,
+                                    DateModified = s.DateModified
                                 };
                 return Task.FromResult(centreDto.FirstOrDefault());
             }

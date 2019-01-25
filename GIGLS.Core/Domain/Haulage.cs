@@ -6,5 +6,7 @@
         public decimal Tonne { get; set; }
         public string Description { get; set; } 
         public bool Status { get; set; }
+        public decimal FixedRate { get; set; }
+        public decimal AdditionalRate { get; set; }
     }
 }

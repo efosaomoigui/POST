@@ -299,6 +299,7 @@
     <Compile Include="DTO\PaymentTransactions\ReroutePricingDTO.cs" />
     <Compile Include="DTO\Report\AccountFilterCriteria.cs" />
     <Compile Include="DTO\Report\BaseFilterCriteria.cs" />
+    <Compile Include="DTO\Report\DashboardFilterCriteria.cs" />
     <Compile Include="DTO\Report\ScanTrackFilterCriteria.cs" />
     <Compile Include="DTO\Report\ShipmentFilterCriteria.cs" />
     <Compile Include="DTO\ServiceCentres\ServiceCentreDTO.cs" />

@@ -77,6 +77,8 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 StationCode = station.StationCode,
                 StateId = station.StateId,
                 StateName = station.State.StateName,
+                DateCreated = station.DateCreated,
+                DateModified = station.DateModified,
                 Country = station.State.CountryId.ToString(),
                 SuperServiceCentreId = station.SuperServiceCentreId,
                 SuperServiceCentreDTO = new ServiceCentreDTO()

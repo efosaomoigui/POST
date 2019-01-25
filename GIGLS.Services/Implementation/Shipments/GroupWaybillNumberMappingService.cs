@@ -10,11 +10,11 @@ using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.IServices.User;
 using System.Linq;
 using GIGLS.Core.DTO.ServiceCentres;
-using AutoMapper;
 using GIGLS.Core.Domain;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.CORE.IServices.Shipments;
 using GIGLS.CORE.Domain;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -393,7 +393,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var overdueShipment = _uow.OverdueShipment.SingleOrDefault(x => (x.Waybill == waybillNumber));
                 if (overdueShipment != null)
                 {
-                    overdueShipment.OverdueShipmentStatus = Core.Enums.OverdueShipmentStatus.UnGrouped;
+                    overdueShipment.OverdueShipmentStatus = OverdueShipmentStatus.UnGrouped;
                 }
 
                 _uow.Complete();
@@ -409,10 +409,13 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //1. call existing api
+                //1. check if the waybill are over due shipment
+                await ValidateOverDueShipments(waybillNumberList);
+
+                //2. call existing api that handle grouping
                 await MappingWaybillNumberToGroup(groupWaybillNumber, waybillNumberList);
 
-                //2. Save into OverdueShipment as grouped status
+                //3. Save into OverdueShipment as grouped status
                 var currentUserId = await _userService.GetCurrentUserId();
                 foreach (var waybill in waybillNumberList)
                 {
@@ -424,7 +427,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             Waybill = waybill,
                             DateCreated = DateTime.Now,
-                            OverdueShipmentStatus = Core.Enums.OverdueShipmentStatus.Grouped,
+                            OverdueShipmentStatus = OverdueShipmentStatus.Grouped,
                             UserId = currentUserId
                         };
                         _uow.OverdueShipment.Add(overdueShipmentNew);
@@ -432,10 +435,58 @@ namespace GIGLS.Services.Implementation.Shipments
                     else
                     {
                         //update status
-                        overdueShipment.OverdueShipmentStatus = Core.Enums.OverdueShipmentStatus.Grouped;
+                        overdueShipment.OverdueShipmentStatus = OverdueShipmentStatus.Grouped;
                     }
                 }
                 await _uow.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task ValidateOverDueShipments(List<string> waybillNumberList)
+        {
+            try
+            {
+                //get all shipments by servicecentre
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();                
+                List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && s.CompanyType != CompanyType.Ecommerce.ToString() && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
+
+                // filter by global property for OverDueShipments
+                var overDueDaysCountObj = _uow.GlobalProperty.SingleOrDefault(s => s.Key == GlobalPropertyType.OverDueDaysCount.ToString());
+                if (overDueDaysCountObj == null)
+                {
+                    throw new GenericException($"The Global property 'Over Due Days Count' has not been set. Kindly contact admin.");
+                }
+                var overDueDaysCount = overDueDaysCountObj.Value;
+                int globalProp = int.Parse(overDueDaysCount);
+                var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
+
+                var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().
+                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate)).ToList();
+
+                shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
+
+                //ensure that already grouped waybills don't appear with this list
+                var overdueShipment = _uow.OverdueShipment.GetAllAsQueryable().
+                    Where(s => s.OverdueShipmentStatus == OverdueShipmentStatus.Grouped).ToList();
+
+                //filter the two lists
+                shipmentCollection =
+                    shipmentCollection.Where(s => !overdueShipment.Select(d => d.Waybill).Contains(s.Waybill)).ToList();
+
+                var overdueShipmentList = shipmentCollection.Select(x => x.Waybill).Distinct().ToList();
+                
+                //validate if the waybills are all overdue shipment
+                var result = waybillNumberList.Where(x => !overdueShipmentList.Contains(x));
+
+                if (result.Count() > 0)
+                {
+                    throw new GenericException($"Error: Group cannot be created. " +
+                        $"The following waybills [{string.Join(", ", result.ToList())}] are not overdue shipments");
+                }
             }
             catch (Exception)
             {

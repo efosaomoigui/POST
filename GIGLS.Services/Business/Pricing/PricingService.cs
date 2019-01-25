@@ -200,7 +200,7 @@ namespace GIGLS.Services.Business.Pricing
             return shipmentTotalPrice;
         }
 
-        public async Task<decimal> GetHaulagePrice(HaulagePricingDTO haulagePricingDto)
+        public async Task<decimal> GetHaulagePriceOld(HaulagePricingDTO haulagePricingDto)
         {
             decimal price = 0;
 
@@ -247,6 +247,65 @@ namespace GIGLS.Services.Business.Pricing
                 price = haulageDistanceMappingPrice.Price * distance;
                 return price;
             }
+
+            return price;
+        }
+
+        public async Task<decimal> GetHaulagePrice(HaulagePricingDTO haulagePricingDto)
+        {
+            decimal price = 0;
+
+            var departureServiceCentreId = haulagePricingDto.DepartureServiceCentreId;
+            var destinationServiceCentreId = haulagePricingDto.DestinationServiceCentreId;
+            var haulageid = haulagePricingDto.Haulageid;
+
+            //check haulage exists
+            var haulage = await _haulageService.GetHaulageById(haulageid);
+            if (haulage == null)
+            {
+                throw new GenericException("The Tonne specified has not been mapped");
+            }
+
+            //ensure departureServiceCentreId is set
+            if (departureServiceCentreId <= 0)
+            {
+                // use currentUser login servicecentre
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                if (serviceCenters.Length > 1)
+                {
+                    throw new GenericException("This user is assign to more than one(1) Service Centre  ");
+                }
+                departureServiceCentreId = serviceCenters[0];
+            }
+
+            //get the distance based on the stations
+            var haulageDistanceMapping = await _haulageDistanceMappingService.GetHaulageDistanceMapping(departureServiceCentreId, destinationServiceCentreId);
+            var distance = haulageDistanceMapping.Distance;
+
+            //set the default distance to 1
+            if(distance == 0)
+            {
+                distance = 1;
+            }
+
+            //Get Haulage Maximum Fixed Distance
+            var maximumFixedDistanceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HaulageMaximumFixedDistance);
+            int maximumFixedDistance = int.Parse(maximumFixedDistanceObj.Value);
+
+            //calculate price for the haulage
+            if (distance <= maximumFixedDistance)
+            {
+                price = haulage.FixedRate;
+            }
+            else
+            {
+                //1. get the fixed rate and substract the maximum fixed distance from distance
+                decimal fixedRate = haulage.FixedRate;
+                distance = distance - maximumFixedDistance;
+
+                //2. multiply the remaining distance with the additional pate
+                price = fixedRate + distance * haulage.AdditionalRate;
+            }           
 
             return price;
         }
@@ -550,6 +609,11 @@ namespace GIGLS.Services.Business.Pricing
                 var shipmentDeliveryOptionMapping =
                     await _shipmentDeliveryOptionMappingService.GetDeliveryOptionInWaybill(waybill);
                 var deliveryOptionIds = shipmentDeliveryOptionMapping.Select(s => s.DeliveryOptionId).ToList();
+
+                if(shipment.CompanyType == CompanyType.Ecommerce.ToString())
+                {
+                    item.ShipmentType = ShipmentType.Ecommerce;
+                }
 
                 //unit price per item
                 var itemPrice = await GetPrice(new PricingDTO()

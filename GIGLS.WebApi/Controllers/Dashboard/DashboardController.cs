@@ -2,9 +2,9 @@
 using GIGLS.Services.Implementation;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.WebApi.Filters;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.IServices.Dashboard;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.Dashboard
 {
@@ -26,6 +26,21 @@ namespace GIGLS.WebApi.Controllers.Dashboard
             return await HandleApiOperationAsync(async () =>
             {
                 var dashboard = await _dashboardService.GetDashboard();
+
+                return new ServiceResponse<DashboardDTO>
+                {
+                    Object = dashboard
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("")]
+        public async Task<IServiceResponse<DashboardDTO>> GetDashboard(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var dashboard = await _dashboardService.GetDashboard(dashboardFilterCriteria);
 
                 return new ServiceResponse<DashboardDTO>
                 {
