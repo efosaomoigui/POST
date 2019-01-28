@@ -59,12 +59,12 @@ namespace GIGLS.Services.Implementation.Messaging
                         }
                     case EmailSmsType.SMS:
                         {
-                            await SendSMSMessage(messageType, obj);
+                            //await SendSMSMessage(messageType, obj);
                             break;
                         }
                     case EmailSmsType.All:
                         {
-                            await SendSMSMessage(messageType, obj);
+                            //await SendSMSMessage(messageType, obj);
                             await SendEmailMessage(messageType, obj);
                             break;
                         }
@@ -206,11 +206,13 @@ namespace GIGLS.Services.Implementation.Messaging
                     {
                         messageDTO.To = customerObj.PhoneNumber;
                         messageDTO.ToEmail = customerObj.Email;
+                        messageDTO.CustomerName = customerObj.CustomerName;
                     }
                     else if ("RECEIVER" == messageDTO.To.Trim())
                     {
                         messageDTO.To = invoice.ReceiverPhoneNumber;
                         messageDTO.ToEmail = invoice.ReceiverEmail;
+                        messageDTO.ReceiverName = invoice.ReceiverName;
                     }
                     else
                     {

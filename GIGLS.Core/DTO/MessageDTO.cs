@@ -15,5 +15,8 @@ namespace GIGLS.Core.DTO
         public MessageType MessageType { get; set; }
 
         public string FinalBody { get; set; }
+
+        public string CustomerName { get; set; }
+        public string ReceiverName { get; set; }
     }
 }
