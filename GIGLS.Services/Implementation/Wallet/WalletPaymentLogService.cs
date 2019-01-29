@@ -2,13 +2,10 @@
 using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Shipments;
-using GIGLS.CORE.Enums;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -123,6 +120,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
             walletPaymentLog.IsWalletCredited = walletPaymentLogDto.IsWalletCredited;
             walletPaymentLog.TransactionStatus = walletPaymentLogDto.TransactionStatus;
+            walletPaymentLog.Description = walletPaymentLogDto.Description;
+            walletPaymentLogDto.TransactionResponse = walletPaymentLogDto.TransactionResponse;
             await _uow.CompleteAsync();
         }
     }

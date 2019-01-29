@@ -274,6 +274,7 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Service.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GIGLS.Core\GIGLS.Core.csproj">

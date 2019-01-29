@@ -1,11 +1,6 @@
 ﻿using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.View;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using PayStack.Net;
+using GIGLS.Core.DTO.OnlinePayment;
 
 namespace GIGLS.Core.IServices.Wallet
 {
@@ -13,5 +8,8 @@ namespace GIGLS.Core.IServices.Wallet
     {
         Task<bool> MakePayment(string LiveSecret, WalletPaymentLogDTO wpd);
         Task<bool> VerifyPayment(string reference, string livesecret);  
+        Task<PaystackWebhookDTO> VerifyPayment(string reference);
+        Task<bool> VerifyAndValidateWallet(PaystackWebhookDTO webhook);
+        Task<bool> VerifyAndValidateWallet(string referenceCode);
     }
 }

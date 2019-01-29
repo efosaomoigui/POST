@@ -112,6 +112,22 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpGet]
+        [Route("verifypayment/{referenceCode}")]
+        public async Task<IServiceResponse<bool>> VerifyAndValidateWallet([FromUri]  string referenceCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _paymentService.VerifyAndValidateWallet(referenceCode);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+
         [HttpPut]
         [Route("updatewalletpaymentlog")]
         public async Task<IServiceResponse<object>> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO)

@@ -14,9 +14,12 @@ namespace GIGLS.WebApi.Controllers.Wallet
     public class WalletController : BaseWebApiController
     {
         private readonly IWalletService _walletService;
-        public WalletController(IWalletService walletService) : base(nameof(WalletController))
+        private readonly IPaystackPaymentService _paymentService;
+
+        public WalletController(IWalletService walletService, IPaystackPaymentService paymentService) : base(nameof(WalletController))
         {
             _walletService = walletService;
+            _paymentService = paymentService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -130,5 +133,19 @@ namespace GIGLS.WebApi.Controllers.Wallet
             });
         }
 
+        [HttpGet]
+        [Route("verifypayment/{referenceCode}")]
+        public async Task<IServiceResponse<bool>> VerifyAndValidateWallet([FromUri]  string referenceCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _paymentService.VerifyAndValidateWallet(referenceCode);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

@@ -88,21 +88,17 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
         {
-
             await _walletService.UpdateWallet(walletId, walletTransactionDTO, false);
-
         }
 
         public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
             var walletPaymentLog = await _wallepaymenttlogService.AddWalletPaymentLog(walletPaymentLogDto);
             return walletPaymentLog;
-
         }
 
         public async Task<object> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
-
             //1.check to prevent multiple entries
             //var walletLogObject = _uow.WalletPaymentLog.GetAllAsQueryable().SingleOrDefault(s => 
             //    s.Reference == walletPaymentLogDto.Reference && s.IsWalletCredited == false);
@@ -147,7 +143,6 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             await _wallepaymenttlogService.UpdateWalletPaymentLog(walletPaymentLogDto.Reference, walletPaymentLogDto);
             return walletPaymentLogDto;
-
         }
 
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactions()

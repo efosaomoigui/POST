@@ -150,6 +150,19 @@ namespace GIGLS.Services.Implementation.User
 
         }
 
+        public async Task<UserDTO> GetUserByChannelCode(string channelCode)
+        {
+            var user = await _unitOfWork.User.GetUserByChannelCode(channelCode);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!");
+            }
+
+            return Mapper.Map<UserDTO>(user);
+
+        }
+
 
         public async Task<IdentityResult> RemoveUser(string userId)
         {

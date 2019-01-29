@@ -19,6 +19,7 @@ namespace GIGLS.Core.IServices.User
         Task<UserDTO> GetUserById(string userId);
         Task<UserDTO> GetUserByEmail(string email);
         Task<UserDTO> GetUserById(int userId);
+        Task<UserDTO> GetUserByChannelCode(string channelCode);
         Task<IdentityResult> AddUser(UserDTO user);
         Task<IdentityResult> UpdateUser(string id, UserDTO user);
         Task<IdentityResult> ActivateUser(string id, bool val);

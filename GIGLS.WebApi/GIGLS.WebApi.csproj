@@ -295,6 +295,7 @@
     <Compile Include="Controllers\Client\ClientNodeController.cs" />
     <Compile Include="Controllers\CountryController.cs" />
     <Compile Include="Controllers\CustomerPortal\CustomerPortalController.cs" />
+    <Compile Include="Controllers\CustomerPortal\PaystackController.cs" />
     <Compile Include="Controllers\Customers\CompanyContactPersonController.cs" />
     <Compile Include="Controllers\Customers\CompanyController.cs" />
     <Compile Include="Controllers\Customers\CustomerController.cs" />
@@ -405,7 +406,9 @@
     <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %2815%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %283%29.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm - Web Deploy %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm - Web Deploy.pubxml" />
