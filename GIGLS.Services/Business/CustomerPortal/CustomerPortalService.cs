@@ -450,15 +450,15 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
 
 
-        public async Task<Tuple<Task<List<WalletPaymentLogView>>, int>> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto)
+        public async Task<Tuple<Task<List<WalletPaymentLogDTO>>, int>> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto)
         {
-            string walletNumber = await GetWalletNummber();
+            int WalletId = await GetWalletNummber();
 
-            var walletPaymentLogView = _uow.WalletPaymentLog.GetWalletPaymentLogs(filterOptionsDto, walletNumber);
+            var walletPaymentLogView = _uow.WalletPaymentLog.GetWalletPaymentLogs(filterOptionsDto, WalletId);
             return walletPaymentLogView;
         }
 
-        private async Task<string> GetWalletNummber()
+        private async Task<int> GetWalletNummber()
         {
             //Get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
@@ -471,7 +471,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException("Wallet does not exist");
             }
 
-            return wallet.WalletNumber;
+            return wallet.WalletId;
         }
     }
 }

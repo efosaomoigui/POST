@@ -59,6 +59,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> SignSLA(int slaId);
 
         //Payment Log
-        Task<Tuple<Task<List<WalletPaymentLogView>>, int>> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto);
+        Task<Tuple<Task<List<WalletPaymentLogDTO>>, int>> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto);
     }
 }

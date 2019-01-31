@@ -14,6 +14,6 @@ namespace GIGLS.Core.IRepositories.Wallet
     {
         Task<List<WalletPaymentLogDTO>> GetWalletPaymentLogs();
         Tuple<Task<List<WalletPaymentLogView>>, int> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto, string WalletNumber = null);
-        Tuple<Task<List<WalletPaymentLogDTO>>, int> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto, int walletId = 0);
+        Tuple<Task<List<WalletPaymentLogDTO>>, int> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto, int walletId);
     }
 }

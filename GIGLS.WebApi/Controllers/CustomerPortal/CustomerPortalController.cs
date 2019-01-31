@@ -14,7 +14,6 @@ using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
@@ -116,7 +115,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("verifypayment/{referenceCode}")]
-        public async Task<IServiceResponse<PaymentResponse>> VerifyAndValidateWallet([FromUri]  string referenceCode)
+        public async Task<IServiceResponse<PaymentResponse>> VerifyAndValidateWallet(string referenceCode)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -131,12 +130,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         
         [HttpGet]
         [Route("walletpaymentlog")]
-        public async Task<IServiceResponse<IEnumerable<WalletPaymentLogView>>> GetWalletPaymentLogs([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<List<WalletPaymentLogDTO>>> GetWalletPaymentLogs([FromUri]FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var walletTuple = await _portalService.GetWalletPaymentLogs(filterOptionsDto);
-                return new ServiceResponse<IEnumerable<WalletPaymentLogView>>
+                return new ServiceResponse<List<WalletPaymentLogDTO>>
                 {
                     Object = await walletTuple.Item1,
                     Total = walletTuple.Item2
