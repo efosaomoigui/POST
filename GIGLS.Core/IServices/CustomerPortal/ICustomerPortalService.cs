@@ -10,9 +10,11 @@ using GIGLS.Core.DTO.SLA;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using Microsoft.AspNet.Identity;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -54,7 +56,9 @@ namespace GIGLS.Core.IServices.CustomerPortal
 
         //SLA
         Task<SLADTO> GetSLA();
-
         Task<object> SignSLA(int slaId);
+
+        //Payment Log
+        Task<Tuple<Task<List<WalletPaymentLogView>>, int>> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto);
     }
 }

@@ -40,7 +40,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var walletPaymentLogView = _uow.WalletPaymentLog.GetWalletPaymentLogs(filterOptionsDto);
             return walletPaymentLogView;
         }
-
+        
         public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
             if (walletPaymentLogDto.UserId == null)
@@ -94,8 +94,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             return Mapper.Map<WalletPaymentLogDTO>(walletPaymentLog);
         }
-
-
+        
         public async Task RemoveWalletPaymentLog(int walletPaymentLogId)
         {
             var walletPaymentLog = await _uow.WalletPaymentLog.GetAsync(walletPaymentLogId);

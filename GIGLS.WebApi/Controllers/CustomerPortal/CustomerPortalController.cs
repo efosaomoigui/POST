@@ -3,6 +3,7 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Haulage;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
@@ -13,6 +14,7 @@ using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.Wallet;
+using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
@@ -114,19 +116,33 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("verifypayment/{referenceCode}")]
-        public async Task<IServiceResponse<bool>> VerifyAndValidateWallet([FromUri]  string referenceCode)
+        public async Task<IServiceResponse<PaymentResponse>> VerifyAndValidateWallet([FromUri]  string referenceCode)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _paymentService.VerifyAndValidateWallet(referenceCode);
 
-                return new ServiceResponse<bool>
+                return new ServiceResponse<PaymentResponse>
                 {
                     Object = result
                 };
             });
         }
-
+        
+        [HttpGet]
+        [Route("walletpaymentlog")]
+        public async Task<IServiceResponse<IEnumerable<WalletPaymentLogView>>> GetWalletPaymentLogs([FromUri]FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var walletTuple = await _portalService.GetWalletPaymentLogs(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<WalletPaymentLogView>>
+                {
+                    Object = await walletTuple.Item1,
+                    Total = walletTuple.Item2
+                };
+            });
+        }
 
         [HttpPut]
         [Route("updatewalletpaymentlog")]
@@ -519,5 +535,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
     }
 }

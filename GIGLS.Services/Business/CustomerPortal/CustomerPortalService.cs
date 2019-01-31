@@ -31,6 +31,7 @@ using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.SLA;
 using GIGLS.Core.IServices.Sla;
 using GIGLS.Core.Enums;
+using GIGLS.Core.View;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -446,6 +447,31 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var signed = await _slaService.UserSignedSLA(slaId);
             return signed;
+        }
+
+
+        public async Task<Tuple<Task<List<WalletPaymentLogView>>, int>> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto)
+        {
+            string walletNumber = await GetWalletNummber();
+
+            var walletPaymentLogView = _uow.WalletPaymentLog.GetWalletPaymentLogs(filterOptionsDto, walletNumber);
+            return walletPaymentLogView;
+        }
+
+        private async Task<string> GetWalletNummber()
+        {
+            //Get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+            
+            var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode.ToLower() == currentUser.UserChannelCode.ToLower());
+
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exist");
+            }
+
+            return wallet.WalletNumber;
         }
     }
 }

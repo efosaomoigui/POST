@@ -63,10 +63,14 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 result.Status = verifyResponse.Status;
                 result.Message = verifyResponse.Message;
-                result.data.Amount = verifyResponse.Data.Amount;
-                result.data.Gateway_Response = verifyResponse.Data.GatewayResponse;
-                result.data.Reference = verifyResponse.Data.Reference;
-                result.data.Status = verifyResponse.Data.Status;
+                result.data.Reference = reference;
+
+                if (verifyResponse.Status)
+                {
+                    result.data.Gateway_Response = verifyResponse.Data.GatewayResponse;
+                    result.data.Status = verifyResponse.Data.Status;
+                    result.data.Amount = verifyResponse.Data.Amount / 100;
+                }
             });
             
             return result;
@@ -108,7 +112,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     //update the wallet
                     await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO() {
                         WalletId = paymentLog.WalletId,
-                        Amount = verifyResult.data.Amount / 100,
+                        Amount = verifyResult.data.Amount,
                         CreditDebitType = CreditDebitType.Credit,
                         Description = "Funding made through debit card",
                         PaymentType = Core.Enums.PaymentType.Online,
@@ -131,12 +135,16 @@ namespace GIGLS.Services.Implementation.Wallet
             return await Task.FromResult(result);
         }
 
-        public async Task<bool> VerifyAndValidateWallet(string referenceCode)
-        {
-            bool result = false;
-
+        public async Task<PaymentResponse> VerifyAndValidateWallet(string referenceCode)
+        {                       
             //1. verify the payment 
             var verifyResult = await VerifyPayment(referenceCode);
+
+            PaymentResponse result = new PaymentResponse
+            {
+                Result = verifyResult.Status,
+                Message = verifyResult.Message
+            };
 
             if (verifyResult.Status)
             {
@@ -144,7 +152,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 var paymentLog = _uow.WalletPaymentLog.SingleOrDefault(x => x.Reference == referenceCode);
 
                 if (paymentLog == null)
+                {
+                    result.GatewayResponse = "Wallet Payment Log Information does not exist";
                     return result;
+                }
 
                 //2. if the payment successful
                 if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited)
@@ -168,7 +179,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
                     {
                         WalletId = paymentLog.WalletId,
-                        Amount = verifyResult.data.Amount / 100,
+                        Amount = verifyResult.data.Amount,
                         CreditDebitType = CreditDebitType.Credit,
                         Description = "Funding made through debit card",
                         PaymentType = PaymentType.Online,
@@ -185,7 +196,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                 await _uow.CompleteAsync();
 
-                result = true;
+                result.GatewayResponse = verifyResult.data.Gateway_Response;
+                result.Status = verifyResult.data.Status;
             }
 
             return await Task.FromResult(result);
