@@ -543,7 +543,6 @@ namespace GIGLS.WebApi.Controllers.User
             }
 
             string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
-            //const string apiBaseUri = "http://giglsresourceapi.azurewebsites.net/api/";
             string getTokenResponse;
 
             return await HandleApiOperationAsync(async () =>
@@ -567,16 +566,16 @@ namespace GIGLS.WebApi.Controllers.User
                     //setup login data
                     HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
 
-                    //get access token from response body
-                    var responseJson = await responseMessage.Content.ReadAsStringAsync();
-                    var jObject = JObject.Parse(responseJson);
-
-                    getTokenResponse = jObject.GetValue("access_token").ToString();
-
                     if (!responseMessage.IsSuccessStatusCode)
                     {
                         throw new GenericException("Operation could not complete login successfully:");
                     }
+
+                    //get access token from response body
+                    var responseJson = await responseMessage.Content.ReadAsStringAsync();
+                    var jObject = JObject.Parse(responseJson);                                      
+
+                    getTokenResponse = jObject.GetValue("access_token").ToString();
 
                     return new ServiceResponse<JObject>
                     {
