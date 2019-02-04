@@ -2,12 +2,14 @@
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Services.Implementation;
+using GIGLS.WebApi.Filters;
 using System.Threading.Tasks;
 using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
     [RoutePrefix("api/paystack")]
+    [IPFilter]
     public class PaystackController : BaseWebApiController
     {
         private readonly IPaystackPaymentService _service;
