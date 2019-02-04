@@ -230,8 +230,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
-
+        
         //map waybills to Manifest from Mobile
         public async Task MappingManifestToWaybillsMobile(string manifest, List<string> waybills)
         {
@@ -245,8 +244,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipmentCollectionList = shipmentCollection.Select(x => x.Waybill).Distinct().ToList();
 
                 //1a. Get the shipment status of the waybills we want to manifest && extrack waybills into a list from shipment collection
-                //List<string> shipmentCollectionList = _uow.ShipmentCollection.GetAllAsQueryable().Where(s => s.ShipmentScanStatus == ShipmentScanStatus.ARF && waybills.Contains(s.Waybill)).Select(x => x.Waybill).Distinct().ToList();
-
+                
                 //1b. check if all the waybills has the same status (ARF)
                 if (shipmentCollectionList.Count() == 0)
                 {
@@ -497,8 +495,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
-
+        
         //Get All Manifests that a Waybill has been mapped to
         public async Task<List<ManifestWaybillMappingDTO>> GetManifestForWaybill(string waybill)
         {
@@ -822,5 +819,74 @@ namespace GIGLS.Services.Implementation.Shipments
             return result.OrderByDescending(x => x.DateCreated).ToList();
         }
 
+        //get all manifests that the waybill pass through 
+        public async Task<List<ManifestWaybillMappingDTO>> GetManifestHistoryForWaybill(string waybill)
+        {
+            try
+            {
+                List<ManifestWaybillMappingDTO> resultList = new List<ManifestWaybillMappingDTO>();
+                
+                //This part hanlde internal and external manifest
+                // 1.Get waybill in a Group Waybill
+                var groupWaybillNumberMapping = await _uow.GroupWaybillNumberMapping.FindAsync(x => x.WaybillNumber == waybill);
+                if (groupWaybillNumberMapping != null)
+                {
+                    foreach (var s in groupWaybillNumberMapping.ToList())
+                    {
+                        //2. Use the Groupwaybill to get manifest
+                        var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetAsync(x => x.GroupWaybillNumber == s.GroupWaybillNumber);
+
+                        //get the manifest detail for the waybill
+                        var manifestDTO = await _manifestService.GetManifestByCode(manifestGroupWaybillMapings.ManifestCode);
+                        var dispatch = await _uow.Dispatch.GetAsync(d => d.ManifestNumber == manifestGroupWaybillMapings.ManifestCode);
+
+                        ManifestWaybillMappingDTO manifest = new ManifestWaybillMappingDTO();
+                        manifest.DateCreated = manifestGroupWaybillMapings.DateCreated;
+                        manifest.DateModified = manifestGroupWaybillMapings.DateModified;
+                        manifest.ManifestCode = manifestGroupWaybillMapings.ManifestCode;
+                        
+                        manifest.ManifestDetails = manifestDTO;
+                                                
+                        if (dispatch != null)
+                        {
+                            manifest.ManifestDetails.DispatchedBy = dispatch.DispatchedBy;
+                            manifest.ManifestDetails.ReceiverBy = dispatch.ReceivedBy;
+                        }
+                        
+                        resultList.Add(manifest);
+                    }
+                }
+
+                //This part hanlde delivery manifest
+                var waybillMappingList = await _uow.ManifestWaybillMapping.FindAsync(x => x.Waybill == waybill);
+
+                if(waybillMappingList != null)
+                {
+                    foreach (var waybillmapped in waybillMappingList)
+                    {
+                        //get the manifest detail for the waybill
+                        var manifestDTO = await _manifestService.GetManifestByCode(waybillmapped.ManifestCode);
+                        var dispatch = await _uow.Dispatch.GetAsync(d => d.ManifestNumber == waybillmapped.ManifestCode);
+
+                        var waybillMapping = Mapper.Map<ManifestWaybillMappingDTO>(waybillmapped);
+                        waybillMapping.ManifestDetails = manifestDTO;
+
+                        if (dispatch != null)
+                        {
+                            waybillMapping.ManifestDetails.DispatchedBy = dispatch.DispatchedBy;
+                            waybillMapping.ManifestDetails.ReceiverBy = dispatch.ReceivedBy;
+                        }
+
+                        resultList.Add(waybillMapping);
+                    }
+                }
+                
+                return resultList.OrderBy(x => x.ManifestDetails.DateTime).ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.View;
-using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using System;
 using System.Collections.Generic;

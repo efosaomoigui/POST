@@ -13,6 +13,7 @@ namespace GIGLS.Core.IRepositories.Wallet
     public interface IWalletPaymentLogRepository : IRepository<WalletPaymentLog>
     {
         Task<List<WalletPaymentLogDTO>> GetWalletPaymentLogs();
-        Tuple<Task<List<WalletPaymentLogView>>, int> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto);
+        Tuple<Task<List<WalletPaymentLogView>>, int> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto, string WalletNumber = null);
+        Tuple<Task<List<WalletPaymentLogDTO>>, int> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto, int walletId);
     }
 }

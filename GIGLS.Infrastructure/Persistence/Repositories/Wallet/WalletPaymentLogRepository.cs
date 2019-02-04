@@ -57,7 +57,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
             }
         }
 
-        public Tuple<Task<List<WalletPaymentLogView>>, int> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto)
+        public Tuple<Task<List<WalletPaymentLogView>>, int> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto, string walletNumber)
         {
             try
             {
@@ -67,6 +67,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 
                 //build query
                 var queryable = GetAllFromWalletPaymentLogView();
+
+                if(walletNumber != null)
+                {
+                    queryable = queryable.Where(x => x.WalletNumber == walletNumber);
+                }
 
                 var filter = filterOptionsDto?.filter ?? null;
                 var filterValue = filterOptionsDto?.filterValue ?? null;
@@ -107,6 +112,52 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                 throw ex;
             }
         }
+
+        public Tuple<Task<List<WalletPaymentLogDTO>>, int> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto, int walletId)
+        {
+            try
+            {
+                var pageNumber = filterOptionsDto?.page ?? FilterOptionsDto.DefaultPageNumber;
+                var pageSize = filterOptionsDto?.count ?? FilterOptionsDto.DefaultCount;
+
+                //build query
+                var queryable = Context.WalletPaymentLog.AsQueryable();
+
+                if (walletId > 0)
+                {
+                    queryable = queryable.Where(x => x.WalletId == walletId);
+                }
+
+                var filter = filterOptionsDto?.filter ?? null;
+                var filterValue = filterOptionsDto?.filterValue ?? null;
+                if (!string.IsNullOrWhiteSpace(filter) && !string.IsNullOrWhiteSpace(filterValue))
+                {
+                    var caseObject = new WalletPaymentLog();
+                    switch (filter)
+                    {
+                        case nameof(caseObject.Reference):
+                            queryable = queryable.Where(s => s.Reference.Contains(filterValue));
+                            break;
+                    }
+                }
+
+                //populate the count variable
+                var totalCount = queryable.Count();
+
+                //page the query
+                queryable = queryable.OrderByDescending(x => x.DateCreated);
+                var result = queryable.Skip(pageSize * (pageNumber - 1)).Take(pageSize).ToList();
+
+                var walletPaymentLogDto = Mapper.Map<List<WalletPaymentLogDTO>>(result);
+                
+                return new Tuple<Task<List<WalletPaymentLogDTO>>, int>(Task.FromResult(walletPaymentLogDto), totalCount);                
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
 
         public IQueryable<WalletPaymentLogView> GetAllFromWalletPaymentLogView()
         {

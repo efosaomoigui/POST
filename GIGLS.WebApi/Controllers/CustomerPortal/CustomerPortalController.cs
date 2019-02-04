@@ -3,6 +3,7 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Haulage;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
@@ -108,6 +109,36 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<object>
                 {
                     Object = updateresult 
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("verifypayment/{referenceCode}")]
+        public async Task<IServiceResponse<PaymentResponse>> VerifyAndValidateWallet(string referenceCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _paymentService.VerifyAndValidateWallet(referenceCode);
+
+                return new ServiceResponse<PaymentResponse>
+                {
+                    Object = result
+                };
+            });
+        }
+        
+        [HttpGet]
+        [Route("walletpaymentlog")]
+        public async Task<IServiceResponse<List<WalletPaymentLogDTO>>> GetWalletPaymentLogs([FromUri]FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var walletTuple = await _portalService.GetWalletPaymentLogs(filterOptionsDto);
+                return new ServiceResponse<List<WalletPaymentLogDTO>>
+                {
+                    Object = await walletTuple.Item1,
+                    Total = walletTuple.Item2
                 };
             });
         }
@@ -503,5 +534,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
     }
 }

@@ -19,6 +19,7 @@ namespace GIGLS.Core.IRepositories.User
         Task<GIGL.GIGLS.Core.Domain.User> GetUserById(string id);
         Task<GIGL.GIGLS.Core.Domain.User> GetUserByEmail(string email);
         Task<GIGL.GIGLS.Core.Domain.User> GetUserById(int id);
+        Task<GIGL.GIGLS.Core.Domain.User> GetUserByChannelCode(string channelCode);
         Task<GIGL.GIGLS.Core.Domain.User> GetUserByName(string userName); 
         Task<IdentityResult> RegisterUser(GIGL.GIGLS.Core.Domain.User user, string password);
         Task<IdentityResult> UpdateUser(string userId, GIGL.GIGLS.Core.Domain.User user);

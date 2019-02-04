@@ -2,13 +2,10 @@
 using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Shipments;
-using GIGLS.CORE.Enums;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -43,7 +40,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var walletPaymentLogView = _uow.WalletPaymentLog.GetWalletPaymentLogs(filterOptionsDto);
             return walletPaymentLogView;
         }
-
+        
         public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
             if (walletPaymentLogDto.UserId == null)
@@ -97,8 +94,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             return Mapper.Map<WalletPaymentLogDTO>(walletPaymentLog);
         }
-
-
+        
         public async Task RemoveWalletPaymentLog(int walletPaymentLogId)
         {
             var walletPaymentLog = await _uow.WalletPaymentLog.GetAsync(walletPaymentLogId);
@@ -123,6 +119,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             walletPaymentLog.IsWalletCredited = walletPaymentLogDto.IsWalletCredited;
             walletPaymentLog.TransactionStatus = walletPaymentLogDto.TransactionStatus;
+            walletPaymentLogDto.TransactionResponse = walletPaymentLogDto.TransactionResponse;
             await _uow.CompleteAsync();
         }
     }

@@ -87,7 +87,7 @@ namespace GIGLS.WebApi.Providers
                 User user = await _repo._userManager.FindAsync(context.UserName, context.Password);
                 
 
-                if (user != null)
+                if (user != null && user.UserChannelType == UserChannelType.Employee)
                 {
                     //Global Property PasswordExpireDaysCount
                     var expiredDayCount = _repo._globalProperty.SingleOrDefault(s => s.Key == GlobalPropertyType.PasswordExpireDaysCount.ToString());
@@ -119,7 +119,7 @@ namespace GIGLS.WebApi.Providers
                     return;  
                 }
 
-                if (user.UserChannelType == Core.Enums.UserChannelType.Employee)
+                if (user.UserChannelType == UserChannelType.Employee)
                 {
                     if (user.SystemUserId == null)
                     {

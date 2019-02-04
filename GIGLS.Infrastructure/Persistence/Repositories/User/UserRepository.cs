@@ -32,6 +32,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             return user;
         }
 
+        public Task<GIGL.GIGLS.Core.Domain.User> GetUserByChannelCode(string channelCode)
+        {
+            var user = _userManager.Users.Where(x => x.UserChannelCode.Equals(channelCode)).FirstOrDefault();          
+            return Task.FromResult(user);
+        }
+
         public Task<GIGL.GIGLS.Core.Domain.User> GetUserById(int id)
         {
             var user = _repo.Get(id);
