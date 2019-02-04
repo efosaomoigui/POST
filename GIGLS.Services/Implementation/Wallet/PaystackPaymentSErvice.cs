@@ -115,16 +115,17 @@ namespace GIGLS.Services.Implementation.Wallet
                         Amount = verifyResult.data.Amount,
                         CreditDebitType = CreditDebitType.Credit,
                         Description = "Funding made through debit card",
-                        PaymentType = Core.Enums.PaymentType.Online,
+                        PaymentType = PaymentType.Online,
                         PaymentTypeReference = verifyResult.data.Reference,
                         UserId = customerId
                     }, false);
-
-                    //set IsWalletCredited = true if nothing fail above
-                    paymentLog.IsWalletCredited = true;
                 }
 
                 //3. update the wallet payment log
+                if(verifyResult.data.Status != null)
+                {
+                    paymentLog.IsWalletCredited = true;
+                }
                 paymentLog.TransactionStatus = verifyResult.data.Status;
                 paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;                
                 await _uow.CompleteAsync();
@@ -185,13 +186,14 @@ namespace GIGLS.Services.Implementation.Wallet
                         PaymentType = PaymentType.Online,
                         PaymentTypeReference = verifyResult.data.Reference,
                         UserId = customerId
-                    }, false);
-
-                    //set IsWalletCredited = true if nothing fail above
-                    paymentLog.IsWalletCredited = true;
+                    }, false);                    
                 }
 
                 //3. update the wallet payment log
+                if (verifyResult.data.Status != null)
+                {
+                    paymentLog.IsWalletCredited = true;
+                }
                 paymentLog.TransactionStatus = verifyResult.data.Status;
                 paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                 await _uow.CompleteAsync();
