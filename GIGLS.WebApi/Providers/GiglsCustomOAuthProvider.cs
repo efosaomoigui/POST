@@ -90,15 +90,15 @@ namespace GIGLS.WebApi.Providers
                 if (user != null && user.UserChannelType == UserChannelType.Employee)
                 {
                     //Global Property PasswordExpireDaysCount
-                    var expiredDayCount = _repo._globalProperty.SingleOrDefault(s => s.Key == GlobalPropertyType.PasswordExpireDaysCount.ToString());
-
+                    var expiredDayCount = await _repo._globalProperty.GetAsync(s => s.Key == GlobalPropertyType.PasswordExpireDaysCount.ToString());
+                    int expiredDays = Convert.ToInt32(expiredDayCount.Value);
 
                     //check for password expiry
                     var LastUpdatePasswordDate = user.PasswordExpireDate;
                     DateTime TodayDate = DateTime.Now.Date;
                     var DayDifferent = (TodayDate - LastUpdatePasswordDate).Days;
-
-                    if (DayDifferent >= Convert.ToInt32(expiredDayCount.Value))
+                    
+                    if (DayDifferent >= expiredDays)
                     {
                         //Redirect to user reset page
                         context.SetError("password_expired", "The user account has expired.");
