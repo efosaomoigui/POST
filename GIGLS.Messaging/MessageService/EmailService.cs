@@ -19,7 +19,7 @@ namespace GIGLS.Messaging.MessageService
         private async Task<string> ConfigSendGridasync(MessageDTO message)
         {
             var myMessage = new SendGridMessage();
-            myMessage.TemplateId = "c7c51f9e-88f3-4c50-b90f-2477a3ac8ce0";
+            myMessage.TemplateId = ConfigurationManager.AppSettings["emailService:SendGridTemplateId"]; ;
             var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
             var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
 
@@ -44,25 +44,6 @@ namespace GIGLS.Messaging.MessageService
 
             var response = await client.SendEmailAsync(myMessage);
             return response.StatusCode.ToString();
-        }
-
-        public async Task<Dictionary<string, string>> GetTemplateIdsByNameAsync()
-        {
-
-            var client = GetSendGridClient();
-
-
-            var response = await client.RequestAsync(method: SendGrid.SendGridClient.Method.GET, urlPath: "templates");
-
-            ThrowExceptionIfStatusIsNotOk(response);
-
-            var content = await response.Body.ReadAsStringAsync();
-
-            var anonymousTemplatesObject = new { Templates = new[] { new { Id = "", Name = "" } } };
-
-            var templates = _genericJsonSerializer.DeserializeAnonymous(content, anonymousTemplatesObject);
-
-            return templates.Templates.ToDictionary(x => x.Name, x => x.Id);
         }
 
         // Use NuGet to install SendGrid (Basic C# client lib) 
