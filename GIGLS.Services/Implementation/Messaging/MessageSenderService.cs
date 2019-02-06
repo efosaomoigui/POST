@@ -13,6 +13,7 @@ using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.MessagingLog;
 using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.DTO.User;
 
 namespace GIGLS.Services.Implementation.Messaging
 {
@@ -128,28 +129,25 @@ namespace GIGLS.Services.Implementation.Messaging
 
         private async Task<bool> PrepareMessageFinalBody(MessageDTO messageDTO, object obj)
         {
-            //if (obj is ShipmentDTO)
-            //{ 
-            //    var shipmentDTO = (ShipmentDTO)obj;
-            //    messageDTO.FinalBody = string.Format(messageDTO.Body, shipmentDTO.Customer[0].CustomerName, shipmentDTO.Waybill);
-            //    messageDTO.To = shipmentDTO.Customer[0].PhoneNumber;
-            //}
-
-            if (obj is ShipmentTrackingDTO)
+            var strArray = new string[]
             {
-                var strArray = new string[]
-                {
-                    "Customer Name",
-                    "Waybill",
-                    "Service Centre",
-                    "State",
-                    "Address",
-                    "Demurrage Day",
-                    "Demurrage Amount",
-                    "Receiver Name"
-                };
+                "Customer Name",
+                "Waybill",
+                "Service Centre",
+                "State",
+                "Address",
+                "Demurrage Day",
+                "Demurrage Amount",
+                "Receiver Name",
+                "Login User Email",
+                "Login User FirstName",
+                "Login User LastName",
+                "Login Date And Time"
+            };
 
-                var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
+            //----A
+            if (obj is ShipmentTrackingDTO shipmentTrackingDTO)
+            {
                 var invoiceList = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).ToList();
                 var invoice = invoiceList.FirstOrDefault();
                 if (invoice != null)
@@ -186,13 +184,13 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[7] = invoice.ReceiverName;
 
                     //added for HomeDelivery sms, when scan is ArrivedFinalDestination
-                    if(messageDTO.MessageType == MessageType.ARF &&
+                    if (messageDTO.MessageType == MessageType.ARF &&
                         invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
                     {
                         var smsMessages = await _messageService.GetSmsAsync();
                         var homeDeliveryMessageDTO = smsMessages.FirstOrDefault(s => s.MessageType == MessageType.AHD);
 
-                        if(homeDeliveryMessageDTO != null)
+                        if (homeDeliveryMessageDTO != null)
                         {
                             messageDTO.Body = homeDeliveryMessageDTO.Body;
                         }
@@ -221,24 +219,40 @@ namespace GIGLS.Services.Implementation.Messaging
                     }
                     //messageDTO.To = invoice.ReceiverPhoneNumber;
                 }
+
+                //--resolve phone numbers to +2347011111111
+                var toPhoneNumber = messageDTO.To;
+                //1
+                if (toPhoneNumber.Trim().StartsWith("0"))   //07011111111
+                {
+                    toPhoneNumber = toPhoneNumber.Substring(1, toPhoneNumber.Length - 1);
+                    toPhoneNumber = $"+234{toPhoneNumber}";
+                }
+                //2
+                if (!toPhoneNumber.Trim().StartsWith("+"))  //2347011111111
+                {
+                    toPhoneNumber = $"+{toPhoneNumber}";
+                }
+
+                //assign
+                messageDTO.To = toPhoneNumber;
             }
 
-            //resolve phone numbers to +2347011111111
-            var toPhoneNumber = messageDTO.To;
-            //1
-            if (toPhoneNumber.Trim().StartsWith("0"))   //07011111111
+            //----B
+            if (obj is UserDTO userDTO)
             {
-                toPhoneNumber = toPhoneNumber.Substring(1, toPhoneNumber.Length - 1);
-                toPhoneNumber = $"+234{toPhoneNumber}";
-            }
-            //2
-            if (!toPhoneNumber.Trim().StartsWith("+"))  //2347011111111
-            {
-                toPhoneNumber = $"+{toPhoneNumber}";
-            }
+                //map the array
+                strArray[8] = userDTO.Email;
+                strArray[9] = userDTO.FirstName;
+                strArray[10] = userDTO.LastName;
+                strArray[11] = DateTime.Now.ToLongDateString();
 
-            //assign
-            messageDTO.To = toPhoneNumber;
+                //populate the message template
+                messageDTO.FinalBody =
+                        string.Format(messageDTO.Body, strArray);
+
+                messageDTO.ToEmail = userDTO.Email;
+            }
 
             return await Task.FromResult(true);
         }
@@ -275,7 +289,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     DateCreated = DateTime.Now,
                     DateModified = DateTime.Now,
                     From = messageDTO.From,
-                    To = messageDTO.To,
+                    To = messageDTO.ToEmail ?? messageDTO.To,
                     Message = messageDTO.FinalBody,
                     Status = exceptiomMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
                     ResultStatus = result,
