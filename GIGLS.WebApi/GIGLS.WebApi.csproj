@@ -278,6 +278,7 @@
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\Account\ExpenditureController.cs" />
+    <Compile Include="Controllers\Account\ExpenseTypeController.cs" />
     <Compile Include="Controllers\Account\GeneralLedgerController.cs" />
     <Compile Include="Controllers\Account\IncomeController.cs" />
     <Compile Include="Controllers\Account\InsuranceController.cs" />
@@ -303,7 +304,6 @@
     <Compile Include="Controllers\Dashboard\DashboardController.cs" />
     <Compile Include="Controllers\Devices\DeviceController.cs" />
     <Compile Include="Controllers\Devices\DeviceManagementController.cs" />
-    <Compile Include="Controllers\Expenses\ExpenseTypeController.cs" />
     <Compile Include="Controllers\Fleets\DispatchActivityController.cs" />
     <Compile Include="Controllers\Fleets\DispatchController.cs" />
     <Compile Include="Controllers\Fleets\FleetController.cs" />

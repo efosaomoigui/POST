@@ -7,8 +7,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.Expenses
+namespace GIGLS.WebApi.Controllers.Account
 {
+
     [Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/expensetype")]
     public class ExpenseTypeController : BaseWebApiController
@@ -80,7 +81,7 @@ namespace GIGLS.WebApi.Controllers.Expenses
                 };
             });
         }
-        
+
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("{expenseTypeId:int}")]
