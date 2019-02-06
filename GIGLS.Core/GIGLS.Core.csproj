@@ -149,6 +149,7 @@
     <Compile Include="Domain\DispatchActivity.cs" />
     <Compile Include="Domain\DomesticRouteZoneMap.cs" />
     <Compile Include="Domain\DomesticZonePrice.cs" />
+    <Compile Include="Domain\Expenses\ExpenseType.cs" />
     <Compile Include="Domain\Fleet.cs" />
     <Compile Include="Domain\FleetMake.cs" />
     <Compile Include="Domain\FleetModel.cs" />
@@ -262,6 +263,7 @@
     <Compile Include="DTO\Dashboard\ShipmentOrderDTO.cs" />
     <Compile Include="DTO\Devices\DeviceDTO.cs" />
     <Compile Include="DTO\Devices\DeviceManagementDTO.cs" />
+    <Compile Include="DTO\Expenses\ExpenseTypeDTO.cs" />
     <Compile Include="DTO\Fleets\DispatchActivityDTO.cs" />
     <Compile Include="DTO\Fleets\DispatchDTO.cs" />
     <Compile Include="DTO\Fleets\FleetDTO.cs" />
@@ -437,6 +439,7 @@
     <Compile Include="IRepositories\Customers\IIndividualCustomerRepository.cs" />
     <Compile Include="IRepositories\Devices\IDeviceManagementRepository.cs" />
     <Compile Include="IRepositories\Devices\IDeviceRepository.cs" />
+    <Compile Include="IRepositories\Expenses\IExpenseTypeRepository.cs" />
     <Compile Include="IRepositories\Fleets\IDispatchActivityRepository.cs" />
     <Compile Include="IRepositories\Fleets\IDispatchRepository.cs" />
     <Compile Include="IRepositories\Fleets\IFleetMakeRepository.cs" />
@@ -545,6 +548,7 @@
     <Compile Include="IServices\Dashboard\IDashboardService.cs" />
     <Compile Include="IServices\Devices\IDeviceManagementService.cs" />
     <Compile Include="IServices\Devices\IDeviceService.cs" />
+    <Compile Include="IServices\Expenses\IExpenseTypeService.cs" />
     <Compile Include="IServices\Fleets\IDispatchActivityService.cs" />
     <Compile Include="IServices\Fleets\IDispatchService.cs" />
     <Compile Include="IServices\Fleets\IFleetMakeService.cs" />

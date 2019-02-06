@@ -30,6 +30,7 @@ using GIGLS.Core.IRepositories.BankSettlement;
 using GIGLS.Infrastructure.Persistence.Repositories.InternationalRequest;
 using GIGLS.Core.IRepositories.InternationalRequest;
 using GIGLS.Core.IRepositories.Sla;
+using GIGLS.Core.IRepositories.Expenses;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -334,6 +335,9 @@ namespace GIGLS.Infrastructure.Persistence
         
         [Inject]
         public ISLASignedUserRepository SLASignedUser { get; set; }
+
+        [Inject]
+        public IExpenseTypeRepository ExpenseType { get; set; }
 
         public int Complete()
         {

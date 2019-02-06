@@ -303,6 +303,7 @@
     <Compile Include="Controllers\Dashboard\DashboardController.cs" />
     <Compile Include="Controllers\Devices\DeviceController.cs" />
     <Compile Include="Controllers\Devices\DeviceManagementController.cs" />
+    <Compile Include="Controllers\Expenses\ExpenseTypeController.cs" />
     <Compile Include="Controllers\Fleets\DispatchActivityController.cs" />
     <Compile Include="Controllers\Fleets\DispatchController.cs" />
     <Compile Include="Controllers\Fleets\FleetController.cs" />

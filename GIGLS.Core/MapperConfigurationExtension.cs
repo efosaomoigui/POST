@@ -33,6 +33,8 @@ using GIGLS.Core.DTO.BankSettlement;
 using GIGLS.Core.DTO.InternationalShipmentDetails;
 using GIGLS.Core.DTO.SLA;
 using GIGLS.Core.Domain.SLA;
+using GIGLS.Core.DTO.Expenses;
+using GIGLS.Core.Domain.Expenses;
 
 namespace GIGLS.Core
 {
@@ -296,6 +298,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<SLASignedUser, SLASignedUserDTO>();
                 config.CreateMap<SLASignedUserDTO, SLASignedUser>();
+
+                config.CreateMap<ExpenseType, ExpenseTypeDTO>();
+                config.CreateMap<ExpenseTypeDTO, ExpenseType>();
             });
 
             isInit = true;
