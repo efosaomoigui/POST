@@ -36,7 +36,7 @@ namespace GIGLS.WebApi.Filters
 
             //Roles from Identity
             var RoleClaims = claimsIdentity.FindAll("Role");
-            if (RoleClaims == null)
+            if (RoleClaims.Count() == 0)
             {
                 // just extra defense
                 return false;
@@ -47,7 +47,7 @@ namespace GIGLS.WebApi.Filters
             //var locIdClaims = claimsIdentity.FindFirst("LocationId");
             var ActivityClaims = claimsIdentity.FindAll("Activity");
 
-            if (ActivityClaims == null)
+            if (ActivityClaims.Count() == 0)
             {
                 // just extra defense
                 return false;
