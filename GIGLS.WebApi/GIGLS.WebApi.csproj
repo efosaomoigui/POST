@@ -403,20 +403,7 @@
     </Content>
     <Content Include="app.manifest">
       <SubType>Designer</SubType>
-    </Content>
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - FTP %282%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %2812%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %2813%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %2814%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %2815%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %282%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %283%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevmm - Web Deploy %282%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevmm - Web Deploy %283%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevmm - Web Deploy.pubxml" />
+    </Content>    
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %2814%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy.pubxml" />
