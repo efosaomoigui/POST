@@ -27,7 +27,7 @@ namespace GIGLS.WebApi.Filters
 
             var RoleClaims = claimsIdentity.FindAll("Role"); //Roles from Identity
 
-            if (RoleClaims.Count() == 0)
+            if (RoleClaims == null)
             {
                 // just extra defense
                 return false;
