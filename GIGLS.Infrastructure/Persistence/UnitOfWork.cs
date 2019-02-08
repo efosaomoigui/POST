@@ -339,6 +339,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IExpenseTypeRepository ExpenseType { get; set; }
 
+        [Inject]
+        public IExpenditureRepository Expenditure { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

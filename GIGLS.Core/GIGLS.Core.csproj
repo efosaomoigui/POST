@@ -149,6 +149,7 @@
     <Compile Include="Domain\DispatchActivity.cs" />
     <Compile Include="Domain\DomesticRouteZoneMap.cs" />
     <Compile Include="Domain\DomesticZonePrice.cs" />
+    <Compile Include="Domain\Expenses\Expenditure.cs" />
     <Compile Include="Domain\Expenses\ExpenseType.cs" />
     <Compile Include="Domain\Fleet.cs" />
     <Compile Include="Domain\FleetMake.cs" />
@@ -263,6 +264,7 @@
     <Compile Include="DTO\Dashboard\ShipmentOrderDTO.cs" />
     <Compile Include="DTO\Devices\DeviceDTO.cs" />
     <Compile Include="DTO\Devices\DeviceManagementDTO.cs" />
+    <Compile Include="DTO\Expenses\ExpenditureDTO.cs" />
     <Compile Include="DTO\Expenses\ExpenseTypeDTO.cs" />
     <Compile Include="DTO\Fleets\DispatchActivityDTO.cs" />
     <Compile Include="DTO\Fleets\DispatchDTO.cs" />
@@ -303,6 +305,7 @@
     <Compile Include="DTO\Report\AccountFilterCriteria.cs" />
     <Compile Include="DTO\Report\BaseFilterCriteria.cs" />
     <Compile Include="DTO\Report\DashboardFilterCriteria.cs" />
+    <Compile Include="DTO\Report\ExpenditureFilterCriteria.cs" />
     <Compile Include="DTO\Report\ScanTrackFilterCriteria.cs" />
     <Compile Include="DTO\Report\ShipmentFilterCriteria.cs" />
     <Compile Include="DTO\ServiceCentres\ServiceCentreDTO.cs" />
@@ -439,6 +442,7 @@
     <Compile Include="IRepositories\Customers\IIndividualCustomerRepository.cs" />
     <Compile Include="IRepositories\Devices\IDeviceManagementRepository.cs" />
     <Compile Include="IRepositories\Devices\IDeviceRepository.cs" />
+    <Compile Include="IRepositories\Expenses\IExpenditureRepository.cs" />
     <Compile Include="IRepositories\Expenses\IExpenseTypeRepository.cs" />
     <Compile Include="IRepositories\Fleets\IDispatchActivityRepository.cs" />
     <Compile Include="IRepositories\Fleets\IDispatchRepository.cs" />

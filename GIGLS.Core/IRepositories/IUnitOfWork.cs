@@ -129,6 +129,7 @@ namespace GIGLS.Core
         ISLARepository SLA { get; set; }
         ISLASignedUserRepository SLASignedUser { get; set; }
         IExpenseTypeRepository ExpenseType { get; set; }
+        IExpenditureRepository Expenditure { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

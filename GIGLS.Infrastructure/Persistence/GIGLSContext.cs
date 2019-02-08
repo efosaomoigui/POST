@@ -169,6 +169,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<Insurance> Insurance { get; set; }
         public DbSet<InvoiceShipment> InvoiceShipment { get; set; }
         public DbSet<ExpenseType> ExpenseType { get; set; }
+        public DbSet<Expenditure> Expenditure { get; set; }
 
         //ClientNode
         public DbSet<ClientNode> ClientNode { get; set; }
