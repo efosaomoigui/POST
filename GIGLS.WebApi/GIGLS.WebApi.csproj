@@ -295,6 +295,7 @@
     <Compile Include="Controllers\Client\ClientNodeController.cs" />
     <Compile Include="Controllers\CountryController.cs" />
     <Compile Include="Controllers\CustomerPortal\CustomerPortalController.cs" />
+    <Compile Include="Controllers\CustomerPortal\PaystackController.cs" />
     <Compile Include="Controllers\Customers\CompanyContactPersonController.cs" />
     <Compile Include="Controllers\Customers\CompanyController.cs" />
     <Compile Include="Controllers\Customers\CustomerController.cs" />
@@ -371,8 +372,13 @@
     <Compile Include="Controllers\Zone\WeightLimitController.cs" />
     <Compile Include="Controllers\Zone\WeightLimitPriceController.cs" />
     <Compile Include="Controllers\Zone\ZoneController.cs" />
+    <Compile Include="Filters\Configuration\HttpRequestMessageExtensions.cs" />
+    <Compile Include="Filters\Configuration\IPAddressElement.cs" />
+    <Compile Include="Filters\Configuration\IPAddressElementCollection.cs" />
+    <Compile Include="Filters\Configuration\IPFilteringSection.cs" />
     <Compile Include="Filters\GIGLSActivityAuthorizeAttribute.cs" />
     <Compile Include="Filters\GIGLSRoleAuthorizeAttribute.cs" />
+    <Compile Include="Filters\IPFilterAttribute.cs" />
     <Compile Include="Filters\RequireHttpsAttribute.cs" />
     <Compile Include="Filters\ThirdPartyActivityAuthorizeAttribute.cs" />
     <Compile Include="Global.asax.cs">
@@ -397,18 +403,7 @@
     </Content>
     <Content Include="app.manifest">
       <SubType>Designer</SubType>
-    </Content>
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - FTP %282%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %2812%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %2813%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %2814%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %2815%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy %282%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidev - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %283%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevmm - Web Deploy %282%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevmm - Web Deploy %283%29.pubxml" />
-    <None Include="Properties\PublishProfiles\agilitysystemapidevmm - Web Deploy.pubxml" />
+    </Content>    
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %2814%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy.pubxml" />

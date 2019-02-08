@@ -27,7 +27,6 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
 {
-
     [Authorize(Roles = "ThirdParty")]
     [RoutePrefix("api/thirdparty")]
     public class ThirdPartyAPIController : BaseWebApiController
@@ -38,10 +37,8 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         {
             _thirdPartyAPIService = portalService;
         }
-
-
-
-        [ThirdPartyActivityAuthorize(Activity = "Create")]
+        
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("haulageprice")]
         private async Task<IServiceResponse<decimal>> GetHaulagePrice(HaulagePricingDTO haulagePricingDto)
@@ -56,10 +53,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
-
-
-
-
+                
         //Route API
 
 
@@ -68,7 +62,6 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
 
         //Invoice API
         [ThirdPartyActivityAuthorize(Activity = "View")]
-        //[AllowAnonymous]
         [HttpGet]
         [Route("invoice")]
         private async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetInvoices()
@@ -99,10 +92,9 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
-
-
+        
         //Transaction History API
-        [ThirdPartyActivityAuthorize(Activity = "Create")]
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("transaction")]
         private async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
@@ -117,8 +109,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
-
-
+        
         //General API
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
@@ -152,9 +143,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
-
-
-
+        
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("cod")]
@@ -359,7 +348,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         /// </summary>
         /// <param name="thirdPartyPricingDto"></param>
         /// <returns></returns>
-        [ThirdPartyActivityAuthorize(Activity = "Create")]
+        [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("price")]
         public async Task<IServiceResponse<decimal>> GetPrice(ThirdPartyPricingDTO thirdPartyPricingDto)
@@ -523,14 +512,14 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                     //setup login data
                     HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
 
-                    //get access token from response body
-                    var responseJson = await responseMessage.Content.ReadAsStringAsync();
-                    var jObject = JObject.Parse(responseJson);
-
                     if (!responseMessage.IsSuccessStatusCode)
                     {
                         throw new GenericException("Operation could not complete login successfully:");
                     }
+
+                    //get access token from response body
+                    var responseJson = await responseMessage.Content.ReadAsStringAsync();
+                    var jObject = JObject.Parse(responseJson);                                       
 
                     getTokenResponse = jObject.GetValue("access_token").ToString();
 

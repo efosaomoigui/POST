@@ -14,6 +14,7 @@ namespace GIGLS.WebApi.Controllers.Wallet
     public class WalletController : BaseWebApiController
     {
         private readonly IWalletService _walletService;
+
         public WalletController(IWalletService walletService) : base(nameof(WalletController))
         {
             _walletService = walletService;

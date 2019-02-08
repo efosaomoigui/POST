@@ -31,6 +31,7 @@ using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.SLA;
 using GIGLS.Core.IServices.Sla;
 using GIGLS.Core.Enums;
+using GIGLS.Core.View;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -88,21 +89,17 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
         {
-
             await _walletService.UpdateWallet(walletId, walletTransactionDTO, false);
-
         }
 
         public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
             var walletPaymentLog = await _wallepaymenttlogService.AddWalletPaymentLog(walletPaymentLogDto);
             return walletPaymentLog;
-
         }
 
         public async Task<object> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
-
             //1.check to prevent multiple entries
             //var walletLogObject = _uow.WalletPaymentLog.GetAllAsQueryable().SingleOrDefault(s => 
             //    s.Reference == walletPaymentLogDto.Reference && s.IsWalletCredited == false);
@@ -147,7 +144,6 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             await _wallepaymenttlogService.UpdateWalletPaymentLog(walletPaymentLogDto.Reference, walletPaymentLogDto);
             return walletPaymentLogDto;
-
         }
 
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactions()
@@ -451,6 +447,31 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var signed = await _slaService.UserSignedSLA(slaId);
             return signed;
+        }
+
+
+        public async Task<Tuple<Task<List<WalletPaymentLogDTO>>, int>> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto)
+        {
+            int WalletId = await GetWalletNummber();
+
+            var walletPaymentLogView = _uow.WalletPaymentLog.GetWalletPaymentLogs(filterOptionsDto, WalletId);
+            return walletPaymentLogView;
+        }
+
+        private async Task<int> GetWalletNummber()
+        {
+            //Get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+            
+            var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode.ToLower() == currentUser.UserChannelCode.ToLower());
+
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exist");
+            }
+
+            return wallet.WalletId;
         }
     }
 }

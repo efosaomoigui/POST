@@ -12,6 +12,7 @@ namespace GIGLS.Core.DTO.Wallet
         public decimal Amount { get; set; }
         public int PaystackAmount { get; set; } 
         public string TransactionStatus { get; set; }
+        public string TransactionResponse { get; set; }
         public string Description { get; set; }
         public string Email { get; set; } 
         public string UserId { get; set; }
