@@ -29,8 +29,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Expenses
             {
                 expenditures = expenditures.Where(x => serviceCentreIds.Contains(x.ServiceCentreId));
             }
-            
-            if(expenditureFilterCriteria.ServiceCentreId > 0)
+
+            if (expenditureFilterCriteria.ExpenseTypeId > 0)
+            {
+                expenditures = expenditures.Where(x => x.ExpenseTypeId == expenditureFilterCriteria.ExpenseTypeId);
+            }
+
+            if (expenditureFilterCriteria.ServiceCentreId > 0)
             {
                 expenditures = expenditures.Where(x => x.ServiceCentreId == expenditureFilterCriteria.ServiceCentreId);
             }
