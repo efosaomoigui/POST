@@ -462,7 +462,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpPost]
         [Route("register")]
         public async Task<IServiceResponse<UserDTO>> Register(UserDTO user)

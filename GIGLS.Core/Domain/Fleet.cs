@@ -1,7 +1,6 @@
 ﻿using GIGLS.Core.Enums;
 using GIGLS.Core;
 using GIGLS.Core.Domain.Partnership;
-using System;
 using System.ComponentModel.DataAnnotations;
 using GIGLS.Core.Domain;
 

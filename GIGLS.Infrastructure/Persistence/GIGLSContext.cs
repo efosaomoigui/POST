@@ -17,6 +17,7 @@ using GIGLS.Core.Domain.Utility;
 using GIGLS.Core.Domain.Devices;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.Domain.SLA;
+using GIGLS.Core.Domain.Expenses;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -167,6 +168,8 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<VAT> VAT { get; set; }
         public DbSet<Insurance> Insurance { get; set; }
         public DbSet<InvoiceShipment> InvoiceShipment { get; set; }
+        public DbSet<ExpenseType> ExpenseType { get; set; }
+        public DbSet<Expenditure> Expenditure { get; set; }
 
         //ClientNode
         public DbSet<ClientNode> ClientNode { get; set; }
