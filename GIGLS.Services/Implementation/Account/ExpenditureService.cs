@@ -10,6 +10,7 @@ using System;
 using GIGLS.Core.IServices.User;
 using AutoMapper;
 using GIGLS.Core.Domain.Expenses;
+using GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Account
 {
@@ -56,6 +57,20 @@ namespace GIGLS.Services.Implementation.Account
             }
 
             _uow.Expenditure.Add(expenditure);
+
+            //Add record to general ledger
+            var generalLedger = new GeneralLedger()
+            {
+                DateOfEntry = DateTime.Now,
+                ServiceCentreId = expenditure.ServiceCentreId,
+                UserId = expenditure.UserId,
+                Amount = expenditure.Amount,
+                CreditDebitType = CreditDebitType.Debit,
+                Description = expenditure.Description,
+                PaymentServiceType = PaymentServiceType.Miscellaneous                
+            };
+            _uow.GeneralLedger.Add(generalLedger);
+
             await _uow.CompleteAsync();
             return new { id = expenditure.ExpenditureId };
         }
