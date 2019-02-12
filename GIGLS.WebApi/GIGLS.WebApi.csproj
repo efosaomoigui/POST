@@ -278,6 +278,7 @@
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\Account\ExpenditureController.cs" />
+    <Compile Include="Controllers\Account\ExpenseTypeController.cs" />
     <Compile Include="Controllers\Account\GeneralLedgerController.cs" />
     <Compile Include="Controllers\Account\IncomeController.cs" />
     <Compile Include="Controllers\Account\InsuranceController.cs" />

@@ -91,6 +91,12 @@ namespace GIGLS.WebApi.Providers
                 {
                     //Global Property PasswordExpireDaysCount
                     var expiredDayCount = await _repo._globalProperty.GetAsync(s => s.Key == GlobalPropertyType.PasswordExpireDaysCount.ToString());
+                    if(expiredDayCount == null)
+                    {
+                        context.SetError("password_expired", "Global Property PasswordExpireDaysCount does not exist.");
+                        return;
+                    }
+
                     int expiredDays = Convert.ToInt32(expiredDayCount.Value);
 
                     //check for password expiry
