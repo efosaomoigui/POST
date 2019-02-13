@@ -285,7 +285,9 @@
     <Compile Include="Controllers\Account\InvoiceShipmentController.cs" />
     <Compile Include="Controllers\Account\ReminderController.cs" />
     <Compile Include="Controllers\Account\VATController.cs" />
+    <Compile Include="Controllers\BankSettlement\BankProcessingOrderController.cs" />
     <Compile Include="Controllers\BankSettlement\BankShipmentSettlementController.cs" />
+    <Compile Include="Controllers\BankSettlement\CODProcessingOrderController.cs" />
     <Compile Include="Controllers\BankSettlement\CODSettlementSheetController.cs" />
     <Compile Include="Controllers\BaseWebApiController.cs" />
     <Compile Include="Controllers\Business\PaymentController.cs" />
@@ -403,7 +405,7 @@
     </Content>
     <Content Include="app.manifest">
       <SubType>Designer</SubType>
-    </Content>    
+    </Content>
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %2814%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy.pubxml" />

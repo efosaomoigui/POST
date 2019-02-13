@@ -20,7 +20,8 @@ namespace GIGLS.Services.Implementation
         public string Code { get; set; }
         public string ShortDescription { get; set; }
         public TResponse Object { get; set; }
-        public int Total { get; set; }
+        public decimal Total { get; set; }
+        public string RefCode { get; set; }
 
         public Dictionary<string, IEnumerable<string>> ValidationErrors { get; set; }
     }

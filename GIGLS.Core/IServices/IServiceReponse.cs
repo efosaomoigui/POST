@@ -9,7 +9,8 @@ namespace GIGLS.Core.IServices
         string Code { get; set; }
         string ShortDescription { get; set; }
         TResponse Object { get; set; }
-        int Total { get; set; }
+        decimal Total { get; set; }
+        string RefCode { get; set; }
         Dictionary<string, IEnumerable<string>> ValidationErrors { get; set; }
   
     }

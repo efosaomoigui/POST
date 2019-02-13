@@ -596,6 +596,22 @@ namespace GIGLS.Services.Implementation.Shipments
             newShipment.Vat = shipmentDTO.vatvalue_display;
             newShipment.DiscountValue = shipmentDTO.InvoiceDiscountValue_display;
 
+            //check if the shipment contains cod
+            if(newShipment.IsCashOnDelivery == true)
+            {
+                //collect the cods and add to CashOnDeliveryRegisterAccount()
+                var cashondeliveryentity = new CashOnDeliveryRegisterAccount();
+                cashondeliveryentity.Amount = newShipment.CashOnDeliveryAmount;
+                cashondeliveryentity.CODStatusHistory = CODStatushistory.Created;
+                cashondeliveryentity.Description = "Cod From Sales";
+                //cashondeliveryentity.ServiceCenterCode = newShipment.DepartureServiceCentreId;
+                cashondeliveryentity.ServiceCenterId = newShipment.DepartureServiceCentreId;
+                cashondeliveryentity.Waybill = newShipment.Waybill;
+                cashondeliveryentity.UserId = newShipment.UserId;
+
+                _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
+            }
+
             _uow.Shipment.Add(newShipment);
             //await _uow.CompleteAsync();
 

@@ -10,6 +10,7 @@ using AutoMapper;
 using GIGLS.CORE.DTO.Report;
 using System;
 using GIGLS.Core.View;
+using GIGLS.Core.Domain.Wallet;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 {
@@ -209,6 +210,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
 
         public IQueryable<InvoiceView> GetAllFromInvoiceView()
+        {
+            var invoices = _GIGLSContextForView.InvoiceView.AsQueryable();
+            return invoices;
+        }
+
+        public IQueryable<InvoiceView> GetAllFromInvoiceViewFromDateRange(string startdate, string enddate)
         {
             var invoices = _GIGLSContextForView.InvoiceView.AsQueryable();
             return invoices;

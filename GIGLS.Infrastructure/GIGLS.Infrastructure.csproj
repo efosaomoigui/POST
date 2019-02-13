@@ -118,6 +118,8 @@
     <Compile Include="Persistence\Repositories\Account\InvoiceRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\InvoiceShipmentRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\VATRepository.cs" />
+    <Compile Include="Persistence\Repositories\BankSettlement\BankProcessingOrderCodesRepository.cs" />
+    <Compile Include="Persistence\Repositories\BankSettlement\BankProcessingOrderForShipmentAndCODRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\CODSettlementSheetRepository.cs" />
     <Compile Include="Persistence\Repositories\Client\ClientNodeRepository.cs" />
     <Compile Include="Persistence\Repositories\CountryRepository.cs" />

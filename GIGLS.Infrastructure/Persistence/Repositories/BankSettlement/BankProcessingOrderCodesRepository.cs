@@ -1,0 +1,77 @@
+﻿
+using GIGLS.Core.Domain.BankSettlement;
+using GIGLS.Core.DTO.BankSettlement;
+using GIGLS.Core.IRepositories.BankSettlement;
+using GIGLS.Infrastructure.Persistence;
+using GIGLS.Infrastructure.Persistence.Repository;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
+{
+    public class BankProcessingOrderCodesRepository : Repository<BankProcessingOrderCodes, GIGLSContext>, IBankProcessingOrderCodesRepository
+    {
+        public BankProcessingOrderCodesRepository(GIGLSContext context) : base(context)
+        {
+        }
+
+
+        public Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCode()
+        {
+            var processingorderCodes = Context.BankProcessingOrderCodes.AsQueryable();
+            var processingcodes = from processingorderCode in processingorderCodes
+                                  select new BankProcessingOrderCodesDTO
+                                  {
+                                      CodeId = processingorderCode.CodeId,
+                                      Code = processingorderCode.Code,
+                                      DateAndTimeOfDeposit = processingorderCode.DateAndTimeOfDeposit,
+                                      DepositType = processingorderCode.DepositType,
+                                      TotalAmount = processingorderCode.TotalAmount,
+                                      UserId = processingorderCode.UserId,
+                                      status = processingorderCode.status,
+                                      ServiceCenter = processingorderCode.ServiceCenter,
+                                  };
+
+            return Task.FromResult(processingcodes.ToList());
+        }
+
+        public IQueryable<BankProcessingOrderCodesDTO> GetBankOrderProcessingCodeAsQueryable()  
+        {
+            var processingorderCodes = Context.BankProcessingOrderCodes.AsQueryable();
+            var processingcodes = from processingorderCode in processingorderCodes
+                                  select new BankProcessingOrderCodesDTO
+                                  {
+                                      CodeId = processingorderCode.CodeId,
+                                      Code = processingorderCode.Code,
+                                      DateAndTimeOfDeposit = processingorderCode.DateAndTimeOfDeposit,
+                                      DepositType = processingorderCode.DepositType,
+                                      TotalAmount = processingorderCode.TotalAmount,
+                                      UserId = processingorderCode.UserId,
+                                      status = processingorderCode.status,
+                                      ServiceCenter = processingorderCode.ServiceCenter,
+                                  };
+            return processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit);
+        }
+
+        public Task<List<BankProcessingOrderCodesDTO>> GetProcessingOrderCodebyRefCode(string refcode)
+        {
+            var processingorderCodes = Context.BankProcessingOrderCodes.AsQueryable();
+            processingorderCodes = processingorderCodes.Where(s => s.Code == refcode);
+
+            var codorder = from processingorderCode in processingorderCodes
+                           select new BankProcessingOrderCodesDTO
+                           {
+                               CodeId = processingorderCode.CodeId,
+                               Code = processingorderCode.Code,
+                               DateAndTimeOfDeposit = processingorderCode.DateAndTimeOfDeposit,
+                               DepositType = processingorderCode.DepositType,
+                               TotalAmount = processingorderCode.TotalAmount,
+                               UserId = processingorderCode.UserId,
+                               status = processingorderCode.status,
+                               ServiceCenter = processingorderCode.ServiceCenter,
+                           };
+            return Task.FromResult(codorder.ToList());
+        }
+    }
+}

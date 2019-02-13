@@ -49,5 +49,28 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Wallet
             }
         }
 
+        public IQueryable<CashOnDeliveryAccount> GetCODCollectedAsQueryable()  
+        {
+                var codAccounts = _context.CashOnDeliveryAccount.AsQueryable();
+                return codAccounts;
+        }
+
+    }
+
+    public class CashOnDeliveryRegisterAccountRepository : Repository<CashOnDeliveryRegisterAccount, GIGLSContext>, ICashOnDeliveryRegisterAccountRepository
+    {
+        private GIGLSContext _context;
+
+        public CashOnDeliveryRegisterAccountRepository(GIGLSContext context) : base(context)
+        {
+            _context = context;
+        }
+
+        public IQueryable<CashOnDeliveryRegisterAccount> GetCODAsQueryable()
+        {
+            var codAccounts = _context.CashOnDeliveryRegisterAccount.AsQueryable();
+            return codAccounts;
+        }
+
     }
 }
