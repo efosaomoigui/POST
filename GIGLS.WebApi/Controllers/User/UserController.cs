@@ -18,6 +18,8 @@ using GIGLS.WebApi.Filters;
 using GIGLS.CORE.DTO.User;
 using GIGLS.Core.IServices.Utility;
 using System.Linq;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.WebApi.Controllers.User
 {
@@ -27,11 +29,14 @@ namespace GIGLS.WebApi.Controllers.User
     {
         private readonly IUserService _userService;
         private readonly IPasswordGenerator _passwordGenerator;
+        private readonly IMessageSenderService _messageSenderService;
 
-        public UserController(IUserService userService, IPasswordGenerator passwordGenerator) : base(nameof(UserController))
+        public UserController(IUserService userService, IPasswordGenerator passwordGenerator,
+              IMessageSenderService messageSenderService) : base(nameof(UserController))
         {
             _userService = userService;
             _passwordGenerator = passwordGenerator;
+            _messageSenderService = messageSenderService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -518,6 +523,10 @@ namespace GIGLS.WebApi.Controllers.User
                         throw new GenericException("Operation could not complete login successfully:");
                     }
 
+                    //send message
+                    var userDTO = await _userService.GetUserByEmail(username);
+                    await _messageSenderService.SendMessage(MessageType.LOGIN, EmailSmsType.Email, userDTO);
+
                     return new ServiceResponse<JObject>
                     {
                         Object = jObject
@@ -577,6 +586,10 @@ namespace GIGLS.WebApi.Controllers.User
                     {
                         throw new GenericException("Operation could not complete login successfully:");
                     }
+
+                    //send message
+                    var userDTO = await _userService.GetUserByEmail(userLoginModel.username);
+                    await _messageSenderService.SendMessage(MessageType.LOGIN, EmailSmsType.Email, userDTO);
 
                     return new ServiceResponse<JObject>
                     {

@@ -19,7 +19,7 @@ namespace GIGLS.WebApi.Controllers.Dashboard
         }
 
         //[GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
+        [HttpPost]
         [Route("")]
         public async Task<IServiceResponse<DashboardDTO>> GetDashboard()
         {
