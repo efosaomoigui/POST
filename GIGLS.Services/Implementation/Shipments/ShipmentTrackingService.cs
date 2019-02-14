@@ -53,9 +53,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var serviceCenter = await _uow.ServiceCentre.GetAsync(UserServiceCenters[0]);
                     tracking.Location = serviceCenter.Name;
                 }
-
-
-
+                
                 if (scanStatus.Equals(ShipmentScanStatus.ARF))
                 {
                     var newShipmentCollection = new ShipmentCollection

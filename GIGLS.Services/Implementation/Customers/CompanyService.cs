@@ -138,12 +138,27 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
+                //Delete user, wallet and customer table
+                
                 var company = await _uow.Company.GetAsync(companyId);
                 if (company == null)
                 {
                     throw new GenericException("Company information does not exist");
                 }
                 _uow.Company.Remove(company);
+
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == company.CustomerCode);
+                if(wallet != null)
+                {
+                    _uow.Wallet.Remove(wallet);
+                }
+                
+                var user = await _uow.User.GetUserByChannelCode(company.CustomerCode);
+                if(user != null)
+                {
+                   await _uow.User.Remove(user.Id);
+                }
+
                 _uow.Complete();
             }
             catch (Exception)
