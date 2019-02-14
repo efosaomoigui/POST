@@ -59,12 +59,12 @@ namespace GIGLS.Services.Implementation.Messaging
                         }
                     case EmailSmsType.SMS:
                         {
-                            //await SendSMSMessage(messageType, obj);
+                            await SendSMSMessage(messageType, obj);
                             break;
                         }
                     case EmailSmsType.All:
                         {
-                            //await SendSMSMessage(messageType, obj);
+                            await SendSMSMessage(messageType, obj);
                             await SendEmailMessage(messageType, obj);
                             break;
                         }
