@@ -128,13 +128,6 @@ namespace GIGLS.Services.Implementation.Messaging
 
         private async Task<bool> PrepareMessageFinalBody(MessageDTO messageDTO, object obj)
         {
-            //if (obj is ShipmentDTO)
-            //{ 
-            //    var shipmentDTO = (ShipmentDTO)obj;
-            //    messageDTO.FinalBody = string.Format(messageDTO.Body, shipmentDTO.Customer[0].CustomerName, shipmentDTO.Waybill);
-            //    messageDTO.To = shipmentDTO.Customer[0].PhoneNumber;
-            //}
-
             if (obj is ShipmentTrackingDTO)
             {
                 var strArray = new string[]
@@ -219,7 +212,6 @@ namespace GIGLS.Services.Implementation.Messaging
                         messageDTO.To = invoice.ReceiverPhoneNumber;
                         messageDTO.ToEmail = invoice.ReceiverEmail;
                     }
-                    //messageDTO.To = invoice.ReceiverPhoneNumber;
                 }
             }
 
@@ -275,7 +267,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     DateCreated = DateTime.Now,
                     DateModified = DateTime.Now,
                     From = messageDTO.From,
-                    To = messageDTO.To,
+                    To = messageDTO.ToEmail,
                     Message = messageDTO.FinalBody,
                     Status = exceptiomMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
                     ResultStatus = result,
