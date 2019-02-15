@@ -12,7 +12,6 @@
         Created = 1,
         CollectedByDispatch,
         RecievedAtServiceCenter, 
-        UnBanked,
         Banked
     }
 }

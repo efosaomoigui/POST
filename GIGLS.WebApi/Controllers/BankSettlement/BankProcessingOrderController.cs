@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.BankSettlement;
 using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Core.IServices.CashOnDeliveryBalance;
@@ -24,15 +25,16 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
             _bankprocessingorder = bankprocessingorder;
         }
 
+        //This one searches for all Shipments recorded: InvoiceView
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("RequestBankProcessingOrderForShipment")]
-        public async Task<IServiceResponse<object>> RequestBankProcessingOrderForShipment(DateTime requestdate)
+        public async Task<IServiceResponse<object>> RequestBankProcessingOrderForShipment(DateTime requestdate, DepositType type)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 //All cash shipments from sales
-                var bankshipmentprocessingorders = await _bankprocessingorder.GetBankProcessingOrderForShipment(requestdate);
+                var bankshipmentprocessingorders = await _bankprocessingorder.GetBankProcessingOrderForShipment(requestdate, type);
                 return new ServiceResponse<object>
                 {
                     Object = bankshipmentprocessingorders.Item2,
@@ -42,17 +44,17 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
             });
         }
 
-
+        //This one searches for all COD recorded: CashOnDeliveryRegisterAccount
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("RequestBankProcessingOrderForCOD")]
-        public async Task<IServiceResponse<object>> RequestBankProcessingOrderForCOD(DateTime requestdate)
+        public async Task<IServiceResponse<object>> RequestBankProcessingOrderForCOD(DateTime requestdate, DepositType type)
         {
             return await HandleApiOperationAsync(async () =>
             {
 
                 //All cash CODs from sales
-                var bankshipmentprocessingorders = await _bankprocessingorder.GetBankProcessingOrderForCOD(requestdate);
+                var bankshipmentprocessingorders = await _bankprocessingorder.GetBankProcessingOrderForCOD(requestdate, type);
                 return new ServiceResponse<object>
                 {
                     Object = bankshipmentprocessingorders.Item2,
@@ -63,16 +65,20 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpPost]
-        [Route("searchbankorder")]
-        public async Task<IServiceResponse<object>> SearchBankOrder() 
+        [HttpGet]
+        [Route("SearchBankOrder")]
+        public async Task<IServiceResponse<object>> SearchBankOrder(string refCode, DepositType type) 
         {
             return await HandleApiOperationAsync(async () =>
             {
                 //All cash shipments from sales
-                //var bankshipmentprocessingorders = await _bankprocessingorder.GetBankProcessingOrderForShipment(requestdate);
+                var bankprocessingorders = await _bankprocessingorder.SearchBankProcessingOrder(refCode, type);
                 return new ServiceResponse<object>
                 {
+                    Object = bankprocessingorders.Item2,
+                    Total = bankprocessingorders.Item3,
+                    RefCode = bankprocessingorders.Item1,
+                    Shipmentcodref = bankprocessingorders.Item4
                 };
             });
         }
@@ -109,11 +115,11 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("getbankprocessingorderForshipmentandcod")]
-        public async Task<IServiceResponse<List<BankProcessingOrderForShipmentAndCODDTO>>> GetBankProcessingOrderForShipmentAndCOD()
+        public async Task<IServiceResponse<List<BankProcessingOrderForShipmentAndCODDTO>>> GetBankProcessingOrderForShipmentAndCOD(DepositType type)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var resValue = await _bankprocessingorder.GetBankProcessingOrderForShipmentAndCOD();
+                var resValue = await _bankprocessingorder.GetBankProcessingOrderForShipmentAndCOD(type);
                 return new ServiceResponse<List<BankProcessingOrderForShipmentAndCODDTO>>
                 {
                     Object = resValue
@@ -121,14 +127,15 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
             });
         }
 
+        //Helps get all processing order by the type: COD or Shipment from 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("getbankOrderprocessingcode")]
-        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> GetBankOrderProcessingCode() 
+        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> GetBankOrderProcessingCode(DepositType type) 
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var resValue = await _bankprocessingorder.GetBankOrderProcessingCode();
+                var resValue = await _bankprocessingorder.GetBankOrderProcessingCode(type);
                 return new ServiceResponse<List<BankProcessingOrderCodesDTO>>
                 {
                     Object = resValue

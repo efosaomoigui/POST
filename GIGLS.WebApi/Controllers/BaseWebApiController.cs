@@ -96,6 +96,7 @@ namespace GIGLS.WebApi.Controllers
                 apiResponse.Object = methodResponse.Object;
                 apiResponse.Total = methodResponse.Total;
                 apiResponse.RefCode = methodResponse.RefCode;
+                apiResponse.Shipmentcodref = methodResponse.Shipmentcodref;
                 apiResponse.ShortDescription = string.IsNullOrEmpty(methodResponse.ShortDescription)
                     ? apiResponse.ShortDescription
                     : methodResponse.ShortDescription;

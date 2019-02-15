@@ -13,9 +13,11 @@ namespace GIGLS.Core.DTO.BankSettlement
 
         [MaxLength(100), MinLength(5)]
         [Index(IsUnique = true)]
-        public string Waybill { get; set; } 
-
+        public string Waybill { get; set; }
+        public decimal Amount { get; set; }
+        public decimal CODAmount { get; set; }
         public string RefCode { get; set; }
+        public DepositType DepositType { get; set; }
         public int ServiceCenterId { get; set; }
         public string ServiceCenter { get; set; }
         public bool status { get; set; }
@@ -34,5 +36,12 @@ namespace GIGLS.Core.DTO.BankSettlement
         public DateTime StartDateTime { get; set; }
         public bool status { get; set; }
 
+    }
+
+    public class CombiineBankOrDerDTO : BaseDomain, IAuditable  
+    {
+        //public BankProcessingOrderForShipmentAndCODDTO f =  new BankProcessingOrderForShipmentAndCODDTO();
+        public BankProcessingOrderCodesDTO orderval = new BankProcessingOrderCodesDTO();
+        public decimal CODAmount { get; set; } 
     }
 }

@@ -601,7 +601,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //collect the cods and add to CashOnDeliveryRegisterAccount()
                 var cashondeliveryentity = new CashOnDeliveryRegisterAccount();
-                cashondeliveryentity.Amount = newShipment.CashOnDeliveryAmount;
+                cashondeliveryentity.Amount = newShipment.CashOnDeliveryAmount??0;
                 cashondeliveryentity.CODStatusHistory = CODStatushistory.Created;
                 cashondeliveryentity.Description = "Cod From Sales";
                 //cashondeliveryentity.ServiceCenterCode = newShipment.DepartureServiceCentreId;

@@ -14,8 +14,10 @@ namespace GIGLS.Core.Domain.BankSettlement
         [MaxLength(100), MinLength(5)] 
         [Index(IsUnique = true)]
         public string Waybill { get; set; }
-
+        public decimal Amount { get; set; }
+        public decimal? CODAmount { get; set; }
         public string RefCode { get; set; }
+        public DepositType DepositType { get; set; }
         public int ServiceCenterId { get; set; }
         public string ServiceCenter { get; set; }
         public bool status { get; set; }

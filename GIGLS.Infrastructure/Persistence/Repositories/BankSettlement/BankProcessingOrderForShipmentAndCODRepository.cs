@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.BankSettlement;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.BankSettlement;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
@@ -15,10 +16,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
         {
         }
 
-        public Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetProcessingOrderForShipmentAndCOD()
+        public Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetProcessingOrderForShipmentAndCOD(DepositType type)
         {
 
             var bankProcessingorderforcods = Context.BankProcessingOrderForShipmentAndCOD.AsQueryable();
+            bankProcessingorderforcods = bankProcessingorderforcods.Where(s => s.DepositType == type);
 
             var codorder = from bankProcessingorderforcod in bankProcessingorderforcods
                            select new BankProcessingOrderForShipmentAndCODDTO
@@ -67,6 +69,42 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                            };
             return Task.FromResult(codorder.ToList());
         }
+
+        public Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetAllWaybillsForBankProcessingOrders(DepositType type) 
+        {
+            var processingordersvalue = Context.BankProcessingOrderForShipmentAndCOD.AsQueryable();
+            processingordersvalue = processingordersvalue.Where(s => s.DepositType == type);
+
+            var processingorders = from processingorderCode in processingordersvalue
+                                   select new BankProcessingOrderForShipmentAndCODDTO
+                                   {
+                                       ProcessingOrderId = processingorderCode.ProcessingOrderId,
+                                       RefCode = processingorderCode.RefCode,
+                                       ServiceCenterId = processingorderCode.ServiceCenterId,
+                                       status = processingorderCode.status,
+                                       Waybill = processingorderCode.Waybill,
+                                       Amount = processingorderCode.Amount,
+                                       CODAmount = processingorderCode.CODAmount??0,
+                                       ServiceCenter = processingorderCode.ServiceCenter,
+                                   };
+            var result = processingorders.ToList();
+            return Task.FromResult(result);
+        }
+
+        //public Task<List<BankProcessingOrderForShipmentAndCOD>> GetAllWaybillsForBankProcessingOrdersForCOD()
+        //{
+        //    var processingordersvalue = Context.BankProcessingOrderForShipmentAndCOD.AsQueryable();
+        //    var processingorders = from processingorderCode in processingordersvalue
+        //                           select new BankProcessingOrderForShipmentAndCOD
+        //                           {
+        //                               ProcessingOrderId = processingorderCode.ProcessingOrderId,
+        //                               RefCode = processingorderCode.RefCode,
+        //                               ServiceCenterId = processingorderCode.ServiceCenterId,
+        //                               status = processingorderCode.status,
+        //                               ServiceCenter = processingorderCode.ServiceCenter,
+        //                           };
+        //    return Task.FromResult(processingorders.ToList());
+        //}
 
 
     }

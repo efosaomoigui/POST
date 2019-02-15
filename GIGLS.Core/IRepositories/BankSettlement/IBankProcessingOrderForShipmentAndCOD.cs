@@ -12,13 +12,14 @@ namespace GIGLS.Core.IRepositories.BankSettlement
 {
     public interface IBankProcessingOrderForShipmentAndCODRepository : IRepository<BankProcessingOrderForShipmentAndCOD>
     {
-        Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetProcessingOrderForShipmentAndCOD();
-        Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetProcessingOrderForShipmentAndCODByRefCode(string refcode); 
+        Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetProcessingOrderForShipmentAndCOD(DepositType type);
+        Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetProcessingOrderForShipmentAndCODByRefCode(string refcode);
+        Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetAllWaybillsForBankProcessingOrders(DepositType type);
     }
 
     public interface IBankProcessingOrderCodesRepository : IRepository<BankProcessingOrderCodes> 
     {
-        Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCode();
+        Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCode(DepositType type);
         Task<List<BankProcessingOrderCodesDTO>> GetProcessingOrderCodebyRefCode(string refcode);
         IQueryable<BankProcessingOrderCodesDTO> GetBankOrderProcessingCodeAsQueryable();
     }

@@ -1,6 +1,7 @@
 ﻿
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.BankSettlement;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.BankSettlement;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
@@ -17,9 +18,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
         }
 
 
-        public Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCode()
+        public Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCode(DepositType type)
         {
             var processingorderCodes = Context.BankProcessingOrderCodes.AsQueryable();
+            processingorderCodes = processingorderCodes.Where(s => s.DepositType ==type);
             var processingcodes = from processingorderCode in processingorderCodes
                                   select new BankProcessingOrderCodesDTO
                                   {
@@ -73,5 +75,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                            };
             return Task.FromResult(codorder.ToList());
         }
+
     }
 }
