@@ -166,14 +166,55 @@ namespace GIGLS.Services.Implementation.User
 
         public async Task<IdentityResult> RemoveUser(string userId)
         {
+            //Remove user, wallet and customer (Inidvidual or company)
+
             var user = await _unitOfWork.User.GetUserById(userId);
 
             if (user == null)
             {
                 throw new GenericException("User does not exist!");
             }
+            
+            if(user.UserChannelType.Equals(UserChannelType.Corporate) || user.UserChannelType.Equals(UserChannelType.Ecommerce))
+            {
+                await RemoveCompanyCustomer(user.UserChannelCode);
+            }
 
+            if (user.UserChannelType.Equals(UserChannelType.IndividualCustomer))
+            {
+                await RemoveIndividualCustomer(user.UserChannelCode);
+            }
+
+            await RemoveWallet(user.UserChannelCode);
+            await _unitOfWork.CompleteAsync();
             return await _unitOfWork.User.Remove(userId);
+        }
+
+        private async Task RemoveCompanyCustomer(string customerCode)
+        {
+            var company = await _unitOfWork.Company.GetAsync(x => x.CustomerCode == customerCode);
+            if(company != null)
+            {
+                _unitOfWork.Company.Remove(company);
+            }
+        }
+
+        private async Task RemoveIndividualCustomer(string customerCode)
+        {
+            var individual = await _unitOfWork.IndividualCustomer.GetAsync(x => x.CustomerCode == customerCode);
+            if (individual != null)
+            {
+                _unitOfWork.IndividualCustomer.Remove(individual);
+            }
+        }
+
+        private async Task RemoveWallet(string customerCode)
+        {
+            var wallet = await _unitOfWork.Wallet.GetAsync(x => x.CustomerCode == customerCode);
+            if (wallet != null)
+            {
+                _unitOfWork.Wallet.Remove(wallet);
+            }
         }
 
         public async Task<IdentityResult> UpdateUser(string userid, UserDTO userDto)
