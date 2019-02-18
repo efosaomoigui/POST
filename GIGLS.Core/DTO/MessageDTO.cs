@@ -10,9 +10,13 @@ namespace GIGLS.Core.DTO
         public string Subject { get; set; }
         public string From { get; set; }
         public string To { get; set; }
+        public string ToEmail { get; set; }
         public EmailSmsType EmailSmsType { get; set; }
         public MessageType MessageType { get; set; }
 
         public string FinalBody { get; set; }
+
+        public string CustomerName { get; set; }
+        public string ReceiverName { get; set; }
     }
 }
