@@ -9,5 +9,6 @@ namespace GIGLS.Core.DTO.ShipmentScan
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public Dictionary<string, int> StatusCountMap { get; set; } = new Dictionary<string, int>();
+        public int ServiceCentreId { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.View;
+﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.View;
 using System;
 using System.Linq;
 
@@ -12,6 +13,7 @@ namespace GIGLS.CORE.DTO.Report
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string UserId { get; set; }
+        public int ServiceCentreId { get; set; }
 
         //ScanStatus
         public string Code { get; set; }
@@ -27,6 +29,52 @@ namespace GIGLS.CORE.DTO.Report
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
+
+        private Tuple<DateTime, DateTime> getStartDateAndEndDate()
+        {
+            ScanTrackFilterCriteria scanFilterCriteria = this;
+
+            var startDate = DateTime.Now;
+            var endDate = DateTime.Now;
+
+            //If No Date Supplied, Pick today date
+            if (!scanFilterCriteria.StartDate.HasValue && !scanFilterCriteria.EndDate.HasValue)
+            {
+                startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+            }
+
+            //StartDate has value and EndDate has Value 
+            if (scanFilterCriteria.StartDate.HasValue && scanFilterCriteria.EndDate.HasValue)
+            {
+                var tempStartDate = ((DateTime)scanFilterCriteria.StartDate);
+                startDate = new DateTime(tempStartDate.Year, tempStartDate.Month, tempStartDate.Day);
+
+                var tempEndDate = ((DateTime)scanFilterCriteria.EndDate);
+                endDate = new DateTime(tempEndDate.Year, tempEndDate.Month, tempEndDate.Day);
+            }
+
+            //StartDate has value and EndDate has no Value
+            if (scanFilterCriteria.StartDate.HasValue && !scanFilterCriteria.EndDate.HasValue)
+            {
+                var tempStartDate = ((DateTime)scanFilterCriteria.StartDate);
+                startDate = new DateTime(tempStartDate.Year, tempStartDate.Month, tempStartDate.Day);
+
+                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+            }
+
+            //StartDate has no value and EndDate has Value
+            if (scanFilterCriteria.EndDate.HasValue && !scanFilterCriteria.StartDate.HasValue)
+            {
+                var tempStartDate = ((DateTime)scanFilterCriteria.EndDate);
+                startDate = new DateTime(tempStartDate.Year, tempStartDate.Month, tempStartDate.Day).AddDays(-1); //a day ago
+
+                var tempEndDate = ((DateTime)scanFilterCriteria.EndDate);
+                endDate = new DateTime(tempEndDate.Year, tempEndDate.Month, tempEndDate.Day);
+            }
+
+            return new Tuple<DateTime, DateTime>(startDate, endDate.AddDays(1));
+        }
 
         //Query builder
         public IQueryable<ShipmentTrackingView> GetQueryFromParameters(IQueryable<ShipmentTrackingView> queryable)
@@ -86,6 +134,38 @@ namespace GIGLS.CORE.DTO.Report
             {
                 queryable = queryable.Where(s => s.DateTime <= EndDate);
             }
+
+            return queryable;
+        }
+
+        public IQueryable<ShipmentTracking> GetQueryFromParameters(IQueryable<ShipmentTracking> queryable)
+        {
+            if (!string.IsNullOrWhiteSpace(Waybill))
+            {
+                queryable = queryable.Where(s => s.Waybill == Waybill.Trim());
+            }
+            if (!string.IsNullOrWhiteSpace(Location))
+            {
+                queryable = queryable.Where(s => s.Location == Location.Trim());
+            }
+            if (!string.IsNullOrWhiteSpace(Status))
+            {
+                queryable = queryable.Where(s => s.Status == Status.Trim());
+            }
+            if (!string.IsNullOrWhiteSpace(UserId))
+            {
+                queryable = queryable.Where(s => s.UserId == UserId.Trim());
+            }
+            if (ServiceCentreId > 0)
+            {
+                queryable = queryable.Where(s => s.ServiceCentreId == ServiceCentreId);
+            }
+            
+            var queryDate = getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            queryable = queryable.Where(x => x.DateTime >= startDate && x.DateTime < endDate);
 
             return queryable;
         }
