@@ -661,7 +661,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                 Location = serviceCenter.Name,
                                 Status = ShipmentScanStatus.SRC.ToString(),
                                 DateTime = DateTime.Now,
-                                UserId = user
+                                UserId = user,
+                                ServiceCentreId = serviceCenter.ServiceCentreId
                             };
                             _uow.ShipmentTracking.Add(newShipmentTracking);
                         }

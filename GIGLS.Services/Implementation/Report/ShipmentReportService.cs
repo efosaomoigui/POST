@@ -175,7 +175,11 @@ namespace GIGLS.Services.Implementation.Report
             //1. Group by Service Centre
             var scanStatusReportList = new List<ScanStatusReportDTO>();
             //var allServiceCentreNames = _uow.ServiceCentre.GetAllAsQueryable().Select(s => s.Name).ToList();
-            var allServiceCentreNames = _uow.ServiceCentre.GetAllAsQueryable().Select(s => new { s.ServiceCentreId, s.Name }).ToList();
+            //var allServiceCentreNames = _uow.ServiceCentre.GetAllAsQueryable().Select(s => new { s.ServiceCentreId, s.Name }).ToList();
+
+            //Get only Nigeria Service centre 
+            var allServiceCentreNames = await _uow.ServiceCentre.GetLocalServiceCentres();
+
             var allScanStatus = _uow.ScanStatus.GetAllAsQueryable().ToList();
             foreach (var scName in allServiceCentreNames)
             {
