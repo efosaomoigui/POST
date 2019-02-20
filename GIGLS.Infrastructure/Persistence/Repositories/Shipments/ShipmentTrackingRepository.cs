@@ -9,7 +9,6 @@ using GIGLS.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
@@ -40,7 +39,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               ShipmentTrackingId = shipmentTracking.ShipmentTrackingId,
                                               TrackingType = shipmentTracking.TrackingType.ToString(),
                                               User = shipmentTracking.User.FirstName + " " + shipmentTracking.User.LastName,
-                                              Status = shipmentTracking.Status
+                                              Status = shipmentTracking.Status,
+                                              ServiceCentreId = shipmentTracking.ServiceCentreId
                                           };
                 return Task.FromResult(shipmentTrackingDto.ToList());
             }
@@ -68,6 +68,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               TrackingType = shipmentTracking.TrackingType.ToString(),
                                               User = shipmentTracking.User.FirstName + " " + shipmentTracking.User.LastName,
                                               Status = shipmentTracking.Status,
+                                              ServiceCentreId = shipmentTracking.ServiceCentreId,
                                               ScanStatus = Context.ScanStatus.Where(c => c.Code == shipmentTracking.Status).Select(x => new ScanStatusDTO
                                               {
                                                   Code = x.Code,
