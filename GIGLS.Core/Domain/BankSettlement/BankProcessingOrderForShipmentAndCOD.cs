@@ -18,9 +18,10 @@ namespace GIGLS.Core.Domain.BankSettlement
         public decimal? CODAmount { get; set; }
         public string RefCode { get; set; }
         public DepositType DepositType { get; set; }
+        public string UserId { get; set; }
         public int ServiceCenterId { get; set; }
         public string ServiceCenter { get; set; }
-        public bool status { get; set; }
+        public bool Status { get; set; } 
     }
     
     public class BankProcessingOrderCodes : BaseDomain, IAuditable
@@ -31,10 +32,12 @@ namespace GIGLS.Core.Domain.BankSettlement
         public decimal TotalAmount { get; set; }
         public DateTime DateAndTimeOfDeposit { get; set; } 
         public string UserId { get; set; }
+        public string FullName { get; set; }
         public int ServiceCenter { get; set; }
+        public string ScName { get; set; }
         public DepositType DepositType { get; set; }
         public DateTime StartDateTime { get; set; }
-        public bool status { get; set; }
+        public bool Status { get; set; }
 
     }
 }

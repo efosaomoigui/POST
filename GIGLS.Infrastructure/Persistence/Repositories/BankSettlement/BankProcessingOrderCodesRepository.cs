@@ -21,7 +21,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
         public Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCode(DepositType type)
         {
             var processingorderCodes = Context.BankProcessingOrderCodes.AsQueryable();
-            processingorderCodes = processingorderCodes.Where(s => s.DepositType ==type);
+            processingorderCodes = processingorderCodes.Where(s => s.DepositType == type);
             var processingcodes = from processingorderCode in processingorderCodes
                                   select new BankProcessingOrderCodesDTO
                                   {
@@ -31,14 +31,16 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                       DepositType = processingorderCode.DepositType,
                                       TotalAmount = processingorderCode.TotalAmount,
                                       UserId = processingorderCode.UserId,
-                                      status = processingorderCode.status,
+                                      Status = processingorderCode.Status,
                                       ServiceCenter = processingorderCode.ServiceCenter,
+                                      ScName = processingorderCode.ScName,
+                                      FullName = processingorderCode.FullName
                                   };
 
             return Task.FromResult(processingcodes.ToList());
         }
 
-        public IQueryable<BankProcessingOrderCodesDTO> GetBankOrderProcessingCodeAsQueryable()  
+        public IQueryable<BankProcessingOrderCodesDTO> GetBankOrderProcessingCodeAsQueryable()
         {
             var processingorderCodes = Context.BankProcessingOrderCodes.AsQueryable();
             var processingcodes = from processingorderCode in processingorderCodes
@@ -50,7 +52,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                       DepositType = processingorderCode.DepositType,
                                       TotalAmount = processingorderCode.TotalAmount,
                                       UserId = processingorderCode.UserId,
-                                      status = processingorderCode.status,
+                                      Status = processingorderCode.Status,
                                       ServiceCenter = processingorderCode.ServiceCenter,
                                   };
             return processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit);
@@ -70,7 +72,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                DepositType = processingorderCode.DepositType,
                                TotalAmount = processingorderCode.TotalAmount,
                                UserId = processingorderCode.UserId,
-                               status = processingorderCode.status,
+                               Status = processingorderCode.Status,
                                ServiceCenter = processingorderCode.ServiceCenter,
                            };
             return Task.FromResult(codorder.ToList());

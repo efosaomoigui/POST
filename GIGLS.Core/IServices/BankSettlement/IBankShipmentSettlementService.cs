@@ -14,11 +14,13 @@ namespace GIGLS.Core.IServices.BankSettlement
 		Task<Tuple<string, List<GIGLS.Core.DTO.Account.InvoiceViewDTO>, decimal>> GetBankProcessingOrderForShipment(DateTime requestdate, DepositType type);
 
         Task<Tuple<string, List<BankProcessingOrderForShipmentAndCODDTO>, decimal, BankProcessingOrderCodesDTO>> SearchBankProcessingOrder(string refcode, DepositType type);
+        Task<Tuple<string, List<BankProcessingOrderForShipmentAndCODDTO>, decimal, List<BankProcessingOrderCodesDTO>>> SearchBankProcessingOrder2(string refcode, DepositType type);
 
         Task<BankProcessingOrderCodesDTO> AddBankProcessingOrderCode(BankProcessingOrderCodesDTO refcode);
         //Task<BankProcessingOrderForShipmentAndCODDTO> AddBankProcessingOrderForShipmentAndCOD(BankProcessingOrderForShipmentAndCODDTO refcode);
 
         Task UpdateBankOrderProcessingCode(BankProcessingOrderCodesDTO refcode);
+        Task UpdateBankOrderProcessingCode_cod(BankProcessingOrderCodesDTO refcode);
         Task UpdateBankProcessingOrderForShipmentAndCOD(BankProcessingOrderForShipmentAndCODDTO refcodeobj);
 
         Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCode(DepositType type);

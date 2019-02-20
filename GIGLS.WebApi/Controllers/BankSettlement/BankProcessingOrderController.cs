@@ -52,7 +52,6 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-
                 //All cash CODs from sales
                 var bankshipmentprocessingorders = await _bankprocessingorder.GetBankProcessingOrderForCOD(requestdate, type);
                 return new ServiceResponse<object>
@@ -79,6 +78,53 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
                     Total = bankprocessingorders.Item3,
                     RefCode = bankprocessingorders.Item1,
                     Shipmentcodref = bankprocessingorders.Item4
+                };
+            });
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("SearchBankOrder2")]
+        public async Task<IServiceResponse<object>> SearchBankOrder2(string refCode, DepositType type)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //All cash shipments from sales
+                var bankprocessingorders = await _bankprocessingorder.SearchBankProcessingOrder2(refCode, type);
+                return new ServiceResponse<object>
+                {
+                    Object = bankprocessingorders.Item4,
+                    Total = bankprocessingorders.Item3,
+                    RefCode = bankprocessingorders.Item1,
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("MarkAsDeposited")]
+        public async Task<IServiceResponse<object>> MarkAsDeposited(BankProcessingOrderCodesDTO bkoc)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var bankshipmentprocessingorders =  _bankprocessingorder.UpdateBankOrderProcessingCode(bkoc);
+                return new ServiceResponse<object>
+                {
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("MarkAsDeposited_cod")]
+        public async Task<IServiceResponse<object>> MarkAsDeposited_cod(BankProcessingOrderCodesDTO bkoc)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var bankshipmentprocessingorders = _bankprocessingorder.UpdateBankOrderProcessingCode_cod(bkoc); 
+                return new ServiceResponse<object>
+                {
                 };
             });
         }

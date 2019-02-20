@@ -29,7 +29,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                RefCode = bankProcessingorderforcod.RefCode,
                                Waybill = bankProcessingorderforcod.Waybill,
                                ServiceCenter = bankProcessingorderforcod.ServiceCenter,
-                               status = bankProcessingorderforcod.status,
+                               Status = bankProcessingorderforcod.Status,
                            };
             return Task.FromResult(codorder.ToList());
         }
@@ -46,7 +46,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                       DepositType = processingorderCode.DepositType,
                                       TotalAmount = processingorderCode.TotalAmount,
                                       UserId = processingorderCode.UserId,
-                                      status = processingorderCode.status,
+                                      Status = processingorderCode.Status,
                                       ServiceCenter = processingorderCode.ServiceCenter,
                                   };
 
@@ -65,12 +65,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                RefCode = bankProcessingorderforcod.RefCode,
                                Waybill = bankProcessingorderforcod.Waybill,
                                ServiceCenter = bankProcessingorderforcod.ServiceCenter,
-                               status = bankProcessingorderforcod.status,
+                               Status = bankProcessingorderforcod.Status,
                            };
             return Task.FromResult(codorder.ToList());
         }
 
-        public Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetAllWaybillsForBankProcessingOrders(DepositType type) 
+        public Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetAllWaybillsForBankProcessingOrders(DepositType type)
         {
             var processingordersvalue = Context.BankProcessingOrderForShipmentAndCOD.AsQueryable();
             processingordersvalue = processingordersvalue.Where(s => s.DepositType == type);
@@ -81,10 +81,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                        ProcessingOrderId = processingorderCode.ProcessingOrderId,
                                        RefCode = processingorderCode.RefCode,
                                        ServiceCenterId = processingorderCode.ServiceCenterId,
-                                       status = processingorderCode.status,
+                                       Status = processingorderCode.Status,
                                        Waybill = processingorderCode.Waybill,
                                        Amount = processingorderCode.Amount,
-                                       CODAmount = processingorderCode.CODAmount??0,
+                                       CODAmount = processingorderCode.CODAmount ?? 0,
                                        ServiceCenter = processingorderCode.ServiceCenter,
                                    };
             var result = processingorders.ToList();

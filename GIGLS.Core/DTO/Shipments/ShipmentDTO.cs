@@ -109,5 +109,7 @@ namespace GIGLS.Core.DTO.Shipments
         public InvoiceDTO Invoice { get; set; }
 
         public string Description { get; set; }
+
+        public int DepositStatus { get; set; }
     }
 }
