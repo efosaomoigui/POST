@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IServices;
@@ -17,5 +18,6 @@ namespace GIGLS.CORE.IServices.Report
         Task<object> GetDailySalesByServiceCentreReport(DailySalesDTO dailySalesDTO);
         Task<List<ShipmentTrackingView>> GetShipmentTrackingFromView(ScanTrackFilterCriteria f_Criteria);
         Task<List<ScanStatusReportDTO>> GetShipmentTrackingFromViewReport(ScanTrackFilterCriteria f_Criteria);
+        Task<DashboardDTO> GetShipmentProgressSummary(BaseFilterCriteria baseFilterCriteria);
     }
 }
