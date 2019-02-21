@@ -128,6 +128,8 @@
     <Compile Include="Persistence\Repositories\Customers\IndividualCustomerRepository.cs" />
     <Compile Include="Persistence\Repositories\Devices\DeviceManagementRepository.cs" />
     <Compile Include="Persistence\Repositories\Devices\DeviceRepository.cs" />
+    <Compile Include="Persistence\Repositories\Expenses\ExpenditureRepository.cs" />
+    <Compile Include="Persistence\Repositories\Expenses\ExpenseTypeRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\DispatchActivityRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\DispatchRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\FleetMakeRepository.cs" />

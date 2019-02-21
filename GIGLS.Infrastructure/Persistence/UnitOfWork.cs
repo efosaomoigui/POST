@@ -30,6 +30,7 @@ using GIGLS.Core.IRepositories.BankSettlement;
 using GIGLS.Infrastructure.Persistence.Repositories.InternationalRequest;
 using GIGLS.Core.IRepositories.InternationalRequest;
 using GIGLS.Core.IRepositories.Sla;
+using GIGLS.Core.IRepositories.Expenses;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Infrastructure.Persistence.Repositories.Wallet;
 
@@ -339,6 +340,12 @@ namespace GIGLS.Infrastructure.Persistence
         
         [Inject]
         public ISLASignedUserRepository SLASignedUser { get; set; }
+
+        [Inject]
+        public IExpenseTypeRepository ExpenseType { get; set; }
+
+        [Inject]
+        public IExpenditureRepository Expenditure { get; set; }
 
         //Bank Processing Order
         [Inject]

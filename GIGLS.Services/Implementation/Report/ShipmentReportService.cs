@@ -15,6 +15,7 @@ using System.Linq;
 using GIGLS.Core.Domain.ShipmentScan;
 using GIGLS.Core.DTO.ShipmentScan;
 using System;
+using GIGL.GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -160,18 +161,25 @@ namespace GIGLS.Services.Implementation.Report
         /// <returns>List of ScanStatusReport objects</returns>
         public async Task<List<ScanStatusReportDTO>> GetShipmentTrackingFromViewReport(ScanTrackFilterCriteria f_Criteria)
         {
-            var queryable = _uow.ShipmentTracking.GetShipmentTrackingsFromViewAsync(f_Criteria);
+            //var queryable = _uow.ShipmentTracking.GetShipmentTrackingsFromViewAsync(f_Criteria);
+            var queryable = _uow.ShipmentTracking.GetShipmentTrackingsAsync(f_Criteria);
             var queryableList = queryable.Select(s =>
             new ShipmentTrackingDTO
             {
                 Status = s.Status,
                 Location = s.Location,
-                ShipmentTrackingId = s.ShipmentTrackingId
+                ShipmentTrackingId = s.ShipmentTrackingId,
+                ServiceCentreId = s.ServiceCentreId
             }).ToList();
 
             //1. Group by Service Centre
             var scanStatusReportList = new List<ScanStatusReportDTO>();
-            var allServiceCentreNames = _uow.ServiceCentre.GetAllAsQueryable().Select(s => s.Name).ToList();
+            //var allServiceCentreNames = _uow.ServiceCentre.GetAllAsQueryable().Select(s => s.Name).ToList();
+            //var allServiceCentreNames = _uow.ServiceCentre.GetAllAsQueryable().Select(s => new { s.ServiceCentreId, s.Name }).ToList();
+
+            //Get only Nigeria Service centre 
+            var allServiceCentreNames = await _uow.ServiceCentre.GetLocalServiceCentres();
+
             var allScanStatus = _uow.ScanStatus.GetAllAsQueryable().ToList();
             foreach (var scName in allServiceCentreNames)
             {
@@ -179,11 +187,12 @@ namespace GIGLS.Services.Implementation.Report
                 {
                     StartDate = f_Criteria.StartDate,
                     EndDate = f_Criteria.EndDate,
-                    Location = scName
+                    Location = scName.Name,
+                    ServiceCentreId = scName.ServiceCentreId
                 };
 
                 //1.1 Group by Scan Status
-                PopulateScanStatusReport(scanStatusReportDTO, queryableList, scName);
+                PopulateScanStatusReport(scanStatusReportDTO, queryableList, scName.ServiceCentreId);
 
                 //1.2 Add to report list
                 scanStatusReportList.Add(scanStatusReportDTO);
@@ -200,16 +209,17 @@ namespace GIGLS.Services.Implementation.Report
         /// <param name="queryableList"></param>
         /// <param name="serviceCentreName"></param>
         private void PopulateScanStatusReport(ScanStatusReportDTO scanStatusReportDTO,
-            List<ShipmentTrackingDTO> queryableList, string serviceCentreName)
+            List<ShipmentTrackingDTO> queryableList, int serviceCentreId)
         {
             var shipmentScanStatusValues = Enum.GetNames(typeof(ShipmentScanStatus));
 
             foreach (var shipmentScanStatusName in shipmentScanStatusValues)
             {
-                var count_status = queryableList.Where(s => s.Status == shipmentScanStatusName &&
-                    s.Location == serviceCentreName).Select(x => x.ShipmentTrackingId).Count();
+                var count_status = queryableList.Where(s => s.ServiceCentreId == serviceCentreId && 
+                s.Status == shipmentScanStatusName).Select(x => x.ShipmentTrackingId).Count();
                 scanStatusReportDTO.StatusCountMap.Add(shipmentScanStatusName, count_status);
             }
         }
+
     }
 }

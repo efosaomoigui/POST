@@ -26,6 +26,7 @@ using GIGLS.Core.IRepositories.Devices;
 using GIGLS.Core.IRepositories.BankSettlement;
 using GIGLS.Core.IRepositories.InternationalRequest;
 using GIGLS.Core.IRepositories.Sla;
+using GIGLS.Core.IRepositories.Expenses;
 
 namespace GIGLS.Core
 {
@@ -128,6 +129,8 @@ namespace GIGLS.Core
         IInternationalRequestReceiverRepository InternationalRequestReceiver { get; set; }
         ISLARepository SLA { get; set; }
         ISLASignedUserRepository SLASignedUser { get; set; }
+        IExpenseTypeRepository ExpenseType { get; set; }
+        IExpenditureRepository Expenditure { get; set; }
         IBankProcessingOrderForShipmentAndCODRepository BankProcessingOrderForShipmentAndCOD { get; set; }
         IBankProcessingOrderCodesRepository BankProcessingOrderCodes { get; set; } 
 

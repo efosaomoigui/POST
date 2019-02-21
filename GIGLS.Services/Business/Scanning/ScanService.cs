@@ -50,26 +50,7 @@ namespace GIGLS.Services.Business.Scanning
             _manifestWaybillService = manifestWaybillService;
             _uow = uow;
         }
-
-        //public async Task<bool> ScanShipment(string waybillNumber, ShipmentScanStatus scanStatus)
-        //{
-        //    // verify the waybill number exists in the system
-        //    var shipment = await _shipmentService.GetShipment(waybillNumber);
-        //    if (shipment == null)
-        //    {
-        //        throw new Exception($"Shipment with waybill: {waybillNumber} does Not Exist");
-        //    }
-
-        //    var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
-        //    {
-        //        DateTime = DateTime.Now,
-        //        Status = scanStatus.ToString(),
-        //        Waybill = waybillNumber
-        //    }, scanStatus);
-
-        //    return true;
-        //}
-
+        
         public async Task<bool> ScanMultipleShipment(List<ScanDTO> scanList)
         {
             bool result = false;
@@ -108,11 +89,22 @@ namespace GIGLS.Services.Business.Scanning
                     return true;
                 }
                 else
-                {
-                    //check if the waybill has not been scan for the same status before
-                    var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);
+                {                    
+                    ////if the scan status is AD and ARF is not yet scanned for the shipment, throw an error
+                    //if (scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD))
+                    //{
+                    //    var checkArrivalFinalDestiantionScan = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, ShipmentScanStatus.ARF.ToString());
 
-                    if (!checkTrack || scanStatus.Equals(ShipmentScanStatus.AD))
+                    //    if (!checkArrivalFinalDestiantionScan)
+                    //    {
+                    //        throw new GenericException($"Error processing request. Shipment with waybill: {scan.WaybillNumber} is not at the final Destination");
+                    //    }
+                    //}
+
+                    //check if the waybill has not been scan for the same status before
+                    var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);                                      
+
+                    if (!checkTrack || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD))
                     {
                         var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                         {
@@ -200,7 +192,7 @@ namespace GIGLS.Services.Business.Scanning
                             {
                                 //check already scanned manifest
                                 var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(waybill, scanStatus);
-                                if (!checkTrack || scanStatus.Equals(ShipmentScanStatus.AD))
+                                if (!checkTrack || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD))
                                 {
                                     await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                                     {
