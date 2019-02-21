@@ -468,6 +468,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw ex;
             }
         }
+
+        /// <summary>
+        /// Mark shipment bank order processing as deposited
+        /// </summary>
+        /// <param name="bankrefcode"></param>
+        /// <returns></returns>
         public async Task UpdateBankOrderProcessingCode(BankProcessingOrderCodesDTO bankrefcode)
         {
             //var bankorder = _uow.BankProcessingOrderCodes.Find(s=>s.Code == bankrefcode.Code).FirstOrDefault();
@@ -487,6 +493,11 @@ namespace GIGLS.Services.Implementation.Wallet
             await _uow.CompleteAsync();
         }
 
+        /// <summary>
+        /// Mark COD bank order processing as deposited
+        /// </summary>
+        /// <param name="bankrefcode"></param>
+        /// <returns></returns>
         public async Task UpdateBankOrderProcessingCode_cod(BankProcessingOrderCodesDTO bankrefcode) 
         {
             //var bankorder = _uow.BankProcessingOrderCodes.Find(s=>s.Code == bankrefcode.Code).FirstOrDefault();
@@ -497,7 +508,14 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Bank Order Request Does not Exist!");
             }
 
+            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
+            allCODs = allCODs.Where(s => s.DepositStatus == 0);
+            var codsforservicecenter = allCODs.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
+
+            codsforservicecenter.ForEach(a => a.DepositStatus = 1);
             bankorder.Status = bankrefcode.Status;
+
             await _uow.CompleteAsync();
         }
 
