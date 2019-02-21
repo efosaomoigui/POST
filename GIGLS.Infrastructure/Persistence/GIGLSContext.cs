@@ -125,6 +125,8 @@ namespace GIGLS.Infrastructure.Persistence
         //store
         public DbSet<Store> Store { get; set; }
 
+        public DbSet<OTP> OTP { get; set; }
+
         //stock
         public DbSet<StockRequest> StockRequest { get; set; }
         public DbSet<StockRequestPart> StockRequestPart { get; set; }

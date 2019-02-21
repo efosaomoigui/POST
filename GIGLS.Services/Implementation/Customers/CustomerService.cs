@@ -33,7 +33,8 @@ namespace GIGLS.Services.Implementation.Customers
                 if (CustomerType.Company.Equals(customerDTO.CustomerType))
                 {
                     var companyId = 0;
-                    var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.Trim().ToLower());
+                    var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.Trim().ToLower() && 
+                    c.PhoneNumber == customerDTO.PhoneNumber);
                     foreach (var item in CompanyByName)
                     {
                         companyId = item.CompanyId;

@@ -58,6 +58,7 @@ namespace GIGLS.Services.Implementation.User
                 user.UserChannelCode = employeeCode;
                 user.UserChannelPassword = GeneratePassword();
             }
+           
 
             var u = await _unitOfWork.User.RegisterUser(user, userDto.Password);
             return u;
@@ -892,5 +893,15 @@ namespace GIGLS.Services.Implementation.User
             return strippedText.Substring(0, length);
         }
 
+        public async Task<UserDTO> GetUserByPhone(string PhoneNumber)
+        {
+            var user = await _unitOfWork.User.GetUserByPhoneNumber(PhoneNumber);
+
+            if (user == null)
+            {
+                throw new GenericException("Phone number does not exist!");
+            }
+           return Mapper.Map<UserDTO>(user);
+        }
     }
 }

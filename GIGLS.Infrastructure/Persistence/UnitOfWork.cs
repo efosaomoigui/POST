@@ -332,7 +332,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public ISLARepository SLA { get; set; }
-        
+
         [Inject]
         public ISLASignedUserRepository SLASignedUser { get; set; }
 
@@ -341,6 +341,9 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IExpenditureRepository Expenditure { get; set; }
+
+        [Inject]
+        public IOTPRepository OTP { get; set; }
 
         public int Complete()
         {

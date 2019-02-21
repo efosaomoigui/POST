@@ -131,6 +131,8 @@ namespace GIGLS.Core
         IExpenseTypeRepository ExpenseType { get; set; }
         IExpenditureRepository Expenditure { get; set; }
 
+        IOTPRepository  OTP { get; set; }
+
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
     }

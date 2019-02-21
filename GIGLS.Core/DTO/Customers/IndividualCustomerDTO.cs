@@ -12,6 +12,7 @@ namespace GIGLS.Core.DTO.Customers
             CustomerShipments = new List<ShipmentDTO>();
         }
         public int IndividualCustomerId { get; set; }
+        public string userId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public Gender Gender { get; set; }
@@ -24,5 +25,7 @@ namespace GIGLS.Core.DTO.Customers
         public string PicData { get; set; }
         public string CustomerCode { get; set; }
         public List<ShipmentDTO> CustomerShipments { get; set; }
+
+        public string Password { get; set; }
     }
 }

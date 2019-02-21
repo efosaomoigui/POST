@@ -304,6 +304,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<Expenditure, ExpenditureDTO>();
                 config.CreateMap<ExpenditureDTO, Expenditure>();
+
+                config.CreateMap<OTP, OTPDTO>();
+                config.CreateMap<OTPDTO, OTP>();
             });
 
             isInit = true;

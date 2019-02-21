@@ -77,14 +77,22 @@ namespace GIGLS.Services.Implementation.Customers
                 }
                 try
                 {
-                    var password = await _passwordGenerator.Generate();
+                    var password = "";
+                    if (newCustomer.Password == null)
+                    {
+                        password = await _passwordGenerator.Generate();
+                    }
+                    else
+                    {
+                        password = newCustomer.Password;
+                    }
                     var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
                     {
                         ConfirmPassword = password,
                         Department = CustomerType.IndividualCustomer.ToString(),
                         DateCreated = DateTime.Now,
                         Designation = CustomerType.IndividualCustomer.ToString(),
-                        Email = newCustomer.Email,
+                        Email=newCustomer.Email,
                         FirstName = newCustomer.FirstName,
                         LastName = newCustomer.LastName,
                         Organisation = CustomerType.IndividualCustomer.ToString(),
@@ -102,7 +110,7 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     // do nothing
                 }
-
+                
                 return Mapper.Map<IndividualCustomerDTO>(newCustomer);
             }
             catch (Exception)
@@ -214,7 +222,14 @@ namespace GIGLS.Services.Implementation.Customers
             //work on the picture later
             customer.PhoneNumber = customerDto.PhoneNumber;
             customer.State = customerDto.State;
+            customer.Password = customerDto.Password;
+            var user = _userService.GetUserByEmail(customerDto.Email).Result;
+            user.FirstName = customerDto.FirstName;
+            user.LastName = customerDto.LastName;
+            user.PhoneNumber = customerDto.PhoneNumber;
+            var m = _userService.UpdateUser(user.Id, user);
             _uow.Complete();
+           
         }
 
         public async Task<List<IndividualCustomerDTO>> GetIndividualCustomers(string searchData)

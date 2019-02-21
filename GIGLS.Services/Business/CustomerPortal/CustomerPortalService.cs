@@ -371,38 +371,50 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<UserDTO> Register(UserDTO user)
         {
-            CustomerType customerType = CustomerType.IndividualCustomer;
-            CompanyType companyType = CompanyType.Client;
-
-            if(user.UserChannelType == UserChannelType.Ecommerce)
+            try
             {
-                customerType = CustomerType.Company;
-                companyType = CompanyType.Ecommerce;
+                CustomerType customerType = CustomerType.IndividualCustomer;
+                CompanyType companyType = CompanyType.Client;
+
+                if (user.UserChannelType == UserChannelType.Ecommerce)
+                {
+                    customerType = CustomerType.Company;
+                    companyType = CompanyType.Ecommerce;
+                }
+                else
+                {
+                    customerType = CustomerType.IndividualCustomer;
+                }
+                //1. convert user data to customer data
+                var customer = new CustomerDTO
+                {
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Name = user.FirstName,
+                    CustomerType = customerType,
+                    CompanyType = companyType,
+                    Password = user.Password
+                };
+
+
+                //2. Create customer data
+                var result = await _customerService.CreateCustomer(customer);
+
+                if (result != null)
+                {
+                    user.UserChannelCode = result.CustomerCode;
+                    user.CustomerId = result.IndividualCustomerId;
+                }
+                else
+                {
+                    throw new GenericException("Customer could not be created");
+                }
             }
-            else
+            catch (Exception)
             {
-                customerType = CustomerType.IndividualCustomer;
-            }
-
-
-            //1. convert user data to customer data
-            var customer = new CustomerDTO
-            {
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Name = user.FirstName,
-                CustomerType = customerType,
-                CompanyType = companyType
-            };
-
-            //2. Create customer data
-            var result = await _customerService.CreateCustomer(customer);
-            
-            if(result != null)
-            {
-                user.UserChannelCode = result.CustomerCode;
+                throw;
             }
 
             return user;

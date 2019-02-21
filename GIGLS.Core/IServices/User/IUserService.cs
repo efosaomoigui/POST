@@ -52,5 +52,7 @@ namespace GIGLS.Core.IServices.User
         Task<IdentityResult> ResetPassword(string userid, string password);
         Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword);
         Task<IdentityResult> ResetExpiredPassword(string userid, string currentPassword, string newPassword);
+
+        Task<UserDTO> GetUserByPhone(string PhoneNumber);
     }
 }
