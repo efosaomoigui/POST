@@ -245,7 +245,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               CompanyType = s.CompanyType,
                               IsInternational = s.IsInternational,
                               DateCreated = s.DateCreated,
-                              DeliveryOptionId = s.DeliveryOptionId                        
+                              DeliveryOptionId = s.DeliveryOptionId,
+                              DepositStatus = s.DepositStatus,
+                              PaymentMethod = i.PaymentMethod
                           });
             return result;
         }

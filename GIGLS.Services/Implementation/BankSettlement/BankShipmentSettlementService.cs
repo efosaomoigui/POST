@@ -5,6 +5,7 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.BankSettlement;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
@@ -24,13 +25,15 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUserService _userService;
         private readonly INumberGeneratorMonitorService _service;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly IInvoiceService _invoiceService;
 
-        public BankShipmentSettlementService(IUnitOfWork uow, IWalletService walletService, IUserService userService, INumberGeneratorMonitorService service, IGlobalPropertyService globalPropertyService)
+        public BankShipmentSettlementService(IUnitOfWork uow, IWalletService walletService, IUserService userService, INumberGeneratorMonitorService service, IGlobalPropertyService globalPropertyService, IInvoiceService invoiceservice)
         {
             _uow = uow;
             _walletService = walletService;
             _userService = userService;
             _service = service;
+            _invoiceService = invoiceservice;
             MapperConfig.Initialize();
             _globalPropertyService = globalPropertyService;
         }
@@ -38,7 +41,8 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<IEnumerable<InvoiceViewDTO>> GetCashShipmentSettlement()
         {
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-            var allShipments = _uow.Invoice.GetAllFromInvoiceView();
+            //var allShipments = _uow.Invoice.GetAllFromInvoiceView();
+            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
             allShipments = allShipments.Where(s => s.PaymentMethod == "Cash" && s.PaymentStatus == PaymentStatus.Paid);
 
             //added for GWA and GWARIMPA service centres
@@ -114,7 +118,8 @@ namespace GIGLS.Services.Implementation.Wallet
             decimal total = 0;
 
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-            var allShipments = _uow.Invoice.GetAllFromInvoiceView();
+            //var allShipments = _uow.Invoice.GetAllFromInvoiceView();
+            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
             allShipments = allShipments.Where(s => s.PaymentMethod == "Cash" && s.PaymentStatus == PaymentStatus.Paid);
             //allShipments = allShipments.Where(s => s.DateCreated >= startdate && s.DateCreated <= enddate);
             allShipments = allShipments.Where(s => s.DepositStatus ==0 && s.DateCreated >= globalpropertiesdate);
@@ -299,7 +304,8 @@ namespace GIGLS.Services.Implementation.Wallet
             decimal total = 0;
 
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-            var allShipments = _uow.Invoice.GetAllFromInvoiceView();
+            //var allShipments = _uow.Invoice.GetAllFromInvoiceView();
+            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
 
             //Filter by deposited code should come here
 
@@ -354,7 +360,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (bkoc.DepositType == DepositType.Shipment)
                 {
                     //Validate the user search result set for newly generated code to ensuree a unique group always
-                    var allShipments = _uow.Invoice.GetAllFromInvoiceView();
+                    //var allShipments = _uow.Invoice.GetAllFromInvoiceView();
+                    var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
                     allShipments = allShipments.Where(s => s.PaymentMethod == "Cash" && s.PaymentStatus == PaymentStatus.Paid);
                     allShipments = allShipments.Where(s => s.DepositStatus == 0);
 
