@@ -310,16 +310,3 @@ namespace GIGLS.Core
         }
     }
 }
-                config.CreateMap<SLASignedUser, SLASignedUserDTO>();
-                config.CreateMap<SLASignedUserDTO, SLASignedUser>();
-
-                config.CreateMap<CashOnDeliveryRegisterAccount, CashOnDeliveryRegisterAccountDTO>();
-                config.CreateMap<CashOnDeliveryRegisterAccountDTO, CashOnDeliveryRegisterAccount>();
-
-                config.CreateMap<BankProcessingOrderForShipmentAndCOD, InvoiceView>();
-            });
-
-            isInit = true;
-        }
-    }
-}
