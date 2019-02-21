@@ -1,9 +1,8 @@
 ﻿namespace GIGLS.Core.Enums
 {
-    public enum AccountType
+    public enum DepositType
     {
-        InventoryAccount,
-        BookingAccount,
-        MaintenanceAccount
+        Shipment = 1,
+        COD
     }
 }

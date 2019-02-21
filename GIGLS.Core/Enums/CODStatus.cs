@@ -6,4 +6,12 @@
         Pending,
         Processed
     }
+
+    public enum CODStatushistory
+    {
+        Created = 1,
+        CollectedByDispatch,
+        RecievedAtServiceCenter, 
+        Banked
+    }
 }

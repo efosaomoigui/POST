@@ -2,6 +2,7 @@
 using GIGLS.INFRASTRUCTURE.SoftDeleteHandler;
 using GIGLS.Core.View;
 using System.Data.Entity.ModelConfiguration.Conventions;
+using GIGLS.Core.Domain.Wallet;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -19,7 +20,6 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<CustomerView> CustomerView { get; set; }
         public DbSet<ShipmentTrackingView> ScanTrackingView { get; set; }
         public DbSet<WalletPaymentLogView> WalletPaymentLogView { get; set; }
-        
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

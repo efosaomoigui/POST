@@ -207,7 +207,8 @@ namespace GIGLS.Services.Implementation.Fleets
                     Location = serviceCenter.Name,
                     Status = scanStatus,
                     DateTime = DateTime.Now,
-                    UserId = currentUserId
+                    UserId = currentUserId,
+                    ServiceCentreId = serviceCenter.ServiceCentreId
                 };
                 _uow.ShipmentTracking.Add(newShipmentTracking);
             }

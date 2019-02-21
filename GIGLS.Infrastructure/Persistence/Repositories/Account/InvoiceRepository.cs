@@ -10,6 +10,7 @@ using AutoMapper;
 using GIGLS.CORE.DTO.Report;
 using System;
 using GIGLS.Core.View;
+using GIGLS.Core.Domain.Wallet;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 {
@@ -214,6 +215,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             return invoices;
         }
 
+        public IQueryable<InvoiceView> GetAllFromInvoiceViewFromDateRange(string startdate, string enddate)
+        {
+            var invoices = _GIGLSContextForView.InvoiceView.AsQueryable();
+            return invoices;
+        }
+
         public IQueryable<CustomerView> GetAllFromCustomerView()
         {
             var customers = _GIGLSContextForView.CustomerView.AsQueryable();
@@ -238,7 +245,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               CompanyType = s.CompanyType,
                               IsInternational = s.IsInternational,
                               DateCreated = s.DateCreated,
-                              DeliveryOptionId = s.DeliveryOptionId                        
+                              DeliveryOptionId = s.DeliveryOptionId,
+                              DepositStatus = s.DepositStatus,
+                              PaymentMethod = i.PaymentMethod
                           });
             return result;
         }

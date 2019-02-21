@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.IServices;
+﻿using GIGLS.Core.DTO.BankSettlement;
+using GIGLS.Core.IServices;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,9 @@ namespace GIGLS.Services.Implementation
         public string Code { get; set; }
         public string ShortDescription { get; set; }
         public TResponse Object { get; set; }
-        public int Total { get; set; }
+        public decimal Total { get; set; }
+        public string RefCode { get; set; }
+        public BankProcessingOrderCodesDTO Shipmentcodref { get; set; }   
 
         public Dictionary<string, IEnumerable<string>> ValidationErrors { get; set; }
     }

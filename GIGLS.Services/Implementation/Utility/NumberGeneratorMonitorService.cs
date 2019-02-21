@@ -177,6 +177,14 @@ namespace GIGLS.Services.Implementation.Utility
                     {
                         return "EMP";
                     }
+                case NumberGeneratorType.BankProcessingOrderForShipment:
+                    {
+                        return "BNKS";
+                    }
+                case NumberGeneratorType.BankProcessingOrderForCOD:
+                    {
+                        return "BNKC";
+                    }
                 default:
                     {
                         return "IND";

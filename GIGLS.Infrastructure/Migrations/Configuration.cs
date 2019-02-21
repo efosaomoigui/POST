@@ -11,6 +11,7 @@ namespace GIGLS.Infrastructure.Migrations
         {
             AutomaticMigrationsEnabled = true;
             AutomaticMigrationDataLossAllowed = true;
+
         }
 
         protected override void Seed(GIGLS.Infrastructure.Persistence.GIGLSContext context)

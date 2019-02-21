@@ -31,7 +31,7 @@ namespace GIGLS.Infrastructure.Persistence
             Configuration.LazyLoadingEnabled = false;
             Configuration.ProxyCreationEnabled = false;
 
-            //Database.Log = s => System.Diagnostics.Debug.WriteLine(s);
+            Database.Log = s => System.Diagnostics.Debug.WriteLine(s);
         }
 
         public static GIGLSContext Create()
@@ -155,6 +155,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<WalletNumber> WalletNumbers { get; set; }
         public DbSet<CashOnDeliveryAccount> CashOnDeliveryAccount { get; set; }
         public DbSet<CashOnDeliveryBalance> CashOnDeliveryBalance { get; set; }
+        public DbSet<CashOnDeliveryRegisterAccount> CashOnDeliveryRegisterAccount { get; set; }
 
         //Weight Limit
         public DbSet<WeightLimit> WeightLimits { get; set; }
@@ -215,12 +216,17 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<OverdueShipment> OverdueShipment { get; set; }
 
         //international request
+
         public DbSet<InternationalRequestReceiver> InternationalRequestReceivers { get; set; }
         public DbSet<InternationalRequestReceiverItem> InternationalRequestReceiverItems { get; set; }
 
         //SLA
         public DbSet<SLA> SLAs { get; set; }
         public DbSet<SLASignedUser> SLASignedUsers { get; set; }
+
+        //Bank Settlement Order
+        public DbSet<BankProcessingOrderForShipmentAndCOD> BankProcessingOrderForShipmentAndCOD { get; set; }
+        public DbSet<BankProcessingOrderCodes> BankProcessingOrderCodes { get; set; }
 
         #endregion
 
