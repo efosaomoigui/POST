@@ -223,82 +223,55 @@ namespace GIGLS.Services.Implementation.Report
             }
         }
 
-        
+
         public async Task<DashboardDTO> GetShipmentProgressSummary(BaseFilterCriteria baseFilterCriteria)
         {
-            var dashboardDTO = new DashboardDTO();
+            var dashboardDTO = new DashboardDTO()
+            {
+                TotalCustomers = 0,
+                TotalShipmentAwaitingCollection = 0,
+                TotalShipmentDelivered = 0,
+                TotalShipmentExpected = 0,
+                TotalShipmentOrdered = 0
+            };
+
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             
             try
             {
-                var currentUserId = await _userService.GetCurrentUserId();
-                var currentUser = await _userService.GetUserById(currentUserId);
-                var userClaims = await _userService.GetClaimsAsync(currentUserId);
-
-                string[] claimValue = null;
-                foreach (var claim in userClaims)
+                if (baseFilterCriteria.ServiceCentreId > 0)
                 {
-                    if (claim.Type == "Privilege")
-                    {
-                        claimValue = claim.Value.Split(':'); 
-                    }
-                }
-                if (claimValue == null)
-                {
-                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                    serviceCenterIds = new int[] { baseFilterCriteria.ServiceCentreId };
                 }
 
-                if (claimValue[0] == "Public")
+                if (baseFilterCriteria.StationId > 0)
                 {
-                    dashboardDTO = new DashboardDTO()
-                    {
-                        Public = "Public",
-                        TotalCustomers = 0,
-                        TotalShipmentAwaitingCollection = 0,
-                        TotalShipmentDelivered = 0,
-                        TotalShipmentExpected = 0,
-                        TotalShipmentOrdered = 0
-                    };
+                    serviceCenterIds = _uow.ServiceCentre.GetAllAsQueryable()
+                        .Where(x => x.StationId == baseFilterCriteria.StationId).Select(x => x.ServiceCentreId).ToArray();
                 }
-                else if (claimValue[0] == "Global")
+
+                if (baseFilterCriteria.StateId > 0)
                 {
-                    //dashboardDTO = await GetDashboardForGlobal(dashboardFilterCriteria);
+                    var stations = _uow.Station.GetAllAsQueryable().Where(x => x.StateId == baseFilterCriteria.StateId).Select(x => x.StationId);
+                    serviceCenterIds = _uow.ServiceCentre.GetAllAsQueryable()
+                        .Where(w => stations.Contains(w.StationId)).Select(s => s.ServiceCentreId).ToArray();                                        
                 }
-                else if (claimValue[0] == "Station")
-                {
-                    //dashboardDTO = await GetDashboardForStation(int.Parse(claimValue[1]), dashboardFilterCriteria);
-                }
-                else if (claimValue[0] == "ServiceCentre")
-                {
-                    dashboardDTO = await GetShipmentProgressSummaryForServiceCentre(int.Parse(claimValue[1]), baseFilterCriteria);
-                }
-                else
-                {
-                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
-                }
+                
+                dashboardDTO = await GetShipmentProgressSummary(serviceCenterIds, baseFilterCriteria);
             }
             catch (Exception ex)
             {
                 throw ex;
             }
 
-            //dashboardDTO = new DashboardDTO()
-            //{
-            //    Public = "Public",
-            //    TotalCustomers = 0,
-            //    TotalShipmentAwaitingCollection = 0,
-            //    TotalShipmentDelivered = 0,
-            //    TotalShipmentExpected = 0,
-            //    TotalShipmentOrdered = 0
-            //};
-
             return dashboardDTO;
         }
 
 
-        private async Task<DashboardDTO> GetShipmentProgressSummaryForServiceCentre(int serviceCenterId, BaseFilterCriteria baseFilterCriteria)
+        private async Task<DashboardDTO> GetShipmentProgressSummary(int[] serviceCenterId, BaseFilterCriteria baseFilterCriteria)
         {
             var dashboardDTO = new DashboardDTO();
-                      
+
             //get startDate and endDate
             var queryDate = baseFilterCriteria.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
@@ -306,57 +279,57 @@ namespace GIGLS.Services.Implementation.Report
 
             //1. Get Total Shipment Created
             var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
-            dashboardDTO.TotalShipmentOrdered = allShipmentsQueryable.Where(s => serviceCenterId == s.DepartureServiceCentreId).Count();
+            dashboardDTO.TotalShipmentOrdered = allShipmentsQueryable.Where(s => serviceCenterId.Contains(s.DepartureServiceCentreId)).Count();
 
             //2. Get Total Shipment Delivered   
             //2a. Get collected shipment by date filtering
             List<string> shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
-                .Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC) 
+                .Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC)
                 && x.DateCreated >= startDate && x.DateCreated < endDate).Select(x => x.Waybill).Distinct().ToList();
 
             //2b. Get Shipments that its destination is the service centre
             List<string> shipmentsWaybills = _uow.Invoice.GetAllFromInvoiceAndShipments()
-                .Where(s => serviceCenterId == s.DestinationServiceCentreId && s.IsShipmentCollected == true).Select(x => x.Waybill).Distinct().ToList();
+                .Where(s => serviceCenterId.Contains(s.DestinationServiceCentreId) && s.IsShipmentCollected == true).Select(x => x.Waybill).Distinct().ToList();
 
             //2c. Extras the current login staff service centre shipment from the shipment collection
             shipmentCollection = shipmentCollection.Where(x => shipmentsWaybills.Contains(x)).ToList();
             dashboardDTO.TotalShipmentDelivered = shipmentCollection.Count();
-            
+
 
             //3. Get Total Shipment Expected filter by date using Date Created
             //3a. Get shipments coming to the service centre 
             List<string> allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments()
-                .Where(s => s.IsShipmentCollected == false && serviceCenterId == s.DestinationServiceCentreId
+                .Where(s => s.IsShipmentCollected == false && serviceCenterId.Contains(s.DestinationServiceCentreId)
                 && s.DateCreated >= startDate && s.DateCreated < endDate).Select(x => x.Waybill).ToList();
-            
-            //For waybill to be collected it must have satisfy the follwoing Shipment Scan Status
+
+            //3b. For waybill to be collected it must have satisfy the follwoing Shipment Scan Status
             //Collected by customer (OKC & OKT), Return (SSR), Reroute (SRR) : All status satisfy IsShipmentCollected above
             //shipments that have arrived destination service centre or cancelled should not be displayed in expected shipments
             List<string> shipmetCollection = _uow.ShipmentCollection.GetAllAsQueryable()
                 .Where(x => !(x.ShipmentScanStatus == ShipmentScanStatus.OKC && x.ShipmentScanStatus == ShipmentScanStatus.OKT
-                && x.ShipmentScanStatus == ShipmentScanStatus.SSR && x.ShipmentScanStatus == ShipmentScanStatus.SRR 
+                && x.ShipmentScanStatus == ShipmentScanStatus.SSR && x.ShipmentScanStatus == ShipmentScanStatus.SRR
                 && x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.ShipmentScanStatus == ShipmentScanStatus.SSC)).Select(w => w.Waybill).ToList();
 
-            //remove all the waybills that at the collection center from the income shipments
+            //3c. remove all the waybills that at the collection center from the income shipments
             allShipments = allShipments.Where(s => !shipmetCollection.Contains(s)).ToList();
             dashboardDTO.TotalShipmentExpected = allShipments.Count();
 
 
             //4. Get Total Shipment Awaiting Collection
             List<string> shipmentsInWaybills = _uow.Invoice.GetAllFromInvoiceAndShipments()
-                .Where(s => s.IsShipmentCollected == false && serviceCenterId == s.DestinationServiceCentreId).Select(x => x.Waybill).Distinct().ToList();
+                .Where(s => s.IsShipmentCollected == false && serviceCenterId.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
             List<string> shipmentInCollection = _uow.ShipmentCollection.GetAllAsQueryable()
-                .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF 
+                .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF
                 && x.DateCreated >= startDate && x.DateCreated < endDate).Select(x => x.Waybill).ToList();
 
             shipmentInCollection = shipmentInCollection.Where(s => shipmentsInWaybills.Contains(s)).ToList();
-            dashboardDTO.TotalShipmentAwaitingCollection = shipmentsInWaybills.Count();                       
+            dashboardDTO.TotalShipmentAwaitingCollection = shipmentInCollection.Count();
 
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
-            dashboardDTO.GraphData = new List<GraphDataDTO> { }; 
+            dashboardDTO.GraphData = new List<GraphDataDTO> { };
 
             return dashboardDTO;
-        }
+        }        
     }
 }
