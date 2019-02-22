@@ -237,10 +237,13 @@ namespace GIGLS.Services.Implementation.Customers
             customer.PhoneNumber = customerDto.PhoneNumber;
             customer.State = customerDto.State;
             customer.Password = customerDto.Password;
-            var user = _userService.GetUserByEmail(customerDto.Email).Result;
+            var user = await _userService.GetUserByEmail(customerDto.Email);
             user.FirstName = customerDto.FirstName;
             user.LastName = customerDto.LastName;
             user.PhoneNumber = customerDto.PhoneNumber;
+            user.Password = customerDto.Password;
+            user.UserChannelPassword = customerDto.Password;
+            user.ConfirmPassword = customerDto.Password;
             var m = _userService.UpdateUser(user.Id, user);
             _uow.Complete();
            

@@ -92,8 +92,15 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     newCompany.Email = newCompany.CustomerCode;
                 }
-
-                var password = await _passwordGenerator.Generate();
+                var password = "";
+                if (newCompany.Password == null)
+                {
+                    password = await _passwordGenerator.Generate();
+                }
+                else
+                {
+                    password = newCompany.Password;
+                }
                 var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
                 {
                     ConfirmPassword = password,
@@ -255,7 +262,8 @@ namespace GIGLS.Services.Implementation.Customers
                         person.PhoneNumber = personDto.PhoneNumber;
                         person.CompanyId = personDto.CompanyId;
                     }
-                }                
+                }
+                
                 _uow.Complete();
             }
             catch (Exception)

@@ -592,12 +592,46 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             var Otp = await _otpService.IsOTPValid(OTP);
             if (Otp != null && Otp.IsActive == true)
             {
-                var jObject = JObject.FromObject(Otp);
-                return new ServiceResponse<JObject>
+                string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+                string getTokenResponse;
+
+                return await HandleApiOperationAsync(async () =>
                 {
-                    ShortDescription = "User has been verified",
-                    Object = jObject
-                };
+                    using (var client = new HttpClient())
+                    {
+                        //setup client
+                        client.BaseAddress = new Uri(apiBaseUri);
+                        client.DefaultRequestHeaders.Accept.Clear();
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                        //setup login data
+                        var formContent = new FormUrlEncodedContent(new[]
+                            {
+                         new KeyValuePair<string, string>("grant_type", "password"),
+                         new KeyValuePair<string, string>("Username", Otp.Username),
+                         new KeyValuePair<string, string>("Password", Otp.UserChannelPassword),
+                         });
+
+                        //setup login data
+                        HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
+
+                        if (!responseMessage.IsSuccessStatusCode)
+                        {
+                            throw new GenericException("Operation could not complete login successfully:");
+                        }
+
+                        //get access token from response body
+                        var responseJson = await responseMessage.Content.ReadAsStringAsync();
+                        var jObject = JObject.Parse(responseJson);
+
+                        getTokenResponse = jObject.GetValue("access_token").ToString();
+
+                        return new ServiceResponse<JObject>
+                        {
+                            Object = jObject
+                        };
+                    }
+                });
             }
             else
             {
@@ -618,23 +652,35 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         public async Task<IServiceResponse<SignResponseDTO>> ResendOTP(UserDTO user)
         {
             var m = new SignResponseDTO();
-            var Otp = await _otpService.GenerateOTP(user);
-            var message = await _otpService.SendOTP(Otp);
-            var CombinedMessage = message.Split(',');
-            var EmailResponse = CombinedMessage[0];
-            var PhoneResponse = CombinedMessage[1];
-            if (EmailResponse == "Accepted")
+            var registerUser = await _otpService.CheckDetails(user.Email);
+            if (registerUser == null)
             {
-                m.EmailSent = true;
+                return new ServiceResponse<SignResponseDTO>
+                {
+                    ShortDescription = "User has not registered",
+                    Object = m
+                };
             }
-            if (PhoneResponse == "OK")
+            else
             {
-                m.PhoneSent = true;
+                var Otp = await _otpService.GenerateOTP(registerUser);
+                var message = await _otpService.SendOTP(Otp);
+                var CombinedMessage = message.Split(',');
+                var EmailResponse = CombinedMessage[0];
+                var PhoneResponse = CombinedMessage[1];
+                if (EmailResponse == "Accepted")
+                {
+                    m.EmailSent = true;
+                }
+                if (PhoneResponse == "OK")
+                {
+                    m.PhoneSent = true;
+                }
+                return new ServiceResponse<SignResponseDTO>
+                {
+                    Object = m
+                };
             }
-            return new ServiceResponse<SignResponseDTO>
-            {
-                Object = m
-            };
         }
 
         [AllowAnonymous]
@@ -642,27 +688,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("login/{UserDetail}/{Password}")]
         public async Task<IServiceResponse<JObject>> Login(string UserDetail, string Password)
         {
-            UserDTO user = new UserDTO();
-            bool isEmail = Regex.IsMatch(UserDetail, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
-            if (isEmail)
-            {
-                UserDetail.Trim();
-                user = await _userService.GetUserByEmail(UserDetail);
-            }
-            else
-            {
-                bool IsPhone = Regex.IsMatch(UserDetail, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
-                if (IsPhone)
-                {
-                    
-                    UserDetail = "+234" + UserDetail.Remove(0, 1); ;
-                    user = await _userService.GetUserByPhone(UserDetail);
-                }
-                else
-                {
-                    throw new GenericException("Invalid Details");
-                }
-            }
+            
+            var user = await _otpService.CheckDetails(UserDetail);
             if (user.Username != null)
             {
                 user.Username = user.Username.Trim();

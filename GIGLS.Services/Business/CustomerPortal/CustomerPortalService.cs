@@ -32,6 +32,7 @@ using GIGLS.Core.DTO.SLA;
 using GIGLS.Core.IServices.Sla;
 using GIGLS.Core.Enums;
 using GIGLS.Core.View;
+using GIGLS.Services.Implementation;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -405,10 +406,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                 if (result != null)
                 {
                     user.UserChannelCode = result.CustomerCode;
-                    user.CustomerId = result.IndividualCustomerId;
                 }
                 else
                 {
+
                     throw new GenericException("Customer could not be created");
                 }
             }

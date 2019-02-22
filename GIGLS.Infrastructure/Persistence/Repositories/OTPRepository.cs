@@ -22,7 +22,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
             try
             {
                 message = Context.OTP.Where(x => x.Otp == OTP).FirstOrDefault();
-                if (message != null)
+                if (message == null)
+                {
+                    throw new GenericException("Invalid OTP");
+                }
+                else if (message != null)
                 {
                     TimeSpan span = LatestTime.Subtract(message.DateCreated);
                     int difference = Convert.ToInt32(span.TotalMinutes);
