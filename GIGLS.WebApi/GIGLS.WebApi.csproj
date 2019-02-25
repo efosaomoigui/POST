@@ -409,8 +409,10 @@
     </Content>
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP %284%29.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP %285%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %284%29.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %285%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %2814%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy.pubxml" />
