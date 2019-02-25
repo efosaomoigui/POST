@@ -393,10 +393,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                     PhoneNumber = user.PhoneNumber,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
-                    Name = user.FirstName,
+                    Name = user.Organisation,
                     CustomerType = customerType,
                     CompanyType = companyType,
                     Password = user.Password
+
                 };
 
 
