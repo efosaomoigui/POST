@@ -638,7 +638,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 var jObject = JObject.FromObject(Otp);
                 return new ServiceResponse<JObject>
                 {
-                    ShortDescription = "User has not been verified"
+                    ShortDescription = "User has not been verified",
+                    Object = jObject
                    
                 };
             }

@@ -406,10 +406,11 @@
     </Content>
     <Content Include="app.manifest">
       <SubType>Designer</SubType>
-    </Content>    
+    </Content>
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP %283%29.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP %284%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %283%29.pubxml" />
-    
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %284%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %2814%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy.pubxml" />
@@ -430,8 +431,8 @@
     <Folder Include="Controllers\Vendors\" />
     <Folder Include="Controllers\Workshops\" />
     <Folder Include="ReportTemplate\download\" />
-    <Folder Include="Views\InvoiceReminder\" />
-    <Folder Include="Views\Reminder\" />
+    <Folder Include="ReportTemplate\Views\InvoiceReminder\" />
+    <Folder Include="ReportTemplate\Views\Reminder\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GIGLS.Core\GIGLS.Core.csproj">
