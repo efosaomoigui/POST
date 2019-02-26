@@ -83,11 +83,20 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                        ServiceCenterId = processingorderCode.ServiceCenterId,
                                        Status = processingorderCode.Status,
                                        Waybill = processingorderCode.Waybill,
-                                       Amount = processingorderCode.Amount,
+                                       GrandTotal = processingorderCode.GrandTotal,
                                        CODAmount = processingorderCode.CODAmount ?? 0,
-                                       ServiceCenter = processingorderCode.ServiceCenter,
+                                       ServiceCenter = processingorderCode.ServiceCenter
                                    };
             var result = processingorders.ToList();
+            return Task.FromResult(result);
+        }
+
+        public Task<IQueryable<BankProcessingOrderForShipmentAndCOD>> GetAllWaybillsForBankProcessingOrdersAsQueryable(DepositType type)
+        {
+            var processingordersvalue = Context.BankProcessingOrderForShipmentAndCOD.AsQueryable();
+            processingordersvalue = processingordersvalue.Where(s => s.DepositType == type);
+
+            var result = processingordersvalue;
             return Task.FromResult(result);
         }
 

@@ -15,6 +15,7 @@ namespace GIGLS.Core.IRepositories.BankSettlement
         Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetProcessingOrderForShipmentAndCOD(DepositType type);
         Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetProcessingOrderForShipmentAndCODByRefCode(string refcode);
         Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetAllWaybillsForBankProcessingOrders(DepositType type);
+        Task<IQueryable<BankProcessingOrderForShipmentAndCOD>> GetAllWaybillsForBankProcessingOrdersAsQueryable(DepositType type);
     }
 
     public interface IBankProcessingOrderCodesRepository : IRepository<BankProcessingOrderCodes> 
@@ -23,4 +24,6 @@ namespace GIGLS.Core.IRepositories.BankSettlement
         Task<List<BankProcessingOrderCodesDTO>> GetProcessingOrderCodebyRefCode(string refcode);
         IQueryable<BankProcessingOrderCodesDTO> GetBankOrderProcessingCodeAsQueryable();
     }
+
+    
 }

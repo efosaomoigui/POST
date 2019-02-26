@@ -11,7 +11,7 @@ namespace GIGLS.Core.IServices.BankSettlement
     public interface IBankShipmentSettlementService : IServiceDependencyMarker
     {
         Task<IEnumerable<InvoiceViewDTO>> GetCashShipmentSettlement();
-		Task<Tuple<string, List<GIGLS.Core.DTO.Account.InvoiceViewDTO>, decimal>> GetBankProcessingOrderForShipment(DateTime requestdate, DepositType type);
+		Task<Tuple<string, List<GIGLS.Core.DTO.Account.InvoiceViewDTO>, decimal>> GetBankProcessingOrderForShipment(DepositType type);
 
         Task<Tuple<string, List<BankProcessingOrderForShipmentAndCODDTO>, decimal, BankProcessingOrderCodesDTO>> SearchBankProcessingOrder(string refcode, DepositType type);
         Task<Tuple<string, List<BankProcessingOrderForShipmentAndCODDTO>, decimal, List<BankProcessingOrderCodesDTO>>> SearchBankProcessingOrder2(string refcode, DepositType type);
@@ -26,6 +26,9 @@ namespace GIGLS.Core.IServices.BankSettlement
         Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCode(DepositType type);
         Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetBankProcessingOrderForShipmentAndCOD(DepositType type);
 
-        Task<Tuple<string, List<CashOnDeliveryRegisterAccountDTO>, decimal>> GetBankProcessingOrderForCOD(DateTime searchdate, DepositType type);
+        Task<Tuple<string, List<CashOnDeliveryRegisterAccountDTO>, decimal>> GetBankProcessingOrderForCOD(DepositType type);
+
+        Task MarkAsVerified(BankProcessingOrderCodesDTO refcode);
+        Task MarkAsVerified_cod(BankProcessingOrderCodesDTO refcode);
     }
 }

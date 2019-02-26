@@ -15,7 +15,7 @@ namespace GIGLS.Core.Domain.Wallet
     }
 
     public class CashOnDeliveryRegisterAccount : BaseDomain, IAuditable
-    {
+    { 
         public int CashOnDeliveryRegisterAccountId { get; set; }
         public decimal Amount { get; set; }
         public string UserId { get; set; }
@@ -25,6 +25,7 @@ namespace GIGLS.Core.Domain.Wallet
         public string ServiceCenterCode { get; set; }
         public string Description { get; set; }
         public PaymentType PaymentType { get; set; }
-        public int DepositStatus { get; set; }
+        public DepositStatus DepositStatus { get; set; }
+        public string RefCode { get; set; } 
     }
 }
