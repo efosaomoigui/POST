@@ -13,6 +13,7 @@ using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.MessagingLog;
 using GIGLS.Core.DTO.MessagingLog;
+using System.Web;
 
 namespace GIGLS.Services.Implementation.Messaging
 {
@@ -212,6 +213,9 @@ namespace GIGLS.Services.Implementation.Messaging
                         }
                     }
 
+                    //B. decode url parameter
+                    messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
                     //C. populate the message subject
                     messageDTO.Subject =
                         string.Format(messageDTO.Subject, strArray);
@@ -253,6 +257,12 @@ namespace GIGLS.Services.Implementation.Messaging
             if (!toPhoneNumber.Trim().StartsWith("+"))  //2347011111111
             {
                 toPhoneNumber = $"+{toPhoneNumber}";
+            }
+            //3
+            if (!toPhoneNumber.Trim().StartsWith("2340"))  //23407011111111
+            {
+                toPhoneNumber = toPhoneNumber.Remove(0, 4);
+                toPhoneNumber = $"+234{toPhoneNumber}";
             }
 
             //assign
