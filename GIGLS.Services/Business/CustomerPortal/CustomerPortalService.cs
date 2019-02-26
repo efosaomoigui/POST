@@ -405,7 +405,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 if (result != null)
                 {
                     user.UserChannelCode = result.CustomerCode;
-                    user.CustomerId = result.IndividualCustomerId;
+                    //SSuser.CustomerId = result.IndividualCustomerId;
                 }
                 else
                 {
