@@ -143,7 +143,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     "Shipment Description",
                     "Total Shipment Amount",
                     "Shipment Creation Date",
-                    "Shipment Creation Time"
+                    "Shipment Creation Time",
+                    "Address Country"
                 };
 
                 var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
@@ -185,6 +186,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[9] = invoice.Amount.ToString();
                     strArray[10] = invoice.DateCreated.ToLongDateString();
                     strArray[11] = invoice.DateCreated.ToShortTimeString();
+                    strArray[12] = customerObj.Address;
 
                     //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
                     if (messageDTO.MessageType == MessageType.ARF &&
@@ -209,6 +211,20 @@ namespace GIGLS.Services.Implementation.Messaging
                         if (homeDeliveryMessageDTO != null)
                         {
                             messageDTO.Body = homeDeliveryMessageDTO.Body;
+                        }
+                    }
+
+                    //B2. added for International Shipment email, when scan is created at Head Office
+                    var internationalPhoneNumber = customerObj.PhoneNumber;
+                    if (messageDTO.MessageType == MessageType.CRT &&
+                        internationalPhoneNumber.ToUpper().StartsWith("GIG"))
+                    {
+                        var emailMessages = await _messageService.GetEmailAsync();
+                        var internationalEmailMessageDTO = emailMessages.FirstOrDefault(s => s.MessageType == MessageType.ISE);
+
+                        if (internationalEmailMessageDTO != null)
+                        {
+                            messageDTO.Body = internationalEmailMessageDTO.Body;
                         }
                     }
 
