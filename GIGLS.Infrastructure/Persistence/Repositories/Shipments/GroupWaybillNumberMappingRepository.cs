@@ -23,8 +23,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         public Task<List<GroupWaybillNumberMappingDTO>> GetGroupWaybillMappings(int[] serviceCentreIds)
         {
             var groupwaybillMapping = Context.GroupWaybillNumberMapping.AsQueryable();
-
-            var serviceCentreWaybills = new List<string>();
+            
             if (serviceCentreIds.Length > 0)
             {
                 groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
@@ -62,13 +61,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         public Task<List<GroupWaybillNumberMappingDTO>> GetGroupWaybillMappings(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds)
         {
             var groupwaybillMapping = Context.GroupWaybillNumberMapping.AsQueryable();
-
-            var serviceCentreWaybills = new List<string>();
+            
             if (serviceCentreIds.Length > 0)
             {
-                //serviceCentreWaybills = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId)).
-                //    Select(s => s.Waybill).ToList();
-                //groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreWaybills.Contains(s.WaybillNumber));
                 groupwaybillMapping = groupwaybillMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
             }
 
