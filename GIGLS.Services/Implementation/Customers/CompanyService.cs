@@ -92,8 +92,15 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     newCompany.Email = newCompany.CustomerCode;
                 }
-
-                var password = await _passwordGenerator.Generate();
+                var password = "";
+                if (newCompany.Password == null)
+                {
+                    password = await _passwordGenerator.Generate();
+                }
+                else
+                {
+                    password = newCompany.Password;
+                }
                 var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
                 {
                     ConfirmPassword = password,
@@ -101,9 +108,9 @@ namespace GIGLS.Services.Implementation.Customers
                     DateCreated = DateTime.Now,
                     Designation = newCompany.CompanyType.ToString(),
                     Email = newCompany.Email,
-                    FirstName = newCompany.Name,
-                    LastName = newCompany.Name,
-                    Organisation = newCompany.CompanyType.ToString(),
+                    FirstName = newCompany.FirstName,
+                    LastName = newCompany.LastName,
+                    Organisation = newCompany.Name,
                     Password = password,
                     PhoneNumber = newCompany.PhoneNumber,
                     UserType = UserType.Regular,
@@ -227,6 +234,7 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     throw new GenericException("Company information does not exist");
                 }
+                var user = await _userService.GetUserByPhone(companyDto.PhoneNumber);
                 company.Name = companyDto.Name;
                 company.PhoneNumber = companyDto.PhoneNumber;
                 company.Address = companyDto.Address;
@@ -255,7 +263,8 @@ namespace GIGLS.Services.Implementation.Customers
                         person.PhoneNumber = personDto.PhoneNumber;
                         person.CompanyId = personDto.CompanyId;
                     }
-                }                
+                }
+                
                 _uow.Complete();
             }
             catch (Exception)

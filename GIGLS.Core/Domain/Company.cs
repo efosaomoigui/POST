@@ -36,5 +36,8 @@ namespace GIGL.GIGLS.Core.Domain
         public string ReturnOption { get; set; }
         public int ReturnServiceCentre { get; set; }
         public string ReturnAddress { get; set; }
+        public string Password { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
     }
 }

@@ -32,6 +32,7 @@ using GIGLS.Core.DTO.SLA;
 using GIGLS.Core.IServices.Sla;
 using GIGLS.Core.Enums;
 using GIGLS.Core.View;
+using GIGLS.Services.Implementation;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -392,23 +393,22 @@ namespace GIGLS.Services.Business.CustomerPortal
                     PhoneNumber = user.PhoneNumber,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
-                    Name = user.FirstName,
+                    Name = user.Organisation,
                     CustomerType = customerType,
                     CompanyType = companyType,
                     Password = user.Password
+
                 };
-
-
-                //2. Create customer data
+         //2. Create customer data
                 var result = await _customerService.CreateCustomer(customer);
 
                 if (result != null)
                 {
                     user.UserChannelCode = result.CustomerCode;
-                    //SSuser.CustomerId = result.IndividualCustomerId;
                 }
                 else
                 {
+
                     throw new GenericException("Customer could not be created");
                 }
             }

@@ -8,6 +8,8 @@ using System;
 using GIGLS.Core.IMessage;
 using AutoMapper;
 using GIGLS.Core.IServices.User;
+using System.Text.RegularExpressions;
+using GIGLS.Infrastructure;
 
 namespace GIGLS.Services.Implementation
 {
@@ -43,14 +45,12 @@ namespace GIGLS.Services.Implementation
        
         public  async Task<OTPDTO> GenerateOTP(UserDTO user)
         {
-           
-                int id = GeneratePassword();
-
+               int id = GeneratePassword();
                 var otp = new OTPDTO
                 {
                     EmailAddress = user.Email,
                     PhoneNumber = user.PhoneNumber,
-                    CustomerId = user.CustomerId,
+                    CustomerId = user.UserChannelCode,
                     Otp = id
                 };
 
@@ -87,6 +87,34 @@ namespace GIGLS.Services.Implementation
             var EmailResponse = await _EmailService.SendAsync(Emailmessage);
             var Smsresponse = await _SmsService.SendAsync(SMSmessage);
            return $"{EmailResponse},{Smsresponse}";
+        }
+        public async Task<UserDTO> CheckDetails(string user)
+        {
+            UserDTO registerUser = new UserDTO();
+            bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            if (isEmail)
+            {
+                user.Trim();
+                registerUser = await _UserService.GetUserByEmail(user);
+            }
+            else
+            {
+                bool IsPhone = Regex.IsMatch(user, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
+                if (IsPhone)
+                {
+                    if (!user.Contains("+234"))
+                    {
+                        user = "+234" + user.Remove(0, 1);
+                    };
+                    registerUser = await _UserService.GetUserByPhone(user);
+                }
+                else
+                {
+                    throw new GenericException("Invalid Details");
+                }
+            }
+            return registerUser;
+
         }
     }
 }
