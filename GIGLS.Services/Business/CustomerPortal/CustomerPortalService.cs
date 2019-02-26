@@ -399,9 +399,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     Password = user.Password
 
                 };
-
-
-                //2. Create customer data
+         //2. Create customer data
                 var result = await _customerService.CreateCustomer(customer);
 
                 if (result != null)

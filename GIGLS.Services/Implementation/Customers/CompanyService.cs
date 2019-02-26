@@ -234,6 +234,7 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     throw new GenericException("Company information does not exist");
                 }
+                var user = await _userService.GetUserByPhone(companyDto.PhoneNumber);
                 company.Name = companyDto.Name;
                 company.PhoneNumber = companyDto.PhoneNumber;
                 company.Address = companyDto.Address;

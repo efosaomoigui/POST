@@ -43,6 +43,7 @@ namespace GIGLS.Services.Implementation.Customers
                     if (companyId > 0)
                     {
                         // update
+                        
                         customerDTO.CompanyId = companyId;
                         var companyDTO = Mapper.Map<CompanyDTO>(customerDTO);
                         await _companyService.UpdateCompany(companyId, companyDTO);

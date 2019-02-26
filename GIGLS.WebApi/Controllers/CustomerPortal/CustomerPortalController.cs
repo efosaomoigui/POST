@@ -754,6 +754,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             }
         }
 
+
+        [Authorize]
+        [HttpPost]
+        [Route("editprofile")]
+        public async Task<IServiceResponse<UserDTO>> EditProfile(UserDTO user)
+        {
+            var registerUser = await _portalService.Register(user);
+            return new ServiceResponse<UserDTO>
+            {
+                ShortDescription = "Record Updated Successfully"
+            };
+        }
+
     }
 
     }
