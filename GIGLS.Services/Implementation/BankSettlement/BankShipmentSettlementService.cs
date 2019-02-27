@@ -290,7 +290,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var bankedShipments = new List<BankProcessingOrderForShipmentAndCODDTO>();
 
             //var shipmentResult = accompanyWaybillsVals.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
-            bankedShipments = accompanyWaybillsVals.ToList(); // Mapper.Map<List<BankProcessingOrderForShipmentAndCODDTO>>(shipmentResult);
+            bankedShipments = accompanyWaybillsVals.OrderByDescending(s => s.DateCreated).ToList(); // Mapper.Map<List<BankProcessingOrderForShipmentAndCODDTO>>(shipmentResult);
 
             if (type == DepositType.Shipment)
             {
@@ -561,10 +561,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //update BankProcessingOrderCodes
             bankorder.Status = DepositStatus.Verified;
-
-            //var serviceCenters = _userService.GetPriviledgeServiceCenters();
-            var serviceCenters = await _userService.GetCurrentServiceCenter();
-            var currentCenter = serviceCenters[0].ServiceCentreId;
             var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
 
             //update BankProcessingOrderForShipmentAndCOD
@@ -603,8 +599,6 @@ namespace GIGLS.Services.Implementation.Wallet
             allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Pending);
             var codsforservicecenter = allCODs.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
 
-            var serviceCenters2 = await _userService.GetCurrentServiceCenter();
-            var currentCenter = serviceCenters2[0].ServiceCentreId;
             var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
 
             //update BankProcessingOrderForShipmentAndCOD
