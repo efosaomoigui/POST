@@ -282,6 +282,9 @@ namespace GIGLS.Services.Business.Scanning
                             {
                                 if (scan.ShipmentScanStatus == ShipmentScanStatus.SRC)
                                 {
+                                    //test for one waybill to see if it has cod
+
+
                                     //Process Shipment Return to Service centre for repackaging
                                     await ProcessReturnWaybillFromDispatch(itemWaybillDTO.Waybill);
                                 }

@@ -624,6 +624,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     var shipmentCollectionDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.OKT);
                     if(shipmentCollectionDelivered != null)
                     {
+                        //handle cod
+                        //if (codRegisterCollectsForASingleWaybill != null)
+                        //{
+                        //    //codsforservicecenter.ForEach(a => a.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter);
+                        //    if (shipmentCollectionDto.IsComingFromDispatch)
+                        //    {
+                        //        codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.CollectedByDispatch;
+                        //    }
+                        //    else
+                        //    {
+                        //        codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
+                        //    }
+
+                        //}
+
                         continue;
                     }
 
