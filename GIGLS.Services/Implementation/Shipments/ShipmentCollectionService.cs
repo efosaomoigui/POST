@@ -395,7 +395,7 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
         {
 
-            var paymentType = shipmentCollection.IsComingFromDispatch;
+            //var paymentType = shipmentCollection.IsComingFromDispatch;
 
             //check if the shipment has not been collected
             var shipmentCollected = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(shipmentCollection.Waybill) && x.ShipmentScanStatus == shipmentCollection.ShipmentScanStatus);
