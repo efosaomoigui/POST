@@ -58,5 +58,7 @@ namespace GIGLS.Core.DTO.User
         public UserChannelType UserChannelType { get; set; }
         
         public DateTime PasswordExpireDate { get; set; }
+
+        public string CustomerId { get; set; }
     }
 }

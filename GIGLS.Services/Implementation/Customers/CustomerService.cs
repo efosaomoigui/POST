@@ -33,7 +33,8 @@ namespace GIGLS.Services.Implementation.Customers
                 if (CustomerType.Company.Equals(customerDTO.CustomerType))
                 {
                     var companyId = 0;
-                    var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.Trim().ToLower());
+                    var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.Trim().ToLower() && 
+                    c.PhoneNumber == customerDTO.PhoneNumber);
                     foreach (var item in CompanyByName)
                     {
                         companyId = item.CompanyId;
@@ -42,6 +43,7 @@ namespace GIGLS.Services.Implementation.Customers
                     if (companyId > 0)
                     {
                         // update
+                        
                         customerDTO.CompanyId = companyId;
                         var companyDTO = Mapper.Map<CompanyDTO>(customerDTO);
                         await _companyService.UpdateCompany(companyId, companyDTO);
@@ -60,16 +62,12 @@ namespace GIGLS.Services.Implementation.Customers
                 if (CustomerType.IndividualCustomer.Equals(customerDTO.CustomerType))
                 {
                     var individualCustomerId = 0;
-                    var individualCustomerByPhone = await _uow.IndividualCustomer.FindAsync(c => c.PhoneNumber == customerDTO.PhoneNumber.Trim());
-                    //var individualCustomerByEmail = await _uow.IndividualCustomer.FindAsync(c => c.Email == customerDTO.Email.Trim());
-                    foreach(var item in individualCustomerByPhone)
+                    var individualCustomerByPhone = await _uow.IndividualCustomer.GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber.Trim());
+
+                    if(individualCustomerByPhone != null)
                     {
-                         individualCustomerId = item.IndividualCustomerId;
+                        individualCustomerId = individualCustomerByPhone.IndividualCustomerId;
                     }
-                    //foreach (var item in individualCustomerByEmail)
-                    //{
-                    //     individualCustomerId = item.IndividualCustomerId;
-                    //}
 
                     if (individualCustomerId > 0)
                     {

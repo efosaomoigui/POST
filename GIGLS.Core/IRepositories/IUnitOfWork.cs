@@ -98,6 +98,7 @@ namespace GIGLS.Core
         IHaulageDistanceMappingPriceRepository HaulageDistanceMappingPrice { get; set; }
         IPackingListRepository PackingList { get; set; }
         ICashOnDeliveryAccountRepository CashOnDeliveryAccount { get; set; }
+        ICashOnDeliveryRegisterAccountRepository CashOnDeliveryRegisterAccount { get; set; } 
         ICashOnDeliveryBalanceRepository CashOnDeliveryBalance { get; set; }
         IDispatchRepository Dispatch { get; set; }
         IDispatchActivityRepository DispatchActivity { get; set; }
@@ -130,6 +131,10 @@ namespace GIGLS.Core
         ISLASignedUserRepository SLASignedUser { get; set; }
         IExpenseTypeRepository ExpenseType { get; set; }
         IExpenditureRepository Expenditure { get; set; }
+        IBankProcessingOrderForShipmentAndCODRepository BankProcessingOrderForShipmentAndCOD { get; set; }
+        IBankProcessingOrderCodesRepository BankProcessingOrderCodes { get; set; } 
+
+        IOTPRepository  OTP { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

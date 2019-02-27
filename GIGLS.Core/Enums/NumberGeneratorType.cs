@@ -11,6 +11,8 @@
         CustomerCodeCorporate = 7,
         CustomerCodeEcommerce = 8,
         Partner = 9,
-        Employee = 10
+        Employee = 10,
+        BankProcessingOrderForShipment = 11,
+        BankProcessingOrderForCOD = 12, 
     }
 }

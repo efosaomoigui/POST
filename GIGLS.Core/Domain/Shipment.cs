@@ -88,10 +88,15 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal? InvoiceDiscountValue_display { get; set; }
         public decimal? offInvoiceDiscountvalue_display { get; set; }
 
+        //payment method
+        public string PaymentMethod { get; set; }
+
         //Cancelled shipment
         public bool IsCancelled { get; set; }
         public bool IsInternational { get; set; }
 
         public string Description { get; set; }
+
+        public int DepositStatus { get; set; }
     }
 }
