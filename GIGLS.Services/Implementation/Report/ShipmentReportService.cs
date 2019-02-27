@@ -8,14 +8,15 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.DTO.Account;
 using System.Web;
 using SpreadsheetLight;
-using System.IO;
 using GIGLS.Core.Enums;
 using GIGLS.Core.View;
 using System.Linq;
-using GIGLS.Core.Domain.ShipmentScan;
 using GIGLS.Core.DTO.ShipmentScan;
 using System;
-using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Dashboard;
+using GIGLS.Core.IServices.ServiceCentres;
+using GIGLS.Core.DTO.Report;
+using AutoMapper;
 
 namespace GIGLS.Services.Implementation.Report
 {
@@ -23,11 +24,14 @@ namespace GIGLS.Services.Implementation.Report
     {
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
+        private IServiceCentreService _serviceCenterService;
 
-        public ShipmentReportService(IUnitOfWork uow, IUserService userService)
+        public ShipmentReportService(IUnitOfWork uow, IUserService userService, IServiceCentreService serviceCenterService)
         {
             _uow = uow;
             _userService = userService;
+            _serviceCenterService = serviceCenterService;
+            MapperConfig.Initialize();
         }
 
         public async Task<List<ShipmentDTO>> GetShipments(ShipmentFilterCriteria filterCriteria)
@@ -221,5 +225,298 @@ namespace GIGLS.Services.Implementation.Report
             }
         }
 
+
+        public async Task<DashboardDTO> GetShipmentProgressSummary(ShipmentProgressSummaryFilterCriteria baseFilterCriteria)
+        {
+            var dashboardDTO = new DashboardDTO()
+            {
+                TotalCustomers = 0,
+                TotalShipmentAwaitingCollection = 0,
+                TotalShipmentDelivered = 0,
+                TotalShipmentExpected = 0,
+                TotalShipmentOrdered = 0
+            };
+
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            
+            try
+            {
+                if (baseFilterCriteria.ServiceCentreId > 0)
+                {
+                    serviceCenterIds = new int[] { baseFilterCriteria.ServiceCentreId };
+                }
+
+                if (baseFilterCriteria.StationId > 0)
+                {
+                    serviceCenterIds = _uow.ServiceCentre.GetAllAsQueryable()
+                        .Where(x => x.StationId == baseFilterCriteria.StationId).Select(x => x.ServiceCentreId).ToArray();
+                }
+
+                if (baseFilterCriteria.StateId > 0)
+                {
+                    var stations = _uow.Station.GetAllAsQueryable().Where(x => x.StateId == baseFilterCriteria.StateId).Select(x => x.StationId);
+                    serviceCenterIds = _uow.ServiceCentre.GetAllAsQueryable()
+                        .Where(w => stations.Contains(w.StationId)).Select(s => s.ServiceCentreId).ToArray();                                        
+                }
+                
+                dashboardDTO = await GetShipmentProgressSummary(serviceCenterIds, baseFilterCriteria);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return dashboardDTO;
+        }
+
+
+        private async Task<DashboardDTO> GetShipmentProgressSummary(int[] serviceCenterId, ShipmentProgressSummaryFilterCriteria baseFilterCriteria)
+        {
+            var dashboardDTO = new DashboardDTO();
+
+            //get startDate and endDate
+            var queryDate = baseFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            //1. Get Total Shipment Created
+            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+            dashboardDTO.TotalShipmentOrdered = allShipmentsQueryable.Where(s => serviceCenterId.Contains(s.DepartureServiceCentreId)).Count();
+            
+            //2. Get Total Shipment Delivered   
+            //2a. Get collected shipment by date filtering
+            var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
+                .Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC)
+                && x.DateCreated >= startDate && x.DateCreated < endDate).Select(x => x.Waybill).Distinct();
+
+            //2b. Get Shipments that its destination is the service centre
+            var shipmentsWaybills = _uow.Invoice.GetAllFromInvoiceAndShipments()
+                .Where(s => serviceCenterId.Contains(s.DestinationServiceCentreId) && s.IsShipmentCollected == true).Select(x => x.Waybill).Distinct();
+
+            //2c. Extras the current login staff service centre shipment from the shipment collection
+            shipmentsWaybills = shipmentsWaybills.Where(x => shipmentCollection.Contains(x));
+            dashboardDTO.TotalShipmentDelivered = shipmentsWaybills.Count();
+
+
+            //3. Get Total Shipment Expected filter by date using Date Created
+            //3a. Get shipments coming to the service centre 
+            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments()
+                .Where(s => s.IsShipmentCollected == false && serviceCenterId.Contains(s.DestinationServiceCentreId)
+                && s.DateCreated >= startDate && s.DateCreated < endDate).Select(x => x.Waybill).Distinct();
+
+            //3b. For waybill to be collected it must have satisfy the follwoing Shipment Scan Status
+            //Collected by customer (OKC & OKT), Return (SSR), Reroute (SRR) : All status satisfy IsShipmentCollected above
+            //shipments that have arrived destination service centre or cancelled should not be displayed in expected shipments
+            var shipmetCollection = _uow.ShipmentCollection.GetAllAsQueryable()
+                .Where(x => !(x.ShipmentScanStatus == ShipmentScanStatus.OKC && x.ShipmentScanStatus == ShipmentScanStatus.OKT
+                && x.ShipmentScanStatus == ShipmentScanStatus.SSR && x.ShipmentScanStatus == ShipmentScanStatus.SRR
+                && x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.ShipmentScanStatus == ShipmentScanStatus.SSC)).Select(w => w.Waybill);
+
+            //3c. remove all the waybills that at the collection center from the income shipments
+            allShipments = allShipments.Where(s => !shipmetCollection.Contains(s));
+            dashboardDTO.TotalShipmentExpected = allShipments.Count();
+            
+            //4. Get Total Shipment Awaiting Collection
+            var shipmentsInWaybills = _uow.Invoice.GetAllFromInvoiceAndShipments()
+                .Where(s => s.IsShipmentCollected == false && serviceCenterId.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct();
+
+            var shipmentInCollection = _uow.ShipmentCollection.GetAllAsQueryable()
+                .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF
+                && x.DateCreated >= startDate && x.DateCreated < endDate).Select(x => x.Waybill);
+
+            shipmentsInWaybills = shipmentsInWaybills.Where(s => shipmentInCollection.Contains(s));
+            dashboardDTO.TotalShipmentAwaitingCollection = shipmentsInWaybills.Count();
+
+            dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
+            dashboardDTO.GraphData = new List<GraphDataDTO> { };
+
+            return dashboardDTO;
+        }
+
+        //Shipment Breakdown
+        public async Task<List<InvoiceViewDTO>> GetShipmentProgressSummaryBreakDown(ShipmentProgressSummaryFilterCriteria baseFilterCriteria)
+        {
+            var dashboardDTO = new List<InvoiceViewDTO>() { };
+
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
+            try
+            {
+                if (baseFilterCriteria.ServiceCentreId > 0)
+                {
+                    serviceCenterIds = new int[] { baseFilterCriteria.ServiceCentreId };
+                }
+
+                if (baseFilterCriteria.StationId > 0)
+                {
+                    serviceCenterIds = _uow.ServiceCentre.GetAllAsQueryable()
+                        .Where(x => x.StationId == baseFilterCriteria.StationId).Select(x => x.ServiceCentreId).ToArray();
+                }
+
+                if (baseFilterCriteria.StateId > 0)
+                {
+                    var stations = _uow.Station.GetAllAsQueryable().Where(x => x.StateId == baseFilterCriteria.StateId).Select(x => x.StationId);
+                    serviceCenterIds = _uow.ServiceCentre.GetAllAsQueryable()
+                        .Where(w => stations.Contains(w.StationId)).Select(s => s.ServiceCentreId).ToArray();
+                }
+
+                switch (baseFilterCriteria.ShipmentProgressSummaryType)
+                {
+                    case ShipmentProgressSummaryType.ExpectedShipment:
+                        return dashboardDTO = await GetShipmentProgressSummaryForExpectedShipment(serviceCenterIds, baseFilterCriteria);
+                    case ShipmentProgressSummaryType.AwaitingCollectionShipment:
+                        return dashboardDTO = await GetShipmentProgressSummaryForAwaitingCollectionShipment(serviceCenterIds, baseFilterCriteria);
+                    case ShipmentProgressSummaryType.DeliveredShipment:
+                        return dashboardDTO = await GetShipmentProgressSummaryForDeliveredShipment(serviceCenterIds, baseFilterCriteria);
+                    case ShipmentProgressSummaryType.OrderedShipment:
+                        return dashboardDTO = await GetShipmentProgressSummaryForOrderedShipment(serviceCenterIds, baseFilterCriteria);
+                    default:
+                        return dashboardDTO;
+                }
+
+                //dashboardDTO = await GetShipmentProgressSummary(serviceCenterIds, baseFilterCriteria);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return dashboardDTO;
+        }
+
+        //break the result into ShipmentProgressSummaryType
+        private async Task<List<InvoiceViewDTO>> GetShipmentProgressSummaryForExpectedShipment(int[] serviceCenterId, ShipmentProgressSummaryFilterCriteria baseFilterCriteria)
+        {
+            var dashboardDTO = new List<InvoiceViewDTO>() { };
+
+            //get startDate and endDate
+            var queryDate = baseFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+            
+            //3. Get Total Shipment Expected filter by date using Date Created
+            //3a. Get shipments coming to the service centre 
+            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments()
+                .Where(s => s.IsShipmentCollected == false && serviceCenterId.Contains(s.DestinationServiceCentreId)
+                && s.DateCreated >= startDate && s.DateCreated < endDate);
+
+            //3b. For waybill to be collected it must have satisfy the follwoing Shipment Scan Status
+            //Collected by customer (OKC & OKT), Return (SSR), Reroute (SRR) : All status satisfy IsShipmentCollected above
+            //shipments that have arrived destination service centre or cancelled should not be displayed in expected shipments
+            var shipmetCollection = _uow.ShipmentCollection.GetAllAsQueryable()
+                .Where(x => !(x.ShipmentScanStatus == ShipmentScanStatus.OKC && x.ShipmentScanStatus == ShipmentScanStatus.OKT
+                && x.ShipmentScanStatus == ShipmentScanStatus.SSR && x.ShipmentScanStatus == ShipmentScanStatus.SRR
+                && x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.ShipmentScanStatus == ShipmentScanStatus.SSC)).Select(w => w.Waybill);
+            
+            //3c. remove all the waybills that at the collection center from the income shipments
+            allShipments = allShipments.Where(s => !shipmetCollection.Any(x => x == s.Waybill));
+            dashboardDTO = Mapper.Map<List<InvoiceViewDTO>>(allShipments.OrderByDescending(x => x.DateCreated).ToList());
+
+            //Use to populate service centre 
+            var allServiceCentres = await _serviceCenterService.GetServiceCentres();
+
+            //populate the service centres
+            foreach (var invoiceViewDTO in dashboardDTO)
+            {
+                invoiceViewDTO.DepartureServiceCentre = allServiceCentres.SingleOrDefault(x => x.ServiceCentreId == invoiceViewDTO.DepartureServiceCentreId);
+                invoiceViewDTO.DestinationServiceCentre = allServiceCentres.SingleOrDefault(x => x.ServiceCentreId == invoiceViewDTO.DestinationServiceCentreId);
+            }
+
+            return dashboardDTO;
+        }
+        private async Task<List<InvoiceViewDTO>> GetShipmentProgressSummaryForOrderedShipment(int[] serviceCenterId, ShipmentProgressSummaryFilterCriteria baseFilterCriteria)
+        {
+            var dashboardDTO = new List<InvoiceViewDTO>() { };
+
+            //get startDate and endDate
+            var queryDate = baseFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+            
+            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+            allShipmentsQueryable = allShipmentsQueryable.Where(s => serviceCenterId.Contains(s.DepartureServiceCentreId));
+            dashboardDTO = Mapper.Map<List<InvoiceViewDTO>>(allShipmentsQueryable.OrderByDescending(x => x.DateCreated).ToList());
+
+            //Use to populate service centre 
+            var allServiceCentres = await _serviceCenterService.GetServiceCentres();
+
+            //populate the service centres
+            foreach (var invoiceViewDTO in dashboardDTO)
+            {
+                invoiceViewDTO.DepartureServiceCentre = allServiceCentres.SingleOrDefault(x => x.ServiceCentreId == invoiceViewDTO.DepartureServiceCentreId);
+                invoiceViewDTO.DestinationServiceCentre = allServiceCentres.SingleOrDefault(x => x.ServiceCentreId == invoiceViewDTO.DestinationServiceCentreId);
+            }
+
+            return dashboardDTO;
+        }
+
+        private async Task<List<InvoiceViewDTO>> GetShipmentProgressSummaryForDeliveredShipment(int[] serviceCenterId, ShipmentProgressSummaryFilterCriteria baseFilterCriteria)
+        {
+            var dashboardDTO = new List<InvoiceViewDTO>() { };
+
+            //get startDate and endDate
+            var queryDate = baseFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            //2. Get Total Shipment Delivered   
+            //2a. Get collected shipment by date filtering
+            var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
+                .Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC)
+                && x.DateCreated >= startDate && x.DateCreated < endDate).Select(x => x.Waybill).Distinct();
+
+            //2b. Get Shipments that its destination is the service centre
+            var shipmentsWaybills = _uow.Invoice.GetAllFromInvoiceAndShipments()
+                .Where(s => serviceCenterId.Contains(s.DestinationServiceCentreId) && s.IsShipmentCollected == true);
+
+            //2c. Extras the current login staff service centre shipment from the shipment collection
+            shipmentsWaybills = shipmentsWaybills.Where(x => shipmentCollection.Any(w => w == x.Waybill));
+            dashboardDTO = Mapper.Map<List<InvoiceViewDTO>>(shipmentsWaybills.OrderByDescending(x => x.DateCreated).ToList());
+
+            //Use to populate service centre 
+            var allServiceCentres = await _serviceCenterService.GetServiceCentres();
+
+            //populate the service centres
+            foreach (var invoiceViewDTO in dashboardDTO)
+            {
+                invoiceViewDTO.DepartureServiceCentre = allServiceCentres.SingleOrDefault(x => x.ServiceCentreId == invoiceViewDTO.DepartureServiceCentreId);
+                invoiceViewDTO.DestinationServiceCentre = allServiceCentres.SingleOrDefault(x => x.ServiceCentreId == invoiceViewDTO.DestinationServiceCentreId);
+            }
+
+            return dashboardDTO;
+        }
+
+        private async Task<List<InvoiceViewDTO>> GetShipmentProgressSummaryForAwaitingCollectionShipment(int[] serviceCenterId, ShipmentProgressSummaryFilterCriteria baseFilterCriteria)
+        {
+            var dashboardDTO = new List<InvoiceViewDTO>() { };
+
+            //get startDate and endDate
+            var queryDate = baseFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+            
+            //4. Get Total Shipment Awaiting Collection
+            var shipmentsInWaybills = _uow.Invoice.GetAllFromInvoiceAndShipments()
+                .Where(s => s.IsShipmentCollected == false && serviceCenterId.Contains(s.DestinationServiceCentreId));
+
+            var shipmentInCollection = _uow.ShipmentCollection.GetAllAsQueryable()
+                .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF
+                && x.DateCreated >= startDate && x.DateCreated < endDate).Select(x => x.Waybill);
+
+            shipmentsInWaybills = shipmentsInWaybills.Where(s => shipmentInCollection.Contains(s.Waybill));
+            dashboardDTO = Mapper.Map<List<InvoiceViewDTO>>(shipmentsInWaybills.OrderByDescending(x => x.DateCreated).ToList());
+
+            //Use to populate service centre 
+            var allServiceCentres = await _serviceCenterService.GetServiceCentres();
+
+            //populate the service centres
+            foreach (var invoiceViewDTO in dashboardDTO)
+            {
+                invoiceViewDTO.DepartureServiceCentre = allServiceCentres.SingleOrDefault(x => x.ServiceCentreId == invoiceViewDTO.DepartureServiceCentreId);
+                invoiceViewDTO.DestinationServiceCentre = allServiceCentres.SingleOrDefault(x => x.ServiceCentreId == invoiceViewDTO.DestinationServiceCentreId);
+            }
+
+            return dashboardDTO;
+        }
     }
 }

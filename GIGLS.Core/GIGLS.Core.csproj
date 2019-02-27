@@ -312,6 +312,7 @@
     <Compile Include="DTO\Report\ExpenditureFilterCriteria.cs" />
     <Compile Include="DTO\Report\ScanTrackFilterCriteria.cs" />
     <Compile Include="DTO\Report\ShipmentFilterCriteria.cs" />
+    <Compile Include="DTO\Report\ShipmentProgressSummaryFilterCriteria.cs" />
     <Compile Include="DTO\ServiceCentres\ServiceCentreDTO.cs" />
     <Compile Include="DTO\ServiceCentres\StationDTO.cs" />
     <Compile Include="DTO\ShipmentScan\ScanStatusDTO.cs" />
@@ -414,6 +415,7 @@
     <Compile Include="Enums\PreShipmentStatus.cs" />
     <Compile Include="Enums\PricingType.cs" />
     <Compile Include="Enums\RegularEcommerceType.cs" />
+    <Compile Include="Enums\ShipmentProgressSummaryType.cs" />
     <Compile Include="Enums\ShipmentRerouteInitiator.cs" />
     <Compile Include="Enums\ShipmentScanStatus.cs" />
     <Compile Include="Enums\ShipmentType.cs" />
