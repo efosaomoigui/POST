@@ -302,13 +302,11 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             var bankedShipments = new List<BankProcessingOrderForShipmentAndCODDTO>();
-            //if (serviceCenters.Length > 0)
-            //{
-            //    var shipmentResult = accompanyWaybillsVals.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
-            //    bankedShipments = Mapper.Map<List<BankProcessingOrderForShipmentAndCODDTO>>(shipmentResult);
-            //}
-
-            bankedShipments = Mapper.Map<List<BankProcessingOrderForShipmentAndCODDTO>>(accompanyWaybillsVals);
+            if (serviceCenters.Length > 0)
+            {
+                //var shipmentResult = accompanyWaybillsVals.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
+                bankedShipments = accompanyWaybillsVals.ToList(); // Mapper.Map<List<BankProcessingOrderForShipmentAndCODDTO>>(shipmentResult);
+            }
 
             if (type == DepositType.Shipment)
             {

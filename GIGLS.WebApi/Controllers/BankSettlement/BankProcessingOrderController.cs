@@ -112,9 +112,10 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
                 var bankprocessingorders = await _bankprocessingorder.SearchBankProcessingOrder3(refCode, type);
                 return new ServiceResponse<object>
                 {
-                    Object = bankprocessingorders.Item4,
+                    Object = bankprocessingorders.Item2,
                     Total = bankprocessingorders.Item3,
                     RefCode = bankprocessingorders.Item1,
+                    Shipmentcodref = bankprocessingorders.Item4
                 };
             });
         }
