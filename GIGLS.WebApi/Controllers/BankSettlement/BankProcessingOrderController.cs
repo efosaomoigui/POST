@@ -14,7 +14,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.BankSettlement
 {
-    [Authorize(Roles = "Account")]
+    [Authorize(Roles = "Account, Shipment")]
     [RoutePrefix("api/BankProcessingOrderWaybillsandCode")]
     public class BankProcessingOrderController : BaseWebApiController
     {
@@ -92,6 +92,24 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
             {
                 //All cash shipments from sales
                 var bankprocessingorders = await _bankprocessingorder.SearchBankProcessingOrder2(refCode, type);
+                return new ServiceResponse<object>
+                {
+                    Object = bankprocessingorders.Item4,
+                    Total = bankprocessingorders.Item3,
+                    RefCode = bankprocessingorders.Item1,
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("SearchBankOrder3")]
+        public async Task<IServiceResponse<object>> SearchBankOrder3(string refCode, DepositType type)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //All cash shipments from sales
+                var bankprocessingorders = await _bankprocessingorder.SearchBankProcessingOrder3(refCode, type);
                 return new ServiceResponse<object>
                 {
                     Object = bankprocessingorders.Item4,
