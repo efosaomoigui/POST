@@ -3,7 +3,6 @@ using GIGLS.Core;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.BankSettlement;
-using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Account;
@@ -11,7 +10,6 @@ using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
-using GIGLS.Core.View;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -83,7 +81,7 @@ namespace GIGLS.Services.Implementation.Wallet
             //Get Bank Deposit Module StartDate
             var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate);
             string globalpropertiesdateStr = globalpropertiesdateObj?.Value;
-            
+
             var globalpropertiesdate = DateTime.MinValue;
             bool success = DateTime.TryParse(globalpropertiesdateStr, out globalpropertiesdate);
 
@@ -146,7 +144,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
             var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
             allCODs = allCODs.Where(s => s.CODStatusHistory == CODStatushistory.RecievedAtServiceCenter);
-            allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Unprocessed); 
+            allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Unprocessed);
 
             //added for GWA and GWARIMPA service centres
             {
@@ -289,24 +287,10 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == refcode);
 
-
-            //added for GWA and GWARIMPA service centres
-            {
-                if (serviceCenters.Length == 1)
-                {
-                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                    {
-                        serviceCenters = new int[] { 4, 294 };
-                    }
-                }
-            }
-
             var bankedShipments = new List<BankProcessingOrderForShipmentAndCODDTO>();
-            if (serviceCenters.Length > 0)
-            {
-                //var shipmentResult = accompanyWaybillsVals.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
-                bankedShipments = accompanyWaybillsVals.ToList(); // Mapper.Map<List<BankProcessingOrderForShipmentAndCODDTO>>(shipmentResult);
-            }
+
+            //var shipmentResult = accompanyWaybillsVals.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
+            bankedShipments = accompanyWaybillsVals.ToList(); // Mapper.Map<List<BankProcessingOrderForShipmentAndCODDTO>>(shipmentResult);
 
             if (type == DepositType.Shipment)
             {
@@ -327,7 +311,7 @@ namespace GIGLS.Services.Implementation.Wallet
             return await Task.FromResult(comboresult);
         }
 
-        public async Task<Tuple<decimal, List<InvoiceViewDTO>>> GetTotalAmountAndShipments(DateTime searchdate, DepositType type) 
+        public async Task<Tuple<decimal, List<InvoiceViewDTO>>> GetTotalAmountAndShipments(DateTime searchdate, DepositType type)
         {
 
             var enddate = searchdate;
@@ -341,7 +325,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //Filter by deposited code should come here
             allShipments = allShipments.Where(s => s.PaymentMethod == "Cash" && s.PaymentStatus == PaymentStatus.Paid);
-            allShipments = allShipments.Where(s => s.DepositStatus ==DepositStatus.Unprocessed);
+            allShipments = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed);
 
             //added for GWA and GWARIMPA service centres
             {
@@ -407,8 +391,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 if (bkoc.DepositType == DepositType.Shipment)
                 {
-                    
-                    var allShipmentsVals = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed); 
+
+                    var allShipmentsVals = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed);
                     var result1 = allShipmentsVals.Select(s => new InvoiceViewDTO()
                     {
                         Waybill = s.Waybill
@@ -460,7 +444,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
                     var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
                     //allCODs = allCODs.Where(s => s.DateCreated >= startdate && s.DateCreated <= enddate);
-                    allCODs = allCODs.Where(s => s.DepositStatus ==DepositStatus.Unprocessed);
+                    allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Unprocessed);
                     var codsforservicecenter = allCODs.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
 
                     var result1 = codsforservicecenter.Select(s => new CashOnDeliveryRegisterAccountDTO()
@@ -532,7 +516,7 @@ namespace GIGLS.Services.Implementation.Wallet
         /// <returns></returns>
         public async Task UpdateBankOrderProcessingCode(BankProcessingOrderCodesDTO bankrefcode)
         {
-            var bankorder = _uow.BankProcessingOrderCodes.Find(s=>s.Code == bankrefcode.Code).FirstOrDefault();
+            var bankorder = _uow.BankProcessingOrderCodes.Find(s => s.Code == bankrefcode.Code).FirstOrDefault();
 
             //var bankorder =  _uow.BankProcessingOrderCodes.GetAll();
             //var bankordervalue = bankorder.Where(s => s.Code == bankrefcode.CodeId);
@@ -564,7 +548,7 @@ namespace GIGLS.Services.Implementation.Wallet
             await _uow.CompleteAsync();
         }
 
-        public async Task MarkAsVerified(BankProcessingOrderCodesDTO bankrefcode) 
+        public async Task MarkAsVerified(BankProcessingOrderCodesDTO bankrefcode)
         {
             var bankorder = _uow.BankProcessingOrderCodes.Find(s => s.Code == bankrefcode.Code).FirstOrDefault();
 
@@ -603,7 +587,7 @@ namespace GIGLS.Services.Implementation.Wallet
         /// </summary>
         /// <param name="bankrefcode"></param>
         /// <returns></returns>
-        public async Task UpdateBankOrderProcessingCode_cod(BankProcessingOrderCodesDTO bankrefcode) 
+        public async Task UpdateBankOrderProcessingCode_cod(BankProcessingOrderCodesDTO bankrefcode)
         {
             var bankorder = _uow.BankProcessingOrderCodes.Find(s => s.Code == bankrefcode.Code).FirstOrDefault();
 
