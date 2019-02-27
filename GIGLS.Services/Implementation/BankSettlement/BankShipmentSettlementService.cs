@@ -573,7 +573,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var arrWaybills = accompanyWaybillsVals.Select(x => x.Waybill).ToArray();
 
-            var nonDepsitedValueQ = _uow.Shipment.GetAll().Where(x => x.DepositStatus == DepositStatus.Deposited && x.DepartureServiceCentreId == currentCenter);
+            var nonDepsitedValueQ = _uow.Shipment.GetAll().Where(x => x.DepositStatus == DepositStatus.Deposited);
             var nonDepsitedValue = nonDepsitedValueQ.Where(x => arrWaybills.Contains(x.Waybill)).ToList();
 
             //update Shipment
