@@ -587,6 +587,14 @@ namespace GIGLS.Services.Implementation.Wallet
             allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Deposited);
             var codsforservicecenter = allCODs.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
 
+            var serviceCenters2 = await _userService.GetCurrentServiceCenter();
+            var currentCenter = serviceCenters2[0].ServiceCentreId;
+            var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
+
+            //update BankProcessingOrderForShipmentAndCOD
+            var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == bankrefcode.Code).ToList();
+            accompanyWaybillsVals.ForEach(a => a.Status = DepositStatus.Verified);
+
             codsforservicecenter.ForEach(a => a.DepositStatus = DepositStatus.Verified);
             bankorder.Status = bankrefcode.Status;
 
