@@ -202,7 +202,7 @@ namespace GIGLS.Services.Implementation.Wallet
             return await Task.FromResult(comboresult);
         }
 
-
+        //General Search
         public async Task<Tuple<string, List<BankProcessingOrderForShipmentAndCODDTO>, decimal, BankProcessingOrderCodesDTO>> SearchBankProcessingOrder(string _refcode, DepositType type)
         {
             //var isSCA =await _userService.CheckSCA();
@@ -245,6 +245,70 @@ namespace GIGLS.Services.Implementation.Wallet
                 var shipmentResult = accompanyWaybillsVals.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
                 bankedShipments = Mapper.Map<List<BankProcessingOrderForShipmentAndCODDTO>>(shipmentResult);
             }
+
+            if (type == DepositType.Shipment)
+            {
+                foreach (var item in bankedShipments)
+                {
+                    total += item.GrandTotal;
+                }
+            }
+            else if (type == DepositType.COD)
+            {
+                foreach (var item in bankedShipments)
+                {
+                    total += item.CODAmount;
+                }
+            }
+
+            var comboresult = Tuple.Create(refcode, bankedShipments, total, bankprcessingresultValue);
+            return await Task.FromResult(comboresult);
+        }
+
+        public async Task<Tuple<string, List<BankProcessingOrderForShipmentAndCODDTO>, decimal, BankProcessingOrderCodesDTO>> SearchBankProcessingOrder3(string _refcode, DepositType type)
+        {
+            //var isSCA =await _userService.CheckSCA();
+            //if (!isSCA)
+            //{
+            //    throw new GenericException("User is not a Service Center Agent!");
+            //}
+
+            var bankprcessingresult = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCode(type);
+            var bankprcessingresultValue = bankprcessingresult.Where(s => s.Code == _refcode).FirstOrDefault();
+
+            //get the start and end date for retrieving of waybills for the bank
+            //var startdate = ReturnBankProcessDate(type);
+            var refcode = _refcode;
+
+            //Generate the refcode
+            var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
+            decimal total = 0;
+
+            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrders(type);
+
+            var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == refcode);
+
+
+            //added for GWA and GWARIMPA service centres
+            {
+                if (serviceCenters.Length == 1)
+                {
+                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                    {
+                        serviceCenters = new int[] { 4, 294 };
+                    }
+                }
+            }
+
+            var bankedShipments = new List<BankProcessingOrderForShipmentAndCODDTO>();
+            //if (serviceCenters.Length > 0)
+            //{
+            //    var shipmentResult = accompanyWaybillsVals.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
+            //    bankedShipments = Mapper.Map<List<BankProcessingOrderForShipmentAndCODDTO>>(shipmentResult);
+            //}
+
+            bankedShipments = Mapper.Map<List<BankProcessingOrderForShipmentAndCODDTO>>(accompanyWaybillsVals);
 
             if (type == DepositType.Shipment)
             {
@@ -527,7 +591,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var arrWaybills = accompanyWaybillsVals.Select(x => x.Waybill).ToArray();
 
-            var nonDepsitedValueQ = _uow.Shipment.GetAll().Where(x => x.DepositStatus == DepositStatus.Pending && x.DepartureServiceCentreId == currentCenter);
+            var nonDepsitedValueQ = _uow.Shipment.GetAll().Where(x => x.DepositStatus == DepositStatus.Deposited && x.DepartureServiceCentreId == currentCenter);
             var nonDepsitedValue = nonDepsitedValueQ.Where(x => arrWaybills.Contains(x.Waybill)).ToList();
 
             //update Shipment
