@@ -29,12 +29,12 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("RequestBankProcessingOrderForShipment")]
-        public async Task<IServiceResponse<object>> RequestBankProcessingOrderForShipment(DateTime requestdate, DepositType type)
+        public async Task<IServiceResponse<object>> RequestBankProcessingOrderForShipment(DepositType type)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 //All cash shipments from sales
-                var bankshipmentprocessingorders = await _bankprocessingorder.GetBankProcessingOrderForShipment(requestdate, type);
+                var bankshipmentprocessingorders = await _bankprocessingorder.GetBankProcessingOrderForShipment(type);
                 return new ServiceResponse<object>
                 {
                     Object = bankshipmentprocessingorders.Item2,
@@ -48,12 +48,12 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("RequestBankProcessingOrderForCOD")]
-        public async Task<IServiceResponse<object>> RequestBankProcessingOrderForCOD(DateTime requestdate, DepositType type)
+        public async Task<IServiceResponse<object>> RequestBankProcessingOrderForCOD(DepositType type)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 //All cash CODs from sales
-                var bankshipmentprocessingorders = await _bankprocessingorder.GetBankProcessingOrderForCOD(requestdate, type);
+                var bankshipmentprocessingorders = await _bankprocessingorder.GetBankProcessingOrderForCOD(type);
                 return new ServiceResponse<object>
                 {
                     Object = bankshipmentprocessingorders.Item2,
@@ -123,6 +123,35 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
             return await HandleApiOperationAsync(async () =>
             {
                 var bankshipmentprocessingorders = _bankprocessingorder.UpdateBankOrderProcessingCode_cod(bkoc); 
+                return new ServiceResponse<object>
+                {
+                };
+            });
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("MarkAsVerified_cod")]
+        public async Task<IServiceResponse<object>> MarkAsVerified_cod(BankProcessingOrderCodesDTO bkoc)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var bankshipmentprocessingorders = _bankprocessingorder.MarkAsVerified_cod(bkoc);
+                return new ServiceResponse<object>
+                {
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("MarkAsVerified")]
+        public async Task<IServiceResponse<object>> MarkAsVerified(BankProcessingOrderCodesDTO bkoc)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var bankshipmentprocessingorders = _bankprocessingorder.MarkAsVerified(bkoc);
                 return new ServiceResponse<object>
                 {
                 };

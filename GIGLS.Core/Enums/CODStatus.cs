@@ -14,4 +14,13 @@
         RecievedAtServiceCenter, 
         Banked
     }
+
+    public enum DepositStatus
+    {
+        Unprocessed = 0,
+        Pending, 
+        Deposited,
+        Verified
+    }
+
 }

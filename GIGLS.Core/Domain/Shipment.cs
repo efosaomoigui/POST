@@ -97,6 +97,6 @@ namespace GIGL.GIGLS.Core.Domain
 
         public string Description { get; set; }
 
-        public int DepositStatus { get; set; }
+        public DepositStatus DepositStatus { get; set; }
     }
 }

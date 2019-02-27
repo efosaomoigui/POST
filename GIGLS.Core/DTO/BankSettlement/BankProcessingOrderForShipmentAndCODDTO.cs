@@ -14,7 +14,7 @@ namespace GIGLS.Core.DTO.BankSettlement
         [MaxLength(100), MinLength(5)]
         [Index(IsUnique = true)]
         public string Waybill { get; set; }
-        public decimal Amount { get; set; }
+        public decimal GrandTotal { get; set; } 
         public decimal CODAmount { get; set; }
         public string RefCode { get; set; }
         public DepositType DepositType { get; set; }
@@ -22,7 +22,7 @@ namespace GIGLS.Core.DTO.BankSettlement
         
         public int ServiceCenterId { get; set; }
         public string ServiceCenter { get; set; }
-        public bool Status { get; set; }
+        public DepositStatus Status { get; set; }
     }
 
     public class BankProcessingOrderCodesDTO : BaseDomain, IAuditable
@@ -38,7 +38,7 @@ namespace GIGLS.Core.DTO.BankSettlement
         public string ScName { get; set; } 
         public DepositType DepositType { get; set; }
         public DateTime StartDateTime { get; set; }
-        public bool Status { get; set; }
+        public DepositStatus Status { get; set; }
 
     }
 

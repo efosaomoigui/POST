@@ -17,6 +17,7 @@ using GIGLS.Core.DTO.Shipments;
 using System.Linq;
 using GIGLS.Core.Domain;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.Domain.Wallet;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -324,6 +325,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     Waybill = shipmentCollectionDto.Waybill,
                     CODStatus = CODStatus.Unprocessed
                 });
+
+                var cashondeliveryentity = new CashOnDeliveryRegisterAccount();
+                cashondeliveryentity.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
+
             }
 
             if (shipmentCollectionDto.Demurrage?.Amount > 0)
