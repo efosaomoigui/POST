@@ -251,5 +251,56 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                           });
             return result;
         }
+
+        public IQueryable<InvoiceView> GetAllInvoiceShipments()
+        {
+            var shipments = Context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false);
+            
+            var result = (from s in shipments
+                          join i in Context.Invoice on s.Waybill equals i.Waybill
+                          join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
+                          join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                          join option in Context.DeliveryOption on s.DeliveryOptionId equals option.DeliveryOptionId
+                          select new InvoiceView
+                          {
+                              ShipmentId = s.ShipmentId,
+                              Waybill = s.Waybill,
+                              CustomerId = s.CustomerId,
+                              CustomerType = s.CustomerType,
+                              CustomerCode = s.CustomerCode,
+                              DateCreated = s.DateCreated,
+                              DateModified = s.DateModified,
+                              DeliveryOptionId = s.DeliveryOptionId,
+                              DeliveryOptionCode = option.Code,
+                              Description = option.Description,
+                              DepartureServiceCentreId = s.DepartureServiceCentreId,
+                              DepartureServiceCentreCode = dept.Code,
+                              DepartureServiceCentreName = dept.Name,
+                              DestinationServiceCentreId = s.DestinationServiceCentreId,
+                              DestinationServiceCentreCode = dest.Code,
+                              DestinationServiceCentreName = dest.Name,
+                              PaymentStatus = i.PaymentStatus,
+                              ReceiverAddress = s.ReceiverAddress,
+                              ReceiverCity = s.ReceiverCity,
+                              ReceiverCountry = s.ReceiverCountry,
+                              ReceiverEmail = s.ReceiverEmail,
+                              ReceiverName = s.ReceiverName,
+                              ReceiverPhoneNumber = s.ReceiverPhoneNumber,
+                              ReceiverState = s.ReceiverState,
+                              SealNumber = s.SealNumber,
+                              UserId = s.UserId,
+                              Value = s.Value,
+                              GrandTotal = i.Amount,
+                              DiscountValue = s.DiscountValue,
+                              CompanyType = s.CompanyType,                              
+                              IsShipmentCollected = i.IsShipmentCollected,
+                              IsInternational = s.IsInternational,
+                              DepositStatus = s.DepositStatus,
+                              PaymentMethod = i.PaymentMethod,
+                              PickupOptions = s.PickupOptions,
+                              IsCancelled = s.IsCancelled                       
+                          });
+            return result;
+        }
     }
 }
