@@ -226,9 +226,7 @@ namespace GIGLS.Services.Implementation.Customers
             {
                 throw new GenericException("Individual Customer information does not exist");
             }
-
-            var user = await _userService.GetUserByPhone(customerDto.PhoneNumber);
-
+            
             customer.FirstName = customerDto.FirstName;
             customer.LastName = customerDto.LastName;
             customer.Email = customerDto.Email;
@@ -241,13 +239,12 @@ namespace GIGLS.Services.Implementation.Customers
             customer.State = customerDto.State;
             customer.Password = customerDto.Password;
 
+
+            var user = await _userService.GetUserByPhone(customer.PhoneNumber);
             user.FirstName = customerDto.FirstName;
             user.LastName = customerDto.LastName;
             user.PhoneNumber = customerDto.PhoneNumber;
-            //user.Password = customerDto.Password;
-            //user.UserChannelPassword = customerDto.Password;
-            //user.ConfirmPassword = customerDto.Password;
-
+            user.Email = customerDto.PhoneNumber;
             await _userService.UpdateUser(user.Id, user);
             await _uow.CompleteAsync();
            
