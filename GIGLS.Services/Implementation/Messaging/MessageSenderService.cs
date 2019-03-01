@@ -13,6 +13,7 @@ using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.MessagingLog;
 using GIGLS.Core.DTO.MessagingLog;
+using System.Web;
 
 namespace GIGLS.Services.Implementation.Messaging
 {
@@ -139,7 +140,11 @@ namespace GIGLS.Services.Implementation.Messaging
                     "Address",
                     "Demurrage Day",
                     "Demurrage Amount",
-                    "Receiver Name"
+                    "Receiver Name",
+                    "Shipment Description",
+                    "Total Shipment Amount",
+                    "Shipment Creation Date",
+                    "Shipment Creation Time"
                 };
 
                 var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
@@ -177,9 +182,13 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[5] = demurrageDayCount;
                     strArray[6] = demurragePrice;
                     strArray[7] = invoice.ReceiverName;
+                    strArray[8] = invoice.Description;
+                    strArray[9] = invoice.Amount.ToString();
+                    strArray[10] = invoice.DateCreated.ToLongDateString();
+                    strArray[11] = invoice.DateCreated.ToShortTimeString();
 
-                    //added for HomeDelivery sms, when scan is ArrivedFinalDestination
-                    if(messageDTO.MessageType == MessageType.ARF &&
+                    //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
+                    if (messageDTO.MessageType == MessageType.ARF &&
                         invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
                     {
                         var smsMessages = await _messageService.GetSmsAsync();
@@ -190,6 +199,27 @@ namespace GIGLS.Services.Implementation.Messaging
                             messageDTO.Body = homeDeliveryMessageDTO.Body;
                         }
                     }
+
+                    //B. added for HomeDelivery email, when scan is created at Service Centre
+                    if (messageDTO.MessageType == MessageType.CRT &&
+                        invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
+                    {
+                        var emailMessages = await _messageService.GetEmailAsync();
+                        var homeDeliveryMessageDTO = emailMessages.FirstOrDefault(s => s.MessageType == MessageType.CRH);
+
+                        if (homeDeliveryMessageDTO != null)
+                        {
+                            messageDTO.Body = homeDeliveryMessageDTO.Body;
+                        }
+                    }
+
+                    //B. decode url parameter
+                    messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                    //C. populate the message subject
+                    messageDTO.Subject =
+                        string.Format(messageDTO.Subject, strArray);
+
 
                     //populate the message template
                     messageDTO.FinalBody =
@@ -227,6 +257,12 @@ namespace GIGLS.Services.Implementation.Messaging
             if (!toPhoneNumber.Trim().StartsWith("+"))  //2347011111111
             {
                 toPhoneNumber = $"+{toPhoneNumber}";
+            }
+            //3
+            if (!toPhoneNumber.Trim().StartsWith("2340"))  //23407011111111
+            {
+                toPhoneNumber = toPhoneNumber.Remove(0, 4);
+                toPhoneNumber = $"+234{toPhoneNumber}";
             }
 
             //assign

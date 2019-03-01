@@ -40,9 +40,9 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
-                if (await _uow.Company.ExistAsync(c => c.Name.ToLower() == company.Name.Trim().ToLower()))
+                if (await _uow.Company.ExistAsync(c => c.Name.ToLower() == company.Name.Trim().ToLower() || c.PhoneNumber == company.PhoneNumber))
                 {
-                    throw new GenericException($"{company.Name} Already Exist");
+                    throw new GenericException($"{company.Name} or phone number already exist");
                 }
 
                 var newCompany = Mapper.Map<Company>(company);
@@ -92,8 +92,15 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     newCompany.Email = newCompany.CustomerCode;
                 }
-
-                var password = await _passwordGenerator.Generate();
+                var password = "";
+                if (newCompany.Password == null)
+                {
+                    password = await _passwordGenerator.Generate();
+                }
+                else
+                {
+                    password = newCompany.Password;
+                }
                 var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
                 {
                     ConfirmPassword = password,
@@ -255,7 +262,17 @@ namespace GIGLS.Services.Implementation.Customers
                         person.PhoneNumber = personDto.PhoneNumber;
                         person.CompanyId = personDto.CompanyId;
                     }
-                }                
+                }
+
+                //Update user 
+                var user = await _userService.GetUserByChannelCode(company.CustomerCode);
+                user.PhoneNumber = companyDto.PhoneNumber;
+                user.LastName = companyDto.Name;
+                user.FirstName = companyDto.Name;
+                user.Email = companyDto.Email;
+
+                await _userService.UpdateUser(user.Id, user);
+
                 _uow.Complete();
             }
             catch (Exception)

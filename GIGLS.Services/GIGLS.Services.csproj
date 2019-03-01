@@ -205,6 +205,7 @@
     <Compile Include="Implementation\Nav\MainNavService.cs" />
     <Compile Include="Implementation\Nav\SubNavService.cs" />
     <Compile Include="Implementation\Nav\SubSubNavService.cs" />
+    <Compile Include="Implementation\OTPService.cs" />
     <Compile Include="Implementation\Partnership\PartnerApplicationService.cs" />
     <Compile Include="Implementation\Partnership\PartnerService.cs" />
     <Compile Include="Implementation\PaymentTransactions\PaymentPartialTransactionService.cs" />
@@ -284,6 +285,10 @@
     <ProjectReference Include="..\GIGLS.Infrastructure\GIGLS.Infrastructure.csproj">
       <Project>{ca1b58fd-e1d5-48d3-a27d-d4e756cbf3e5}</Project>
       <Name>GIGLS.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GIGLS.Messaging\GIGLS.Messaging.csproj">
+      <Project>{f5d1aa8b-bb98-43e6-a758-cbfa7563f4a7}</Project>
+      <Name>GIGLS.Messaging</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

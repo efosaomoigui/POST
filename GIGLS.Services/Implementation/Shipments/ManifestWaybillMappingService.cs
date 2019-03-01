@@ -1,19 +1,20 @@
-﻿using System;
-using System.Threading.Tasks;
-using GIGLS.Core;
-using System.Collections.Generic;
-using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.Domain;
-using GIGLS.Core.IServices.User;
-using System.Linq;
-using AutoMapper;
+﻿using AutoMapper;
 using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
-using GIGLS.Core.DTO.Zone;
+using GIGLS.Core;
+using GIGLS.Core.Domain;
+using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Customers;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.IServices.User;
+using GIGLS.Infrastructure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -177,7 +178,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException($"Error: Delivery Manifest cannot be created. " +
                                $"The following waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
                 }
-                
+
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
                 //create the manifest if manifest does not exist
                 if (manifestObj == null)
@@ -190,7 +191,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                     _uow.Manifest.Add(newManifest);
                 }
-                                
+
                 foreach (var waybill in waybills)
                 {
                     //check if the shipment is at the final destination with a scan of ARF (WHEN SHIPMENT ARRIVED FINAL DESTINATION)
@@ -204,7 +205,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         //WC -- SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO RECEIVER
                         shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.WC;
                     }
-                    
+
                     //check if Waybill has not been added to this manifest 
                     var isWaybillMapped = await _uow.ManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
 
@@ -220,7 +221,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             ServiceCentreId = serviceIds[0]
                         };
                         _uow.ManifestWaybillMapping.Add(newMapping);
-                    }                    
+                    }
                 }
 
                 _uow.Complete();
@@ -230,7 +231,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        
+
         //map waybills to Manifest from Mobile
         public async Task MappingManifestToWaybillsMobile(string manifest, List<string> waybills)
         {
@@ -244,14 +245,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipmentCollectionList = shipmentCollection.Select(x => x.Waybill).Distinct().ToList();
 
                 //1a. Get the shipment status of the waybills we want to manifest && extrack waybills into a list from shipment collection
-                
+
                 //1b. check if all the waybills has the same status (ARF)
                 if (shipmentCollectionList.Count() == 0)
                 {
                     throw new GenericException($"No waybill available for Processing");
                 }
 
-                if(shipmentCollectionList.Count() != waybills.Count())
+                if (shipmentCollectionList.Count() != waybills.Count())
                 {
                     var result = waybills.Where(x => !shipmentCollectionList.Contains(x));
 
@@ -261,12 +262,12 @@ namespace GIGLS.Services.Implementation.Shipments
                             $"The following waybills [{string.Join(", ", result.ToList())}] are not available for Processing");
                     }
                 }
-                
+
                 //2. Get the shipment details of all the waybills that we want to manifest again by 
                 // check if the waybill is not cancelled, Home Delivery and the user that want to manifest it is at the final service centre of the waybills  
                 var InvoicesBySC = _uow.Invoice.GetAllFromInvoiceView();
                 //InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && x.PickupOptions == PickupOptions.HOMEDELIVERY && waybills.Contains(x.Waybill));
-                InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && waybills.Contains(x.Waybill)); 
+                InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && waybills.Contains(x.Waybill));
 
                 //filter if the shipment is at the final service centre
                 if (serviceCenters.Length > 0)
@@ -316,9 +317,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //get shipment detail 
                     manifestwaybill.Shipment = await _shipmentService.GetBasicShipmentDetail(manifestwaybill.Waybill);
-                    
+
                     CustomerType customerType;
-                    if(manifestwaybill.Shipment.CustomerType == CustomerType.Company.ToString())
+                    if (manifestwaybill.Shipment.CustomerType == CustomerType.Company.ToString())
                     {
                         customerType = CustomerType.Company;
                     }
@@ -326,7 +327,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         customerType = CustomerType.IndividualCustomer;
                     }
-                    
+
                     //Get  customer detail
                     var currentCustomerObject = await _customerService.GetCustomer(manifestwaybill.Shipment.CustomerId, customerType);
                     manifestwaybill.Shipment.CustomerDetails = currentCustomerObject;
@@ -374,7 +375,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //update userDispatchs
                     var deliveryManifestCodeArray = manifestObjects.Select(s => s.ManifestCode).ToList();
-                    userDispatchs = userDispatchs.Where(s => 
+                    userDispatchs = userDispatchs.Where(s =>
                     deliveryManifestCodeArray.Contains(s.ManifestNumber)).ToList();
                 }
 
@@ -400,7 +401,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //get from ShipmentCollection
                     var shipmentCollectionObj = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == manifestwaybill.Waybill);
-                    if(shipmentCollectionObj != null)
+                    if (shipmentCollectionObj != null)
                     {
                         manifestwaybill.ShipmentScanStatus = shipmentCollectionObj.ShipmentScanStatus;
                     }
@@ -437,14 +438,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     var manifestCodeArray = userDispatchs.Select(s => s.ManifestNumber).ToList();
                     var manifestObjects = _uow.Manifest.GetAll().Where(s =>
                     manifestCodeArray.Contains(s.ManifestCode) && s.ManifestType == ManifestType.Delivery).ToList();
-                    
+
                     //update userDispatchs
                     var deliveryManifestCodeArray = manifestObjects.Select(s => s.ManifestCode).ToList();
                     userDispatchs = userDispatchs.Where(s =>
                     deliveryManifestCodeArray.Contains(s.ManifestNumber)).ToList();
-                }                               
+                }
 
-                List<ManifestWaybillMappingDTO> manifestWaybillNumberMappingDto = new List<ManifestWaybillMappingDTO>();                              
+                List<ManifestWaybillMappingDTO> manifestWaybillNumberMappingDto = new List<ManifestWaybillMappingDTO>();
 
                 foreach (var manifestcode in userDispatchs)
                 {
@@ -456,9 +457,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //map the data to the DTO
                     var manifestMappingDto = Mapper.Map<List<ManifestWaybillMappingDTO>>(manifestWaybillMappingList.ToList());
-                    
+
                     //add manifest details to the dto
-                    foreach(var waybill in manifestMappingDto)
+                    foreach (var waybill in manifestMappingDto)
                     {
                         waybill.ManifestDetails = manifestDTO;
                     }
@@ -466,7 +467,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     //add it to range of array
                     manifestWaybillNumberMappingDto.AddRange(manifestMappingDto);
                 }
-                
+
                 //get shipment detail for the manifest
                 foreach (var manifestwaybill in manifestWaybillNumberMappingDto)
                 {
@@ -495,7 +496,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        
+
         //Get All Manifests that a Waybill has been mapped to
         public async Task<List<ManifestWaybillMappingDTO>> GetManifestForWaybill(string waybill)
         {
@@ -618,12 +619,21 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var manifestDTO = await _manifestService.GetManifestByCode(manifest);
 
+                List<CashOnDeliveryRegisterAccount> codRegisterCollectsForASingleWaybillList = new List<CashOnDeliveryRegisterAccount>();
                 foreach (var waybill in waybills)
                 {
                     //1a. check and return only delivered shipments
                     var shipmentCollectionDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.OKT);
-                    if(shipmentCollectionDelivered != null)
+                    if (shipmentCollectionDelivered != null)
                     {
+                        //Update CashOnDevliveryRegisterAccount As  Cash Recieved at Service Center
+                        var codRegisterCollectsForASingleWaybill = _uow.CashOnDeliveryRegisterAccount.Find(s => s.Waybill == waybill).FirstOrDefault();
+
+                        if (codRegisterCollectsForASingleWaybill != null)
+                        {
+                            codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
+                            codRegisterCollectsForASingleWaybillList.Add(codRegisterCollectsForASingleWaybill);
+                        }
                         continue;
                     }
 
@@ -673,6 +683,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
+                //update codRegisterCollectsForASingleWaybillList in the db
+                codRegisterCollectsForASingleWaybillList.ForEach(s => s.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter);
+
                 await _uow.CompleteAsync();
             }
             catch (Exception)
@@ -685,109 +698,75 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                List<ShipmentDTO> shipmentsBySC = new List<ShipmentDTO>();
+
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
-                //var filterOptionsDto = new FilterOptionsDto
-                //{
-                //    count = 500,
-                //    page = 1,
-                //    sortorder = "0"
-                //};
-
                 //1. get all shipments at colletion centre for the service centre which status is ARF
-                var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF);
-
-                if (shipmentCollection.Count() == 0)
-                {
-                    return new List<ShipmentDTO>();
-                }
-
-                var waybills = new List<string>();
-                foreach (var waybillCollection in shipmentCollection)
-                {
-                    waybills.Add(waybillCollection.Waybill);
-                }
-
+                //var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF);
+                var shipmentCollection = _uow.ShipmentCollection.GetAll()
+                    .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).Select(x => x.Waybill);
+                
                 //2. Get shipment details for the service centre that are at the collection centre using the waybill and service centre
-                //var shipmentsBySC = await _uow.Shipment.GetShipmentDetailByWaybills(filterOptionsDto, serviceCenters, result).Item1;
-                var InvoicesBySC = _uow.Invoice.GetAllFromInvoiceView();
+                var InvoicesBySC = _uow.Invoice.GetAllInvoiceShipments();
 
                 //filter by destination service center that is not cancelled and it is home delivery
-                InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && x.PickupOptions == PickupOptions.HOMEDELIVERY);
+                InvoicesBySC = InvoicesBySC.Where(x => x.PickupOptions == PickupOptions.HOMEDELIVERY);
 
                 if (serviceCenters.Length > 0)
                 {
                     InvoicesBySC = InvoicesBySC.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId));
                 }
-
-                //filter by Local or International Shipment
-                //if (filterOptionsDto.IsInternational != null)
-                //{
-                //    InvoicesBySC = InvoicesBySC.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
-                //}
-
-
+                
                 ////final list
+                InvoicesBySC = InvoicesBySC.Where(s => shipmentCollection.Contains(s.Waybill));
                 var InvoicesBySCList = InvoicesBySC.ToList();
-                if (waybills.Count > 0)
-                {
-                    InvoicesBySCList = InvoicesBySCList.Where(s => waybills.Contains(s.Waybill)).ToList();
-                }
-
-                List<ShipmentDTO> shipmentsBySC = (from r in InvoicesBySCList
-                                                   select new ShipmentDTO()
-                                                 {
-                                                     ShipmentId = r.ShipmentId,
-                                                     Waybill = r.Waybill,
-                                                     CustomerId = r.CustomerId,
-                                                     CustomerType = r.CustomerType,
-                                                     //ActualDateOfArrival = r.ActualDateOfArrival,
-                                                     DateCreated = r.DateCreated,
-                                                     DateModified = r.DateModified,
-                                                     DeliveryOptionId = r.DeliveryOptionId,
-                                                     DeliveryOption = new DeliveryOptionDTO
-                                                     {
-                                                         Code = r.DeliveryOptionCode,
-                                                         Description = r.DeliveryOptionDescription
-                                                     },
-                                                     //DeliveryTime = r.DeliveryTime,
-                                                     DepartureServiceCentreId = r.DepartureServiceCentreId,
-                                                     DepartureServiceCentre = new ServiceCentreDTO()
-                                                     {
-                                                         Code = r.DepartureServiceCentreCode,
-                                                         Name = r.DepartureServiceCentreName
-                                                     },
-                                                     DestinationServiceCentreId = r.DestinationServiceCentreId,
-                                                     DestinationServiceCentre = new ServiceCentreDTO()
-                                                     {
-                                                         Code = r.DestinationServiceCentreCode,
-                                                         Name = r.DestinationServiceCentreName
-                                                     },
-
-                                                       //ExpectedDateOfArrival = r.ExpectedDateOfArrival,
-                                                     PaymentStatus = r.PaymentStatus,
-                                                     ReceiverAddress = r.ReceiverAddress,
-                                                     ReceiverCity = r.ReceiverCity,
-                                                     ReceiverCountry = r.ReceiverCountry,
-                                                     ReceiverEmail = r.ReceiverEmail,
-                                                     ReceiverName = r.ReceiverName,
-                                                     ReceiverPhoneNumber = r.ReceiverPhoneNumber,
-                                                     ReceiverState = r.ReceiverState,
-                                                     SealNumber = r.SealNumber,
-                                                     UserId = r.UserId,
-                                                     Value = r.Value,
-                                                     GrandTotal = r.GrandTotal,
-                                                     //AppliedDiscount = r.AppliedDiscount,
-                                                     DiscountValue = r.DiscountValue,
-                                                     ShipmentPackagePrice = r.ShipmentPackagePrice,
-                                                     CompanyType = r.CompanyType,
-                                                     CustomerCode = r.CustomerCode,
-                                                     Description = r.Description
-                                                 }).ToList();
-
-
-                //var shipmentsBySC = await _uow.Shipment.GetShipmentDetailByWaybills(filterOptionsDto, serviceCenters, result).Item1;
-
+                
+                shipmentsBySC = (from r in InvoicesBySCList
+                                 select new ShipmentDTO()
+                                 {
+                                     ShipmentId = r.ShipmentId,
+                                     Waybill = r.Waybill,
+                                     CustomerId = r.CustomerId,
+                                     CustomerType = r.CustomerType,
+                                     DateCreated = r.DateCreated,
+                                     DateModified = r.DateModified,
+                                     DeliveryOptionId = r.DeliveryOptionId,
+                                     DeliveryOption = new DeliveryOptionDTO
+                                     {
+                                         Code = r.DeliveryOptionCode,
+                                         Description = r.DeliveryOptionDescription
+                                     },
+                                     DepartureServiceCentreId = r.DepartureServiceCentreId,
+                                     DepartureServiceCentre = new ServiceCentreDTO()
+                                     {
+                                         Code = r.DepartureServiceCentreCode,
+                                         Name = r.DepartureServiceCentreName
+                                     },
+                                     DestinationServiceCentreId = r.DestinationServiceCentreId,
+                                     DestinationServiceCentre = new ServiceCentreDTO()
+                                     {
+                                         Code = r.DestinationServiceCentreCode,
+                                         Name = r.DestinationServiceCentreName
+                                     },                                     
+                                     PaymentStatus = r.PaymentStatus,
+                                     ReceiverAddress = r.ReceiverAddress,
+                                     ReceiverCity = r.ReceiverCity,
+                                     ReceiverCountry = r.ReceiverCountry,
+                                     ReceiverEmail = r.ReceiverEmail,
+                                     ReceiverName = r.ReceiverName,
+                                     ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                     ReceiverState = r.ReceiverState,
+                                     SealNumber = r.SealNumber,
+                                     UserId = r.UserId,
+                                     Value = r.Value,
+                                     GrandTotal = r.GrandTotal,
+                                     DiscountValue = r.DiscountValue,
+                                     //ShipmentPackagePrice = r.ShipmentPackagePrice,
+                                     CompanyType = r.CompanyType,
+                                     CustomerCode = r.CustomerCode,
+                                     Description = r.Description
+                                 }).ToList();
                 return shipmentsBySC;
             }
             catch (Exception)
@@ -795,6 +774,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
 
         //get manifest waiting to signoff
         public async Task<List<ManifestWaybillMappingDTO>> GetManifestWaitingForSignOff()
@@ -806,7 +786,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //get delivery manifest that have been dispatched but not received
             var manifests = _uow.Manifest.GetAll().Where(x => x.ManifestType == ManifestType.Delivery && x.IsDispatched == true && x.IsReceived == false).Select(m => m.ManifestCode).Distinct().ToList();
-           
+
             var manifestWaybillMapings = await _uow.ManifestWaybillMapping.GetManifestWaybillWaitingForSignOff(serviceIds, manifests);
 
             foreach (var item in manifestWaybillMapings)
@@ -826,7 +806,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 List<ManifestWaybillMappingDTO> resultList = new List<ManifestWaybillMappingDTO>();
-                
+
                 //This part hanlde internal and external manifest
                 // 1.Get waybill in a Group Waybill
                 var groupWaybillNumberMapping = await _uow.GroupWaybillNumberMapping.FindAsync(x => x.WaybillNumber == waybill);
@@ -845,15 +825,15 @@ namespace GIGLS.Services.Implementation.Shipments
                         manifest.DateCreated = manifestGroupWaybillMapings.DateCreated;
                         manifest.DateModified = manifestGroupWaybillMapings.DateModified;
                         manifest.ManifestCode = manifestGroupWaybillMapings.ManifestCode;
-                        
+
                         manifest.ManifestDetails = manifestDTO;
-                                                
+
                         if (dispatch != null)
                         {
                             manifest.ManifestDetails.DispatchedBy = dispatch.DispatchedBy;
                             manifest.ManifestDetails.ReceiverBy = dispatch.ReceivedBy;
                         }
-                        
+
                         resultList.Add(manifest);
                     }
                 }
@@ -861,7 +841,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //This part hanlde delivery manifest
                 var waybillMappingList = await _uow.ManifestWaybillMapping.FindAsync(x => x.Waybill == waybill);
 
-                if(waybillMappingList != null)
+                if (waybillMappingList != null)
                 {
                     foreach (var waybillmapped in waybillMappingList)
                     {
@@ -881,7 +861,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         resultList.Add(waybillMapping);
                     }
                 }
-                
+
                 return resultList.OrderBy(x => x.ManifestDetails.DateTime).ToList();
             }
             catch (Exception)

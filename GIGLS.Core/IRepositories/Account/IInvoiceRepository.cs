@@ -18,5 +18,6 @@ namespace GIGLS.Core.IRepositories.Account
         IQueryable<CustomerView> GetAllFromCustomerView();
         Task<List<InvoiceView>> GetInvoicesForReminderAsync(double rangeofdays);
         IQueryable<InvoiceView> GetAllFromInvoiceAndShipments();
+        IQueryable<InvoiceView> GetAllInvoiceShipments();
     }
 }

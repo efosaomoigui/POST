@@ -25,7 +25,7 @@ namespace GIGLS.CORE.DTO.Report
             //If No Date Supplied
             if (!accountFilterCriteria.StartDate.HasValue && !accountFilterCriteria.EndDate.HasValue)
             {
-                startDate = new DateTime(2000, DateTime.Now.Month, DateTime.Now.Day);
+                startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
                 endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
             }
 

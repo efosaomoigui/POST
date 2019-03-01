@@ -1,22 +1,22 @@
-﻿using GIGLS.CORE.IServices.Shipments;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
-using GIGLS.CORE.Domain;
-using AutoMapper;
+﻿using AutoMapper;
 using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
-using System;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.CashOnDeliveryAccount;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.DTO.Shipments;
-using System.Linq;
+using GIGLS.Core;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.CashOnDeliveryAccount;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.CORE.Domain;
+using GIGLS.CORE.DTO.Shipments;
+using GIGLS.CORE.IServices.Shipments;
+using GIGLS.Infrastructure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -324,6 +324,24 @@ namespace GIGLS.Services.Implementation.Shipments
                     Waybill = shipmentCollectionDto.Waybill,
                     CODStatus = CODStatus.Unprocessed
                 });
+
+                //Update CashOnDevliveryRegisterAccount As  Cash Recieved at Service Center
+                var codRegisterCollectsForASingleWaybill = _uow.CashOnDeliveryRegisterAccount.Find(s => s.Waybill == shipmentCollectionDto.Waybill).FirstOrDefault();
+
+                if (codRegisterCollectsForASingleWaybill != null)
+                {
+                    //codsforservicecenter.ForEach(a => a.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter);
+                    if (shipmentCollectionDto.IsComingFromDispatch)
+                    {
+                        codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.CollectedByDispatch;
+                    }
+                    else
+                    {
+                        codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
+                    }
+
+                }
+
             }
 
             if (shipmentCollectionDto.Demurrage?.Amount > 0)
@@ -376,6 +394,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
         {
+
+            //var paymentType = shipmentCollection.IsComingFromDispatch;
+
             //check if the shipment has not been collected
             var shipmentCollected = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(shipmentCollection.Waybill) && x.ShipmentScanStatus == shipmentCollection.ShipmentScanStatus);
 
@@ -574,7 +595,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        
+
         //---Added for global customer care and ecommerce
         public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetOverDueShipmentsGLOBAL(FilterOptionsDto filterOptionsDto)
         {
@@ -646,7 +667,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public  async Task<IEnumerable<ShipmentCollectionDTO>> GetOverDueShipmentsGLOBAL()
+        public async Task<IEnumerable<ShipmentCollectionDTO>> GetOverDueShipmentsGLOBAL()
         {
             try
             {
@@ -835,7 +856,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 int count = shipmentCollection.Count();
 
                 var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
-               return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateModified));
+                return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateModified));
             }
             catch (Exception)
             {
@@ -843,6 +864,6 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-      
+
     }
 }

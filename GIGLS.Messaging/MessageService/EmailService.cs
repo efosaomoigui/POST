@@ -16,7 +16,9 @@ namespace GIGLS.Messaging.MessageService
             return result;
         }
 
-        private async Task<string> ConfigSendGridasync(MessageDTO message)
+        
+
+private async Task<string> ConfigSendGridasync(MessageDTO message)
         {
             var myMessage = new SendGridMessage();
             myMessage.TemplateId = ConfigurationManager.AppSettings["emailService:SendGridTemplateId"]; ;

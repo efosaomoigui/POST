@@ -96,6 +96,9 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal? InvoiceDiscountValue_display { get; set; } = 0;
         public decimal? offInvoiceDiscountvalue_display { get; set; } = 0;
 
+        //payment method
+        public string PaymentMethod { get; set; }
+
         //ShipmentCollection
         public ShipmentCollectionDTO ShipmentCollection { get; set; }
 
@@ -109,5 +112,7 @@ namespace GIGLS.Core.DTO.Shipments
         public InvoiceDTO Invoice { get; set; }
 
         public string Description { get; set; }
+
+        public int DepositStatus { get; set; }
     }
 }

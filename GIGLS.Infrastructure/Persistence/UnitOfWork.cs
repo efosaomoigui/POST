@@ -31,6 +31,8 @@ using GIGLS.Infrastructure.Persistence.Repositories.InternationalRequest;
 using GIGLS.Core.IRepositories.InternationalRequest;
 using GIGLS.Core.IRepositories.Sla;
 using GIGLS.Core.IRepositories.Expenses;
+using GIGLS.Core.Domain.Wallet;
+using GIGLS.Infrastructure.Persistence.Repositories.Wallet;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -250,6 +252,9 @@ namespace GIGLS.Infrastructure.Persistence
         public ICashOnDeliveryAccountRepository CashOnDeliveryAccount { get; set; }
 
         [Inject]
+        public ICashOnDeliveryRegisterAccountRepository CashOnDeliveryRegisterAccount { get; set; }
+
+        [Inject]
         public ICashOnDeliveryBalanceRepository CashOnDeliveryBalance { get; set; }
 
         [Inject]
@@ -341,6 +346,18 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IExpenditureRepository Expenditure { get; set; }
+
+        //Bank Processing Order
+        [Inject]
+        public IBankProcessingOrderForShipmentAndCODRepository BankProcessingOrderForShipmentAndCOD { get; set; }
+
+        [Inject]
+        public IBankProcessingOrderCodesRepository BankProcessingOrderCodes { get; set; }
+
+        //IBankProcessingOrderForShipmentAndCODRepository
+
+        [Inject]
+        public IOTPRepository OTP { get; set; }
 
         public int Complete()
         {

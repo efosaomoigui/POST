@@ -20,4 +20,8 @@ namespace GIGLS.Core.Domain.BankSettlement
         public string CollectionAgentId { get; set; }
         public bool ReceivedCOD { get; set; }
     }
+
+   
+    
+    
 }
