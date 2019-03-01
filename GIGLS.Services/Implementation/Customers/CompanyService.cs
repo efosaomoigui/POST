@@ -265,7 +265,7 @@ namespace GIGLS.Services.Implementation.Customers
                 }
 
                 //Update user 
-                var user = await _userService.GetUserByPhone(company.PhoneNumber);
+                var user = await _userService.GetUserByChannelCode(company.CustomerCode);
                 user.PhoneNumber = companyDto.PhoneNumber;
                 user.LastName = companyDto.Name;
                 user.FirstName = companyDto.Name;

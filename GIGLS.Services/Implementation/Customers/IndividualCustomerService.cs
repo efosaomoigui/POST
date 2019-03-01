@@ -238,9 +238,8 @@ namespace GIGLS.Services.Implementation.Customers
             customer.PhoneNumber = customerDto.PhoneNumber;
             customer.State = customerDto.State;
             customer.Password = customerDto.Password;
-
-
-            var user = await _userService.GetUserByPhone(customer.PhoneNumber);
+            
+            var user = await _userService.GetUserByChannelCode(customer.CustomerCode);
             user.FirstName = customerDto.FirstName;
             user.LastName = customerDto.LastName;
             user.PhoneNumber = customerDto.PhoneNumber;
