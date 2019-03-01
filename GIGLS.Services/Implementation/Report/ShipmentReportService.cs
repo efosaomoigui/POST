@@ -286,7 +286,7 @@ namespace GIGLS.Services.Implementation.Report
             //2. Get Total Shipment Delivered   
             //2a. Get collected shipment by date filtering
             var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
-                .Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC)
+                .Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT)
                 && x.DateCreated >= startDate && x.DateCreated < endDate).Select(x => x.Waybill).Distinct();
 
             //2b. Get Shipments that its destination is the service centre
@@ -462,7 +462,7 @@ namespace GIGLS.Services.Implementation.Report
             //2. Get Total Shipment Delivered   
             //2a. Get collected shipment by date filtering
             var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
-                .Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC)
+                .Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT)
                 && x.DateCreated >= startDate && x.DateCreated < endDate).Select(x => x.Waybill).Distinct();
 
             //2b. Get Shipments that its destination is the service centre
