@@ -240,7 +240,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var bankedShipments = new List<BankProcessingOrderForShipmentAndCODDTO>();
             if (serviceCenters.Length > 0)
             {
-                var shipmentResult = accompanyWaybillsVals.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
+                var shipmentResult = accompanyWaybillsVals.Where(s => serviceCenters.Contains(s.ServiceCenterId) && s.Status ==DepositStatus.Pending).ToList();
                 bankedShipments = Mapper.Map<List<BankProcessingOrderForShipmentAndCODDTO>>(shipmentResult);
             }
 
@@ -323,9 +323,16 @@ namespace GIGLS.Services.Implementation.Wallet
             //var allShipments = _uow.Invoice.GetAllFromInvoiceView();
             var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
 
+            //Get Bank Deposit Module StartDate
+            var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate);
+            string globalpropertiesdateStr = globalpropertiesdateObj?.Value;
+
+            var globalpropertiesdate = DateTime.MinValue;
+            bool success = DateTime.TryParse(globalpropertiesdateStr, out globalpropertiesdate);
+
             //Filter by deposited code should come here
             allShipments = allShipments.Where(s => s.PaymentMethod == "Cash" && s.PaymentStatus == PaymentStatus.Paid);
-            allShipments = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed);
+            allShipments = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate);
 
             //added for GWA and GWARIMPA service centres
             {
@@ -392,7 +399,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (bkoc.DepositType == DepositType.Shipment)
                 {
 
-                    var allShipmentsVals = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed);
+                    var allShipmentsVals = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate);
                     var result1 = allShipmentsVals.Select(s => new InvoiceViewDTO()
                     {
                         Waybill = s.Waybill
