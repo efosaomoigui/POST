@@ -341,7 +341,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     else
                     {
                         codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
-                        codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
+                        codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;   
                     }
 
                 }
