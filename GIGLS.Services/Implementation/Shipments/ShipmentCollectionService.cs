@@ -337,11 +337,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (shipmentCollectionDto.IsComingFromDispatch)
                     {
                         codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.CollectedByDispatch;
+                        codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
+                        codRegisterCollectsForASingleWaybill.PaymentType = shipmentCollectionDto.PaymentType;
                     }
                     else
                     {
                         codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
-                        codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;   
+                        codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
+                        codRegisterCollectsForASingleWaybill.PaymentType = shipmentCollectionDto.PaymentType;
                     }
 
                 }

@@ -144,7 +144,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
             var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
             allCODs = allCODs.Where(s => s.CODStatusHistory == CODStatushistory.RecievedAtServiceCenter);
-            allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Unprocessed);
+            allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
 
             //added for GWA and GWARIMPA service centres
             {
@@ -366,45 +366,48 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             try
             {
-                //Collect total shipment unproceessed and its total
-                var comboShipmentAndTotal = await GetTotalAmountAndShipments(bkoc.DateAndTimeOfDeposit, bkoc.DepositType);
-                bkoc.TotalAmount = comboShipmentAndTotal.Item1;
-                var allShipments = comboShipmentAndTotal.Item2;
-
-                //get the current service user
+                //1. get the current service user
                 var user = await _userService.retUser();
                 bkoc.UserId = user.Id;
                 bkoc.FullName = user.FirstName + " " + user.LastName;
 
+                //2. get the service centers for the current user
                 var scs = await _userService.GetCurrentServiceCenter();
                 bkoc.ServiceCenter = scs[0].ServiceCentreId;
                 bkoc.ScName = scs[0].Name;
 
-                //Get Bank Deposit Module StartDate
+                //3. Get Bank Deposit Module StartDate
                 var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate);
                 string globalpropertiesdateStr = globalpropertiesdateObj?.Value;
 
                 var globalpropertiesdate = DateTime.MinValue;
                 bool success = DateTime.TryParse(globalpropertiesdateStr, out globalpropertiesdate);
 
+                var bankordercodes = new BankProcessingOrderCodes();
+
+                //4. updating the startdate
                 bkoc.StartDateTime = globalpropertiesdate;
                 bkoc.DateAndTimeOfDeposit = DateTime.Now;
                 bkoc.Status = DepositStatus.Pending;
 
-                var bankordercodes = Mapper.Map<BankProcessingOrderCodes>(bkoc);
-
-                //commence preparatiion to insert records in the BankProcessingOrderForShipmentAndCOD
+                //5. commence preparatiion to insert records in the BankProcessingOrderForShipmentAndCOD
                 var enddate = bkoc.DateAndTimeOfDeposit;
 
                 if (bkoc.DepositType == DepositType.Shipment)
                 {
+                    //5.1 Collect total shipment unproceessed and its total
+                    var comboShipmentAndTotal = await GetTotalAmountAndShipments(bkoc.DateAndTimeOfDeposit, bkoc.DepositType);
+                    bkoc.TotalAmount = comboShipmentAndTotal.Item1;
+                    var allShipments = comboShipmentAndTotal.Item2;
 
-                    var allShipmentsVals = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate);
+                    var allShipmentsVals = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate
+                    && s.DepartureServiceCentreId == bkoc.ServiceCenter);
                     var result1 = allShipmentsVals.Select(s => new InvoiceViewDTO()
                     {
                         Waybill = s.Waybill
                     });
 
+                    //5.2 get the shipments from [[BankProcessingOrderForShipmentAndCOD]]
                     var allprocessingordeforshipment = await _uow.BankProcessingOrderForShipmentAndCOD.GetProcessingOrderForShipmentAndCOD(bkoc.DepositType);
                     var result2 = allprocessingordeforshipment.Select(s => new BankProcessingOrderForShipmentAndCOD()
                     {
@@ -437,6 +440,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     var arrWaybills = allShipments.Select(x => x.Waybill).ToArray();
 
+                    bankordercodes = Mapper.Map<BankProcessingOrderCodes>(bkoc);
                     _uow.BankProcessingOrderCodes.Add(bankordercodes);
                     _uow.BankProcessingOrderForShipmentAndCOD.AddRange(bankorderforshipmentandcod);
 
@@ -488,18 +492,26 @@ namespace GIGLS.Services.Implementation.Wallet
                     });
 
                     var arrCODs = codsforservicecenter.Select(x => x.Waybill).ToArray();
-
-                    _uow.BankProcessingOrderCodes.Add(bankordercodes);
-                    _uow.BankProcessingOrderForShipmentAndCOD.AddRange(bankorderforshipmentandcod);
-
                     //var arrWaybills = allShipments.Select(x => x.Waybill).ToArray();
 
                     //select a list of values that contains the allshipment from the invoice view
                     var nonDepsitedValue = _uow.CashOnDeliveryRegisterAccount.GetAll().Where(x => arrCODs.Contains(x.Waybill));
                     var nonDepsitedValueunprocessed = nonDepsitedValue.Where(s => s.DepositStatus == 0).ToList();
+
+                    //Collect total shipment unproceessed and its total
+                    decimal codTotal = 0;
+                    foreach (var item in nonDepsitedValueunprocessed)
+                    {
+                        codTotal += item.Amount;
+                    }
+
+                    bkoc.TotalAmount = codTotal;
+                    bankordercodes = Mapper.Map<BankProcessingOrderCodes>(bkoc);
                     nonDepsitedValueunprocessed.ForEach(a => a.DepositStatus = DepositStatus.Pending);
                     nonDepsitedValueunprocessed.ForEach(a => a.RefCode = bkoc.Code);
 
+                    _uow.BankProcessingOrderCodes.Add(bankordercodes);
+                    _uow.BankProcessingOrderForShipmentAndCOD.AddRange(bankorderforshipmentandcod);
 
                 }
 
