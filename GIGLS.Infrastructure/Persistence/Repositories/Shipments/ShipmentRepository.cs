@@ -909,7 +909,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                PaymentStatus = i.PaymentStatus,
                                                DateCreated = i.DateCreated,
                                                UserName = u.FirstName + " " + u.LastName,
-                                               CompanyType = s.CompanyType
+                                               CompanyType = s.CompanyType,
+                                               PaymentTypeReference = i.PaymentTypeReference
                                            }).ToList();
             var resultDto = result.OrderByDescending(x => x.DateCreated).ToList();
             return Task.FromResult(resultDto);

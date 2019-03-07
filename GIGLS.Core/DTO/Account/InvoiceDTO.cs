@@ -28,5 +28,6 @@ namespace GIGLS.Core.DTO.Account
         public CustomerDTO Customer { get; set; }
 
         public PaymentPartialTransactionProcessDTO PaymentPartialTransaction { get; set; }
+        public string PaymentTypeReference { get; set; }
     }
 }

@@ -186,6 +186,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             invoiceEntity.PaymentDate = DateTime.Now;
             invoiceEntity.PaymentMethod = paymentTransaction.PaymentType.ToString();
             invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
+            invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
 
             await _uow.CompleteAsync();
             result = true;
@@ -275,6 +276,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             invoiceEntity.PaymentDate = DateTime.Now;
             invoiceEntity.PaymentMethod = paymentTransaction.PaymentType.ToString();
             invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
+            invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
 
             await _uow.CompleteAsync();
             result = true;
