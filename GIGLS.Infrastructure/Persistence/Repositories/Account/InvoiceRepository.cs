@@ -247,7 +247,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               DateCreated = s.DateCreated,
                               DeliveryOptionId = s.DeliveryOptionId,
                               DepositStatus = s.DepositStatus,
-                              PaymentMethod = i.PaymentMethod
+                              PaymentMethod = i.PaymentMethod,
+                              CashOnDeliveryAmount = s.CashOnDeliveryAmount
                           });
             return result;
         }
@@ -302,5 +303,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                           });
             return result;
         }
+
+       
     }
 }

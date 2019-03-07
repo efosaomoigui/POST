@@ -299,6 +299,8 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentCollection.ShipmentScanStatus = shipmentCollectionDto.ShipmentScanStatus;
             shipmentCollection.UserId = shipmentCollectionDto.UserId;
 
+            var collectionServiceCenter = shipmentCollectionDto.OriginalDestinationServiceCentre;
+
             //Add Collected Scan to Scan History
             var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
             {
@@ -327,6 +329,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Update CashOnDevliveryRegisterAccount As  Cash Recieved at Service Center
                 var codRegisterCollectsForASingleWaybill = _uow.CashOnDeliveryRegisterAccount.Find(s => s.Waybill == shipmentCollectionDto.Waybill).FirstOrDefault();
+                var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
 
                 if (codRegisterCollectsForASingleWaybill != null)
                 {
@@ -334,10 +337,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (shipmentCollectionDto.IsComingFromDispatch)
                     {
                         codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.CollectedByDispatch;
+                        codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
+                        codRegisterCollectsForASingleWaybill.PaymentType = shipmentCollectionDto.PaymentType;
                     }
                     else
                     {
                         codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
+                        codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
+                        codRegisterCollectsForASingleWaybill.PaymentType = shipmentCollectionDto.PaymentType;
                     }
 
                 }

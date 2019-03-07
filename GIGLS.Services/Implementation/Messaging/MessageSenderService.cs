@@ -191,10 +191,21 @@ namespace GIGLS.Services.Implementation.Messaging
                     if (messageDTO.MessageType == MessageType.ARF &&
                         invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
                     {
-                        var smsMessages = await _messageService.GetSmsAsync();
-                        var homeDeliveryMessageDTO = smsMessages.FirstOrDefault(s => s.MessageType == MessageType.AHD);
+                        MessageDTO homeDeliveryMessageDTO = null;
+                        if (messageDTO.EmailSmsType == EmailSmsType.SMS)
+                        {
+                            //sms
+                            var smsMessages = await _messageService.GetSmsAsync();
+                            homeDeliveryMessageDTO = smsMessages.FirstOrDefault(s => s.MessageType == MessageType.AHD);
+                        }
+                        else
+                        {
+                            //email
+                            var emailMessages = await _messageService.GetEmailAsync();
+                            homeDeliveryMessageDTO = emailMessages.FirstOrDefault(s => s.MessageType == MessageType.AHD);
+                        }
 
-                        if(homeDeliveryMessageDTO != null)
+                        if (homeDeliveryMessageDTO != null)
                         {
                             messageDTO.Body = homeDeliveryMessageDTO.Body;
                         }
@@ -204,8 +215,19 @@ namespace GIGLS.Services.Implementation.Messaging
                     if (messageDTO.MessageType == MessageType.CRT &&
                         invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
                     {
-                        var emailMessages = await _messageService.GetEmailAsync();
-                        var homeDeliveryMessageDTO = emailMessages.FirstOrDefault(s => s.MessageType == MessageType.CRH);
+                        MessageDTO homeDeliveryMessageDTO = null;
+                        if (messageDTO.EmailSmsType == EmailSmsType.SMS)
+                        {
+                            //sms
+                            var smsMessages = await _messageService.GetSmsAsync();
+                            homeDeliveryMessageDTO = smsMessages.FirstOrDefault(s => s.MessageType == MessageType.CRH);
+                        }
+                        else
+                        {
+                            //email
+                            var emailMessages = await _messageService.GetEmailAsync();
+                            homeDeliveryMessageDTO = emailMessages.FirstOrDefault(s => s.MessageType == MessageType.CRH);
+                        }
 
                         if (homeDeliveryMessageDTO != null)
                         {

@@ -6,5 +6,6 @@ namespace GIGLS.Core.DTO.Report
     public class ShipmentProgressSummaryFilterCriteria : BaseFilterCriteria
     {
         public ShipmentProgressSummaryType ShipmentProgressSummaryType { get; set; }
+        public bool IsCOD { get; set; }
     }
 }
