@@ -222,7 +222,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
             var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrders(type);
-
             var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == refcode);
 
 
@@ -241,6 +240,7 @@ namespace GIGLS.Services.Implementation.Wallet
             if (serviceCenters.Length > 0)
             {
                 var shipmentResult = accompanyWaybillsVals.Where(s => serviceCenters.Contains(s.ServiceCenterId) && (s.Status == DepositStatus.Pending || s.Status == DepositStatus.Deposited || s.Status == DepositStatus.Verified)).ToList();
+
                 bankedShipments = Mapper.Map<List<BankProcessingOrderForShipmentAndCODDTO>>(shipmentResult);
             }
 
@@ -455,7 +455,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
                     var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
                     //allCODs = allCODs.Where(s => s.DateCreated >= startdate && s.DateCreated <= enddate);
-                    allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Unprocessed);
+                    allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
                     var codsforservicecenter = allCODs.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
 
                     var result1 = codsforservicecenter.Select(s => new CashOnDeliveryRegisterAccountDTO()
