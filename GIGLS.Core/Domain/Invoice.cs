@@ -22,5 +22,6 @@ namespace GIGLS.Core.Domain
         public int ServiceCentreId { get; set; }
         public bool IsInternational { get; set; }
         public bool IsShipmentCollected { get; set; }
+        public string PaymentTypeReference { get; set; }
     }
 }

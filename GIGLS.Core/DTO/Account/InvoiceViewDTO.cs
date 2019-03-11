@@ -18,6 +18,7 @@ namespace GIGLS.Core.DTO.Account
         public string Waybill { get; set; }
         public DateTime DueDate { get; set; }
         public bool IsShipmentCollected { get; set; }
+        public string PaymentTypeReference { get; set; }
 
         //Shipment Information
         public int ShipmentId { get; set; }
