@@ -329,26 +329,24 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Update CashOnDevliveryRegisterAccount As  Cash Recieved at Service Center
                 var codRegisterCollectsForASingleWaybill = _uow.CashOnDeliveryRegisterAccount.Find(s => s.Waybill == shipmentCollectionDto.Waybill).FirstOrDefault();
-                var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
-
+                
                 if (codRegisterCollectsForASingleWaybill != null)
                 {
-                    //codsforservicecenter.ForEach(a => a.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter);
+                    var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
+
                     if (shipmentCollectionDto.IsComingFromDispatch)
                     {
                         codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.CollectedByDispatch;
-                        codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
-                        codRegisterCollectsForASingleWaybill.PaymentType = shipmentCollectionDto.PaymentType;
                     }
                     else
                     {
                         codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
-                        codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
-                        codRegisterCollectsForASingleWaybill.PaymentType = shipmentCollectionDto.PaymentType;
                     }
-
+                    
+                    codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
+                    codRegisterCollectsForASingleWaybill.PaymentType = shipmentCollectionDto.PaymentType;
+                    codRegisterCollectsForASingleWaybill.PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference;
                 }
-
             }
 
             if (shipmentCollectionDto.Demurrage?.Amount > 0)
@@ -358,7 +356,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 var generalLedger = new GeneralLedger()
                 {
                     DateOfEntry = DateTime.Now,
-
                     ServiceCentreId = serviceCenters[0],
                     UserId = shipmentCollectionDto.UserId,
                     Amount = shipmentCollectionDto.Demurrage.Amount,
@@ -367,8 +364,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     IsDeferred = false,
                     Waybill = shipmentCollectionDto.Waybill,
                     PaymentServiceType = PaymentServiceType.Demurage,
-                    PaymentType = shipmentCollectionDto.PaymentType
-                    //ClientNodeId = shipment.c
+                    PaymentType = shipmentCollectionDto.PaymentType,
+                    PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference                    
                 };
                 _uow.GeneralLedger.Add(generalLedger);
             }

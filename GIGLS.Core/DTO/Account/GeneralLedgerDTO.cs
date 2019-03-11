@@ -26,6 +26,7 @@ namespace GIGLS.Core.DTO.Account
         public string Waybill { get; set; }
         public string ClientNodeId { get; set; }
         public PaymentServiceType PaymentServiceType { get; set; }
+        public string PaymentTypeReference { get; set; }
         public bool IsInternational { get; set; }
     }
 }

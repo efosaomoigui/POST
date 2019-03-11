@@ -25,6 +25,7 @@ namespace GIGLS.Core.Domain.Wallet
         public string ServiceCenterCode { get; set; }
         public string Description { get; set; }
         public PaymentType PaymentType { get; set; }
+        public string PaymentTypeReference { get; set; }
         public DepositStatus DepositStatus { get; set; }
         public string RefCode { get; set; }
     }
