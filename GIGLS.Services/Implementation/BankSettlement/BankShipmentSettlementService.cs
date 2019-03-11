@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
+using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.BankSettlement;
@@ -88,7 +89,7 @@ namespace GIGLS.Services.Implementation.Wallet
             //Generate the refcode
             var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
             var refcode = await _service.GenerateNextNumber(NumberGeneratorType.BankProcessingOrderForShipment, getServiceCenterCode[0].Code);
-            decimal total = 0;
+
 
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
@@ -97,6 +98,9 @@ namespace GIGLS.Services.Implementation.Wallet
 
             allShipments = allShipments.Where(s => s.PaymentMethod == "Cash" && s.PaymentStatus == PaymentStatus.Paid);
             allShipments = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate);
+
+            //A. get partial payment values
+            var allShipmentsPartial = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate && s.PaymentMethod == "Partial");
 
             //added for GWA and GWARIMPA service centres
             {
@@ -109,19 +113,59 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
             }
 
+            //B. combine list for partial and cash shipment
             var cashShipments = new List<GIGLS.Core.DTO.Account.InvoiceViewDTO>();
             if (serviceCenters.Length > 0)
             {
                 var shipmentResult = allShipments.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId)).ToList();
+                var allShipmentsPartialVals = allShipmentsPartial.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId)).ToList();
+
+                shipmentResult.AddRange(allShipmentsPartialVals);
                 cashShipments = Mapper.Map<List<GIGLS.Core.DTO.Account.InvoiceViewDTO>>(shipmentResult);
             }
 
+            //var partialPaymentCash = returnPartialPaymentCashByWaybill();
+            var cashShipmentsVal = new List<GIGLS.Core.DTO.Account.InvoiceViewDTO>();
             foreach (var item in cashShipments)
             {
-                total += item.GrandTotal;
+                //1. cash first
+                if (item.PaymentMethod == "Cash")
+                {
+                    cashShipmentsVal.Add(item);
+                }
+
+                //2. partial
+                if (item.PaymentMethod == "Partial")
+                {
+                    var partialPaymentCash = await returnPartialPaymentCashByWaybill(item.Waybill);
+
+                    if (partialPaymentCash.Item1 != null && partialPaymentCash.Item1.Count > 0)
+                    {
+                        item.GrandTotal = partialPaymentCash.Item2;
+                        cashShipmentsVal.Add(item);
+                    }
+                }
             }
 
-            var comboresult = Tuple.Create(refcode, cashShipments, total);
+            //3. sum total
+            decimal total = cashShipmentsVal.Sum(s => s.GrandTotal);
+            var comboresult = Tuple.Create(refcode, cashShipmentsVal, total);
+            return await Task.FromResult(comboresult);
+        }
+
+        private async Task<Tuple<List<PaymentPartialTransaction>, decimal>> returnPartialPaymentCashByWaybill(string waybill)
+        {
+            decimal total = 0;
+            var cashPaymentPartial = _uow.PaymentPartialTransaction.GetAll().Where(s => s.Waybill == waybill && s.PaymentType == PaymentType.Cash).ToList();
+
+            foreach (var item in cashPaymentPartial)
+            {
+                total += item.Amount;
+            }
+
+            var vals = Tuple.Create(cashPaymentPartial, total);
+
+            var comboresult = Tuple.Create(cashPaymentPartial, total);
             return await Task.FromResult(comboresult);
         }
 
@@ -222,7 +266,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
             var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrders(type);
-
             var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == refcode);
 
 
@@ -394,6 +437,52 @@ namespace GIGLS.Services.Implementation.Wallet
                 var enddate = bkoc.DateAndTimeOfDeposit;
 
                 if (bkoc.DepositType == DepositType.Shipment)
+                {
+                    var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+
+                    //1. get data from COD register account as queryable from CashOnDeliveryRegisterAccount table
+                    var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
+
+                    allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
+                    allCODs = allCODs.Where(s => s.CODStatusHistory == CODStatushistory.RecievedAtServiceCenter);
+
+                    var validateInsertWaybills = false;
+                    foreach (var rs in result1)
+                    {
+                        validateInsertWaybills = result2.Any(p => p.Waybill == rs.Waybill);
+                        if (validateInsertWaybills)
+                        {
+                            throw new GenericException("Error validating one or more waybills, Please try requesting again for a fresh record.");
+                        }
+                    }
+
+                    //var bankorderforshipmentandcod = Mapper.Map<List<BankProcessingOrderForShipmentAndCOD>>(allShipments);
+                    var bankorderforshipmentandcod = allShipmentsVals.Select(s => new BankProcessingOrderForShipmentAndCOD()
+                    {
+                        Waybill = s.Waybill,
+                        RefCode = bkoc.Code,
+                        DepositType = bkoc.DepositType,
+                        GrandTotal = s.GrandTotal,
+                        CODAmount = s.CashOnDeliveryAmount,
+                        ServiceCenterId = bkoc.ServiceCenter,
+                        ServiceCenter = bkoc.ScName,
+                        UserId = bkoc.UserId,
+                        Status = DepositStatus.Pending
+                    });
+
+                    var arrWaybills = allShipments.Select(x => x.Waybill).ToArray();
+
+                    bankordercodes = Mapper.Map<BankProcessingOrderCodes>(bkoc);
+                    _uow.BankProcessingOrderCodes.Add(bankordercodes);
+                    _uow.BankProcessingOrderForShipmentAndCOD.AddRange(bankorderforshipmentandcod);
+
+                    //select a list of values that contains the allshipment from the invoice view
+                    var nonDepsitedValue = _uow.Shipment.GetAll().Where(x => arrWaybills.Contains(x.Waybill)).ToList();
+                    var nonDepsitedValueunprocessed = nonDepsitedValue.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate).ToList();
+                    nonDepsitedValueunprocessed.ForEach(a => a.DepositStatus = DepositStatus.Pending);
+
+                }
+                else if (bkoc.DepositType == DepositType.COD)
                 {
                     var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
