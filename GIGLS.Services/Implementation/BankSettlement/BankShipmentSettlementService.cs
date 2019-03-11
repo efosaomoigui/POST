@@ -151,6 +151,7 @@ namespace GIGLS.Services.Implementation.Wallet
             decimal total = cashShipmentsVal.Sum(s => s.GrandTotal);
             var comboresult = Tuple.Create(refcode, cashShipmentsVal, total);
             return await Task.FromResult(comboresult);
+
         }
 
         private async Task<Tuple<List<PaymentPartialTransaction>, decimal>> returnPartialPaymentCashByWaybill(string waybill)
@@ -438,13 +439,24 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 if (bkoc.DepositType == DepositType.Shipment)
                 {
-                    var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                    //5.1 Collect total shipment unproceessed and its total
+                    var comboShipmentAndTotal = await GetTotalAmountAndShipments(bkoc.DateAndTimeOfDeposit, bkoc.DepositType);
+                    bkoc.TotalAmount = comboShipmentAndTotal.Item1;
+                    var allShipments = comboShipmentAndTotal.Item2;
 
-                    //1. get data from COD register account as queryable from CashOnDeliveryRegisterAccount table
-                    var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
+                    var allShipmentsVals = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate
+                    && s.DepartureServiceCentreId == bkoc.ServiceCenter);
+                    var result1 = allShipmentsVals.Select(s => new InvoiceViewDTO()
+                    {
+                        Waybill = s.Waybill
+                    });
 
-                    allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
-                    allCODs = allCODs.Where(s => s.CODStatusHistory == CODStatushistory.RecievedAtServiceCenter);
+                    //5.2 get the shipments from [[BankProcessingOrderForShipmentAndCOD]]
+                    var allprocessingordeforshipment = await _uow.BankProcessingOrderForShipmentAndCOD.GetProcessingOrderForShipmentAndCOD(bkoc.DepositType);
+                    var result2 = allprocessingordeforshipment.Select(s => new BankProcessingOrderForShipmentAndCOD()
+                    {
+                        Waybill = s.Waybill
+                    });
 
                     var validateInsertWaybills = false;
                     foreach (var rs in result1)
