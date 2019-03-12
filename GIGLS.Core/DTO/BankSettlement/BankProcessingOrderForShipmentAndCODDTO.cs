@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace GIGLS.Core.DTO.BankSettlement
@@ -39,6 +40,9 @@ namespace GIGLS.Core.DTO.BankSettlement
         public DepositType DepositType { get; set; }
         public DateTime StartDateTime { get; set; }
         public DepositStatus Status { get; set; }
+
+        //Shipment Items
+        public List<BankProcessingOrderForShipmentAndCODDTO> ShipmentAndCOD { get; set; }
 
     }
 
