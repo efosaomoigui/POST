@@ -14,6 +14,7 @@ using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.MessagingLog;
 using GIGLS.Core.DTO.MessagingLog;
 using System.Web;
+using GIGLS.Core.DTO.User;
 
 namespace GIGLS.Services.Implementation.Messaging
 {
@@ -337,6 +338,70 @@ namespace GIGLS.Services.Implementation.Messaging
 
             }
             return true;
+        }
+
+        //Sends generic email message
+        public async Task SendGenericEmailMessage(MessageType messageType, object obj)
+        {
+            var messageDTO = new MessageDTO();
+            var result = "";
+
+            try
+            {
+                var emailMessages = await _messageService.GetEmailAsync();
+                messageDTO = emailMessages.FirstOrDefault(s => s.MessageType == messageType);
+
+                if (messageDTO != null)
+                {
+                    //prepare generic message finalBody
+                    await PrepareGenericMessageFinalBody(messageDTO, obj);
+                    result = await _emailService.SendAsync(messageDTO);
+                    await LogEmailMessage(messageDTO, result);
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
+
+        private async Task<bool> PrepareGenericMessageFinalBody(MessageDTO messageDTO, object obj)
+        {
+            //1. obj is UserDTO
+            if (obj is UserDTO)
+            {
+                var strArray = new string[]
+                {
+                    "User Name",
+                    "Login Time",
+                    "Url",
+                };
+
+                var userDTO = (UserDTO)obj;
+                //map the array
+                strArray[0] = userDTO.Email;
+                strArray[1] = $"{DateTime.Now.ToLongDateString()} : {DateTime.Now.ToLongTimeString()}";
+                //strArray[2] = invoice.DepartureServiceCentreName;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject =
+                    string.Format(messageDTO.Subject, strArray);
+
+
+                //populate the message template
+                messageDTO.FinalBody =
+                    string.Format(messageDTO.Body, strArray);
+
+
+                messageDTO.To = userDTO.PhoneNumber;
+                messageDTO.ToEmail = userDTO.Email;
+
+            }
+
+            return await Task.FromResult(true);
         }
 
     }

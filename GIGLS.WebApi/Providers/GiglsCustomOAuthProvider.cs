@@ -10,6 +10,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.DTO.User;
+using GIGLS.Services.Implementation.Messaging;
 
 namespace GIGLS.WebApi.Providers
 {
@@ -85,13 +88,13 @@ namespace GIGLS.WebApi.Providers
             using (var _repo = new AuthRepository<User, GIGLSContext>(new GIGLSContext()))
             {
                 User user = await _repo._userManager.FindAsync(context.UserName, context.Password);
-                
+
 
                 if (user != null && user.UserChannelType == UserChannelType.Employee)
                 {
                     //Global Property PasswordExpireDaysCount
                     var expiredDayCount = await _repo._globalProperty.GetAsync(s => s.Key == GlobalPropertyType.PasswordExpireDaysCount.ToString());
-                    if(expiredDayCount == null)
+                    if (expiredDayCount == null)
                     {
                         context.SetError("password_expired", "Global Property PasswordExpireDaysCount does not exist.");
                         return;
@@ -103,7 +106,7 @@ namespace GIGLS.WebApi.Providers
                     var LastUpdatePasswordDate = user.PasswordExpireDate;
                     DateTime TodayDate = DateTime.Now.Date;
                     var DayDifferent = (TodayDate - LastUpdatePasswordDate).Days;
-                    
+
                     if (DayDifferent >= expiredDays)
                     {
                         //Redirect to user reset page
@@ -122,7 +125,7 @@ namespace GIGLS.WebApi.Providers
                     //Add your flag to the header of the response
                     //context.Response.Headers.Add(ServerGlobalVariables.OwinChallengeFlag, new[] { ((int)HttpStatusCode.Unauthorized).ToString() });
 
-                    return;  
+                    return;
                 }
 
                 if (user.UserChannelType == UserChannelType.Employee)
@@ -190,7 +193,18 @@ namespace GIGLS.WebApi.Providers
                 var props = new AuthenticationProperties(authPropDictionary);
                 var ticket = new AuthenticationTicket(oAuthIdentity, props);
 
-                context.Validated(ticket);
+                var isLoginSuccess = context.Validated(ticket);
+
+                //After successful login, send email
+                if (isLoginSuccess)
+                {
+                    var _messageSenderService = (IMessageSenderService)System.Web.Http.GlobalConfiguration.Configuration.DependencyResolver.GetService(typeof(IMessageSenderService));
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.USER_LOGIN,
+                        new UserDTO()
+                        {
+                            Email = user.Email
+                        });
+                }
 
             }
         }
