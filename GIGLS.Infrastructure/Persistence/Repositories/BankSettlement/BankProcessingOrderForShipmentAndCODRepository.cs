@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.BankSettlement;
+using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.BankSettlement;
 using GIGLS.Infrastructure.Persistence;
