@@ -279,39 +279,8 @@ namespace GIGLS.Services.Implementation.Report
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            //1. Get Total Shipment Created
-            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
-
-            if (baseFilterCriteria.IsCOD)
-            {
-                allShipmentsQueryable = allShipmentsQueryable.Where(s => s.CashOnDeliveryAmount > 0);
-            }
-
-            dashboardDTO.TotalShipmentOrdered = allShipmentsQueryable.Where(s => serviceCenterId.Contains(s.DepartureServiceCentreId)).Count();
-            
-            //2. Get Total Shipment Delivered   
-            //2a. Get collected shipment by date filtering
-            var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
-                .Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT)
-                && x.DateCreated >= startDate && x.DateCreated < endDate).Select(x => x.Waybill).Distinct();
-
-            //2b. Get Shipments that its destination is the service centre
-            var shipmentsWaybills = _uow.Invoice.GetAllFromInvoiceAndShipments();
-
-            if (baseFilterCriteria.IsCOD)
-            {
-                shipmentsWaybills = shipmentsWaybills.Where(x => x.CashOnDeliveryAmount > 0);
-            }
-
-            var shipmentsWaybillsResult = shipmentsWaybills.Where(s => serviceCenterId.Contains(s.DestinationServiceCentreId) && s.IsShipmentCollected == true).Select(x => x.Waybill).Distinct();
-
-            //2c. Extras the current login staff service centre shipment from the shipment collection
-            shipmentsWaybillsResult = shipmentsWaybillsResult.Where(x => shipmentCollection.Contains(x));
-            dashboardDTO.TotalShipmentDelivered = shipmentsWaybillsResult.Count();
-
-
-            //3. Get Total Shipment Expected filter by date using Date Created
-            //3a. Get shipments coming to the service centre 
+            //1. Get Total Shipment Expected filter by date using Date Created
+            //1a. Get shipments coming to the service centre 
             var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
 
             if (baseFilterCriteria.IsCOD)
@@ -322,7 +291,7 @@ namespace GIGLS.Services.Implementation.Report
             var allShipmentsResult = allShipments.Where(s => s.IsShipmentCollected == false && serviceCenterId.Contains(s.DestinationServiceCentreId)
                 && s.DateCreated >= startDate && s.DateCreated < endDate).Select(x => x.Waybill).Distinct();
 
-            //3b. For waybill to be collected it must have satisfy the follwoing Shipment Scan Status
+            //1b. For waybill to be collected it must have satisfy the follwoing Shipment Scan Status
             //Collected by customer (OKC & OKT), Return (SSR), Reroute (SRR) : All status satisfy IsShipmentCollected above
             //shipments that have arrived destination service centre or cancelled should not be displayed in expected shipments
             var shipmetCollection = _uow.ShipmentCollection.GetAllAsQueryable()
@@ -330,11 +299,12 @@ namespace GIGLS.Services.Implementation.Report
                 && x.ShipmentScanStatus == ShipmentScanStatus.SSR && x.ShipmentScanStatus == ShipmentScanStatus.SRR
                 && x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.ShipmentScanStatus == ShipmentScanStatus.SSC)).Select(w => w.Waybill);
 
-            //3c. remove all the waybills that at the collection center from the income shipments
+            //1c. remove all the waybills that at the collection center from the income shipments
             allShipmentsResult = allShipmentsResult.Where(s => !shipmetCollection.Contains(s));
             dashboardDTO.TotalShipmentExpected = allShipmentsResult.Count();
 
-            //4. Get Total Shipment Awaiting Collection
+
+            //2. Get Total Shipment Awaiting Collection
             var shipmentsInWaybills = _uow.Invoice.GetAllFromInvoiceAndShipments();
 
             if (baseFilterCriteria.IsCOD)
@@ -342,10 +312,9 @@ namespace GIGLS.Services.Implementation.Report
                 shipmentsInWaybills = shipmentsInWaybills.Where(x => x.CashOnDeliveryAmount > 0);
             }
 
-            var shipmentsInWaybillsResult = shipmentsInWaybills.Where(s => s.IsShipmentCollected == false 
+            var shipmentsInWaybillsResult = shipmentsInWaybills.Where(s => s.IsShipmentCollected == false
             && serviceCenterId.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct();
-
-
+            
             var shipmentInCollection = _uow.ShipmentCollection.GetAllAsQueryable()
                 .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF
                 && x.DateCreated >= startDate && x.DateCreated < endDate).Select(x => x.Waybill);
@@ -353,6 +322,49 @@ namespace GIGLS.Services.Implementation.Report
             shipmentsInWaybillsResult = shipmentsInWaybillsResult.Where(s => shipmentInCollection.Contains(s));
             dashboardDTO.TotalShipmentAwaitingCollection = shipmentsInWaybillsResult.Count();
 
+            //3. Get Total Shipment Created that has not depart service centre
+            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+
+            if (baseFilterCriteria.IsCOD)
+            {
+                allShipmentsQueryable = allShipmentsQueryable.Where(s => s.CashOnDeliveryAmount > 0);
+            }
+
+            allShipmentsQueryable = allShipmentsQueryable.Where(s => serviceCenterId.Contains(s.DepartureServiceCentreId));
+
+            var shipmentTrackingHistory = _uow.ShipmentTracking.GetAllAsQueryable()
+                .Where(x => x.Status == ShipmentScanStatus.DSC.ToString() || x.Status == ShipmentScanStatus.DPC.ToString()).Select(x => x.Waybill).Distinct();
+
+            allShipmentsQueryable = allShipmentsQueryable.Where(s => !shipmentTrackingHistory.Contains(s.Waybill));
+
+            dashboardDTO.TotalShipmentOrdered = allShipmentsQueryable.Count();
+            
+            //4. Get Total Shipment Delivered   
+            //4a. Get collected shipment by date filtering : use current date if not date selected
+            if(baseFilterCriteria.StartDate == null & baseFilterCriteria.EndDate == null)
+            {
+                startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
+            }
+
+            var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
+                .Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT)
+                && x.DateModified >= startDate && x.DateModified < endDate).Select(x => x.Waybill).Distinct();
+
+            //4b. Get Shipments that its destination is the service centre
+            var shipmentsWaybills = _uow.Invoice.GetAllFromInvoiceAndShipments();
+
+            if (baseFilterCriteria.IsCOD)
+            {
+                shipmentsWaybills = shipmentsWaybills.Where(x => x.CashOnDeliveryAmount > 0);
+            }
+
+            var shipmentsWaybillsResult = shipmentsWaybills.Where(s => serviceCenterId.Contains(s.DestinationServiceCentreId) && s.IsShipmentCollected == true).Select(x => x.Waybill).Distinct();
+
+            //4c. Extras the current login staff service centre shipment from the shipment collection
+            shipmentsWaybillsResult = shipmentsWaybillsResult.Where(x => shipmentCollection.Contains(x));
+            dashboardDTO.TotalShipmentDelivered = shipmentsWaybillsResult.Count();                      
+            
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
             dashboardDTO.GraphData = new List<GraphDataDTO> { };
 
@@ -468,6 +480,11 @@ namespace GIGLS.Services.Implementation.Report
                 allShipmentsQueryable = allShipmentsQueryable.Where(x => x.CashOnDeliveryAmount > 0);
             }
 
+            var shipmentTrackingHistory = _uow.ShipmentTracking.GetAllAsQueryable()
+                .Where(x => x.Status == ShipmentScanStatus.DSC.ToString() || x.Status == ShipmentScanStatus.DPC.ToString()).Select(x => x.Waybill).Distinct();
+
+            allShipmentsQueryable = allShipmentsQueryable.Where(s => !shipmentTrackingHistory.Contains(s.Waybill));
+
             dashboardDTO = Mapper.Map<List<InvoiceViewDTO>>(allShipmentsQueryable.OrderByDescending(x => x.DateCreated).ToList());
 
             //Use to populate service centre 
@@ -493,10 +510,16 @@ namespace GIGLS.Services.Implementation.Report
             var endDate = queryDate.Item2;
 
             //2. Get Total Shipment Delivered   
+            if (baseFilterCriteria.StartDate == null & baseFilterCriteria.EndDate == null)
+            {
+                startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
+            }
+
             //2a. Get collected shipment by date filtering
             var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
                 .Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT)
-                && x.DateCreated >= startDate && x.DateCreated < endDate).Select(x => x.Waybill).Distinct();
+                && x.DateModified >= startDate && x.DateModified < endDate).Select(x => x.Waybill).Distinct();
 
             //2b. Get Shipments that its destination is the service centre
             var shipmentsWaybills = _uow.Invoice.GetAllFromInvoiceAndShipments()
