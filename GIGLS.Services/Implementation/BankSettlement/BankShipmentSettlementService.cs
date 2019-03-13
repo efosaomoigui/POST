@@ -439,35 +439,48 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 if (bkoc.DepositType == DepositType.Shipment)
                 {
-                    //5.1 Collect total shipment unproceessed and its total
+                    //5.1 Collect total shipment unproceessed and its total (only cash shipments)
                     var comboShipmentAndTotal = await GetTotalAmountAndShipments(bkoc.DateAndTimeOfDeposit, bkoc.DepositType);
                     bkoc.TotalAmount = comboShipmentAndTotal.Item1;
-                    var allShipments = comboShipmentAndTotal.Item2;
+                    //var allShipments = comboShipmentAndTotal.Item2;
 
-                    var allShipmentsVals = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate
-                    && s.DepartureServiceCentreId == bkoc.ServiceCenter);
+                    //var allShipmentsVals = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate
+                    //&& s.DepartureServiceCentreId == bkoc.ServiceCenter);
 
-                    var result1 = allShipmentsVals.Select(s => new InvoiceViewDTO()
-                    {
-                        Waybill = s.Waybill
-                    });
+
+                    //all shipments from payload JSON
+                    var allShipmentsVals = bkoc.ShipmentAndCOD;
+
+                    var result1 = allShipmentsVals.Select(s => s.Waybill);// new InvoiceViewDTO()
+                    //{
+                    //    Waybill = s.Waybill
+                    //});
 
                     //5.2 get the shipments from [[BankProcessingOrderForShipmentAndCOD]]
-                    var allprocessingordeforshipment = await _uow.BankProcessingOrderForShipmentAndCOD.GetProcessingOrderForShipmentAndCOD(bkoc.DepositType);
-                    var result2 = allprocessingordeforshipment.Select(s => new BankProcessingOrderForShipmentAndCOD()
-                    {
-                        Waybill = s.Waybill
-                    });
+                    //var allprocessingordeforshipment = await _uow.BankProcessingOrderForShipmentAndCOD.GetProcessingOrderForShipmentAndCOD(bkoc.DepositType);
 
-                    var validateInsertWaybills = false;
-                    foreach (var rs in result1)
+                    var allprocessingordeforshipment = _uow.BankProcessingOrderForShipmentAndCOD.GetAll().Where(s => s.DepositType == bkoc.DepositType && result1.Contains(s.Waybill));
+
+                    //var validateInsertWaybills = false;
+                    if (allprocessingordeforshipment.Count() > 0)
                     {
-                        validateInsertWaybills = result2.Any(p => p.Waybill == rs.Waybill);
-                        if (validateInsertWaybills)
-                        {
-                            throw new GenericException("Error validating one or more waybills, Please try requesting again for a fresh record.");
-                        }
+                        throw new GenericException("Error validating one or more waybills, Please try requesting again for a fresh record.");
                     }
+
+                    //var result2 = allprocessingordeforshipment.Select(s => new BankProcessingOrderForShipmentAndCOD()
+                    //{
+                    //    Waybill = s.Waybill
+                    //});
+
+                    //var validateInsertWaybills = false;
+                    //foreach (var rs in result1)
+                    //{
+                    //    validateInsertWaybills = result2.Any(p => p.Waybill == rs.Waybill);
+                    //    if (validateInsertWaybills)
+                    //    {
+                    //        throw new GenericException("Error validating one or more waybills, Please try requesting again for a fresh record.");
+                    //    }
+                    //}
 
                     //var bankorderforshipmentandcod = Mapper.Map<List<BankProcessingOrderForShipmentAndCOD>>(allShipments);
                     var bankorderforshipmentandcod = allShipmentsVals.Select(s => new BankProcessingOrderForShipmentAndCOD()
@@ -476,14 +489,14 @@ namespace GIGLS.Services.Implementation.Wallet
                         RefCode = bkoc.Code,
                         DepositType = bkoc.DepositType,
                         GrandTotal = s.GrandTotal,
-                        CODAmount = s.CashOnDeliveryAmount,
+                        CODAmount = s.CODAmount,
                         ServiceCenterId = bkoc.ServiceCenter,
                         ServiceCenter = bkoc.ScName,
                         UserId = bkoc.UserId,
                         Status = DepositStatus.Pending
                     });
 
-                    var arrWaybills = allShipments.Select(x => x.Waybill).ToArray();
+                    var arrWaybills = allShipmentsVals.Select(x => x.Waybill).ToArray();
 
                     bankordercodes = Mapper.Map<BankProcessingOrderCodes>(bkoc);
                     _uow.BankProcessingOrderCodes.Add(bankordercodes);
@@ -515,24 +528,37 @@ namespace GIGLS.Services.Implementation.Wallet
                     });
 
                     //3. GEt the parent bank processing order based on COD type on BankProcessingOrderForShipmentAndCOD table
-                    var allprocessingordeforshipment = await _uow.BankProcessingOrderForShipmentAndCOD.GetProcessingOrderForShipmentAndCOD(bkoc.DepositType);
+                    //var allprocessingordeforshipment = await _uow.BankProcessingOrderForShipmentAndCOD.GetProcessingOrderForShipmentAndCOD(bkoc.DepositType);
+
+                    //all shipments from payload JSON
+                    var allprocessingordeforshipment = bkoc.ShipmentAndCOD;
 
                     //4. Based on value collected from BankProcessingOrderForShipmentAndCOD table filter out the waybils
-                    var result2 = allprocessingordeforshipment.Select(s => new BankProcessingOrderForShipmentAndCOD()
+                    //var result2 = allprocessingordeforshipment.Select(s => new BankProcessingOrderForShipmentAndCOD()
+                    //{
+                    //    Waybill = s.Waybill
+                    //});
+
+
+                    var result2 = allprocessingordeforshipment.Select(s => s.Waybill);
+                    var allprocessingordeforcods = _uow.BankProcessingOrderForShipmentAndCOD.GetAll().Where(s => s.DepositType == bkoc.DepositType && result2.Contains(s.Waybill));
+
+                    if (allprocessingordeforcods.Count() > 0)
                     {
-                        Waybill = s.Waybill
-                    });
+                        throw new GenericException("Error validating one or more CODs, Please try requesting again for a fresh record.");
+                    }
+
 
                     //5. validate to make sure the shipment is not already in BankProcessingOrderForShipmentAndCOD table
-                    var validateInsertWaybills = false;
-                    foreach (var rs in result1)
-                    {
-                        validateInsertWaybills = result2.Any(p => p.Waybill == rs.Waybill);
-                        if (validateInsertWaybills)
-                        {
-                            throw new GenericException("Error validating one or more CODs, Please try requesting again for a fresh record.");
-                        }
-                    }
+                    //var validateInsertWaybills = false;
+                    //foreach (var rs in result1)
+                    //{
+                    //    validateInsertWaybills = result2.Any(p => p.Waybill == rs.Waybill);
+                    //    if (validateInsertWaybills)
+                    //    {
+                    //        throw new GenericException("Error validating one or more CODs, Please try requesting again for a fresh record.");
+                    //    }
+                    //}
 
                     //var bankorderforshipmentandcod = Mapper.Map<List<BankProcessingOrderForShipmentAndCOD>>(allShipments);
                     var bankorderforshipmentandcod = codsforservicecenter.Select(s => new BankProcessingOrderForShipmentAndCOD()
@@ -550,8 +576,8 @@ namespace GIGLS.Services.Implementation.Wallet
                     //var arrWaybills = allShipments.Select(x => x.Waybill).ToArray();
 
                     //select a values from 
-                    var nonDepsitedValue = _uow.CashOnDeliveryRegisterAccount.GetAll().Where(x => arrCODs.Contains(x.Waybill));
-                    var nonDepsitedValueunprocessed = nonDepsitedValue.Where(s => s.DepositStatus == 0).ToList();
+                    //var nonDepsitedValue = _uow.CashOnDeliveryRegisterAccount.GetAll().Where(x => arrCODs.Contains(x.Waybill));
+                    var nonDepsitedValueunprocessed = allCODs.Where(s => s.DepositStatus == 0).ToList();
 
                     //Collect total shipment unproceessed and its total
                     decimal codTotal = 0;
