@@ -366,6 +366,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
+                    if (shipmentCollectionDto.IsComingFromDispatch)
+                    {
+                        codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.CollectedByDispatch;
+                        cashondeliveryinfo.CODStatusHistory = CODStatushistory.CollectedByDispatch;
+                    }
+                    else
+                    {
+                        codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
+                        cashondeliveryinfo.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
+                    }
+
+                    cashondeliveryinfo.DepositStatus = DepositStatus.Unprocessed;
                     //Add the the selected cod information and set it in the codregister account
                     _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryinfo);
                 }
