@@ -440,8 +440,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (bkoc.DepositType == DepositType.Shipment)
                 {
                     //5.1 Collect total shipment unproceessed and its total (only cash shipments)
-                    var comboShipmentAndTotal = await GetTotalAmountAndShipments(bkoc.DateAndTimeOfDeposit, bkoc.DepositType);
-                    bkoc.TotalAmount = comboShipmentAndTotal.Item1;
+                    //var comboShipmentAndTotal = await GetTotalAmountAndShipments(bkoc.DateAndTimeOfDeposit, bkoc.DepositType);
+                    //bkoc.TotalAmount = comboShipmentAndTotal.Item1;
                     //var allShipments = comboShipmentAndTotal.Item2;
 
                     //var allShipmentsVals = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate
@@ -450,8 +450,13 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     //all shipments from payload JSON
                     var allShipmentsVals = bkoc.ShipmentAndCOD;
+                    decimal totalShipment = 0;
 
                     var result1 = allShipmentsVals.Select(s => s.Waybill);// new InvoiceViewDTO()
+                    foreach (var item in allShipmentsVals)
+                    {
+                        totalShipment += item.GrandTotal;
+                    }
                     //{
                     //    Waybill = s.Waybill
                     //});
@@ -499,6 +504,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     var arrWaybills = allShipmentsVals.Select(x => x.Waybill).ToArray();
 
                     bankordercodes = Mapper.Map<BankProcessingOrderCodes>(bkoc);
+                    bankordercodes.TotalAmount = totalShipment;
                     _uow.BankProcessingOrderCodes.Add(bankordercodes);
                     _uow.BankProcessingOrderForShipmentAndCOD.AddRange(bankorderforshipmentandcod);
 
