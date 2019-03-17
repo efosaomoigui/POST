@@ -352,12 +352,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (shipmentCollectionDto.IsComingFromDispatch)
                     {
                         codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.CollectedByDispatch;
-                        //cashondeliveryinfo.CODStatusHistory = CODStatushistory.CollectedByDispatch;
+                        cashondeliveryinfo.CODStatusHistory = CODStatushistory.CollectedByDispatch;
                     }
                     else
                     {
                         codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
-                        //cashondeliveryinfo.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
+                        cashondeliveryinfo.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
                     }
 
                     codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
@@ -368,12 +368,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     if (shipmentCollectionDto.IsComingFromDispatch)
                     {
-                        //codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.CollectedByDispatch;
+                        codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.CollectedByDispatch;
                         cashondeliveryinfo.CODStatusHistory = CODStatushistory.CollectedByDispatch;
                     }
                     else
                     {
-                        //codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
+                        codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
                         cashondeliveryinfo.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
                     }
 
