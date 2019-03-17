@@ -334,30 +334,15 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
 
-                var cashondeliveryinfo = new CashOnDeliveryRegisterAccount()
-                {
-                    Waybill = shipmentCollectionDto.Waybill,
-                    RefCode = null,
-                    UserId = shipmentCollectionDto.UserId,
-                    Amount = (decimal)shipmentCollectionDto.CashOnDeliveryAmount,
-                    ServiceCenterId = getServiceCenterCode[0].ServiceCentreId,
-                    DepositStatus = DepositStatus.Pending,
-                    PaymentType = shipmentCollectionDto.PaymentType,
-                    ServiceCenterCode = getServiceCenterCode[0].Code
-                };
-
                 if (codRegisterCollectsForASingleWaybill != null)
                 {
-
                     if (shipmentCollectionDto.IsComingFromDispatch)
                     {
                         codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.CollectedByDispatch;
-                        cashondeliveryinfo.CODStatusHistory = CODStatushistory.CollectedByDispatch;
                     }
                     else
                     {
                         codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
-                        cashondeliveryinfo.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
                     }
 
                     codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
@@ -366,18 +351,28 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
+                    var cashondeliveryinfo = new CashOnDeliveryRegisterAccount()
+                    {
+                        Waybill = shipmentCollectionDto.Waybill,
+                        RefCode = null,
+                        UserId = shipmentCollectionDto.UserId,
+                        Amount = (decimal)shipmentCollectionDto.CashOnDeliveryAmount,
+                        ServiceCenterId = getServiceCenterCode[0].ServiceCentreId,
+                        DepositStatus = DepositStatus.Unprocessed,
+                        PaymentType = shipmentCollectionDto.PaymentType,
+                        PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference,
+                        ServiceCenterCode = getServiceCenterCode[0].Code
+                    };
+
                     if (shipmentCollectionDto.IsComingFromDispatch)
                     {
-                        codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.CollectedByDispatch;
                         cashondeliveryinfo.CODStatusHistory = CODStatushistory.CollectedByDispatch;
                     }
                     else
                     {
-                        codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
                         cashondeliveryinfo.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
                     }
-
-                    cashondeliveryinfo.DepositStatus = DepositStatus.Unprocessed;
+                    
                     //Add the the selected cod information and set it in the codregister account
                     _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryinfo);
                 }
