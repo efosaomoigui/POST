@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace GIGLS.Core.Domain.Wallet
 {
@@ -32,6 +33,7 @@ namespace GIGLS.Core.Domain.Wallet
 
     public class DemurrageRegisterAccount : BaseDomain, IAuditable 
     {
+        [Key]
         public int DemurrageAccountId { get; set; } 
         public decimal Amount { get; set; }
         public string UserId { get; set; }

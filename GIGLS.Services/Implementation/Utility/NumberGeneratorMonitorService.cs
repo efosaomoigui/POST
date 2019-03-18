@@ -59,7 +59,8 @@ namespace GIGLS.Services.Implementation.Utility
                    numberGeneratorType == NumberGeneratorType.CustomerCodeEcommerce ||
                    numberGeneratorType == NumberGeneratorType.Wallet ||
                    numberGeneratorType == NumberGeneratorType.Partner ||
-                   numberGeneratorType == NumberGeneratorType.Employee)
+                   numberGeneratorType == NumberGeneratorType.Employee
+                   )
                 {
                     numberGenerated = ResolvePrefixFromNumberGeneratorTypeForCustomers(numberGeneratorType) + numberStr;
                 }
@@ -142,6 +143,18 @@ namespace GIGLS.Services.Implementation.Utility
                     {
                         return (int)NumberGeneratorType.Wallet;
                     }
+                case NumberGeneratorType.BankProcessingOrderForShipment:
+                    {
+                        return (int)NumberGeneratorType.BankProcessingOrderForShipment;
+                    }
+                case NumberGeneratorType.BankProcessingOrderForCOD:
+                    {
+                        return (int)NumberGeneratorType.BankProcessingOrderForCOD;
+                    }
+                case NumberGeneratorType.BankProcessingOrderForDemurrage:
+                    {
+                        return (int)NumberGeneratorType.BankProcessingOrderForDemurrage;
+                    }
                 default:
                     {
                         return (int)NumberGeneratorType.WaybillNumber;
@@ -176,14 +189,6 @@ namespace GIGLS.Services.Implementation.Utility
                 case NumberGeneratorType.Employee:
                     {
                         return "EMP";
-                    }
-                case NumberGeneratorType.BankProcessingOrderForShipment:
-                    {
-                        return "BNKS";
-                    }
-                case NumberGeneratorType.BankProcessingOrderForCOD:
-                    {
-                        return "BNKC";
                     }
                 default:
                     {

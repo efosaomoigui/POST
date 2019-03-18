@@ -206,6 +206,12 @@ namespace GIGLS.Core
                 config.CreateMap<CashOnDeliveryAccount, CashOnDeliveryAccountDTO>();
                 config.CreateMap<CashOnDeliveryAccountDTO, CashOnDeliveryAccount>();
 
+                config.CreateMap<CashOnDeliveryRegisterAccount, CashOnDeliveryRegisterAccountDTO>();
+                config.CreateMap<CashOnDeliveryRegisterAccountDTO, CashOnDeliveryRegisterAccount>();
+
+                config.CreateMap<DemurrageRegisterAccount, DemurrageRegisterAccountDTO>();
+                config.CreateMap<DemurrageRegisterAccountDTO, DemurrageRegisterAccount>();
+
                 config.CreateMap<Dispatch, DispatchDTO>();
                 config.CreateMap<DispatchDTO, DispatchDTO>();
 

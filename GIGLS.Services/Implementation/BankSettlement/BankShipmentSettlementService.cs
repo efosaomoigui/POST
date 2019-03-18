@@ -90,7 +90,6 @@ namespace GIGLS.Services.Implementation.Wallet
             var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
             var refcode = await _service.GenerateNextNumber(NumberGeneratorType.BankProcessingOrderForShipment, getServiceCenterCode[0].Code);
 
-
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
             //var allShipments = _uow.Invoice.GetAllFromInvoiceView();
