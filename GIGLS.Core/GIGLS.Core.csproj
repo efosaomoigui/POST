@@ -353,6 +353,7 @@
     <Compile Include="DTO\Stocks\StockRequestPartDTO.cs" />
     <Compile Include="DTO\Stocks\StockSupplyDetailsDTO.cs" />
     <Compile Include="DTO\Stores\StoreDTO.cs" />
+    <Compile Include="DTO\UserLoginEmailDTO.cs" />
     <Compile Include="DTO\User\AddClaimDto.cs" />
     <Compile Include="DTO\User\ClaimDto.cs" />
     <Compile Include="DTO\User\RoleDTO.cs" />
