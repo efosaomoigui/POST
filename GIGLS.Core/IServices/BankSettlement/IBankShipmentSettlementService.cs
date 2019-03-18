@@ -18,6 +18,7 @@ namespace GIGLS.Core.IServices.BankSettlement
         Task<Tuple<string, List<BankProcessingOrderForShipmentAndCODDTO>, decimal, BankProcessingOrderCodesDTO>> SearchBankProcessingOrder3(string refcode, DepositType type);
 
         Task<BankProcessingOrderCodesDTO> AddBankProcessingOrderCode(BankProcessingOrderCodesDTO refcode);
+        Task<BankProcessingOrderCodesDTO> AddBankProcessingOrderCodeDemurrageOnly(BankProcessingOrderCodesDTO refcode); 
         //Task<BankProcessingOrderForShipmentAndCODDTO> AddBankProcessingOrderForShipmentAndCOD(BankProcessingOrderForShipmentAndCODDTO refcode);
 
         Task UpdateBankOrderProcessingCode(BankProcessingOrderCodesDTO refcode);
@@ -28,6 +29,7 @@ namespace GIGLS.Core.IServices.BankSettlement
         Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetBankProcessingOrderForShipmentAndCOD(DepositType type);
 
         Task<Tuple<string, List<CashOnDeliveryRegisterAccountDTO>, decimal>> GetBankProcessingOrderForCOD(DepositType type);
+        Task<Tuple<string, List<DemurrageRegisterAccountDTO>, decimal>> GetBankProcessingOrderForDemurrage(DepositType type);
 
         Task MarkAsVerified(BankProcessingOrderCodesDTO refcode);
         Task MarkAsVerified_cod(BankProcessingOrderCodesDTO refcode);

@@ -255,6 +255,10 @@ namespace GIGLS.Infrastructure.Persistence
         public ICashOnDeliveryRegisterAccountRepository CashOnDeliveryRegisterAccount { get; set; }
 
         [Inject]
+        public IDemurrageRegisterAccountRepository DemurrageRegisterAccount { get; set; }  
+        
+
+        [Inject]
         public ICashOnDeliveryBalanceRepository CashOnDeliveryBalance { get; set; }
 
         [Inject]

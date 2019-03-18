@@ -14,5 +14,6 @@
         Employee = 10,
         BankProcessingOrderForShipment = 11,
         BankProcessingOrderForCOD = 12, 
+        BankProcessingOrderForDemurrage = 13,
     }
 }

@@ -3,6 +3,7 @@
     public enum DepositType
     {
         Shipment = 1,
-        COD
+        COD, 
+        Demurrage
     }
 }

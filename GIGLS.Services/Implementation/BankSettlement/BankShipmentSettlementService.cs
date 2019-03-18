@@ -170,6 +170,54 @@ namespace GIGLS.Services.Implementation.Wallet
             return await Task.FromResult(comboresult);
         }
 
+        //New bank processing order for Demurrage
+        public async Task<Tuple<string, List<DemurrageRegisterAccountDTO>, decimal>> GetBankProcessingOrderForDemurrage(DepositType type)
+        {
+            //var isSCA =await _userService.CheckSCA();
+            //if (!isSCA)
+            //{
+            //    throw new GenericException("User is not a Service Center Agent!");
+            //}
+
+            var enddate = DateTime.Now;
+
+            //Generate the refcode
+            var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
+            var refcode = await _service.GenerateNextNumber(NumberGeneratorType.BankProcessingOrderForDemurrage, getServiceCenterCode[0].Code);
+            decimal total = 0;
+
+            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var allDemurrages = _uow.DemurrageRegisterAccount.GetDemurrageAsQueryable();
+            allDemurrages = allDemurrages.Where(s => s.DEMStatusHistory == CODStatushistory.RecievedAtServiceCenter);
+            allDemurrages = allDemurrages.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
+
+            //added for GWA and GWARIMPA service centres
+            {
+                if (serviceCenters.Length == 1)
+                {
+                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                    {
+                        serviceCenters = new int[] { 4, 294 };
+                    }
+                }
+            }
+
+            var cashdemurrage = new List<DemurrageRegisterAccountDTO>();
+            if (serviceCenters.Length > 0)
+            {
+                var demurrageResults = allDemurrages.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
+                cashdemurrage = Mapper.Map<List<DemurrageRegisterAccountDTO>>(demurrageResults);
+            }
+
+            foreach (var item in cashdemurrage)
+            {
+                total += item.Amount;
+            }
+
+            var comboresult = Tuple.Create(refcode, cashdemurrage, total);
+            return await Task.FromResult(comboresult);
+        }
+
         //New bank processing order for COD
         public async Task<Tuple<string, List<CashOnDeliveryRegisterAccountDTO>, decimal>> GetBankProcessingOrderForCOD(DepositType type)
         {
@@ -404,6 +452,115 @@ namespace GIGLS.Services.Implementation.Wallet
             //return total;
             var comboresult = Tuple.Create(total, cashShipments);
             return await Task.FromResult(comboresult);
+        }
+
+        //Add Bank ProcessingOrder Code DemurrageOnly
+        public async Task<BankProcessingOrderCodesDTO> AddBankProcessingOrderCodeDemurrageOnly(BankProcessingOrderCodesDTO bkoc)
+        {
+            try
+            {
+                //1. get the current service user
+                var user = await _userService.retUser();
+                bkoc.UserId = user.Id;
+                bkoc.FullName = user.FirstName + " " + user.LastName;
+
+                //2. get the service centers for the current user
+                var scs = await _userService.GetCurrentServiceCenter();
+                bkoc.ServiceCenter = scs[0].ServiceCentreId;
+                bkoc.ScName = scs[0].Name;
+
+                //3. Get Bank Deposit Module StartDate
+                var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate);
+                string globalpropertiesdateStr = globalpropertiesdateObj?.Value;
+
+                var globalpropertiesdate = DateTime.MinValue;
+                bool success = DateTime.TryParse(globalpropertiesdateStr, out globalpropertiesdate);
+
+                var bankordercodes = new BankProcessingOrderCodes();
+
+                //4. updating the startdate
+                bkoc.StartDateTime = globalpropertiesdate;
+                bkoc.DateAndTimeOfDeposit = DateTime.Now;
+                bkoc.Status = DepositStatus.Pending;
+
+                //5. commence preparatiion to insert records in the BankProcessingOrderForShipmentAndCOD
+                var enddate = bkoc.DateAndTimeOfDeposit;
+
+                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+
+                //1. get data from Demurrage register account as queryable from DemurrageRegisterAccount table
+                var allDemurrages = _uow.DemurrageRegisterAccount.GetDemurrageAsQueryable();
+
+                allDemurrages = allDemurrages.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
+                allDemurrages = allDemurrages.Where(s => s.DEMStatusHistory == CODStatushistory.RecievedAtServiceCenter);
+
+                //2. convert demurrage to list
+                var demurrageforservicecenter = allDemurrages.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
+
+                //Based on the value from CashOnDeliveryRegisterAccount table filter out the waybills
+                var result1 = demurrageforservicecenter.Select(s => new DemurrageRegisterAccountDTO()
+                {
+                    Waybill = s.Waybill
+                });
+
+                //all shipments from payload JSON
+                var allprocessingordeforshipment = bkoc.ShipmentAndCOD;
+
+                var result2 = allprocessingordeforshipment.Select(s => s.Waybill);
+                var allprocessingordefordemurrage = _uow.BankProcessingOrderForShipmentAndCOD.GetAll().Where(s => s.DepositType == bkoc.DepositType && result2.Contains(s.Waybill));
+
+                if (allprocessingordefordemurrage.Count() > 0)
+                {
+                    throw new GenericException("Error validating one or more Demurrages, Please try requesting again for a fresh record.");
+                }
+
+                //var bankorderforshipmentandcod = Mapper.Map<List<BankProcessingOrderForShipmentAndCOD>>(allShipments);
+                var bankorderforshipmentandcod = demurrageforservicecenter.Select(s => new BankProcessingOrderForShipmentAndCOD()
+                {
+                    Waybill = s.Waybill,
+                    RefCode = bkoc.Code,
+                    ServiceCenterId = bkoc.ServiceCenter,
+                    CODAmount = s.Amount,
+                    DepositType = bkoc.DepositType,
+                    ServiceCenter = bkoc.ScName,
+                    Status = DepositStatus.Pending
+                });
+
+                var arrDemurrages = demurrageforservicecenter.Select(x => x.Waybill).ToArray();
+                //var arrWaybills = allShipments.Select(x => x.Waybill).ToArray();
+
+                //select a values from 
+                //var nonDepsitedValue = _uow.CashOnDeliveryRegisterAccount.GetAll().Where(x => arrCODs.Contains(x.Waybill));
+                var nonDepsitedValueunprocessed = allDemurrages.Where(s => s.DepositStatus == 0).ToList();
+
+                //Collect total shipment unproceessed and its total
+                decimal demurrageTotal = 0;
+                foreach (var item in nonDepsitedValueunprocessed)
+                {
+                    demurrageTotal += item.Amount;
+                }
+
+                bkoc.TotalAmount = demurrageTotal;
+                bankordercodes = Mapper.Map<BankProcessingOrderCodes>(bkoc);
+                nonDepsitedValueunprocessed.ForEach(a => a.DepositStatus = DepositStatus.Pending);
+                nonDepsitedValueunprocessed.ForEach(a => a.RefCode = bkoc.Code);
+
+                _uow.BankProcessingOrderCodes.Add(bankordercodes);
+                _uow.BankProcessingOrderForShipmentAndCOD.AddRange(bankorderforshipmentandcod);
+
+                await _uow.CompleteAsync();
+
+                return new BankProcessingOrderCodesDTO()
+                {
+                    CodeId = bankordercodes.CodeId,
+                    Code = bankordercodes.Code,
+                    DateAndTimeOfDeposit = bankordercodes.DateAndTimeOfDeposit
+                };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public async Task<BankProcessingOrderCodesDTO> AddBankProcessingOrderCode(BankProcessingOrderCodesDTO bkoc)
