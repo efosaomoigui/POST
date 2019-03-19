@@ -15,6 +15,7 @@ using GIGLS.Core.IServices.MessagingLog;
 using GIGLS.Core.DTO.MessagingLog;
 using System.Web;
 using GIGLS.Core.DTO.User;
+using System.Collections.Generic;
 
 namespace GIGLS.Services.Implementation.Messaging
 {
@@ -29,6 +30,9 @@ namespace GIGLS.Services.Implementation.Messaging
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ISmsSendLogService _iSmsSendLogService;
         private readonly IEmailSendLogService _iEmailSendLogService;
+
+        //In-memory object that holds the records of emails sent and at what interval
+        private static readonly Dictionary<string, UserLoginEmailDTO> UserLoginEmailDictionary = new Dictionary<string, UserLoginEmailDTO>();
 
         public MessageSenderService(IUnitOfWork uow, IEmailService emailService, ISMSService sMSService,
             IMessageService messageService,
@@ -354,9 +358,12 @@ namespace GIGLS.Services.Implementation.Messaging
                 if (messageDTO != null)
                 {
                     //prepare generic message finalBody
-                    await PrepareGenericMessageFinalBody(messageDTO, obj);
-                    result = await _emailService.SendAsync(messageDTO);
-                    await LogEmailMessage(messageDTO, result);
+                    bool verifySendEmail = await PrepareGenericMessageFinalBody(messageDTO, obj);
+                    if (verifySendEmail)
+                    {
+                        result = await _emailService.SendAsync(messageDTO);
+                        await LogEmailMessage(messageDTO, result);
+                    }
                 }
             }
             catch (Exception ex)
@@ -367,6 +374,8 @@ namespace GIGLS.Services.Implementation.Messaging
 
         private async Task<bool> PrepareGenericMessageFinalBody(MessageDTO messageDTO, object obj)
         {
+            bool verifySendEmail = true;
+
             //1. obj is UserDTO
             if (obj is UserDTO)
             {
@@ -399,10 +408,58 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.To = userDTO.PhoneNumber;
                 messageDTO.ToEmail = userDTO.Email;
 
+
+                //--- 2. Verify The Email is within the interval for sending
+                verifySendEmail = await VerifyUserLoginIsWithinTheEmailInterval(userDTO.Email);
             }
 
-            return await Task.FromResult(true);
+            return await Task.FromResult(verifySendEmail);
         }
 
+        private async Task<bool> VerifyUserLoginIsWithinTheEmailInterval(string email)
+        {
+            bool verifySendEmail = true;
+
+            //1. check interval from global property
+            var globalPropertyForEmailSendInterval = 1;
+            var globalPropertyForEmailSendIntervalObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.UserLoginEmailSendInterval);
+            if (globalPropertyForEmailSendIntervalObj != null)
+            {
+                int.TryParse(globalPropertyForEmailSendIntervalObj.Value, out globalPropertyForEmailSendInterval);
+            }
+
+            //2. check the In-memory dictionary object if the email has been sent
+            if (UserLoginEmailDictionary.TryGetValue(email, out var userLoginEmailDTO))
+            {
+                var currentTime = DateTime.Now;
+                var dateLastSent = userLoginEmailDTO.DateLastSent;
+                var nextTimeToBeSent = dateLastSent.AddMinutes(globalPropertyForEmailSendInterval);
+                if (currentTime.CompareTo(nextTimeToBeSent) > 0)
+                {
+                    //update time
+                    userLoginEmailDTO.DateLastSent = currentTime;
+                    userLoginEmailDTO.NumberOfEmailsSent = userLoginEmailDTO.NumberOfEmailsSent + 1;
+                    verifySendEmail = true;
+                }
+                else
+                {
+                    verifySendEmail = false;
+                }
+            }
+            else
+            {
+                //add this user
+                userLoginEmailDTO = new UserLoginEmailDTO()
+                {
+                    Email = email,
+                    DateCreated = DateTime.Now,
+                    DateLastSent = DateTime.Now,
+                    NumberOfEmailsSent = 1
+                };
+                UserLoginEmailDictionary.Add(email, userLoginEmailDTO);
+            }
+
+            return await Task.FromResult(verifySendEmail);
+        }
     }
 }
