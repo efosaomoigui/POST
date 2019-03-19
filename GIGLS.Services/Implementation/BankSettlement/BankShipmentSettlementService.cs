@@ -276,11 +276,11 @@ namespace GIGLS.Services.Implementation.Wallet
             //}
 
             var bankprcessingresult = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCode(type);
-            var bankprcessingresultValue = bankprcessingresult.Where(s => s.Code == _refcode).ToList();
+            var bankprcessingresultValue = bankprcessingresult.Where(s => s.Code == _refcode.Trim()).ToList();
 
             //get the start and end date for retrieving of waybills for the bank
             //var startdate = ReturnBankProcessDate(type);
-            var refcode = _refcode;
+            var refcode = _refcode.Trim();
 
             //Generate the refcode
             var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
@@ -300,13 +300,12 @@ namespace GIGLS.Services.Implementation.Wallet
             //{
             //    throw new GenericException("User is not a Service Center Agent!");
             //}
-
             var bankprcessingresult = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCode(type);
-            var bankprcessingresultValue = bankprcessingresult.Where(s => s.Code == _refcode).FirstOrDefault();
+            var bankprcessingresultValue = bankprcessingresult.Where(s => s.Code == _refcode.Trim()).FirstOrDefault();
 
             //get the start and end date for retrieving of waybills for the bank
             //var startdate = ReturnBankProcessDate(type);
-            var refcode = _refcode;
+            var refcode = _refcode.Trim();
 
             //Generate the refcode
             var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
@@ -314,7 +313,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
             var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrders(type);
-            var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == refcode);
+            var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == refcode.Trim());
 
 
             //added for GWA and GWARIMPA service centres
@@ -363,11 +362,11 @@ namespace GIGLS.Services.Implementation.Wallet
             //}
 
             var bankprcessingresult = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCode(type);
-            var bankprcessingresultValue = bankprcessingresult.Where(s => s.Code == _refcode).FirstOrDefault();
+            var bankprcessingresultValue = bankprcessingresult.Where(s => s.Code == _refcode.Trim()).FirstOrDefault();
 
             //get the start and end date for retrieving of waybills for the bank
             //var startdate = ReturnBankProcessDate(type);
-            var refcode = _refcode;
+            var refcode = _refcode.Trim();
 
             //Generate the refcode
             var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
@@ -780,7 +779,7 @@ namespace GIGLS.Services.Implementation.Wallet
         /// <returns></returns>
         public async Task UpdateBankOrderProcessingCode(BankProcessingOrderCodesDTO bankrefcode)
         {
-            var bankorder = _uow.BankProcessingOrderCodes.Find(s => s.Code == bankrefcode.Code).FirstOrDefault();
+            var bankorder = _uow.BankProcessingOrderCodes.Find(s => s.Code == bankrefcode.Code.Trim()).FirstOrDefault();
 
             //var bankorder =  _uow.BankProcessingOrderCodes.GetAll();
             //var bankordervalue = bankorder.Where(s => s.Code == bankrefcode.CodeId);
