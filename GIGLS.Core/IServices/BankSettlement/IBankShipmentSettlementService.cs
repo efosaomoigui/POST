@@ -23,6 +23,7 @@ namespace GIGLS.Core.IServices.BankSettlement
 
         Task UpdateBankOrderProcessingCode(BankProcessingOrderCodesDTO refcode);
         Task UpdateBankOrderProcessingCode_cod(BankProcessingOrderCodesDTO refcode);
+        Task UpdateBankOrderProcessingCode_demurrage(BankProcessingOrderCodesDTO bankrefcode);
         Task UpdateBankProcessingOrderForShipmentAndCOD(BankProcessingOrderForShipmentAndCODDTO refcodeobj);
 
         Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCode(DepositType type);

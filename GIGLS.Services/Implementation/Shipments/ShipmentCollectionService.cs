@@ -312,6 +312,8 @@ namespace GIGLS.Services.Implementation.Shipments
             }, shipmentCollectionDto.ShipmentScanStatus);
 
 
+            var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
+
             //cash collected on Delivery
             if (shipmentCollectionDto.IsCashOnDelivery)
             {
@@ -331,8 +333,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Update CashOnDevliveryRegisterAccount As  Cash Recieved at Service Center
                 var codRegisterCollectsForASingleWaybill = _uow.CashOnDeliveryRegisterAccount.Find(s => s.Waybill == shipmentCollectionDto.Waybill).FirstOrDefault();
-
-                var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
 
                 if (codRegisterCollectsForASingleWaybill != null)
                 {
@@ -396,6 +396,22 @@ namespace GIGLS.Services.Implementation.Shipments
                     PaymentType = shipmentCollectionDto.PaymentType,
                     PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference                    
                 };
+
+                //insert demurrage in the database
+                var demurrageinformation = new DemurrageRegisterAccount() 
+                {
+                    Waybill = shipmentCollectionDto.Waybill,
+                    RefCode = null,
+                    UserId = shipmentCollectionDto.UserId,
+                    Amount = (decimal)shipmentCollectionDto.CashOnDeliveryAmount,
+                    ServiceCenterId = getServiceCenterCode[0].ServiceCentreId,
+                    DepositStatus = DepositStatus.Unprocessed,
+                    PaymentType = shipmentCollectionDto.PaymentType,
+                    PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference,
+                    ServiceCenterCode = getServiceCenterCode[0].Code
+                };
+
+                _uow.DemurrageRegisterAccount.Add(demurrageinformation);
                 _uow.GeneralLedger.Add(generalLedger);
             }
 

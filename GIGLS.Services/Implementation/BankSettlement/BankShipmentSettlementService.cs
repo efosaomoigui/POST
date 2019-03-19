@@ -854,6 +854,39 @@ namespace GIGLS.Services.Implementation.Wallet
         /// </summary>
         /// <param name="bankrefcode"></param>
         /// <returns></returns>
+        public async Task UpdateBankOrderProcessingCode_demurrage(BankProcessingOrderCodesDTO bankrefcode) 
+        {
+            var bankorder = _uow.BankProcessingOrderCodes.Find(s => s.Code == bankrefcode.Code).FirstOrDefault();
+
+            //var bankorder =  _uow.BankProcessingOrderCodes.GetAll();
+            //var bankordervalue = bankorder.Where(s => s.Code == bankrefcode.CodeId);
+            if (bankorder == null)
+            {
+                throw new GenericException("Bank Order Request Does not Exist!");
+            }
+
+            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
+            allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Pending);
+            var codsforservicecenter = allCODs.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
+
+            var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
+
+            //update BankProcessingOrderForShipmentAndCOD
+            var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == bankrefcode.Code).ToList();
+            accompanyWaybillsVals.ForEach(a => a.Status = DepositStatus.Deposited);
+
+            codsforservicecenter.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
+            bankorder.Status = bankrefcode.Status;
+
+            await _uow.CompleteAsync();
+        }
+
+        /// <summary>
+        /// Mark COD bank order processing as deposited
+        /// </summary>
+        /// <param name="bankrefcode"></param>
+        /// <returns></returns>
         public async Task UpdateBankOrderProcessingCode_cod(BankProcessingOrderCodesDTO bankrefcode)
         {
             var bankorder = _uow.BankProcessingOrderCodes.Find(s => s.Code == bankrefcode.Code).FirstOrDefault();

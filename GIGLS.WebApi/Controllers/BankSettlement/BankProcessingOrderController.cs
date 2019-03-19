@@ -167,6 +167,20 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("MarkAsDeposited_demurrage")]
+        public async Task<IServiceResponse<object>> MarkAsDeposited_demurrage(BankProcessingOrderCodesDTO bkoc)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var bankshipmentprocessingorders = _bankprocessingorder.UpdateBankOrderProcessingCode_cod(bkoc);
+                return new ServiceResponse<object>
+                {
+                };
+            });
+        }
+
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
