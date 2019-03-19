@@ -767,6 +767,18 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             };
         }
 
+
+        [HttpGet]
+        [Route("itemTypes")]
+        public async Task<IServiceResponse<List<string>>> GetItemTypes()
+        {
+            var ItemTypes = _portalService.GetItemTypes();
+            return new ServiceResponse<List<string>>
+            {
+                Object = ItemTypes,
+            };
+        }
+
     }
 
     }

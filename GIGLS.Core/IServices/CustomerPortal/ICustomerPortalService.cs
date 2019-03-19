@@ -60,5 +60,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
 
         //Payment Log
         Task<Tuple<Task<List<WalletPaymentLogDTO>>, int>> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto);
+
+        List<string> GetItemTypes();
     }
 }

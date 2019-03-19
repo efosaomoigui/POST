@@ -429,7 +429,8 @@ namespace GIGLS.Services.Implementation.Messaging
             }
 
             //2. check the In-memory dictionary object if the email has been sent
-            if (UserLoginEmailDictionary.TryGetValue(email, out var userLoginEmailDTO))
+            UserLoginEmailDTO userLoginEmailDTO = null;
+            if (UserLoginEmailDictionary.TryGetValue(email, out userLoginEmailDTO))
             {
                 var currentTime = DateTime.Now;
                 var dateLastSent = userLoginEmailDTO.DateLastSent;

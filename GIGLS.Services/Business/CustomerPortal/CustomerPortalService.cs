@@ -485,5 +485,18 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return wallet.WalletId;
         }
+
+        public List<string> GetItemTypes()
+        {
+            List<string> items = new List<string>();
+            items.Add("NORMAL");
+            items.Add("DANGEROUS GOODS");
+            items.Add("FRAGILE");
+            items.Add("KEEP AT ROOM TEMPERATURE");
+            items.Add("KEEP UPRIGHT");
+            items.Add("REFRIGERATED ON ARRIVA");
+            items.Add("SENSITIVE");
+            return items;
+        }
     }
 }
