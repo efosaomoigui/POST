@@ -22,6 +22,7 @@
         PasswordExpireDaysCount,
         EcommerceOverDueDaysCount,
         HaulageMaximumFixedDistance, 
-        BankDepositModuleStartDate
+        BankDepositModuleStartDate,
+        UserLoginEmailSendInterval
     }
 }

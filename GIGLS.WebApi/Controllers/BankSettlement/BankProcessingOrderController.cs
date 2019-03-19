@@ -63,6 +63,25 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
             });
         }
 
+        //This one searches for all Denurrage recorded: CashOnDeliveryRegisterAccount
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("RequestBankProcessingOrderForDemurrage")]
+        public async Task<IServiceResponse<object>> RequestBankProcessingOrderForDemurrage(DepositType type)  
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //All cash CODs from sales
+                var bankshipmentprocessingorders = await _bankprocessingorder.GetBankProcessingOrderForDemurrage(type);
+                return new ServiceResponse<object>
+                {
+                    Object = bankshipmentprocessingorders.Item2,
+                    Total = bankshipmentprocessingorders.Item3,
+                    RefCode = bankshipmentprocessingorders.Item1
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("SearchBankOrder")]
@@ -185,6 +204,20 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
             return await HandleApiOperationAsync(async () =>
             {
                 var bankshipmentprocessingorders = await _bankprocessingorder.AddBankProcessingOrderCode(bkoc);
+                return new ServiceResponse<object>
+                {
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")] 
+        [HttpPost]
+        [Route("addbankprocessingorderCodedemurrageonly")]
+        public async Task<IServiceResponse<object>> AddBankProcessingOrderCodeDemurrageOnly(BankProcessingOrderCodesDTO bkoc)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var bankshipmentprocessingorders = await _bankprocessingorder.AddBankProcessingOrderCodeDemurrageOnly(bkoc);
                 return new ServiceResponse<object>
                 {
                 };

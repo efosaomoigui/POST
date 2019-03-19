@@ -353,6 +353,7 @@
     <Compile Include="DTO\Stocks\StockRequestPartDTO.cs" />
     <Compile Include="DTO\Stocks\StockSupplyDetailsDTO.cs" />
     <Compile Include="DTO\Stores\StoreDTO.cs" />
+    <Compile Include="DTO\UserLoginEmailDTO.cs" />
     <Compile Include="DTO\User\AddClaimDto.cs" />
     <Compile Include="DTO\User\ClaimDto.cs" />
     <Compile Include="DTO\User\RoleDTO.cs" />
@@ -523,6 +524,7 @@
     <Compile Include="IRepositories\Utility\IGlobalPropertyRepository.cs" />
     <Compile Include="IRepositories\Utility\INumberGeneratorMonitorRepository.cs" />
     <Compile Include="IRepositories\Vendors\IVendorRepository.cs" />
+    <Compile Include="IRepositories\Wallet\IDemurrageRegisterAccountRepository.cs" />
     <Compile Include="IRepositories\Wallet\ICashOnDeliveryRegisterAccountRepository.cs" />
     <Compile Include="IRepositories\Wallet\ICashOnDeliveryBalanceRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletNumberRepository.cs" />

@@ -73,4 +73,22 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Wallet
         }
 
     }
+
+
+    public class DemurrageRegisterAccountRepository : Repository<DemurrageRegisterAccount, GIGLSContext>, IDemurrageRegisterAccountRepository
+    {
+        private GIGLSContext _context;
+
+        public DemurrageRegisterAccountRepository(GIGLSContext context) : base(context)
+        {
+            _context = context;
+        }
+
+        public IQueryable<DemurrageRegisterAccount> GetDemurrageAsQueryable()
+        {
+            var DemurrageAccounts = _context.DemurrageRegisterAccount.AsQueryable();
+            return DemurrageAccounts;
+        } 
+
+    }
 }
