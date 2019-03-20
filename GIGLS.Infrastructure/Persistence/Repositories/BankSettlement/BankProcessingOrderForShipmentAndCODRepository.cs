@@ -86,7 +86,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                        Waybill = processingorderCode.Waybill,
                                        GrandTotal = processingorderCode.GrandTotal,
                                        CODAmount = processingorderCode.CODAmount ?? 0,
-                                       ServiceCenter = processingorderCode.ServiceCenter
+                                       ServiceCenter = processingorderCode.ServiceCenter,
+                                       DemurrageAmount = processingorderCode.DemurrageAmount??0
                                    };
             var result = processingorders.ToList();
             return Task.FromResult(result);
