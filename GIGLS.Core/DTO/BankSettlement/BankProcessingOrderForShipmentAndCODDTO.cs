@@ -17,6 +17,7 @@ namespace GIGLS.Core.DTO.BankSettlement
         public string Waybill { get; set; }
         public decimal GrandTotal { get; set; } 
         public decimal CODAmount { get; set; }
+        public decimal DemurrageAmount { get; set; }
         public string RefCode { get; set; }
         public DepositType DepositType { get; set; }
         public string UserId { get; set; }

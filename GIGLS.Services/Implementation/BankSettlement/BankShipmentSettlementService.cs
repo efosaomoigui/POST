@@ -345,7 +345,15 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 foreach (var item in bankedShipments)
                 {
-                    total += item.CODAmount;
+                    total += item.CODAmount; 
+                }
+            }
+
+            else if (type == DepositType.Demurrage)
+            {
+                foreach (var item in bankedShipments)
+                {
+                    total += item.DemurrageAmount;
                 }
             }
 
@@ -394,6 +402,14 @@ namespace GIGLS.Services.Implementation.Wallet
                 foreach (var item in bankedShipments)
                 {
                     total += item.CODAmount;
+                }
+            }
+
+            else if (type == DepositType.Demurrage)
+            {
+                foreach (var item in bankedShipments)
+                {
+                    total += item.DemurrageAmount;
                 }
             }
 
@@ -518,7 +534,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     Waybill = s.Waybill,
                     RefCode = bkoc.Code,
                     ServiceCenterId = bkoc.ServiceCenter,
-                    CODAmount = s.Amount,
+                    DemurrageAmount = s.Amount,
                     DepositType = bkoc.DepositType,
                     ServiceCenter = bkoc.ScName,
                     Status = DepositStatus.Pending
@@ -865,9 +881,9 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-            var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
-            allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Pending);
-            var codsforservicecenter = allCODs.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
+            var allDemurrages = _uow.DemurrageRegisterAccount.GetDemurrageAsQueryable();
+            allDemurrages = allDemurrages.Where(s => s.DepositStatus == DepositStatus.Pending);
+            var codsforservicecenter = allDemurrages.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
 
             var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
 
@@ -909,6 +925,39 @@ namespace GIGLS.Services.Implementation.Wallet
             accompanyWaybillsVals.ForEach(a => a.Status = DepositStatus.Deposited);
 
             codsforservicecenter.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
+            bankorder.Status = bankrefcode.Status;
+
+            await _uow.CompleteAsync();
+        }
+
+        public async Task MarkAsVerified_demurrage(BankProcessingOrderCodesDTO bankrefcode) 
+        {
+            var bankorder = _uow.BankProcessingOrderCodes.Find(s => s.Code == bankrefcode.Code).FirstOrDefault();
+
+            //var bankorder =  _uow.BankProcessingOrderCodes.GetAll();
+            //var bankordervalue = bankorder.Where(s => s.Code == bankrefcode.CodeId);
+            if (bankorder == null)
+            {
+                throw new GenericException("Bank Order Request Does not Exist!");
+            }
+
+            //var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var allDemurrages = _uow.DemurrageRegisterAccount.GetDemurrageAsQueryable();
+            allDemurrages = allDemurrages.Where(s => s.DepositStatus == DepositStatus.Deposited && s.RefCode == bankrefcode.Code);
+
+            //allCODs = allCODs.Where(s => s.RefCode == bankrefcode.Code);
+            var allDemurragesResult = allDemurrages.ToList();
+            //var codsforservicecenter = allCODs.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
+
+            //var serviceCenters2 = await _userService.GetCurrentServiceCenter();
+            //var currentCenter = serviceCenters2[0].ServiceCentreId;
+            var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
+
+            //update BankProcessingOrderForShipmentAndCOD
+            var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == bankrefcode.Code).ToList();
+            accompanyWaybillsVals.ForEach(a => a.Status = DepositStatus.Verified);
+
+            allDemurragesResult.ForEach(a => a.DepositStatus = DepositStatus.Verified);
             bankorder.Status = bankrefcode.Status;
 
             await _uow.CompleteAsync();

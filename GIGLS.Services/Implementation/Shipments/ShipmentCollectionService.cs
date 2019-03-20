@@ -375,6 +375,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     
                     //Add the the selected cod information and set it in the codregister account
                     _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryinfo);
+                    
                 }
             }
 
@@ -403,11 +404,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     Waybill = shipmentCollectionDto.Waybill,
                     RefCode = null,
                     UserId = shipmentCollectionDto.UserId,
-                    Amount = (decimal)shipmentCollectionDto.CashOnDeliveryAmount,
+                    Amount = (decimal)shipmentCollectionDto.Demurrage.Amount,
                     ServiceCenterId = getServiceCenterCode[0].ServiceCentreId,
                     DepositStatus = DepositStatus.Unprocessed,
                     PaymentType = shipmentCollectionDto.PaymentType,
                     PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference,
+                    DEMStatusHistory  = CODStatushistory.RecievedAtServiceCenter,
                     ServiceCenterCode = getServiceCenterCode[0].Code
                 };
 
