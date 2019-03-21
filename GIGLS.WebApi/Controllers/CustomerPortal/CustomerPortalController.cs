@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.Core;
 using GIGLS.Core.IServices.ServiceCentres;
+using GIGLS.Core.IServices.Business;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -46,6 +47,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         private readonly IUserService _userService;
         private readonly IPreShipmentMobileService _preshipmentmobileService;
         private readonly IStationService _stationService;
+        
 
         public CustomerPortalController(IUnitOfWork uow,ICustomerPortalService portalService, IPaystackPaymentService paymentService, IOTPService otpService,
             IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService) : base(nameof(CustomerPortalController))
