@@ -31,6 +31,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.Core;
+using GIGLS.Core.IServices.ServiceCentres;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -44,9 +45,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         private readonly IOTPService _otpService;
         private readonly IUserService _userService;
         private readonly IPreShipmentMobileService _preshipmentmobileService;
+        private readonly IStationService _stationService;
 
         public CustomerPortalController(IUnitOfWork uow,ICustomerPortalService portalService, IPaystackPaymentService paymentService, IOTPService otpService,
-            IUserService userService, IPreShipmentMobileService preshipmentmobileService) : base(nameof(CustomerPortalController))
+            IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService) : base(nameof(CustomerPortalController))
         {
             _uow = uow;
             _userService = userService;
@@ -54,6 +56,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             _portalService = portalService;
             _paymentService = paymentService;
             _preshipmentmobileService = preshipmentmobileService;
+            _stationService = stationService;
         }
 
         [Authorize]
@@ -813,6 +816,17 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             {
                 Object = PreshipMentMobile,
                 ShortDescription = "Shipment created successfully"
+            };
+        }
+        [HttpGet]
+        [Route("getStations")]
+        public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetStations()
+        {
+            var Stations = await _stationService.GetStations();
+            return new ServiceResponse<IEnumerable<StationDTO>>
+            {
+                Object = Stations,
+                
             };
         }
 

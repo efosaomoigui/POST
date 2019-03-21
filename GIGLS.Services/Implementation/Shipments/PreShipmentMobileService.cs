@@ -11,7 +11,7 @@ using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.Domain;
 using AutoMapper;
-using System.Device.Location;
+
 
 using GIGLS.Core.Enums;
 
@@ -73,9 +73,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             // get the current user info
             var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
-            var m = new GeoCoordinate((double)preShipmentDTO.ReceiverLocation.Latitude, (double)preShipmentDTO.ReceiverLocation.Longitude);
-            GeoCoordinate r = new GeoCoordinate(90.00,45.00);
-            var s = m.GetDistanceTo(r);
+            
             preShipmentDTO.Waybill = waybill;
             var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
 

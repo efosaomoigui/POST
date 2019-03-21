@@ -11,6 +11,8 @@ namespace GIGLS.Core.IServices.Business
         Task<decimal> GetEcommerceReturnPrice(PricingDTO pricingDto);
         Task<decimal> GetInternationalPrice(PricingDTO pricingDto);
         Task<ShipmentDTO> GetReroutePrice(ReroutePricingDTO pricingDto);
+        Task<decimal> GetMobileRegularPrice(PricingDTO pricingDto);
+
 
     }
 }
