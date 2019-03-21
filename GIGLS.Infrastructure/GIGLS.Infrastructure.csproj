@@ -168,12 +168,14 @@
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\LogVisitReasonRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\OverdueShipmentRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\PreShipmentItemMobileRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\PreShipmentManifestMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ManifestWaybillMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ManifestGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ManifestRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ManifestVisitMonitoringRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\MissingShipmentRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\PreShipmentMobileRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentDeliveryOptionMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCancelRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCollectionRepository.cs" />

@@ -396,7 +396,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                     Name = user.Organisation,
                     CustomerType = customerType,
                     CompanyType = companyType,
-                    Password = user.Password
+                    Password = user.Password,
+                    CustomerCode = user.UserChannelCode,
+                    PictureUrl = user.PictureUrl
+                    //added this to pass channelcode 
+                   
 
                 };
          //2. Create customer data
@@ -484,6 +488,19 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
 
             return wallet.WalletId;
+        }
+
+        public List<string> GetItemTypes()
+        {
+            List<string> items = new List<string>();
+            items.Add("NORMAL");
+            items.Add("DANGEROUS GOODS");
+            items.Add("FRAGILE");
+            items.Add("KEEP AT ROOM TEMPERATURE");
+            items.Add("KEEP UPRIGHT");
+            items.Add("REFRIGERATED ON ARRIVA");
+            items.Add("SENSITIVE");
+            return items;
         }
     }
 }

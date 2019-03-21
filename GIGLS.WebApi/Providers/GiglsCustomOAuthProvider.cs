@@ -165,7 +165,9 @@ namespace GIGLS.WebApi.Providers
                     { "SystemUserRole", user.SystemUserRole},
                     { "PhoneNumber", user.PhoneNumber},
                     { "IsActive", user.IsActive.ToString()},
-                    { "Organization", user.Organisation}
+                    { "Organization", user.Organisation},
+                    { "UserChannelCode", user.UserChannelCode},
+                    { "PictureUrl", user.PictureUrl}
                 };
 
                 //get claims for the user
