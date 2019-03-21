@@ -31,9 +31,6 @@ namespace GIGLS.Services.Implementation.Messaging
         private readonly ISmsSendLogService _iSmsSendLogService;
         private readonly IEmailSendLogService _iEmailSendLogService;
 
-        //In-memory object that holds the records of emails sent and at what interval
-        private static readonly Dictionary<string, UserLoginEmailDTO> UserLoginEmailDictionary = new Dictionary<string, UserLoginEmailDTO>();
-
         public MessageSenderService(IUnitOfWork uow, IEmailService emailService, ISMSService sMSService,
             IMessageService messageService,
             //IInvoiceService invoiceService, 
@@ -429,8 +426,10 @@ namespace GIGLS.Services.Implementation.Messaging
             }
 
             //2. check the In-memory dictionary object if the email has been sent
+            Dictionary<string, UserLoginEmailDTO> userLoginEmailDictionary = GetUserLoginEmailDictionaryFromCache();
+
             UserLoginEmailDTO userLoginEmailDTO = null;
-            if (UserLoginEmailDictionary.TryGetValue(email, out userLoginEmailDTO))
+            if (userLoginEmailDictionary.TryGetValue(email, out userLoginEmailDTO))
             {
                 var currentTime = DateTime.Now;
                 var dateLastSent = userLoginEmailDTO.DateLastSent;
@@ -457,10 +456,22 @@ namespace GIGLS.Services.Implementation.Messaging
                     DateLastSent = DateTime.Now,
                     NumberOfEmailsSent = 1
                 };
-                UserLoginEmailDictionary.Add(email, userLoginEmailDTO);
+                userLoginEmailDictionary.Add(email, userLoginEmailDTO);
             }
 
             return await Task.FromResult(verifySendEmail);
+        }
+
+        private Dictionary<string, UserLoginEmailDTO> GetUserLoginEmailDictionaryFromCache()
+        {
+            if (System.Web.HttpRuntime.Cache[nameof(UserLoginEmailDTO)] == null)
+            {
+                //In-memory object that holds the records of emails sent and at what interval
+                System.Web.HttpRuntime.Cache[nameof(UserLoginEmailDTO)] = new Dictionary<string, UserLoginEmailDTO>();
+            }
+
+            var result = (Dictionary<string, UserLoginEmailDTO>)System.Web.HttpRuntime.Cache[nameof(UserLoginEmailDTO)];
+            return result;
         }
     }
 }
