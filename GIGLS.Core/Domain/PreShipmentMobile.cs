@@ -38,13 +38,17 @@ namespace GIGLS.Core.Domain
         public string ReceiverCity { get; set; }
         public string ReceiverState { get; set; }
         public string ReceiverCountry { get; set; }
-        
-        
 
+
+
+       
         public int SenderLocationId { get; set; }
-        public virtual Location SenderLocation { get; set; }
 
+       
+        public virtual Location SenderLocation { get; set; }
         public int ReceiverLocationId { get; set; }
+
+       
 
         public virtual Location ReceiverLocation { get; set; }
         //Delivery Options

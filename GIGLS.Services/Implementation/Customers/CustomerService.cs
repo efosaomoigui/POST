@@ -82,12 +82,13 @@ namespace GIGLS.Services.Implementation.Customers
                         var individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(customerDTO);
                         var createdCustomer = await _individualCustomerService.AddCustomer(individualCustomerDTO);
                         customerDTO.IndividualCustomerId = createdCustomer.IndividualCustomerId;
+                        customerDTO.CustomerCode = createdCustomer.CustomerCode;
                     }
                 }
 
                 return customerDTO;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }

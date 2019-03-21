@@ -25,5 +25,7 @@ namespace GIGL.GIGLS.Core.Domain
         public virtual Station Destination { get; set; }
 
         public bool Status { get; set; }
+
+        
     }
 }

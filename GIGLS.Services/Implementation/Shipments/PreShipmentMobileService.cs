@@ -9,6 +9,11 @@ using GIGLS.Core;
 using GIGLS.Core.IServices.Zone;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.Domain;
+using AutoMapper;
+using System.Device.Location;
+
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -41,20 +46,58 @@ namespace GIGLS.Services.Implementation.Shipments
         }
         public Task<PreShipmentMobileDTO> AddPreShipmentMobile(PreShipmentMobileDTO preShipment)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var newPreShipment = CreatePreShipment(preShipment);
+                 _uow.CompleteAsync();
+
+                //scan the shipment for tracking
+                //await ScanPreShipment(new ScanDTO
+                //{
+                //    WaybillNumber = newPreShipment.Waybill,
+                //    ShipmentScanStatus = ShipmentScanStatus.PRECRT
+                //});
+
+                //send message
+                 //_messageSenderService.SendMessage(MessageType.PreShipmentCreation, EmailSmsType.All, preShipmentDTO);
+
+                return newPreShipment;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-        public Task<bool> CancelPreShipmentMobile(string waybill)
+        private async Task<PreShipmentMobileDTO> CreatePreShipment(PreShipmentMobileDTO preShipmentDTO)
         {
-            throw new NotImplementedException();
+            // get the current user info
+            var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
+            var m = new GeoCoordinate((double)preShipmentDTO.ReceiverLocation.Latitude, (double)preShipmentDTO.ReceiverLocation.Longitude);
+            GeoCoordinate r = new GeoCoordinate(90.00,45.00);
+            var s = m.GetDistanceTo(r);
+            preShipmentDTO.Waybill = waybill;
+            var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
+
+            // add serial numbers to the ShipmentItems
+            var serialNumber = 1;
+            foreach (var preShipmentItem in newPreShipment.PreShipmentItems)
+            {
+                preShipmentItem.SerialNumber = serialNumber;
+                serialNumber++;
+            }
+            //save the display value of Insurance and Vat
+            newPreShipment.Vat = preShipmentDTO.vatvalue_display;
+            newPreShipment.DiscountValue = preShipmentDTO.InvoiceDiscountValue_display;
+
+            _uow.PreShipmentMobile.Add(newPreShipment);
+            //await _uow.CompleteAsync();
+
+            return preShipmentDTO;
         }
 
-        public Task DeletePreShipmentMobile(string waybill)
-        {
-            throw new NotImplementedException();
-        }
 
-        public Task DeletePreShipmentMobile(int shipmentId)
+        public Task<PreShipmentMobileDTO> GetPreShipmentMobile(int preShipmentMobileId)
         {
             throw new NotImplementedException();
         }
@@ -64,7 +107,7 @@ namespace GIGLS.Services.Implementation.Shipments
             throw new NotImplementedException();
         }
 
-        public Task<PreShipmentMobileDTO> GetPreShipmentMobile(int preShipmentMobileId)
+        public Task UpdatePreShipmentMobile(int preShipmentMobileId, PreShipmentMobileDTO preShipment)
         {
             throw new NotImplementedException();
         }
@@ -74,9 +117,22 @@ namespace GIGLS.Services.Implementation.Shipments
             throw new NotImplementedException();
         }
 
-        public Task UpdatePreShipmentMobile(int preShipmentMobileId, PreShipmentMobileDTO preShipment)
+        public Task DeletePreShipmentMobile(int shipmentId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeletePreShipmentMobile(string waybill)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> CancelPreShipmentMobile(string waybill)
         {
             throw new NotImplementedException();
         }
     }
+
+       
+    
 }

@@ -396,7 +396,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                     Name = user.Organisation,
                     CustomerType = customerType,
                     CompanyType = companyType,
-                    Password = user.Password
+                    Password = user.Password,
+                    CustomerCode = user.UserChannelCode,
+                    PictureUrl = user.PictureUrl
+                    //added this to pass channelcode 
+                   
 
                 };
          //2. Create customer data

@@ -243,7 +243,8 @@ namespace GIGLS.Services.Implementation.Customers
             user.FirstName = customerDto.FirstName;
             user.LastName = customerDto.LastName;
             user.PhoneNumber = customerDto.PhoneNumber;
-            user.Email = customerDto.PhoneNumber;
+            user.Email = customerDto.Email;
+            user.PictureUrl = customerDto.PictureUrl;
             await _userService.UpdateUser(user.Id, user);
             await _uow.CompleteAsync();
            
