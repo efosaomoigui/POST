@@ -47,10 +47,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         private readonly IUserService _userService;
         private readonly IPreShipmentMobileService _preshipmentmobileService;
         private readonly IStationService _stationService;
+        private readonly IWalletService _walletService;
         
 
         public CustomerPortalController(IUnitOfWork uow,ICustomerPortalService portalService, IPaystackPaymentService paymentService, IOTPService otpService,
-            IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService) : base(nameof(CustomerPortalController))
+            IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService, IWalletService walletService) : base(nameof(CustomerPortalController))
         {
             _uow = uow;
             _userService = userService;
@@ -59,6 +60,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             _paymentService = paymentService;
             _preshipmentmobileService = preshipmentmobileService;
             _stationService = stationService;
+            _walletService = walletService;
         }
 
         [Authorize]
@@ -818,7 +820,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             var Insurance = (decimal)PreshipmentMobile.Insurance;
             var vat = (decimal)PreshipMentMobile.Vat;
             var Total = (double)PreshipMentMobile.CalculatedTotal;
-            Total = Math.Round(Total / 100d, 0) * 100;
             var ReturnPrice = new MobilePriceDTO()
             {
                 DeliveryPrice = Deliveryprice,
@@ -841,6 +842,18 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             {
                 Object = stations,
            };
+        }
+
+        
+        [HttpGet]
+        [Route("getWalletBalance/{CustomerCode}")]
+        public async Task<IServiceResponse<decimal>> GetWalletByCustomerCode(string CustomerCode)
+        {
+            var wallet = await _walletService.GetWalletByCustomerCode(CustomerCode);
+            return new ServiceResponse<decimal>
+            {
+                Object = wallet,
+            };
         }
 
     }

@@ -19,7 +19,9 @@ namespace GIGLS.Core.DTO.Shipments
         public string SenderPhoneNumber { get; set; }
         public decimal Value { get; set; }
         public DateTime? DeliveryTime { get; set; }
+        public int SenderStationId { get; set; }
 
+        public int ReceiverStationId { get; set; }
 
         public string CustomerType { get; set; }
         public string CompanyType { get; set; }
@@ -36,10 +38,10 @@ namespace GIGLS.Core.DTO.Shipments
 
 
 
-        public int SenderLocationId { get; set; }
+        
         public LocationDTO SenderLocation { get; set; }
 
-        public int ReceiverLocationId { get; set; }
+        
 
         public  LocationDTO ReceiverLocation { get; set; }
         //Delivery Options
@@ -89,6 +91,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string DeclinedReason { get; set; }
 
         //Agility Validations
-        public decimal? CalculatedTotal { get; set; } = 0;
+        public double? CalculatedTotal { get; set; } = 0;
     }
 }

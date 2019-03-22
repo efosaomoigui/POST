@@ -39,17 +39,10 @@ namespace GIGLS.Core.Domain
         public string ReceiverState { get; set; }
         public string ReceiverCountry { get; set; }
 
+        public int SenderStationId { get; set; }
 
-
-       
-        public int SenderLocationId { get; set; }
-
-       
+        public int ReceiverStationId { get; set; }
         public virtual Location SenderLocation { get; set; }
-        public int ReceiverLocationId { get; set; }
-
-       
-
         public virtual Location ReceiverLocation { get; set; }
         //Delivery Options
         public bool IsHomeDelivery { get; set; }
@@ -98,6 +91,6 @@ namespace GIGLS.Core.Domain
         public string DeclinedReason { get; set; }
 
         //Agility Validations
-        public decimal? CalculatedTotal { get; set; } = 0;
+        public double? CalculatedTotal { get; set; } = 0;
     }
 }

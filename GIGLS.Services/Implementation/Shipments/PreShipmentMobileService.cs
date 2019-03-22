@@ -93,11 +93,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 serialNumber++;
                 var PriceDTO = new PricingDTO
                 {
-                    DepartureStationId = newPreShipment.SenderLocationId,
-                    DestinationStationId = newPreShipment.ReceiverLocationId,
+                    DepartureStationId = newPreShipment.SenderStationId,
+                    DestinationStationId = newPreShipment.ReceiverStationId,
                     Weight = (decimal)preShipmentItem.Weight
                 };
-                Price += await _pricingService.GetMobileRegularPrice(PriceDTO);
+                preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
+                Price += (decimal)preShipmentItem.CalculatedPrice;
+
                 if (!string.IsNullOrEmpty(preShipmentItem.Value))
                 {
                     DeclaredValue += Convert.ToDecimal(preShipmentItem.Value);
@@ -108,7 +110,8 @@ namespace GIGLS.Services.Implementation.Shipments
             preShipmentDTO.Total = Price;
             preShipmentDTO.Vat = (decimal)(Convert.ToInt32(preShipmentDTO.Total) * 0.05);
             preShipmentDTO.Insurance = (decimal)(EstimatedDeclaredPrice * 0.01);
-            preShipmentDTO.CalculatedTotal = (preShipmentDTO.Total + preShipmentDTO.Vat + preShipmentDTO.Insurance);
+            preShipmentDTO.CalculatedTotal = (double)(preShipmentDTO.Total + preShipmentDTO.Vat + preShipmentDTO.Insurance);
+            preShipmentDTO.CalculatedTotal=Math.Round((double)preShipmentDTO.CalculatedTotal / 100d, 0) * 100;
             preShipmentDTO.Value = DeclaredValue;
 
             //save the display value of Insurance and Vat
