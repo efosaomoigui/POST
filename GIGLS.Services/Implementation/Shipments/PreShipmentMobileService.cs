@@ -85,10 +85,8 @@ namespace GIGLS.Services.Implementation.Shipments
             // add serial numbers to the ShipmentItems
             var serialNumber = 1;
             var Price = 0.0M;
-            if(!preShipmentDTO.Value.Equals(null))
-            {
-                newPreShipment.IsdeclaredVal = true;
-            }
+            decimal DeclaredValue = 0.0M;
+           
             foreach (var preShipmentItem in newPreShipment.PreShipmentItems)
             {
                 preShipmentItem.SerialNumber = serialNumber;
@@ -99,15 +97,27 @@ namespace GIGLS.Services.Implementation.Shipments
                     DestinationStationId = newPreShipment.ReceiverLocationId,
                     Weight = (decimal)preShipmentItem.Weight
                 };
-                Price =+ await _pricingService.GetMobileRegularPrice(PriceDTO);
+                Price += await _pricingService.GetMobileRegularPrice(PriceDTO);
+                if (!string.IsNullOrEmpty(preShipmentItem.Value))
+                {
+                    DeclaredValue += Convert.ToDecimal(preShipmentItem.Value);
+                    preShipmentDTO.IsdeclaredVal = true;
+                }
             };
-            preShipmentDTO.CalculatedTotal = Price;
-            //save the display value of Insurance and Vat
-            newPreShipment.Vat = preShipmentDTO.vatvalue_display;
-            newPreShipment.DiscountValue = preShipmentDTO.InvoiceDiscountValue_display;
-            newPreShipment.CalculatedTotal = Price;
-            newPreShipment.IsConfirmed = false;
+            int EstimatedDeclaredPrice = Convert.ToInt32(DeclaredValue);
+            preShipmentDTO.Total = Price;
+            preShipmentDTO.Vat = (decimal)(Convert.ToInt32(preShipmentDTO.Total) * 0.05);
+            preShipmentDTO.Insurance = (decimal)(EstimatedDeclaredPrice * 0.01);
+            preShipmentDTO.CalculatedTotal = (preShipmentDTO.Total + preShipmentDTO.Vat + preShipmentDTO.Insurance);
+            preShipmentDTO.Value = DeclaredValue;
 
+            //save the display value of Insurance and Vat
+            newPreShipment.Total = preShipmentDTO.Total;
+            newPreShipment.IsConfirmed = false;
+            newPreShipment.Insurance = preShipmentDTO.Insurance;
+            newPreShipment.Vat = preShipmentDTO.Vat;
+            newPreShipment.CalculatedTotal = preShipmentDTO.CalculatedTotal;
+            newPreShipment.Value = preShipmentDTO.Value;
 
             _uow.PreShipmentMobile.Add(newPreShipment);
             await _uow.CompleteAsync();

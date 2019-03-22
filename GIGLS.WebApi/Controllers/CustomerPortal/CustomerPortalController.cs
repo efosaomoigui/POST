@@ -811,12 +811,24 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("createShipment")]
-        public async Task<IServiceResponse<decimal>> CreateShipment(PreShipmentMobileDTO PreshipmentMobile)
+        public async Task<IServiceResponse<MobilePriceDTO>> CreateShipment(PreShipmentMobileDTO PreshipmentMobile)
         {
             var PreshipMentMobile = await _preshipmentmobileService.AddPreShipmentMobile(PreshipmentMobile);
-            return new ServiceResponse<decimal>
+            var Deliveryprice = (decimal)PreshipMentMobile.Total;
+            var Insurance = (decimal)PreshipmentMobile.Insurance;
+            var vat = (decimal)PreshipMentMobile.Vat;
+            var Total = (double)PreshipMentMobile.CalculatedTotal;
+            Total = Math.Round(Total / 100d, 0) * 100;
+            var ReturnPrice = new MobilePriceDTO()
             {
-                Object = (decimal)PreshipMentMobile.CalculatedTotal,
+                DeliveryPrice = Deliveryprice,
+                InsuranceValue = Insurance,
+                Vat = vat,
+                GrandTotal = (decimal)Total
+            };
+            return new ServiceResponse<MobilePriceDTO>
+            {
+                Object = ReturnPrice,
                 ShortDescription = "Shipment created successfully"
             };
         }

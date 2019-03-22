@@ -329,6 +329,7 @@
     <Compile Include="DTO\Shipments\ManifestDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestGroupWaybillNumberMappingDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestVisitMonitoringDTO.cs" />
+    <Compile Include="DTO\Shipments\MobilePriceDTO.cs" />
     <Compile Include="DTO\Shipments\OverdueShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentItemMobileDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentMobileDTO.cs" />
