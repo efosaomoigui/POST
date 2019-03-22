@@ -85,6 +85,10 @@ namespace GIGLS.Services.Implementation.Shipments
             // add serial numbers to the ShipmentItems
             var serialNumber = 1;
             var Price = 0.0M;
+            if(!preShipmentDTO.Value.Equals(null))
+            {
+                newPreShipment.IsdeclaredVal = true;
+            }
             foreach (var preShipmentItem in newPreShipment.PreShipmentItems)
             {
                 preShipmentItem.SerialNumber = serialNumber;
@@ -102,6 +106,8 @@ namespace GIGLS.Services.Implementation.Shipments
             newPreShipment.Vat = preShipmentDTO.vatvalue_display;
             newPreShipment.DiscountValue = preShipmentDTO.InvoiceDiscountValue_display;
             newPreShipment.CalculatedTotal = Price;
+            newPreShipment.IsConfirmed = false;
+
 
             _uow.PreShipmentMobile.Add(newPreShipment);
             await _uow.CompleteAsync();
