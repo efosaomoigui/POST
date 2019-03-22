@@ -14,6 +14,8 @@ using AutoMapper;
 
 
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Business;
+using GIGLS.Core.DTO.PaymentTransactions;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -25,14 +27,16 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IServiceCentreService _centreService;
         private readonly IUserServiceCentreMappingService _userServiceCentre;
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
+        private readonly IPricingService _pricingService;
 
-        public PreShipmentMobileService(IUnitOfWork uow, 
+        public PreShipmentMobileService(IUnitOfWork uow,
             IShipmentService shipmentService,
             IDeliveryOptionService deliveryService,
-            IServiceCentreService centreService, 
+            IServiceCentreService centreService,
             IUserServiceCentreMappingService userServiceCentre,
-            INumberGeneratorMonitorService numberGeneratorMonitorService
-           
+            INumberGeneratorMonitorService numberGeneratorMonitorService,
+            IPricingService pricingService
+
             )
         {
             _uow = uow;
@@ -41,7 +45,8 @@ namespace GIGLS.Services.Implementation.Shipments
             _centreService = centreService;
             _userServiceCentre = userServiceCentre;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
-            
+            _pricingService = pricingService;
+
             MapperConfig.Initialize();
         }
         public Task<PreShipmentMobileDTO> AddPreShipmentMobile(PreShipmentMobileDTO preShipment)
@@ -49,7 +54,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var newPreShipment = CreatePreShipment(preShipment);
-                 _uow.CompleteAsync();
+                _uow.CompleteAsync();
 
                 //scan the shipment for tracking
                 //await ScanPreShipment(new ScanDTO
@@ -59,7 +64,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //});
 
                 //send message
-                 //_messageSenderService.SendMessage(MessageType.PreShipmentCreation, EmailSmsType.All, preShipmentDTO);
+                //_messageSenderService.SendMessage(MessageType.PreShipmentCreation, EmailSmsType.All, preShipmentDTO);
 
                 return newPreShipment;
             }
@@ -73,62 +78,38 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             // get the current user info
             var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
-            
+
             preShipmentDTO.Waybill = waybill;
             var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
 
             // add serial numbers to the ShipmentItems
             var serialNumber = 1;
+            var Price = 0.0M;
             foreach (var preShipmentItem in newPreShipment.PreShipmentItems)
             {
                 preShipmentItem.SerialNumber = serialNumber;
                 serialNumber++;
-            }
+                var PriceDTO = new PricingDTO
+                {
+                    DepartureStationId = newPreShipment.SenderLocationId,
+                    DestinationStationId = newPreShipment.ReceiverLocationId,
+                    Weight = (decimal)preShipmentItem.Weight
+                };
+                Price =+ await _pricingService.GetMobileRegularPrice(PriceDTO);
+            };
+            preShipmentDTO.CalculatedTotal = Price;
             //save the display value of Insurance and Vat
             newPreShipment.Vat = preShipmentDTO.vatvalue_display;
             newPreShipment.DiscountValue = preShipmentDTO.InvoiceDiscountValue_display;
+            newPreShipment.CalculatedTotal = Price;
 
             _uow.PreShipmentMobile.Add(newPreShipment);
-            //await _uow.CompleteAsync();
+            await _uow.CompleteAsync();
 
             return preShipmentDTO;
         }
 
-
-        public Task<PreShipmentMobileDTO> GetPreShipmentMobile(int preShipmentMobileId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<PreShipmentMobileDTO> GetPreShipmentMobile(string waybill)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdatePreShipmentMobile(int preShipmentMobileId, PreShipmentMobileDTO preShipment)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdatePreShipmentMobile(string waybill, PreShipmentMobileDTO preShipment)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task DeletePreShipmentMobile(int shipmentId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task DeletePreShipmentMobile(string waybill)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> CancelPreShipmentMobile(string waybill)
-        {
-            throw new NotImplementedException();
-        }
+       
     }
 
        

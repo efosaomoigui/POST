@@ -811,12 +811,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("createShipment")]
-        public async Task<IServiceResponse<PreShipmentMobileDTO>> CreateShipment(PreShipmentMobileDTO PreshipmentMobile)
+        public async Task<IServiceResponse<decimal>> CreateShipment(PreShipmentMobileDTO PreshipmentMobile)
         {
             var PreshipMentMobile = await _preshipmentmobileService.AddPreShipmentMobile(PreshipmentMobile);
-            return new ServiceResponse<PreShipmentMobileDTO>
+            return new ServiceResponse<decimal>
             {
-                Object = PreshipMentMobile,
+                Object = (decimal)PreshipMentMobile.CalculatedTotal,
                 ShortDescription = "Shipment created successfully"
             };
         }
@@ -824,12 +824,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("getStations")]
         public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetStations()
         {
-            var Stations = await _stationService.GetStations();
+            var stations = await _stationService.GetLocalStations();
             return new ServiceResponse<IEnumerable<StationDTO>>
             {
-                Object = Stations,
-                
-            };
+                Object = stations,
+           };
         }
 
     }

@@ -658,24 +658,20 @@ namespace GIGLS.Services.Business.Pricing
         public  async Task<decimal> GetMobileRegularPrice(PricingDTO pricingDto)
         {
             
-
-            var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureServiceCentreId, pricingDto.DestinationServiceCentreId);
-
-            //get the deliveryOptionPrice from an array
-            decimal deliveryOptionPriceTemp = 0;
-
-            if (pricingDto.DeliveryOptionIds.Count() == 0)
+            if(pricingDto.DepartureStationId == pricingDto.DestinationStationId)
             {
-                throw new GenericException("Delivery Option can not be empty");
+                pricingDto.DeliveryOptionId = 3;
             }
             else
             {
-                foreach (var deliveryOptionId in pricingDto.DeliveryOptionIds)
-                {
-                    deliveryOptionPriceTemp += await _optionPrice.GetDeliveryOptionPrice(deliveryOptionId, zone.ZoneId);
-                }
+                pricingDto.DeliveryOptionId = 2;
             }
+            var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
 
+            //get the deliveryOptionPrice from an array
+           
+            decimal deliveryOptionPriceTemp = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId);
+                
             decimal deliveryOptionPrice = deliveryOptionPriceTemp;
 
             //check for volumetric weight
