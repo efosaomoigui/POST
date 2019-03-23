@@ -136,6 +136,9 @@ namespace GIGLS.Core
         IBankProcessingOrderCodesRepository BankProcessingOrderCodes { get; set; } 
 
         IOTPRepository  OTP { get; set; }
+        IPreShipmentMobileRepository PreShipmentMobile { get; set; }
+
+        IPreShipmentItemMobileRepository PreShipmentItemMobile { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

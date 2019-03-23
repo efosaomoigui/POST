@@ -12,6 +12,7 @@ using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
@@ -29,6 +30,9 @@ using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Http;
+using GIGLS.Core;
+using GIGLS.Core.IServices.ServiceCentres;
+using GIGLS.Core.IServices.Business;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -36,19 +40,25 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
     [RoutePrefix("api/portal")]
     public class CustomerPortalController : BaseWebApiController
     {
+        private readonly IUnitOfWork _uow;
         private readonly ICustomerPortalService _portalService;
         private readonly IPaystackPaymentService _paymentService;
-
         private readonly IOTPService _otpService;
         private readonly IUserService _userService;
+        private readonly IPreShipmentMobileService _preshipmentmobileService;
+        private readonly IStationService _stationService;
+        
 
-        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IOTPService otpService,
-            IUserService userService) : base(nameof(CustomerPortalController))
+        public CustomerPortalController(IUnitOfWork uow,ICustomerPortalService portalService, IPaystackPaymentService paymentService, IOTPService otpService,
+            IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService) : base(nameof(CustomerPortalController))
         {
+            _uow = uow;
             _userService = userService;
             _otpService = otpService;
             _portalService = portalService;
             _paymentService = paymentService;
+            _preshipmentmobileService = preshipmentmobileService;
+            _stationService = stationService;
         }
 
         [Authorize]
@@ -565,24 +575,43 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         public async Task<IServiceResponse<SignResponseDTO>> SignUp(UserDTO user)
         {
             var m = new SignResponseDTO();
-            var registerUser = await _portalService.Register(user);
-            var Otp = await _otpService.GenerateOTP(registerUser);
-            var message = await _otpService.SendOTP(Otp);
-            var CombinedMessage = message.Split(',');
-            var EmailResponse = CombinedMessage[0];
-            var PhoneResponse = CombinedMessage[1];
-            if (EmailResponse == "Accepted")
+            var EmailUser =  await _uow.User.GetUserByEmail(user.Email);
+            var PhoneNumberUser = await _uow.User.GetUserByPhoneNumber(user.PhoneNumber);
+            if (EmailUser != null)
             {
-                m.EmailSent = true;
+                return new ServiceResponse<SignResponseDTO>
+                {
+                    ShortDescription = "Email already Exists",
+                };
             }
-            if (PhoneResponse == "OK")
+            else if (PhoneNumberUser != null)
             {
-                m.PhoneSent = true;
+                return new ServiceResponse<SignResponseDTO>
+                {
+                    ShortDescription = "PhoneNumber already Exists",
+                };
             }
-            return new ServiceResponse<SignResponseDTO>
+            else
             {
-                Object = m
-            };
+                var registerUser = await _portalService.Register(user);
+                var Otp = await _otpService.GenerateOTP(registerUser);
+                var message = await _otpService.SendOTP(Otp);
+                var CombinedMessage = message.Split(',');
+                var EmailResponse = CombinedMessage[0];
+                var PhoneResponse = CombinedMessage[1];
+                if (EmailResponse == "Accepted")
+                {
+                    m.EmailSent = true;
+                }
+                if (PhoneResponse == "OK")
+                {
+                    m.PhoneSent = true;
+                }
+                return new ServiceResponse<SignResponseDTO>
+                {
+                    Object = m
+                };
+            }
         }
         [AllowAnonymous]
         [HttpPost]
@@ -653,6 +682,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         public async Task<IServiceResponse<SignResponseDTO>> ResendOTP(UserDTO user)
         {
             var m = new SignResponseDTO();
+            
             var registerUser = await _otpService.CheckDetails(user.Email);
             if (registerUser == null)
             {
@@ -755,7 +785,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
 
-        [Authorize]
+        
         [HttpPost]
         [Route("editprofile")]
         public async Task<IServiceResponse<UserDTO>> EditProfile(UserDTO user)
@@ -765,6 +795,52 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             {
                 ShortDescription = "Record Updated Successfully"
             };
+        }
+
+
+        [HttpGet]
+        [Route("itemTypes")]
+        public async Task<IServiceResponse<List<string>>> GetItemTypes()
+        {
+            var ItemTypes = _portalService.GetItemTypes();
+            return new ServiceResponse<List<string>>
+            {
+                Object = ItemTypes,
+            };
+        }
+
+        [HttpPost]
+        [Route("createShipment")]
+        public async Task<IServiceResponse<MobilePriceDTO>> CreateShipment(PreShipmentMobileDTO PreshipmentMobile)
+        {
+            var PreshipMentMobile = await _preshipmentmobileService.AddPreShipmentMobile(PreshipmentMobile);
+            var Deliveryprice = (decimal)PreshipMentMobile.Total;
+            var Insurance = (decimal)PreshipmentMobile.Insurance;
+            var vat = (decimal)PreshipMentMobile.Vat;
+            var Total = (double)PreshipMentMobile.CalculatedTotal;
+            Total = Math.Round(Total / 100d, 0) * 100;
+            var ReturnPrice = new MobilePriceDTO()
+            {
+                DeliveryPrice = Deliveryprice,
+                InsuranceValue = Insurance,
+                Vat = vat,
+                GrandTotal = (decimal)Total
+            };
+            return new ServiceResponse<MobilePriceDTO>
+            {
+                Object = ReturnPrice,
+                ShortDescription = "Shipment created successfully"
+            };
+        }
+        [HttpGet]
+        [Route("getStations")]
+        public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetStations()
+        {
+            var stations = await _stationService.GetLocalStations();
+            return new ServiceResponse<IEnumerable<StationDTO>>
+            {
+                Object = stations,
+           };
         }
 
     }

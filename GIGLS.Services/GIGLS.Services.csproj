@@ -224,6 +224,7 @@
     <Compile Include="Implementation\Shipments\PreShipmentManifestMappingService.cs" />
     <Compile Include="Implementation\Shipments\ManifestWaybillMappingService.cs" />
     <Compile Include="Implementation\Shipments\ManifestVisitMonitoringService.cs" />
+    <Compile Include="Implementation\Shipments\PreShipmentMobileService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentDeliveryOptionMappingService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentPackagePriceService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentRerouteService.cs" />

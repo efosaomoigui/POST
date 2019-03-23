@@ -243,6 +243,7 @@ namespace GIGLS.Services.Implementation.User
             user.UserChannelCode = userDto.UserChannelCode;
             user.UserChannelPassword = userDto.UserChannelPassword;
             user.UserChannelType = userDto.UserChannelType;
+            user.PictureUrl = userDto.PictureUrl;
 
             return await _unitOfWork.User.UpdateUser(userid, user);
 

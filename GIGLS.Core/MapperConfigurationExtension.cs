@@ -313,6 +313,15 @@ namespace GIGLS.Core
 
                 config.CreateMap<OTP, OTPDTO>();
                 config.CreateMap<OTPDTO, OTP>();
+
+                config.CreateMap<PreShipmentMobile, PreShipmentMobileDTO>();
+                config.CreateMap<PreShipmentMobileDTO, PreShipmentMobile>();
+
+                config.CreateMap<PreShipmentItemMobile, PreShipmentItemMobileDTO>();
+                config.CreateMap<PreShipmentItemMobileDTO, PreShipmentItemMobile>();
+
+                config.CreateMap<Location, LocationDTO>();
+                config.CreateMap<LocationDTO, Location>();
             });
 
             isInit = true;
