@@ -348,6 +348,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
                     codRegisterCollectsForASingleWaybill.PaymentType = shipmentCollectionDto.PaymentType;
                     codRegisterCollectsForASingleWaybill.PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference;
+                    codRegisterCollectsForASingleWaybill.DepositStatus = DepositStatus.Unprocessed;
                 }
                 else
                 {
@@ -412,6 +413,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     DEMStatusHistory  = CODStatushistory.RecievedAtServiceCenter,
                     ServiceCenterCode = getServiceCenterCode[0].Code
                 };
+
+                //PaymentType.Wallet
 
                 _uow.DemurrageRegisterAccount.Add(demurrageinformation);
                 _uow.GeneralLedger.Add(generalLedger);
