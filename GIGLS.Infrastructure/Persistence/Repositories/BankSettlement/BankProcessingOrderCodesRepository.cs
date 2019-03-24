@@ -34,7 +34,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                       Status = processingorderCode.Status,
                                       ServiceCenter = processingorderCode.ServiceCenter,
                                       ScName = processingorderCode.ScName,
-                                      FullName = processingorderCode.FullName
+                                      FullName = processingorderCode.FullName,
+                                      VerifiedBy = processingorderCode.VerifiedBy
                                   };
 
             return Task.FromResult(processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit).ToList());
