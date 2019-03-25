@@ -91,12 +91,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
                 preShipmentDTO.Waybill = waybill;
                 var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
-                newPreShipment.DeliveryPrice = preShipmentDTO.DeliveryPrice;
                 newPreShipment.IsConfirmed = false;
-                newPreShipment.InsuranceValue = preShipmentDTO.InsuranceValue;
-                newPreShipment.Vat = preShipmentDTO.Vat;
-                newPreShipment.CalculatedTotal = preShipmentDTO.CalculatedTotal;
-                _uow.PreShipmentMobile.Add(newPreShipment);
+               _uow.PreShipmentMobile.Add(newPreShipment);
                 var Updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
                 Updatedwallet.Balance = price;
                 await _uow.CompleteAsync();
