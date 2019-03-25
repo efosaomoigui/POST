@@ -12,7 +12,7 @@ namespace GIGLS.Core.Domain
     {
          [Key]
         public int PreShipmentMobileId { get; set; }
-        public string SealNumber { get; set; }
+       
 
         [MaxLength(100), MinLength(5)]
         [Index(IsUnique = true)]
@@ -39,17 +39,10 @@ namespace GIGLS.Core.Domain
         public string ReceiverState { get; set; }
         public string ReceiverCountry { get; set; }
 
+        public int SenderStationId { get; set; }
 
-
-       
-        public int SenderLocationId { get; set; }
-
-       
+        public int ReceiverStationId { get; set; }
         public virtual Location SenderLocation { get; set; }
-        public int ReceiverLocationId { get; set; }
-
-       
-
         public virtual Location ReceiverLocation { get; set; }
         //Delivery Options
         public bool IsHomeDelivery { get; set; }
@@ -78,12 +71,15 @@ namespace GIGLS.Core.Domain
        
 
         //discount information
-        public decimal? AppliedDiscount { get; set; }
+       
+        public decimal? Total { get; set; }
+
         public decimal? DiscountValue { get; set; }
 
-        public decimal? Insurance { get; set; }
         public decimal? Vat { get; set; }
-        public decimal? Total { get; set; }
+
+        public decimal? InsuranceValue { get; set; }
+        public decimal? DeliveryPrice { get; set; }
 
         public decimal? ShipmentPackagePrice { get; set; }
 
@@ -98,6 +94,8 @@ namespace GIGLS.Core.Domain
         public string DeclinedReason { get; set; }
 
         //Agility Validations
-        public decimal? CalculatedTotal { get; set; } = 0;
+        public double? CalculatedTotal { get; set; } = 0;
+
+       
     }
 }

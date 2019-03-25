@@ -11,6 +11,7 @@ namespace GIGLS.Core.IServices.Shipments
     {
         
         Task<PreShipmentMobileDTO> AddPreShipmentMobile(PreShipmentMobileDTO preShipment);
-       
+        Task<PreShipmentMobileDTO> GetPrice(PreShipmentMobileDTO preShipment);
+
     }
 }

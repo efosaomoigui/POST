@@ -47,10 +47,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         private readonly IUserService _userService;
         private readonly IPreShipmentMobileService _preshipmentmobileService;
         private readonly IStationService _stationService;
+        private readonly IWalletService _walletService;
         
 
         public CustomerPortalController(IUnitOfWork uow,ICustomerPortalService portalService, IPaystackPaymentService paymentService, IOTPService otpService,
-            IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService) : base(nameof(CustomerPortalController))
+            IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService, IWalletService walletService) : base(nameof(CustomerPortalController))
         {
             _uow = uow;
             _userService = userService;
@@ -59,6 +60,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             _paymentService = paymentService;
             _preshipmentmobileService = preshipmentmobileService;
             _stationService = stationService;
+            _walletService = walletService;
         }
 
         [Authorize]
@@ -814,21 +816,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         public async Task<IServiceResponse<MobilePriceDTO>> CreateShipment(PreShipmentMobileDTO PreshipmentMobile)
         {
             var PreshipMentMobile = await _preshipmentmobileService.AddPreShipmentMobile(PreshipmentMobile);
-            var Deliveryprice = (decimal)PreshipMentMobile.Total;
-            var Insurance = (decimal)PreshipmentMobile.Insurance;
-            var vat = (decimal)PreshipMentMobile.Vat;
-            var Total = (double)PreshipMentMobile.CalculatedTotal;
-            Total = Math.Round(Total / 100d, 0) * 100;
-            var ReturnPrice = new MobilePriceDTO()
-            {
-                DeliveryPrice = Deliveryprice,
-                InsuranceValue = Insurance,
-                Vat = vat,
-                GrandTotal = (decimal)Total
-            };
             return new ServiceResponse<MobilePriceDTO>
             {
-                Object = ReturnPrice,
                 ShortDescription = "Shipment created successfully"
             };
         }
@@ -841,6 +830,40 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             {
                 Object = stations,
            };
+        }
+
+        
+        [HttpGet]
+        [Route("getWalletBalance/{CustomerCode}")]
+        public async Task<IServiceResponse<WalletDTO>> GetWalletByCustomerCode(string CustomerCode)
+        {
+            var wallet = await _walletService.GetWalletByCustomerCode(CustomerCode);
+            return new ServiceResponse<WalletDTO>
+            {
+                Object = wallet,
+            };
+        }
+
+        [HttpPost]
+        [Route("getPrice")]
+        public async Task<IServiceResponse<MobilePriceDTO>> GetPrice(PreShipmentMobileDTO PreshipmentMobile)
+        {
+            var PreshipMentMobile = await _preshipmentmobileService.GetPrice(PreshipmentMobile);
+            var Deliveryprice = (decimal)PreshipMentMobile.DeliveryPrice;
+            var Insurance = (decimal)PreshipmentMobile.InsuranceValue;
+            var vat = (decimal)PreshipMentMobile.Vat;
+            var Total = (double)PreshipMentMobile.CalculatedTotal;
+            var ReturnPrice = new MobilePriceDTO()
+            {
+                DeliveryPrice = Deliveryprice,
+                InsuranceValue = Insurance,
+                Vat = vat,
+                GrandTotal = (decimal)Total
+            };
+            return new ServiceResponse<MobilePriceDTO>
+            {
+                Object = ReturnPrice,
+            };
         }
 
     }
