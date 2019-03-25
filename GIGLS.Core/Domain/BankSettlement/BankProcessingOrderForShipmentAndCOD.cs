@@ -20,7 +20,8 @@ namespace GIGLS.Core.Domain.BankSettlement
         public string UserId { get; set; }
         public int ServiceCenterId { get; set; }
         public string ServiceCenter { get; set; }
-        public DepositStatus Status { get; set; } 
+        public DepositStatus Status { get; set; }
+        public string VerifiedBy { get; set; }
     }
     
     public class BankProcessingOrderCodes : BaseDomain, IAuditable
@@ -37,6 +38,7 @@ namespace GIGLS.Core.Domain.BankSettlement
         public DepositType DepositType { get; set; }
         public DateTime StartDateTime { get; set; }
         public DepositStatus Status { get; set; }
+        public string VerifiedBy { get; set; }
 
     }
 }
