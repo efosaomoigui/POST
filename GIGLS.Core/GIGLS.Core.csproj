@@ -171,7 +171,6 @@
     <Compile Include="Domain\Location.cs" />
     <Compile Include="Domain\LogVisitReason.cs" />
     <Compile Include="Domain\ManifestVisitMonitoring.cs" />
-    <Compile Include="Domain\MobilePrice.cs" />
     <Compile Include="Domain\Notification.cs" />
     <Compile Include="Domain\OTP.cs" />
     <Compile Include="Domain\OverdueShipment.cs" />
