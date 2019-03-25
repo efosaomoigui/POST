@@ -295,7 +295,6 @@
     <Compile Include="DTO\MessagingLog\EmailSendLogDTO.cs" />
     <Compile Include="DTO\MessagingLog\MessageFilterOption.cs" />
     <Compile Include="DTO\MessagingLog\SmsSendLogDTO.cs" />
-    <Compile Include="DTO\MobilePrice.cs" />
     <Compile Include="DTO\Nav\MainNavDTO.cs" />
     <Compile Include="DTO\Nav\SubNavDTO.cs" />
     <Compile Include="DTO\Nav\SubSubNavDTO.cs" />
