@@ -813,13 +813,25 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("createShipment")]
-        public async Task<IServiceResponse<MobilePriceDTO>> CreateShipment(PreShipmentMobileDTO PreshipmentMobile)
+        public async Task<IServiceResponse<PreShipmentMobileDTO>> CreateShipment(PreShipmentMobileDTO PreshipmentMobile)
         {
             var PreshipMentMobile = await _preshipmentmobileService.AddPreShipmentMobile(PreshipmentMobile);
-            return new ServiceResponse<MobilePriceDTO>
+            if (PreshipMentMobile.IsBalanceSufficient == false)
             {
-                ShortDescription = "Shipment created successfully"
-            };
+                return new ServiceResponse<PreShipmentMobileDTO>
+                {
+                   
+                    Object = PreshipMentMobile,
+                    ShortDescription = "Insufficient Wallet Balance"
+                };
+            }
+            else
+            {
+                return new ServiceResponse<PreShipmentMobileDTO>
+                {
+                    ShortDescription = "Shipment created successfully"
+                };
+            }
         }
         [HttpGet]
         [Route("getStations")]

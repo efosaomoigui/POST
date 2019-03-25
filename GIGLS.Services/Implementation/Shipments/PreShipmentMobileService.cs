@@ -92,15 +92,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 preShipmentDTO.Waybill = waybill;
                 var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
                 newPreShipment.IsConfirmed = false;
+                preShipmentDTO.IsBalanceSufficient = true;
                _uow.PreShipmentMobile.Add(newPreShipment);
                 var Updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
                 Updatedwallet.Balance = price;
                 await _uow.CompleteAsync();
                 return preShipmentDTO;
             }
-           else if(wallet.Balance < preShipmentDTO.Total)
+           else if(wallet.Balance < Convert.ToDecimal(preShipmentDTO.CalculatedTotal))
             {
-                throw new GenericException("Insufficient Wallet Balance");
+                preShipmentDTO.IsBalanceSufficient = false;
+                return preShipmentDTO;
+
             }
             return new PreShipmentMobileDTO();
         }
