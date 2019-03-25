@@ -8,15 +8,11 @@ namespace GIGLS.Core.DTO.Shipments
 {
     public class MobilePriceDTO
     {
-        public int MobilePriceId { get; set; }
-        public decimal DeliveryPrice { get; set; }
+        public decimal? DeliveryPrice { get; set; }
+        public decimal? InsuranceValue { get; set; }
+        public decimal? Vat { get; set; }
+        public decimal? GrandTotal { get; set; }
 
-        public decimal Vat { get; set; }
-
-        public decimal InsuranceValue { get; set; }
-
-        public decimal GrandTotal { get; set; }
-
-        public decimal Discount { get; set; }
+        public decimal? Discount { get; set; }
     }
 }
