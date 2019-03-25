@@ -793,7 +793,7 @@ namespace GIGLS.Services.Implementation.Wallet
             //Verifield by
             var user = await _userService.retUser();
             bankorder.UserId = user.Id;
-            bankorder.FullName = user.FirstName + " " + user.LastName;
+            //bankorder.FullName = user.FirstName + " " + user.LastName;
             bankorder.VerifiedBy = bankorder.FullName;
 
             var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
@@ -894,7 +894,7 @@ namespace GIGLS.Services.Implementation.Wallet
             //Verifield by
             var user = await _userService.retUser();
             bankorder.UserId = user.Id;
-            bankorder.FullName = user.FirstName + " " + user.LastName;
+            //bankorder.FullName = user.FirstName + " " + user.LastName;
             bankorder.VerifiedBy = bankorder.FullName;
 
             //var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
@@ -934,7 +934,7 @@ namespace GIGLS.Services.Implementation.Wallet
             //Verifield by
             var user = await _userService.retUser();
             bankorder.UserId = user.Id;
-            bankorder.FullName = user.FirstName + " " + user.LastName;
+            //bankorder.FullName = user.FirstName + " " + user.LastName;
             bankorder.VerifiedBy = bankorder.FullName;
 
             //var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
