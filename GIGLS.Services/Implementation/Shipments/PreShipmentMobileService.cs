@@ -16,6 +16,9 @@ using AutoMapper;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.IServices.Wallet;
+using GIGLS.Infrastructure;
+using GIGLS.Core.DTO.Wallet;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -28,6 +31,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUserServiceCentreMappingService _userServiceCentre;
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly IPricingService _pricingService;
+        private readonly IWalletService _walletService;
 
         public PreShipmentMobileService(IUnitOfWork uow,
             IShipmentService shipmentService,
@@ -35,7 +39,8 @@ namespace GIGLS.Services.Implementation.Shipments
             IServiceCentreService centreService,
             IUserServiceCentreMappingService userServiceCentre,
             INumberGeneratorMonitorService numberGeneratorMonitorService,
-            IPricingService pricingService
+            IPricingService pricingService,
+            IWalletService walletService
 
             )
         {
@@ -46,6 +51,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _userServiceCentre = userServiceCentre;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _pricingService = pricingService;
+            _walletService = walletService;
 
             MapperConfig.Initialize();
         }
@@ -77,24 +83,43 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<PreShipmentMobileDTO> CreatePreShipment(PreShipmentMobileDTO preShipmentDTO)
         {
             // get the current user info
-            var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
+           
+            var wallet = await _walletService.GetWalletByCustomerCode(preShipmentDTO.CustomerCode);
+            if (wallet.Balance > Convert.ToDecimal(preShipmentDTO.CalculatedTotal))
+            {
+                var price = (wallet.Balance - Convert.ToDecimal(preShipmentDTO.CalculatedTotal));
+                var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
+                preShipmentDTO.Waybill = waybill;
+                var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
+                newPreShipment.DeliveryPrice = preShipmentDTO.DeliveryPrice;
+                newPreShipment.IsConfirmed = false;
+                newPreShipment.InsuranceValue = preShipmentDTO.InsuranceValue;
+                newPreShipment.Vat = preShipmentDTO.Vat;
+                newPreShipment.CalculatedTotal = preShipmentDTO.CalculatedTotal;
+                _uow.PreShipmentMobile.Add(newPreShipment);
+                var Updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
+                Updatedwallet.Balance = price;
+                await _uow.CompleteAsync();
+                return preShipmentDTO;
+            }
+           else if(wallet.Balance < preShipmentDTO.Total)
+            {
+                throw new GenericException("Insufficient Wallet Balance");
+            }
+            return new PreShipmentMobileDTO();
+        }
 
-            preShipmentDTO.Waybill = waybill;
-            var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
-
-            // add serial numbers to the ShipmentItems
-            var serialNumber = 1;
+        public async Task<PreShipmentMobileDTO> GetPrice(PreShipmentMobileDTO preShipment)
+        {
+           
             var Price = 0.0M;
             decimal DeclaredValue = 0.0M;
-           
-            foreach (var preShipmentItem in newPreShipment.PreShipmentItems)
+            foreach (var preShipmentItem in preShipment.PreShipmentItems)
             {
-                preShipmentItem.SerialNumber = serialNumber;
-                serialNumber++;
-                var PriceDTO = new PricingDTO
+              var PriceDTO = new PricingDTO
                 {
-                    DepartureStationId = newPreShipment.SenderStationId,
-                    DestinationStationId = newPreShipment.ReceiverStationId,
+                    DepartureStationId = preShipment.SenderStationId,
+                    DestinationStationId = preShipment.ReceiverStationId,
                     Weight = (decimal)preShipmentItem.Weight
                 };
                 preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
@@ -103,32 +128,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (!string.IsNullOrEmpty(preShipmentItem.Value))
                 {
                     DeclaredValue += Convert.ToDecimal(preShipmentItem.Value);
-                    preShipmentDTO.IsdeclaredVal = true;
+                    preShipment.IsdeclaredVal = true;
                 }
             };
             int EstimatedDeclaredPrice = Convert.ToInt32(DeclaredValue);
-            preShipmentDTO.Total = Price;
-            preShipmentDTO.Vat = (decimal)(Convert.ToInt32(preShipmentDTO.Total) * 0.05);
-            preShipmentDTO.Insurance = (decimal)(EstimatedDeclaredPrice * 0.01);
-            preShipmentDTO.CalculatedTotal = (double)(preShipmentDTO.Total + preShipmentDTO.Vat + preShipmentDTO.Insurance);
-            preShipmentDTO.CalculatedTotal=Math.Round((double)preShipmentDTO.CalculatedTotal / 100d, 0) * 100;
-            preShipmentDTO.Value = DeclaredValue;
-
-            //save the display value of Insurance and Vat
-            newPreShipment.Total = preShipmentDTO.Total;
-            newPreShipment.IsConfirmed = false;
-            newPreShipment.Insurance = preShipmentDTO.Insurance;
-            newPreShipment.Vat = preShipmentDTO.Vat;
-            newPreShipment.CalculatedTotal = preShipmentDTO.CalculatedTotal;
-            newPreShipment.Value = preShipmentDTO.Value;
-
-            _uow.PreShipmentMobile.Add(newPreShipment);
-            await _uow.CompleteAsync();
-
-            return preShipmentDTO;
+            preShipment.DeliveryPrice = Price;
+            preShipment.Vat = (decimal)(Convert.ToInt32(preShipment.DeliveryPrice) * 0.05);
+            preShipment.InsuranceValue = (decimal)(EstimatedDeclaredPrice * 0.01);
+            preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice + preShipment.Vat + preShipment.InsuranceValue);
+            preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal / 100d, 0) * 100;
+            preShipment.Value = DeclaredValue;
+            return preShipment;
+            
         }
-
-       
     }
 
        

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GIGLS.Core.DTO.Shipments
+namespace GIGLS.Core.DTO
 {
-    public class MobilePriceDTO
+    public class MobilePrice
     {
         public int MobilePriceId { get; set; }
         public decimal DeliveryPrice { get; set; }

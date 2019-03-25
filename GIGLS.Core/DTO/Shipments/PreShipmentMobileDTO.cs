@@ -10,7 +10,7 @@ namespace GIGLS.Core.DTO.Shipments
     public class PreShipmentMobileDTO : BaseDomainDTO
     {
         public int PreShipmentMobileId { get; set; }
-        public string SealNumber { get; set; }
+        
         public string Waybill { get; set; }
 
         //Senders' Information
@@ -71,11 +71,14 @@ namespace GIGLS.Core.DTO.Shipments
 
 
         //discount information
-        public decimal? AppliedDiscount { get; set; }
+      
+
         public decimal? DiscountValue { get; set; }
 
-        public decimal? Insurance { get; set; }
         public decimal? Vat { get; set; }
+
+        public decimal? InsuranceValue { get; set; }
+        public decimal? DeliveryPrice { get; set; }
         public decimal? Total { get; set; }
 
         public decimal? ShipmentPackagePrice { get; set; }
@@ -92,5 +95,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         //Agility Validations
         public double? CalculatedTotal { get; set; } = 0;
+
+       
     }
 }

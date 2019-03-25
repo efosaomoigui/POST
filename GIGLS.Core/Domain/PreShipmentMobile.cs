@@ -12,7 +12,7 @@ namespace GIGLS.Core.Domain
     {
          [Key]
         public int PreShipmentMobileId { get; set; }
-        public string SealNumber { get; set; }
+       
 
         [MaxLength(100), MinLength(5)]
         [Index(IsUnique = true)]
@@ -71,12 +71,15 @@ namespace GIGLS.Core.Domain
        
 
         //discount information
-        public decimal? AppliedDiscount { get; set; }
+       
+        public decimal? Total { get; set; }
+
         public decimal? DiscountValue { get; set; }
 
-        public decimal? Insurance { get; set; }
         public decimal? Vat { get; set; }
-        public decimal? Total { get; set; }
+
+        public decimal? InsuranceValue { get; set; }
+        public decimal? DeliveryPrice { get; set; }
 
         public decimal? ShipmentPackagePrice { get; set; }
 
@@ -92,5 +95,7 @@ namespace GIGLS.Core.Domain
 
         //Agility Validations
         public double? CalculatedTotal { get; set; } = 0;
+
+       
     }
 }

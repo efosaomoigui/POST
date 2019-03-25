@@ -287,7 +287,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
-        public async Task<decimal> GetWalletByCustomerCode(string CustomerCode)
+        public async Task<WalletDTO> GetWalletByCustomerCode(string CustomerCode)
         {
             var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
                     s => s.CustomerCode == CustomerCode);
@@ -298,7 +298,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Wallet does not exist");
             }
 
-            return walletDTO.Balance;
+            return walletDTO;
         }
     }
 }
