@@ -844,7 +844,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             };
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("getPrice")]
         public async Task<IServiceResponse<MobilePriceDTO>> GetPrice(PreShipmentMobileDTO PreshipmentMobile)
         {
