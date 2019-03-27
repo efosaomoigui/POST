@@ -312,6 +312,8 @@ namespace GIGLS.Services.Implementation.Shipments
             }, shipmentCollectionDto.ShipmentScanStatus);
 
 
+            var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
+
             //cash collected on Delivery
             if (shipmentCollectionDto.IsCashOnDelivery)
             {
@@ -332,8 +334,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 //Update CashOnDevliveryRegisterAccount As  Cash Recieved at Service Center
                 var codRegisterCollectsForASingleWaybill = _uow.CashOnDeliveryRegisterAccount.Find(s => s.Waybill == shipmentCollectionDto.Waybill).FirstOrDefault();
 
-                var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
-
                 if (codRegisterCollectsForASingleWaybill != null)
                 {
                     if (shipmentCollectionDto.IsComingFromDispatch)
@@ -348,6 +348,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
                     codRegisterCollectsForASingleWaybill.PaymentType = shipmentCollectionDto.PaymentType;
                     codRegisterCollectsForASingleWaybill.PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference;
+                    codRegisterCollectsForASingleWaybill.DepositStatus = DepositStatus.Unprocessed;
                 }
                 else
                 {
@@ -375,6 +376,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     
                     //Add the the selected cod information and set it in the codregister account
                     _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryinfo);
+                    
                 }
             }
 
@@ -396,6 +398,25 @@ namespace GIGLS.Services.Implementation.Shipments
                     PaymentType = shipmentCollectionDto.PaymentType,
                     PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference                    
                 };
+
+                //insert demurrage in the database
+                var demurrageinformation = new DemurrageRegisterAccount() 
+                {
+                    Waybill = shipmentCollectionDto.Waybill,
+                    RefCode = null,
+                    UserId = shipmentCollectionDto.UserId,
+                    Amount = (decimal)shipmentCollectionDto.Demurrage.Amount,
+                    ServiceCenterId = getServiceCenterCode[0].ServiceCentreId,
+                    DepositStatus = DepositStatus.Unprocessed,
+                    PaymentType = shipmentCollectionDto.PaymentType,
+                    PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference,
+                    DEMStatusHistory  = CODStatushistory.RecievedAtServiceCenter,
+                    ServiceCenterCode = getServiceCenterCode[0].Code
+                };
+
+                //PaymentType.Wallet
+
+                _uow.DemurrageRegisterAccount.Add(demurrageinformation);
                 _uow.GeneralLedger.Add(generalLedger);
             }
 

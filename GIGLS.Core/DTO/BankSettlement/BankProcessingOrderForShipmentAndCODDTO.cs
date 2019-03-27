@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.Domain;
+using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.Enums;
 using System;
 using System.Collections.Generic;
@@ -17,13 +18,16 @@ namespace GIGLS.Core.DTO.BankSettlement
         public string Waybill { get; set; }
         public decimal GrandTotal { get; set; } 
         public decimal CODAmount { get; set; }
+        public decimal DemurrageAmount { get; set; }
         public string RefCode { get; set; }
         public DepositType DepositType { get; set; }
         public string UserId { get; set; }
-        
+        public decimal Amount { get; set; }
+
         public int ServiceCenterId { get; set; }
         public string ServiceCenter { get; set; }
         public DepositStatus Status { get; set; }
+        public string VerifiedBy { get; set; }
     }
 
     public class BankProcessingOrderCodesDTO : BaseDomain, IAuditable
@@ -40,9 +44,16 @@ namespace GIGLS.Core.DTO.BankSettlement
         public DepositType DepositType { get; set; }
         public DateTime StartDateTime { get; set; }
         public DepositStatus Status { get; set; }
+        public string VerifiedBy { get; set; }
 
         //Shipment Items
         public List<BankProcessingOrderForShipmentAndCODDTO> ShipmentAndCOD { get; set; }
+
+        ////COD Items
+        //public List<CashOnDeliveryRegisterAccount> CODRegister { get; set; }
+
+        ////Demurrage Items
+        //public List<DemurrageRegisterAccount> DemurrageRegister { get; set; }
 
     }
 

@@ -31,6 +31,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                Waybill = bankProcessingorderforcod.Waybill,
                                ServiceCenter = bankProcessingorderforcod.ServiceCenter,
                                Status = bankProcessingorderforcod.Status,
+                               VerifiedBy = bankProcessingorderforcod.VerifiedBy
                            };
             return Task.FromResult(codorder.ToList());
         }
@@ -86,7 +87,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                        Waybill = processingorderCode.Waybill,
                                        GrandTotal = processingorderCode.GrandTotal,
                                        CODAmount = processingorderCode.CODAmount ?? 0,
-                                       ServiceCenter = processingorderCode.ServiceCenter
+                                       ServiceCenter = processingorderCode.ServiceCenter,
+                                       DemurrageAmount = processingorderCode.DemurrageAmount??0,
+                                       VerifiedBy = processingorderCode.VerifiedBy
                                    };
             var result = processingorders.ToList();
             return Task.FromResult(result);

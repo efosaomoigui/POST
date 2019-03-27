@@ -48,6 +48,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverCity { get; set; }
         public string ReceiverState { get; set; }
         public string ReceiverCountry { get; set; }
+      
 
         //Delivery Options
         public int DeliveryOptionId { get; set; } = 1;

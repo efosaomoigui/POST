@@ -167,6 +167,20 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("markasdeposited_demurrage")]
+        public async Task<IServiceResponse<object>> MarkAsDeposited_demurrage(BankProcessingOrderCodesDTO bkoc)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var bankshipmentprocessingorders = _bankprocessingorder.UpdateBankOrderProcessingCode_demurrage(bkoc);
+                return new ServiceResponse<object>
+                {
+                };
+            });
+        }
+
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
@@ -176,6 +190,20 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
             return await HandleApiOperationAsync(async () =>
             {
                 var bankshipmentprocessingorders = _bankprocessingorder.MarkAsVerified_cod(bkoc);
+                return new ServiceResponse<object>
+                {
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("markasVerified_demurrage")]
+        public async Task<IServiceResponse<object>> MarkAsVerified_demurrage(BankProcessingOrderCodesDTO bkoc)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var bankshipmentprocessingorders = _bankprocessingorder.MarkAsVerified_demurrage(bkoc); 
                 return new ServiceResponse<object>
                 {
                 };
