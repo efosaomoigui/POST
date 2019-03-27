@@ -14,6 +14,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using System.Linq;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.User;
+using GIGLS.Core.Domain.Expenses;
 
 namespace GIGLS.Services.Implementation.Fleets
 {
@@ -100,16 +101,29 @@ namespace GIGLS.Services.Implementation.Fleets
                 var generalLedger = new GeneralLedger()
                 {
                     DateOfEntry = DateTime.Now,
-
                     ServiceCentreId = userServiceCentreId,
                     UserId = currentUserId,
                     Amount = dispatchDTO.Amount,
                     CreditDebitType = CreditDebitType.Debit,
-                    Description = "Debit from Dispatch",
+                    Description = "Debit from Dispatch :" + dispatchDTO.ManifestNumber,
                     IsDeferred = false,
                     PaymentServiceType = PaymentServiceType.Dispatch
                 };
                 _uow.GeneralLedger.Add(generalLedger);
+
+                if(dispatchDTO.Amount > 0)
+                {
+                    //add record to Expenditure 
+                    var expenditure = new Expenditure
+                    {
+                        Amount = dispatchDTO.Amount,
+                        ExpenseTypeId = 11, //Id number for dispatch on Expense type
+                        ServiceCentreId = userServiceCentreId,
+                        UserId = currentUserId,
+                        Description = "Dispatch fee for " + dispatchDTO.ManifestType.ToString() + " Manifest " + dispatchDTO.ManifestNumber
+                    };
+                    _uow.Expenditure.Add(expenditure);
+                }
 
                 // commit transaction
                 await _uow.CompleteAsync();
@@ -193,7 +207,8 @@ namespace GIGLS.Services.Implementation.Fleets
                     Location = serviceCenter.Name,
                     Status = scanStatus,
                     DateTime = DateTime.Now,
-                    UserId = currentUserId
+                    UserId = currentUserId,
+                    ServiceCentreId = serviceCenter.ServiceCentreId
                 };
                 _uow.ShipmentTracking.Add(newShipmentTracking);
             }

@@ -1,22 +1,23 @@
-﻿using GIGLS.CORE.IServices.Shipments;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
-using GIGLS.CORE.Domain;
-using AutoMapper;
+﻿using AutoMapper;
 using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
-using System;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IServices.CashOnDeliveryAccount;
-using GIGLS.Core.DTO.Wallet;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.DTO.Shipments;
-using System.Linq;
+using GIGLS.Core;
 using GIGLS.Core.Domain;
+using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.CashOnDeliveryAccount;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.CORE.Domain;
+using GIGLS.CORE.DTO.Shipments;
+using GIGLS.CORE.IServices.Shipments;
+using GIGLS.Infrastructure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -299,6 +300,8 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentCollection.ShipmentScanStatus = shipmentCollectionDto.ShipmentScanStatus;
             shipmentCollection.UserId = shipmentCollectionDto.UserId;
 
+            var collectionServiceCenter = shipmentCollectionDto.OriginalDestinationServiceCentre;
+
             //Add Collected Scan to Scan History
             var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
             {
@@ -307,6 +310,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 Waybill = shipmentCollectionDto.Waybill,
                 User = shipmentCollectionDto.UserId,
             }, shipmentCollectionDto.ShipmentScanStatus);
+
+
+            var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
 
             //cash collected on Delivery
             if (shipmentCollectionDto.IsCashOnDelivery)
@@ -324,6 +330,54 @@ namespace GIGLS.Services.Implementation.Shipments
                     Waybill = shipmentCollectionDto.Waybill,
                     CODStatus = CODStatus.Unprocessed
                 });
+
+                //Update CashOnDevliveryRegisterAccount As  Cash Recieved at Service Center
+                var codRegisterCollectsForASingleWaybill = _uow.CashOnDeliveryRegisterAccount.Find(s => s.Waybill == shipmentCollectionDto.Waybill).FirstOrDefault();
+
+                if (codRegisterCollectsForASingleWaybill != null)
+                {
+                    if (shipmentCollectionDto.IsComingFromDispatch)
+                    {
+                        codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.CollectedByDispatch;
+                    }
+                    else
+                    {
+                        codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
+                    }
+
+                    codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
+                    codRegisterCollectsForASingleWaybill.PaymentType = shipmentCollectionDto.PaymentType;
+                    codRegisterCollectsForASingleWaybill.PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference;
+                    codRegisterCollectsForASingleWaybill.DepositStatus = DepositStatus.Unprocessed;
+                }
+                else
+                {
+                    var cashondeliveryinfo = new CashOnDeliveryRegisterAccount()
+                    {
+                        Waybill = shipmentCollectionDto.Waybill,
+                        RefCode = null,
+                        UserId = shipmentCollectionDto.UserId,
+                        Amount = (decimal)shipmentCollectionDto.CashOnDeliveryAmount,
+                        ServiceCenterId = getServiceCenterCode[0].ServiceCentreId,
+                        DepositStatus = DepositStatus.Unprocessed,
+                        PaymentType = shipmentCollectionDto.PaymentType,
+                        PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference,
+                        ServiceCenterCode = getServiceCenterCode[0].Code
+                    };
+
+                    if (shipmentCollectionDto.IsComingFromDispatch)
+                    {
+                        cashondeliveryinfo.CODStatusHistory = CODStatushistory.CollectedByDispatch;
+                    }
+                    else
+                    {
+                        cashondeliveryinfo.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
+                    }
+                    
+                    //Add the the selected cod information and set it in the codregister account
+                    _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryinfo);
+                    
+                }
             }
 
             if (shipmentCollectionDto.Demurrage?.Amount > 0)
@@ -333,7 +387,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 var generalLedger = new GeneralLedger()
                 {
                     DateOfEntry = DateTime.Now,
-
                     ServiceCentreId = serviceCenters[0],
                     UserId = shipmentCollectionDto.UserId,
                     Amount = shipmentCollectionDto.Demurrage.Amount,
@@ -342,9 +395,28 @@ namespace GIGLS.Services.Implementation.Shipments
                     IsDeferred = false,
                     Waybill = shipmentCollectionDto.Waybill,
                     PaymentServiceType = PaymentServiceType.Demurage,
-                    PaymentType = shipmentCollectionDto.PaymentType
-                    //ClientNodeId = shipment.c
+                    PaymentType = shipmentCollectionDto.PaymentType,
+                    PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference                    
                 };
+
+                //insert demurrage in the database
+                var demurrageinformation = new DemurrageRegisterAccount() 
+                {
+                    Waybill = shipmentCollectionDto.Waybill,
+                    RefCode = null,
+                    UserId = shipmentCollectionDto.UserId,
+                    Amount = (decimal)shipmentCollectionDto.Demurrage.Amount,
+                    ServiceCenterId = getServiceCenterCode[0].ServiceCentreId,
+                    DepositStatus = DepositStatus.Unprocessed,
+                    PaymentType = shipmentCollectionDto.PaymentType,
+                    PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference,
+                    DEMStatusHistory  = CODStatushistory.RecievedAtServiceCenter,
+                    ServiceCenterCode = getServiceCenterCode[0].Code
+                };
+
+                //PaymentType.Wallet
+
+                _uow.DemurrageRegisterAccount.Add(demurrageinformation);
                 _uow.GeneralLedger.Add(generalLedger);
             }
 
@@ -376,6 +448,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
         {
+
+            //var paymentType = shipmentCollection.IsComingFromDispatch;
+
             //check if the shipment has not been collected
             var shipmentCollected = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(shipmentCollection.Waybill) && x.ShipmentScanStatus == shipmentCollection.ShipmentScanStatus);
 
@@ -574,7 +649,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        
+
         //---Added for global customer care and ecommerce
         public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetOverDueShipmentsGLOBAL(FilterOptionsDto filterOptionsDto)
         {
@@ -639,6 +714,43 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), count);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<ShipmentCollectionDTO>> GetOverDueShipmentsGLOBAL()
+        {
+            try
+            {
+                // filter by global property for OverDueShipments
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount).Result;
+                if (overDueDaysCountObj == null)
+                {
+                    throw new GenericException($"The Global property 'Over Due Days Count' has not been set. Kindly contact admin.");
+                }
+                var overDueDaysCount = overDueDaysCountObj.Value;
+                int globalProp = int.Parse(overDueDaysCount);
+                var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
+                var shipmentCollection = _uow.ShipmentCollection.ShipmentCollectionsForEcommerceAsQueryable(false).
+                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate)).ToList();
+                shipmentCollection = shipmentCollection.OrderByDescending(x => x.DateCreated).ToList();
+
+                //ensure that already grouped waybills don't appear with this list
+                var overdueShipment = _uow.OverdueShipment.GetAllAsQueryable().
+                    Where(s => s.OverdueShipmentStatus == OverdueShipmentStatus.Grouped).ToList();
+
+                //filter the two lists
+                shipmentCollection =
+                    shipmentCollection.Where(s => !overdueShipment.Select(d => d.Waybill).Contains(s.Waybill)).ToList();
+
+
+                int count = shipmentCollection.Count();
+
+                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
+                return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateModified));
             }
             catch (Exception)
             {
@@ -716,6 +828,96 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        public async Task<IEnumerable<ShipmentCollectionDTO>> GetEcommerceOverDueShipmentsGLOBAL()
+        {
+            try
+            {
+                // filter by global property for OverDueShipments
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount).Result;
+                if (overDueDaysCountObj == null)
+                {
+                    throw new GenericException($"The Global property 'Over Due Days Count for Ecommerce customer' has not been set. Kindly contact admin.");
+                }
+                var overDueDaysCount = overDueDaysCountObj.Value;
+                int globalProp = int.Parse(overDueDaysCount);
+                var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
+                var shipmentCollection = _uow.ShipmentCollection.ShipmentCollectionsForEcommerceAsQueryable(true).
+                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate)).ToList();
+                shipmentCollection = shipmentCollection.OrderByDescending(x => x.DateCreated).ToList();
+
+                //ensure that already grouped waybills don't appear with this list
+                var overdueShipment = _uow.OverdueShipment.GetAllAsQueryable().
+                    Where(s => s.OverdueShipmentStatus == OverdueShipmentStatus.Grouped).ToList();
+
+                //filter the two lists
+                shipmentCollection =
+                    shipmentCollection.Where(s => !overdueShipment.Select(d => d.Waybill).Contains(s.Waybill)).ToList();
+                int count = shipmentCollection.Count();
+                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
+
+                return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateModified));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<IEnumerable<ShipmentCollectionDTO>> GetEcommerceOverDueShipments()
+        {
+            try
+            {
+                //get all shipments by servicecentre
+                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+
+                //added for GWA and GWARIMPA service centres
+                {
+                    if (serviceCenters.Length == 1)
+                    {
+                        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                        {
+                            serviceCenters = new int[] { 4, 294 };
+                        }
+                    }
+                }
+
+                List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && s.CompanyType == CompanyType.Ecommerce.ToString() && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
+
+                // filter by global property for OverDueShipments
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount).Result;
+                if (overDueDaysCountObj == null)
+                {
+                    throw new GenericException($"The Global property 'Over Due Days Count for Ecommerce customer' has not been set. Kindly contact admin.");
+                }
+                var overDueDaysCount = overDueDaysCountObj.Value;
+                int globalProp = int.Parse(overDueDaysCount);
+                var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
+                var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().
+                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate)).ToList();
+                shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
+
+                //ensure that already grouped waybills don't appear with this list
+                var overdueShipment = _uow.OverdueShipment.GetAllAsQueryable().
+                    Where(s => s.OverdueShipmentStatus == OverdueShipmentStatus.Grouped).ToList();
+
+                //filter the two lists
+                shipmentCollection =
+                    shipmentCollection.Where(s => !overdueShipment.Select(d => d.Waybill).Contains(s.Waybill)).ToList();
+
+
+                int count = shipmentCollection.Count();
+
+                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
+                return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateModified));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
     }
 }

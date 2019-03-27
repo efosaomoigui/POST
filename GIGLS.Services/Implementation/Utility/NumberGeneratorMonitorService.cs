@@ -59,7 +59,8 @@ namespace GIGLS.Services.Implementation.Utility
                    numberGeneratorType == NumberGeneratorType.CustomerCodeEcommerce ||
                    numberGeneratorType == NumberGeneratorType.Wallet ||
                    numberGeneratorType == NumberGeneratorType.Partner ||
-                   numberGeneratorType == NumberGeneratorType.Employee)
+                   numberGeneratorType == NumberGeneratorType.Employee
+                   )
                 {
                     numberGenerated = ResolvePrefixFromNumberGeneratorTypeForCustomers(numberGeneratorType) + numberStr;
                 }
@@ -141,6 +142,18 @@ namespace GIGLS.Services.Implementation.Utility
                 case NumberGeneratorType.Wallet:
                     {
                         return (int)NumberGeneratorType.Wallet;
+                    }
+                case NumberGeneratorType.BankProcessingOrderForShipment:
+                    {
+                        return (int)NumberGeneratorType.BankProcessingOrderForShipment;
+                    }
+                case NumberGeneratorType.BankProcessingOrderForCOD:
+                    {
+                        return (int)NumberGeneratorType.BankProcessingOrderForCOD;
+                    }
+                case NumberGeneratorType.BankProcessingOrderForDemurrage:
+                    {
+                        return (int)NumberGeneratorType.BankProcessingOrderForDemurrage;
                     }
                 default:
                     {

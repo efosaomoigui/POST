@@ -28,5 +28,9 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal TargetAmount { get; set; }
         public int TargetOrder { get; set; }
         public bool IsDefault { get; set; }
+
+        public double? Latitude { get; set; }
+
+        public double? Longitude { get; set; }
     }
 }

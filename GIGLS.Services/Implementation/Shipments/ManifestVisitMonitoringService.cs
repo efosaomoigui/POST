@@ -62,7 +62,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     Location = serviceCenter.Name,
                     Status = ShipmentScanStatus.ATD.ToString(),
                     DateTime = DateTime.Now,
-                    UserId = manifestVisitMonitoringDto.UserId
+                    UserId = manifestVisitMonitoringDto.UserId,
+                    ServiceCentreId = serviceCenter.ServiceCentreId
                 };
 
                 _uow.ManifestVisitMonitoring.Add(newManifest);

@@ -48,5 +48,7 @@ namespace GIGLS.Core.DTO.Customers
         public string PicData { get; set; }
         public string WalletNumber { get; set; }
         public string CustomerCode { get; set; }
+
+        public string Password { get; set; }
     }
 }

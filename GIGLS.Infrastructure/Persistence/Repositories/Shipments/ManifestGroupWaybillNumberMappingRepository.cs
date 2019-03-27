@@ -17,16 +17,16 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
         {
             _context = context;
         }
-
+        
         public async Task<List<ManifestGroupWaybillNumberMappingDTO>> GetManifestGroupWaybillNumberMappings(int[] serviceCentreIds)
         {
             var manifestGroupwaybillMapping = Context.ManifestGroupWaybillNumberMapping.Where(s => s.IsDeleted == false).AsQueryable();
-
-            var serviceCentreGroupWaybills = new List<string>();
+            
             if (serviceCentreIds.Length > 0)
             {
-                serviceCentreGroupWaybills = _context.GroupWaybillNumberMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId)).
-                    Select(s => s.GroupWaybillNumber).ToList();
+                var serviceCentreGroupWaybills = _context.GroupWaybillNumberMapping.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId)).
+                    Select(s => s.GroupWaybillNumber).AsQueryable();
+
                 manifestGroupwaybillMapping = manifestGroupwaybillMapping.Where(s => serviceCentreGroupWaybills.Contains(s.GroupWaybillNumber));
             }
 
@@ -43,7 +43,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      IsDeleted = mgw.IsDeleted,
                                                      RowVersion = mgw.RowVersion,
                                                      ManifestDetails = Context.Manifest.Where(x => x.ManifestCode == mgw.ManifestCode).
-                                                     Select(p => new ManifestDTO {
+                                                     Select(p => new ManifestDTO
+                                                     {
                                                          DateCreated = p.DateCreated,
                                                          DateModified = p.DateModified,
                                                          ManifestCode = p.ManifestCode,
@@ -52,7 +53,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                          IsDispatched = p.IsDispatched,
                                                          IsReceived = p.IsReceived,
                                                          DispatchedBy = Context.Users.Where(d => d.Id == p.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
-                                                         ReceiverBy  = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault()       
+                                                         ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault()
                                                      }).FirstOrDefault()
                                                  };
 

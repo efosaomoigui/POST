@@ -33,5 +33,9 @@ namespace GIGLS.CORE.DTO.Shipments
         public ServiceCentreDTO OriginalDestinationServiceCentre { get; set; }
 
         public PaymentType PaymentType { get; set; }
+        public string PaymentTypeReference { get; set; }
+
+        //boolean to check if release is coming from mobile
+        public bool IsComingFromDispatch { get; set; } 
     }
 }

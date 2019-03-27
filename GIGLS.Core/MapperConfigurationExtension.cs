@@ -33,6 +33,8 @@ using GIGLS.Core.DTO.BankSettlement;
 using GIGLS.Core.DTO.InternationalShipmentDetails;
 using GIGLS.Core.DTO.SLA;
 using GIGLS.Core.Domain.SLA;
+using GIGLS.Core.DTO.Expenses;
+using GIGLS.Core.Domain.Expenses;
 
 namespace GIGLS.Core
 {
@@ -204,6 +206,12 @@ namespace GIGLS.Core
                 config.CreateMap<CashOnDeliveryAccount, CashOnDeliveryAccountDTO>();
                 config.CreateMap<CashOnDeliveryAccountDTO, CashOnDeliveryAccount>();
 
+                config.CreateMap<CashOnDeliveryRegisterAccount, CashOnDeliveryRegisterAccountDTO>();
+                config.CreateMap<CashOnDeliveryRegisterAccountDTO, CashOnDeliveryRegisterAccount>();
+
+                config.CreateMap<DemurrageRegisterAccount, DemurrageRegisterAccountDTO>();
+                config.CreateMap<DemurrageRegisterAccountDTO, DemurrageRegisterAccount>();
+
                 config.CreateMap<Dispatch, DispatchDTO>();
                 config.CreateMap<DispatchDTO, DispatchDTO>();
 
@@ -296,6 +304,24 @@ namespace GIGLS.Core
 
                 config.CreateMap<SLASignedUser, SLASignedUserDTO>();
                 config.CreateMap<SLASignedUserDTO, SLASignedUser>();
+
+                config.CreateMap<ExpenseType, ExpenseTypeDTO>();
+                config.CreateMap<ExpenseTypeDTO, ExpenseType>();
+
+                config.CreateMap<Expenditure, ExpenditureDTO>();
+                config.CreateMap<ExpenditureDTO, Expenditure>();
+
+                config.CreateMap<OTP, OTPDTO>();
+                config.CreateMap<OTPDTO, OTP>();
+
+                config.CreateMap<PreShipmentMobile, PreShipmentMobileDTO>();
+                config.CreateMap<PreShipmentMobileDTO, PreShipmentMobile>();
+
+                config.CreateMap<PreShipmentItemMobile, PreShipmentItemMobileDTO>();
+                config.CreateMap<PreShipmentItemMobileDTO, PreShipmentItemMobile>();
+
+                config.CreateMap<Location, LocationDTO>();
+                config.CreateMap<LocationDTO, Location>();
             });
 
             isInit = true;

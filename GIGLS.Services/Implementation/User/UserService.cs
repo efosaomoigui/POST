@@ -58,6 +58,7 @@ namespace GIGLS.Services.Implementation.User
                 user.UserChannelCode = employeeCode;
                 user.UserChannelPassword = GeneratePassword();
             }
+           
 
             var u = await _unitOfWork.User.RegisterUser(user, userDto.Password);
             return u;
@@ -166,14 +167,55 @@ namespace GIGLS.Services.Implementation.User
 
         public async Task<IdentityResult> RemoveUser(string userId)
         {
+            //Remove user, wallet and customer (Inidvidual or company)
+
             var user = await _unitOfWork.User.GetUserById(userId);
 
             if (user == null)
             {
                 throw new GenericException("User does not exist!");
             }
+            
+            if(user.UserChannelType.Equals(UserChannelType.Corporate) || user.UserChannelType.Equals(UserChannelType.Ecommerce))
+            {
+                await RemoveCompanyCustomer(user.UserChannelCode);
+            }
 
+            if (user.UserChannelType.Equals(UserChannelType.IndividualCustomer))
+            {
+                await RemoveIndividualCustomer(user.UserChannelCode);
+            }
+
+            await RemoveWallet(user.UserChannelCode);
+            await _unitOfWork.CompleteAsync();
             return await _unitOfWork.User.Remove(userId);
+        }
+
+        private async Task RemoveCompanyCustomer(string customerCode)
+        {
+            var company = await _unitOfWork.Company.GetAsync(x => x.CustomerCode == customerCode);
+            if(company != null)
+            {
+                _unitOfWork.Company.Remove(company);
+            }
+        }
+
+        private async Task RemoveIndividualCustomer(string customerCode)
+        {
+            var individual = await _unitOfWork.IndividualCustomer.GetAsync(x => x.CustomerCode == customerCode);
+            if (individual != null)
+            {
+                _unitOfWork.IndividualCustomer.Remove(individual);
+            }
+        }
+
+        private async Task RemoveWallet(string customerCode)
+        {
+            var wallet = await _unitOfWork.Wallet.GetAsync(x => x.CustomerCode == customerCode);
+            if (wallet != null)
+            {
+                _unitOfWork.Wallet.Remove(wallet);
+            }
         }
 
         public async Task<IdentityResult> UpdateUser(string userid, UserDTO userDto)
@@ -201,6 +243,7 @@ namespace GIGLS.Services.Implementation.User
             user.UserChannelCode = userDto.UserChannelCode;
             user.UserChannelPassword = userDto.UserChannelPassword;
             user.UserChannelType = userDto.UserChannelType;
+            user.PictureUrl = userDto.PictureUrl;
 
             return await _unitOfWork.User.UpdateUser(userid, user);
 
@@ -461,6 +504,52 @@ namespace GIGLS.Services.Implementation.User
             return result;
         }
 
+        public async Task<bool> CheckSCA()
+        {
+
+            var result = false;
+
+            var currentUserId = await GetCurrentUserId();
+            var currentUser = await GetUserById(currentUserId);
+            var userClaims = await GetClaimsAsync(currentUserId);
+
+            string[] claimValue = null;
+            foreach (var claim in userClaims)
+            {
+                if (claim.Type == "Privilege")
+                {
+                    claimValue = claim.Value.Split(':');   // format stringName:stringValue
+                }
+            }
+            if (claimValue == null)
+            {
+                return result;
+            }
+
+            if (
+                claimValue[0] == "ServiceCentre")
+            {
+                result = true;
+            }
+
+            return result;
+        }
+
+        public async Task<UserDTO> retUser()
+        {
+            var currentUserId = await GetCurrentUserId();
+            var currentUser = await GetUserById(currentUserId);
+
+            return currentUser;
+        }
+
+        public async Task<UserDTO> retServiceCenter() 
+        {
+            var currentUserId = await GetCurrentUserId();
+            var currentUser = await GetUserById(currentUserId);
+
+            return currentUser;
+        }
 
         public async Task<bool> CheckPriviledge()
         {
@@ -497,6 +586,66 @@ namespace GIGLS.Services.Implementation.User
             return result;
         }
 
+        public async Task<ServiceCentreDTO[]> GetCurrentServiceCenter() 
+        {
+            var sc = new ServiceCentreDTO[] { };
+
+            // get current user
+            try
+            {
+                var currentUserId = GetCurrentUserId().Result;
+                var currentUser = GetUserById(currentUserId).Result;
+                var userClaims = GetClaimsAsync(currentUserId).Result;
+
+                //currentUser.ServiceCentres
+
+                string[] claimValue = null;
+                foreach (var claim in userClaims)
+                {
+                    if (claim.Type == "Privilege")
+                    {
+                        claimValue = claim.Value.Split(':');   // format stringName:stringValue
+                    }
+                }
+
+                if (claimValue == null)
+                {
+                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                }
+
+                if (claimValue[0] == "Global")
+                {
+                    sc = new ServiceCentreDTO[] { };
+                }
+                else if (claimValue[0] == "Station")
+                {
+                    var stationId = int.Parse(claimValue[1]);
+                    var serviceCentres = await _serviceCentreService.GetServiceCentres();
+                    sc = serviceCentres.Where(s => s.StationId == stationId).ToArray();
+                }
+                else if (claimValue[0] == "ServiceCentre")
+                {
+                    int serviceCenterId = int.Parse(claimValue[1]);
+                    var serviceCentres = await _serviceCentreService.GetServiceCentres();
+                    sc = serviceCentres.Where(s => s.ServiceCentreId == serviceCenterId).ToArray();
+                }
+                else if (claimValue[0] == "Public")
+                {
+                    sc = new ServiceCentreDTO[] { };
+                }
+                else
+                {
+                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return sc;
+        }
+
         public async Task<int[]> GetPriviledgeServiceCenters()
         {
             int[] serviceCenterIds = { };   //empty array
@@ -506,6 +655,8 @@ namespace GIGLS.Services.Implementation.User
                 var currentUserId = GetCurrentUserId().Result;
                 var currentUser = GetUserById(currentUserId).Result;
                 var userClaims = GetClaimsAsync(currentUserId).Result;
+
+                //currentUser.ServiceCentres
 
                 string[] claimValue = null;
                 foreach (var claim in userClaims)
@@ -892,5 +1043,15 @@ namespace GIGLS.Services.Implementation.User
             return strippedText.Substring(0, length);
         }
 
+        public async Task<UserDTO> GetUserByPhone(string PhoneNumber)
+        {
+            var user = await _unitOfWork.User.GetUserByPhoneNumber(PhoneNumber);
+
+            if (user == null)
+            {
+                throw new GenericException("Phone number does not exist!");
+            }
+           return Mapper.Map<UserDTO>(user);
+        }
     }
 }

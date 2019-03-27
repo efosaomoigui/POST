@@ -18,6 +18,7 @@ namespace GIGLS.Core.View
         public string Waybill { get; set; }
         public DateTime DueDate { get; set; }
         public bool IsShipmentCollected { get; set; }
+        public string PaymentTypeReference { get; set; }
 
         //Shipment Information
         public int ShipmentId { get; set; }
@@ -90,5 +91,7 @@ namespace GIGLS.Core.View
         public int? IndividualCustomerId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+
+        public DepositStatus DepositStatus { get; set; }
     }
 }

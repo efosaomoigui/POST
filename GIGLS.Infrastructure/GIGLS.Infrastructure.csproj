@@ -118,6 +118,8 @@
     <Compile Include="Persistence\Repositories\Account\InvoiceRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\InvoiceShipmentRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\VATRepository.cs" />
+    <Compile Include="Persistence\Repositories\BankSettlement\BankProcessingOrderCodesRepository.cs" />
+    <Compile Include="Persistence\Repositories\BankSettlement\BankProcessingOrderForShipmentAndCODRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\CODSettlementSheetRepository.cs" />
     <Compile Include="Persistence\Repositories\Client\ClientNodeRepository.cs" />
     <Compile Include="Persistence\Repositories\CountryRepository.cs" />
@@ -126,6 +128,8 @@
     <Compile Include="Persistence\Repositories\Customers\IndividualCustomerRepository.cs" />
     <Compile Include="Persistence\Repositories\Devices\DeviceManagementRepository.cs" />
     <Compile Include="Persistence\Repositories\Devices\DeviceRepository.cs" />
+    <Compile Include="Persistence\Repositories\Expenses\ExpenditureRepository.cs" />
+    <Compile Include="Persistence\Repositories\Expenses\ExpenseTypeRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\DispatchActivityRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\DispatchRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\FleetMakeRepository.cs" />
@@ -150,6 +154,7 @@
     <Compile Include="Persistence\Repositories\Nav\SubNavRepository.cs" />
     <Compile Include="Persistence\Repositories\Nav\SubSubNavRepository.cs" />
     <Compile Include="Persistence\Repositories\NotificationRepository.cs" />
+    <Compile Include="Persistence\Repositories\OTPRepository.cs" />
     <Compile Include="Persistence\Repositories\Partnership\PartnerApplicationRepository.cs" />
     <Compile Include="Persistence\Repositories\Partnership\PartnerRepository.cs" />
     <Compile Include="Persistence\Repositories\PaymentTransactions\PaymentPartialTransactionRepository.cs" />
@@ -163,12 +168,14 @@
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\LogVisitReasonRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\OverdueShipmentRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\PreShipmentItemMobileRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\PreShipmentManifestMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ManifestWaybillMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ManifestGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ManifestRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ManifestVisitMonitoringRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\MissingShipmentRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\PreShipmentMobileRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentDeliveryOptionMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCancelRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCollectionRepository.cs" />

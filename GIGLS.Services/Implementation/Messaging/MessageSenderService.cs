@@ -13,6 +13,9 @@ using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.MessagingLog;
 using GIGLS.Core.DTO.MessagingLog;
+using System.Web;
+using GIGLS.Core.DTO.User;
+using System.Collections.Generic;
 
 namespace GIGLS.Services.Implementation.Messaging
 {
@@ -128,13 +131,6 @@ namespace GIGLS.Services.Implementation.Messaging
 
         private async Task<bool> PrepareMessageFinalBody(MessageDTO messageDTO, object obj)
         {
-            //if (obj is ShipmentDTO)
-            //{ 
-            //    var shipmentDTO = (ShipmentDTO)obj;
-            //    messageDTO.FinalBody = string.Format(messageDTO.Body, shipmentDTO.Customer[0].CustomerName, shipmentDTO.Waybill);
-            //    messageDTO.To = shipmentDTO.Customer[0].PhoneNumber;
-            //}
-
             if (obj is ShipmentTrackingDTO)
             {
                 var strArray = new string[]
@@ -146,7 +142,11 @@ namespace GIGLS.Services.Implementation.Messaging
                     "Address",
                     "Demurrage Day",
                     "Demurrage Amount",
-                    "Receiver Name"
+                    "Receiver Name",
+                    "Shipment Description",
+                    "Total Shipment Amount",
+                    "Shipment Creation Date",
+                    "Shipment Creation Time"
                 };
 
                 var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
@@ -184,19 +184,66 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[5] = demurrageDayCount;
                     strArray[6] = demurragePrice;
                     strArray[7] = invoice.ReceiverName;
+                    strArray[8] = invoice.Description;
+                    strArray[9] = invoice.Amount.ToString();
+                    strArray[10] = invoice.DateCreated.ToLongDateString();
+                    strArray[11] = invoice.DateCreated.ToShortTimeString();
 
-                    //added for HomeDelivery sms, when scan is ArrivedFinalDestination
-                    if(messageDTO.MessageType == MessageType.ARF &&
+                    //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
+                    if (messageDTO.MessageType == MessageType.ARF &&
                         invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
                     {
-                        var smsMessages = await _messageService.GetSmsAsync();
-                        var homeDeliveryMessageDTO = smsMessages.FirstOrDefault(s => s.MessageType == MessageType.AHD);
+                        MessageDTO homeDeliveryMessageDTO = null;
+                        if (messageDTO.EmailSmsType == EmailSmsType.SMS)
+                        {
+                            //sms
+                            var smsMessages = await _messageService.GetSmsAsync();
+                            homeDeliveryMessageDTO = smsMessages.FirstOrDefault(s => s.MessageType == MessageType.AHD);
+                        }
+                        else
+                        {
+                            //email
+                            var emailMessages = await _messageService.GetEmailAsync();
+                            homeDeliveryMessageDTO = emailMessages.FirstOrDefault(s => s.MessageType == MessageType.AHD);
+                        }
 
-                        if(homeDeliveryMessageDTO != null)
+                        if (homeDeliveryMessageDTO != null)
                         {
                             messageDTO.Body = homeDeliveryMessageDTO.Body;
                         }
                     }
+
+                    //B. added for HomeDelivery email, when scan is created at Service Centre
+                    if (messageDTO.MessageType == MessageType.CRT &&
+                        invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
+                    {
+                        MessageDTO homeDeliveryMessageDTO = null;
+                        if (messageDTO.EmailSmsType == EmailSmsType.SMS)
+                        {
+                            //sms
+                            var smsMessages = await _messageService.GetSmsAsync();
+                            homeDeliveryMessageDTO = smsMessages.FirstOrDefault(s => s.MessageType == MessageType.CRH);
+                        }
+                        else
+                        {
+                            //email
+                            var emailMessages = await _messageService.GetEmailAsync();
+                            homeDeliveryMessageDTO = emailMessages.FirstOrDefault(s => s.MessageType == MessageType.CRH);
+                        }
+
+                        if (homeDeliveryMessageDTO != null)
+                        {
+                            messageDTO.Body = homeDeliveryMessageDTO.Body;
+                        }
+                    }
+
+                    //B. decode url parameter
+                    messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                    //C. populate the message subject
+                    messageDTO.Subject =
+                        string.Format(messageDTO.Subject, strArray);
+
 
                     //populate the message template
                     messageDTO.FinalBody =
@@ -205,16 +252,20 @@ namespace GIGLS.Services.Implementation.Messaging
                     if ("CUSTOMER" == messageDTO.To.Trim())
                     {
                         messageDTO.To = customerObj.PhoneNumber;
+                        messageDTO.ToEmail = customerObj.Email;
+                        messageDTO.CustomerName = customerObj.CustomerName;
                     }
                     else if ("RECEIVER" == messageDTO.To.Trim())
                     {
                         messageDTO.To = invoice.ReceiverPhoneNumber;
+                        messageDTO.ToEmail = invoice.ReceiverEmail;
+                        messageDTO.ReceiverName = invoice.ReceiverName;
                     }
                     else
                     {
                         messageDTO.To = invoice.ReceiverPhoneNumber;
+                        messageDTO.ToEmail = invoice.ReceiverEmail;
                     }
-                    //messageDTO.To = invoice.ReceiverPhoneNumber;
                 }
             }
 
@@ -230,6 +281,12 @@ namespace GIGLS.Services.Implementation.Messaging
             if (!toPhoneNumber.Trim().StartsWith("+"))  //2347011111111
             {
                 toPhoneNumber = $"+{toPhoneNumber}";
+            }
+            //3
+            if (!toPhoneNumber.Trim().StartsWith("2340"))  //23407011111111
+            {
+                toPhoneNumber = toPhoneNumber.Remove(0, 4);
+                toPhoneNumber = $"+234{toPhoneNumber}";
             }
 
             //assign
@@ -270,7 +327,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     DateCreated = DateTime.Now,
                     DateModified = DateTime.Now,
                     From = messageDTO.From,
-                    To = messageDTO.To,
+                    To = messageDTO.ToEmail,
                     Message = messageDTO.FinalBody,
                     Status = exceptiomMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
                     ResultStatus = result,
@@ -284,5 +341,137 @@ namespace GIGLS.Services.Implementation.Messaging
             return true;
         }
 
+        //Sends generic email message
+        public async Task SendGenericEmailMessage(MessageType messageType, object obj)
+        {
+            var messageDTO = new MessageDTO();
+            var result = "";
+
+            try
+            {
+                var emailMessages = await _messageService.GetEmailAsync();
+                messageDTO = emailMessages.FirstOrDefault(s => s.MessageType == messageType);
+
+                if (messageDTO != null)
+                {
+                    //prepare generic message finalBody
+                    bool verifySendEmail = await PrepareGenericMessageFinalBody(messageDTO, obj);
+                    if (verifySendEmail)
+                    {
+                        result = await _emailService.SendAsync(messageDTO);
+                        await LogEmailMessage(messageDTO, result);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await LogEmailMessage(messageDTO, result, ex.Message);
+            }
+        }
+
+        private async Task<bool> PrepareGenericMessageFinalBody(MessageDTO messageDTO, object obj)
+        {
+            bool verifySendEmail = true;
+
+            //1. obj is UserDTO
+            if (obj is UserDTO)
+            {
+                var strArray = new string[]
+                {
+                    "User Name",
+                    "Login Time",
+                    "Url",
+                };
+
+                var userDTO = (UserDTO)obj;
+                //map the array
+                strArray[0] = userDTO.Email;
+                strArray[1] = $"{DateTime.Now.ToLongDateString()} : {DateTime.Now.ToLongTimeString()}";
+                //strArray[2] = invoice.DepartureServiceCentreName;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject =
+                    string.Format(messageDTO.Subject, strArray);
+
+
+                //populate the message template
+                messageDTO.FinalBody =
+                    string.Format(messageDTO.Body, strArray);
+
+
+                messageDTO.To = userDTO.PhoneNumber;
+                messageDTO.ToEmail = userDTO.Email;
+
+
+                //--- 2. Verify The Email is within the interval for sending
+                verifySendEmail = await VerifyUserLoginIsWithinTheEmailInterval(userDTO.Email);
+            }
+
+            return await Task.FromResult(verifySendEmail);
+        }
+
+        private async Task<bool> VerifyUserLoginIsWithinTheEmailInterval(string email)
+        {
+            bool verifySendEmail = true;
+
+            //1. check interval from global property
+            var globalPropertyForEmailSendInterval = 1;
+            var globalPropertyForEmailSendIntervalObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.UserLoginEmailSendInterval);
+            if (globalPropertyForEmailSendIntervalObj != null)
+            {
+                int.TryParse(globalPropertyForEmailSendIntervalObj.Value, out globalPropertyForEmailSendInterval);
+            }
+
+            //2. check the In-memory dictionary object if the email has been sent
+            Dictionary<string, UserLoginEmailDTO> userLoginEmailDictionary = GetUserLoginEmailDictionaryFromCache();
+
+            UserLoginEmailDTO userLoginEmailDTO = null;
+            if (userLoginEmailDictionary.TryGetValue(email, out userLoginEmailDTO))
+            {
+                var currentTime = DateTime.Now;
+                var dateLastSent = userLoginEmailDTO.DateLastSent;
+                var nextTimeToBeSent = dateLastSent.AddMinutes(globalPropertyForEmailSendInterval);
+                if (currentTime.CompareTo(nextTimeToBeSent) > 0)
+                {
+                    //update time
+                    userLoginEmailDTO.DateLastSent = currentTime;
+                    userLoginEmailDTO.NumberOfEmailsSent = userLoginEmailDTO.NumberOfEmailsSent + 1;
+                    verifySendEmail = true;
+                }
+                else
+                {
+                    verifySendEmail = false;
+                }
+            }
+            else
+            {
+                //add this user
+                userLoginEmailDTO = new UserLoginEmailDTO()
+                {
+                    Email = email,
+                    DateCreated = DateTime.Now,
+                    DateLastSent = DateTime.Now,
+                    NumberOfEmailsSent = 1
+                };
+                userLoginEmailDictionary.Add(email, userLoginEmailDTO);
+            }
+
+            return await Task.FromResult(verifySendEmail);
+        }
+
+        private Dictionary<string, UserLoginEmailDTO> GetUserLoginEmailDictionaryFromCache()
+        {
+            if (System.Web.HttpRuntime.Cache[nameof(UserLoginEmailDTO)] == null)
+            {
+                //In-memory object that holds the records of emails sent and at what interval
+                System.Web.HttpRuntime.Cache[nameof(UserLoginEmailDTO)] = new Dictionary<string, UserLoginEmailDTO>();
+            }
+
+            var result = (Dictionary<string, UserLoginEmailDTO>)System.Web.HttpRuntime.Cache[nameof(UserLoginEmailDTO)];
+            return result;
+        }
     }
 }

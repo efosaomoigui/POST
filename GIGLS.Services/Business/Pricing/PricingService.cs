@@ -13,6 +13,7 @@ using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices.Shipments;
+using System;
 
 namespace GIGLS.Services.Business.Pricing
 {
@@ -653,5 +654,49 @@ namespace GIGLS.Services.Business.Pricing
             
             return shipment;
         }
+
+        public  async Task<decimal> GetMobileRegularPrice(PricingDTO pricingDto)
+        {
+            
+            if(pricingDto.DepartureStationId == pricingDto.DestinationStationId)
+            {
+                pricingDto.DeliveryOptionId = 3;
+            }
+            else
+            {
+                pricingDto.DeliveryOptionId = 2;
+            }
+            var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
+
+            //get the deliveryOptionPrice from an array
+           
+            decimal deliveryOptionPriceTemp = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId);
+                
+            decimal deliveryOptionPrice = deliveryOptionPriceTemp;
+
+            //check for volumetric weight
+            if (pricingDto.IsVolumetric)
+            {
+                decimal volume = (pricingDto.Length * pricingDto.Height * pricingDto.Width) / 5000;
+                pricingDto.Weight = pricingDto.Weight > volume ? pricingDto.Weight : volume;
+            }
+
+            //This is our limit weight.
+            var activeWeightLimit = await _weightLimit.GetActiveWeightLimits();
+
+            decimal PackagePrice;
+
+            if (pricingDto.Weight > activeWeightLimit.Weight)
+            {
+                PackagePrice = await GetRegularPriceOverflow(pricingDto.Weight, activeWeightLimit.Weight, zone.ZoneId);
+            }
+            else
+            {
+                PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId);
+            }
+            return PackagePrice + deliveryOptionPrice;
+        }
+
+        
     }
 }

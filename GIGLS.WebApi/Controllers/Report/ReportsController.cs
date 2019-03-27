@@ -1,4 +1,6 @@
 ﻿using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Dashboard;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IServices;
@@ -167,6 +169,39 @@ namespace GIGLS.WebApi.Controllers.Report
                 return new ServiceResponse<List<ScanStatusReportDTO>>
                 {
                     Object = shipmentTrackings
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("shipmentprogresssummary")]
+        public async Task<IServiceResponse<DashboardDTO>> GetShipmentProgressSummary(ShipmentProgressSummaryFilterCriteria baseFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var summary = await _shipmentService.GetShipmentProgressSummary(baseFilterCriteria);
+
+                return new ServiceResponse<DashboardDTO>
+                {
+                    Object = summary
+                };
+            });
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("shipmentprogresssummarybreakdown")]
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentProgressSummaryBreakDown(ShipmentProgressSummaryFilterCriteria baseFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var summary = await _shipmentService.GetShipmentProgressSummaryBreakDown(baseFilterCriteria);
+
+                return new ServiceResponse<List<InvoiceViewDTO>>
+                {
+                    Object = summary
                 };
             });
         }

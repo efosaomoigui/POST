@@ -77,14 +77,22 @@ namespace GIGLS.Services.Implementation.Customers
                 }
                 try
                 {
-                    var password = await _passwordGenerator.Generate();
+                    var password = "";
+                    if (newCustomer.Password == null)
+                    {
+                        password = await _passwordGenerator.Generate();
+                    }
+                    else
+                    {
+                        password = newCustomer.Password;
+                    }
                     var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
                     {
                         ConfirmPassword = password,
                         Department = CustomerType.IndividualCustomer.ToString(),
                         DateCreated = DateTime.Now,
                         Designation = CustomerType.IndividualCustomer.ToString(),
-                        Email = newCustomer.Email,
+                        Email=newCustomer.Email,
                         FirstName = newCustomer.FirstName,
                         LastName = newCustomer.LastName,
                         Organisation = CustomerType.IndividualCustomer.ToString(),
@@ -102,7 +110,7 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     // do nothing
                 }
-
+                
                 return Mapper.Map<IndividualCustomerDTO>(newCustomer);
             }
             catch (Exception)
@@ -115,12 +123,26 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
+                //Delete user, wallet and customer table
                 var customer = await _uow.IndividualCustomer.GetAsync(customerId);
                 if (customer == null)
                 {
                     throw new GenericException("Individual Customer Inforamtion does not exist");
                 }
                 _uow.IndividualCustomer.Remove(customer);
+
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customer.CustomerCode);
+                if (wallet != null)
+                {
+                    _uow.Wallet.Remove(wallet);
+                }
+
+                var user = await _uow.User.GetUserByChannelCode(customer.CustomerCode);
+                if (user != null)
+                {
+                    await _uow.User.Remove(user.Id);
+                }
+
                 _uow.Complete();
             }
             catch (Exception)
@@ -204,6 +226,7 @@ namespace GIGLS.Services.Implementation.Customers
             {
                 throw new GenericException("Individual Customer information does not exist");
             }
+            
             customer.FirstName = customerDto.FirstName;
             customer.LastName = customerDto.LastName;
             customer.Email = customerDto.Email;
@@ -214,7 +237,17 @@ namespace GIGLS.Services.Implementation.Customers
             //work on the picture later
             customer.PhoneNumber = customerDto.PhoneNumber;
             customer.State = customerDto.State;
-            _uow.Complete();
+            customer.Password = customerDto.Password;
+            
+            var user = await _userService.GetUserByChannelCode(customer.CustomerCode);
+            user.FirstName = customerDto.FirstName;
+            user.LastName = customerDto.LastName;
+            user.PhoneNumber = customerDto.PhoneNumber;
+            user.Email = customerDto.Email;
+            user.PictureUrl = customerDto.PictureUrl;
+            await _userService.UpdateUser(user.Id, user);
+            await _uow.CompleteAsync();
+           
         }
 
         public async Task<List<IndividualCustomerDTO>> GetIndividualCustomers(string searchData)

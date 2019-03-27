@@ -52,10 +52,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     var serviceCenter = await _uow.ServiceCentre.GetAsync(UserServiceCenters[0]);
                     tracking.Location = serviceCenter.Name;
+                    tracking.ServiceCentreId = serviceCenter.ServiceCentreId;
                 }
-
-
-
+                
                 if (scanStatus.Equals(ShipmentScanStatus.ARF))
                 {
                     var newShipmentCollection = new ShipmentCollection
@@ -79,7 +78,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         Location = tracking.Location,
                         Status = tracking.Status,
                         DateTime = DateTime.Now,
-                        UserId = tracking.User
+                        UserId = tracking.User,
+                        ServiceCentreId = tracking.ServiceCentreId
                     };
                     _uow.ShipmentTracking.Add(newShipmentTracking);
 

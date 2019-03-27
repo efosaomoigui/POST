@@ -17,6 +17,7 @@ using GIGLS.Core.Domain.Utility;
 using GIGLS.Core.Domain.Devices;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.Domain.SLA;
+using GIGLS.Core.Domain.Expenses;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -124,6 +125,8 @@ namespace GIGLS.Infrastructure.Persistence
         //store
         public DbSet<Store> Store { get; set; }
 
+        public DbSet<OTP> OTP { get; set; }
+
         //stock
         public DbSet<StockRequest> StockRequest { get; set; }
         public DbSet<StockRequestPart> StockRequestPart { get; set; }
@@ -152,6 +155,8 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<WalletNumber> WalletNumbers { get; set; }
         public DbSet<CashOnDeliveryAccount> CashOnDeliveryAccount { get; set; }
         public DbSet<CashOnDeliveryBalance> CashOnDeliveryBalance { get; set; }
+        public DbSet<CashOnDeliveryRegisterAccount> CashOnDeliveryRegisterAccount { get; set; }
+        public DbSet<DemurrageRegisterAccount> DemurrageRegisterAccount { get; set; } 
 
         //Weight Limit
         public DbSet<WeightLimit> WeightLimits { get; set; }
@@ -167,6 +172,8 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<VAT> VAT { get; set; }
         public DbSet<Insurance> Insurance { get; set; }
         public DbSet<InvoiceShipment> InvoiceShipment { get; set; }
+        public DbSet<ExpenseType> ExpenseType { get; set; }
+        public DbSet<Expenditure> Expenditure { get; set; }
 
         //ClientNode
         public DbSet<ClientNode> ClientNode { get; set; }
@@ -210,12 +217,24 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<OverdueShipment> OverdueShipment { get; set; }
 
         //international request
+
         public DbSet<InternationalRequestReceiver> InternationalRequestReceivers { get; set; }
         public DbSet<InternationalRequestReceiverItem> InternationalRequestReceiverItems { get; set; }
 
         //SLA
         public DbSet<SLA> SLAs { get; set; }
         public DbSet<SLASignedUser> SLASignedUsers { get; set; }
+
+        //Bank Settlement Order
+        public DbSet<BankProcessingOrderForShipmentAndCOD> BankProcessingOrderForShipmentAndCOD { get; set; }
+        public DbSet<BankProcessingOrderCodes> BankProcessingOrderCodes { get; set; }
+        public DbSet<PreShipmentItemMobile> PresShipmentItemMobile { get; set; }
+
+        public DbSet<PreShipmentMobile> PresShipmentMobile { get; set; }
+
+        public DbSet<Location> Location { get; set; }
+
+        
 
         #endregion
 
