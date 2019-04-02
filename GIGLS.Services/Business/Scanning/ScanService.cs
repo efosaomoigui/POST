@@ -83,7 +83,7 @@ namespace GIGLS.Services.Business.Scanning
             //}
 
             //check if the waybill has not been scan for (AHK) shipment collecte or Delivered status before
-            var shipmentCollected = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(scan.WaybillNumber) && x.ShipmentScanStatus == ShipmentScanStatus.AHD);
+            var shipmentCollected = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(scan.WaybillNumber) && (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC));
 
             if (shipmentCollected != null)
             {

@@ -618,6 +618,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 string user = await _userService.GetCurrentUserId();
 
                 var manifestDTO = await _manifestService.GetManifestByCode(manifest);
+                var getServiceCenterCode = await _userService.GetCurrentServiceCenter(); 
 
                 List<CashOnDeliveryRegisterAccount> codRegisterCollectsForASingleWaybillList = new List<CashOnDeliveryRegisterAccount>();
                 foreach (var waybill in waybills)
@@ -632,6 +633,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         if (codRegisterCollectsForASingleWaybill != null)
                         {
                             codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
+                            codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
                             codRegisterCollectsForASingleWaybillList.Add(codRegisterCollectsForASingleWaybill);
                         }
                         continue;

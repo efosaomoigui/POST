@@ -605,9 +605,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 cashondeliveryentity.CODStatusHistory = CODStatushistory.Created;
                 cashondeliveryentity.Description = "Cod From Sales";
                 //cashondeliveryentity.ServiceCenterCode = newShipment.DepartureServiceCentreId;
-                cashondeliveryentity.ServiceCenterId = newShipment.DepartureServiceCentreId;
+                cashondeliveryentity.ServiceCenterId = 0; //newShipment.DepartureServiceCentreId; recieveddatcenter && unproccessed &&  cash && sc
                 cashondeliveryentity.Waybill = newShipment.Waybill;
                 cashondeliveryentity.UserId = newShipment.UserId;
+                cashondeliveryentity.DepartureServiceCenterId = newShipment.DepartureServiceCentreId;
 
                 _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
             }
