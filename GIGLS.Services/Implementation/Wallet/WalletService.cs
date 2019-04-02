@@ -300,5 +300,19 @@ namespace GIGLS.Services.Implementation.Wallet
 
             return walletDTO;
         }
+        public async Task<WalletDTO> GetWalletByUserId(string Userid)
+        {
+            var userDTO = await _uow.User.GetUserById(Userid);
+            var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
+                    s => s.CustomerCode == userDTO.UserChannelCode);
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerId.Equals(individualCustomerDTO.IndividualCustomerId));
+            var walletDTO = Mapper.Map<WalletDTO>(wallet);
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exist");
+            }
+
+            return walletDTO;
+        }
     }
 }

@@ -21,6 +21,7 @@ using GIGLS.Infrastructure;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -34,6 +35,8 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly IPricingService _pricingService;
         private readonly IWalletService _walletService;
+        private readonly IWalletTransactionService _walletTransactionService;
+        private readonly IUserService _userService;
 
         public PreShipmentMobileService(IUnitOfWork uow,
             IShipmentService shipmentService,
@@ -42,7 +45,9 @@ namespace GIGLS.Services.Implementation.Shipments
             IUserServiceCentreMappingService userServiceCentre,
             INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService,
-            IWalletService walletService
+            IWalletService walletService,
+            IWalletTransactionService walletTransactionService,
+            IUserService userService
 
             )
         {
@@ -54,6 +59,8 @@ namespace GIGLS.Services.Implementation.Shipments
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _pricingService = pricingService;
             _walletService = walletService;
+            _walletTransactionService = walletTransactionService;
+            _userService = userService;
 
             MapperConfig.Initialize();
         }
@@ -85,14 +92,16 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<PreShipmentMobileDTO> CreatePreShipment(PreShipmentMobileDTO preShipmentDTO)
         {
             // get the current user info
-
+            
             var wallet = await _walletService.GetWalletByCustomerCode(preShipmentDTO.CustomerCode);
             if (wallet.Balance > Convert.ToDecimal(preShipmentDTO.CalculatedTotal))
             {
+                var user = await _userService.GetUserByChannelCode(preShipmentDTO.CustomerCode);
                 var price = (wallet.Balance - Convert.ToDecimal(preShipmentDTO.CalculatedTotal));
                 var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
                 preShipmentDTO.Waybill = waybill;
                 var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
+                newPreShipment.UserId = user.Id;
                 foreach (var item in newPreShipment.PreShipmentItems)
                 {
                     if (!string.IsNullOrEmpty(item.Value))
@@ -101,10 +110,22 @@ namespace GIGLS.Services.Implementation.Shipments
                         newPreShipment.IsdeclaredVal = true;
                     }
                 }
+                var transaction = new WalletTransactionDTO {
+                    WalletId = wallet.WalletId,
+                    CreditDebitType = CreditDebitType.Debit,
+                    Amount = (decimal)newPreShipment.CalculatedTotal,
+                    ServiceCentreId = 296,
+                    Waybill = waybill,
+                    Description = "Payment for Shipment",
+                    PaymentType = PaymentType.Online,
+                    UserId = newPreShipment.UserId
+                };
+                
                 newPreShipment.IsConfirmed = false;
                 newPreShipment.shipmentstatus = "Shipment created";
                 preShipmentDTO.IsBalanceSufficient = true;
                 _uow.PreShipmentMobile.Add(newPreShipment);
+                var m = await _walletTransactionService.AddWalletTransaction(transaction);
                 var Updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
                 Updatedwallet.Balance = price;
                 await _uow.CompleteAsync();

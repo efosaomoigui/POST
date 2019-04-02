@@ -14,5 +14,7 @@ namespace GIGLS.Core.IServices.Wallet
         Task<object> AddWalletTransaction(WalletTransactionDTO walletTransaction);
         Task UpdateWalletTransaction(int walletTransactionId, WalletTransactionDTO walletTransaction);
         Task RemoveWalletTransaction(int walletTransactionId);
+
+        Task<WalletTransactionSummaryDTO> GetWalletTransactionByWalletForMobileId(int walletId);
     }
 }
