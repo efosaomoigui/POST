@@ -19,6 +19,8 @@ using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Infrastructure;
 using GIGLS.Core.DTO.Wallet;
+using GIGLS.CORE.DTO.Shipments;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -83,7 +85,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<PreShipmentMobileDTO> CreatePreShipment(PreShipmentMobileDTO preShipmentDTO)
         {
             // get the current user info
-           
+
             var wallet = await _walletService.GetWalletByCustomerCode(preShipmentDTO.CustomerCode);
             if (wallet.Balance > Convert.ToDecimal(preShipmentDTO.CalculatedTotal))
             {
@@ -91,15 +93,24 @@ namespace GIGLS.Services.Implementation.Shipments
                 var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
                 preShipmentDTO.Waybill = waybill;
                 var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
+                foreach (var item in newPreShipment.PreShipmentItems)
+                {
+                    if (!string.IsNullOrEmpty(item.Value))
+                    {
+                        newPreShipment.Value += Convert.ToDecimal(item.Value);
+                        newPreShipment.IsdeclaredVal = true;
+                    }
+                }
                 newPreShipment.IsConfirmed = false;
+                newPreShipment.shipmentstatus = "Shipment created";
                 preShipmentDTO.IsBalanceSufficient = true;
-               _uow.PreShipmentMobile.Add(newPreShipment);
+                _uow.PreShipmentMobile.Add(newPreShipment);
                 var Updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
                 Updatedwallet.Balance = price;
                 await _uow.CompleteAsync();
                 return preShipmentDTO;
             }
-           else if(wallet.Balance < Convert.ToDecimal(preShipmentDTO.CalculatedTotal))
+            else if (wallet.Balance < Convert.ToDecimal(preShipmentDTO.CalculatedTotal))
             {
                 preShipmentDTO.IsBalanceSufficient = false;
                 return preShipmentDTO;
@@ -110,12 +121,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<PreShipmentMobileDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
-           
+
             var Price = 0.0M;
             decimal DeclaredValue = 0.0M;
             foreach (var preShipmentItem in preShipment.PreShipmentItems)
             {
-              var PriceDTO = new PricingDTO
+                var PriceDTO = new PricingDTO
                 {
                     DepartureStationId = preShipment.SenderStationId,
                     DestinationStationId = preShipment.ReceiverStationId,
@@ -138,10 +149,140 @@ namespace GIGLS.Services.Implementation.Shipments
             preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal / 100d, 0) * 100;
             preShipment.Value = DeclaredValue;
             return preShipment;
-            
+
+        }
+
+
+        public async Task<List<PreShipmentMobileDTO>> GetShipments(BaseFilterCriteria filterOptionsDto)
+        {
+            try
+            {
+
+                //get startDate and endDate
+                var queryDate = filterOptionsDto.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+                var allShipments = _uow.PreShipmentMobile.GetAllAsQueryable();
+
+                if (filterOptionsDto.StartDate == null & filterOptionsDto.EndDate == null)
+                {
+                    startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                    endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
+
+                }
+                var allShipmentsResult = allShipments.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+
+                List<PreShipmentMobileDTO> shipmentDto = (from r in allShipmentsResult
+                                                          select new PreShipmentMobileDTO()
+                                                          {
+                                                              PreShipmentMobileId = r.PreShipmentMobileId,
+                                                              Waybill = r.Waybill,
+                                                              CustomerType = r.CustomerType,
+                                                              ActualDateOfArrival = r.ActualDateOfArrival,
+                                                              DateCreated = r.DateCreated,
+                                                              DateModified = r.DateModified,
+                                                              ExpectedDateOfArrival = r.ExpectedDateOfArrival,
+                                                              ReceiverAddress = r.ReceiverAddress,
+                                                              SenderAddress = r.SenderAddress,
+                                                              SenderPhoneNumber = r.SenderPhoneNumber,
+                                                              ReceiverCity = r.ReceiverCity,
+                                                              ReceiverCountry = r.ReceiverCountry,
+                                                              ReceiverEmail = r.ReceiverEmail,
+                                                              ReceiverName = r.ReceiverName,
+                                                              ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                                              ReceiverState = r.ReceiverState,
+                                                              SenderName = r.SenderName,
+                                                              UserId = r.UserId,
+                                                              Value = r.Value,
+                                                              shipmentstatus = r.shipmentstatus,
+                                                              GrandTotal = r.GrandTotal,
+                                                              DeliveryPrice = r.DeliveryPrice,
+                                                              CalculatedTotal = r.CalculatedTotal,
+                                                              InsuranceValue = r.InsuranceValue,
+                                                              DiscountValue = r.DiscountValue,
+                                                              CompanyType = r.CompanyType,
+                                                              CustomerCode = r.CustomerCode
+                                                          }).ToList();
+
+                return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+
+        public async Task<PreShipmentMobileDTO> GetPreShipmentDetail(string waybill)
+        {
+            try
+            {
+                var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill, "PreShipmentItems");
+                var Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(shipment);
+                if (shipment == null)
+                {
+                    throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
+                }
+
+                return await Task.FromResult(Shipmentdto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser(string userid)
+        {
+            try
+            {
+                var user = await _uow.User.GetUserById(userid);
+                var shipment = await _uow.PreShipmentMobile.FindAsync(x => x.CustomerCode == user.UserChannelCode, "PreShipmentItems");
+                if (shipment == null)
+                {
+                    throw new GenericException($"PreShipment with username: {user.UserName} does not exist");
+                }
+
+                List<PreShipmentMobileDTO> shipmentDto = (from r in shipment
+                                                          select new PreShipmentMobileDTO()
+                                                          {
+                                                              PreShipmentMobileId = r.PreShipmentMobileId,
+                                                              Waybill = r.Waybill,
+                                                              CustomerType = r.CustomerType,
+                                                              ActualDateOfArrival = r.ActualDateOfArrival,
+                                                              DateCreated = r.DateCreated,
+                                                              DateModified = r.DateModified,
+                                                              ExpectedDateOfArrival = r.ExpectedDateOfArrival,
+                                                              ReceiverAddress = r.ReceiverAddress,
+                                                              SenderAddress = r.SenderAddress,
+                                                              SenderPhoneNumber = r.SenderPhoneNumber,
+                                                              ReceiverCity = r.ReceiverCity,
+                                                              ReceiverCountry = r.ReceiverCountry,
+                                                              ReceiverEmail = r.ReceiverEmail,
+                                                              ReceiverName = r.ReceiverName,
+                                                              ReceiverPhoneNumber = r.ReceiverPhoneNumber,
+                                                              ReceiverState = r.ReceiverState,
+                                                              SenderName = r.SenderName,
+                                                              UserId = r.UserId,
+                                                              Value = r.Value,
+                                                              shipmentstatus = r.shipmentstatus,
+                                                              GrandTotal = r.GrandTotal,
+                                                              DeliveryPrice = r.DeliveryPrice,
+                                                              CalculatedTotal = r.CalculatedTotal,
+                                                              InsuranceValue = r.InsuranceValue,
+                                                              DiscountValue = r.DiscountValue,
+                                                              CompanyType = r.CompanyType,
+                                                              CustomerCode = r.CustomerCode
+                                                          }).ToList();
+
+                return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
         }
     }
-
-       
-    
 }

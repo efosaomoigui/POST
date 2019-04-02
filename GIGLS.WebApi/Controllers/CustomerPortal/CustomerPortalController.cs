@@ -787,7 +787,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
 
-        
+        //[Authorize]
         [HttpPost]
         [Route("editprofile")]
         public async Task<IServiceResponse<UserDTO>> EditProfile(UserDTO user)
@@ -799,7 +799,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             };
         }
 
-
+       // [Authorize]
         [HttpGet]
         [Route("itemTypes")]
         public async Task<IServiceResponse<List<string>>> GetItemTypes()
@@ -811,6 +811,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             };
         }
 
+       // [Authorize]
         [HttpPost]
         [Route("createShipment")]
         public async Task<IServiceResponse<PreShipmentMobileDTO>> CreateShipment(PreShipmentMobileDTO PreshipmentMobile)
@@ -829,10 +830,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             {
                 return new ServiceResponse<PreShipmentMobileDTO>
                 {
+                    Object = PreshipMentMobile,
                     ShortDescription = "Shipment created successfully"
                 };
             }
         }
+
+        //[Authorize]
         [HttpGet]
         [Route("getStations")]
         public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetStations()
@@ -844,7 +848,9 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
            };
         }
 
-        
+
+
+       // [Authorize]
         [HttpGet]
         [Route("getWalletBalance/{CustomerCode}")]
         public async Task<IServiceResponse<WalletDTO>> GetWalletByCustomerCode(string CustomerCode)
@@ -856,6 +862,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             };
         }
 
+       // [Authorize]
         [HttpPost]
         [Route("getPrice")]
         public async Task<IServiceResponse<MobilePriceDTO>> GetPrice(PreShipmentMobileDTO PreshipmentMobile)
@@ -878,7 +885,18 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             };
         }
 
-    }
+        [HttpGet]
+        [Route("getPreShipmentByUserId/{userid}")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetPreshipmentOrderbyId(string userid)
+        {
+            var PreshipMentMobile = await _preshipmentmobileService.GetPreShipmentForUser(userid);
+            return new ServiceResponse<List<PreShipmentMobileDTO>>
+            {
+                Object = PreshipMentMobile,
+            };
+        }
 
     }
+
+  }
 
