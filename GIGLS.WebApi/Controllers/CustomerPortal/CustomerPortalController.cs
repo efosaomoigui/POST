@@ -854,8 +854,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
        // [Authorize]
         [HttpGet]
-        [Route("getWalletBalance/{CustomerCode}")]
-        public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletByCustomerCode(string CustomerCode)
+        [Route("getWallet/{CustomerCode}")]
+        public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetAllWalletByCustomerCode(string CustomerCode)
         {
             var user = await _userService.GetUserByChannelCode(CustomerCode);
             var wallet = await _walletService.GetWalletByCustomerCode(CustomerCode);
@@ -912,6 +912,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return new ServiceResponse<PaymentResponse>
             {
                 Object = result
+            };
+        }
+
+        [HttpGet]
+        [Route("getWalletBalance/{CustomerCode}")]
+        public async Task<IServiceResponse<decimal>> GetWalletByCustomerCode(string CustomerCode)
+        {
+            
+            var wallet = await _walletService.GetWalletByCustomerCode(CustomerCode);
+            return new ServiceResponse<decimal>
+            {
+                Object = wallet.Balance,
+               
             };
         }
 
