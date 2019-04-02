@@ -829,6 +829,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             {
                 return new ServiceResponse<PreShipmentMobileDTO>
                 {
+                    Object = PreshipMentMobile,
                     ShortDescription = "Shipment created successfully"
                 };
             }
