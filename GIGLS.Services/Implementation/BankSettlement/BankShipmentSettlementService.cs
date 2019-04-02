@@ -794,7 +794,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var user = await _userService.retUser();
             bankorder.UserId = user.Id;
             //bankorder.FullName = user.FirstName + " " + user.LastName;
-            bankorder.VerifiedBy = bankorder.FullName;
+            bankorder.VerifiedBy = user.FirstName + " " + user.LastName;
 
             var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
 
@@ -895,7 +895,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var user = await _userService.retUser();
             bankorder.UserId = user.Id;
             //bankorder.FullName = user.FirstName + " " + user.LastName;
-            bankorder.VerifiedBy = bankorder.FullName;
+            bankorder.VerifiedBy = user.FirstName + " " + user.LastName;
 
             //var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
             var allDemurrages = _uow.DemurrageRegisterAccount.GetDemurrageAsQueryable();
@@ -935,7 +935,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var user = await _userService.retUser();
             bankorder.UserId = user.Id;
             //bankorder.FullName = user.FirstName + " " + user.LastName;
-            bankorder.VerifiedBy = bankorder.FullName;
+            bankorder.VerifiedBy = user.FirstName + " " + user.LastName;
 
             //var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
             var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();

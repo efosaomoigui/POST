@@ -29,6 +29,7 @@ namespace GIGLS.Core.Domain.Wallet
         public string PaymentTypeReference { get; set; }
         public DepositStatus DepositStatus { get; set; }
         public string RefCode { get; set; }
+        public int DepartureServiceCenterId { get; set; } 
     }
 
     public class DemurrageRegisterAccount : BaseDomain, IAuditable 
