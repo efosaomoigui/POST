@@ -99,6 +99,7 @@ namespace GIGLS.Core.DTO.Shipments
         public bool? IsBalanceSufficient { get; set; }
 
         public string shipmentstatus { get; set; }
+        public bool IsDelivered { get; set; }
 
 
     }

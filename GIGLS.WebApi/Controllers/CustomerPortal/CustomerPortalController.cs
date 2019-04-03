@@ -844,6 +844,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetStations()
         {
             var stations = await _stationService.GetLocalStations();
+            stations = stations.OrderBy(x => x.StationName).ToList();
             return new ServiceResponse<IEnumerable<StationDTO>>
             {
                 Object = stations,
@@ -904,7 +905,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpGet]
-        [Route("VeifyPaystackPayment")]
+        [Route("VerifyPaystackPayment")]
         public async Task<IServiceResponse<PaymentResponse>> VerifyMobilePayment(WalletPaymentLogDTO walletPaymentLogDTO)
         {
             var walletPaymentLog = await _portalService.AddWalletPaymentLog(walletPaymentLogDTO);
