@@ -93,6 +93,7 @@ namespace GIGLS.Core.Domain
         //Cancelled shipment
         public bool IsCancelled { get; set; }
         public bool IsConfirmed { get; set; }
+        public bool IsDelivered { get; set; }
         public string DeclinedReason { get; set; }
 
         //Agility Validations

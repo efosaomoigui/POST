@@ -697,6 +697,54 @@ namespace GIGLS.Services.Business.Pricing
             return PackagePrice + deliveryOptionPrice;
         }
 
-        
+        public async Task<decimal> GetMobileEcommercePrice(PricingDTO pricingDto)
+        {
+           
+
+            var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
+
+            //get the deliveryOptionPrice from an array
+            decimal deliveryOptionPriceTemp = 0;
+
+            if (pricingDto.DepartureStationId == pricingDto.DestinationStationId)
+            {
+                pricingDto.DeliveryOptionId = 3;
+            }
+            else
+            {
+                pricingDto.DeliveryOptionId = 2;
+            }
+            
+            deliveryOptionPriceTemp = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId);
+               
+
+            decimal deliveryOptionPrice = deliveryOptionPriceTemp;
+
+            //check for volumetric weight
+            if (pricingDto.IsVolumetric)
+            {
+                decimal volume = (pricingDto.Length * pricingDto.Height * pricingDto.Width) / 5000;
+                pricingDto.Weight = pricingDto.Weight > volume ? pricingDto.Weight : volume;
+            }
+
+            //Get Ecommerce limit weight from GlobalProperty
+            var ecommerceWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceWeightLimit);
+
+            decimal weightLimit = decimal.Parse(ecommerceWeightLimitObj.Value);
+
+            decimal PackagePrice;
+
+            if (pricingDto.Weight > weightLimit)
+            {
+                PackagePrice = await GetEcommercePriceOverflow(pricingDto.Weight, weightLimit, zone.ZoneId);
+            }
+            else
+            {
+                PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Ecommerce);
+            }
+
+            return PackagePrice + deliveryOptionPrice;
+        }
+
     }
 }
