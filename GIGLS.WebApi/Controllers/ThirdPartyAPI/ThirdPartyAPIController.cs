@@ -348,21 +348,21 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         /// </summary>
         /// <param name="thirdPartyPricingDto"></param>
         /// <returns></returns>
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpPost]
-        [Route("previousprice")]
-        public async Task<IServiceResponse<decimal>> GetPrice(ThirdPartyPricingDTO thirdPartyPricingDto)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var price = await _thirdPartyAPIService.GetPrice2(thirdPartyPricingDto);
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpPost]
+        //[Route("previousprice")]
+        //public async Task<IServiceResponse<decimal>> GetPrice(ThirdPartyPricingDTO thirdPartyPricingDto)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var price = await _thirdPartyAPIService.GetPrice2(thirdPartyPricingDto);
 
-                return new ServiceResponse<decimal>
-                {
-                    Object = price
-                };
-            });
-        }
+        //        return new ServiceResponse<decimal>
+        //        {
+        //            Object = price
+        //        };
+        //    });
+        //}
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("price")]
@@ -394,20 +394,20 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         /// </summary>
         /// <param name="thirdPartyPreShipmentDTO"></param>
         /// <returns></returns>
-        [ThirdPartyActivityAuthorize(Activity = "Create")]
-        [HttpPost]
-        [Route("previouscaptureshipment")]
-        public async Task<IServiceResponse<bool>> AddPreShipment(ThirdPartyPreShipmentDTO thirdPartyPreShipmentDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var shipment = await _thirdPartyAPIService.AddPreShipment(thirdPartyPreShipmentDTO);
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
+        //[ThirdPartyActivityAuthorize(Activity = "Create")]
+        //[HttpPost]
+        //[Route("previouscaptureshipment")]
+        //public async Task<IServiceResponse<bool>> AddPreShipment(ThirdPartyPreShipmentDTO thirdPartyPreShipmentDTO)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var shipment = await _thirdPartyAPIService.AddPreShipment(thirdPartyPreShipmentDTO);
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Object = true
+        //        };
+        //    });
+        //}
 
         [ThirdPartyActivityAuthorize(Activity = "Create")]
         [HttpPost]
