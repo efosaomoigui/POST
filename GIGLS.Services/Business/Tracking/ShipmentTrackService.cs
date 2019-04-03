@@ -175,11 +175,23 @@ namespace GIGLS.Services.Business.Tracking
                     strArray[2] = shipmentTrackingDTO.DepartureServiceCentre.Name;
                 }
 
-                //3. {3} - Destination Service Centre
+                //3. {3} - Destination Service Centre (REROUTE)
                 if (shipmentTrackingDTO.ScanStatus.Incident.Contains("{3}"))
                 {
                     //map the array
                     strArray[3] = shipmentTrackingDTO.DestinationServiceCentre.Name;
+
+                    //check ShipmentReroute for waybill
+                    var shipmentReroute = await _uow.ShipmentReroute.GetAsync(s => s.WaybillOld == shipmentTrackingDTO.Waybill);
+                    if(shipmentReroute != null)
+                    {
+                        //get the Rerouted Shipment information
+                        var currentShipmentInfo = await _uow.Shipment.GetAsync(s => s.Waybill == shipmentReroute.WaybillNew);
+                        var destinationServiceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == currentShipmentInfo.DestinationServiceCentreId);
+
+                        //map the array
+                        strArray[3] = destinationServiceCentre.Name;
+                    }
                 }
 
                 //populate the Incident message
