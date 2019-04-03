@@ -547,6 +547,10 @@ namespace GIGLS.Services.Implementation.Shipments
             await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
             await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
 
+            //Get SuperCentre for Home Delivery
+            var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
+            shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
+
             // get deliveryOptionIds and set the first value in shipment
             var deliveryOptionIds = shipmentDTO.DeliveryOptionIds;
             if (deliveryOptionIds.Count > 0)
