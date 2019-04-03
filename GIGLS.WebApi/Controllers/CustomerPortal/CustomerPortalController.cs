@@ -908,8 +908,9 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("VerifyPaystackPayment")]
         public async Task<IServiceResponse<PaymentResponse>> VerifyMobilePayment(WalletPaymentLogDTO walletPaymentLogDTO)
         {
-            var walletPaymentLog = await _portalService.AddWalletPaymentLog(walletPaymentLogDTO);
+            
             var result = await _paymentService.VerifyAndValidateWallet(walletPaymentLogDTO.Reference);
+            var walletPaymentLog = await _portalService.AddWalletPaymentLog(walletPaymentLogDTO);
             return new ServiceResponse<PaymentResponse>
             {
                 Object = result

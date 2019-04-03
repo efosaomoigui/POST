@@ -350,6 +350,8 @@
     <Compile Include="DTO\Shipments\ShipmentRerouteDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentReturnDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentTrackingDTO.cs" />
+    <Compile Include="DTO\Shipments\ThirdPartyShipmentDTO.cs" />
+    <Compile Include="DTO\Shipments\ThirdPartyShipmentItemsDTO.cs" />
     <Compile Include="DTO\Shipments\TransitWaybillNumberDTO.cs" />
     <Compile Include="DTO\Shipments\WaybillNumberDTO.cs" />
     <Compile Include="DTO\SignResponseDTO.cs" />
