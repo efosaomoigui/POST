@@ -289,9 +289,12 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<WalletDTO> GetWalletByCustomerCode(string CustomerCode)
         {
-            var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
-                    s => s.CustomerCode == CustomerCode);
-            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerId.Equals(individualCustomerDTO.IndividualCustomerId));
+            
+            var individualCustomerDTO = await _uow.User.GetUserByChannelCode(CustomerCode);
+            
+           var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(individualCustomerDTO.UserChannelCode));
+            
+            
             var walletDTO = Mapper.Map<WalletDTO>(wallet);
             if (wallet == null)
             {
