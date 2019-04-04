@@ -143,11 +143,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<PreShipmentMobileDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
-            var user = await _userService.GetUserByChannelCode(preShipment.CustomerCode);
+            var user = await _userService.GetUserById(preShipment.UserId);
             var Price = 0.0M;
             decimal DeclaredValue = 0.0M;
             foreach (var preShipmentItem in preShipment.PreShipmentItems)
             {
+                preShipmentItem.Weight = (preShipmentItem.Quantity * preShipmentItem.Weight);
                 var PriceDTO = new PricingDTO
                 {
                     DepartureStationId = preShipment.SenderStationId,
