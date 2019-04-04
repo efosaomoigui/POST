@@ -148,6 +148,7 @@ namespace GIGLS.Services.Implementation.Shipments
             decimal DeclaredValue = 0.0M;
             foreach (var preShipmentItem in preShipment.PreShipmentItems)
             {
+                preShipmentItem.Weight = (preShipmentItem.Quantity * preShipmentItem.Weight);
                 var PriceDTO = new PricingDTO
                 {
                     DepartureStationId = preShipment.SenderStationId,
