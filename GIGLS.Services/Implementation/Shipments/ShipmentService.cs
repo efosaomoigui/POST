@@ -548,8 +548,11 @@ namespace GIGLS.Services.Implementation.Shipments
             await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
 
             //Get SuperCentre for Home Delivery
-            var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
-            shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
+            if(shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
+            {
+                var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
+                shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
+            }
 
             // get deliveryOptionIds and set the first value in shipment
             var deliveryOptionIds = shipmentDTO.DeliveryOptionIds;
