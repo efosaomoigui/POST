@@ -228,6 +228,7 @@
     <Compile Include="Domain\SubSubNav.cs" />
     <Compile Include="Domain\TransitWaybillNumber.cs" />
     <Compile Include="Domain\User.cs" />
+    <Compile Include="Domain\UserLoginEmail.cs" />
     <Compile Include="Domain\UserServiceCentreMapping.cs" />
     <Compile Include="Domain\Utility\GlobalProperty.cs" />
     <Compile Include="Domain\VAT.cs" />
@@ -482,6 +483,7 @@
     <Compile Include="IRepositories\IRepository.cs" />
     <Compile Include="IRepositories\IStateRepository.cs" />
     <Compile Include="IRepositories\IUnitOfWork.cs" />
+    <Compile Include="IRepositories\IUserLoginEmailRepository.cs" />
     <Compile Include="IRepositories\JobCards\IJobCardManagementPartRepository.cs" />
     <Compile Include="IRepositories\JobCards\IJobCardManagementRepository.cs" />
     <Compile Include="IRepositories\JobCards\IJobCardRepository.cs" />
