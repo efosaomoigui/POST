@@ -1,21 +1,20 @@
-﻿using GIGLS.Core.Enums;
+﻿using GIGLS.Core;
+using GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.User;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IMessage;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.Customers;
+using GIGLS.Core.IServices.MessagingLog;
+using GIGLS.Core.IServices.Utility;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core;
-using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.IServices.Account;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.IServices.MessagingLog;
-using GIGLS.Core.DTO.MessagingLog;
 using System.Web;
-using GIGLS.Core.DTO.User;
-using System.Collections.Generic;
 
 namespace GIGLS.Services.Implementation.Messaging
 {
@@ -425,20 +424,18 @@ namespace GIGLS.Services.Implementation.Messaging
                 int.TryParse(globalPropertyForEmailSendIntervalObj.Value, out globalPropertyForEmailSendInterval);
             }
 
-            //2. check the In-memory dictionary object if the email has been sent
-            Dictionary<string, UserLoginEmailDTO> userLoginEmailDictionary = GetUserLoginEmailDictionaryFromCache();
-
-            UserLoginEmailDTO userLoginEmailDTO = null;
-            if (userLoginEmailDictionary.TryGetValue(email, out userLoginEmailDTO))
+            //get info from the database
+            var userLoginEmail = await _uow.UserLoginEmail.GetUserLoginEmailByEmail(email);
+            if (userLoginEmail != null)
             {
                 var currentTime = DateTime.Now;
-                var dateLastSent = userLoginEmailDTO.DateLastSent;
+                var dateLastSent = userLoginEmail.DateLastSent;
                 var nextTimeToBeSent = dateLastSent.AddMinutes(globalPropertyForEmailSendInterval);
                 if (currentTime.CompareTo(nextTimeToBeSent) > 0)
                 {
                     //update time
-                    userLoginEmailDTO.DateLastSent = currentTime;
-                    userLoginEmailDTO.NumberOfEmailsSent = userLoginEmailDTO.NumberOfEmailsSent + 1;
+                    userLoginEmail.DateLastSent = currentTime;
+                    userLoginEmail.NumberOfEmailsSent = userLoginEmail.NumberOfEmailsSent + 1;
                     verifySendEmail = true;
                 }
                 else
@@ -448,30 +445,19 @@ namespace GIGLS.Services.Implementation.Messaging
             }
             else
             {
-                //add this user
-                userLoginEmailDTO = new UserLoginEmailDTO()
+                //add this userLoginEmail
+                userLoginEmail = new UserLoginEmail()
                 {
                     Email = email,
                     DateCreated = DateTime.Now,
                     DateLastSent = DateTime.Now,
                     NumberOfEmailsSent = 1
                 };
-                userLoginEmailDictionary.Add(email, userLoginEmailDTO);
+                _uow.UserLoginEmail.Add(userLoginEmail);
             }
+            await _uow.CompleteAsync();
 
             return await Task.FromResult(verifySendEmail);
-        }
-
-        private Dictionary<string, UserLoginEmailDTO> GetUserLoginEmailDictionaryFromCache()
-        {
-            if (System.Web.HttpRuntime.Cache[nameof(UserLoginEmailDTO)] == null)
-            {
-                //In-memory object that holds the records of emails sent and at what interval
-                System.Web.HttpRuntime.Cache[nameof(UserLoginEmailDTO)] = new Dictionary<string, UserLoginEmailDTO>();
-            }
-
-            var result = (Dictionary<string, UserLoginEmailDTO>)System.Web.HttpRuntime.Cache[nameof(UserLoginEmailDTO)];
-            return result;
         }
     }
 }
