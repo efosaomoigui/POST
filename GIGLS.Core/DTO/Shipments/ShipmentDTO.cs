@@ -114,5 +114,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string Description { get; set; }
 
         public int DepositStatus { get; set; }
+
+        public bool ReprintCounterStatus { get; set; }
     }
 }

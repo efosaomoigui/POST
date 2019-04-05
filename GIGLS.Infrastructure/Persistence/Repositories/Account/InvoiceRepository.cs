@@ -248,7 +248,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               DeliveryOptionId = s.DeliveryOptionId,
                               DepositStatus = s.DepositStatus,
                               PaymentMethod = i.PaymentMethod,
-                              CashOnDeliveryAmount = s.CashOnDeliveryAmount
+                              CashOnDeliveryAmount = s.CashOnDeliveryAmount,
+                              ReprintCounterStatus = s.ReprintCounterStatus
                           });
             return result;
         }

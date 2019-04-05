@@ -348,6 +348,7 @@
     <Compile Include="Controllers\Shipments\PreShipmentManifestMappingController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentCancelController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentCollectionController.cs" />
+    <Compile Include="Controllers\Shipments\ForWebJobsController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentDeliveryOptionMappingController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentPackagePriceController.cs" />

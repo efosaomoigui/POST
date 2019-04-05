@@ -93,5 +93,7 @@ namespace GIGLS.Core.View
         public string LastName { get; set; }
 
         public DepositStatus DepositStatus { get; set; }
+
+        public bool ReprintCounterStatus { get; set; }
     }
 }

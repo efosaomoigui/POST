@@ -43,5 +43,7 @@ namespace GIGLS.Core.IServices.Shipments
 
         Task<List<ServiceCentreDTO>> GetAllWarehouseServiceCenters();
         Task<DailySalesDTO> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria);
+
+        Task<bool> RePrintCountUpdater();
     }
 }
