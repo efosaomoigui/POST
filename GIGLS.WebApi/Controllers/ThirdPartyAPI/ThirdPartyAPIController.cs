@@ -580,5 +580,31 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+
+        /// <summary>
+        /// This api is used to get shipments created by user
+        /// </summary>
+        /// <description>This api is used to get shipments by user</description>
+        /// <param name="userid"></param>
+        /// <returns></returns>
+
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("PickUpRequests/{userid}")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> ViewShipment(string userid)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var PreshipMentMobile = await _thirdPartyAPIService.GetPreShipmentById(userid);
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = PreshipMentMobile,
+                };
+            });
+        }
+
+
+
+
     }
 }

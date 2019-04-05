@@ -96,7 +96,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpPost]
         [Route("addwalletpaymentlog")]
         public async Task<IServiceResponse<object>> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO)
@@ -143,20 +143,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet]
         [Route("verifypayment/{referenceCode}")]
         public async Task<IServiceResponse<PaymentResponse>> VerifyAndValidateWallet(string referenceCode)
         {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var result = await _paymentService.VerifyAndValidateWallet(referenceCode);
+            //return await HandleApiOperationAsync(async () =>
+            //{
+             var result = await _paymentService.VerifyAndValidateWallet(referenceCode);
 
                 return new ServiceResponse<PaymentResponse>
                 {
                     Object = result
                 };
-            });
+            //});
         }
 
         [Authorize]
@@ -905,15 +905,15 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpGet]
-        [Route("VerifyPaystackPayment")]
-        public async Task<IServiceResponse<PaymentResponse>> VerifyMobilePayment(WalletPaymentLogDTO walletPaymentLogDTO)
+        [Route("VerifyPaystackPayment/{reference}/{UserId}")]
+        public async Task<IServiceResponse<PaystackWebhookDTO>> VerifyMobilePayment(string reference, string UserId)
         {
             
-            var result = await _paymentService.VerifyAndValidateWallet(walletPaymentLogDTO.Reference);
-            var walletPaymentLog = await _portalService.AddWalletPaymentLog(walletPaymentLogDTO);
-            return new ServiceResponse<PaymentResponse>
+           var walletPaymentLog = await _paymentService.VerifyPaymentMobile(reference, UserId);
+            return new ServiceResponse<PaystackWebhookDTO>
             {
-                Object = result
+                
+                Object = walletPaymentLog
             };
         }
 
