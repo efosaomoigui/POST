@@ -262,6 +262,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 paymentLog.PaystackAmount = Convert.ToInt32(paymentLog.Amount);
                 paymentLog.Email = user.Email;
                 paymentLog.Reference = ResponseModel.data.Reference;
+                paymentLog.UserId = user.Id;
                 transaction.WalletId = paymentLog.WalletId;
                 transaction.Amount = paymentLog.Amount;
                 transaction.CreditDebitType = CreditDebitType.Credit;
