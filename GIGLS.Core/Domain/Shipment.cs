@@ -58,6 +58,7 @@ namespace GIGL.GIGLS.Core.Domain
 
         //Shipment Items
         public virtual List<ShipmentItem> ShipmentItems { get; set; }
+        public double ApproximateItemsWeight { get; set; }
 
         public decimal GrandTotal { get; set; }
 

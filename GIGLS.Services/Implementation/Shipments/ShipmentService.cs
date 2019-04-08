@@ -586,11 +586,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 newShipment.DeclarationOfValueCheck = null;
             }
 
+            newShipment.ApproximateItemsWeight = 0;
+
             // add serial numbers to the ShipmentItems
             var serialNumber = 1;
             foreach (var shipmentItem in newShipment.ShipmentItems)
             {
                 shipmentItem.SerialNumber = serialNumber;
+
+                //sum item weight
+                newShipment.ApproximateItemsWeight += shipmentItem.Weight;
+
                 serialNumber++;
             }
 

@@ -33,6 +33,7 @@ namespace GIGLS.Core.DTO.Account
         public bool IsCancelled { get; set; }
         public decimal ShipmentPackagePrice { get; set; }
         public bool IsInternational { get; set; }
+        public double ApproximateItemsWeight { get; set; }
 
         //Customer Information
         public int CustomerId { get; set; }

@@ -57,6 +57,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         //Shipment Items
         public List<ShipmentItemDTO> ShipmentItems { get; set; }
+        public double ApproximateItemsWeight { get; set; }
 
         public decimal GrandTotal { get; set; }
 
