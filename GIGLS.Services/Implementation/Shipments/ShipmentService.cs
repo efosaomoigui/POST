@@ -595,7 +595,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentItem.SerialNumber = serialNumber;
 
                 //sum item weight
-                newShipment.ApproximateItemsWeight += shipmentItem.Weight;
+                //check for volumetric weight
+                if (shipmentItem.IsVolumetric)
+                {
+                    double volume = (shipmentItem.Length * shipmentItem.Height * shipmentItem.Width) / 5000;
+                    double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
+
+                    newShipment.ApproximateItemsWeight += Weight;
+                }
+                else
+                {
+                    newShipment.ApproximateItemsWeight += shipmentItem.Weight;
+                }                
 
                 serialNumber++;
             }
