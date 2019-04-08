@@ -99,5 +99,7 @@ namespace GIGL.GIGLS.Core.Domain
         public string Description { get; set; }
 
         public DepositStatus DepositStatus { get; set; }
+
+        public bool ReprintCounterStatus { get; set; }
     }
 }

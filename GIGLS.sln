@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GIGLS.WebApi", "GIGLS.WebApi\GIGLS.WebApi.csproj", "{34F0A9AD-90CD-4E09-9034-10A5F730F85A}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GIGLS.Services", "GIGLS.Services\GIGLS.Services.csproj", "{3E97DED8-8A27-4B97-B8A9-FC3511550D91}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReminderJobs", "ReminderJobs\ReminderJobs.csproj", "{494B05BC-FC71-4B14-8E24-8359C45AD74C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebJobEngine", "WebJobEngine\WebJobEngine.csproj", "{1EE6393A-7D4E-4418-A8CE-302788DD4408}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,8 +47,15 @@ Global
 		{494B05BC-FC71-4B14-8E24-8359C45AD74C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{494B05BC-FC71-4B14-8E24-8359C45AD74C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{494B05BC-FC71-4B14-8E24-8359C45AD74C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EE6393A-7D4E-4418-A8CE-302788DD4408}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EE6393A-7D4E-4418-A8CE-302788DD4408}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EE6393A-7D4E-4418-A8CE-302788DD4408}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EE6393A-7D4E-4418-A8CE-302788DD4408}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {65A97F4B-8506-4B55-80AC-C7FC750CDC28}
 	EndGlobalSection
 EndGlobal
