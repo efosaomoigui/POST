@@ -36,7 +36,7 @@ using GIGLS.Core.IServices.Business;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
-   
+     [Authorize]
     [RoutePrefix("api/portal")]
     public class CustomerPortalController : BaseWebApiController
     {
@@ -65,7 +65,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             _walletTransactionService = walletTransactionService;
         }
 
-        [Authorize]
+       //[Authorize]
         [HttpPost]
         [Route("transaction")]
         public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
@@ -81,7 +81,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpPut]
         [Route("wallet/{walletId:int}")]
         public async Task<IServiceResponse<object>> UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)

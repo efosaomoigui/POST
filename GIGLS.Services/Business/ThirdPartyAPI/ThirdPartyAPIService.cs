@@ -46,6 +46,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IPreShipmentMobileService _preshipmentMobileService;
         private readonly IWalletService _walletService;
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
+        
 
         public ThirdPartyAPIService(IUnitOfWork uow, IPreShipmentService preShipmentService, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService, 
@@ -369,7 +370,13 @@ namespace GIGLS.Services.Business.CustomerPortal
             var preshipmentDto = await _preshipmentMobileService.AddPreShipmentMobile(PreshipmentPriceDTO);
             return preshipmentDto;
         }
+        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentById(string userid)
+        {
+            // get the current user info
+            var preshipmentDto = await _preshipmentMobileService.GetPreShipmentForUser(userid);
+            return preshipmentDto;
+        }
 
-        
+
     }
 }
