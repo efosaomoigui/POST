@@ -12,6 +12,15 @@ using GIGLS.Core.DTO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Formatting;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using System.Configuration;
 using Newtonsoft.Json.Linq;
 
@@ -21,51 +30,31 @@ namespace ReminderJobs
     {
 
         //Job to remind about due invoices
-        public async static void InvoiceReminderJob( string message, TextWriter log)
+        public async static Task<JObject> ReminderJob(string message, TextWriter log, string method, string apiurlsegment)
         {
+            string apiBaseUri1 = ConfigurationManager.AppSettings["WebApiUrl"];
+            var apiurl = apiBaseUri1 + apiurlsegment;
 
-            JObject invoiceview = null;
+            WebRequest requestObject = WebRequest.Create(apiurl);
+            requestObject.Method = method;
+            HttpWebResponse response = (HttpWebResponse)requestObject.GetResponse();
+            string result = "";
 
-            //make a call to the reminder invoices services to collect all close to due invoices
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri("http://localhost/giglsresourceapi/api/reminderinvoices");
-
-            // Add an Accept header for JSON format.
-            client.DefaultRequestHeaders.Accept.Add(
-            new MediaTypeWithQualityHeaderValue("application/json"));
-
-            var urlParameters = "";
-
-            // List data response.
-            HttpResponseMessage response = client.GetAsync(urlParameters).Result;
-            JToken invoices = null;
-
-
-            if (response.IsSuccessStatusCode)
+            using (Stream stream = response.GetResponseStream())
             {
-                // Parse the response body.
-                var responseJson = await response.Content.ReadAsStringAsync();
-                invoiceview = JObject.Parse(responseJson);
-                invoices = invoiceview.GetValue("Object");
+                StreamReader sr = new StreamReader(stream);
+                result = sr.ReadToEnd();
+                sr.Close();
             }
-
-
-            //create email obj for sending the messages
-            EmailService _emailservice = new EmailService();
-            int countmessages = 0;
-
-            foreach (var invoice in invoices)
-            {
-                //prepare the message for reminder
-                MessageDTO messageDto = new MessageDTO();
-                await _emailservice.SendAsync(messageDto);
-                countmessages += countmessages;
-            }
+            var jObject = JObject.Parse(result);
 
             //var invoiceTuple = _invoiceservice.GetInvoices(filterOptionsDto);
-            log.WriteLine("Sent a total number of "+ countmessages + " messages");
-        }
+            log.WriteLine("Operation done successfully");
 
+            return jObject;
+
+        }
+        
 
         //Job to remind about wallet balances
         public static void WalletReminderJob(string message, TextWriter log) 

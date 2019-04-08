@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>GIGLS.WebApi</name>
+    </assembly>
+    <members>
+        <member name="M:GIGLS.WebApi.App_Start.NinjectWebCommon.Start">
+            <summary>
+            Starts the application
+            </summary>
+        </member>
+        <member name="M:GIGLS.WebApi.App_Start.NinjectWebCommon.Stop">
+            <summary>
+            Stops the application.
+            </summary>
+        </member>
+        <member name="M:GIGLS.WebApi.App_Start.NinjectWebCommon.CreateKernel">
+            <summary>
+            Creates the kernel that will manage your application.
+            </summary>
+            <returns>The created kernel.</returns>
+        </member>
+        <member name="M:GIGLS.WebApi.App_Start.NinjectWebCommon.RegisterServices(Ninject.IKernel)">
+            <summary>
+            Load your modules or register your services here!
+            </summary>
+            <param name="kernel">The kernel.</param>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetPrice(GIGLS.Core.DTO.Shipments.PreShipmentMobileDTO)">
+            <summary>
+            This api is used to get the price for Shipment Items
+            </summary>
+            <param name="thirdPartyPricingDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.CreateShipment(GIGLS.Core.DTO.Shipments.PreShipmentMobileDTO)">
+            <summary>
+            This api is used to register a shipment
+            </summary>
+            <param name="thirdPartyPreShipmentDTO"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.TrackShipment(System.String)">
+            <summary>
+            This api is used to track shipment created by the user
+            </summary>
+            <param name="waybillNumber"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.PublicTrackShipment(System.String)">
+            <summary>
+            This api is used to track all shipments
+            </summary>
+            <param name="waybillNumber"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetLocalStations">
+            <summary>
+            This api is used to get all local stations
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetInternationalStations">
+            <summary>
+            This api is used to get all international stations
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.Login(EfeAuthen.Models.UserloginDetailsModel)">
+            <summary>
+            This api is used to login and acquire token for subsequent calls
+            </summary>
+            <description>This api is used to login and acquire token for subsequent calls</description>
+            <param name="userLoginModel"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

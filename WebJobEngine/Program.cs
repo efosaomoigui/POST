@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -13,35 +14,28 @@ namespace WebJobEngine
     {
         public static void Main(string[] args)
         {
-            callReprintJob();
+            callReprintJob("GET", "api/webjobs/runreprintexpirycounter");
         }
 
-        private async static Task<JObject> callReprintJob()
+        private async static Task<JObject> callReprintJob(string method, string apiurlsegment)
         {
-            string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
-            apiBaseUri = apiBaseUri + "api/webjobs/runreprintexpirycounter";
+            string apiBaseUri1 = ConfigurationManager.AppSettings["WebApiUrl"];
+            var apiurl = apiBaseUri1 + apiurlsegment;
 
-            using (var client = new HttpClient())
+            WebRequest requestObject = WebRequest.Create(apiurl);
+            requestObject.Method = method;
+            HttpWebResponse response = (HttpWebResponse)requestObject.GetResponse();
+            string result = "";
+
+            using (Stream stream = response.GetResponseStream())
             {
-                //setup client
-                client.BaseAddress = new Uri(apiBaseUri);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-
-                //call the api for run
-                HttpResponseMessage responseMessage = await client.GetAsync(apiBaseUri);
-
-                if (!responseMessage.IsSuccessStatusCode)
-                {
-                    throw new Exception("There are bugs that require fixes in your code:");
-                }
-
-                //get access token from response body
-                var responseJson = responseMessage.Content.ReadAsStringAsync();
-                var jObject = JObject.Parse(responseJson.ToString());
-
-                return jObject;
+                StreamReader sr = new StreamReader(stream);
+                result = sr.ReadToEnd();
+                sr.Close();
             }
+            var jObject = JObject.Parse(result);
+            return jObject;
+
         }
     }
 }

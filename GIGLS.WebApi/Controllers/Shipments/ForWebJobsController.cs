@@ -7,7 +7,6 @@ using GIGLS.CORE.IServices.Report;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
-    [AllowAnonymous]
     [RoutePrefix("api/webjobs")]
     public class ForWebJobsController : BaseWebApiController
     {
@@ -20,7 +19,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
             _reportService = reportService;
         }
 
-        [AllowAnonymous]
         [HttpGet]
         [Route("runreprintexpirycounter")] 
         public async Task<IServiceResponse<bool>> RunReprintExpiryCounter() 

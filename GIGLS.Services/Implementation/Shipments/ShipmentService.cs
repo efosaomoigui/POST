@@ -469,7 +469,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //============================================================================
 
-                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                //var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var shipments = _uow.Shipment.GetAllAsQueryable().Where(s => s.ReprintCounterStatus == false && s.DateCreated >= globalpropertiesreprintdate).ToList();
                 var today = DateTime.Now;
 
@@ -478,7 +478,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 foreach (var shipment in shipments)
                 {
                     var creationDate = shipment.DateCreated;
-                    int daysDiff = ((TimeSpan)(creationDate - today)).Days;
+                    int daysDiff = ((TimeSpan)(today- creationDate)).Days;
 
                     if (daysDiff >= globalpropertiesreprintcounter)
                     {
@@ -493,7 +493,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
         }
 

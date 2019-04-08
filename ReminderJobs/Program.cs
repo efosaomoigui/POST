@@ -16,7 +16,7 @@ namespace ReminderJobs
         {
             while (true)
             {
-                Functions.InvoiceReminderJob("Testing jobs for real", Console.Out);
+                Functions.ReminderJob("Testing jobs for real", Console.Out, "GET", "api/webjobs/runreprintexpirycounter");
             }
         }
     }
