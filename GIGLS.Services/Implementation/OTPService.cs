@@ -41,8 +41,7 @@ namespace GIGLS.Services.Implementation
             
             return userdto;
         }
-
-       
+               
         public  async Task<OTPDTO> GenerateOTP(UserDTO user)
         {
                int id = GeneratePassword();

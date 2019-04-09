@@ -146,25 +146,21 @@ namespace GIGLS.Services.Implementation.Wallet
             await _uow.CompleteAsync();
         }
 
-        public async Task<WalletTransactionSummaryDTO> GetWalletTransactionByWalletForMobileId(int walletId)
+        private async Task<WalletTransactionSummaryDTO> GetWalletTransactionByWalletIdForMobile(WalletDTO wallet)
         {
-            // get the wallet owner information
-            var wallet = await _walletService.GetWalletById(walletId);
-
             //get the customer info
             var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
 
-            var walletTransactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == walletId);
+            var walletTransactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == wallet.WalletId);
             if (walletTransactions.Count() < 1)
             {
-                //throw new GenericException("Wallet Transaction information does not exist");
                 return new WalletTransactionSummaryDTO
                 {
                     WalletTransactions = new List<WalletTransactionDTO>(),
                     WalletNumber = wallet.WalletNumber,
                     WalletBalance = wallet.Balance,
                     WalletOwnerName = customerDTO.CustomerName,
-                    WalletId = walletId
+                    WalletId = wallet.WalletId
                 };
             }
             var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(s => s.DateCreated));
@@ -175,9 +171,15 @@ namespace GIGLS.Services.Implementation.Wallet
                 WalletNumber = wallet.WalletNumber,
                 WalletBalance = wallet.Balance,
                 WalletOwnerName = customerDTO.CustomerName,
-                WalletId = walletId
+                WalletId = wallet.WalletId
             };
         }
 
+        public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile()
+        {
+            var currentUser = await _userService.GetCurrentUserId();
+            var wallet = await _walletService.GetWalletByUserId(currentUser);
+            return await GetWalletTransactionByWalletIdForMobile(wallet);
+        }
     }
 }
