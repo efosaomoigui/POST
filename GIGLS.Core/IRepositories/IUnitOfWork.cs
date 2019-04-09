@@ -140,6 +140,10 @@ namespace GIGLS.Core
 
         IPreShipmentItemMobileRepository PreShipmentItemMobile { get; set; }
 
+        IUserLoginEmailRepository UserLoginEmail { get; set; }
+        
+
+
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
     }

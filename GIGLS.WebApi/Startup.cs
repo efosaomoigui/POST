@@ -25,7 +25,6 @@ namespace GIGLS.WebApi
             HttpConfiguration config = new HttpConfiguration();
 
             ConfigureAuth(app);
-
             ConfigureOAuthTokenConsumption(app);
 
             //ConfigureWebApi(config);

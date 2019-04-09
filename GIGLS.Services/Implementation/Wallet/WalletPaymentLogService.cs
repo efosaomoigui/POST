@@ -122,6 +122,14 @@ namespace GIGLS.Services.Implementation.Wallet
             walletPaymentLogDto.TransactionResponse = walletPaymentLogDto.TransactionResponse;
             await _uow.CompleteAsync();
         }
+        public async Task AddWalletPaymentLogMobile(WalletPaymentLogDTO walletPaymentLogDto)
+        {
+            var walletPaymentLog = Mapper.Map<WalletPaymentLog>(walletPaymentLogDto);
+            walletPaymentLog.Wallet = null;
+            _uow.WalletPaymentLog.Add(walletPaymentLog);
+            await _uow.CompleteAsync();
+
+        }
     }
 
 }

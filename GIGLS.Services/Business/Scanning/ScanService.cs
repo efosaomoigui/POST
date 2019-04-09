@@ -73,6 +73,23 @@ namespace GIGLS.Services.Business.Scanning
             }
             var shipment = await _shipmentService.GetShipmentForScan(scan.WaybillNumber);
 
+
+            //check if the waybill has not been scan for (AHK) shipment collecte or Delivered status before
+            //var checkShipmentCollectionTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, ShipmentScanStatus.AHD.ToString());
+            //if (checkShipmentCollectionTrack.Equals(false))
+            //{   
+            //    throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already collected, no further scan is required!");
+
+            //}
+
+            //check if the waybill has not been scan for (AHK) shipment collecte or Delivered status before
+            var shipmentCollected = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(scan.WaybillNumber) && (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC));
+
+            if (shipmentCollected != null)
+            {
+                throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already collected, no further scan is required!");
+            }
+
             string scanStatus = scan.ShipmentScanStatus.ToString();
 
             /////////////////////////1. Shipment

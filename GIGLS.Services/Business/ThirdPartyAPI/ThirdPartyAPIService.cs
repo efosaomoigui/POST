@@ -27,6 +27,8 @@ using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.IServices.ThirdPartyAPI;
 using System;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -41,11 +43,15 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ICashOnDeliveryAccountService _iCashOnDeliveryAccountService;
         private readonly IPricingService _pricing;
         private readonly ICustomerService _customerService;
+        private readonly IPreShipmentMobileService _preshipmentMobileService;
+        private readonly IWalletService _walletService;
+        private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
+        
 
         public ThirdPartyAPIService(IUnitOfWork uow, IPreShipmentService preShipmentService, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService, 
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService,
-            ICustomerService customerService)
+            ICustomerService customerService, IPreShipmentMobileService preshipmentMobileService, IWalletService walletService, INumberGeneratorMonitorService numberGeneratorMonitorService)
         {
             _preShipmentService = preShipmentService;
             _invoiceService = invoiceService;
@@ -56,11 +62,14 @@ namespace GIGLS.Services.Business.CustomerPortal
             _pricing = pricingService;
             _customerService = customerService;
             _uow = uow;
+            _preshipmentMobileService = preshipmentMobileService;
+            _walletService = walletService;
+            _numberGeneratorMonitorService = numberGeneratorMonitorService;
             MapperConfig.Initialize();
         }
 
         //Price API
-        public async Task<decimal> GetPrice(ThirdPartyPricingDTO thirdPartyPricingDto)
+        public async Task<decimal> GetPrice2(ThirdPartyPricingDTO thirdPartyPricingDto)
         {
             //service centres from station
             var departureServiceCentre = _uow.ServiceCentre.GetAll().Where(s => s.StationId == thirdPartyPricingDto.DepartureStationId).ToList().FirstOrDefault();
@@ -87,6 +96,14 @@ namespace GIGLS.Services.Business.CustomerPortal
             };
 
             return await _pricing.GetPrice(newPricingDTO);
+        }
+
+
+        public async Task<PreShipmentMobileDTO> GetPrice(PreShipmentMobileDTO preShipment)
+        {
+            var PreShipment = await _preshipmentMobileService.GetPrice(preShipment);
+            return PreShipment;
+
         }
 
         public async Task<decimal> GetHaulagePrice(HaulagePricingDTO haulagePricingDto)
@@ -345,5 +362,21 @@ namespace GIGLS.Services.Business.CustomerPortal
             var internationalStations = await _uow.Station.GetInternationalStations();
             return internationalStations.OrderBy(x => x.StationName).ToList();
         }
+
+        public async Task<PreShipmentMobileDTO> CreatePreShipment(PreShipmentMobileDTO preShipmentDTO)
+        {
+            // get the current user info
+            var PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
+            var preshipmentDto = await _preshipmentMobileService.AddPreShipmentMobile(PreshipmentPriceDTO);
+            return preshipmentDto;
+        }
+        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentById(string userid)
+        {
+            // get the current user info
+            var preshipmentDto = await _preshipmentMobileService.GetPreShipmentForUser(userid);
+            return preshipmentDto;
+        }
+
+
     }
 }

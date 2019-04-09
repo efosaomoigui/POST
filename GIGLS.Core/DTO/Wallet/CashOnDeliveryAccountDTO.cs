@@ -29,6 +29,7 @@ namespace GIGLS.Core.DTO.Wallet
         public PaymentType PaymentType { get; set; }
         public DepositStatus DepositStatus { get; set; }
         public string RefCode { get; set; }
+        public int DepartureServiceCenterId { get; set; }
     }
 
     public class DemurrageRegisterAccountDTO : BaseDomainDTO 

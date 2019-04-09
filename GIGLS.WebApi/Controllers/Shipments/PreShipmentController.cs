@@ -2,6 +2,7 @@
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
@@ -11,15 +12,17 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
-    [Authorize(Roles = "Shipment, ViewAdmin")]
+   [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/preshipment")]
     public class PreShipmentController : BaseWebApiController
     {
         private readonly IPreShipmentService _service;
+        private readonly IPreShipmentMobileService _preShipmentMobileService;
 
-        public PreShipmentController(IPreShipmentService service) : base(nameof(ShipmentController))
+        public PreShipmentController(IPreShipmentService service, IPreShipmentMobileService preShipmentMobileService) : base(nameof(ShipmentController))
         {
             _service = service;
+            _preShipmentMobileService = preShipmentMobileService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -313,6 +316,36 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<IEnumerable<PreShipmentDTO>>
                 {
                     Object = preShipments
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("GetMobileShipments")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetPreShipmentsMobile(BaseFilterCriteria filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+            var preshipmentMobile = await _preShipmentMobileService.GetShipments(filter);
+            return new ServiceResponse<List<PreShipmentMobileDTO>>
+            {
+                Object = preshipmentMobile
+
+            };
+            });
+        }
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("waybill/{waybill}")]
+        public async Task<IServiceResponse<PreShipmentMobileDTO>> GetPreShipmentMobileDetail(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preShipment = await _preShipmentMobileService.GetPreShipmentDetail(waybill);
+                return new ServiceResponse<PreShipmentMobileDTO>
+                {
+                    Object = preShipment
                 };
             });
         }

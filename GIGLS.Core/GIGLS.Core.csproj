@@ -228,6 +228,7 @@
     <Compile Include="Domain\SubSubNav.cs" />
     <Compile Include="Domain\TransitWaybillNumber.cs" />
     <Compile Include="Domain\User.cs" />
+    <Compile Include="Domain\UserLoginEmail.cs" />
     <Compile Include="Domain\UserServiceCentreMapping.cs" />
     <Compile Include="Domain\Utility\GlobalProperty.cs" />
     <Compile Include="Domain\VAT.cs" />
@@ -350,6 +351,8 @@
     <Compile Include="DTO\Shipments\ShipmentRerouteDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentReturnDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentTrackingDTO.cs" />
+    <Compile Include="DTO\Shipments\ThirdPartyShipmentDTO.cs" />
+    <Compile Include="DTO\Shipments\ThirdPartyShipmentItemsDTO.cs" />
     <Compile Include="DTO\Shipments\TransitWaybillNumberDTO.cs" />
     <Compile Include="DTO\Shipments\WaybillNumberDTO.cs" />
     <Compile Include="DTO\SignResponseDTO.cs" />
@@ -482,6 +485,7 @@
     <Compile Include="IRepositories\IRepository.cs" />
     <Compile Include="IRepositories\IStateRepository.cs" />
     <Compile Include="IRepositories\IUnitOfWork.cs" />
+    <Compile Include="IRepositories\IUserLoginEmailRepository.cs" />
     <Compile Include="IRepositories\JobCards\IJobCardManagementPartRepository.cs" />
     <Compile Include="IRepositories\JobCards\IJobCardManagementRepository.cs" />
     <Compile Include="IRepositories\JobCards\IJobCardRepository.cs" />

@@ -7,6 +7,13 @@ using PayStack.Net;
 using GIGLS.Core.DTO.OnlinePayment;
 using System.Configuration;
 using GIGLS.Core.Enums;
+using GIGLS.Core.Domain;
+using System.Net;
+using System;
+using System.IO;
+using Newtonsoft.Json;
+using AutoMapper;
+using GIGLS.Core.Domain.Wallet;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -15,14 +22,19 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUserService _userService;
         private readonly IWalletService _walletService;
         private readonly IUnitOfWork _uow;
+        private readonly IWalletPaymentLogService _walletPaymentLogService;
+        private readonly IWalletTransactionService _transactionService;
+
 
         private string secretKey = ConfigurationManager.AppSettings["PayStackSecret"];
 
-        public PaystackPaymentService(IUserService userService,IWalletService walletService, IUnitOfWork uow)
+        public PaystackPaymentService(IUserService userService,IWalletService walletService, IUnitOfWork uow, IWalletPaymentLogService walletPaymentLogService,
+            IWalletTransactionService transactionService)
         {
             _userService = userService;
             _walletService = walletService;
             _uow = uow;
+            _walletPaymentLogService = walletPaymentLogService;
             MapperConfig.Initialize();
         }
 
@@ -57,6 +69,7 @@ namespace GIGLS.Services.Implementation.Wallet
             await Task.Run(() =>
             {
                 var api = new PayStackApi(secretKey);
+                
 
                 // Verifying a transaction
                 var verifyResponse = api.Transactions.Verify(reference);
@@ -203,6 +216,73 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             return await Task.FromResult(result);
+        }
+
+        public async Task<PaystackWebhookDTO> VerifyPaymentMobile(string reference,string UserId)
+        {
+            PaystackWebhookDTO result = new PaystackWebhookDTO();
+            WalletPaymentLogDTO paymentLog = new WalletPaymentLogDTO();
+            WalletTransactionDTO transaction = new WalletTransactionDTO();
+
+           
+            var baseAddress = "https://api.paystack.co/transaction/verify/" + reference;
+
+            var SecKey = string.Format("Bearer {0}", "sk_test_75eb63768f05426fa4f4c2ae68cd451dc10b4ac4");
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+            var http = (HttpWebRequest)WebRequest.Create(new Uri(baseAddress));
+            http.Headers.Add("Authorization", SecKey);
+            http.Accept = "application/json";
+            http.ContentType = "application/json";
+            http.Method = "GET";
+
+            var response = http.GetResponse();
+            var stream = response.GetResponseStream();
+            var sr = new StreamReader(stream);
+            var content = sr.ReadToEnd();
+            var ResponseModel = JsonConvert.DeserializeObject<PaystackWebhookDTO>(content);
+
+            result.Status = ResponseModel.Status;
+            result.Message = ResponseModel.Message;
+            result.data.Reference = reference;
+
+            if (ResponseModel.data.Status == "success")
+            {
+                var user = await _userService.GetUserById(UserId);
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
+                    
+                result.data.Gateway_Response = ResponseModel.data.Gateway_Response;
+                result.data.Status = ResponseModel.data.Status;
+                result.data.Amount = ResponseModel.data.Amount / 100;
+                paymentLog.Amount = result.data.Amount;
+                paymentLog.TransactionResponse = result.data.Gateway_Response;
+                paymentLog.TransactionStatus = result.data.Status;
+                paymentLog.WalletId = wallet.WalletId;
+                paymentLog.Description = "Wallet Fund";
+                paymentLog.IsWalletCredited = true;
+                paymentLog.PaystackAmount = Convert.ToInt32(paymentLog.Amount);
+                paymentLog.Email = user.Email;
+                paymentLog.Reference = ResponseModel.data.Reference;
+                paymentLog.UserId = user.Id;
+                transaction.WalletId = paymentLog.WalletId;
+                transaction.Amount = paymentLog.Amount;
+                transaction.CreditDebitType = CreditDebitType.Credit;
+                transaction.Description = "Funding made through debit card";
+                transaction.PaymentType = PaymentType.Online;
+                transaction.PaymentTypeReference = paymentLog.Reference;
+                transaction.UserId = user.Id;
+                transaction.ServiceCentreId = 296;
+                transaction.DateOfEntry = DateTime.Now;
+                transaction.IsDeferred = false;
+                var newWalletTransaction = Mapper.Map<WalletTransaction>(transaction);
+                var newPaymentLog = Mapper.Map<WalletPaymentLog>(paymentLog);
+                _uow.WalletTransaction.Add(newWalletTransaction);
+                _uow.WalletPaymentLog.Add(newPaymentLog);
+                wallet.Balance = (wallet.Balance + result.data.Amount);
+                await _uow.CompleteAsync();
+                }
+           
+
+            return result;
         }
     }
 }

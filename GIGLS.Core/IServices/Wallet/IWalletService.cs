@@ -18,6 +18,7 @@ namespace GIGLS.Core.IServices.Wallet
         Task<List<WalletDTO>> SearchForWallets(WalletSearchOption searchOption);
 
         Task<WalletDTO> GetWalletByCustomerCode(string CustomerCode);
+        Task<WalletDTO> GetWalletByUserId(string Userid);
 
     }
 
