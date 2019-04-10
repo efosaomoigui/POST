@@ -188,7 +188,6 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-
                 //get startDate and endDate
                 var queryDate = filterOptionsDto.getStartDateAndEndDate();
                 var startDate = queryDate.Item1;
@@ -271,12 +270,8 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var currentUser = await _userService.GetCurrentUserId();
                 var user = await _uow.User.GetUserById(currentUser);
-                var shipment = await _uow.PreShipmentMobile.FindAsync(x => x.CustomerCode == user.UserChannelCode, "PreShipmentItems");
-                if (shipment == null)
-                {
-                    throw new GenericException($"PreShipment with username: {user.UserName} does not exist");
-                }
-
+                var shipment = await _uow.PreShipmentMobile.FindAsync(x => x.CustomerCode.Equals(user.UserChannelCode), "PreShipmentItems");
+                
                 List<PreShipmentMobileDTO> shipmentDto = (from r in shipment
                                                           select new PreShipmentMobileDTO()
                                                           {

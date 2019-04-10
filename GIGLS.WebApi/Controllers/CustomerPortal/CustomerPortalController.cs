@@ -797,12 +797,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var preshipments = await _preshipmentmobileService.GetPreShipmentForUser();
                 var Transactionhistory = await _walletTransactionService.GetWalletTransactionsForMobile();
+                var preshipments = await _preshipmentmobileService.GetPreShipmentForUser();
+                Transactionhistory.Shipments = preshipments;
                 return new ServiceResponse<WalletTransactionSummaryDTO>
                 {
-                    Object = Transactionhistory,
-                    Shipments = preshipments
+                    Object = Transactionhistory
                 };
             });
         }
