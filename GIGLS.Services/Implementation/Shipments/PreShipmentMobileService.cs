@@ -81,16 +81,19 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<PreShipmentMobileDTO> CreatePreShipment(PreShipmentMobileDTO preShipmentDTO)
         {
             // get the current user info
+            var currentUser = await _userService.GetCurrentUserId();
+            preShipmentDTO.UserId = currentUser;
+
             var PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
-            var wallet = await _walletService.GetWalletByCustomerCode(preShipmentDTO.CustomerCode);
-            if (wallet.Balance > Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal))
+
+            var wallet = await _walletService.GetWalletBalance();
+
+            if (wallet.Balance >= Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal))
             {
-                var user = await _userService.GetUserByChannelCode(preShipmentDTO.CustomerCode);
                 var price = (wallet.Balance - Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal));
                 var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
                 preShipmentDTO.Waybill = waybill;
                 var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
-                newPreShipment.UserId = user.Id;
                 foreach (var item in newPreShipment.PreShipmentItems)
                 {
                     if (!string.IsNullOrEmpty(item.Value))
@@ -99,35 +102,39 @@ namespace GIGLS.Services.Implementation.Shipments
                         newPreShipment.IsdeclaredVal = true;
                     }
                 }
-                var transaction = new WalletTransactionDTO {
-                    WalletId = wallet.WalletId,
-                    CreditDebitType = CreditDebitType.Debit,
-                    Amount = (decimal)newPreShipment.CalculatedTotal,
-                    ServiceCentreId = 296,
-                    Waybill = waybill,
-                    Description = "Payment for Shipment",
-                    PaymentType = PaymentType.Online,
-                    UserId = newPreShipment.UserId
-                };
                 
                 newPreShipment.IsConfirmed = false;
                 newPreShipment.IsDelivered = false;
                 newPreShipment.shipmentstatus = "Shipment created";
                 preShipmentDTO.IsBalanceSufficient = true;
                 _uow.PreShipmentMobile.Add(newPreShipment);
-                var m = await _walletTransactionService.AddWalletTransaction(transaction);
-                var Updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
-                Updatedwallet.Balance = price;
+                
+                var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
+
+                var transaction = new WalletTransactionDTO
+                {
+                    WalletId = wallet.WalletId,
+                    CreditDebitType = CreditDebitType.Debit,
+                    Amount = (decimal)newPreShipment.CalculatedTotal,
+                    ServiceCentreId = defaultServiceCenter.ServiceCentreId,
+                    Waybill = waybill,
+                    Description = "Payment for Shipment",
+                    PaymentType = PaymentType.Online,
+                    UserId = newPreShipment.UserId
+                };
+
+                var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
+
+                var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
+                updatedwallet.Balance = price;
                 await _uow.CompleteAsync();
                 return preShipmentDTO;
             }
-            else if (wallet.Balance < Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal))
+            else
             {
                 preShipmentDTO.IsBalanceSufficient = false;
                 return preShipmentDTO;
-
             }
-            return new PreShipmentMobileDTO();
         }
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
@@ -173,13 +180,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 Vat= preShipment.Vat,
                 InsuranceValue = preShipment.InsuranceValue,
                 GrandTotal = (decimal)preShipment.CalculatedTotal
-
             };
             return returnprice;
-
         }
-
-
+        
         public async Task<List<PreShipmentMobileDTO>> GetShipments(BaseFilterCriteria filterOptionsDto)
         {
             try
@@ -311,8 +315,6 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
-
-        }
-        
+        }        
     }
 }

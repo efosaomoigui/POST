@@ -177,8 +177,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile()
         {
-            var currentUser = await _userService.GetCurrentUserId();
-            var wallet = await _walletService.GetWalletByUserId(currentUser);
+            var wallet = await _walletService.GetWalletBalance();
             return await GetWalletTransactionByWalletIdForMobile(wallet);
         }
     }
