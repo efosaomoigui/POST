@@ -10,6 +10,7 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -47,6 +48,25 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var serviceIds = _userService.GetPriviledgeServiceCenters().Result;
             var manifestWaybillMapings = await _uow.ManifestWaybillMapping.GetManifestWaybillMappings(serviceIds);
+
+            foreach (var item in manifestWaybillMapings)
+            {
+                if (resultSet.Add(item.ManifestCode))
+                {
+                    result.Add(item);
+                }
+            }
+
+            return result.OrderByDescending(x => x.DateCreated).ToList();
+        }
+
+        public async Task<List<ManifestWaybillMappingDTO>> GetAllManifestWaybillMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            var resultSet = new HashSet<string>();
+            var result = new List<ManifestWaybillMappingDTO>();
+
+            var serviceIds = _userService.GetPriviledgeServiceCenters().Result;
+            var manifestWaybillMapings = await _uow.ManifestWaybillMapping.GetManifestWaybillMappings(serviceIds, dateFilterCriteria);
 
             foreach (var item in manifestWaybillMapings)
             {
