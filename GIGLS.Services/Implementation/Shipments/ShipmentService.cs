@@ -1085,12 +1085,22 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var resultSet = new HashSet<string>();
                 var result = new List<GroupWaybillNumberMappingDTO>();
+
+                //fetch all service centre into the memory
+                var allServiceCenters = await _centreService.GetServiceCentres();
+
                 foreach (var item in unmappedGroupedWaybills)
                 {
                     if (resultSet.Add(item.GroupWaybillNumber))
                     {
                         result.Add(item);
-                        item.DestinationServiceCentre = await _centreService.GetServiceCentreById(item.DestinationServiceCentreId);
+                        //item.DestinationServiceCentre = await _centreService.GetServiceCentreById(item.DestinationServiceCentreId);
+                        item.DestinationServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == item.DestinationServiceCentreId).Select(s => new ServiceCentreDTO
+                        {
+                            Name = s.Name,
+                            Code = s.Code,
+                            ServiceCentreId = s.ServiceCentreId
+                        }).FirstOrDefault();
                     }
                 }
 
