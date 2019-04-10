@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Domain;
 using GIGLS.Core.IServices.User;
 using System.Linq;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -227,7 +228,21 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
                 var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters);
-                return manifestGroupWaybillMapings.OrderByDescending(x => x.DateCreated).Take(200);
+                return manifestGroupWaybillMapings;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<ManifestGroupWaybillNumberMappingDTO>> GetAllManifestGroupWayBillNumberMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            try
+            {
+                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters, dateFilterCriteria);
+                return manifestGroupWaybillMapings;
             }
             catch (Exception)
             {

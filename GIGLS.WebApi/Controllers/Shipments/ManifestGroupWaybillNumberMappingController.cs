@@ -7,6 +7,7 @@ using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.WebApi.Filters;
 using System.Linq;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -32,6 +33,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<IEnumerable<ManifestGroupWaybillNumberMappingDTO>>
                 {
                     Object = manifestGroupWayBillNumberMappings.ToList()
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("manifestbydate")]
+        public async Task<IServiceResponse<IEnumerable<ManifestGroupWaybillNumberMappingDTO>>> GetAllManifestGroupWayBillNumberMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestGroupWayBillNumberMappings = await _service.GetAllManifestGroupWayBillNumberMappings(dateFilterCriteria);
+
+                return new ServiceResponse<IEnumerable<ManifestGroupWaybillNumberMappingDTO>>
+                {
+                    Object = manifestGroupWayBillNumberMappings
                 };
             });
         }
