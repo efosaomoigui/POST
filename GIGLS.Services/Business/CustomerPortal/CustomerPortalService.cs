@@ -33,6 +33,7 @@ using GIGLS.Core.IServices.Sla;
 using GIGLS.Core.Enums;
 using GIGLS.Core.View;
 using GIGLS.Services.Implementation;
+using GIGLS.Core.IServices;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -51,12 +52,14 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IWalletService _walletService;
         private readonly IWalletPaymentLogService _wallepaymenttlogService;
         private readonly ISLAService _slaService;
+        private readonly IOTPService _otpService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService,ICustomerService customerService, 
-            IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService, ISLAService slaService)
+            IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService, 
+            ISLAService slaService, IOTPService otpService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -71,6 +74,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _walletService = walletService;
             _wallepaymenttlogService = wallepaymenttlogService;
             _slaService = slaService;
+            _otpService = otpService;
             MapperConfig.Initialize();
         }
 
@@ -502,5 +506,62 @@ namespace GIGLS.Services.Business.CustomerPortal
             items.Add("SENSITIVE");
             return items;
         }
+
+        public async Task<SignResponseDTO> SignUp(UserDTO user)
+        {
+            var EmailUser = await _uow.User.GetUserByEmail(user.Email);
+            if (EmailUser != null)
+            {
+                throw new GenericException("Email already Exists!");
+            }
+
+            var PhoneNumberUser = await _uow.User.GetUserByPhoneNumber(user.PhoneNumber);
+            if (PhoneNumberUser != null)
+            {
+                throw new GenericException("PhoneNumber already Exists!");
+            }
+
+            var registeredUser = await Register(user);
+            var result = await SendOTPForRegisteredUser(registeredUser);
+
+            return result;
+        }
+
+        private async Task<SignResponseDTO> SendOTPForRegisteredUser(UserDTO user)
+        {
+            var responseDto = new SignResponseDTO();
+
+            var Otp = await _otpService.GenerateOTP(user);
+            var message = await _otpService.SendOTP(Otp);
+
+            string[] CombinedMessage = message.Split(',');
+
+            var EmailResponse = CombinedMessage[0];
+            var PhoneResponse = CombinedMessage[1];
+
+            if (EmailResponse == "Accepted")
+            {
+                responseDto.EmailSent = true;
+            }
+            if (PhoneResponse == "OK")
+            {
+                responseDto.PhoneSent = true;
+            }
+
+            return responseDto;
+        }
+
+        public async Task<SignResponseDTO> ResendOTP(UserDTO user)
+        {
+            var registeredUser = await _otpService.CheckDetails(user.Email);
+            if (registeredUser == null)
+            {
+                throw new GenericException("User has not registered!");
+            }
+            
+            var result = await SendOTPForRegisteredUser(registeredUser);
+            return result;
+        }
+
     }
 }

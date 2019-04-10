@@ -23,8 +23,6 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IWalletService _walletService;
         private readonly IUnitOfWork _uow;
         private readonly IWalletPaymentLogService _walletPaymentLogService;
-        private readonly IWalletTransactionService _transactionService;
-
 
         private string secretKey = ConfigurationManager.AppSettings["PayStackSecret"];
 

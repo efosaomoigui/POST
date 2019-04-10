@@ -1,4 +1,5 @@
-﻿using GIGLS.CORE.DTO;
+﻿using GIGLS.Core.DTO.Shipments;
+using GIGLS.CORE.DTO;
 using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Wallet
@@ -10,5 +11,6 @@ namespace GIGLS.Core.DTO.Wallet
         public string WalletNumber { get; set; }
         public decimal WalletBalance { get; set; }
         public List<WalletTransactionDTO> WalletTransactions { get; set; }
+        public List<PreShipmentMobileDTO> Shipments { get; set; }
     }
 }

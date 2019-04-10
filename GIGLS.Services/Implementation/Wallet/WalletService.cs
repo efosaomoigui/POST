@@ -109,7 +109,6 @@ namespace GIGLS.Services.Implementation.Wallet
             return Mapper.Map<WalletDTO>(wallet);
         }
 
-
         public async Task AddWallet(WalletDTO wallet)
         {
             var walletNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Wallet);
@@ -287,28 +286,12 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
-        public async Task<WalletDTO> GetWalletByCustomerCode(string CustomerCode)
+        public async Task<WalletDTO> GetWalletBalance()
         {
-            
-            var individualCustomerDTO = await _uow.User.GetUserByChannelCode(CustomerCode);
-            
-           var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(individualCustomerDTO.UserChannelCode));
-            
-            
-            var walletDTO = Mapper.Map<WalletDTO>(wallet);
-            if (wallet == null)
-            {
-                throw new GenericException("Wallet does not exist");
-            }
+            var currentUser = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(currentUser);
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
 
-            return walletDTO;
-        }
-        public async Task<WalletDTO> GetWalletByUserId(string Userid)
-        {
-            var userDTO = await _uow.User.GetUserById(Userid);
-            var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
-                    s => s.CustomerCode == userDTO.UserChannelCode);
-            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerId.Equals(individualCustomerDTO.IndividualCustomerId));
             var walletDTO = Mapper.Map<WalletDTO>(wallet);
             if (wallet == null)
             {

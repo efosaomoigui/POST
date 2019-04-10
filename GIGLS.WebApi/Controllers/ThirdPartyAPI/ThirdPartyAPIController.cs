@@ -37,7 +37,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         {
             _thirdPartyAPIService = portalService;
         }
-        
+
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("haulageprice")]
@@ -53,7 +53,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
-                
+
         //Route API
 
 
@@ -92,7 +92,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
-        
+
         //Transaction History API
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpPost]
@@ -109,7 +109,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
-        
+
         //General API
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
@@ -143,7 +143,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
-        
+
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("cod")]
@@ -371,23 +371,13 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             return await HandleApiOperationAsync(async () =>
             {
                 var PreshipMentMobile = await _thirdPartyAPIService.GetPrice(PreshipmentMobile);
-                var Deliveryprice = (decimal)PreshipMentMobile.DeliveryPrice;
-                var Insurance = (decimal)PreshipmentMobile.InsuranceValue;
-                var vat = (decimal)PreshipMentMobile.Vat;
-                var Total = (double)PreshipMentMobile.CalculatedTotal;
-                var ReturnPrice = new MobilePriceDTO()
+                return new ServiceResponse<MobilePriceDTO>
                 {
-                    DeliveryPrice = Deliveryprice,
-                    InsuranceValue = Insurance,
-                    Vat = vat,
-                    GrandTotal = (decimal)Total
+                    Object = PreshipMentMobile
                 };
-               return new ServiceResponse<MobilePriceDTO>
-                 {
-                   Object = ReturnPrice
-                 };
             });
-       }
+        }
+
         //Capture Shipment API
         /// <summary>
         /// This api is used to register a shipment
@@ -412,25 +402,15 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         [ThirdPartyActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("captureshipment")]
-        public async Task<IServiceResponse<PreShipmentMobileDTO>> CreateShipment(PreShipmentMobileDTO PreshipmentMobile)
+        public async Task<IServiceResponse<object>> CreateShipment(PreShipmentMobileDTO PreshipmentMobile)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var PreshipMentMobile = await _thirdPartyAPIService.CreatePreShipment(PreshipmentMobile);
-                if (PreshipMentMobile.IsBalanceSufficient == false)
+                return new ServiceResponse<object>
                 {
-                    return new ServiceResponse<PreShipmentMobileDTO>
-                    {
-                        ShortDescription = "Insufficient Wallet Balance"
-                    };
-                }
-                else
-                {
-                    return new ServiceResponse<PreShipmentMobileDTO>
-                    {
-                        ShortDescription = "Shipment created successfully"
-                    };
-                }
+                    Object = PreshipMentMobile
+                };
             });
         }
 
@@ -568,7 +548,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
 
                     //get access token from response body
                     var responseJson = await responseMessage.Content.ReadAsStringAsync();
-                    var jObject = JObject.Parse(responseJson);                                       
+                    var jObject = JObject.Parse(responseJson);
 
                     getTokenResponse = jObject.GetValue("access_token").ToString();
 
@@ -585,26 +565,21 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         /// This api is used to get shipments created by user
         /// </summary>
         /// <description>This api is used to get shipments by user</description>
-        /// <param name="userid"></param>
         /// <returns></returns>
 
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("PickUpRequests/{userid}")]
-        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> ViewShipment(string userid)
+        [Route("PickUpRequests")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> ViewShipment()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var PreshipMentMobile = await _thirdPartyAPIService.GetPreShipmentById(userid);
+                var PreshipMentMobile = await _thirdPartyAPIService.GetPreShipmentById();
                 return new ServiceResponse<List<PreShipmentMobileDTO>>
                 {
                     Object = PreshipMentMobile,
                 };
             });
         }
-
-
-
-
     }
 }

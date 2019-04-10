@@ -74,12 +74,11 @@
             <param name="userLoginModel"></param>
             <returns></returns>
         </member>
-        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.ViewShipment(System.String)">
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.ViewShipment">
             <summary>
             This api is used to get shipments created by user
             </summary>
             <description>This api is used to get shipments by user</description>
-            <param name="userid"></param>
             <returns></returns>
         </member>
     </members>
