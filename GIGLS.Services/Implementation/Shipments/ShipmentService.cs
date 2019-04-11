@@ -289,6 +289,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     GetDemurrageInformation(shipmentDto);
                 }
 
+                //Set the Senders AAddress for the Shipment in the CustomerDetails
+                shipmentDto.CustomerDetails.Address = shipmentDto.SenderAddress ?? shipmentDto.CustomerDetails.Address;
+                shipmentDto.CustomerDetails.State = shipmentDto.SenderState ?? shipmentDto.CustomerDetails.State;
+
                 return shipmentDto;
             }
             catch (Exception)
