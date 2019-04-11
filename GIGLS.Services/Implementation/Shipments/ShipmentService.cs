@@ -1079,9 +1079,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 // get all manifest for that Service Centre
                 var manifestGroupWayBillNumberMappings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters);
+               // var manifestGroupWayBillNumberMappingsWaybillOnly = manifestGroupWayBillNumberMappings.Select(a => a.GroupWaybillNumber);
 
                 // filter the two lists
-                var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappings.ToList().Select(a => a.GroupWaybillNumber).Contains(s.GroupWaybillNumber));
+                //var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappings.ToList().Select(a => a.GroupWaybillNumber).Contains(s.GroupWaybillNumber));
+               // var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappingsWaybillOnly.Any(x => s.GroupWaybillNumber == x));
+                var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappings.Any(x => s.GroupWaybillNumber == x.GroupWaybillNumber));
 
                 var resultSet = new HashSet<string>();
                 var result = new List<GroupWaybillNumberMappingDTO>();
