@@ -359,9 +359,9 @@
     <Compile Include="Controllers\Account\GeneralLedgerController.cs" />
     <Compile Include="Controllers\Account\IncomeController.cs" />
     <Compile Include="Controllers\Account\InsuranceController.cs" />
+    <Compile Include="Controllers\Account\InvoiceReminderController.cs" />
     <Compile Include="Controllers\Account\InvoiceController.cs" />
     <Compile Include="Controllers\Account\InvoiceShipmentController.cs" />
-    <Compile Include="Controllers\Account\ReminderController.cs" />
     <Compile Include="Controllers\Account\VATController.cs" />
     <Compile Include="Controllers\BankSettlement\BankProcessingOrderController.cs" />
     <Compile Include="Controllers\BankSettlement\BankShipmentSettlementController.cs" />

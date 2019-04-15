@@ -15,10 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GIGLS.Services", "GIGLS.Ser
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReminderJobs", "ReminderJobs\ReminderJobs.csproj", "{494B05BC-FC71-4B14-8E24-8359C45AD74C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebJobEngine", "WebJobEngine\WebJobEngine.csproj", "{1EE6393A-7D4E-4418-A8CE-302788DD4408}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebJob2", "WebJob2\WebJob2.csproj", "{0FA92660-2D9E-43BE-A566-2BF3085DA15B}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,14 +45,6 @@ Global
 		{494B05BC-FC71-4B14-8E24-8359C45AD74C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{494B05BC-FC71-4B14-8E24-8359C45AD74C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{494B05BC-FC71-4B14-8E24-8359C45AD74C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1EE6393A-7D4E-4418-A8CE-302788DD4408}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1EE6393A-7D4E-4418-A8CE-302788DD4408}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1EE6393A-7D4E-4418-A8CE-302788DD4408}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1EE6393A-7D4E-4418-A8CE-302788DD4408}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0FA92660-2D9E-43BE-A566-2BF3085DA15B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0FA92660-2D9E-43BE-A566-2BF3085DA15B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0FA92660-2D9E-43BE-A566-2BF3085DA15B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0FA92660-2D9E-43BE-A566-2BF3085DA15B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

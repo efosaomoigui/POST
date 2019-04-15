@@ -4,6 +4,7 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.Shipments;
@@ -26,16 +27,22 @@ namespace GIGLS.Services.Implementation.Account
         private IShipmentService _shipmentService { get; set; }
         private ICustomerService _customerService { get; set; }
         private readonly IUserService _userService;
+        private readonly IMessageSenderService _messageSenderService;
+        private readonly IGlobalPropertyService _globalPropertyService;
 
         public InvoiceService(IUnitOfWork uow, INumberGeneratorMonitorService service,
             IShipmentService shipmentService, ICustomerService customerService,
-            IUserService userService)
+            IMessageSenderService messageSenderService,
+            IUserService userService,
+            IGlobalPropertyService globalPropertyService)
         {
             _uow = uow;
             _service = service;
             _shipmentService = shipmentService;
             _customerService = customerService;
             _userService = userService;
+            _messageSenderService = messageSenderService;
+            _globalPropertyService = globalPropertyService;
             MapperConfig.Initialize();
         }
 
@@ -46,10 +53,58 @@ namespace GIGLS.Services.Implementation.Account
             return invoices.ToList().OrderByDescending(x => x.DateCreated);
         }
 
-        public async Task<IEnumerable<InvoiceView>> GetInvoicesForReminder(double daystoduedate)  
+        public async Task<string> SendEmailForDueInvoices(double daystoduedate)
         {
-            var invoices = await _uow.Invoice.GetInvoicesForReminderAsync(daystoduedate);
-            return invoices;
+
+            //1.Get start date for this feature
+            var globalpropertiesreminderdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.globalpropertiesreminderdate);
+            string globalpropertiesdateStr = globalpropertiesreminderdateObj?.Value;
+
+            var globalpropertiesdate = DateTime.MinValue;
+            bool success = DateTime.TryParse(globalpropertiesdateStr, out globalpropertiesdate);
+
+            var invoices = _uow.Invoice.GetInvoicesForReminderAsync();
+            var invoiceResults = invoices.Where(s => s.DateCreated >= globalpropertiesdate).ToList();
+
+            //2. get today's date
+            DateTime today = DateTime.Now;
+            //var invoiceResults = invoices.Where(s => s.DueDate.Date == dayfromtoday.Date).ToList();
+            var allinvoiceintherange = new List<InvoiceView>();
+
+            //3. filter all due invoices by due date
+            foreach (var invoice in invoices)
+            {
+                var duedate = invoice.DueDate;
+                TimeSpan difference = duedate - today;
+
+                if (difference.Days == daystoduedate)
+                {
+                    allinvoiceintherange.Add(invoice);
+                }
+            }
+
+            string message = "";
+
+            //4. send Email For all Due Invoices
+            if (invoices != null)
+            {
+                foreach (var invoice in allinvoiceintherange)
+                {
+                    InvoiceViewDTO invoiceviewDTO = new InvoiceViewDTO();
+                    
+                    invoiceviewDTO.Email = "omoigui.efosa@thegiggroupng.com"; // invoice.Email;
+                    invoiceviewDTO.PhoneNumber = invoice.PhoneNumber;
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.IEMAIL, invoiceviewDTO);
+                    message = "Message Send Successfully";
+                    break;
+                }
+            }
+            else
+            {
+                message = "No Due Invoices at this time!";
+            }
+
+            return message;
         }
 
         public Tuple<Task<List<InvoiceDTO>>, int> GetInvoices(FilterOptionsDto filterOptionsDto)
@@ -70,7 +125,7 @@ namespace GIGLS.Services.Implementation.Account
                     var filterValue = filterOptionsDto.filterValue;
                     if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
                     {
-                        invoicesDto = invoicesDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null  
+                        invoicesDto = invoicesDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null
                             && (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
                     }
 

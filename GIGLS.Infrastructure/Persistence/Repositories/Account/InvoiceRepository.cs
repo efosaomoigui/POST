@@ -114,38 +114,18 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             return Task.FromResult(invoicesResult.OrderByDescending(x => x.DateCreated).ToList());
         }
 
-        public Task<List<InvoiceView>> GetInvoicesForReminderAsync(double rangeofdays)  
+        public IQueryable<InvoiceView> GetInvoicesForReminderAsync()
         {
 
             //get all invoices from InvoiceView Table
             var invoices = _GIGLSContextForView.InvoiceView.AsQueryable();
 
             //filter by paymentstatus of non paid
-            invoices = invoices.Where(s => s.PaymentStatus == 0 && s.CompanyType == "Corporate" );
+            invoices = invoices.Where(s => s.PaymentStatus == 0 && s.CompanyType == "Corporate");
 
-            //get todays date
-            DateTime dayfromtoday = DateTime.Now.AddDays(rangeofdays); 
+            return invoices;
 
-            //create a new invoiceview object to collect the filtered view
-            var allinvoiceintherange = new List<InvoiceView>();
-
-            //filter some more to get all invoices that meets the range of day to duedate
-            //
-            foreach (var invoice in invoices) 
-            {
-                var duedate = invoice.DueDate;
-
-                if (dayfromtoday.Date == duedate.Date)
-                {
-                    allinvoiceintherange.Add(invoice);
-                }
-            }
-
-            //a filter list of people to send reminder to
-            var result = allinvoiceintherange.ToList();
-
-            return Task.FromResult(result);
-    }
+        }
 
         public Task<List<InvoiceViewDTO>> GetInvoicesFromViewAsync(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
         {
@@ -257,7 +237,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
         public IQueryable<InvoiceView> GetAllInvoiceShipments()
         {
             var shipments = Context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false);
-            
+
             var result = (from s in shipments
                           join i in Context.Invoice on s.Waybill equals i.Waybill
                           join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
@@ -294,17 +274,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               Value = s.Value,
                               GrandTotal = i.Amount,
                               DiscountValue = s.DiscountValue,
-                              CompanyType = s.CompanyType,                              
+                              CompanyType = s.CompanyType,
                               IsShipmentCollected = i.IsShipmentCollected,
                               IsInternational = s.IsInternational,
                               DepositStatus = s.DepositStatus,
                               PaymentMethod = i.PaymentMethod,
                               PickupOptions = s.PickupOptions,
-                              IsCancelled = s.IsCancelled                       
+                              IsCancelled = s.IsCancelled
                           });
             return result;
         }
 
-       
+
     }
 }
