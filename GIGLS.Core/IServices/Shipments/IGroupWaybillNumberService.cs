@@ -18,5 +18,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task RemoveGroupWaybillNumber(int groupwaybillId);
         Task RemoveGroupWaybillNumber(string groupwaybillId);
         Task<GroupWaybillNumber> GetGroupWayBillNumberForScan(string groupwaybillNumber);
+        Task ChangeDepartureServiceInGroupWaybill(int serviceCentreId, string groupWaybillNumber, bool hasManifest = false);
     }
 }

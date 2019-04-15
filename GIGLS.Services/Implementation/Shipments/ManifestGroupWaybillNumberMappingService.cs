@@ -179,6 +179,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         };
 
                         _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+
+                        //Update The Group Waybill HasManifest to True
+                        var groupWaybill = await _uow.GroupWaybillNumber.GetAsync(groupWaybillNumberDTO.GroupWaybillNumberId);
+                        groupWaybill.HasManifest = true;
                     }
                 }
 

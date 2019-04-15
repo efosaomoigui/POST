@@ -435,8 +435,11 @@ namespace GIGLS.Services.Business.Scanning
                     foreach (var groupWaybill in groupWaybillsInManifest)
                     {
                         await _groupManifest.RemoveGroupWaybillNumberFromManifest(manifest.ManifestCode, groupWaybill);
-                    }
 
+                        //Update the GroupWaybill for Transit
+                        //1. Update Departure Service Centre to New Service Centre and Set HasManifested to false
+                        await _groupWaybill.ChangeDepartureServiceInGroupWaybill(currentUserSercentreId, groupWaybill);
+                    }
                 }
             }
 
@@ -463,7 +466,5 @@ namespace GIGLS.Services.Business.Scanning
 
             return true;
         }
-
-
     }
 }
