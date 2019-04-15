@@ -3,6 +3,7 @@ using GIGLS.Core.DTO.User;
 using GIGLS.CORE.Domain;
 using Microsoft.AspNet.Identity;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -57,5 +58,7 @@ namespace GIGLS.Core.IServices.User
         Task<IdentityResult> ResetExpiredPassword(string userid, string currentPassword, string newPassword);
 
         Task<UserDTO> GetUserByPhone(string PhoneNumber);
+
+        IQueryable<GIGL.GIGLS.Core.Domain.User> GetCorporateCustomerUsersAsQueryable();
     }
 }

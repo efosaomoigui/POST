@@ -73,6 +73,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
         }
 
+        public IQueryable<GIGL.GIGLS.Core.Domain.User> GetCorporateCustomerUsersAsQueryable()
+        {
+            var users = _userManager.Users.AsQueryable();
+            return users; 
+        }
+
 
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsers()
         {

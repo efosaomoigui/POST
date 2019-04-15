@@ -15,6 +15,7 @@ namespace GIGLS.Core.IServices.Account
         Task<object> AddInvoice(InvoiceDTO invoice);
         Task UpdateInvoice(int invoiceId, InvoiceDTO invoice);
         Task RemoveInvoice(int invoiceId);
-        Task<string> SendEmailForDueInvoices(double daystoduedate);
+        Task<string> SendEmailForDueInvoices(int daystoduedate);
+        Task<string> SendEmailForWalletBalanceCheck(decimal daystoduedate);
     }
 }

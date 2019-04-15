@@ -127,6 +127,20 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
         }
 
+        public IQueryable<InvoiceView> GetWalletForReminderAsync()
+        {
+
+            //get all invoices from InvoiceView Table
+            var invoices = _GIGLSContextForView.InvoiceView.AsQueryable();
+
+            //filter by paymentstatus of non paid
+            invoices = invoices.Where(s=>s.CompanyType == "Ecommerce");
+
+            return invoices;
+
+        }
+
+
         public Task<List<InvoiceViewDTO>> GetInvoicesFromViewAsync(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
         {
             DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;

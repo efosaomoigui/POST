@@ -3,6 +3,7 @@ using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Account;
@@ -10,6 +11,7 @@ using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
@@ -27,6 +29,7 @@ namespace GIGLS.Services.Implementation.Account
         private IShipmentService _shipmentService { get; set; }
         private ICustomerService _customerService { get; set; }
         private readonly IUserService _userService;
+        private readonly IWalletService _walletService;
         private readonly IMessageSenderService _messageSenderService;
         private readonly IGlobalPropertyService _globalPropertyService;
 
@@ -34,6 +37,7 @@ namespace GIGLS.Services.Implementation.Account
             IShipmentService shipmentService, ICustomerService customerService,
             IMessageSenderService messageSenderService,
             IUserService userService,
+            IWalletService walletService,
             IGlobalPropertyService globalPropertyService)
         {
             _uow = uow;
@@ -41,6 +45,7 @@ namespace GIGLS.Services.Implementation.Account
             _shipmentService = shipmentService;
             _customerService = customerService;
             _userService = userService;
+            _walletService = walletService;
             _messageSenderService = messageSenderService;
             _globalPropertyService = globalPropertyService;
             MapperConfig.Initialize();
@@ -53,7 +58,7 @@ namespace GIGLS.Services.Implementation.Account
             return invoices.ToList().OrderByDescending(x => x.DateCreated);
         }
 
-        public async Task<string> SendEmailForDueInvoices(double daystoduedate)
+        public async Task<string> SendEmailForDueInvoices(int daystoduedate)
         {
 
             //1.Get start date for this feature
@@ -68,16 +73,16 @@ namespace GIGLS.Services.Implementation.Account
 
             //2. get today's date
             DateTime today = DateTime.Now;
-            //var invoiceResults = invoices.Where(s => s.DueDate.Date == dayfromtoday.Date).ToList();
+
             var allinvoiceintherange = new List<InvoiceView>();
 
             //3. filter all due invoices by due date
             foreach (var invoice in invoices)
             {
-                var duedate = invoice.DueDate;
-                TimeSpan difference = duedate - today;
+                var dateofexpiry = today.AddDays(daystoduedate).ToShortDateString();
+                var duedateinview = invoice.DueDate.ToShortDateString();
 
-                if (difference.Days == daystoduedate)
+                if (duedateinview.Equals(dateofexpiry))
                 {
                     allinvoiceintherange.Add(invoice);
                 }
@@ -86,18 +91,61 @@ namespace GIGLS.Services.Implementation.Account
             string message = "";
 
             //4. send Email For all Due Invoices
-            if (invoices != null)
+            if (allinvoiceintherange != null)
             {
                 foreach (var invoice in allinvoiceintherange)
                 {
                     InvoiceViewDTO invoiceviewDTO = new InvoiceViewDTO();
-                    
+
                     invoiceviewDTO.Email = "omoigui.efosa@thegiggroupng.com"; // invoice.Email;
                     invoiceviewDTO.PhoneNumber = invoice.PhoneNumber;
                     await _messageSenderService.SendGenericEmailMessage(MessageType.IEMAIL, invoiceviewDTO);
-                    message = "Message Send Successfully";
-                    break;
                 }
+            }
+            else
+            {
+                message = "No Due Invoices at this time!";
+            }
+
+            return message;
+        }
+
+        public async Task<string> SendEmailForWalletBalanceCheck(decimal amountforreminder) 
+        {
+
+            //1.Get start date for this feature
+            var globalpropertiesreminderdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.globalpropertiesreminderdate);
+            string globalpropertiesdateStr = globalpropertiesreminderdateObj?.Value;
+
+            var globalpropertiesdate = DateTime.MinValue;
+            bool success = DateTime.TryParse(globalpropertiesdateStr, out globalpropertiesdate);
+
+            //get all wallets matching the amountstatedforreminder supplied
+            var wallets = _walletService.GetWalletAsQueryableService();
+            var allwalletsintherange = wallets.Where(s => s.Balance.Equals(amountforreminder)).ToList();
+            var walletthatqualifies_Result = allwalletsintherange.Select(s => s.CustomerCode).ToArray();
+
+            //Get all the customers who are Ecommercce
+            var users = _userService.GetCorporateCustomerUsersAsQueryable();
+            var usersResults = users.Where(s=>s.UserChannelType == UserChannelType.Ecommerce );
+            
+            var invResults = usersResults.Where(s => walletthatqualifies_Result.Contains(s.UserChannelCode)).ToList();
+
+            string message = "";
+
+            //4. send Email For all Due Invoices
+            if (invResults != null)
+            {
+                foreach (var user in invResults)
+                {
+                    InvoiceViewDTO invoiceviewDTO = new InvoiceViewDTO();
+
+                    invoiceviewDTO.Email = "omoigui.efosa@thegiggroupng.com"; // invoice.Email;
+                    invoiceviewDTO.PhoneNumber = user.PhoneNumber;
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.WEMAIL, invoiceviewDTO);
+                }
+
+                message = "Message Sen Successfully";
             }
             else
             {

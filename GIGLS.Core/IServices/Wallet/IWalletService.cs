@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Wallet;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GIGLS.Core.IServices.Wallet
@@ -17,6 +18,7 @@ namespace GIGLS.Core.IServices.Wallet
         Task<WalletDTO> GetSystemWallet();
         Task<List<WalletDTO>> SearchForWallets(WalletSearchOption searchOption);
         Task<WalletDTO> GetWalletBalance();
+        IQueryable<Core.Domain.Wallet.Wallet> GetWalletAsQueryableService();
     }
 
 }

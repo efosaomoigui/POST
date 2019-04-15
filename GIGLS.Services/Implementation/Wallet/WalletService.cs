@@ -300,5 +300,11 @@ namespace GIGLS.Services.Implementation.Wallet
 
             return walletDTO;
         }
+
+        public IQueryable<Core.Domain.Wallet.Wallet> GetWalletAsQueryableService()
+        {
+            var wallet = _uow.Wallet.GetAllAsQueryable();
+            return wallet;
+        }
     }
 }

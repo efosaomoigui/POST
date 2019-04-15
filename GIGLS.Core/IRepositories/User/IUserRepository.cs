@@ -3,6 +3,7 @@ using GIGLS.Core.DTO.User;
 using GIGLS.CORE.Domain;
 using Microsoft.AspNet.Identity;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -43,6 +44,7 @@ namespace GIGLS.Core.IRepositories.User
         Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword);
         Task<bool> CheckPasswordAsync(GIGL.GIGLS.Core.Domain.User user, string password);
         Task<GIGL.GIGLS.Core.Domain.User> GetUserByPhoneNumber(string PhoneNumber);
+        IQueryable<GIGL.GIGLS.Core.Domain.User> GetCorporateCustomerUsersAsQueryable();
 
     }
 }

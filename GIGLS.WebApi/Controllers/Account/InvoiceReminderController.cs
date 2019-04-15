@@ -39,7 +39,7 @@ namespace GIGLS.WebApi.Controllers.Account
 
         [HttpGet]
         [Route("sendemailfordueinvoices")]
-        public async Task<IServiceResponse<string>> SendEmailForDueInvoices([FromUri] double datetoduedate)
+        public async Task<IServiceResponse<string>> SendEmailForDueInvoices([FromUri] int datetoduedate)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -54,11 +54,11 @@ namespace GIGLS.WebApi.Controllers.Account
 
         [HttpGet]
         [Route("sendemailForwalletbalancecheck")]
-        public async Task<IServiceResponse<string>> SendEmailForWalletBalanceCheck([FromUri] double amountBalance)
+        public async Task<IServiceResponse<string>> SendEmailForWalletBalanceCheck([FromUri] decimal amountBalance)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _invoiceService.SendEmailForDueInvoices(amountBalance);
+                var result = await _invoiceService.SendEmailForWalletBalanceCheck(amountBalance);
 
                 return new ServiceResponse<string>
                 {
