@@ -96,6 +96,8 @@ namespace GIGLS.Core.DTO.Account
         public string FirstName { get; set; }
         public string LastName { get; set; }
 
+        public string WalletBalance { get; set; } 
+
         public DepositStatus DepositStatus { get; set; }
 
     }

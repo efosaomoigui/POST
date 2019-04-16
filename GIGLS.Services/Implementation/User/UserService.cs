@@ -15,6 +15,7 @@ using GIGLS.Core.Enums;
 using System.Linq;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.View;
 
 namespace GIGLS.Services.Implementation.User
 {
@@ -78,6 +79,11 @@ namespace GIGLS.Services.Implementation.User
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCorporateCustomerUsers()
         {
             return _unitOfWork.User.GetCorporateCustomerUsers();
+        }
+
+        public IQueryable<GIGL.GIGLS.Core.Domain.User> GetCorporateCustomerUsersAsQueryable()
+        {
+            return _unitOfWork.User.GetCorporateCustomerUsersAsQueryable();
         }
 
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsers()

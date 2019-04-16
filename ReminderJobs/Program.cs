@@ -16,7 +16,9 @@ namespace ReminderJobs
         {
             //while (true)
             {
-                Functions.RePrintJob("GET", "api/webjobs/runreprintexpirycounter", Console.Out);
+                Functions.callAPI("GET", "api/webjobs/runreprintexpirycounter", Console.Out);
+                Functions.callAPI("GET", "api/webjobs/runreprintexpirycounter", Console.Out);
+                Functions.callAPI("GET", "api/webjobs/runreprintexpirycounter", Console.Out);
                 //Functions.WalletReminderJob("GET", "api/webjobs/runreprintexpirycounter", Console.Out);
             }
         }

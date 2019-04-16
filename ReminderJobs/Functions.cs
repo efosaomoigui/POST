@@ -30,7 +30,7 @@ namespace ReminderJobs
     {
 
         //Job to remind about due invoices
-        public async static Task<JObject> RePrintJob(string method, string apiurlsegment, TextWriter log)
+        public async static Task<JObject> callAPI(string method, string apiurlsegment, TextWriter log)
         {
             string apiBaseUri1 = ConfigurationManager.AppSettings["WebApiUrl"];
             var apiurl = apiBaseUri1 + apiurlsegment;
