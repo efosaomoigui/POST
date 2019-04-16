@@ -27,7 +27,6 @@ namespace GIGLS.Services.Implementation
         public string RefCode { get; set; }
 
         //added to display list of shipments for a wallet code
-        public List<PreShipmentMobileDTO> Shipments { get; set; }
         public BankProcessingOrderCodesDTO Shipmentcodref { get; set; }   
 
         public Dictionary<string, IEnumerable<string>> ValidationErrors { get; set; }

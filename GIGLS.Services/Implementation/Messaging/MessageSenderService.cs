@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
@@ -407,6 +408,39 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 //--- 2. Verify The Email is within the interval for sending
                 verifySendEmail = await VerifyUserLoginIsWithinTheEmailInterval(userDTO.Email);
+            }
+
+            //2. obj is InvoiceViewDTO
+            if (obj is InvoiceViewDTO)
+            {
+                var strArray = new string[]
+                {
+                    "User Name",
+                    "Login Time",
+                    "Url",
+                };
+
+                var invoiceViewDTO = (InvoiceViewDTO)obj;
+                //map the array
+                strArray[0] = invoiceViewDTO.Email;
+                strArray[1] = $"{DateTime.Now.ToLongDateString()} : {DateTime.Now.ToLongTimeString()}";
+                //strArray[2] = invoice.DepartureServiceCentreName;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject =
+                    string.Format(messageDTO.Subject, strArray);
+
+
+                //populate the message template
+                messageDTO.FinalBody =
+                    string.Format(messageDTO.Body, strArray);
+
+
+                messageDTO.To = invoiceViewDTO.PhoneNumber;
+                messageDTO.ToEmail = invoiceViewDTO.Email;
             }
 
             return await Task.FromResult(verifySendEmail);

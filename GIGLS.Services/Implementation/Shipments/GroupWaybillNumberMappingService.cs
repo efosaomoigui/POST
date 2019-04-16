@@ -271,6 +271,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 //validate the ids are in the system
                 var serviceCenterId = int.Parse(groupWaybillNumber.Substring(1, 3));
                 var serviceCentre = await _centreService.GetServiceCentreById(serviceCenterId);
+
+                // get the service centres of login user
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var departureServiceCenterId = serviceCenters[0];
+
+                if (serviceCenters.Length == 0)
+                {
+                    throw new GenericException("Error processing request. The login user is not assign to any service centre nor has the right privilege");
+                }
+                
                 if (groupwaybillObj == null)
                 {                    
                     var currentUserId = await _userService.GetCurrentUserId();
@@ -279,7 +289,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         GroupWaybillCode = groupWaybillNumber,
                         UserId = currentUserId,
                         ServiceCentreId = serviceCentre.ServiceCentreId,
-                        IsActive = true
+                        IsActive = true,
+                        DepartureServiceCentreId = departureServiceCenterId
                     };
 
                     _uow.GroupWaybillNumber.Add(newGroupWaybill);
@@ -304,12 +315,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         throw new GenericException($"No Shipment exists for this : {waybillNumber}");
                     }
-
-                    // get the service centres
-                    var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                    var departureServiceCenterId = serviceCenters[0];
-
-
+                    
                     //check if waybill has not been grouped 
                     var isWaybillGroup = await _uow.GroupWaybillNumberMapping.ExistAsync(x => x.GroupWaybillNumber == groupWaybillNumber && x.WaybillNumber == shipmentDTO.Waybill);
 
@@ -493,6 +499,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
+        
     }
 }

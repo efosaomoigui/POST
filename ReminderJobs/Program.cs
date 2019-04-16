@@ -14,9 +14,12 @@ namespace ReminderJobs
         // AzureWebJobsDashboard and AzureWebJobsStorage
         static void Main()
         {
-            while (true)
+            //while (true)
             {
-                Functions.ReminderJob("Testing jobs for real", Console.Out, "GET", "api/webjobs/runreprintexpirycounter");
+                Functions.callAPI("GET", "api/webjobs/runreprintexpirycounter", Console.Out);
+                Functions.callAPI("GET", "api/webjobs/runreprintexpirycounter", Console.Out);
+                Functions.callAPI("GET", "api/webjobs/runreprintexpirycounter", Console.Out);
+                //Functions.WalletReminderJob("GET", "api/webjobs/runreprintexpirycounter", Console.Out);
             }
         }
     }

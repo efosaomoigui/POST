@@ -60,9 +60,8 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         Task<IEnumerable<StationDTO>> GetLocalStations();
         Task<IEnumerable<StationDTO>> GetInternationalStations();
 
-        Task<PreShipmentMobileDTO> GetPrice(PreShipmentMobileDTO preShipment);
-        Task<PreShipmentMobileDTO> CreatePreShipment(PreShipmentMobileDTO preShipmentDTO);
-        Task<List<PreShipmentMobileDTO>> GetPreShipmentById(string userid);
-
+        Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment);
+        Task<object> CreatePreShipment(PreShipmentMobileDTO preShipmentDTO);
+        Task<List<PreShipmentMobileDTO>> GetPreShipmentById();
     }
 }
