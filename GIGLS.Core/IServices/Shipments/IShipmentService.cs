@@ -32,7 +32,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<InvoiceViewDTO>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto, bool filterByDestinationSC = false);
         Task<List<InvoiceView>> GetUnGroupedWaybillsForServiceCentreDropDown(FilterOptionsDto filterOptionsDto, bool filterByDestinationSC = false);
         Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentres();
-        Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto);
+        //Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto);
+        Task<List<GroupWaybillNumberDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto);
         Task<DomesticRouteZoneMapDTO> GetZone(int destinationServiceCentre);
         Task<CountryRouteZoneMapDTO> GetCountryZone(int destinationCountry);
         Task<DailySalesDTO> GetDailySales(AccountFilterCriteria accountFilterCriteria);
