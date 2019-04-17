@@ -1178,35 +1178,23 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     groupwaybills = groupwaybills.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
                 }
-
-                //get the destination service centre from GetGroupWaybillMappings table
-               // var getGroupWaybillMappings = _uow.GroupWaybillNumberMapping.GetAllAsQueryable();
-
-               // getGroupWaybillMappings = getGroupWaybillMappings.Where(g => groupwaybills.ToList().Any(x => x.GroupWaybillCode == g.GroupWaybillNumber));
-                //getGroupWaybillMappings = getGroupWaybillMappings.Where(g => groupwaybills.Select(x => x.GroupWaybillCode).Contains(g.GroupWaybillNumber));
-                
+                                
                 //Filter the service centre details using the destination of the waybill
                 var allServiceCenters = _uow.ServiceCentre.GetAllAsQueryable();
-                //allServiceCenters = allServiceCenters.Where(s => getGroupWaybillMappings.Any(x => x.DestinationServiceCentreId == s.ServiceCentreId));
-                var result = allServiceCenters.Where(s => groupwaybills.Any(x => x.ServiceCentreId == s.ServiceCentreId)).Select(x => x.ServiceCentreId).ToList();
-                //var result = allServiceCenters.ToList();
+                var result = allServiceCenters.Where(s => groupwaybills.Any(x => x.ServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
                 
                 //Fetch all Service Centre including their Station Detail into Memory
                 var allServiceCenterDTOs = await _centreService.GetServiceCentres();
 
                 var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => result.Any(r => r == s.ServiceCentreId));
 
-                //var unmappedGroupServiceCentres = Mapper.Map<List<ServiceCentreDTO>>(result);
-
                 return unmappedGroupServiceCentres.ToList();
-
             }
             catch (Exception)
             {
                 throw;
             }
         }
-
 
         public async Task<DomesticRouteZoneMapDTO> GetZone(int destinationServiceCentre)
         {
