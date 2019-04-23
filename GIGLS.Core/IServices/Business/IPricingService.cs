@@ -13,6 +13,7 @@ namespace GIGLS.Core.IServices.Business
         Task<ShipmentDTO> GetReroutePrice(ReroutePricingDTO pricingDto);
         Task<decimal> GetMobileRegularPrice(PricingDTO pricingDto);
         Task<decimal> GetMobileEcommercePrice(PricingDTO pricingDto);
+        Task<decimal> GetMobileSpecialPrice(PricingDTO pricingDto);
 
     }
 }

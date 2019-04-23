@@ -152,13 +152,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     DepartureStationId = preShipment.SenderStationId,
                     DestinationStationId = preShipment.ReceiverStationId,
-                    Weight = (decimal)preShipmentItem.Weight
+                    Weight = (decimal)preShipmentItem.Weight,
+                    SpecialPackageId = preShipmentItem.SpecialPackageId,
+                    ShipmentType = preShipmentItem.ShipmentType
                 };
-                if (user.Organisation == "Ecommerce")
+             
+                if (preShipmentItem.ShipmentType ==ShipmentType.Ecommerce)
                 {
                     preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
                 }
-                else
+                if(preShipmentItem.ShipmentType == ShipmentType.Special)
+                {
+                    preShipmentItem.CalculatedPrice = await _pricingService.GetMobileSpecialPrice(PriceDTO);
+                }
+                else if(preShipmentItem.ShipmentType ==ShipmentType.Regular)
                 {
                     preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
                 }
