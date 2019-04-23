@@ -1,9 +1,0 @@
-﻿{
-  "$schema": "http://schemastore.org/schemas/json/webjob-publish-settings.json",
-  "webJobName": "InvoiceandWalletBalanceReminderJobs",
-  "startTime": "2018-12-16T00:00:00+01:00",
-  "endTime": "2018-12-17T00:00:00+01:00",
-  "jobRecurrenceFrequency": "Day",
-  "interval": 1,
-  "runMode": "Scheduled"
-}

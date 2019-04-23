@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.168
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.202
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GIGLS.WebApi", "GIGLS.WebApi\GIGLS.WebApi.csproj", "{34F0A9AD-90CD-4E09-9034-10A5F730F85A}"
 EndProject
@@ -12,10 +12,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GIGLS.Messaging", "GIGLS.Messaging\GIGLS.Messaging.csproj", "{F5D1AA8B-BB98-43E6-A758-CBFA7563F4A7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GIGLS.Services", "GIGLS.Services\GIGLS.Services.csproj", "{3E97DED8-8A27-4B97-B8A9-FC3511550D91}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReminderJobs", "ReminderJobs\ReminderJobs.csproj", "{494B05BC-FC71-4B14-8E24-8359C45AD74C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletReminderJobs", "WalletReminderJobs\WalletReminderJobs.csproj", "{D7BBC8AF-2715-4602-AED0-29C2EBCC7E54}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,14 +39,6 @@ Global
 		{3E97DED8-8A27-4B97-B8A9-FC3511550D91}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E97DED8-8A27-4B97-B8A9-FC3511550D91}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E97DED8-8A27-4B97-B8A9-FC3511550D91}.Release|Any CPU.Build.0 = Release|Any CPU
-		{494B05BC-FC71-4B14-8E24-8359C45AD74C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{494B05BC-FC71-4B14-8E24-8359C45AD74C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{494B05BC-FC71-4B14-8E24-8359C45AD74C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{494B05BC-FC71-4B14-8E24-8359C45AD74C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D7BBC8AF-2715-4602-AED0-29C2EBCC7E54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D7BBC8AF-2715-4602-AED0-29C2EBCC7E54}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D7BBC8AF-2715-4602-AED0-29C2EBCC7E54}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D7BBC8AF-2715-4602-AED0-29C2EBCC7E54}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
