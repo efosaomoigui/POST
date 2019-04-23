@@ -1067,53 +1067,95 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto)
+        public async Task<List<GroupWaybillNumberDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto)
         {
             try
             {
-                //filterOptionsDto.count = 1000000;
-
-                // get groupedWaybills for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var groupedWaybillsBySC = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(filterOptionsDto, serviceCenters);
 
-                // get all manifest for that Service Centre
-                var manifestGroupWayBillNumberMappings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters);
-               // var manifestGroupWayBillNumberMappingsWaybillOnly = manifestGroupWayBillNumberMappings.Select(a => a.GroupWaybillNumber);
+                //Get Groupwaybill not yet manifest for the login user
+                var groupedWaybillsBySc = _uow.GroupWaybillNumber.GetAllAsQueryable().Where(x => x.HasManifest == false);
 
-                // filter the two lists
-                //var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappings.ToList().Select(a => a.GroupWaybillNumber).Contains(s.GroupWaybillNumber));
-               // var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappingsWaybillOnly.Any(x => s.GroupWaybillNumber == x));
-                var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappings.Any(x => s.GroupWaybillNumber == x.GroupWaybillNumber));
-
-                var resultSet = new HashSet<string>();
-                var result = new List<GroupWaybillNumberMappingDTO>();
-
-                //fetch all service centre into the memory
-                var allServiceCenters = await _centreService.GetServiceCentres();
-
-                foreach (var item in unmappedGroupedWaybills)
+                if (serviceCenters.Length > 0)
                 {
-                    if (resultSet.Add(item.GroupWaybillNumber))
-                    {
-                        result.Add(item);
-                        //item.DestinationServiceCentre = await _centreService.GetServiceCentreById(item.DestinationServiceCentreId);
-                        item.DestinationServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == item.DestinationServiceCentreId).Select(s => new ServiceCentreDTO
-                        {
-                            Name = s.Name,
-                            Code = s.Code,
-                            ServiceCentreId = s.ServiceCentreId
-                        }).FirstOrDefault();
-                    }
+                    groupedWaybillsBySc = groupedWaybillsBySc.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
                 }
 
-                return result.ToList();
+                //Filter it by the destination service centre send from filter option
+                var filter = filterOptionsDto.filter;
+                int filterValue = Convert.ToInt32(filterOptionsDto.filterValue);
+                if (!string.IsNullOrEmpty(filter) && filterValue > 0)
+                {
+                    groupedWaybillsBySc = groupedWaybillsBySc.Where(s => s.ServiceCentreId == filterValue);
+                }
+
+                var result = groupedWaybillsBySc.ToList();
+
+                var resultDTO = Mapper.Map<List<GroupWaybillNumberDTO>>(result);
+
+                var DestinationServiceCentre = await _uow.ServiceCentre.GetAsync(filterValue);
+
+                foreach (var item in resultDTO)
+                {
+                    item.DestinationServiceCentre = DestinationServiceCentre;
+                }
+
+                return resultDTO;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
+        ////old not used again
+        //public async Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto)
+        //{
+        //    try
+        //    {
+        //        //filterOptionsDto.count = 1000000;
+
+        //        // get groupedWaybills for that Service Centre
+        //        var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+        //        var groupedWaybillsBySC = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(filterOptionsDto, serviceCenters);
+
+        //        // get all manifest for that Service Centre
+        //        var manifestGroupWayBillNumberMappings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters);
+        //        // var manifestGroupWayBillNumberMappingsWaybillOnly = manifestGroupWayBillNumberMappings.Select(a => a.GroupWaybillNumber);
+
+        //        // filter the two lists
+        //        //var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappings.ToList().Select(a => a.GroupWaybillNumber).Contains(s.GroupWaybillNumber));
+        //        // var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappingsWaybillOnly.Any(x => s.GroupWaybillNumber == x));
+        //        var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappings.Any(x => s.GroupWaybillNumber == x.GroupWaybillNumber));
+
+        //        var resultSet = new HashSet<string>();
+        //        var result = new List<GroupWaybillNumberMappingDTO>();
+
+        //        //fetch all service centre into the memory
+        //        var allServiceCenters = await _centreService.GetServiceCentres();
+
+        //        foreach (var item in unmappedGroupedWaybills)
+        //        {
+        //            if (resultSet.Add(item.GroupWaybillNumber))
+        //            {
+        //                result.Add(item);
+        //                //item.DestinationServiceCentre = await _centreService.GetServiceCentreById(item.DestinationServiceCentreId);
+        //                item.DestinationServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == item.DestinationServiceCentreId).Select(s => new ServiceCentreDTO
+        //                {
+        //                    Name = s.Name,
+        //                    Code = s.Code,
+        //                    ServiceCentreId = s.ServiceCentreId
+        //                }).FirstOrDefault();
+        //            }
+        //        }
+
+        //        return result.ToList();
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
         //public async Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre()
         //{
@@ -1127,10 +1169,10 @@ namespace GIGLS.Services.Implementation.Shipments
         //        {
         //            groupwaybillMapping = groupwaybillMapping.Where(s => serviceCenters.Contains(s.ServiceCentreId));
         //        }
-                
+
         //        var resultSet = new HashSet<string>();
         //        var result = new List<GroupWaybillNumberMappingDTO>();
-                
+
         //        return result.ToList();
         //    }
         //    catch (Exception)
@@ -1140,31 +1182,31 @@ namespace GIGLS.Services.Implementation.Shipments
         //}
 
         //Not used again
-        public async Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentresOld()
-        {
-            try
-            {
-                var filterOptionsDto = new FilterOptionsDto
-                {
-                    count = 1000000,
-                    page = 1,
-                    sortorder = "0"
-                };
-                var unmappedGroupWaybills = await GetUnmappedGroupedWaybillsForServiceCentre(filterOptionsDto);
+        //public async Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentresOld()
+        //{
+        //    try
+        //    {
+        //        var filterOptionsDto = new FilterOptionsDto
+        //        {
+        //            count = 1000000,
+        //            page = 1,
+        //            sortorder = "0"
+        //        };
+        //        var unmappedGroupWaybills = await GetUnmappedGroupedWaybillsForServiceCentre(filterOptionsDto);
 
-                var allServiceCenters = await _centreService.GetServiceCentres();
+        //        var allServiceCenters = await _centreService.GetServiceCentres();
 
-                var unmappedGroupServiceCentres = allServiceCenters.ToList().Where(
-                    s => unmappedGroupWaybills.Select(
-                        a => a.DestinationServiceCentreId).Contains(s.ServiceCentreId)).ToList();
+        //        var unmappedGroupServiceCentres = allServiceCenters.ToList().Where(
+        //            s => unmappedGroupWaybills.Select(
+        //                a => a.DestinationServiceCentreId).Contains(s.ServiceCentreId)).ToList();
 
-                return unmappedGroupServiceCentres;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //        return unmappedGroupServiceCentres;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
         public async Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentres()
         {
@@ -1178,35 +1220,23 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     groupwaybills = groupwaybills.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
                 }
-
-                //get the destination service centre from GetGroupWaybillMappings table
-               // var getGroupWaybillMappings = _uow.GroupWaybillNumberMapping.GetAllAsQueryable();
-
-               // getGroupWaybillMappings = getGroupWaybillMappings.Where(g => groupwaybills.ToList().Any(x => x.GroupWaybillCode == g.GroupWaybillNumber));
-                //getGroupWaybillMappings = getGroupWaybillMappings.Where(g => groupwaybills.Select(x => x.GroupWaybillCode).Contains(g.GroupWaybillNumber));
-                
+                                
                 //Filter the service centre details using the destination of the waybill
                 var allServiceCenters = _uow.ServiceCentre.GetAllAsQueryable();
-                //allServiceCenters = allServiceCenters.Where(s => getGroupWaybillMappings.Any(x => x.DestinationServiceCentreId == s.ServiceCentreId));
-                var result = allServiceCenters.Where(s => groupwaybills.Any(x => x.ServiceCentreId == s.ServiceCentreId)).Select(x => x.ServiceCentreId).ToList();
-                //var result = allServiceCenters.ToList();
+                var result = allServiceCenters.Where(s => groupwaybills.Any(x => x.ServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
                 
                 //Fetch all Service Centre including their Station Detail into Memory
                 var allServiceCenterDTOs = await _centreService.GetServiceCentres();
 
                 var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => result.Any(r => r == s.ServiceCentreId));
 
-                //var unmappedGroupServiceCentres = Mapper.Map<List<ServiceCentreDTO>>(result);
-
                 return unmappedGroupServiceCentres.ToList();
-
             }
             catch (Exception)
             {
                 throw;
             }
         }
-
 
         public async Task<DomesticRouteZoneMapDTO> GetZone(int destinationServiceCentre)
         {

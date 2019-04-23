@@ -3,6 +3,9 @@
   "WebJobs": [
     {
       "filePath": "../ReminderJobs/ReminderJobs.csproj"
+    },
+    {
+      "filePath": "../WalletReminderJobs/WalletReminderJobs.csproj"
     }
   ]
 }

@@ -402,7 +402,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     overdueShipment.OverdueShipmentStatus = OverdueShipmentStatus.UnGrouped;
                 }
 
-                _uow.Complete();
+                await _uow.CompleteAsync();
+
+                //Delete the GroupWaybill If All the Waybills attached to it have been deleted.
+                var checkIfWaybillExistForGroup = await _uow.GroupWaybillNumberMapping.FindAsync(x => x.GroupWaybillNumber == groupWaybillNumber);
+                if(checkIfWaybillExistForGroup.Count() == 0)
+                {
+                    await _groupWaybillNumberService.RemoveGroupWaybillNumber(groupWaybillNumberDTO.GroupWaybillNumberId);
+                }
             }
             catch (Exception)
             {
