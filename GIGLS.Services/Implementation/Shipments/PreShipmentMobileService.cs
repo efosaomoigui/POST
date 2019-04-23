@@ -22,6 +22,7 @@ using GIGLS.Core.DTO.Wallet;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.IServices.User;
+using GIGLS.Core.DTO.Zone;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -37,11 +38,12 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IWalletService _walletService;
         private readonly IWalletTransactionService _walletTransactionService;
         private readonly IUserService _userService;
-
+        private readonly ISpecialDomesticPackageService _specialdomesticpackageservice;
+             
         public PreShipmentMobileService(IUnitOfWork uow,IShipmentService shipmentService,IDeliveryOptionService deliveryService,
             IServiceCentreService centreService,IUserServiceCentreMappingService userServiceCentre,INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService,IWalletService walletService,IWalletTransactionService walletTransactionService,
-            IUserService userService)
+            IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -53,6 +55,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _walletService = walletService;
             _walletTransactionService = walletTransactionService;
             _userService = userService;
+            _specialdomesticpackageservice = specialdomesticpackageservice;
             MapperConfig.Initialize();
         }
 
@@ -310,6 +313,20 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
-        }        
+        }
+
+
+        public async Task<List<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages()
+        {
+            var specialpackages = await _specialdomesticpackageservice.GetSpecialDomesticPackages();
+            var special = specialpackages.ToList();
+            special.Add(new SpecialDomesticPackageDTO
+            {
+                Name = "Other",
+                Status = true,
+                SpecialDomesticPackageType = SpecialDomesticPackageType.Special
+            });
+            return special;
+        }
     }
 }

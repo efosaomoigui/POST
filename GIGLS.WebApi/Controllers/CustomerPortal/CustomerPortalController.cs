@@ -865,5 +865,18 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        [HttpGet]
+        [Route("getspecialpackages")]
+        public async Task<IServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>> GetSpecialPackages()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var specialpackages = await _preshipmentmobileService.GetSpecialDomesticPackages();
+                 return new ServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>
+                {
+                    Object = specialpackages
+                };
+            });
+        }
     }
 }
