@@ -164,10 +164,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 if(preShipmentItem.ShipmentType == ShipmentType.Special)
                 {
                     preShipmentItem.CalculatedPrice = await _pricingService.GetMobileSpecialPrice(PriceDTO);
+                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                 }
                 else if(preShipmentItem.ShipmentType ==ShipmentType.Regular)
                 {
                     preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
+                    
                 }
                 Price += (decimal)preShipmentItem.CalculatedPrice;
 
