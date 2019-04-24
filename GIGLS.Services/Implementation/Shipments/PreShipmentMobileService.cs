@@ -23,6 +23,7 @@ using GIGLS.CORE.DTO.Shipments;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -39,11 +40,12 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IWalletTransactionService _walletTransactionService;
         private readonly IUserService _userService;
         private readonly ISpecialDomesticPackageService _specialdomesticpackageservice;
+        private readonly IMobileShipmentTrackingService _mobiletrackingservice;
              
         public PreShipmentMobileService(IUnitOfWork uow,IShipmentService shipmentService,IDeliveryOptionService deliveryService,
             IServiceCentreService centreService,IUserServiceCentreMappingService userServiceCentre,INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService,IWalletService walletService,IWalletTransactionService walletTransactionService,
-            IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice)
+            IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice, IMobileShipmentTrackingService mobiletrackingservice)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -56,6 +58,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _walletTransactionService = walletTransactionService;
             _userService = userService;
             _specialdomesticpackageservice = specialdomesticpackageservice;
+            _mobiletrackingservice = mobiletrackingservice;
             MapperConfig.Initialize();
         }
 
@@ -73,7 +76,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     message = "Insufficient Wallet Balance";
                 }
 
-                return new { waybill = newPreShipment.Waybill, message = message };
+                return new { waybill = newPreShipment.Waybill, message = message, trackingid = newPreShipment.TrackingId };
             }
             catch (Exception)
             {
@@ -111,7 +114,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 newPreShipment.shipmentstatus = "Shipment created";
                 preShipmentDTO.IsBalanceSufficient = true;
                 _uow.PreShipmentMobile.Add(newPreShipment);
-                
+                await _uow.CompleteAsync();
+                var trackingnumber = await ScanMobileShipment(new ScanDTO
+                {
+                    WaybillNumber = newPreShipment.Waybill,
+                    ShipmentScanStatus = ShipmentScanStatus.CRT
+                });
+                preShipmentDTO.TrackingId = trackingnumber;
+
+
+
                 var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
 
                 var transaction = new WalletTransactionDTO
@@ -336,6 +348,42 @@ namespace GIGLS.Services.Implementation.Shipments
                 SpecialDomesticPackageType = SpecialDomesticPackageType.Special
             });
             return special;
+        }
+        public async Task<int> ScanMobileShipment(ScanDTO scan)
+        {
+            // verify the waybill number exists in the system
+            int trackingid = 0;
+            var shipment = await GetMobileShipmentForScan(scan.WaybillNumber);
+           string scanStatus = scan.ShipmentScanStatus.ToString();
+           if (shipment != null)
+            {
+               trackingid = await _mobiletrackingservice.AddMobileShipmentTracking(new MobileShipmentTrackingDTO
+                {
+                    DateTime = DateTime.Now,
+                    Status = scanStatus,
+                    Waybill = scan.WaybillNumber,
+                },  scan.ShipmentScanStatus);
+            }
+
+            return trackingid;
+        }
+        public async Task<PreShipmentMobile> GetMobileShipmentForScan(string waybill)
+        {
+            var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill.Equals(waybill));
+            return shipment;
+        }
+
+        public async Task<IEnumerable<MobileShipmentTrackingDTO>> TrackShipment(string waybillNumber)
+        {
+            try
+            {
+                var result = await _mobiletrackingservice.GetMobileShipmentTrackings(waybillNumber);
+                return result;
+            }
+            catch
+            {
+                throw new GenericException("Error: You cannot track this waybill number.");
+            }
         }
     }
 }

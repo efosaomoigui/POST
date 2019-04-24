@@ -231,6 +231,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<PreShipmentItemMobile> PresShipmentItemMobile { get; set; }
 
         public DbSet<PreShipmentMobile> PresShipmentMobile { get; set; }
+        public DbSet<MobileShipmentTracking> MobileShipmentTracking { get; set; }
 
         public DbSet<Location> Location { get; set; }
 

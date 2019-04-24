@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.CORE.DTO.Report;
 using System.Collections.Generic;
@@ -14,5 +15,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<PreShipmentMobileDTO> GetPreShipmentDetail(string waybill);
         Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser();
         Task<List<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
+        Task<IEnumerable<MobileShipmentTrackingDTO>> TrackShipment(string waybillNumber);
     }
 }
