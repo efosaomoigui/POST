@@ -11,6 +11,8 @@
     <AssemblyName>GIGLS.Core</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -171,6 +173,7 @@
     <Compile Include="Domain\Location.cs" />
     <Compile Include="Domain\LogVisitReason.cs" />
     <Compile Include="Domain\ManifestVisitMonitoring.cs" />
+    <Compile Include="Domain\MobileShipmentTracking.cs" />
     <Compile Include="Domain\Notification.cs" />
     <Compile Include="Domain\OTP.cs" />
     <Compile Include="Domain\OverdueShipment.cs" />
@@ -296,6 +299,7 @@
     <Compile Include="DTO\MessagingLog\EmailSendLogDTO.cs" />
     <Compile Include="DTO\MessagingLog\MessageFilterOption.cs" />
     <Compile Include="DTO\MessagingLog\SmsSendLogDTO.cs" />
+    <Compile Include="DTO\MobileShipmentTrackingDTO.cs" />
     <Compile Include="DTO\Nav\MainNavDTO.cs" />
     <Compile Include="DTO\Nav\SubNavDTO.cs" />
     <Compile Include="DTO\Nav\SubSubNavDTO.cs" />
@@ -506,6 +510,7 @@
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberRepository.cs" />
     <Compile Include="IRepositories\Shipments\ILogVisitReasonRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IMobileShipmentTrackingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IOverdueShipmentRepository.cs" />
     <Compile Include="IRepositories\Shipments\IPreShipmentItemMobileRepository.cs" />
     <Compile Include="IRepositories\Shipments\IPreShipmentManifestMappingRepository.cs" />
@@ -623,6 +628,7 @@
     <Compile Include="IServices\Shipments\IGroupWaybillNumberMappingService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberService.cs" />
     <Compile Include="IServices\Shipments\ILogVisitReasonService.cs" />
+    <Compile Include="IServices\Shipments\IMobileShipmentTrackingService.cs" />
     <Compile Include="IServices\Shipments\IOverdueShipmentService.cs" />
     <Compile Include="IServices\Shipments\IPreShipmentManifestMappingService.cs" />
     <Compile Include="IServices\Shipments\IManifestWaybillMappingService.cs" />
@@ -691,6 +697,13 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

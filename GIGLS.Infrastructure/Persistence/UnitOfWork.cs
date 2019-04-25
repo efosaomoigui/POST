@@ -372,7 +372,12 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IUserLoginEmailRepository UserLoginEmail { get; set; }
-        
+
+        [Inject]
+       public IMobileShipmentTrackingRepository MobileShipmentTracking
+        {
+            get; set;
+        }
 
         public int Complete()
         {
