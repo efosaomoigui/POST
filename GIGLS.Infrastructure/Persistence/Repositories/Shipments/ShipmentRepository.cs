@@ -91,10 +91,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                  CompanyType = r.CompanyType,
                                                  CustomerCode = r.CustomerCode,
-                                                 Description = r.Description
+                                                 Description = r.Description,
+                                                 SenderAddress = r.SenderAddress,
+                                                 SenderState = r.SenderState
                                                  //DepartureTerminalName = r.DepartureTerminal.Name,
                                                  //DestinationTerminalName = r.DestinationTerminal.Name       
-                                                 //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
+                                                 //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()z
                                              }).ToList();
 
 
@@ -188,6 +190,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        CompanyType = r.CompanyType,
                                        CustomerCode = r.CustomerCode,
                                        Description = r.Description,
+                                       SenderAddress = r.SenderAddress,
+                                       SenderState = r.SenderState,
                                        ReprintCounterStatus = r.ReprintCounterStatus,
                                        Invoice = Context.Invoice.Where(c => c.Waybill == r.Waybill).Select(x => new InvoiceDTO
                                        {
@@ -262,6 +266,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                    CompanyType = r.CompanyType,
                                    CustomerCode = r.CustomerCode,
                                    Description = r.Description,
+                                   SenderAddress = r.SenderAddress,
+                                   SenderState = r.SenderState,
                                    Invoice = Context.Invoice.Where(c => c.Waybill == r.Waybill).Select(x => new InvoiceDTO
                                    {
                                        InvoiceId = x.InvoiceId,
@@ -383,7 +389,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                      CompanyType = r.CompanyType,
                                                      CustomerCode = r.CustomerCode,
-                                                     Description = r.Description
+                                                     Description = r.Description,
+                                                     SenderAddress = r.SenderAddress,
+                                                     SenderState = r.SenderState
                                                  }).ToList();
 
                 //filter
@@ -497,7 +505,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                      CompanyType = r.CompanyType,
                                                      CustomerCode = r.CustomerCode,
-                                                     Description = r.Description
+                                                     Description = r.Description,
+                                                     SenderAddress = r.SenderAddress,
+                                                     SenderState = r.SenderState
                                                  }).ToList();
 
                 //filter
@@ -664,7 +674,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                  CompanyType = r.CompanyType,
                                                  CustomerCode = r.CustomerCode,
-                                                 Description = r.Description
+                                                 Description = r.Description,
+                                                 SenderAddress = r.SenderAddress,
+                                                 SenderState = r.SenderState
                                              }).ToList();
 
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -800,7 +812,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                  CompanyType = r.CompanyType,
                                                  CustomerCode = r.CustomerCode,
-                                                 Description = r.Description
+                                                 Description = r.Description,
+                                                 SenderAddress = r.SenderAddress,
+                                                 SenderState = r.SenderState
                                              }).ToList();
 
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -866,7 +880,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            IsInternational = r.IsInternational,
                                            Total = r.Total,
                                            CashOnDeliveryAmount = r.CashOnDeliveryAmount,
-                                           IsCashOnDelivery = r.IsCashOnDelivery
+                                           IsCashOnDelivery = r.IsCashOnDelivery,
+                                           SenderAddress = r.SenderAddress,
+                                           SenderState = r.SenderState
                                        }).FirstOrDefault();            
             return Task.FromResult(shipmentDto);
         }
