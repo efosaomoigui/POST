@@ -188,6 +188,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        CompanyType = r.CompanyType,
                                        CustomerCode = r.CustomerCode,
                                        Description = r.Description,
+                                       ReprintCounterStatus = r.ReprintCounterStatus,
                                        Invoice = Context.Invoice.Where(c => c.Waybill == r.Waybill).Select(x => new InvoiceDTO
                                        {
                                            InvoiceId = x.InvoiceId,
