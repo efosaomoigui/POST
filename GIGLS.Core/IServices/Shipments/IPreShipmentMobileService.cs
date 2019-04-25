@@ -15,6 +15,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<PreShipmentMobileDTO> GetPreShipmentDetail(string waybill);
         Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser();
         Task<List<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
-        Task<IEnumerable<MobileShipmentTrackingDTO>> TrackShipment(string waybillNumber);
+        Task<MobileShipmentTrackingHistoryDTO> TrackShipment(string waybillNumber);
     }
 }
