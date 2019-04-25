@@ -100,6 +100,7 @@ namespace GIGLS.Services.Implementation.Account
                     invoiceviewDTO.Email = "omoigui.efosa@thegiggroupng.com"; // invoice.Email;
                     invoiceviewDTO.PhoneNumber = invoice.PhoneNumber;
                     await _messageSenderService.SendGenericEmailMessage(MessageType.IEMAIL, invoiceviewDTO);
+                    message = "Operation Completed Successfully";
                 }
             }
             else
@@ -145,7 +146,7 @@ namespace GIGLS.Services.Implementation.Account
                     await _messageSenderService.SendGenericEmailMessage(MessageType.WEMAIL, invoiceviewDTO);
                 }
 
-                message = "Message Sen Successfully";
+                message = "Operation Completed Successfully";
             }
             else
             {
