@@ -143,7 +143,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 
                 //for other customers
                 //deduct the price for the wallet and update wallet transaction table
-                if (shipment != null && CompanyType.Ecommerce.ToString() != shipment.CompanyType)
+                //--Update April 25, 2019: Corporate customers should be debited from wallet
+                if (shipment != null && CompanyType.Client.ToString() == shipment.CompanyType)
                 {
                     if (wallet.Balance < invoiceEntity.Amount)
                     {

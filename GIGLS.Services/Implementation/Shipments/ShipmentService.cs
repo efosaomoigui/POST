@@ -5,11 +5,13 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
@@ -44,6 +46,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IShipmentTrackingService _shipmentTrackingService;
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
+        private readonly IPaymentService _paymentService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
@@ -52,7 +55,8 @@ namespace GIGLS.Services.Implementation.Shipments
             IMessageSenderService messageSenderService, ICompanyService companyService,
             IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
-            IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService
+            IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
+            IPaymentService paymentService
             )
         {
             _uow = uow;
@@ -69,6 +73,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _shipmentTrackingService = shipmentTrackingService;
             _globalPropertyService = globalPropertyService;
             _countryRouteZoneMapService = countryRouteZoneMapService;
+            _paymentService = paymentService;
             MapperConfig.Initialize();
         }
 
@@ -451,7 +456,7 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //
-        public async Task<bool> RePrintCountUpdater() 
+        public async Task<bool> RePrintCountUpdater()
         {
             try
             {
@@ -482,7 +487,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 foreach (var shipment in shipments)
                 {
                     var creationDate = shipment.DateCreated;
-                    int daysDiff = ((TimeSpan)(today- creationDate)).Days;
+                    int daysDiff = ((TimeSpan)(today - creationDate)).Days;
 
                     if (daysDiff >= globalpropertiesreprintcounter)
                     {
@@ -528,6 +533,25 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //send message
                 await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All, shipmentDTO);
+
+                //For Corporate Customers, Pay for their shipments through wallet immediately
+                if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType)
+                {
+                    var walletEnumeration = await _uow.Wallet.FindAsync(x => x.CustomerCode.Equals(customerId.CustomerCode));
+                    var wallet = walletEnumeration.FirstOrDefault();
+
+                    if (wallet != null)
+                    {
+                        await _paymentService.ProcessPayment(new PaymentTransactionDTO()
+                        {
+                            PaymentType = PaymentType.Wallet,
+                            TransactionCode = wallet.WalletNumber,
+                            Waybill = newShipment.Waybill
+                        });
+                    }
+
+                }
+
 
                 return newShipment;
             }
@@ -603,7 +627,7 @@ namespace GIGLS.Services.Implementation.Shipments
             await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
 
             //Get SuperCentre for Home Delivery
-            if(shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
+            if (shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
             {
                 var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
                 shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
@@ -661,7 +685,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 else
                 {
                     newShipment.ApproximateItemsWeight += shipmentItem.Weight;
-                }                
+                }
 
                 serialNumber++;
             }
