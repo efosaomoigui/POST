@@ -89,6 +89,7 @@ namespace GIGLS.Services.Implementation.Account
             }
 
             string message = "";
+            int count = 0;
 
             //4. send Email For all Due Invoices
             if (allinvoiceintherange != null)
@@ -97,10 +98,11 @@ namespace GIGLS.Services.Implementation.Account
                 {
                     InvoiceViewDTO invoiceviewDTO = new InvoiceViewDTO();
 
-                    invoiceviewDTO.Email = "omoigui.efosa@thegiggroupng.com"; // invoice.Email;
+                    invoiceviewDTO.Email = "it@giglogistics.com"; // invoice.Email;
                     invoiceviewDTO.PhoneNumber = invoice.PhoneNumber;
                     await _messageSenderService.SendGenericEmailMessage(MessageType.IEMAIL, invoiceviewDTO);
                     message = "Operation Completed Successfully";
+                    count++;
                 }
             }
             else
@@ -108,7 +110,7 @@ namespace GIGLS.Services.Implementation.Account
                 message = "No Due Invoices at this time!";
             }
 
-            return message;
+            return message + " Count:" + count;
         }
 
         public async Task<string> SendEmailForWalletBalanceCheck(decimal amountforreminder) 
@@ -133,6 +135,7 @@ namespace GIGLS.Services.Implementation.Account
             var invResults = usersResults.Where(s => walletthatqualifies_Result.Contains(s.UserChannelCode)).ToList();
 
             string message = "";
+            int count = 0;
 
             //4. send Email For all Due Invoices
             if (invResults != null)
@@ -141,9 +144,10 @@ namespace GIGLS.Services.Implementation.Account
                 {
                     InvoiceViewDTO invoiceviewDTO = new InvoiceViewDTO();
 
-                    invoiceviewDTO.Email = "omoigui.efosa@thegiggroupng.com"; // invoice.Email;
+                    invoiceviewDTO.Email = "it@giglogistics.com"; // invoice.Email;
                     invoiceviewDTO.PhoneNumber = user.PhoneNumber;
                     await _messageSenderService.SendGenericEmailMessage(MessageType.WEMAIL, invoiceviewDTO);
+                    count++;
                 }
 
                 message = "Operation Completed Successfully";
@@ -153,7 +157,7 @@ namespace GIGLS.Services.Implementation.Account
                 message = "No Due Invoices at this time!";
             }
 
-            return message;
+            return message+" Count:"+count;
         }
 
         public Tuple<Task<List<InvoiceDTO>>, int> GetInvoices(FilterOptionsDto filterOptionsDto)
