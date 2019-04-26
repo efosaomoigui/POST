@@ -416,7 +416,8 @@ namespace GIGLS.Services.Implementation.Messaging
                 var strArray = new string[]
                 {
                     "Customer Name",
-                    "Amount",
+                    "Wallet Balance",
+                    "Invoice Amount",
                     "Waybill",
                     "Days Overdue"
                 };
@@ -433,9 +434,10 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 //A. map the array
                 strArray[0] = customerObj.CustomerName;
-                strArray[1] = invoiceViewDTO.Amount.ToString();
-                strArray[2] = invoiceViewDTO.Waybill;
-                strArray[3] = "3";    // Days Overdue
+                strArray[1] = invoiceViewDTO.WalletBalance;
+                strArray[2] = invoiceViewDTO.Amount.ToString();
+                strArray[3] = invoiceViewDTO.Waybill;
+                strArray[4] = invoiceViewDTO.InvoiceDueDays;
 
                 ////map the array
                 //strArray[0] = invoiceViewDTO.Email;

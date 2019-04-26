@@ -96,10 +96,12 @@ namespace GIGLS.Services.Implementation.Account
             {
                 foreach (var invoice in allinvoiceintherange)
                 {
-                    InvoiceViewDTO invoiceviewDTO = new InvoiceViewDTO();
+                    InvoiceViewDTO invoiceviewDTO = Mapper.Map<InvoiceViewDTO>(invoice);
 
                     invoiceviewDTO.Email = "it@giglogistics.com"; // invoice.Email;
                     invoiceviewDTO.PhoneNumber = invoice.PhoneNumber;
+                    invoiceviewDTO.InvoiceDueDays = daystoduedate.ToString(); //invoice.DueDate.AddDays(daystoduedate);
+
                     await _messageSenderService.SendGenericEmailMessage(MessageType.IEMAIL, invoiceviewDTO);
                     message = "Operation Completed Successfully";
                     count++;
@@ -143,9 +145,12 @@ namespace GIGLS.Services.Implementation.Account
                 foreach (var user in invResults)
                 {
                     InvoiceViewDTO invoiceviewDTO = new InvoiceViewDTO();
+                    var wallinfo = allwalletsintherange.Find(s=>s.CustomerCode == user.UserChannelCode);
 
                     invoiceviewDTO.Email = "it@giglogistics.com"; // invoice.Email;
                     invoiceviewDTO.PhoneNumber = user.PhoneNumber;
+                    invoiceviewDTO.WalletBalance = wallinfo.Balance.ToString();
+
                     await _messageSenderService.SendGenericEmailMessage(MessageType.WEMAIL, invoiceviewDTO);
                     count++;
                 }
