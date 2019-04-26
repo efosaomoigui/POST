@@ -373,7 +373,7 @@ namespace GIGLS.Services.Implementation.Shipments
             return shipment;
         }
 
-        public async Task<IEnumerable<MobileShipmentTrackingDTO>> TrackShipment(string waybillNumber)
+        public async Task<MobileShipmentTrackingHistoryDTO> TrackShipment(string waybillNumber)
         {
             try
             {

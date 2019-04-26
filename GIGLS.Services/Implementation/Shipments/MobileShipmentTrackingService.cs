@@ -11,6 +11,7 @@ using System.Linq;
 using GIGLS.Infrastructure;
 using GIGLS.CORE.Domain;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Shipments;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -19,12 +20,15 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
         private readonly IMessageSenderService _messageSenderService;
+       
 
-        public MobileShipmentTrackingService(IUnitOfWork uow, IUserService userService, IMessageSenderService messageSenderService)
+        public MobileShipmentTrackingService(IUnitOfWork uow, IUserService userService, IMessageSenderService messageSenderService
+            )
         {
             _uow = uow;
             _userService = userService;
             _messageSenderService = messageSenderService;
+           
         }
 
         public async Task<List<MobileShipmentTrackingDTO>> GetMobileShipmentTrackings()
@@ -39,12 +43,20 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<IEnumerable<MobileShipmentTrackingDTO>> GetMobileShipmentTrackings(string waybill)
+        public async Task<MobileShipmentTrackingHistoryDTO> GetMobileShipmentTrackings(string waybill)
         {
             try
             {
                 var shipmentTracking = await _uow.MobileShipmentTracking.GetMobileShipmentTrackingsAsync(waybill);
-                return shipmentTracking.OrderByDescending(x => x.DateTime).ToList();
+                var addresses = await _uow.PreShipmentMobile.GetAsync(s=>s.Waybill == waybill, "");
+                var trackings = new MobileShipmentTrackingHistoryDTO
+                {
+                    Origin = addresses.SenderAddress,
+                    Destination = addresses.ReceiverAddress,
+                    MobileShipmentTrackings = shipmentTracking
+                };
+
+                return trackings;
             }
             catch (Exception)
             {

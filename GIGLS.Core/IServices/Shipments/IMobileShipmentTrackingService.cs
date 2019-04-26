@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace GIGLS.Core.IServices.Shipments
     {
         Task<List<MobileShipmentTrackingDTO>> GetMobileShipmentTrackings();
         //Task<IEnumerable<ShipmentTrackingDTO>> GetShipmentWaitingForCollection();
-        Task<IEnumerable<MobileShipmentTrackingDTO>> GetMobileShipmentTrackings(string waybill);
+        Task<MobileShipmentTrackingHistoryDTO> GetMobileShipmentTrackings(string waybill);
         Task<MobileShipmentTrackingDTO> GetMobileShipmentTrackingById(int trackingId);
         Task<int> AddMobileShipmentTracking(MobileShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus);
         Task UpdateShipmentTracking(int trackingId, MobileShipmentTrackingDTO tracking);
