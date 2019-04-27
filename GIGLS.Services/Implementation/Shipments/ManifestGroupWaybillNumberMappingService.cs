@@ -218,6 +218,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("ManifestGroupWaybillNumberMapping Does Not Exist");
                 }
                 _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupWaybillNumberMapping);
+
+                //set GroupWaybill HasManifest to false
+                var groupwaybill = _uow.GroupWaybillNumber.SingleOrDefault(x => x.GroupWaybillCode == groupWaybillNumber);
+                groupwaybill.HasManifest = false;
                 _uow.Complete();
             }
             catch (Exception)
