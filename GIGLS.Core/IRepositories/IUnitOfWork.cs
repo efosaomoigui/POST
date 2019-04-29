@@ -143,7 +143,8 @@ namespace GIGLS.Core
         IUserLoginEmailRepository UserLoginEmail { get; set; }
 
         IMobileShipmentTrackingRepository MobileShipmentTracking { get; set; }
-        
+        IMobilePickUpRequestsRepository MobilePickUpRequests { get; set; }
+
 
 
         int Complete();

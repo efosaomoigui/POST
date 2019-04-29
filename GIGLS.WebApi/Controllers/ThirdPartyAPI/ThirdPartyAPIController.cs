@@ -581,5 +581,25 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
+        /// <summary>
+        /// This api is used to track shipments created by the user
+        /// </summary>
+        /// <param name="waybillNumber"></param>
+        /// <returns></returns>
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("TrackAllShipment/{waybillNumber}")]
+        public async Task<IServiceResponse<MobileShipmentTrackingHistoryDTO>> TrackMobileShipment(string waybillNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.TrackMobileShipment(waybillNumber);
+
+                return new ServiceResponse<MobileShipmentTrackingHistoryDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

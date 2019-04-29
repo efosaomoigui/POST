@@ -63,5 +63,6 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment);
         Task<object> CreatePreShipment(PreShipmentMobileDTO preShipmentDTO);
         Task<List<PreShipmentMobileDTO>> GetPreShipmentById();
+        Task<MobileShipmentTrackingHistoryDTO> TrackMobileShipment(string waybillNumber);
     }
 }
