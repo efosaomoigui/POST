@@ -173,6 +173,7 @@
     <Compile Include="Domain\Location.cs" />
     <Compile Include="Domain\LogVisitReason.cs" />
     <Compile Include="Domain\ManifestVisitMonitoring.cs" />
+    <Compile Include="Domain\MobilePickUpRequests.cs" />
     <Compile Include="Domain\MobileShipmentTracking.cs" />
     <Compile Include="Domain\Notification.cs" />
     <Compile Include="Domain\OTP.cs" />
@@ -299,6 +300,7 @@
     <Compile Include="DTO\MessagingLog\EmailSendLogDTO.cs" />
     <Compile Include="DTO\MessagingLog\MessageFilterOption.cs" />
     <Compile Include="DTO\MessagingLog\SmsSendLogDTO.cs" />
+    <Compile Include="DTO\MobilePickUpRequestsDTO.cs" />
     <Compile Include="DTO\MobileShipmentTrackingDTO.cs" />
     <Compile Include="DTO\Nav\MainNavDTO.cs" />
     <Compile Include="DTO\Nav\SubNavDTO.cs" />
@@ -420,6 +422,7 @@
     <Compile Include="Enums\ManifestType.cs" />
     <Compile Include="Enums\MessageType.cs" />
     <Compile Include="Enums\MessagingLogStatus.cs" />
+    <Compile Include="Enums\MobilePickUpRequestStatus.cs" />
     <Compile Include="Enums\NumberGeneratorType.cs" />
     <Compile Include="Enums\OverdueShipmentStatus.cs" />
     <Compile Include="Enums\PartnerApplicationStatus.cs" />
@@ -511,6 +514,7 @@
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberRepository.cs" />
     <Compile Include="IRepositories\Shipments\ILogVisitReasonRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IMobilePickUpRequestsRepository.cs" />
     <Compile Include="IRepositories\Shipments\IMobileShipmentTrackingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IOverdueShipmentRepository.cs" />
     <Compile Include="IRepositories\Shipments\IPreShipmentItemMobileRepository.cs" />
@@ -629,6 +633,7 @@
     <Compile Include="IServices\Shipments\IGroupWaybillNumberMappingService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberService.cs" />
     <Compile Include="IServices\Shipments\ILogVisitReasonService.cs" />
+    <Compile Include="IServices\Shipments\IMobilePickUpRequestsService.cs" />
     <Compile Include="IServices\Shipments\IMobileShipmentTrackingService.cs" />
     <Compile Include="IServices\Shipments\IOverdueShipmentService.cs" />
     <Compile Include="IServices\Shipments\IPreShipmentManifestMappingService.cs" />

@@ -326,6 +326,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<UserLoginEmail, UserLoginEmailDTO>();
                 config.CreateMap<UserLoginEmailDTO, UserLoginEmail>();
+
+                config.CreateMap<MobilePickUpRequests, MobilePickUpRequestsDTO>();
+                config.CreateMap<MobilePickUpRequestsDTO, MobilePickUpRequests>();
             });
 
             isInit = true;

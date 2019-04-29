@@ -81,5 +81,12 @@
             <description>This api is used to get shipments by user</description>
             <returns></returns>
         </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.TrackMobileShipment(System.String)">
+            <summary>
+            This api is used to track shipments created by the user
+            </summary>
+            <param name="waybillNumber"></param>
+            <returns></returns>
+        </member>
     </members>
 </doc>

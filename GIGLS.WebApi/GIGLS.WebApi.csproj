@@ -282,8 +282,8 @@
     <Compile Include="Controllers\Account\GeneralLedgerController.cs" />
     <Compile Include="Controllers\Account\IncomeController.cs" />
     <Compile Include="Controllers\Account\InsuranceController.cs" />
-    <Compile Include="Controllers\Account\InvoiceReminderController.cs" />
     <Compile Include="Controllers\Account\InvoiceController.cs" />
+    <Compile Include="Controllers\Account\InvoiceReminderController.cs" />
     <Compile Include="Controllers\Account\InvoiceShipmentController.cs" />
     <Compile Include="Controllers\Account\VATController.cs" />
     <Compile Include="Controllers\BankSettlement\BankProcessingOrderController.cs" />
@@ -336,6 +336,7 @@
     <Compile Include="Controllers\ServiceCentres\StationController.cs" />
     <Compile Include="Controllers\ServiceCentres\UserServiceCentreMappingController.cs" />
     <Compile Include="Controllers\ShipmentScan\ScanStatusController.cs" />
+    <Compile Include="Controllers\Shipments\ForWebJobsController.cs" />
     <Compile Include="Controllers\Shipments\GroupWaybillNumberController.cs" />
     <Compile Include="Controllers\Shipments\GroupWaybillNumberMappingController.cs" />
     <Compile Include="Controllers\Shipments\LogVisitReasonController.cs" />
@@ -348,7 +349,6 @@
     <Compile Include="Controllers\Shipments\PreShipmentManifestMappingController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentCancelController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentCollectionController.cs" />
-    <Compile Include="Controllers\Shipments\ForWebJobsController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentDeliveryOptionMappingController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentPackagePriceController.cs" />
@@ -416,6 +416,8 @@
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %286%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevmm - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevmm - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %2814%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy.pubxml" />
@@ -483,8 +485,6 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    
-   
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

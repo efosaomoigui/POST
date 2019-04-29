@@ -169,6 +169,7 @@
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\LogVisitReasonRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\MobilePickUpRequestsRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\MobileShipmentTrackingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\OverdueShipmentRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\PreShipmentItemMobileRepository.cs" />
