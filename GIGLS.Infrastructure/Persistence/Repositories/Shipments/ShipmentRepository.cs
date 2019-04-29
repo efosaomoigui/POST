@@ -93,7 +93,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  CustomerCode = r.CustomerCode,
                                                  Description = r.Description,
                                                  SenderAddress = r.SenderAddress,
-                                                 SenderState = r.SenderState
+                                                 SenderState = r.SenderState,
+                                                 ApproximateItemsWeight = r.ApproximateItemsWeight
                                                  //DepartureTerminalName = r.DepartureTerminal.Name,
                                                  //DestinationTerminalName = r.DestinationTerminal.Name       
                                                  //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()z
@@ -193,6 +194,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        SenderAddress = r.SenderAddress,
                                        SenderState = r.SenderState,
                                        ReprintCounterStatus = r.ReprintCounterStatus,
+                                       ApproximateItemsWeight = r.ApproximateItemsWeight,
                                        Invoice = Context.Invoice.Where(c => c.Waybill == r.Waybill).Select(x => new InvoiceDTO
                                        {
                                            InvoiceId = x.InvoiceId,
@@ -268,6 +270,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                    Description = r.Description,
                                    SenderAddress = r.SenderAddress,
                                    SenderState = r.SenderState,
+                                   ApproximateItemsWeight = r.ApproximateItemsWeight,
                                    Invoice = Context.Invoice.Where(c => c.Waybill == r.Waybill).Select(x => new InvoiceDTO
                                    {
                                        InvoiceId = x.InvoiceId,
@@ -391,7 +394,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      CustomerCode = r.CustomerCode,
                                                      Description = r.Description,
                                                      SenderAddress = r.SenderAddress,
-                                                     SenderState = r.SenderState
+                                                     SenderState = r.SenderState,
+                                                     ApproximateItemsWeight = r.ApproximateItemsWeight
                                                  }).ToList();
 
                 //filter
@@ -507,7 +511,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      CustomerCode = r.CustomerCode,
                                                      Description = r.Description,
                                                      SenderAddress = r.SenderAddress,
-                                                     SenderState = r.SenderState
+                                                     SenderState = r.SenderState,
+                                                     ApproximateItemsWeight = r.ApproximateItemsWeight
                                                  }).ToList();
 
                 //filter
@@ -676,7 +681,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  CustomerCode = r.CustomerCode,
                                                  Description = r.Description,
                                                  SenderAddress = r.SenderAddress,
-                                                 SenderState = r.SenderState
+                                                 SenderState = r.SenderState,
+                                                 ApproximateItemsWeight = r.ApproximateItemsWeight
                                              }).ToList();
 
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -814,7 +820,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  CustomerCode = r.CustomerCode,
                                                  Description = r.Description,
                                                  SenderAddress = r.SenderAddress,
-                                                 SenderState = r.SenderState
+                                                 SenderState = r.SenderState,
+                                                 ApproximateItemsWeight = r.ApproximateItemsWeight
                                              }).ToList();
 
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -882,7 +889,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            CashOnDeliveryAmount = r.CashOnDeliveryAmount,
                                            IsCashOnDelivery = r.IsCashOnDelivery,
                                            SenderAddress = r.SenderAddress,
-                                           SenderState = r.SenderState
+                                           SenderState = r.SenderState,
+                                           ApproximateItemsWeight = r.ApproximateItemsWeight
                                        }).FirstOrDefault();            
             return Task.FromResult(shipmentDto);
         }

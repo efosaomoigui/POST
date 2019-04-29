@@ -89,18 +89,22 @@ namespace GIGLS.Services.Implementation.Account
             }
 
             string message = "";
+            int count = 0;
 
             //4. send Email For all Due Invoices
             if (allinvoiceintherange != null)
             {
                 foreach (var invoice in allinvoiceintherange)
                 {
-                    InvoiceViewDTO invoiceviewDTO = new InvoiceViewDTO();
+                    InvoiceViewDTO invoiceviewDTO = Mapper.Map<InvoiceViewDTO>(invoice);
 
-                    invoiceviewDTO.Email = "omoigui.efosa@thegiggroupng.com"; // invoice.Email;
+                    invoiceviewDTO.Email = "it@giglogistics.com"; // invoice.Email;
                     invoiceviewDTO.PhoneNumber = invoice.PhoneNumber;
+                    invoiceviewDTO.InvoiceDueDays = daystoduedate.ToString(); //invoice.DueDate.AddDays(daystoduedate);
+
                     await _messageSenderService.SendGenericEmailMessage(MessageType.IEMAIL, invoiceviewDTO);
                     message = "Operation Completed Successfully";
+                    count++;
                 }
             }
             else
@@ -108,7 +112,7 @@ namespace GIGLS.Services.Implementation.Account
                 message = "No Due Invoices at this time!";
             }
 
-            return message;
+            return message + " Count:" + count;
         }
 
         public async Task<string> SendEmailForWalletBalanceCheck(decimal amountforreminder) 
@@ -133,6 +137,7 @@ namespace GIGLS.Services.Implementation.Account
             var invResults = usersResults.Where(s => walletthatqualifies_Result.Contains(s.UserChannelCode)).ToList();
 
             string message = "";
+            int count = 0;
 
             //4. send Email For all Due Invoices
             if (invResults != null)
@@ -140,10 +145,14 @@ namespace GIGLS.Services.Implementation.Account
                 foreach (var user in invResults)
                 {
                     InvoiceViewDTO invoiceviewDTO = new InvoiceViewDTO();
+                    var wallinfo = allwalletsintherange.Find(s=>s.CustomerCode == user.UserChannelCode);
 
-                    invoiceviewDTO.Email = "omoigui.efosa@thegiggroupng.com"; // invoice.Email;
+                    invoiceviewDTO.Email = "it@giglogistics.com"; // invoice.Email;
                     invoiceviewDTO.PhoneNumber = user.PhoneNumber;
+                    invoiceviewDTO.WalletBalance = wallinfo.Balance.ToString();
+
                     await _messageSenderService.SendGenericEmailMessage(MessageType.WEMAIL, invoiceviewDTO);
+                    count++;
                 }
 
                 message = "Operation Completed Successfully";
@@ -153,7 +162,7 @@ namespace GIGLS.Services.Implementation.Account
                 message = "No Due Invoices at this time!";
             }
 
-            return message;
+            return message+" Count:"+count;
         }
 
         public Tuple<Task<List<InvoiceDTO>>, int> GetInvoices(FilterOptionsDto filterOptionsDto)

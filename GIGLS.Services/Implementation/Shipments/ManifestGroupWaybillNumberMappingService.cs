@@ -218,6 +218,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("ManifestGroupWaybillNumberMapping Does Not Exist");
                 }
                 _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupWaybillNumberMapping);
+
+                //set GroupWaybill HasManifest to false
+                var groupwaybill = _uow.GroupWaybillNumber.SingleOrDefault(x => x.GroupWaybillCode == groupWaybillNumber);
+                groupwaybill.HasManifest = false;
                 _uow.Complete();
             }
             catch (Exception)
@@ -246,7 +250,17 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
                 var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters, dateFilterCriteria);
-                return manifestGroupWaybillMapings;
+
+                //group the result by manifest                
+                var resultGroup = manifestGroupWaybillMapings.GroupBy(x => x.ManifestCode).ToList();
+                var result = new List<ManifestGroupWaybillNumberMappingDTO>();
+                
+                foreach(var resultGrp in resultGroup)
+                {
+                    result.Add(resultGrp.FirstOrDefault());
+                }
+
+                return result;
             }
             catch (Exception)
             {
