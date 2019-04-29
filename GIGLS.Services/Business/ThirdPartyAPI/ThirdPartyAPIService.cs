@@ -44,11 +44,14 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IPreShipmentMobileService _preshipmentMobileService;
         private readonly IWalletService _walletService;
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
-        
+        private readonly IMobileShipmentTrackingService _mobiletrackingservice;
+
+
         public ThirdPartyAPIService(IUnitOfWork uow, IPreShipmentService preShipmentService, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService, 
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService,
-            ICustomerService customerService, IPreShipmentMobileService preshipmentMobileService, IWalletService walletService, INumberGeneratorMonitorService numberGeneratorMonitorService)
+            ICustomerService customerService, IPreShipmentMobileService preshipmentMobileService, IWalletService walletService, INumberGeneratorMonitorService numberGeneratorMonitorService,
+            IMobileShipmentTrackingService mobiletrackingservice)
         {
             _preShipmentService = preShipmentService;
             _invoiceService = invoiceService;
@@ -364,6 +367,18 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var preshipmentDto = await _preshipmentMobileService.GetPreShipmentForUser();
             return preshipmentDto;
+        }
+        public async Task<MobileShipmentTrackingHistoryDTO> TrackMobileShipment(string waybillNumber)
+        {
+            try
+            {
+                var result = await _mobiletrackingservice.GetMobileShipmentTrackings(waybillNumber);
+                return result;
+            }
+            catch
+            {
+                throw new GenericException("Error: You cannot track this waybill number.");
+            }
         }
     }
 }

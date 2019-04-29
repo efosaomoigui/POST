@@ -41,11 +41,13 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUserService _userService;
         private readonly ISpecialDomesticPackageService _specialdomesticpackageservice;
         private readonly IMobileShipmentTrackingService _mobiletrackingservice;
+        private readonly IMobilePickUpRequestsService _mobilepickuprequestservice;
              
         public PreShipmentMobileService(IUnitOfWork uow,IShipmentService shipmentService,IDeliveryOptionService deliveryService,
             IServiceCentreService centreService,IUserServiceCentreMappingService userServiceCentre,INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService,IWalletService walletService,IWalletTransactionService walletTransactionService,
-            IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice, IMobileShipmentTrackingService mobiletrackingservice)
+            IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice, IMobileShipmentTrackingService mobiletrackingservice,
+            IMobilePickUpRequestsService mobilepickuprequestservice)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -59,6 +61,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _userService = userService;
             _specialdomesticpackageservice = specialdomesticpackageservice;
             _mobiletrackingservice = mobiletrackingservice;
+            _mobilepickuprequestservice = mobilepickuprequestservice;
             MapperConfig.Initialize();
         }
 
@@ -99,16 +102,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 var price = (wallet.Balance - Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal));
                 var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
                 preShipmentDTO.Waybill = waybill;
-                var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
-                foreach (var item in newPreShipment.PreShipmentItems)
+                foreach (var item in preShipmentDTO.PreShipmentItems)
                 {
                     if (!string.IsNullOrEmpty(item.Value))
                     {
-                        newPreShipment.Value += Convert.ToDecimal(item.Value);
-                        newPreShipment.IsdeclaredVal = true;
+                        preShipmentDTO.Value += Convert.ToDecimal(item.Value);
+                        preShipmentDTO.IsdeclaredVal = true;
                     }
+                    
                 }
-                
+                var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
                 newPreShipment.IsConfirmed = false;
                 newPreShipment.IsDelivered = false;
                 newPreShipment.shipmentstatus = "Shipment created";
@@ -159,6 +162,10 @@ namespace GIGLS.Services.Implementation.Shipments
             decimal DeclaredValue = 0.0M;
             foreach (var preShipmentItem in preShipment.PreShipmentItems)
             {
+                if (preShipmentItem.Quantity == 0)
+                {
+                    throw new GenericException("Quantity cannot be zero");
+                }
                 preShipmentItem.Weight = (preShipmentItem.Quantity * preShipmentItem.Weight);
                 var PriceDTO = new PricingDTO
                 {
@@ -168,7 +175,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     SpecialPackageId = preShipmentItem.SpecialPackageId,
                     ShipmentType = preShipmentItem.ShipmentType
                 };
-             
+              
                 if (preShipmentItem.ShipmentType ==ShipmentType.Ecommerce)
                 {
                     preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
@@ -383,6 +390,19 @@ namespace GIGLS.Services.Implementation.Shipments
             catch
             {
                 throw new GenericException("Error: You cannot track this waybill number.");
+            }
+        }
+        public async Task<bool> AddMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest)
+        {
+            try
+            {
+                await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
+                return true;
+              
+            }
+            catch
+            {
+                throw;
             }
         }
     }

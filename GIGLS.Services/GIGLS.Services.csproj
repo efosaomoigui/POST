@@ -220,6 +220,7 @@
     <Compile Include="Implementation\Shipments\GroupWaybillNumberMappingService.cs" />
     <Compile Include="Implementation\Shipments\GroupWaybillNumberService.cs" />
     <Compile Include="Implementation\Shipments\LogVisitReasonService.cs" />
+    <Compile Include="Implementation\Shipments\MobilePickUpRequestsService.cs" />
     <Compile Include="Implementation\Shipments\MobileShipmentTrackingService.cs" />
     <Compile Include="Implementation\Shipments\OverdueShipmentService.cs" />
     <Compile Include="Implementation\Shipments\PreShipmentManifestMappingService.cs" />

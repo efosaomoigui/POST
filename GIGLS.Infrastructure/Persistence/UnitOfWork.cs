@@ -374,11 +374,13 @@ namespace GIGLS.Infrastructure.Persistence
         public IUserLoginEmailRepository UserLoginEmail { get; set; }
 
         [Inject]
-       public IMobileShipmentTrackingRepository MobileShipmentTracking
-        {
-            get; set;
-        }
+        public IMobileShipmentTrackingRepository MobileShipmentTracking
+        {get; set;}
 
+        [Inject]
+        public IMobilePickUpRequestsRepository MobilePickUpRequests
+        { get; set; }
+       
         public int Complete()
         {
             return _context.SaveChanges();
