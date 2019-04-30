@@ -208,6 +208,7 @@ namespace GIGLS.Services.Implementation.Shipments
             preShipment.Value = DeclaredValue;
             var returnprice = new MobilePriceDTO()
             {
+                PreshipmentMobile = preShipment,
                 DeliveryPrice = preShipment.DeliveryPrice,
                 Vat= preShipment.Vat,
                 InsuranceValue = preShipment.InsuranceValue,
