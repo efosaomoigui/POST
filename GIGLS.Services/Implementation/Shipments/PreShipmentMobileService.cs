@@ -167,7 +167,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Quantity cannot be zero");
                 }
-                preShipmentItem.Weight = (preShipmentItem.Quantity * preShipmentItem.Weight);
+                
                 var PriceDTO = new PricingDTO
                 {
                     DepartureStationId = preShipment.SenderStationId,
@@ -180,6 +180,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (preShipmentItem.ShipmentType ==ShipmentType.Ecommerce)
                 {
                     preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
+                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                 }
                 if(preShipmentItem.ShipmentType == ShipmentType.Special)
                 {
@@ -189,7 +190,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 else if(preShipmentItem.ShipmentType ==ShipmentType.Regular)
                 {
                     preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
-                    
+                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                 }
                 Price += (decimal)preShipmentItem.CalculatedPrice;
 
