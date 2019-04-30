@@ -48,7 +48,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var shipmentTracking = await _uow.MobileShipmentTracking.GetMobileShipmentTrackingsAsync(waybill);
-                var addresses = await _uow.PreShipmentMobile.GetAsync(s=>s.Waybill == waybill, "");
+                var addresses = await _uow.PreShipmentMobile.GetAsync(s=>s.Waybill == waybill);
                 var trackings = new MobileShipmentTrackingHistoryDTO
                 {
                     Origin = addresses.SenderAddress,

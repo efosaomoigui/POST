@@ -8,10 +8,9 @@ namespace GIGLS.Core.Enums
 {
     public enum MobilePickUpRequestStatus
     {
-        Created,
+        Accepted,
         Confirmed,
         Rejected,
-        Cancelled,
         Delivered
     }
 }

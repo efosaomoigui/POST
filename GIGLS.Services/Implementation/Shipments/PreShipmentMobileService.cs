@@ -71,15 +71,16 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var newPreShipment = await CreatePreShipment(preShipment);
                 await _uow.CompleteAsync();
-                
+                bool IsBalanceSufficient = true;
                 string message = "Shipment created successfully";               
 
                 if (newPreShipment.IsBalanceSufficient == false)
                 {
                     message = "Insufficient Wallet Balance";
+                    IsBalanceSufficient = false;
                 }
 
-                return new { waybill = newPreShipment.Waybill, message = message, trackingid = newPreShipment.TrackingId };
+                return new { waybill = newPreShipment.Waybill, message = message, IsBalanceSufficient};
             }
             catch (Exception)
             {
@@ -399,6 +400,31 @@ namespace GIGLS.Services.Implementation.Shipments
                 await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
                 return true;
               
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        public async Task<bool> UpdateMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest)
+        {
+            try
+            {
+                await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
+                return true;
+
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        public async Task<List<MobilePickUpRequestsDTO>> GetMobilePickupRequest()
+        {
+            try
+            {
+                var mobilerequests = await _mobilepickuprequestservice.GetAllMobilePickUpRequests();
+                return mobilerequests;
             }
             catch
             {

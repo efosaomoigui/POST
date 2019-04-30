@@ -27,7 +27,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
         {
             try
             {
-                var MobileshipmentTrackings = Context.MobileShipmentTracking;
+                var MobileshipmentTrackings = _context.MobileShipmentTracking;
 
                 var mobileshipmentTrackingDto = from shipmentTracking in MobileshipmentTrackings
                                           select new MobileShipmentTrackingDTO
@@ -58,8 +58,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                           };
                 var AllshipmentTrackings = shipmentTrackingDto.ToList();
                 AllshipmentTrackings.AddRange(mobileshipmentTrackingDto);
-
-                    return Task.FromResult(AllshipmentTrackings.ToList());
+                return Task.FromResult(AllshipmentTrackings.ToList());
             }
             catch (Exception)
             {
