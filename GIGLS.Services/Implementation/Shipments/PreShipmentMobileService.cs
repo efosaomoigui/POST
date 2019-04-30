@@ -412,7 +412,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
+                await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest);
                 return true;
 
             }

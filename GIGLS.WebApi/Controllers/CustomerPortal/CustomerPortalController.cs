@@ -911,7 +911,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("getmobilepickuprequests")]
-        public async Task<IServiceResponse<List<MobilePickUpRequestsDTO>>> GetPickupRequest()
+        public async Task<IServiceResponse<List<MobilePickUpRequestsDTO>>> GetPickupRequests()
         {
             return await HandleApiOperationAsync(async () =>
             {
