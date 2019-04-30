@@ -101,5 +101,6 @@ namespace GIGLS.Core.DTO.Account
 
         public string InvoiceDueDays { get; set; }
 
+        public string PaymentStatusDisplay { get; set; }
     }
 }

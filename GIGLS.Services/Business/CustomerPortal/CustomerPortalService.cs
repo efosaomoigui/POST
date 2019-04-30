@@ -57,8 +57,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
-            ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService,ICustomerService customerService, 
-            IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService, 
+            ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService, ICustomerService customerService,
+            IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
             ISLAService slaService, IOTPService otpService)
         {
             _shipmentService = shipmentService;
@@ -120,7 +120,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 //Check if transaction exist before updating the wallet
                 //to prevent duplicate entry
-                var transactionExist =_uow.WalletTransaction.GetAllAsQueryable().SingleOrDefault(s => s.PaymentTypeReference == walletPaymentLogDto.Reference);
+                var transactionExist = _uow.WalletTransaction.GetAllAsQueryable().SingleOrDefault(s => s.PaymentTypeReference == walletPaymentLogDto.Reference);
 
                 if (transactionExist != null)
                 {
@@ -188,6 +188,18 @@ namespace GIGLS.Services.Business.CustomerPortal
             invoices = invoices.OrderByDescending(s => s.DateCreated).ToList();
 
             var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
+
+            //Update to change the Corporate Paid status from 'Paid' to 'Credit'
+            foreach (var item in invoicesDto)
+            {
+                item.PaymentStatusDisplay = item.PaymentStatus.ToString();
+                if ((CompanyType.Corporate.ToString() == item.CompanyType)
+                    && (PaymentStatus.Paid == item.PaymentStatus))
+                {
+                    item.PaymentStatusDisplay = "Credit";
+                }
+            }
+
             return invoicesDto;
         }
 
@@ -404,10 +416,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     CustomerCode = user.UserChannelCode,
                     PictureUrl = user.PictureUrl
                     //added this to pass channelcode 
-                   
+
 
                 };
-         //2. Create customer data
+                //2. Create customer data
                 var result = await _customerService.CreateCustomer(customer);
 
                 if (result != null)
@@ -483,7 +495,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             //Get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
-            
+
             var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode.ToLower() == currentUser.UserChannelCode.ToLower());
 
             if (wallet == null)
@@ -558,7 +570,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException("User has not registered!");
             }
-            
+
             var result = await SendOTPForRegisteredUser(registeredUser);
             return result;
         }
