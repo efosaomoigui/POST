@@ -212,6 +212,7 @@
     <Compile Include="Implementation\PaymentTransactions\PaymentTransactionService.cs" />
     <Compile Include="Implementation\Report\AccountReportService.cs" />
     <Compile Include="Implementation\Report\ShipmentReportService.cs" />
+    <Compile Include="Implementation\ServiceCentres\RegionService.cs" />
     <Compile Include="Implementation\ServiceCentres\ServiceCentreService.cs" />
     <Compile Include="Implementation\ServiceCentres\StationService.cs" />
     <Compile Include="Implementation\ServiceCentres\UserServiceCentreMappingService.cs" />
