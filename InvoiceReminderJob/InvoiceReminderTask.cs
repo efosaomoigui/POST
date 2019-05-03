@@ -17,7 +17,7 @@ namespace InvoiceReminderJob
             // The code provided will print ‘Hello World’ to the console.
             try
             {
-                ApiCaller.callAPI("GET", "invoice/sendemailfordueinvoices?datetoduedate=14  ", Console.Out).Wait();
+                ApiCaller.callAPI("GET", "api/invoice/sendemailfordueinvoices?datetoduedate=14  ", Console.Out).Wait();
             }
             catch (Exception ex)
             {
