@@ -18,6 +18,5 @@ namespace GIGLS.Core.IServices.Shipments
         Task<MobileShipmentTrackingHistoryDTO> TrackShipment(string waybillNumber);
         Task<bool> AddMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest);
         Task<List<MobilePickUpRequestsDTO>> GetMobilePickupRequest();
-        Task<bool> UpdateMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest);
     }
 }

@@ -97,7 +97,6 @@ namespace GIGLS.Core.DTO.Shipments
         //Agility Validations
         public double? CalculatedTotal { get; set; } = 0;
         public bool? IsBalanceSufficient { get; set; }
-        public bool? IsFromCustomerPortal { get; set; }
 
         public string shipmentstatus { get; set; }
         public bool IsDelivered { get; set; }

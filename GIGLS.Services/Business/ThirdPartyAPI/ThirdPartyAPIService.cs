@@ -65,7 +65,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             _preshipmentMobileService = preshipmentMobileService;
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
-            _mobiletrackingservice = mobiletrackingservice;
             MapperConfig.Initialize();
         }
 

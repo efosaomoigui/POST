@@ -923,20 +923,5 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
-        [HttpPost]
-        [Route("getmobilepickuprequests")]
-        public async Task<IServiceResponse<bool>> UpdatePickupRequests(MobilePickUpRequestsDTO PickupRequest)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var flag = await _preshipmentmobileService.UpdateMobilePickupRequest(PickupRequest);
-
-                return new ServiceResponse<bool>
-                {
-                    Object = flag
-                };
-            });
-        }
     }
 }
