@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.Domain
 {
-    public class MobilePickUpRequests
+    public class MobilePickUpRequests : BaseDomain
     {
         public int MobilePickUpRequestsId { get; set; }
         //foreign key information

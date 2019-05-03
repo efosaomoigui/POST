@@ -71,15 +71,16 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var newPreShipment = await CreatePreShipment(preShipment);
                 await _uow.CompleteAsync();
-                
+                bool IsBalanceSufficient = true;
                 string message = "Shipment created successfully";               
 
                 if (newPreShipment.IsBalanceSufficient == false)
                 {
                     message = "Insufficient Wallet Balance";
+                    IsBalanceSufficient = false;
                 }
 
-                return new { waybill = newPreShipment.Waybill, message = message, trackingid = newPreShipment.TrackingId };
+                return new { waybill = newPreShipment.Waybill, message = message, IsBalanceSufficient};
             }
             catch (Exception)
             {
@@ -92,30 +93,43 @@ namespace GIGLS.Services.Implementation.Shipments
             // get the current user info
             var currentUser = await _userService.GetCurrentUserId();
             preShipmentDTO.UserId = currentUser;
-
-            var PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
-
-            var wallet = await _walletService.GetWalletBalance();
-
-            if (wallet.Balance >= Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal))
+            var preshipment = new PreShipmentMobileDTO();
+            if (preShipmentDTO.IsFromCustomerPortal == true)
             {
-                var price = (wallet.Balance - Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal));
+                preshipment = await AddMobilePreshipment(preShipmentDTO);
+                return preshipment;
+            }
+            else
+            {
+                var price = await GetPrice(preShipmentDTO);
+                preShipmentDTO.GrandTotal = (decimal)price.GrandTotal;
+                preshipment = await AddMobilePreshipment(preShipmentDTO);
+                return preshipment;
+            }
+        }
+        public async  Task<PreShipmentMobileDTO> AddMobilePreshipment(PreShipmentMobileDTO preshipment)
+        {
+            var wallet = await _walletService.GetWalletBalance();
+            if (wallet.Balance >= Convert.ToDecimal(preshipment.GrandTotal))
+            {
+                var price = (wallet.Balance - Convert.ToDecimal(preshipment.GrandTotal));
                 var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
-                preShipmentDTO.Waybill = waybill;
-                foreach (var item in preShipmentDTO.PreShipmentItems)
+                preshipment.GrandTotal = (decimal)preshipment.GrandTotal;
+                preshipment.Waybill = waybill;
+                foreach (var item in preshipment.PreShipmentItems)
                 {
                     if (!string.IsNullOrEmpty(item.Value))
                     {
-                        preShipmentDTO.Value += Convert.ToDecimal(item.Value);
-                        preShipmentDTO.IsdeclaredVal = true;
+                        preshipment.Value += Convert.ToDecimal(item.Value);
+                        preshipment.IsdeclaredVal = true;
                     }
-                    
+
                 }
-                var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
+                var newPreShipment = Mapper.Map<PreShipmentMobile>(preshipment);
                 newPreShipment.IsConfirmed = false;
                 newPreShipment.IsDelivered = false;
                 newPreShipment.shipmentstatus = "Shipment created";
-                preShipmentDTO.IsBalanceSufficient = true;
+                preshipment.IsBalanceSufficient = true;
                 _uow.PreShipmentMobile.Add(newPreShipment);
                 await _uow.CompleteAsync();
                 var trackingnumber = await ScanMobileShipment(new ScanDTO
@@ -123,7 +137,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     WaybillNumber = newPreShipment.Waybill,
                     ShipmentScanStatus = ShipmentScanStatus.CRT
                 });
-                preShipmentDTO.TrackingId = trackingnumber;
+                preshipment.TrackingId = trackingnumber;
 
 
 
@@ -133,7 +147,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     WalletId = wallet.WalletId,
                     CreditDebitType = CreditDebitType.Debit,
-                    Amount = (decimal)newPreShipment.CalculatedTotal,
+                    Amount = (decimal)newPreShipment.GrandTotal,
                     ServiceCentreId = defaultServiceCenter.ServiceCentreId,
                     Waybill = waybill,
                     Description = "Payment for Shipment",
@@ -146,15 +160,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
                 updatedwallet.Balance = price;
                 await _uow.CompleteAsync();
-                return preShipmentDTO;
+                return preshipment;
             }
             else
             {
-                preShipmentDTO.IsBalanceSufficient = false;
-                return preShipmentDTO;
+                preshipment.IsBalanceSufficient = false;
+                return preshipment;
             }
         }
-
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
             var user = await _userService.GetUserById(preShipment.UserId);
@@ -166,7 +179,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Quantity cannot be zero");
                 }
-                preShipmentItem.Weight = (preShipmentItem.Quantity * preShipmentItem.Weight);
+                
                 var PriceDTO = new PricingDTO
                 {
                     DepartureStationId = preShipment.SenderStationId,
@@ -179,6 +192,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (preShipmentItem.ShipmentType ==ShipmentType.Ecommerce)
                 {
                     preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
+                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                 }
                 if(preShipmentItem.ShipmentType == ShipmentType.Special)
                 {
@@ -188,7 +202,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 else if(preShipmentItem.ShipmentType ==ShipmentType.Regular)
                 {
                     preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
-                    
+                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                 }
                 Price += (decimal)preShipmentItem.CalculatedPrice;
 
@@ -207,6 +221,7 @@ namespace GIGLS.Services.Implementation.Shipments
             preShipment.Value = DeclaredValue;
             var returnprice = new MobilePriceDTO()
             {
+                PreshipmentMobile = preShipment,
                 DeliveryPrice = preShipment.DeliveryPrice,
                 Vat= preShipment.Vat,
                 InsuranceValue = preShipment.InsuranceValue,
@@ -399,6 +414,31 @@ namespace GIGLS.Services.Implementation.Shipments
                 await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
                 return true;
               
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        public async Task<bool> UpdateMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest)
+        {
+            try
+            {
+                await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest);
+                return true;
+
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        public async Task<List<MobilePickUpRequestsDTO>> GetMobilePickupRequest()
+        {
+            try
+            {
+                var mobilerequests = await _mobilepickuprequestservice.GetAllMobilePickUpRequests();
+                return mobilerequests;
             }
             catch
             {

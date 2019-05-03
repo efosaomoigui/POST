@@ -900,11 +900,41 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var PreshipMentMobile = await _preshipmentmobileService.AddMobilePickupRequest(PickupRequest);
+                var flag = await _preshipmentmobileService.AddMobilePickupRequest(PickupRequest);
 
                 return new ServiceResponse<object>
                 {
-                    Object = PreshipMentMobile
+                    Object = flag
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getmobilepickuprequests")]
+        public async Task<IServiceResponse<List<MobilePickUpRequestsDTO>>> GetPickupRequests()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var PickUpRequests = await _preshipmentmobileService.GetMobilePickupRequest();
+
+                return new ServiceResponse<List<MobilePickUpRequestsDTO>>
+                {
+                    Object = PickUpRequests
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getmobilepickuprequests")]
+        public async Task<IServiceResponse<bool>> UpdatePickupRequests(MobilePickUpRequestsDTO PickupRequest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _preshipmentmobileService.UpdateMobilePickupRequest(PickupRequest);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = flag
                 };
             });
         }
