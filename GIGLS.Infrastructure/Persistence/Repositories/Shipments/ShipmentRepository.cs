@@ -125,8 +125,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                     shipment = shipment.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
                 }
 
-
-                var count = shipment.Count();
+                var count = 0;
                 //shipment = shipment.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count);
 
 
@@ -208,7 +207,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            IsInternational = x.IsInternational
                                        }).FirstOrDefault()
                                        //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
-                                   }).OrderByDescending(x => x.DateCreated).Take(20).ToList();
+                                   }).OrderByDescending(x => x.DateCreated).Take(10).ToList();
+
+                    //var count = shipment.Count();
+                    count = shipmentDto.Count();
 
                     return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto), count);
                 }
@@ -315,7 +317,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 }
 
                 shipmentDto = shipmentDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
-
+                count = shipmentDto.Count();
                 return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto), count);
             }
             catch (Exception)
