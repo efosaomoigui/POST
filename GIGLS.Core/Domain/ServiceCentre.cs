@@ -1,6 +1,5 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.Domain;
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,7 +9,7 @@ namespace GIGL.GIGLS.Core.Domain
     {
         public int ServiceCentreId { get; set; }
 
-        [MaxLength(100), MinLength(5)]
+        [MaxLength(100)]
         [Index(IsUnique = true)]
         public string Name { get; set; }
 
