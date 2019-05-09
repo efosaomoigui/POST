@@ -43,7 +43,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(Convert.ToInt32(PickUpRequest.Waybill));
+                var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(s=>s.Waybill==PickUpRequest.Waybill);
                 if (MobilePickupRequests == null )
                 {
                     throw new GenericException("Pickup Request Does Not Exist");

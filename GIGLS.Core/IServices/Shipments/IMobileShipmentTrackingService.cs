@@ -12,10 +12,9 @@ namespace GIGLS.Core.IServices.Shipments
     public interface IMobileShipmentTrackingService : IServiceDependencyMarker
     {
         Task<List<MobileShipmentTrackingDTO>> GetMobileShipmentTrackings();
-        //Task<IEnumerable<ShipmentTrackingDTO>> GetShipmentWaitingForCollection();
         Task<MobileShipmentTrackingHistoryDTO> GetMobileShipmentTrackings(string waybill);
         Task<MobileShipmentTrackingDTO> GetMobileShipmentTrackingById(int trackingId);
-        Task<int> AddMobileShipmentTracking(MobileShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus);
+        Task AddMobileShipmentTracking(MobileShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus);
         Task UpdateShipmentTracking(int trackingId, MobileShipmentTrackingDTO tracking);
         Task<bool> CheckMobileShipmentTracking(string waybill, string status);
     }

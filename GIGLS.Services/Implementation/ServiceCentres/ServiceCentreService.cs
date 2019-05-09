@@ -240,20 +240,22 @@ namespace GIGLS.Services.IServices.ServiceCentres
                     }
                 }
 
+                var station = await _uow.Station.GetAsync(service.StationId);
+
                 //2. Update the service centre details
                 centre.Name = service.Name;
                 centre.PhoneNumber = service.PhoneNumber;
                 centre.Address = service.Address;
                 centre.City = service.City;
                 centre.Email = service.Email;
-                centre.StationId = service.StationId;
+                centre.StationId = station.StationId;
                 centre.IsActive = true;
                 centre.Code = service.Code;
                 centre.TargetAmount = service.TargetAmount;
                 centre.TargetOrder = service.TargetOrder;
                 _uow.Complete();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }

@@ -923,5 +923,35 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPost]
+        [Route("updatemobilepickuprequests")]
+        public async Task<IServiceResponse<object>> UpdatePickupRequests(MobilePickUpRequestsDTO PickupRequest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _preshipmentmobileService.UpdateMobilePickupRequest(PickupRequest);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getpreshipmentmobiledetails/{waybillNumber}")]
+        public async Task<IServiceResponse<PreShipmentMobileDTO>> GetPreshipmentMobileDetails(string waybillNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var details = await _preshipmentmobileService.GetPreShipmentDetail(waybillNumber);
+
+                return new ServiceResponse<PreShipmentMobileDTO>
+                {
+                    Object = details
+                };
+            });
+        }
     }
 }

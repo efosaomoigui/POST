@@ -90,12 +90,12 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<int> AddMobileShipmentTracking(MobileShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus)
+        public async Task AddMobileShipmentTracking(MobileShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus)
         {
             
             try
             {
-                int Id = 0;
+                
                 if (tracking.User == null)
                 {
                     tracking.User = await _userService.GetCurrentUserId();
@@ -117,11 +117,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                     _uow.MobileShipmentTracking.Add(newShipmentTracking);
                     await _uow.CompleteAsync();
-                    Id = newShipmentTracking.MobileShipmentTrackingId;
+                    
                 }
-                
-               
-                return Id;
             }
             catch (Exception)
             {
