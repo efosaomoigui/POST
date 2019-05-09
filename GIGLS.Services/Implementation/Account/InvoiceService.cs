@@ -98,7 +98,6 @@ namespace GIGLS.Services.Implementation.Account
                 {
                     InvoiceViewDTO invoiceviewDTO = Mapper.Map<InvoiceViewDTO>(invoice);
 
-                    invoiceviewDTO.Email = "it@giglogistics.com"; // invoice.Email;
                     invoiceviewDTO.PhoneNumber = invoice.PhoneNumber;
                     invoiceviewDTO.InvoiceDueDays = daystoduedate.ToString(); //invoice.DueDate.AddDays(daystoduedate);
 
@@ -146,8 +145,6 @@ namespace GIGLS.Services.Implementation.Account
                 {
                     InvoiceViewDTO invoiceviewDTO = new InvoiceViewDTO();
                     var wallinfo = allwalletsintherange.Find(s=>s.CustomerCode == user.UserChannelCode);
-
-                    invoiceviewDTO.Email = "it@giglogistics.com"; // invoice.Email;
                     invoiceviewDTO.PhoneNumber = user.PhoneNumber;
                     invoiceviewDTO.WalletBalance = wallinfo.Balance.ToString();
 
