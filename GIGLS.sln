@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.168
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.202
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GIGLS.WebApi", "GIGLS.WebApi\GIGLS.WebApi.csproj", "{34F0A9AD-90CD-4E09-9034-10A5F730F85A}"
 EndProject
@@ -13,13 +13,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GIGLS.Messaging", "GIGLS.Me
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GIGLS.Services", "GIGLS.Services\GIGLS.Services.csproj", "{3E97DED8-8A27-4B97-B8A9-FC3511550D91}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReminderJobs", "ReminderJobs\ReminderJobs.csproj", "{494B05BC-FC71-4B14-8E24-8359C45AD74C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReprintReminder", "ReprintReminder\ReprintReminder.csproj", "{8FB810F2-6766-4AC9-BAB0-9CCBEA87E067}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RePrintJobs", "RePrintJobs\RePrintJobs.csproj", "{4F2A9F64-C70E-4E8C-B40C-110BB752EB67}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiProcessor", "ApiProcessor\ApiProcessor.csproj", "{117C4B24-C6D3-4D17-BA8D-02E717CEAA94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletReminderJobs", "WalletReminderJobs\WalletReminderJobs.csproj", "{57BF7E21-7F8C-4896-819A-CACC8718D69A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvoiceReminderJob", "InvoiceReminderJob\InvoiceReminderJob.csproj", "{DD4DC220-45D5-476F-BDB7-2AFD10D1EAE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvoiceReminderJobs", "InvoiceReminderJobs\InvoiceReminderJobs.csproj", "{A11D30F6-6B6F-4774-9C27-4B1254B4375E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletReminderJobs", "WalletReminderJobs\WalletReminderJobs.csproj", "{BFEF64E0-9061-4865-87B2-A41F33383695}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,22 +47,22 @@ Global
 		{3E97DED8-8A27-4B97-B8A9-FC3511550D91}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E97DED8-8A27-4B97-B8A9-FC3511550D91}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E97DED8-8A27-4B97-B8A9-FC3511550D91}.Release|Any CPU.Build.0 = Release|Any CPU
-		{494B05BC-FC71-4B14-8E24-8359C45AD74C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{494B05BC-FC71-4B14-8E24-8359C45AD74C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{494B05BC-FC71-4B14-8E24-8359C45AD74C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{494B05BC-FC71-4B14-8E24-8359C45AD74C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4F2A9F64-C70E-4E8C-B40C-110BB752EB67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4F2A9F64-C70E-4E8C-B40C-110BB752EB67}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4F2A9F64-C70E-4E8C-B40C-110BB752EB67}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4F2A9F64-C70E-4E8C-B40C-110BB752EB67}.Release|Any CPU.Build.0 = Release|Any CPU
-		{57BF7E21-7F8C-4896-819A-CACC8718D69A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{57BF7E21-7F8C-4896-819A-CACC8718D69A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{57BF7E21-7F8C-4896-819A-CACC8718D69A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{57BF7E21-7F8C-4896-819A-CACC8718D69A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A11D30F6-6B6F-4774-9C27-4B1254B4375E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A11D30F6-6B6F-4774-9C27-4B1254B4375E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A11D30F6-6B6F-4774-9C27-4B1254B4375E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A11D30F6-6B6F-4774-9C27-4B1254B4375E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FB810F2-6766-4AC9-BAB0-9CCBEA87E067}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FB810F2-6766-4AC9-BAB0-9CCBEA87E067}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FB810F2-6766-4AC9-BAB0-9CCBEA87E067}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FB810F2-6766-4AC9-BAB0-9CCBEA87E067}.Release|Any CPU.Build.0 = Release|Any CPU
+		{117C4B24-C6D3-4D17-BA8D-02E717CEAA94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{117C4B24-C6D3-4D17-BA8D-02E717CEAA94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{117C4B24-C6D3-4D17-BA8D-02E717CEAA94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{117C4B24-C6D3-4D17-BA8D-02E717CEAA94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD4DC220-45D5-476F-BDB7-2AFD10D1EAE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD4DC220-45D5-476F-BDB7-2AFD10D1EAE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD4DC220-45D5-476F-BDB7-2AFD10D1EAE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD4DC220-45D5-476F-BDB7-2AFD10D1EAE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFEF64E0-9061-4865-87B2-A41F33383695}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFEF64E0-9061-4865-87B2-A41F33383695}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFEF64E0-9061-4865-87B2-A41F33383695}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFEF64E0-9061-4865-87B2-A41F33383695}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

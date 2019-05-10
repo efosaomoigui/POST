@@ -333,7 +333,8 @@ namespace GIGLS.Services.Implementation.Report
             allShipmentsQueryable = allShipmentsQueryable.Where(s => serviceCenterId.Contains(s.DepartureServiceCentreId));
 
             var shipmentTrackingHistory = _uow.ShipmentTracking.GetAllAsQueryable()
-                .Where(x => x.Status == ShipmentScanStatus.DSC.ToString() || x.Status == ShipmentScanStatus.DPC.ToString()).Select(x => x.Waybill).Distinct();
+                .Where(x => serviceCenterId.Contains(x.ServiceCentreId) && (x.Status == ShipmentScanStatus.DSC.ToString()
+                || x.Status == ShipmentScanStatus.TRO.ToString() || x.Status == ShipmentScanStatus.DTR.ToString())).Select(x => x.Waybill).Distinct();
 
             allShipmentsQueryable = allShipmentsQueryable.Where(s => !shipmentTrackingHistory.Contains(s.Waybill));
 

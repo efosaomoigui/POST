@@ -865,5 +865,93 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        [HttpGet]
+        [Route("getspecialpackages")]
+        public async Task<IServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>> GetSpecialPackages()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var specialpackages = await _preshipmentmobileService.GetSpecialDomesticPackages();
+                 return new ServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>
+                {
+                    Object = specialpackages
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("trackshipment/{waybillNumber}")]
+        public async Task<IServiceResponse<MobileShipmentTrackingHistoryDTO>> TrackMobileShipment(string waybillNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preshipmentmobileService.TrackShipment(waybillNumber);
+
+                return new ServiceResponse<MobileShipmentTrackingHistoryDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("addmobilepickuprequest")]
+        public async Task<IServiceResponse<object>> AddPickupRequest(MobilePickUpRequestsDTO PickupRequest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _preshipmentmobileService.AddMobilePickupRequest(PickupRequest);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getmobilepickuprequests")]
+        public async Task<IServiceResponse<List<MobilePickUpRequestsDTO>>> GetPickupRequests()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var PickUpRequests = await _preshipmentmobileService.GetMobilePickupRequest();
+
+                return new ServiceResponse<List<MobilePickUpRequestsDTO>>
+                {
+                    Object = PickUpRequests
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("updatemobilepickuprequests")]
+        public async Task<IServiceResponse<object>> UpdatePickupRequests(MobilePickUpRequestsDTO PickupRequest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _preshipmentmobileService.UpdateMobilePickupRequest(PickupRequest);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getpreshipmentmobiledetails/{waybillNumber}")]
+        public async Task<IServiceResponse<PreShipmentMobileDTO>> GetPreshipmentMobileDetails(string waybillNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var details = await _preshipmentmobileService.GetPreShipmentDetail(waybillNumber);
+
+                return new ServiceResponse<PreShipmentMobileDTO>
+                {
+                    Object = details
+                };
+            });
+        }
     }
 }

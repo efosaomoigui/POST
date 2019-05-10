@@ -264,83 +264,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Aftership-API.exe" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\AutoMapper.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\AutoMapper.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\DocumentFormat.OpenXml.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\EntityFramework.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\EntityFramework.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\GIGLS.Core.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\GIGLS.Core.pdb" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\GIGLS.Infrastructure.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\GIGLS.Infrastructure.pdb" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\GIGLS.Services.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\GIGLS.Services.pdb" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\GIGLS.WebApi.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\GIGLS.WebApi.pdb" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\GIGLS.WebApi.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.AspNet.Identity.Core.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.AspNet.Identity.Core.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.AspNet.Identity.EntityFramework.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.AspNet.Identity.EntityFramework.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.AspNet.Identity.Owin.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.AspNet.Identity.Owin.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.Owin.Cors.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.Owin.Cors.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.Owin.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.Owin.Security.Cookies.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.Owin.Security.Cookies.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.Owin.Security.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.Owin.Security.Jwt.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.Owin.Security.Jwt.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.Owin.Security.OAuth.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.Owin.Security.OAuth.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.Owin.Security.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.Owin.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Microsoft.Web.Infrastructure.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Newtonsoft.Json.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Newtonsoft.Json.pdb" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Newtonsoft.Json.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Ninject.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Ninject.Extensions.Conventions.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Ninject.Extensions.Conventions.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Ninject.Web.Common.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Ninject.Web.Common.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Ninject.Web.WebApi.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Ninject.Web.WebApi.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Ninject.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Owin.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\PayStack.Net.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\roslyn\csc.exe" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\roslyn\Microsoft.CodeAnalysis.CSharp.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\roslyn\Microsoft.CodeAnalysis.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\roslyn\System.Collections.Immutable.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\roslyn\System.Reflection.Metadata.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\roslyn\vbc.exe" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\roslyn\VBCSCompiler.exe" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\SpreadsheetLight.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\SpreadsheetLight.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Swashbuckle.Core.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\System.IdentityModel.Tokens.Jwt.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\System.IdentityModel.Tokens.Jwt.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\System.Net.Http.Extensions.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\System.Net.Http.Formatting.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\System.Net.Http.Primitives.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\System.Web.Cors.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\System.Web.Http.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\System.Web.Http.Owin.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\System.Web.Http.Owin.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\System.Web.Http.WebHost.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\System.Web.Http.WebHost.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\System.Web.Http.xml" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Thinktecture.IdentityModel.Core.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\Thinktecture.IdentityModel.Core.pdb" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\WebActivatorEx.dll" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\WebJobEngine.exe" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\WebJobEngine.pdb" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\XtremeIT.Library.Pins.dll" />
     <Content Include="GIGLS.WebApi.xml" />
     <Content Include="Global.asax" />
     <Content Include="Web.config">
@@ -359,8 +282,8 @@
     <Compile Include="Controllers\Account\GeneralLedgerController.cs" />
     <Compile Include="Controllers\Account\IncomeController.cs" />
     <Compile Include="Controllers\Account\InsuranceController.cs" />
-    <Compile Include="Controllers\Account\InvoiceReminderController.cs" />
     <Compile Include="Controllers\Account\InvoiceController.cs" />
+    <Compile Include="Controllers\Account\InvoiceReminderController.cs" />
     <Compile Include="Controllers\Account\InvoiceShipmentController.cs" />
     <Compile Include="Controllers\Account\VATController.cs" />
     <Compile Include="Controllers\BankSettlement\BankProcessingOrderController.cs" />
@@ -413,6 +336,7 @@
     <Compile Include="Controllers\ServiceCentres\StationController.cs" />
     <Compile Include="Controllers\ServiceCentres\UserServiceCentreMappingController.cs" />
     <Compile Include="Controllers\ShipmentScan\ScanStatusController.cs" />
+    <Compile Include="Controllers\Shipments\ForWebJobsController.cs" />
     <Compile Include="Controllers\Shipments\GroupWaybillNumberController.cs" />
     <Compile Include="Controllers\Shipments\GroupWaybillNumberMappingController.cs" />
     <Compile Include="Controllers\Shipments\LogVisitReasonController.cs" />
@@ -425,7 +349,6 @@
     <Compile Include="Controllers\Shipments\PreShipmentManifestMappingController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentCancelController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentCollectionController.cs" />
-    <Compile Include="Controllers\Shipments\ForWebJobsController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentDeliveryOptionMappingController.cs" />
     <Compile Include="Controllers\Shipments\ShipmentPackagePriceController.cs" />
@@ -478,27 +401,23 @@
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="packages.config" />
+    <Content Include="packages.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="app.manifest">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\ApplicationInsights.config" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\GIGLS.Core.dll.config" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\GIGLS.Infrastructure.dll.config" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\GIGLS.Services.dll.config" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\GIGLS.WebApi.dll.config" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\roslyn\Microsoft.CSharp.Core.targets" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\roslyn\Microsoft.VisualBasic.Core.targets" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\roslyn\VBCSCompiler.exe.config" />
-    <Content Include="App_Data\Jobs\triggered\WebJobEngine\WebJobEngine.exe.config" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP %286%29.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %286%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevmm - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevmm - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %2814%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy.pubxml" />
@@ -512,6 +431,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="App_Data\" />
     <Folder Include="Controllers\JobCards\" />
     <Folder Include="Controllers\Stocks\" />
     <Folder Include="Controllers\Stores\" />
@@ -565,10 +485,7 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
-  <Import Project="..\packages\Microsoft.Web.WebJobs.Publish.1.0.9\tools\webjobs.targets" Condition="Exists('..\packages\Microsoft.Web.WebJobs.Publish.1.0.9\tools\webjobs.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

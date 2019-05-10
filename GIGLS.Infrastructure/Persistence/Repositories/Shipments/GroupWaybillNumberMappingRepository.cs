@@ -120,7 +120,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                     groupwaybillMappingDto = groupwaybillMappingDto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
                     //shipment = shipment.OrderByDescending(x => prop.Name); 
                 }
-
             }
 
             return Task.FromResult(groupwaybillMappingDto.ToList());

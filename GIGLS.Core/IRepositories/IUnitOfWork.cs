@@ -141,7 +141,10 @@ namespace GIGLS.Core
         IPreShipmentItemMobileRepository PreShipmentItemMobile { get; set; }
 
         IUserLoginEmailRepository UserLoginEmail { get; set; }
-        
+
+        IMobileShipmentTrackingRepository MobileShipmentTracking { get; set; }
+        IMobilePickUpRequestsRepository MobilePickUpRequests { get; set; }
+
 
 
         int Complete();

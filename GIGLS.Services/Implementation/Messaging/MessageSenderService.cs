@@ -415,16 +415,34 @@ namespace GIGLS.Services.Implementation.Messaging
             {
                 var strArray = new string[]
                 {
-                    "User Name",
-                    "Login Time",
-                    "Url",
+                    "Customer Name",
+                    "Wallet Balance",
+                    "Invoice Amount",
+                    "Waybill",
+                    "Days Overdue"
                 };
 
                 var invoiceViewDTO = (InvoiceViewDTO)obj;
-                //map the array
-                strArray[0] = invoiceViewDTO.Email;
-                strArray[1] = $"{DateTime.Now.ToLongDateString()} : {DateTime.Now.ToLongTimeString()}";
-                //strArray[2] = invoice.DepartureServiceCentreName;
+
+                //get CustomerDetails (
+                if (invoiceViewDTO.CustomerType.Contains("Individual"))
+                {
+                    invoiceViewDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
+                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), invoiceViewDTO.CustomerType);
+                var customerObj = await _customerService.GetCustomer(invoiceViewDTO.CustomerId, customerType);
+
+                //A. map the array
+                strArray[0] = customerObj.CustomerName;
+                strArray[1] = invoiceViewDTO.WalletBalance;
+                strArray[2] = invoiceViewDTO.Amount.ToString();
+                strArray[3] = invoiceViewDTO.Waybill;
+                strArray[4] = invoiceViewDTO.InvoiceDueDays;
+
+                ////map the array
+                //strArray[0] = invoiceViewDTO.Email;
+                //strArray[1] = $"{DateTime.Now.ToLongDateString()} : {DateTime.Now.ToLongTimeString()}";
+                ////strArray[2] = invoice.DepartureServiceCentreName;
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);

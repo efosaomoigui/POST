@@ -117,5 +117,9 @@ namespace GIGLS.Core.DTO.Shipments
         public int DepositStatus { get; set; }
 
         public bool ReprintCounterStatus { get; set; }
+
+        //Sender's Address - added for the special case of corporate customers
+        public string SenderAddress { get; set; }
+        public string SenderState { get; set; }
     }
 }

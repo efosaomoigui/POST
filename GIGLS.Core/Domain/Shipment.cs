@@ -101,5 +101,9 @@ namespace GIGL.GIGLS.Core.Domain
         public DepositStatus DepositStatus { get; set; }
 
         public bool ReprintCounterStatus { get; set; }
+
+        //Sender's Address - added for the special case of corporate customers
+        public string SenderAddress { get; set; }
+        public string SenderState { get; set; }
     }
 }
