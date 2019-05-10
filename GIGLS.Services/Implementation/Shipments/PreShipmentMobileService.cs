@@ -124,11 +124,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     WaybillNumber = newPreShipment.Waybill,
                     ShipmentScanStatus = ShipmentScanStatus.MCRT
                 });
-                
-
-
-
-                var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
+                 var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
 
                 var transaction = new WalletTransactionDTO
                 {
