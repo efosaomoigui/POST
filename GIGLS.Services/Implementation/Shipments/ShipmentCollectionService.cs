@@ -19,6 +19,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+
+
 namespace GIGLS.Services.Implementation.Shipments
 {
     public class ShipmentCollectionService : IShipmentCollectionService
@@ -218,7 +220,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (filterOptionsDto.filterValue == "0" || filterOptionsDto.filterValue== null)
                 {
 
-                    shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.DateCreated == DateTime.Now).ToList();
+                    shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().ToList().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.DateCreated.ToString("MM/dd/yyyy") == DateTime.Now.ToString("MM/dd/yyyy")).ToList();
                 }
                 else
                 {
@@ -266,7 +268,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), count);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
