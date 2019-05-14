@@ -144,6 +144,7 @@ namespace GIGLS.Core
 
         IMobileShipmentTrackingRepository MobileShipmentTracking { get; set; }
         IMobilePickUpRequestsRepository MobilePickUpRequests { get; set; }
+        IMobileScanStatusRepository MobileScanStatus { get; set; }
 
 
 

@@ -238,6 +238,8 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<UserLoginEmail> UserLoginEmail { get; set; }
         public DbSet<MobilePickUpRequests> MobilePickUpRequests { get; set; }
 
+        public DbSet<MobileScanStatus> MobileScanStatus { get; set; }
+
 
 
         #endregion

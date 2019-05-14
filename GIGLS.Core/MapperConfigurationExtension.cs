@@ -329,6 +329,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<MobilePickUpRequests, MobilePickUpRequestsDTO>();
                 config.CreateMap<MobilePickUpRequestsDTO, MobilePickUpRequests>();
+
+                config.CreateMap<MobileScanStatus, MobileScanStatusDTO>();
+                config.CreateMap<MobileScanStatusDTO, MobileScanStatus>();
             });
 
             isInit = true;

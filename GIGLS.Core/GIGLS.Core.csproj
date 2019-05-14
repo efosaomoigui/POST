@@ -216,6 +216,7 @@
     <Compile Include="Domain\ShipmentItem.cs" />
     <Compile Include="Domain\ShipmentReroute.cs" />
     <Compile Include="Domain\ShipmentReturn.cs" />
+    <Compile Include="Domain\ShipmentScan\MobileScanStatus.cs" />
     <Compile Include="Domain\ShipmentScan\ScanStatus.cs" />
     <Compile Include="Domain\ShipmentTracking.cs" />
     <Compile Include="Domain\SLA\SLA.cs" />
@@ -327,6 +328,7 @@
     <Compile Include="DTO\Report\ShipmentProgressSummaryFilterCriteria.cs" />
     <Compile Include="DTO\ServiceCentres\ServiceCentreDTO.cs" />
     <Compile Include="DTO\ServiceCentres\StationDTO.cs" />
+    <Compile Include="DTO\ShipmentScan\MobileScanStatusDTO.cs" />
     <Compile Include="DTO\ShipmentScan\ScanStatusDTO.cs" />
     <Compile Include="DTO\ShipmentScan\ScanStatusReportDTO.cs" />
     <Compile Include="DTO\Shipments\DemurrageDTO.cs" />
@@ -510,6 +512,7 @@
     <Compile Include="IRepositories\ServiceCentres\IServiceCentreRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IStationRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IUserServiceCentreMappingRepository.cs" />
+    <Compile Include="IRepositories\ShipmentScan\IMobileScanStatusRepository.cs" />
     <Compile Include="IRepositories\ShipmentScan\IScanStatusRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberRepository.cs" />
@@ -629,6 +632,7 @@
     <Compile Include="IServices\ServiceCentres\IServiceCentreService.cs" />
     <Compile Include="IServices\ServiceCentres\IStationService.cs" />
     <Compile Include="IServices\ServiceCentres\IUserServiceCentreMappingService.cs" />
+    <Compile Include="IServices\ShipmentScan\IMobileScanStatusService.cs" />
     <Compile Include="IServices\ShipmentScan\IScanStatusService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberMappingService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberService.cs" />
