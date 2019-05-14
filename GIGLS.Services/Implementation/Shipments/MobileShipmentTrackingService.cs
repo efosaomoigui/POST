@@ -58,7 +58,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return trackings;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
