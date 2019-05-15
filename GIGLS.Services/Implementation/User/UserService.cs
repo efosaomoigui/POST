@@ -1,21 +1,20 @@
-﻿using GIGLS.Core.IServices.User;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using GIGLS.Core.DTO.User;
-using AutoMapper;
-using GIGLS.Infrastructure;
+﻿using AutoMapper;
 using GIGLS.Core;
+using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.User;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.ServiceCentres;
+using GIGLS.Core.IServices.User;
+using GIGLS.Core.IServices.Utility;
+using GIGLS.CORE.Domain;
+using GIGLS.Infrastructure;
 using Microsoft.AspNet.Identity;
 using System;
-using GIGLS.CORE.Domain;
-using System.Security.Claims;
-using GIGLS.Core.IServices.ServiceCentres;
-using System.Web;
-using GIGLS.Core.Enums;
+using System.Collections.Generic;
 using System.Linq;
-using GIGLS.Core.DTO.ServiceCentres;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.View;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using System.Web;
 
 namespace GIGLS.Services.Implementation.User
 {
@@ -23,13 +22,16 @@ namespace GIGLS.Services.Implementation.User
     {
         private readonly IUnitOfWork _unitOfWork;
         private IServiceCentreService _serviceCentreService;
+        private IRegionServiceCentreMappingService _regionServiceCentreMappingService;
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
 
         public UserService(IUnitOfWork uow, IServiceCentreService serviceCentreService,
+            IRegionServiceCentreMappingService regionServiceCentreMappingService,
             INumberGeneratorMonitorService numberGeneratorMonitorService)
         {
             _unitOfWork = uow;
             _serviceCentreService = serviceCentreService;
+            _regionServiceCentreMappingService = regionServiceCentreMappingService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             MapperConfig.Initialize();
         }
@@ -59,7 +61,7 @@ namespace GIGLS.Services.Implementation.User
                 user.UserChannelCode = employeeCode;
                 user.UserChannelPassword = GeneratePassword();
             }
-           
+
 
             var u = await _unitOfWork.User.RegisterUser(user, userDto.Password);
             return u;
@@ -181,8 +183,8 @@ namespace GIGLS.Services.Implementation.User
             {
                 throw new GenericException("User does not exist!");
             }
-            
-            if(user.UserChannelType.Equals(UserChannelType.Corporate) || user.UserChannelType.Equals(UserChannelType.Ecommerce))
+
+            if (user.UserChannelType.Equals(UserChannelType.Corporate) || user.UserChannelType.Equals(UserChannelType.Ecommerce))
             {
                 await RemoveCompanyCustomer(user.UserChannelCode);
             }
@@ -200,7 +202,7 @@ namespace GIGLS.Services.Implementation.User
         private async Task RemoveCompanyCustomer(string customerCode)
         {
             var company = await _unitOfWork.Company.GetAsync(x => x.CustomerCode == customerCode);
-            if(company != null)
+            if (company != null)
             {
                 _unitOfWork.Company.Remove(company);
             }
@@ -549,7 +551,7 @@ namespace GIGLS.Services.Implementation.User
             return currentUser;
         }
 
-        public async Task<UserDTO> retServiceCenter() 
+        public async Task<UserDTO> retServiceCenter()
         {
             var currentUserId = await GetCurrentUserId();
             var currentUser = await GetUserById(currentUserId);
@@ -581,6 +583,7 @@ namespace GIGLS.Services.Implementation.User
                 }
 
                 if (claimValue[0] == "Global" ||
+                    claimValue[0] == "Region" ||
                     claimValue[0] == "Station" ||
                     claimValue[0] == "ServiceCentre")
                 {
@@ -592,7 +595,7 @@ namespace GIGLS.Services.Implementation.User
             return result;
         }
 
-        public async Task<ServiceCentreDTO[]> GetCurrentServiceCenter() 
+        public async Task<ServiceCentreDTO[]> GetCurrentServiceCenter()
         {
             var sc = new ServiceCentreDTO[] { };
 
@@ -622,6 +625,12 @@ namespace GIGLS.Services.Implementation.User
                 if (claimValue[0] == "Global")
                 {
                     sc = new ServiceCentreDTO[] { };
+                }
+                else if (claimValue[0] == "Region")
+                {
+                    var regionId = int.Parse(claimValue[1]);
+                    var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
+                    sc = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentreDTO).ToArray();
                 }
                 else if (claimValue[0] == "Station")
                 {
@@ -679,7 +688,13 @@ namespace GIGLS.Services.Implementation.User
 
                 if (claimValue[0] == "Global")
                 {
-                    serviceCenterIds = new int[] { }; 
+                    serviceCenterIds = new int[] { };
+                }
+                else if (claimValue[0] == "Region")
+                {
+                    var regionId = int.Parse(claimValue[1]);
+                    var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
+                    serviceCenterIds = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentreDTO.ServiceCentreId).ToArray();
                 }
                 else if (claimValue[0] == "Station")
                 {
@@ -726,26 +741,26 @@ namespace GIGLS.Services.Implementation.User
             }
 
             user.PasswordExpireDate = DateTime.Now;
-            var result = await _unitOfWork.User.ResetPassword(userid, password);            
+            var result = await _unitOfWork.User.ResetPassword(userid, password);
             await _unitOfWork.CompleteAsync();
             return result;
         }
 
         public async Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword)
-        {            
+        {
             var user = await _unitOfWork.User.GetUserById(userid);
             if (user == null || newPassword == null || newPassword == "")
             {
                 throw new GenericException("Operation could not complete, kindly supply valid credential");
             }
 
-            if(!await _unitOfWork.User.CheckPasswordAsync(user, currentPassword))
+            if (!await _unitOfWork.User.CheckPasswordAsync(user, currentPassword))
             {
                 throw new GenericException("Operation could not complete, kindly supply valid credential");
             }
 
             user.PasswordExpireDate = DateTime.Now;
-            var result = await _unitOfWork.User.ChangePassword(userid, currentPassword, newPassword);            
+            var result = await _unitOfWork.User.ChangePassword(userid, currentPassword, newPassword);
             await _unitOfWork.CompleteAsync();
             return result;
         }
@@ -1057,7 +1072,7 @@ namespace GIGLS.Services.Implementation.User
             {
                 throw new GenericException("Phone number does not exist!");
             }
-           return Mapper.Map<UserDTO>(user);
+            return Mapper.Map<UserDTO>(user);
         }
     }
 }

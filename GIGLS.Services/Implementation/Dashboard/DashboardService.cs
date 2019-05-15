@@ -27,6 +27,8 @@ namespace GIGLS.Services.Implementation.Dashboard
         private IIndividualCustomerService _individualCustomerService;
         private ICompanyService _companyService;
         private ICustomerService _customerService;
+        private IRegionServiceCentreMappingService _regionServiceCentreMappingService;
+        private IRegionService _regionService;
 
         public DashboardService(IUnitOfWork uow,
             IShipmentService shipmentService, IUserService userService,
@@ -35,7 +37,9 @@ namespace GIGLS.Services.Implementation.Dashboard
             IStationService stationService,
             IIndividualCustomerService individualCustomerService,
             ICompanyService companyService,
-            ICustomerService customerService
+            ICustomerService customerService,
+            IRegionServiceCentreMappingService regionServiceCentreMappingService,
+            IRegionService regionService
             )
         {
             _uow = uow;
@@ -47,6 +51,8 @@ namespace GIGLS.Services.Implementation.Dashboard
             _individualCustomerService = individualCustomerService;
             _companyService = companyService;
             _customerService = customerService;
+            _regionServiceCentreMappingService = regionServiceCentreMappingService;
+            _regionService = regionService;
         }
 
         public async Task<DashboardDTO> GetDashboard()
@@ -84,6 +90,10 @@ namespace GIGLS.Services.Implementation.Dashboard
                 else if (claimValue[0] == "Global")
                 {
                     dashboardDTO = await GetDashboardForGlobal();
+                }
+                else if (claimValue[0] == "Region")
+                {
+                    dashboardDTO = await GetDashboardForRegion(int.Parse(claimValue[1]));
                 }
                 else if (claimValue[0] == "Station")
                 {
@@ -347,7 +357,56 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             return dashboardDTO;
         }
-        
+
+        private async Task<DashboardDTO> GetDashboardForRegion(int regionId)
+        {
+            int currentYear = DateTime.Now.Year;
+            var dashboardDTO = new DashboardDTO();
+
+            //get the region
+            var regionDTO = await _regionService.GetRegionById(regionId);
+            dashboardDTO.Region = regionDTO;
+
+            // get the service centre
+            var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
+            var serviceCentres = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentreDTO).ToArray();
+            int[] serviceCenterIds = serviceCentres.Select(s => s.ServiceCentreId).ToArray();
+
+            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated.Year == currentYear);
+            var serviceCentreShipments = allShipments.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId));
+
+            //set for TargetAmount and TargetOrder
+            dashboardDTO.TargetOrder = serviceCentres.Sum(s => s.TargetOrder);
+            dashboardDTO.TargetAmount = serviceCentres.Sum(s => s.TargetAmount);
+
+            // get shipment ordered
+            var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
+            dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
+
+            // set properties
+            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.DateCreated.Year == currentYear && serviceCenterIds.Contains(s.DepartureServiceCentreId)).Count();
+            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
+
+            //customers
+            int accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated.Year == currentYear).Count();
+            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated.Year == currentYear).Count();
+            dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
+
+            // MostRecentOrder
+            dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
+
+            // populate customer
+            //await PopulateCustomer(dashboardDTO);
+
+            // populate graph data
+            await PopulateGraphData(dashboardDTO);
+
+            // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
+            dashboardDTO.ShipmentsOrderedByServiceCenter = null;
+
+            return dashboardDTO;
+        }
+
         private async Task<DashboardDTO> GetDashboardForGlobalOld()
         {
             var dashboardDTO = new DashboardDTO();
@@ -580,6 +639,12 @@ namespace GIGLS.Services.Implementation.Dashboard
                 {
                     serviceCenterIds = new int[] { };
                 }
+                else if (claimValue[0] == "Region")
+                {
+                    var regionId = int.Parse(claimValue[1]);
+                    var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
+                    serviceCenterIds = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentreDTO.ServiceCentreId).ToArray();
+                }
                 else if (claimValue[0] == "Station")
                 {
                     var stationId = int.Parse(claimValue[1]);
@@ -638,6 +703,10 @@ namespace GIGLS.Services.Implementation.Dashboard
                 else if (claimValue[0] == "Global")
                 {
                     dashboardDTO = await GetDashboardForGlobal(dashboardFilterCriteria);
+                }
+                else if (claimValue[0] == "Region")
+                {
+                    dashboardDTO = await GetDashboardForRegion(int.Parse(claimValue[1]), dashboardFilterCriteria);
                 }
                 else if (claimValue[0] == "Station")
                 {
@@ -729,6 +798,59 @@ namespace GIGLS.Services.Implementation.Dashboard
             //set for TargetAmount and TargetOrder
             dashboardDTO.TargetOrder = serviceCentres.Where(s => s.StationId == stationId).Sum(s => s.TargetOrder);
             dashboardDTO.TargetAmount = serviceCentres.Where(s => s.StationId == stationId).Sum(s => s.TargetAmount);
+
+            // get shipment ordered
+            var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
+            dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
+
+            // set properties
+            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.DateCreated >= startDate && s.DateCreated < endDate && serviceCenterIds.Contains(s.DepartureServiceCentreId)).Count();
+            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
+
+            //customers
+            int accountCustomer = _uow.Company.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).Count();
+            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated >= startDate && i.DateCreated < endDate).Count();
+            dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
+
+            // MostRecentOrder
+            dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
+
+            // populate customer
+            //await PopulateCustomer(dashboardDTO);
+
+            // populate graph data
+            await PopulateGraphDataByDate(dashboardDTO);
+
+            // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
+            dashboardDTO.ShipmentsOrderedByServiceCenter = null;
+
+            return dashboardDTO;
+        }
+
+        private async Task<DashboardDTO> GetDashboardForRegion(int regionId, DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            var dashboardDTO = new DashboardDTO();
+
+            //get the region
+            var regionDTO = await _regionService.GetRegionById(regionId);
+            dashboardDTO.Region = regionDTO;
+
+            // get the service centre
+            var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
+            var serviceCentres = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentreDTO).ToArray();
+            int[] serviceCenterIds = serviceCentres.Select(s => s.ServiceCentreId).ToArray();
+
+            //get startDate and endDate
+            var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+            var serviceCentreShipments = allShipments.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId));
+
+            //set for TargetAmount and TargetOrder
+            dashboardDTO.TargetOrder = serviceCentres.Sum(s => s.TargetOrder);
+            dashboardDTO.TargetAmount = serviceCentres.Sum(s => s.TargetAmount);
 
             // get shipment ordered
             var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
