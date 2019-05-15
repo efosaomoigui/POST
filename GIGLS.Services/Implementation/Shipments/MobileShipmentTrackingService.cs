@@ -36,17 +36,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
         }
 
-        public async Task<List<MobileShipmentTrackingDTO>> GetMobileShipmentTrackings()
-        {
-            try
-            {
-                return await _uow.MobileShipmentTracking.GetMobileShipmentTrackingsAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        
 
         public async Task<MobileShipmentTrackingHistoryDTO> GetMobileShipmentTrackings(string waybill)
         {

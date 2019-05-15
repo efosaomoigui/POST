@@ -11,7 +11,7 @@ namespace GIGLS.Core.IServices.Shipments
 {
     public interface IMobileShipmentTrackingService : IServiceDependencyMarker
     {
-        Task<List<MobileShipmentTrackingDTO>> GetMobileShipmentTrackings();
+       
         Task<MobileShipmentTrackingHistoryDTO> GetMobileShipmentTrackings(string waybill);
         Task<MobileShipmentTrackingDTO> GetMobileShipmentTrackingById(int trackingId);
         Task AddMobileShipmentTracking(MobileShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus);
