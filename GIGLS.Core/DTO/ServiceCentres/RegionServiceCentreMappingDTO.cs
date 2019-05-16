@@ -10,9 +10,11 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public int RegionId { get; set; }
         public int ServiceCentreId { get; set; }
 
-        public RegionDTO RegionDTO { get; set; }
-        public ServiceCentreDTO ServiceCentreDTO { get; set; }
+        public RegionDTO Region { get; set; }
+        public ServiceCentreDTO ServiceCentre { get; set; }
 
         public List<int> ServiceCentreIds { get; set; }
+        public List<ServiceCentreDTO> ServiceCentres { get; set; }
+        public List<string> ServiceCentreNames { get; set; }
     }
 }

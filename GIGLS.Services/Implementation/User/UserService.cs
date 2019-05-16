@@ -630,7 +630,7 @@ namespace GIGLS.Services.Implementation.User
                 {
                     var regionId = int.Parse(claimValue[1]);
                     var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
-                    sc = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentreDTO).ToArray();
+                    sc = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentre).ToArray();
                 }
                 else if (claimValue[0] == "Station")
                 {
@@ -694,7 +694,7 @@ namespace GIGLS.Services.Implementation.User
                 {
                     var regionId = int.Parse(claimValue[1]);
                     var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
-                    serviceCenterIds = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentreDTO.ServiceCentreId).ToArray();
+                    serviceCenterIds = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentre.ServiceCentreId).ToArray();
                 }
                 else if (claimValue[0] == "Station")
                 {

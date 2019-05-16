@@ -369,7 +369,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // get the service centre
             var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
-            var serviceCentres = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentreDTO).ToArray();
+            var serviceCentres = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentre).ToArray();
             int[] serviceCenterIds = serviceCentres.Select(s => s.ServiceCentreId).ToArray();
 
             var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated.Year == currentYear);
@@ -643,7 +643,7 @@ namespace GIGLS.Services.Implementation.Dashboard
                 {
                     var regionId = int.Parse(claimValue[1]);
                     var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
-                    serviceCenterIds = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentreDTO.ServiceCentreId).ToArray();
+                    serviceCenterIds = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentre.ServiceCentreId).ToArray();
                 }
                 else if (claimValue[0] == "Station")
                 {
@@ -837,7 +837,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // get the service centre
             var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
-            var serviceCentres = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentreDTO).ToArray();
+            var serviceCentres = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentre).ToArray();
             int[] serviceCenterIds = serviceCentres.Select(s => s.ServiceCentreId).ToArray();
 
             //get startDate and endDate

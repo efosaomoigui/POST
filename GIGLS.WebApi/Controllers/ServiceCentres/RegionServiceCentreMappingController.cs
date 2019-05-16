@@ -37,6 +37,22 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("UnassignedServiceCentres")]
+        public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetUnassignedServiceCentres()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var unassignedServiceCentres = await _service.GetUnassignedServiceCentres();
+
+                return new ServiceResponse<List<ServiceCentreDTO>>
+                {
+                    Object = unassignedServiceCentres
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapmultiple")]

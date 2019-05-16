@@ -50,13 +50,73 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             foreach (var item in result)
             {
                 var regionDTO = allRegions.FirstOrDefault(x => x.RegionId == item.RegionId);
-                item.RegionDTO = regionDTO;
+                item.Region = regionDTO;
 
                 var serviceCentreDTO = allServiceCentres.FirstOrDefault(x => x.ServiceCentreId == item.ServiceCentreId);
-                item.ServiceCentreDTO = serviceCentreDTO;
+                item.ServiceCentre = serviceCentreDTO;
+
+                //add array of service centres
+                var serviceCentreIds = regionServiceCentreMappingsDto.Where(s => s.RegionId == item.RegionId).
+                    Select(x => x.ServiceCentreId).ToList();
+                item.ServiceCentreIds = serviceCentreIds;
+                item.ServiceCentres = allServiceCentres.Where(s => serviceCentreIds.Contains(s.ServiceCentreId)).ToList();
+                item.ServiceCentreNames = item.ServiceCentres.Select(s => s.Name).OrderBy(s => s).ToList();
             }
 
-            return result.OrderByDescending(x => x.DateCreated).ToList();
+            //3. get all unmapped regions
+            var unmappedRegions = allRegions.
+                Where(s => !result.Select(d => d.RegionId).Contains(s.RegionId)).ToList();
+
+            //4. Apped the two list together
+            foreach (var itemUnmapped in unmappedRegions)
+            {
+                var item = new RegionServiceCentreMappingDTO
+                {
+                    RegionId = itemUnmapped.RegionId
+                };
+
+                var regionDTO = allRegions.FirstOrDefault(x => x.RegionId == item.RegionId);
+                item.Region = regionDTO;
+
+                //add array of service centres
+                var serviceCentreIds = regionServiceCentreMappingsDto.Where(s => s.RegionId == item.RegionId).
+                    Select(x => x.ServiceCentreId).ToList();
+                item.ServiceCentreIds = serviceCentreIds;
+                item.ServiceCentres = allServiceCentres.Where(s => serviceCentreIds.Contains(s.ServiceCentreId)).ToList();
+                item.ServiceCentreNames = item.ServiceCentres.Select(s => s.Name).OrderBy(s => s).ToList();
+
+                //
+                result.Add(item);
+            }
+
+            return result.OrderBy(x => x.Region.RegionName).ToList();
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetUnassignedServiceCentres()
+        {
+            var resultSet = new HashSet<int>();
+            var resultForSC = new List<RegionServiceCentreMappingDTO>();
+
+            var regionServiceCentreMappings = _uow.RegionServiceCentreMapping.GetAllAsQueryable().ToList();
+            var regionServiceCentreMappingsDto = Mapper.Map<List<RegionServiceCentreMappingDTO>>(regionServiceCentreMappings);
+
+            foreach (var item in regionServiceCentreMappingsDto)
+            {
+                if (resultSet.Add(item.ServiceCentreId))
+                {
+                    resultForSC.Add(item);
+                }
+            }
+
+            //1. get all service centres and all regions
+            var allServiceCentres = await _serviceCentreService.GetServiceCentres();
+            var allRegions = await _regionService.GetRegions();
+
+            //2. get the intersection of service centres
+            var unassignedServiceCentres = allServiceCentres.
+                Where(s => !resultForSC.Select(d => d.ServiceCentreId).Contains(s.ServiceCentreId)).ToList();
+
+            return unassignedServiceCentres.OrderBy(x => x.Name).ToList();
         }
 
         public async Task<RegionServiceCentreMappingDTO> GetRegionForServiceCentre(int serviceCentreId)
@@ -79,10 +139,10 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 var resultDTO = Mapper.Map<RegionServiceCentreMappingDTO>(result);
 
                 var regionDTO = allRegions.FirstOrDefault(x => x.RegionId == resultDTO.RegionId);
-                resultDTO.RegionDTO = regionDTO;
+                resultDTO.Region = regionDTO;
 
                 var serviceCentreDTO = allServiceCentres.FirstOrDefault(x => x.ServiceCentreId == resultDTO.ServiceCentreId);
-                resultDTO.ServiceCentreDTO = serviceCentreDTO;
+                resultDTO.ServiceCentre = serviceCentreDTO;
 
                 return resultDTO;
             }
@@ -109,10 +169,10 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 {
                     //2. Map the 'result' to contain the RegionDTO and ServiceCentreDTO
                     var regionTempDTO = allRegions.FirstOrDefault(x => x.RegionId == regionServiceCentreMappingDTO.RegionId);
-                    regionServiceCentreMappingDTO.RegionDTO = regionTempDTO;
+                    regionServiceCentreMappingDTO.Region = regionTempDTO;
 
                     var serviceCentreTempDTO = allServiceCentres.FirstOrDefault(x => x.ServiceCentreId == regionServiceCentreMappingDTO.ServiceCentreId);
-                    regionServiceCentreMappingDTO.ServiceCentreDTO = serviceCentreTempDTO;
+                    regionServiceCentreMappingDTO.ServiceCentre = serviceCentreTempDTO;
                 }
 
                 return regionServiceCentreMappingDTOList;

@@ -11,5 +11,7 @@ namespace GIGLS.Core.IServices.ServiceCentres
         Task<RegionServiceCentreMappingDTO> GetRegionForServiceCentre(int serviceCentreId);
         Task<List<RegionServiceCentreMappingDTO>> GetServiceCentresInRegion(int regionId);
         Task RemoveServiceCentreFromRegion(int regionId, int serviceCentreId);
+
+        Task<List<ServiceCentreDTO>> GetUnassignedServiceCentres();
     }
 }
