@@ -278,7 +278,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill, "PreShipmentItems");
+                var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
                 var Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(shipment);
                 if (shipment == null)
                 {
@@ -359,7 +359,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             // verify the waybill number exists in the system
        
-            var shipment = await GetMobileShipmentForScan(scan.WaybillNumber);
+           var shipment = await GetMobileShipmentForScan(scan.WaybillNumber);
            string scanStatus = scan.ShipmentScanStatus.ToString();
            if (shipment != null)
             {
@@ -391,23 +391,32 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException("Error: You cannot track this waybill number.");
             }
         }
-        public async Task<bool> AddMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest)
+        public async Task<PreShipmentMobileDTO> AddMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest)
         {
             try
             {
-               await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
-               var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
-               preshipmentmobile.shipmentstatus = "Assigned for Pickup";
-               await _uow.CompleteAsync();
+               var userId = await _userService.GetCurrentUserId();
+               pickuprequest.UserId = userId;
+               pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
+               var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems");
+               if (preshipmentmobile != null)
+               {
+                    await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
+                    preshipmentmobile.shipmentstatus = "Assigned for Pickup";
+                    await _uow.CompleteAsync();
+                    var newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
 
-                await ScanMobileShipment(new ScanDTO
-                {
-                    WaybillNumber = pickuprequest.Waybill,
-                    ShipmentScanStatus = ShipmentScanStatus.MAPT
-                });
-                return true;
-              
-            }
+                    await ScanMobileShipment(new ScanDTO
+                    {
+                        WaybillNumber = pickuprequest.Waybill,
+                        ShipmentScanStatus = ShipmentScanStatus.MAPT
+                    });
+                    return newPreShipment;
+                }
+                else {
+                    throw new GenericException("Waybill Does Not Exist");
+                }
+              }
             catch
             {
                 throw;

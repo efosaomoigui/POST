@@ -10,12 +10,8 @@ namespace GIGLS.Core.Domain
     public class MobilePickUpRequests : BaseDomain
     {
         public int MobilePickUpRequestsId { get; set; }
-        //foreign key information
-        public int PreShipmentMobileId { get; set; }
-        public virtual PreShipmentMobile PreShipment { get; set; }
         public string Status { get; set; }
         public string Waybill { get; set; }
-
         //foreign key information
         public string UserId { get; set; }
         public virtual User User { get; set; }

@@ -13,12 +13,9 @@ namespace GIGLS.Core.DTO
     public class MobilePickUpRequestsDTO: BaseDomainDTO
     {
         public int MobilePickUpRequestsId { get; set; }
-        public int PreShipmentMobileId { get; set; }
-        public PreShipmentMobileDTO PreShipment { get; set; }
         public string Status { get; set; }
         public string Waybill { get; set; }
-
         public string UserId { get; set; }
-        public  UserDTO User { get; set; }
+        public PreShipmentMobileDTO PreShipment { get; set; }
     }
 }

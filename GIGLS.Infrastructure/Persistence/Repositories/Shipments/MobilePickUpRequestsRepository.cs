@@ -32,7 +32,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                   DateCreated = mobilepickuprequest.DateCreated,
                                                   Waybill = mobilepickuprequest.Waybill,
                                                   Status = mobilepickuprequest.Status,
-                                                  PreShipment = _context.PresShipmentMobile.Where(c => c.PreShipmentMobileId == mobilepickuprequest.PreShipmentMobileId).Select(x => new PreShipmentMobileDTO
+                                                  PreShipment = _context.PresShipmentMobile.Where(c => c.Waybill == mobilepickuprequest.Waybill).Select(x => new PreShipmentMobileDTO
                                                   {
                                                       GrandTotal = x.GrandTotal,
                                                       ReceiverAddress = x.ReceiverAddress,
