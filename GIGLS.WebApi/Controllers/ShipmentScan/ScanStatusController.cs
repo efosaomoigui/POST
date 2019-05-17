@@ -4,6 +4,7 @@ using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -24,6 +25,26 @@ namespace GIGLS.WebApi.Controllers.ShipmentScan
         [HttpGet]
         [Route("")]
         public async Task<IServiceResponse<IEnumerable<ScanStatusDTO>>> GetScanStatus()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var scanStatus = await _scanService.GetScanStatus();
+
+                //filter only the status for display
+                scanStatus = scanStatus.Where(s => s.HiddenFlag == false);
+                scanStatus = scanStatus.OrderBy(s => s.Reason);
+
+                return new ServiceResponse<IEnumerable<ScanStatusDTO>>
+                {
+                    Object = scanStatus
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("all")]
+        public async Task<IServiceResponse<IEnumerable<ScanStatusDTO>>> GetScanStatusAll()
         {
             return await HandleApiOperationAsync(async () =>
             {
