@@ -102,7 +102,7 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
 
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
-        [Route("RemoveServiceCentreFromRegion/{manifest}/{waybill}")]
+        [Route("RemoveServiceCentreFromRegion/{regionId}/{serviceCentrId}")]
         public async Task<IServiceResponse<bool>> RemoveServiceCentreFromRegion(int regionId, int serviceCentrId)
         {
             return await HandleApiOperationAsync(async () =>
