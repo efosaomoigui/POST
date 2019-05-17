@@ -68,12 +68,18 @@ namespace GIGLS.Services.Business.Scanning
 
         public async Task<bool> ScanShipment(ScanDTO scan)
         {
-            // check if the waybill number exists in the system
+            //1. check if the waybill number exists in the system
             if (scan.WaybillNumber != null)
             {
                 scan.WaybillNumber = scan.WaybillNumber.Trim();
             }
             var shipment = await _shipmentService.GetShipmentForScan(scan.WaybillNumber);
+
+            //2. check if the shipment has not been cancelled (DSC)
+            if (shipment.IsCancelled)
+            {
+                throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already cancelled, no further scan is required!");
+            }
 
             var serviceCenters = await _userService.GetCurrentServiceCenter();
             var currentCenter = serviceCenters[0].ServiceCentreId;
