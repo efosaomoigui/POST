@@ -76,7 +76,7 @@ namespace GIGLS.Services.Business.Scanning
             var shipment = await _shipmentService.GetShipmentForScan(scan.WaybillNumber);
 
             //2. check if the shipment has not been cancelled (DSC)
-            if (shipment.IsCancelled)
+            if (shipment != null && shipment.IsCancelled)
             {
                 throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already cancelled, no further scan is required!");
             }
