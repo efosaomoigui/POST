@@ -13,7 +13,7 @@ namespace GIGLS.Infrastructure.Persistence
             : base("GIGLSContextDB")
         {
             Database.SetInitializer<GIGLSContextForView>(null);
-            //Database.Log = s => System.Diagnostics.Debug.WriteLine(s);
+            Database.Log = s => System.Diagnostics.Debug.WriteLine(s);
         }
 
         public DbSet<InvoiceView> InvoiceView { get; set; }
