@@ -9,7 +9,7 @@ namespace GIGLS.Core.Domain
     {
         public Region()
         {
-            ServiceCentres = new HashSet<ServiceCentre>();
+            //ServiceCentres = new HashSet<ServiceCentre>();
         }
 
         public int RegionId { get; set; }
@@ -18,6 +18,6 @@ namespace GIGLS.Core.Domain
         [Index(IsUnique = true)]
         public string RegionName { get; set; }
 
-        public virtual ICollection<ServiceCentre> ServiceCentres { get; set; }
+        //public virtual ICollection<ServiceCentre> ServiceCentres { get; set; }
     }
 }
