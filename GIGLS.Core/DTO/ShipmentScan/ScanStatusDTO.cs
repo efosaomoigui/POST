@@ -9,5 +9,6 @@ namespace GIGLS.Core.DTO.ShipmentScan
         public string Incident { get; set; }
         public string Reason { get; set; }
         public string Comment { get; set; }
+        public bool HiddenFlag { get; set; }
     }
 }
