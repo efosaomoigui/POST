@@ -162,9 +162,12 @@
     <Compile Include="Persistence\Repositories\PaymentTransactions\PaymentPartialTransactionRepository.cs" />
     <Compile Include="Persistence\Repositories\PaymentTransactions\PaymentTransactionRepository.cs" />
     <Compile Include="Persistence\Repositories\Repository.cs" />
+    <Compile Include="Persistence\Repositories\ServiceCentres\RegionRepository.cs" />
+    <Compile Include="Persistence\Repositories\ServiceCentres\RegionServiceCentreMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\ServiceCentres\ServiceCentreRepository.cs" />
     <Compile Include="Persistence\Repositories\ServiceCentres\StationRepository.cs" />
     <Compile Include="Persistence\Repositories\ServiceCentres\UserServiceCentreMappingRepository.cs" />
+    <Compile Include="Persistence\Repositories\ShipmentScan\MobileScanStatusRepository.cs" />
     <Compile Include="Persistence\Repositories\ShipmentScan\ScanStatusRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberRepository.cs" />

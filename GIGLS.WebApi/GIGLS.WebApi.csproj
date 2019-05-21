@@ -332,6 +332,8 @@
     <Compile Include="Controllers\PaymentTransactions\PaymentTransactionController.cs" />
     <Compile Include="Controllers\PickUp\PickUpController.cs" />
     <Compile Include="Controllers\Report\ReportsController.cs" />
+    <Compile Include="Controllers\ServiceCentres\RegionController.cs" />
+    <Compile Include="Controllers\ServiceCentres\RegionServiceCentreMappingController.cs" />
     <Compile Include="Controllers\ServiceCentres\ServiceCentreController.cs" />
     <Compile Include="Controllers\ServiceCentres\StationController.cs" />
     <Compile Include="Controllers\ServiceCentres\UserServiceCentreMappingController.cs" />
@@ -417,6 +419,7 @@
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %286%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevmm - FTP1.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %2814%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %282%29.pubxml" />

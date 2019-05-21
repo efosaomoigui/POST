@@ -12,6 +12,7 @@ using GIGLS.Infrastructure;
 using GIGLS.CORE.Domain;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.ShipmentScan;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -20,45 +21,65 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
         private readonly IMessageSenderService _messageSenderService;
+        private readonly IShipmentTrackingService _shipmentTrackingService;
        
 
-        public MobileShipmentTrackingService(IUnitOfWork uow, IUserService userService, IMessageSenderService messageSenderService
+        public MobileShipmentTrackingService(IUnitOfWork uow, IUserService userService, IMessageSenderService messageSenderService,
+            IShipmentTrackingService shipmentTrackingService
             )
         {
             _uow = uow;
             _userService = userService;
             _messageSenderService = messageSenderService;
-           
+            _shipmentTrackingService = shipmentTrackingService;
+
+
         }
 
-        public async Task<List<MobileShipmentTrackingDTO>> GetMobileShipmentTrackings()
-        {
-            try
-            {
-                return await _uow.MobileShipmentTracking.GetMobileShipmentTrackingsAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        
 
         public async Task<MobileShipmentTrackingHistoryDTO> GetMobileShipmentTrackings(string waybill)
         {
             try
             {
-                var shipmentTracking = await _uow.MobileShipmentTracking.GetMobileShipmentTrackingsAsync(waybill);
+                //1. call agility core tracking
+                var shipmentTracking = await _shipmentTrackingService.GetShipmentTrackings(waybill);
+
+                //2. call mobile tracking
+                var MobileshipmentTracking = await _uow.MobileShipmentTracking.GetMobileShipmentTrackingsAsync(waybill);
+
+                //3. convert agility tracking object to mobile tracking object
+                var shipmentTrackingMobileVersion = shipmentTracking.Select(s => new MobileShipmentTrackingDTO
+                {
+                    Waybill = s.Waybill,
+                    Location = s.Location,
+                    Status = s.Status,
+                    DateTime = s.DateTime,
+                    TrackingType = s.TrackingType,
+                    User = s.User,
+                    MobileShipmentTrackingId = s.ShipmentTrackingId,
+                    ScanStatus = new MobileScanStatusDTO
+                    {
+                        Code = s.ScanStatus.Code,
+                        Incident = s.ScanStatus.Incident,
+                        Reason = s.ScanStatus.Reason,
+                        Comment = s.ScanStatus.Comment
+                    }
+                }
+                );
+                //4. append the two lists together
+                MobileshipmentTracking.AddRange(shipmentTrackingMobileVersion);
                 var addresses = await _uow.PreShipmentMobile.GetAsync(s=>s.Waybill == waybill);
                 var trackings = new MobileShipmentTrackingHistoryDTO
                 {
                     Origin = addresses.SenderAddress,
                     Destination = addresses.ReceiverAddress,
-                    MobileShipmentTrackings = shipmentTracking
+                    MobileShipmentTrackings = MobileshipmentTracking
                 };
 
                 return trackings;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -100,8 +121,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     tracking.User = await _userService.GetCurrentUserId();
                 }
-
-               
                 //check if the waybill has not been scan for the status before
                 bool shipmentTracking = await _uow.MobileShipmentTracking.ExistAsync(x => x.Waybill.Equals(tracking.Waybill) && x.Status.Equals(tracking.Status));
 

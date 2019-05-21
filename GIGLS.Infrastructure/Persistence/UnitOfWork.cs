@@ -380,6 +380,18 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IMobilePickUpRequestsRepository MobilePickUpRequests
         { get; set; }
+
+        [Inject]
+        public IRegionRepository Region
+        { get; set; }
+
+        [Inject]
+        public IRegionServiceCentreMappingRepository RegionServiceCentreMapping
+        { get; set; }
+
+
+        [Inject]
+        public IMobileScanStatusRepository MobileScanStatus { get; set; }
        
         public int Complete()
         {

@@ -10,7 +10,7 @@ namespace GIGLS.Core.IRepositories.Shipments
     public interface IMobileShipmentTrackingRepository : IRepository<Domain.MobileShipmentTracking>
     {
 
-        Task<List<MobileShipmentTrackingDTO>> GetMobileShipmentTrackingsAsync();
+       
         Task<List<MobileShipmentTrackingDTO>> GetMobileShipmentTrackingsAsync(string waybill);
     }
 }

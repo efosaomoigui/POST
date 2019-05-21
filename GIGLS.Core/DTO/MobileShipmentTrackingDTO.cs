@@ -15,7 +15,7 @@ namespace GIGLS.Core.DTO
         public string Status { get; set; }
         public DateTime DateTime { get; set; }
         public string TrackingType { get; set; }
-        public ScanStatusDTO ScanStatus { get; set; }
+        public MobileScanStatusDTO ScanStatus { get; set; }
 
         public string User { get; set; }
         public int ServiceCentreId { get; set; }

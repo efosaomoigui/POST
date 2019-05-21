@@ -144,8 +144,10 @@ namespace GIGLS.Core
 
         IMobileShipmentTrackingRepository MobileShipmentTracking { get; set; }
         IMobilePickUpRequestsRepository MobilePickUpRequests { get; set; }
+        IMobileScanStatusRepository MobileScanStatus { get; set; }
 
-
+        IRegionRepository Region { get; set; }
+        IRegionServiceCentreMappingRepository RegionServiceCentreMapping { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
