@@ -211,7 +211,7 @@ namespace GIGLS.Services.Business.Tracking
                 //String key = System.IO.File.ReadAllText(@"\\psf\Home\Documents\aftership-key.txt");
                 //ConnectionAPI connection_api_backup = new ConnectionAPI(key, "https://api-backup.aftership.com/");
 
-                String key = ConfigurationManager.AppSettings["aramex:API_KEY"];
+                string key = ConfigurationManager.AppSettings["aramex:API_KEY"];
                 ConnectionAPI connection_api = new ConnectionAPI(key, null);
 
                 //tracking:
