@@ -151,33 +151,22 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             var queryDate = accountFilterCriteria.getStartDateAndEndDate();
 
             //declare parameters for the stored procedure
-            SqlParameter iscancelled = new SqlParameter("@IsCancelled", false); 
+            SqlParameter iscancelled = new SqlParameter("@IsCancelled", (object)accountFilterCriteria.IsCancelled?? DBNull.Value);
             SqlParameter startDate = new SqlParameter("@StartDate", queryDate.Item1);
             SqlParameter endDate = new SqlParameter("@EndDate", queryDate.Item2);
-            SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", accountFilterCriteria.PaymentStatus);
-            //SqlParameter paymentMethod = new SqlParameter("@paymentMethod", accountFilterCriteria.p);
-            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", serviceCentreIds[0]);
-            SqlParameter stationId = new SqlParameter("@StationId", accountFilterCriteria.StationId);
-            SqlParameter CompanyType = new SqlParameter("@CompanyType", accountFilterCriteria.CompanyType);
-            SqlParameter isCod = new SqlParameter("@IsCashOnDelivery", true);
+            
+            SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", Convert.ToInt32(accountFilterCriteria.PaymentStatus));//accountFilterCriteria.PaymentStatus
 
-            var invoices = await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTO>("NewInvoiceViewSP " +
-                "@IsCancelled, " +
-                "@EndDate, " +
-                "@StartDate, " +
-                "@PaymentStatus, " +
-                "@DepartureServiceCentreId, " +
-                "@StationId, " +
-                "@CompanyType, "+
-                "@IsCashOnDelivery", 
-                iscancelled, 
-                endDate, 
-                startDate, 
-                paymentStatus, 
-                departureServiceCentreId, 
-                stationId, 
-                CompanyType,
-                new SqlParameter("@IsCashOnDelivery", 1)).ToListAsync();
+            //SqlParameter paymentMethod = new SqlParameter("@paymentMethod", accountFilterCriteria.p);
+            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", serviceCentreIds[0]); //serviceCentreIds[0]
+
+            SqlParameter stationId = new SqlParameter("@StationId", accountFilterCriteria.StationId);
+            SqlParameter CompanyType = new SqlParameter("@CompanyType", (object)accountFilterCriteria.CompanyType?? DBNull.Value);
+            SqlParameter isCod = new SqlParameter("@IsCashOnDelivery", (object)accountFilterCriteria.IsCashOnDelivery??DBNull.Value);
+
+            var invoices = 
+           await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTO>("NewInvoiceViewSP @IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CompanyType, @IsCashOnDelivery",  
+                iscancelled, startDate, endDate, paymentStatus, departureServiceCentreId, stationId, CompanyType, isCod).ToListAsync();
 
             var result = invoices.ToList();
             var invoicesResult = Mapper.Map<IEnumerable<InvoiceViewDTO>>(result);
