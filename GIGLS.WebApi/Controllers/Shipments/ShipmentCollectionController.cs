@@ -199,6 +199,10 @@ namespace GIGLS.WebApi.Controllers.Shipments
         public async Task<IServiceResponse<bool>> ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
         {
             shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKT;
+            if(shipmentCollection.IsComingFromDispatch)
+            {
+                shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKC;
+            }
 
             return await HandleApiOperationAsync(async () => {
                 await _service.ReleaseShipmentForCollection(shipmentCollection);

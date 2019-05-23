@@ -9,6 +9,6 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public int RegionId { get; set; }
         public string RegionName { get; set; }
 
-        public ICollection<ServiceCentre> ServiceCentres { get; set; }
+        //public ICollection<ServiceCentre> ServiceCentres { get; set; }
     }
 }
