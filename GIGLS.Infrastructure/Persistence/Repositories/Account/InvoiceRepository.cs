@@ -11,6 +11,7 @@ using GIGLS.CORE.DTO.Report;
 using System;
 using GIGLS.Core.View;
 using GIGLS.Core.Domain.Wallet;
+using System.Data.SqlClient;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 {
@@ -140,6 +141,38 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
         }
 
+        //Stored Procedure version
+        //var salesPeople = await context.Database.SqlQuery<SalesPerson>("AllSalesPeople").ToListAsync();
+        public async Task<List<InvoiceViewDTO>> GetInvoicesFromViewAsyncFromSP(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
+        {
+            DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
+            DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
+
+            var queryDate = accountFilterCriteria.getStartDateAndEndDate();
+
+            //declare parameters for the stored procedure
+            SqlParameter iscancelled = new SqlParameter("@IsCancelled", (object)accountFilterCriteria.IsCancelled?? DBNull.Value);
+            SqlParameter startDate = new SqlParameter("@StartDate", queryDate.Item1);
+            SqlParameter endDate = new SqlParameter("@EndDate", queryDate.Item2);
+            
+            SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", Convert.ToInt32(accountFilterCriteria.PaymentStatus));//accountFilterCriteria.PaymentStatus
+
+            //SqlParameter paymentMethod = new SqlParameter("@paymentMethod", accountFilterCriteria.p);
+            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", serviceCentreIds[0]); //serviceCentreIds[0]
+
+            SqlParameter stationId = new SqlParameter("@StationId", accountFilterCriteria.StationId);
+            SqlParameter CompanyType = new SqlParameter("@CompanyType", (object)accountFilterCriteria.CompanyType?? DBNull.Value);
+            SqlParameter isCod = new SqlParameter("@IsCashOnDelivery", (object)accountFilterCriteria.IsCashOnDelivery??DBNull.Value);
+
+            var invoices = 
+           await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTO>("NewInvoiceViewSP @IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CompanyType, @IsCashOnDelivery",  
+                iscancelled, startDate, endDate, paymentStatus, departureServiceCentreId, stationId, CompanyType, isCod).ToListAsync();
+
+            var result = invoices.ToList();
+            var invoicesResult = Mapper.Map<IEnumerable<InvoiceViewDTO>>(result);
+
+            return await Task.FromResult(invoicesResult.ToList()); // Task.FromResult(invoicesResult.OrderByDescending(x => x.DateCreated).ToList());
+        }
 
         public Task<List<InvoiceViewDTO>> GetInvoicesFromViewAsync(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
         {
@@ -155,7 +188,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             //filter by cancelled shipments
             invoices = invoices.Where(s => s.IsCancelled == false);
-
 
             //get startDate and endDate
             var queryDate = accountFilterCriteria.getStartDateAndEndDate();
@@ -174,7 +206,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             {
                 invoices = invoices.Where(x => x.CompanyType.Equals(accountFilterCriteria.CompanyType));
             }
-
 
             //service center
             if (accountFilterCriteria.ServiceCentreId > 0)
@@ -197,7 +228,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             var result = invoices.ToList();
             var invoicesResult = Mapper.Map<IEnumerable<InvoiceViewDTO>>(result);
-
 
             return Task.FromResult(invoicesResult.OrderByDescending(x => x.DateCreated).ToList());
         }

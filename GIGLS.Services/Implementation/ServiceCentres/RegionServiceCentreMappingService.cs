@@ -67,7 +67,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             var unmappedRegions = allRegions.
                 Where(s => !result.Select(d => d.RegionId).Contains(s.RegionId)).ToList();
 
-            //4. Apped the two list together
+            //4. Append the two list together
             foreach (var itemUnmapped in unmappedRegions)
             {
                 var item = new RegionServiceCentreMappingDTO
@@ -92,7 +92,27 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             return result.OrderBy(x => x.Region.RegionName).ToList();
         }
 
+        /// <summary>
+        /// This method returns all the service centres.
+        /// The method name was retained in case as rollback is needed.
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<ServiceCentreDTO>> GetUnassignedServiceCentres()
+        {
+            //1. get all service centres and all regions
+            var allServiceCentres = await _serviceCentreService.GetServiceCentres();
+ 
+            return allServiceCentres.OrderBy(x => x.Name).ToList();
+        }
+
+        /// <summary>
+        /// This method gets the unassigned service centres.
+        /// However, an updated request was made that required this method to return all service 
+        /// centres instead.
+        /// Hence, it was renamed to '..._Old_Version'
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<ServiceCentreDTO>> GetUnassignedServiceCentres_Old_Version()
         {
             var resultSet = new HashSet<int>();
             var resultForSC = new List<RegionServiceCentreMappingDTO>();

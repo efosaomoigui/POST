@@ -12,6 +12,7 @@ namespace GIGLS.CORE.DTO.Report
         public bool? IsDeferred { get; set; }
         public string CompanyType { get; set; }
         public PaymentServiceType? PaymentServiceType { get; set; }
-        public bool? IsCashOnDelivery { get; set; }
+        public bool? IsCashOnDelivery { get; set; } = false;
+        public bool? IsCancelled { get; set; } = false;
     }
 }
