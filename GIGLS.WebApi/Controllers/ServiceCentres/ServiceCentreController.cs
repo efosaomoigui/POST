@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
+using System.Linq;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.WebApi.Controllers.ServiceCentres  
 {
@@ -14,10 +16,12 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
     public class ServiceCentreController : BaseWebApiController
     {
         private readonly IServiceCentreService _service;
+        private readonly IUserService _userService;
 
-        public ServiceCentreController(IServiceCentreService service):base(nameof(ServiceCentreController))
+        public ServiceCentreController(IServiceCentreService service, IUserService userService):base(nameof(ServiceCentreController))
         {
             _service = service;
+            _userService = userService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -31,6 +35,45 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                 return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
                 {
                     Object = centres
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("hubs")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetHUBServiceCentres()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.GetServiceCentres();
+                centres = centres.Where(s => s.IsHUB == true);
+
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("usersServiceCentres")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetUsersServiceCentres()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //1. all service centres
+                var allCentres = await _service.GetServiceCentres();
+
+                //2. all priviledged users service centres
+                var usersServiceCentresId = await _userService.GetPriviledgeServiceCenters();
+
+                //3.
+                var usersServiceCentres = allCentres.Where(s => usersServiceCentresId.Contains(s.ServiceCentreId));
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = usersServiceCentres
                 };
             });
         }
