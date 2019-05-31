@@ -49,10 +49,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         private readonly IStationService _stationService;
         private readonly IWalletService _walletService;
         private readonly IWalletTransactionService _walletTransactionService;
+        private readonly IServiceCentreService _service;
 
 
         public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IOTPService otpService,
-            IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService, IWalletService walletService, IWalletTransactionService walletTransactionService) : base(nameof(CustomerPortalController))
+            IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService, IWalletService walletService, IWalletTransactionService walletTransactionService, IServiceCentreService service) : base(nameof(CustomerPortalController))
         {
             // _uow = uow;
             _userService = userService;
@@ -63,6 +64,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             _stationService = stationService;
             _walletService = walletService;
             _walletTransactionService = walletTransactionService;
+            _service = service;
         }
 
 
@@ -953,5 +955,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        
     }
 }
