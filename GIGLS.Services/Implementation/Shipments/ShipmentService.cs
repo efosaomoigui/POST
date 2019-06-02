@@ -1009,7 +1009,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var finalUngroupedList = new List<InvoiceView>();
                 foreach (var item in ungroupedWaybills)
                 {
-                    var tranWaybillObj = allTransitWaybillNumberList.SingleOrDefault(s => s.WaybillNumber == item.Waybill);
+                    var tranWaybillObj = allTransitWaybillNumberList.FirstOrDefault(s => s.WaybillNumber == item.Waybill);
                     if (tranWaybillObj != null)
                     {
                         if (tranWaybillObj.ServiceCentreId == serviceCenters[0] && tranWaybillObj.IsGrouped == false)
