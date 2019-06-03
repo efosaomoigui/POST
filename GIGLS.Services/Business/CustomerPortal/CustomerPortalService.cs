@@ -84,13 +84,23 @@ namespace GIGLS.Services.Business.CustomerPortal
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
-
+           
             var invoices = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.CustomerCode == currentUser.UserChannelCode).ToList();
-            invoices = invoices.OrderByDescending(s => s.DateCreated).ToList();
+
+            if (f_Criteria.IsDashBoard)
+            {
+                invoices = invoices.OrderByDescending(s => s.DateCreated).Take(5).ToList();
+            }
+            else
+            {
+                invoices = invoices.OrderByDescending(s => s.DateCreated).ToList();
+            }
 
             var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
             return await Task.FromResult(invoicesDto);
         }
+        //my own
+       
 
         public async Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
         {

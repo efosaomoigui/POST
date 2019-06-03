@@ -16,7 +16,7 @@
     <RootNamespace>GIGLS.WebApi</RootNamespace>
     <AssemblyName>GIGLS.WebApi</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <UseIISExpress>true</UseIISExpress>
+    <UseIISExpress>false</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
@@ -24,6 +24,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -415,12 +416,16 @@
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP %286%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP1.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %286%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy1.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm - FTP1.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemsdevgui - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemsdevgui - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %2814%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\giglsresourceapi - Web Deploy.pubxml" />
@@ -479,7 +484,16 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <SaveServerSettingsInUserFile>True</SaveServerSettingsInUserFile>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost/giglsresourceapi/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
     </VisualStudio>
