@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.User;
 using GIGLS.CORE.Domain;
 using Microsoft.AspNet.Identity;
@@ -60,5 +61,8 @@ namespace GIGLS.Core.IServices.User
         Task<UserDTO> GetUserByPhone(string PhoneNumber);
 
         IQueryable<GIGL.GIGLS.Core.Domain.User> GetCorporateCustomerUsersAsQueryable();
+
+        Task<int[]> GetPriviledgeCountryIds();
+        Task<List<CountryDTO>> GetPriviledgeCountrys();
     }
 }
