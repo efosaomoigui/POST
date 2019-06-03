@@ -988,5 +988,50 @@ namespace GIGLS.Services.Implementation.Wallet
             return await Task.FromResult(result);
         }
 
+
+        //New bank processing order for COD
+        public async Task<Tuple<string, List<CashOnDeliveryRegisterAccountDTO>, decimal>> RequestCODCustomerWhoNeedPayOut(DepositType type)
+        {
+
+            var enddate = DateTime.Now;
+
+            //Generate the refcode
+            var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
+            var refcode = await _service.GenerateNextNumber(NumberGeneratorType.PayOutOrder, getServiceCenterCode[0].Code);
+            decimal total = 0;
+
+            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
+            allCODs = allCODs.Where(s => s.CODStatusHistory == CODStatushistory.RecievedAtServiceCenter);
+            allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
+
+            //added for GWA and GWARIMPA service centres
+            {
+                if (serviceCenters.Length == 1)
+                {
+                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                    {
+                        serviceCenters = new int[] { 4, 294 };
+                    }
+                }
+            }
+
+            var codResults = new List<CashOnDeliveryRegisterAccount>();
+            if (serviceCenters.Length > 0)
+            {
+                codResults = allCODs.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
+            }
+
+            foreach (var item in codResults)
+            {
+                total += item.Amount;
+            }
+
+            var cashcods = Mapper.Map<List<CashOnDeliveryRegisterAccountDTO>>(codResults);
+            var comboresult = Tuple.Create(refcode, cashcods, total);
+            return await Task.FromResult(comboresult);
+        }
+
+
     }
 }

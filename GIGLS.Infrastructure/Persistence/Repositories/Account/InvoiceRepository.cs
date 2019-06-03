@@ -157,8 +157,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             
             SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", Convert.ToInt32(accountFilterCriteria.PaymentStatus));//accountFilterCriteria.PaymentStatus
 
+            var sc = (serviceCentreIds.Length > 0) ? serviceCentreIds[0] : 0; 
             //SqlParameter paymentMethod = new SqlParameter("@paymentMethod", accountFilterCriteria.p);
-            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", serviceCentreIds[0]); //serviceCentreIds[0]
+            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
 
             SqlParameter stationId = new SqlParameter("@StationId", accountFilterCriteria.StationId);
             SqlParameter CompanyType = new SqlParameter("@CompanyType", (object)accountFilterCriteria.CompanyType?? DBNull.Value);
