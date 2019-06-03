@@ -125,7 +125,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return resultList;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -302,6 +302,33 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             return manifestGroupWaybillMapings;
+        }
+
+        //Search For Manifest
+        public async Task<ManifestDTO> GetManifestSearch(string manifestCode)
+        {
+            try
+            {
+                var manifestDTO = await _manifestService.GetManifestByCode(manifestCode);
+               
+                var DispatchName =  _uow.User.GetUserById(manifestDTO.DispatchedBy).Result;
+                if (DispatchName != null)
+                {
+                    manifestDTO.DispatchedBy = DispatchName.FirstName + " " + DispatchName.LastName;
+                }
+
+                var RecieverName = _uow.User.GetUserById(manifestDTO.ReceiverBy).Result;
+                if (RecieverName != null)
+                {
+                    manifestDTO.ReceiverBy = RecieverName.FirstName + " " + RecieverName.LastName;
+                }
+                
+                return manifestDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

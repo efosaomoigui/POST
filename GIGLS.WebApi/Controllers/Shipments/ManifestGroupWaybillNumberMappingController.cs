@@ -164,5 +164,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity ="View")]
+        [HttpGet]
+        [Route("getmanifestsearch/{manifestCode}")]
+        public async Task<IServiceResponse<ManifestDTO>> GetManifestSearch(string manifestCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestSearch = await _service.GetManifestSearch(manifestCode);
+                return new ServiceResponse<ManifestDTO>
+                {
+                    Object = manifestSearch
+                };
+         });
+        }
     }
 }
