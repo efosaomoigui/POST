@@ -10,4 +10,10 @@
         Partial,
         Waiver
     }
+
+    public enum CODPaidOutStatus 
+    {
+        PaidOut,
+        NotPaidOut
+    }
 }
