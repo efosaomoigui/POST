@@ -88,7 +88,7 @@ namespace GIGLS.Services.Implementation.Report
         public async Task<List<InvoiceViewDTO>> GetInvoiceReportsFromView(AccountFilterCriteria accountFilterCriteria)
         {
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            var invoices = await _uow.Invoice.GetInvoicesFromViewAsync(accountFilterCriteria, serviceCenterIds);
+            var invoices = await _uow.Invoice.GetInvoicesFromViewAsyncFromSP(accountFilterCriteria, serviceCenterIds);
 
             foreach(var item in invoices)
             {
@@ -114,6 +114,14 @@ namespace GIGLS.Services.Implementation.Report
                 };
 
                 item.CustomerDetails = customerDetails;
+
+                //Update to change the Corporate Paid status from 'Paid' to 'Credit'
+                item.PaymentStatusDisplay = item.PaymentStatus.ToString();
+                if ((CompanyType.Corporate.ToString() == item.CompanyType) 
+                    && (PaymentStatus.Paid == item.PaymentStatus))
+                {
+                    item.PaymentStatusDisplay = "Credit";
+                }
             }
 
             return invoices;

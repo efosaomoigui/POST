@@ -1,4 +1,5 @@
-﻿using GIGLS.CORE.DTO;
+﻿using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.DTO.Shipments
 {
-    public class PreShipmentItemMobileDTO : BaseDomainDTO
+    public class PreShipmentItemMobileDTO
     {
         public int PreShipmentItemMobileId { get; set; }
         public string Description { get; set; }
         public double Weight { get; set; }
         public string ItemType { get; set; }
+        public ShipmentType ShipmentType { get; set; }
 
-        public string ItemCode { get; set; }
 
         public string ItemName { get; set; }
         public decimal EstimatedPrice { get; set; }
@@ -37,5 +38,6 @@ namespace GIGLS.Core.DTO.Shipments
 
         //Agility Calculations
         public decimal? CalculatedPrice { get; set; }
+        public int SpecialPackageId { get; set; }
     }
 }

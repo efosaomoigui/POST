@@ -3,12 +3,15 @@ using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.View;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
@@ -26,16 +29,25 @@ namespace GIGLS.Services.Implementation.Account
         private IShipmentService _shipmentService { get; set; }
         private ICustomerService _customerService { get; set; }
         private readonly IUserService _userService;
+        private readonly IWalletService _walletService;
+        private readonly IMessageSenderService _messageSenderService;
+        private readonly IGlobalPropertyService _globalPropertyService;
 
         public InvoiceService(IUnitOfWork uow, INumberGeneratorMonitorService service,
             IShipmentService shipmentService, ICustomerService customerService,
-            IUserService userService)
+            IMessageSenderService messageSenderService,
+            IUserService userService,
+            IWalletService walletService,
+            IGlobalPropertyService globalPropertyService)
         {
             _uow = uow;
             _service = service;
             _shipmentService = shipmentService;
             _customerService = customerService;
             _userService = userService;
+            _walletService = walletService;
+            _messageSenderService = messageSenderService;
+            _globalPropertyService = globalPropertyService;
             MapperConfig.Initialize();
         }
 
@@ -46,10 +58,108 @@ namespace GIGLS.Services.Implementation.Account
             return invoices.ToList().OrderByDescending(x => x.DateCreated);
         }
 
-        public async Task<IEnumerable<InvoiceView>> GetInvoicesForReminder(double daystoduedate)  
+        public async Task<string> SendEmailForDueInvoices(int daystoduedate)
         {
-            var invoices = await _uow.Invoice.GetInvoicesForReminderAsync(daystoduedate);
-            return invoices;
+
+            //1.Get start date for this feature
+            var globalpropertiesreminderdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.globalpropertiesreminderdate);
+            string globalpropertiesdateStr = globalpropertiesreminderdateObj?.Value;
+
+            var globalpropertiesdate = DateTime.MinValue;
+            bool success = DateTime.TryParse(globalpropertiesdateStr, out globalpropertiesdate);
+
+            var invoices = _uow.Invoice.GetInvoicesForReminderAsync();
+            var invoiceResults = invoices.Where(s => s.DateCreated >= globalpropertiesdate).ToList();
+
+            //2. get today's date
+            DateTime today = DateTime.Now;
+
+            var allinvoiceintherange = new List<InvoiceView>();
+
+            //3. filter all due invoices by due date
+            foreach (var invoice in invoices)
+            {
+                var dateofexpiry = today.AddDays(daystoduedate).ToShortDateString();
+                var duedateinview = invoice.DueDate.ToShortDateString();
+
+                if (duedateinview.Equals(dateofexpiry))
+                {
+                    allinvoiceintherange.Add(invoice);
+                }
+            }
+
+            string message = "";
+            int count = 0;
+
+            //4. send Email For all Due Invoices
+            if (allinvoiceintherange != null)
+            {
+                foreach (var invoice in allinvoiceintherange)
+                {
+                    InvoiceViewDTO invoiceviewDTO = Mapper.Map<InvoiceViewDTO>(invoice);
+
+                    invoiceviewDTO.PhoneNumber = invoice.PhoneNumber;
+                    invoiceviewDTO.InvoiceDueDays = daystoduedate.ToString(); //invoice.DueDate.AddDays(daystoduedate);
+
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.IEMAIL, invoiceviewDTO);
+                    message = "Operation Completed Successfully";
+                    count++;
+                }
+            }
+            else
+            {
+                message = "No Due Invoices at this time!";
+            }
+
+            return message + " Count:" + count;
+        }
+
+        public async Task<string> SendEmailForWalletBalanceCheck(decimal amountforreminder) 
+        {
+
+            //1.Get start date for this feature
+            var globalpropertiesreminderdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.globalpropertiesreminderdate);
+            string globalpropertiesdateStr = globalpropertiesreminderdateObj?.Value;
+
+            var globalpropertiesdate = DateTime.MinValue;
+            bool success = DateTime.TryParse(globalpropertiesdateStr, out globalpropertiesdate);
+
+            //get all wallets matching the amountstatedforreminder supplied
+            var wallets = _walletService.GetWalletAsQueryableService();
+            var allwalletsintherange = wallets.Where(s => s.Balance.Equals(amountforreminder)).ToList();
+            var walletthatqualifies_Result = allwalletsintherange.Select(s => s.CustomerCode).ToArray();
+
+            //Get all the customers who are Ecommercce
+            var users = _userService.GetCorporateCustomerUsersAsQueryable();
+            var usersResults = users.Where(s=>s.UserChannelType == UserChannelType.Ecommerce );
+            
+            var invResults = usersResults.Where(s => walletthatqualifies_Result.Contains(s.UserChannelCode)).ToList();
+
+            string message = "";
+            int count = 0;
+
+            //4. send Email For all Due Invoices
+            if (invResults != null)
+            {
+                foreach (var user in invResults)
+                {
+                    InvoiceViewDTO invoiceviewDTO = new InvoiceViewDTO();
+                    var wallinfo = allwalletsintherange.Find(s=>s.CustomerCode == user.UserChannelCode);
+                    invoiceviewDTO.PhoneNumber = user.PhoneNumber;
+                    invoiceviewDTO.WalletBalance = wallinfo.Balance.ToString();
+
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.WEMAIL, invoiceviewDTO);
+                    count++;
+                }
+
+                message = "Operation Completed Successfully";
+            }
+            else
+            {
+                message = "No Due Invoices at this time!";
+            }
+
+            return message+" Count:"+count;
         }
 
         public Tuple<Task<List<InvoiceDTO>>, int> GetInvoices(FilterOptionsDto filterOptionsDto)
@@ -70,7 +180,7 @@ namespace GIGLS.Services.Implementation.Account
                     var filterValue = filterOptionsDto.filterValue;
                     if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
                     {
-                        invoicesDto = invoicesDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null  
+                        invoicesDto = invoicesDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null
                             && (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
                     }
 

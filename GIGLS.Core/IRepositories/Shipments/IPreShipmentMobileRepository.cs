@@ -1,5 +1,7 @@
 ﻿using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.CORE.DTO.Shipments;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +12,6 @@ namespace GIGLS.Core.IRepositories.Shipments
 {
     public interface IPreShipmentMobileRepository : IRepository<PreShipmentMobile>
     {
-
+       Task<List<PreShipmentMobileDTO>> GetPreShipmentsForMobile();
     }
 }

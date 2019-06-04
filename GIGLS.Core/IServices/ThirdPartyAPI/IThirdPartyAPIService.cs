@@ -18,7 +18,7 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
     public interface IThirdPartyAPIService : IServiceDependencyMarker
     {
         //Price API
-        Task<decimal> GetPrice(ThirdPartyPricingDTO thirdPartyPricingDto);
+        Task<decimal> GetPrice2(ThirdPartyPricingDTO thirdPartyPricingDto);
         Task<decimal> GetHaulagePrice(HaulagePricingDTO pricingDto);
 
         //Capture PreShipment API
@@ -60,5 +60,9 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         Task<IEnumerable<StationDTO>> GetLocalStations();
         Task<IEnumerable<StationDTO>> GetInternationalStations();
 
+        Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment);
+        Task<object> CreatePreShipment(PreShipmentMobileDTO preShipmentDTO);
+        Task<List<PreShipmentMobileDTO>> GetPreShipmentById();
+        Task<MobileShipmentTrackingHistoryDTO> TrackMobileShipment(string waybillNumber);
     }
 }

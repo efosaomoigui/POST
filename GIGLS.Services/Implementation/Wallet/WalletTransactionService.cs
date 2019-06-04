@@ -145,5 +145,40 @@ namespace GIGLS.Services.Implementation.Wallet
 
             await _uow.CompleteAsync();
         }
+
+        private async Task<WalletTransactionSummaryDTO> GetWalletTransactionByWalletIdForMobile(WalletDTO wallet)
+        {
+            //get the customer info
+            var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
+
+            var walletTransactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == wallet.WalletId);
+            if (walletTransactions.Count() < 1)
+            {
+                return new WalletTransactionSummaryDTO
+                {
+                    WalletTransactions = new List<WalletTransactionDTO>(),
+                    WalletNumber = wallet.WalletNumber,
+                    WalletBalance = wallet.Balance,
+                    WalletOwnerName = customerDTO.CustomerName,
+                    WalletId = wallet.WalletId
+                };
+            }
+            var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(s => s.DateCreated));
+
+            return new WalletTransactionSummaryDTO
+            {
+                WalletTransactions = walletTransactionDTOList,
+                WalletNumber = wallet.WalletNumber,
+                WalletBalance = wallet.Balance,
+                WalletOwnerName = customerDTO.CustomerName,
+                WalletId = wallet.WalletId
+            };
+        }
+
+        public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile()
+        {
+            var wallet = await _walletService.GetWalletBalance();
+            return await GetWalletTransactionByWalletIdForMobile(wallet);
+        }
     }
 }

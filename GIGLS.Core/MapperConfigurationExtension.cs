@@ -238,7 +238,7 @@ namespace GIGLS.Core
 
                 config.CreateMap<Country, CountryDTO>();
                 config.CreateMap<CountryDTO, Country>();
-                
+
                 config.CreateMap<ShipmentReroute, ShipmentRerouteDTO>();
                 config.CreateMap<ShipmentRerouteDTO, ShipmentReroute>();
 
@@ -250,7 +250,7 @@ namespace GIGLS.Core
 
                 config.CreateMap<ManifestWaybillMapping, ManifestWaybillMappingDTO>();
                 config.CreateMap<ManifestWaybillMappingDTO, ManifestWaybillMapping>();
-                
+
                 config.CreateMap<Device, DeviceDTO>();
                 config.CreateMap<DeviceDTO, Device>();
 
@@ -322,6 +322,22 @@ namespace GIGLS.Core
 
                 config.CreateMap<Location, LocationDTO>();
                 config.CreateMap<LocationDTO, Location>();
+
+
+                config.CreateMap<UserLoginEmail, UserLoginEmailDTO>();
+                config.CreateMap<UserLoginEmailDTO, UserLoginEmail>();
+
+                config.CreateMap<MobilePickUpRequests, MobilePickUpRequestsDTO>();
+                config.CreateMap<MobilePickUpRequestsDTO, MobilePickUpRequests>();
+
+                config.CreateMap<Region, RegionDTO>();
+                config.CreateMap<RegionDTO, Region>();
+
+                config.CreateMap<RegionServiceCentreMapping, RegionServiceCentreMappingDTO>();
+                config.CreateMap<RegionServiceCentreMappingDTO, RegionServiceCentreMapping>();
+
+                config.CreateMap<MobileScanStatus, MobileScanStatusDTO>();
+                config.CreateMap<MobileScanStatusDTO, MobileScanStatus>();
             });
 
             isInit = true;

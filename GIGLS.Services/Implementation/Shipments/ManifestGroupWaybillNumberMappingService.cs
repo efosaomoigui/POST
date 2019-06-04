@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Domain;
 using GIGLS.Core.IServices.User;
 using System.Linq;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -124,7 +125,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return resultList;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -178,6 +179,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         };
 
                         _uow.ManifestGroupWaybillNumberMapping.Add(newMapping);
+
+                        //Update The Group Waybill HasManifest to True
+                        var groupWaybill = await _uow.GroupWaybillNumber.GetAsync(groupWaybillNumberDTO.GroupWaybillNumberId);
+                        groupWaybill.HasManifest = true;
                     }
                 }
 
@@ -213,6 +218,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("ManifestGroupWaybillNumberMapping Does Not Exist");
                 }
                 _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupWaybillNumberMapping);
+
+                //set GroupWaybill HasManifest to false
+                var groupwaybill = _uow.GroupWaybillNumber.SingleOrDefault(x => x.GroupWaybillCode == groupWaybillNumber);
+                groupwaybill.HasManifest = false;
                 _uow.Complete();
             }
             catch (Exception)
@@ -227,7 +236,31 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
                 var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters);
-                return manifestGroupWaybillMapings.OrderByDescending(x => x.DateCreated).Take(200);
+                return manifestGroupWaybillMapings;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<ManifestGroupWaybillNumberMappingDTO>> GetAllManifestGroupWayBillNumberMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            try
+            {
+                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters, dateFilterCriteria);
+
+                //group the result by manifest                
+                var resultGroup = manifestGroupWaybillMapings.GroupBy(x => x.ManifestCode).ToList();
+                var result = new List<ManifestGroupWaybillNumberMappingDTO>();
+                
+                foreach(var resultGrp in resultGroup)
+                {
+                    result.Add(resultGrp.FirstOrDefault());
+                }
+
+                return result;
             }
             catch (Exception)
             {
@@ -269,6 +302,33 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             return manifestGroupWaybillMapings;
+        }
+
+        //Search For Manifest
+        public async Task<ManifestDTO> GetManifestSearch(string manifestCode)
+        {
+            try
+            {
+                var manifestDTO = await _manifestService.GetManifestByCode(manifestCode);
+               
+                var DispatchName =  _uow.User.GetUserById(manifestDTO.DispatchedBy).Result;
+                if (DispatchName != null)
+                {
+                    manifestDTO.DispatchedBy = DispatchName.FirstName + " " + DispatchName.LastName;
+                }
+
+                var RecieverName = _uow.User.GetUserById(manifestDTO.ReceiverBy).Result;
+                if (RecieverName != null)
+                {
+                    manifestDTO.ReceiverBy = RecieverName.FirstName + " " + RecieverName.LastName;
+                }
+                
+                return manifestDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using GIGLS.Core.DTO.BankSettlement;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System;
@@ -23,6 +25,8 @@ namespace GIGLS.Services.Implementation
         public TResponse Object { get; set; }
         public decimal Total { get; set; }
         public string RefCode { get; set; }
+
+        //added to display list of shipments for a wallet code
         public BankProcessingOrderCodesDTO Shipmentcodref { get; set; }   
 
         public Dictionary<string, IEnumerable<string>> ValidationErrors { get; set; }

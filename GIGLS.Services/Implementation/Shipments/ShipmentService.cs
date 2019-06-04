@@ -1,30 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core;
-using GIGLS.Infrastructure;
-using AutoMapper;
-using GIGLS.Core.IServices.Zone;
-using GIGLS.Core.IServices.ServiceCentres;
+﻿using AutoMapper;
 using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core;
 using GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.IServices.Customers;
-using GIGLS.Core.DTO.Customers;
-using GIGLS.CORE.DTO.Shipments;
-using GIGLS.Core.IServices.User;
-using GIGLS.Core.IMessageService;
-using GIGLS.Core.DTO.ServiceCentres;
-using System.Linq;
-using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.IServices.Wallet;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.Core.DTO.Account;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices.Business;
+using GIGLS.Core.IServices.Customers;
+using GIGLS.Core.IServices.ServiceCentres;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.Core.IServices.User;
+using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.IServices.Wallet;
+using GIGLS.Core.IServices.Zone;
 using GIGLS.Core.View;
+using GIGLS.CORE.DTO.Report;
+using GIGLS.CORE.DTO.Shipments;
+using GIGLS.Infrastructure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -44,6 +46,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IShipmentTrackingService _shipmentTrackingService;
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
+        private readonly IPaymentService _paymentService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
@@ -52,7 +55,8 @@ namespace GIGLS.Services.Implementation.Shipments
             IMessageSenderService messageSenderService, ICompanyService companyService,
             IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
-            IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService
+            IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
+            IPaymentService paymentService
             )
         {
             _uow = uow;
@@ -69,6 +73,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _shipmentTrackingService = shipmentTrackingService;
             _globalPropertyService = globalPropertyService;
             _countryRouteZoneMapService = countryRouteZoneMapService;
+            _paymentService = paymentService;
             MapperConfig.Initialize();
         }
 
@@ -113,7 +118,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
                 }
-                
+
                 var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false);
                 var incomingShipments = new List<InvoiceViewDTO>();
 
@@ -126,7 +131,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     //Collected by customer (OKC & OKT), Return (SSR), Reroute (SRR) : All status satisfy IsShipmentCollected above
                     //shipments that have arrived destination service centre should not be displayed in expected shipments
                     List<string> shipmetCollection = _uow.ShipmentCollection.GetAllAsQueryable()
-                        .Where(x => !(x.ShipmentScanStatus == ShipmentScanStatus.OKC && x.ShipmentScanStatus == ShipmentScanStatus.OKT 
+                        .Where(x => !(x.ShipmentScanStatus == ShipmentScanStatus.OKC && x.ShipmentScanStatus == ShipmentScanStatus.OKT
                         && x.ShipmentScanStatus == ShipmentScanStatus.SSR && x.ShipmentScanStatus == ShipmentScanStatus.SRR)).Select(w => w.Waybill).ToList();
 
                     //remove all the waybills that at the collection center from the income shipments
@@ -143,7 +148,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     invoiceViewDTO.DepartureServiceCentre = allServiceCentres.SingleOrDefault(x => x.ServiceCentreId == invoiceViewDTO.DepartureServiceCentreId);
                     invoiceViewDTO.DestinationServiceCentre = allServiceCentres.SingleOrDefault(x => x.ServiceCentreId == invoiceViewDTO.DestinationServiceCentreId);
-                    invoiceViewDTO.DeliveryOption = deliveryOptions.SingleOrDefault(x => x.DeliveryOptionId == invoiceViewDTO.DeliveryOptionId);                    
+                    invoiceViewDTO.DeliveryOption = deliveryOptions.SingleOrDefault(x => x.DeliveryOptionId == invoiceViewDTO.DeliveryOptionId);
                 }
 
                 return await Task.FromResult(incomingShipments);
@@ -272,7 +277,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Demurage should be exclude from Ecommerce and Corporate customer. Only individual customer should have demurage
                 //HomeDelivery shipments should not have demurrage for Individual Shipments
-                if (customerType == CustomerType.Company || 
+                if (customerType == CustomerType.Company ||
                     shipmentDto.PickupOptions == PickupOptions.HOMEDELIVERY)
                 {
                     //set Default Demurrage info in ShipmentDTO for Company customer
@@ -288,6 +293,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     //get Demurrage information for Individual customer
                     GetDemurrageInformation(shipmentDto);
                 }
+
+                //Set the Senders AAddress for the Shipment in the CustomerDetails
+                shipmentDto.CustomerDetails.Address = shipmentDto.SenderAddress ?? shipmentDto.CustomerDetails.Address;
+                shipmentDto.CustomerDetails.State = shipmentDto.SenderState ?? shipmentDto.CustomerDetails.State;
 
                 return shipmentDto;
             }
@@ -447,6 +456,57 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //
+        public async Task<bool> RePrintCountUpdater()
+        {
+            try
+            {
+                //Get the global properties of the number of days to allow reprint to stop
+                var globalpropertiesreprintlimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReprintDays);
+                string globalpropertiesreprintStr = globalpropertiesreprintlimitObj?.Value;
+
+                var globalpropertiesreprintcounter = 0;
+                bool success_counter = int.TryParse(globalpropertiesreprintStr, out globalpropertiesreprintcounter);
+
+                //===========================================================================
+
+                //Get the global properties of the date to start using this service
+                var globalpropertiesreObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReprintFeatureStartDate);
+                string globalpropertiesdateStr = globalpropertiesreObj?.Value;
+
+                var globalpropertiesreprintdate = DateTime.MinValue;
+                bool success = DateTime.TryParse(globalpropertiesdateStr, out globalpropertiesreprintdate);
+
+                //============================================================================
+
+                //var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var shipments = _uow.Shipment.GetAllAsQueryable().Where(s => s.ReprintCounterStatus == false && s.DateCreated >= globalpropertiesreprintdate).ToList();
+                var today = DateTime.Now;
+
+                var newShipmentLists = new List<Shipment>();
+
+                foreach (var shipment in shipments)
+                {
+                    var creationDate = shipment.DateCreated;
+                    int daysDiff = ((TimeSpan)(today - creationDate)).Days;
+
+                    if (daysDiff >= globalpropertiesreprintcounter)
+                    {
+                        newShipmentLists.Add(shipment);
+                    }
+                }
+
+                newShipmentLists.ForEach(a => a.ReprintCounterStatus = true);
+                await _uow.CompleteAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        //
         public async Task<ShipmentDTO> AddShipment(ShipmentDTO shipmentDTO)
         {
             try
@@ -474,9 +534,28 @@ namespace GIGLS.Services.Implementation.Shipments
                 //send message
                 await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All, shipmentDTO);
 
+                //For Corporate Customers, Pay for their shipments through wallet immediately
+                if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType)
+                {
+                    var walletEnumeration = await _uow.Wallet.FindAsync(x => x.CustomerCode.Equals(customerId.CustomerCode));
+                    var wallet = walletEnumeration.FirstOrDefault();
+
+                    if (wallet != null)
+                    {
+                        await _paymentService.ProcessPayment(new PaymentTransactionDTO()
+                        {
+                            PaymentType = PaymentType.Wallet,
+                            TransactionCode = wallet.WalletNumber,
+                            Waybill = newShipment.Waybill
+                        });
+                    }
+
+                }
+
+
                 return newShipment;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -547,6 +626,13 @@ namespace GIGLS.Services.Implementation.Shipments
             await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
             await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
 
+            //Get SuperCentre for Home Delivery
+            if (shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
+            {
+                var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
+                shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
+            }
+
             // get deliveryOptionIds and set the first value in shipment
             var deliveryOptionIds = shipmentDTO.DeliveryOptionIds;
             if (deliveryOptionIds.Count > 0)
@@ -579,11 +665,28 @@ namespace GIGLS.Services.Implementation.Shipments
                 newShipment.DeclarationOfValueCheck = null;
             }
 
+            newShipment.ApproximateItemsWeight = 0;
+
             // add serial numbers to the ShipmentItems
             var serialNumber = 1;
             foreach (var shipmentItem in newShipment.ShipmentItems)
             {
                 shipmentItem.SerialNumber = serialNumber;
+
+                //sum item weight
+                //check for volumetric weight
+                if (shipmentItem.IsVolumetric)
+                {
+                    double volume = (shipmentItem.Length * shipmentItem.Height * shipmentItem.Width) / 5000;
+                    double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
+
+                    newShipment.ApproximateItemsWeight += Weight;
+                }
+                else
+                {
+                    newShipment.ApproximateItemsWeight += shipmentItem.Weight;
+                }
+
                 serialNumber++;
             }
 
@@ -597,17 +700,18 @@ namespace GIGLS.Services.Implementation.Shipments
             newShipment.DiscountValue = shipmentDTO.InvoiceDiscountValue_display;
 
             //check if the shipment contains cod
-            if(newShipment.IsCashOnDelivery == true)
+            if (newShipment.IsCashOnDelivery == true)
             {
                 //collect the cods and add to CashOnDeliveryRegisterAccount()
                 var cashondeliveryentity = new CashOnDeliveryRegisterAccount();
-                cashondeliveryentity.Amount = newShipment.CashOnDeliveryAmount??0;
+                cashondeliveryentity.Amount = newShipment.CashOnDeliveryAmount ?? 0;
                 cashondeliveryentity.CODStatusHistory = CODStatushistory.Created;
                 cashondeliveryentity.Description = "Cod From Sales";
                 //cashondeliveryentity.ServiceCenterCode = newShipment.DepartureServiceCentreId;
-                cashondeliveryentity.ServiceCenterId = newShipment.DepartureServiceCentreId;
+                cashondeliveryentity.ServiceCenterId = 0; //newShipment.DepartureServiceCentreId; recieveddatcenter && unproccessed &&  cash && sc
                 cashondeliveryentity.Waybill = newShipment.Waybill;
                 cashondeliveryentity.UserId = newShipment.UserId;
+                cashondeliveryentity.DepartureServiceCenterId = newShipment.DepartureServiceCentreId;
 
                 _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
             }
@@ -792,7 +896,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         finalUngroupedList.Add(shipment);
                     }
                 }
-                
+
                 //7.
                 var finalList = new List<InvoiceViewDTO>();
 
@@ -818,7 +922,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             Code = s.Code,
                             ServiceCentreId = s.ServiceCentreId
                         }).FirstOrDefault();
-                        
+
                         finalList.Add(invoiceViewDTO);
                     }
                 }
@@ -905,7 +1009,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var finalUngroupedList = new List<InvoiceView>();
                 foreach (var item in ungroupedWaybills)
                 {
-                    var tranWaybillObj = allTransitWaybillNumberList.SingleOrDefault(s => s.WaybillNumber == item.Waybill);
+                    var tranWaybillObj = allTransitWaybillNumberList.FirstOrDefault(s => s.WaybillNumber == item.Waybill);
                     if (tranWaybillObj != null)
                     {
                         if (tranWaybillObj.ServiceCentreId == serviceCenters[0] && tranWaybillObj.IsGrouped == false)
@@ -940,7 +1044,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         finalUngroupedList.Add(shipment);
                     }
                 }
-                
+
 
                 return finalUngroupedList;
             }
@@ -960,7 +1064,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     page = 1,
                     sortorder = "0"
                 };
-                
+
                 //var ungroupedWaybills = await GetUnGroupedWaybillsForServiceCentre(filterOptionsDto);
                 var ungroupedWaybills = await GetUnGroupedWaybillsForServiceCentreDropDown(filterOptionsDto);
 
@@ -991,67 +1095,176 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto)
+        public async Task<List<GroupWaybillNumberDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto)
         {
             try
             {
-                //filterOptionsDto.count = 1000000;
-
-                // get groupedWaybills for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var groupedWaybillsBySC = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(filterOptionsDto, serviceCenters);
 
-                // get all manifest for that Service Centre
-                var manifestGroupWayBillNumberMappings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters);
+                //Get Groupwaybill not yet manifest for the login user
+                var groupedWaybillsBySc = _uow.GroupWaybillNumber.GetAllAsQueryable().Where(x => x.HasManifest == false);
 
-                // filter the two lists
-                var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappings.ToList().Select(a => a.GroupWaybillNumber).Contains(s.GroupWaybillNumber));
-
-                var resultSet = new HashSet<string>();
-                var result = new List<GroupWaybillNumberMappingDTO>();
-                foreach (var item in unmappedGroupedWaybills)
+                if (serviceCenters.Length > 0)
                 {
-                    if (resultSet.Add(item.GroupWaybillNumber))
-                    {
-                        result.Add(item);
-                        item.DestinationServiceCentre = await _centreService.GetServiceCentreById(item.DestinationServiceCentreId);
-                    }
+                    groupedWaybillsBySc = groupedWaybillsBySc.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
                 }
 
-                return result.ToList();
+                //Filter it by the destination service centre send from filter option
+                var filter = filterOptionsDto.filter;
+                int filterValue = Convert.ToInt32(filterOptionsDto.filterValue);
+                if (!string.IsNullOrEmpty(filter) && filterValue > 0)
+                {
+                    groupedWaybillsBySc = groupedWaybillsBySc.Where(s => s.ServiceCentreId == filterValue);
+                }
+
+                var result = groupedWaybillsBySc.ToList();
+
+                var resultDTO = Mapper.Map<List<GroupWaybillNumberDTO>>(result);
+
+                var DestinationServiceCentre = await _uow.ServiceCentre.GetAsync(filterValue);
+
+                foreach (var item in resultDTO)
+                {
+                    item.DestinationServiceCentre = DestinationServiceCentre;
+                }
+
+                return resultDTO;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
+        ////old not used again
+        //public async Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto)
+        //{
+        //    try
+        //    {
+        //        //filterOptionsDto.count = 1000000;
+
+        //        // get groupedWaybills for that Service Centre
+        //        var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+        //        var groupedWaybillsBySC = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(filterOptionsDto, serviceCenters);
+
+        //        // get all manifest for that Service Centre
+        //        var manifestGroupWayBillNumberMappings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters);
+        //        // var manifestGroupWayBillNumberMappingsWaybillOnly = manifestGroupWayBillNumberMappings.Select(a => a.GroupWaybillNumber);
+
+        //        // filter the two lists
+        //        //var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappings.ToList().Select(a => a.GroupWaybillNumber).Contains(s.GroupWaybillNumber));
+        //        // var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappingsWaybillOnly.Any(x => s.GroupWaybillNumber == x));
+        //        var unmappedGroupedWaybills = groupedWaybillsBySC.Where(s => !manifestGroupWayBillNumberMappings.Any(x => s.GroupWaybillNumber == x.GroupWaybillNumber));
+
+        //        var resultSet = new HashSet<string>();
+        //        var result = new List<GroupWaybillNumberMappingDTO>();
+
+        //        //fetch all service centre into the memory
+        //        var allServiceCenters = await _centreService.GetServiceCentres();
+
+        //        foreach (var item in unmappedGroupedWaybills)
+        //        {
+        //            if (resultSet.Add(item.GroupWaybillNumber))
+        //            {
+        //                result.Add(item);
+        //                //item.DestinationServiceCentre = await _centreService.GetServiceCentreById(item.DestinationServiceCentreId);
+        //                item.DestinationServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == item.DestinationServiceCentreId).Select(s => new ServiceCentreDTO
+        //                {
+        //                    Name = s.Name,
+        //                    Code = s.Code,
+        //                    ServiceCentreId = s.ServiceCentreId
+        //                }).FirstOrDefault();
+        //            }
+        //        }
+
+        //        return result.ToList();
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
+        //public async Task<List<GroupWaybillNumberMappingDTO>> GetUnmappedGroupedWaybillsForServiceCentre()
+        //{
+        //    try
+        //    {
+        //        // get groupedWaybills that have not been mapped to a manifest for that Service Centre
+        //        var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+        //        var groupwaybillMapping = _uow.GroupWaybillNumber.GetAllAsQueryable().Where(x => x.HasManifest == false);
+
+        //        if (serviceCenters.Length > 0)
+        //        {
+        //            groupwaybillMapping = groupwaybillMapping.Where(s => serviceCenters.Contains(s.ServiceCentreId));
+        //        }
+
+        //        var resultSet = new HashSet<string>();
+        //        var result = new List<GroupWaybillNumberMappingDTO>();
+
+        //        return result.ToList();
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
+        //Not used again
+        //public async Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentresOld()
+        //{
+        //    try
+        //    {
+        //        var filterOptionsDto = new FilterOptionsDto
+        //        {
+        //            count = 1000000,
+        //            page = 1,
+        //            sortorder = "0"
+        //        };
+        //        var unmappedGroupWaybills = await GetUnmappedGroupedWaybillsForServiceCentre(filterOptionsDto);
+
+        //        var allServiceCenters = await _centreService.GetServiceCentres();
+
+        //        var unmappedGroupServiceCentres = allServiceCenters.ToList().Where(
+        //            s => unmappedGroupWaybills.Select(
+        //                a => a.DestinationServiceCentreId).Contains(s.ServiceCentreId)).ToList();
+
+        //        return unmappedGroupServiceCentres;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
         public async Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentres()
         {
             try
             {
-                var filterOptionsDto = new FilterOptionsDto
+                // get groupedWaybills that have not been mapped to a manifest for that Service Centre
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var groupwaybills = _uow.GroupWaybillNumber.GetAllAsQueryable().Where(x => x.HasManifest == false);
+
+                if (serviceCenters.Length > 0)
                 {
-                    count = 1000000,
-                    page = 1,
-                    sortorder = "0"
-                };
-                var unmappedGroupWaybills = await GetUnmappedGroupedWaybillsForServiceCentre(filterOptionsDto);
+                    groupwaybills = groupwaybills.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                }
+                                
+                //Filter the service centre details using the destination of the waybill
+                var allServiceCenters = _uow.ServiceCentre.GetAllAsQueryable();
+                var result = allServiceCenters.Where(s => groupwaybills.Any(x => x.ServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
+                
+                //Fetch all Service Centre including their Station Detail into Memory
+                var allServiceCenterDTOs = await _centreService.GetServiceCentres();
 
-                var allServiceCenters = await _centreService.GetServiceCentres();
+                var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => result.Any(r => r == s.ServiceCentreId));
 
-                var unmappedGroupServiceCentres = allServiceCenters.ToList().Where(
-                    s => unmappedGroupWaybills.Select(
-                        a => a.DestinationServiceCentreId).Contains(s.ServiceCentreId)).ToList();
-
-                return unmappedGroupServiceCentres;
+                return unmappedGroupServiceCentres.ToList();
             }
             catch (Exception)
             {
                 throw;
             }
         }
-
 
         public async Task<DomesticRouteZoneMapDTO> GetZone(int destinationServiceCentre)
         {
@@ -1095,7 +1308,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            var invoices = await _uow.Invoice.GetInvoicesFromViewAsync(accountFilterCriteria, serviceCenterIds);
+            var invoices = await _uow.Invoice.GetInvoicesFromViewAsyncFromSP(accountFilterCriteria, serviceCenterIds);
 
             //get customer details
             foreach (var item in invoices)
@@ -1149,7 +1362,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var invoices = await _uow.Shipment.GetSalesForServiceCentre(accountFilterCriteria, serviceCenterIds);
-            
+
             var dailySalesDTO = new DailySalesDTO()
             {
                 StartDate = (DateTime)accountFilterCriteria.StartDate,
@@ -1353,7 +1566,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 string[] warehouseServiceCentres = { };
                 // filter by global property for warehouse service centre
                 var warehouseServiceCentreObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.WarehouseServiceCentre).Result;
-                if(warehouseServiceCentreObj != null)
+                if (warehouseServiceCentreObj != null)
                 {
                     var warehouseServiceCentre = warehouseServiceCentreObj.Value;
                     warehouseServiceCentres = warehouseServiceCentre.Split(',');

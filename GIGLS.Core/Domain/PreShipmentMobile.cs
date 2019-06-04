@@ -39,6 +39,8 @@ namespace GIGLS.Core.Domain
         public string ReceiverState { get; set; }
         public string ReceiverCountry { get; set; }
 
+        public string SenderAddress { get; set; }
+
         public int SenderStationId { get; set; }
 
         public int ReceiverStationId { get; set; }
@@ -91,11 +93,14 @@ namespace GIGLS.Core.Domain
         //Cancelled shipment
         public bool IsCancelled { get; set; }
         public bool IsConfirmed { get; set; }
+        public bool IsDelivered { get; set; }
         public string DeclinedReason { get; set; }
 
         //Agility Validations
         public double? CalculatedTotal { get; set; } = 0;
 
-       
+        public string shipmentstatus { get; set; }
+
+
     }
 }

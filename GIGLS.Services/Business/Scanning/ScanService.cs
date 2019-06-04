@@ -11,7 +11,9 @@ using GIGLS.Core.IServices.Fleets;
 using System.Collections.Generic;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
+using System.Linq;
 using GIGLS.Core.Domain;
+using GIGLS.Core.Domain.Wallet;
 
 namespace GIGLS.Services.Business.Scanning
 {
@@ -66,12 +68,38 @@ namespace GIGLS.Services.Business.Scanning
 
         public async Task<bool> ScanShipment(ScanDTO scan)
         {
-            // check if the waybill number exists in the system
+            //1. check if the waybill number exists in the system
             if (scan.WaybillNumber != null)
             {
                 scan.WaybillNumber = scan.WaybillNumber.Trim();
             }
             var shipment = await _shipmentService.GetShipmentForScan(scan.WaybillNumber);
+
+            //2. check if the shipment has not been cancelled (DSC)
+            if (shipment != null && shipment.IsCancelled)
+            {
+                throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already cancelled, no further scan is required!");
+            }
+
+            var serviceCenters = await _userService.GetCurrentServiceCenter();
+            var currentCenter = serviceCenters[0].ServiceCentreId;
+            var cashondeliveryinfo = new List<CashOnDeliveryRegisterAccount>();
+
+            //check if the waybill has not been scan for (AHK) shipment collecte or Delivered status before
+            //var checkShipmentCollectionTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, ShipmentScanStatus.AHD.ToString());
+            //if (checkShipmentCollectionTrack.Equals(false))
+            //{   
+            //    throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already collected, no further scan is required!");
+
+            //}
+
+            //check if the waybill has not been scan for (AHK) shipment collecte or Delivered status before
+            var shipmentCollected = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(scan.WaybillNumber) && (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC));
+
+            if (shipmentCollected != null)
+            {
+                throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already collected, no further scan is required!");
+            }
 
             string scanStatus = scan.ShipmentScanStatus.ToString();
 
@@ -238,6 +266,7 @@ namespace GIGLS.Services.Business.Scanning
 
 
                 //Delivery Manifest
+
                 if (manifest.ManifestType == ManifestType.Delivery)
                 {
                     var waybillInManifestList = await _manifestWaybillService.GetWaybillsInManifest(manifest.ManifestCode);
@@ -274,6 +303,7 @@ namespace GIGLS.Services.Business.Scanning
                                     manifestObj.ReceiverBy = userId;
                                     await _manifestService.UpdateManifest(manifestObj.ManifestId, manifestObj);
                                 }
+
                                 await _dispatchService.UpdateDispatch(dispatch.DispatchId, dispatch);
                             }
 
@@ -282,11 +312,19 @@ namespace GIGLS.Services.Business.Scanning
                             {
                                 if (scan.ShipmentScanStatus == ShipmentScanStatus.SRC)
                                 {
-                                    //test for one waybill to see if it has cod
-
-
                                     //Process Shipment Return to Service centre for repackaging
                                     await ProcessReturnWaybillFromDispatch(itemWaybillDTO.Waybill);
+                                }
+
+                                //get the cod info using the waybill in the itemWaybillDTO
+                                var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
+                                var allCODsResult = allCODs.Where(s => s.Waybill == itemWaybillDTO.Waybill).FirstOrDefault();
+
+                                //check if cod info exist in cash on delivery register account
+                                if (allCODsResult != null)
+                                {
+                                    //update  cash on delivery register account
+                                    cashondeliveryinfo.Add(allCODsResult);
                                 }
                             }
 
@@ -300,6 +338,8 @@ namespace GIGLS.Services.Business.Scanning
                     {
                         throw new GenericException($"No Shipment attached to this Manifest: {scan.WaybillNumber} ");
                     }
+
+                    
                     return true;
                 }
 
@@ -312,6 +352,9 @@ namespace GIGLS.Services.Business.Scanning
 
             //////////////////////4. Check and Create Entries for Transit Manifest
             await CheckAndCreateEntriesForTransitManifest(scan, manifest, waybillsInManifest);
+
+            cashondeliveryinfo.ForEach(a => a.ServiceCenterId = currentCenter);
+            await _uow.CompleteAsync();
 
             return true;
         }
@@ -418,8 +461,11 @@ namespace GIGLS.Services.Business.Scanning
                     foreach (var groupWaybill in groupWaybillsInManifest)
                     {
                         await _groupManifest.RemoveGroupWaybillNumberFromManifest(manifest.ManifestCode, groupWaybill);
-                    }
 
+                        //Update the GroupWaybill for Transit
+                        //1. Update Departure Service Centre to New Service Centre and Set HasManifested to false
+                        await _groupWaybill.ChangeDepartureServiceInGroupWaybill(currentUserSercentreId, groupWaybill);
+                    }
                 }
             }
 
@@ -446,7 +492,5 @@ namespace GIGLS.Services.Business.Scanning
 
             return true;
         }
-
-
     }
 }

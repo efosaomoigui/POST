@@ -212,19 +212,24 @@
     <Compile Include="Implementation\PaymentTransactions\PaymentTransactionService.cs" />
     <Compile Include="Implementation\Report\AccountReportService.cs" />
     <Compile Include="Implementation\Report\ShipmentReportService.cs" />
+    <Compile Include="Implementation\ServiceCentres\RegionService.cs" />
     <Compile Include="Implementation\ServiceCentres\ServiceCentreService.cs" />
     <Compile Include="Implementation\ServiceCentres\StationService.cs" />
     <Compile Include="Implementation\ServiceCentres\UserServiceCentreMappingService.cs" />
     <Compile Include="Implementation\ServiceResponse.cs" />
+    <Compile Include="Implementation\ShipmentScan\MobileScanStatusService.cs" />
     <Compile Include="Implementation\ShipmentScan\ScanStatusService.cs" />
     <Compile Include="Implementation\Shipments\GroupWaybillNumberMappingService.cs" />
     <Compile Include="Implementation\Shipments\GroupWaybillNumberService.cs" />
     <Compile Include="Implementation\Shipments\LogVisitReasonService.cs" />
+    <Compile Include="Implementation\Shipments\MobilePickUpRequestsService.cs" />
+    <Compile Include="Implementation\Shipments\MobileShipmentTrackingService.cs" />
     <Compile Include="Implementation\Shipments\OverdueShipmentService.cs" />
     <Compile Include="Implementation\Shipments\PreShipmentManifestMappingService.cs" />
     <Compile Include="Implementation\Shipments\ManifestWaybillMappingService.cs" />
     <Compile Include="Implementation\Shipments\ManifestVisitMonitoringService.cs" />
     <Compile Include="Implementation\Shipments\PreShipmentMobileService.cs" />
+    <Compile Include="Implementation\ServiceCentres\RegionServiceCentreMappingService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentDeliveryOptionMappingService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentPackagePriceService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentRerouteService.cs" />
@@ -296,6 +301,9 @@
     <Folder Include="Business\AdminConsole\" />
     <Folder Include="Business\Finance\" />
     <Folder Include="Business\OrderManagement\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />

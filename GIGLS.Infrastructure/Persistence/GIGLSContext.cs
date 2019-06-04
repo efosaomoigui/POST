@@ -231,10 +231,19 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<PreShipmentItemMobile> PresShipmentItemMobile { get; set; }
 
         public DbSet<PreShipmentMobile> PresShipmentMobile { get; set; }
+        public DbSet<MobileShipmentTracking> MobileShipmentTracking { get; set; }
 
         public DbSet<Location> Location { get; set; }
 
-        
+        public DbSet<UserLoginEmail> UserLoginEmail { get; set; }
+        public DbSet<MobilePickUpRequests> MobilePickUpRequests { get; set; }
+
+        //Region
+        public DbSet<Region> Regions { get; set; }
+        public DbSet<RegionServiceCentreMapping> RegionServiceCentreMappings { get; set; }
+        public DbSet<MobileScanStatus> MobileScanStatus { get; set; }
+
+
 
         #endregion
 

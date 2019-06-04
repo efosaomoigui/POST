@@ -37,7 +37,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         {
             _thirdPartyAPIService = portalService;
         }
-        
+
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("haulageprice")]
@@ -53,7 +53,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
-                
+
         //Route API
 
 
@@ -92,7 +92,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
-        
+
         //Transaction History API
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpPost]
@@ -109,7 +109,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
-        
+
         //General API
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
@@ -143,7 +143,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
-        
+
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("cod")]
@@ -348,18 +348,32 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         /// </summary>
         /// <param name="thirdPartyPricingDto"></param>
         /// <returns></returns>
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpPost]
+        //[Route("previousprice")]
+        //public async Task<IServiceResponse<decimal>> GetPrice(ThirdPartyPricingDTO thirdPartyPricingDto)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var price = await _thirdPartyAPIService.GetPrice2(thirdPartyPricingDto);
+
+        //        return new ServiceResponse<decimal>
+        //        {
+        //            Object = price
+        //        };
+        //    });
+        //}
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("price")]
-        public async Task<IServiceResponse<decimal>> GetPrice(ThirdPartyPricingDTO thirdPartyPricingDto)
+        public async Task<IServiceResponse<MobilePriceDTO>> GetPrice(PreShipmentMobileDTO PreshipmentMobile)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var price = await _thirdPartyAPIService.GetPrice(thirdPartyPricingDto);
-
-                return new ServiceResponse<decimal>
+                var PreshipMentMobile = await _thirdPartyAPIService.GetPrice(PreshipmentMobile);
+                return new ServiceResponse<MobilePriceDTO>
                 {
-                    Object = price
+                    Object = PreshipMentMobile
                 };
             });
         }
@@ -370,17 +384,32 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         /// </summary>
         /// <param name="thirdPartyPreShipmentDTO"></param>
         /// <returns></returns>
+        //[ThirdPartyActivityAuthorize(Activity = "Create")]
+        //[HttpPost]
+        //[Route("previouscaptureshipment")]
+        //public async Task<IServiceResponse<bool>> AddPreShipment(ThirdPartyPreShipmentDTO thirdPartyPreShipmentDTO)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var shipment = await _thirdPartyAPIService.AddPreShipment(thirdPartyPreShipmentDTO);
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Object = true
+        //        };
+        //    });
+        //}
+
         [ThirdPartyActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("captureshipment")]
-        public async Task<IServiceResponse<bool>> AddPreShipment(ThirdPartyPreShipmentDTO thirdPartyPreShipmentDTO)
+        public async Task<IServiceResponse<object>> CreateShipment(PreShipmentMobileDTO PreshipmentMobile)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipment = await _thirdPartyAPIService.AddPreShipment(thirdPartyPreShipmentDTO);
-                return new ServiceResponse<bool>
+                var PreshipMentMobile = await _thirdPartyAPIService.CreatePreShipment(PreshipmentMobile);
+                return new ServiceResponse<object>
                 {
-                    Object = true
+                    Object = PreshipMentMobile
                 };
             });
         }
@@ -519,7 +548,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
 
                     //get access token from response body
                     var responseJson = await responseMessage.Content.ReadAsStringAsync();
-                    var jObject = JObject.Parse(responseJson);                                       
+                    var jObject = JObject.Parse(responseJson);
 
                     getTokenResponse = jObject.GetValue("access_token").ToString();
 
@@ -531,5 +560,46 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             });
         }
 
+
+        /// <summary>
+        /// This api is used to get shipments created by user
+        /// </summary>
+        /// <description>This api is used to get shipments by user</description>
+        /// <returns></returns>
+
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("PickUpRequests")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> ViewShipment()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var PreshipMentMobile = await _thirdPartyAPIService.GetPreShipmentById();
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = PreshipMentMobile,
+                };
+            });
+        }
+        /// <summary>
+        /// This api is used to track shipments created by the user
+        /// </summary>
+        /// <param name="waybillNumber"></param>
+        /// <returns></returns>
+        [ThirdPartyActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("TrackAllShipment/{waybillNumber}")]
+        public async Task<IServiceResponse<MobileShipmentTrackingHistoryDTO>> TrackMobileShipment(string waybillNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.TrackMobileShipment(waybillNumber);
+
+                return new ServiceResponse<MobileShipmentTrackingHistoryDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

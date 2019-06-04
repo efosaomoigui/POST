@@ -109,7 +109,6 @@ namespace GIGLS.Services.Implementation.Wallet
             return Mapper.Map<WalletDTO>(wallet);
         }
 
-
         public async Task AddWallet(WalletDTO wallet)
         {
             var walletNumber = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Wallet);
@@ -287,11 +286,12 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
-        public async Task<WalletDTO> GetWalletByCustomerCode(string CustomerCode)
+        public async Task<WalletDTO> GetWalletBalance()
         {
-            var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
-                    s => s.CustomerCode == CustomerCode);
-            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerId.Equals(individualCustomerDTO.IndividualCustomerId));
+            var currentUser = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(currentUser);
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
+
             var walletDTO = Mapper.Map<WalletDTO>(wallet);
             if (wallet == null)
             {
@@ -299,6 +299,12 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             return walletDTO;
+        }
+
+        public IQueryable<Core.Domain.Wallet.Wallet> GetWalletAsQueryableService()
+        {
+            var wallet = _uow.Wallet.GetAllAsQueryable();
+            return wallet;
         }
     }
 }

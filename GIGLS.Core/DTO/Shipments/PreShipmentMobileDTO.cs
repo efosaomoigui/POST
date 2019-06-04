@@ -26,6 +26,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string CustomerType { get; set; }
         public string CompanyType { get; set; }
         public string CustomerCode { get; set; }
+        public string SenderAddress { get; set; }
 
         //Receivers Information
         public string ReceiverName { get; set; }
@@ -97,6 +98,10 @@ namespace GIGLS.Core.DTO.Shipments
         public double? CalculatedTotal { get; set; } = 0;
         public bool? IsBalanceSufficient { get; set; }
 
-       
+        public string shipmentstatus { get; set; }
+        public bool IsDelivered { get; set; }
+        public int TrackingId { get; set; }
+
+
     }
 }

@@ -1,5 +1,4 @@
-﻿using GIGLS.Core.IServices.CustomerPortal;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Shipments;
@@ -27,6 +26,7 @@ using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.IServices.ThirdPartyAPI;
 using System;
+using GIGLS.Core.IServices.Utility;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -41,11 +41,17 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ICashOnDeliveryAccountService _iCashOnDeliveryAccountService;
         private readonly IPricingService _pricing;
         private readonly ICustomerService _customerService;
+        private readonly IPreShipmentMobileService _preshipmentMobileService;
+        private readonly IWalletService _walletService;
+        private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
+        private readonly IMobileShipmentTrackingService _mobiletrackingservice;
+
 
         public ThirdPartyAPIService(IUnitOfWork uow, IPreShipmentService preShipmentService, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService, 
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService,
-            ICustomerService customerService)
+            ICustomerService customerService, IPreShipmentMobileService preshipmentMobileService, IWalletService walletService, INumberGeneratorMonitorService numberGeneratorMonitorService,
+            IMobileShipmentTrackingService mobiletrackingservice)
         {
             _preShipmentService = preShipmentService;
             _invoiceService = invoiceService;
@@ -56,11 +62,15 @@ namespace GIGLS.Services.Business.CustomerPortal
             _pricing = pricingService;
             _customerService = customerService;
             _uow = uow;
+            _preshipmentMobileService = preshipmentMobileService;
+            _walletService = walletService;
+            _numberGeneratorMonitorService = numberGeneratorMonitorService;
+            _mobiletrackingservice = mobiletrackingservice;
             MapperConfig.Initialize();
         }
 
         //Price API
-        public async Task<decimal> GetPrice(ThirdPartyPricingDTO thirdPartyPricingDto)
+        public async Task<decimal> GetPrice2(ThirdPartyPricingDTO thirdPartyPricingDto)
         {
             //service centres from station
             var departureServiceCentre = _uow.ServiceCentre.GetAll().Where(s => s.StationId == thirdPartyPricingDto.DepartureStationId).ToList().FirstOrDefault();
@@ -89,6 +99,13 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _pricing.GetPrice(newPricingDTO);
         }
 
+
+        public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
+        {
+            var PreShipment = await _preshipmentMobileService.GetPrice(preShipment);
+            return PreShipment;
+        }
+
         public async Task<decimal> GetHaulagePrice(HaulagePricingDTO haulagePricingDto)
         {
             return await _pricing.GetHaulagePrice(haulagePricingDto);
@@ -99,8 +116,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             try
             {
-
-
                 //1. convert thirdPartyPreShipmentDTO to PreShipmentDTO
                 var preShipmentDTO = Mapper.Map<PreShipmentDTO>(thirdPartyPreShipmentDTO);
 
@@ -114,7 +129,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     totalPrice += preShipmentItemDTO.Price;
                 }
                 preShipmentDTO.PreShipmentItems = preShipmentItemDTOList;
-
 
                 //3. set other default values
                 //3.1 price
@@ -233,7 +247,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             return Mapper.Map<IEnumerable<PaymentPartialTransactionDTO>>(transaction);
         }
 
-
         //General API
         public async Task<DashboardDTO> GetDashboard()
         {
@@ -256,8 +269,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return await Task.FromResult(dashboardDTO);
         }
-
-
+        
         //For Quick Quotes
         public async Task<IEnumerable<StateDTO>> GetStates(int pageSize, int page)
         {
@@ -344,6 +356,30 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var internationalStations = await _uow.Station.GetInternationalStations();
             return internationalStations.OrderBy(x => x.StationName).ToList();
+        }
+
+        public async Task<object> CreatePreShipment(PreShipmentMobileDTO preShipmentDTO)
+        {
+            var preshipmentDto = await _preshipmentMobileService.AddPreShipmentMobile(preShipmentDTO);
+            return preshipmentDto;
+        }
+
+        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentById()
+        {
+            var preshipmentDto = await _preshipmentMobileService.GetPreShipmentForUser();
+            return preshipmentDto;
+        }
+        public async Task<MobileShipmentTrackingHistoryDTO> TrackMobileShipment(string waybillNumber)
+        {
+            try
+            {
+                var result = await _mobiletrackingservice.GetMobileShipmentTrackings(waybillNumber);
+                return result;
+            }
+            catch
+            {
+                throw new GenericException("Error: You cannot track this waybill number.");
+            }
         }
     }
 }

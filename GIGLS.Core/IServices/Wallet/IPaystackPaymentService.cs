@@ -11,5 +11,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task<PaystackWebhookDTO> VerifyPayment(string reference);
         Task<bool> VerifyAndValidateWallet(PaystackWebhookDTO webhook);
         Task<PaymentResponse> VerifyAndValidateWallet(string referenceCode);
+        Task<PaystackWebhookDTO> VerifyPaymentMobile(string reference, string UserId);
     }
 }

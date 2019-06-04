@@ -33,6 +33,7 @@ using GIGLS.Core.IServices.Sla;
 using GIGLS.Core.Enums;
 using GIGLS.Core.View;
 using GIGLS.Services.Implementation;
+using GIGLS.Core.IServices;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -51,12 +52,14 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IWalletService _walletService;
         private readonly IWalletPaymentLogService _wallepaymenttlogService;
         private readonly ISLAService _slaService;
+        private readonly IOTPService _otpService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
-            ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService,ICustomerService customerService, 
-            IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService, ISLAService slaService)
+            ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService, ICustomerService customerService,
+            IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
+            ISLAService slaService, IOTPService otpService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -71,6 +74,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _walletService = walletService;
             _wallepaymenttlogService = wallepaymenttlogService;
             _slaService = slaService;
+            _otpService = otpService;
             MapperConfig.Initialize();
         }
 
@@ -80,13 +84,23 @@ namespace GIGLS.Services.Business.CustomerPortal
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
-
+           
             var invoices = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.CustomerCode == currentUser.UserChannelCode).ToList();
-            invoices = invoices.OrderByDescending(s => s.DateCreated).ToList();
+
+            if (f_Criteria.IsDashBoard)
+            {
+                invoices = invoices.OrderByDescending(s => s.DateCreated).Take(5).ToList();
+            }
+            else
+            {
+                invoices = invoices.OrderByDescending(s => s.DateCreated).ToList();
+            }
 
             var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
             return await Task.FromResult(invoicesDto);
         }
+        //my own
+       
 
         public async Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
         {
@@ -116,7 +130,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 //Check if transaction exist before updating the wallet
                 //to prevent duplicate entry
-                var transactionExist =_uow.WalletTransaction.GetAllAsQueryable().SingleOrDefault(s => s.PaymentTypeReference == walletPaymentLogDto.Reference);
+                var transactionExist = _uow.WalletTransaction.GetAllAsQueryable().SingleOrDefault(s => s.PaymentTypeReference == walletPaymentLogDto.Reference);
 
                 if (transactionExist != null)
                 {
@@ -184,6 +198,18 @@ namespace GIGLS.Services.Business.CustomerPortal
             invoices = invoices.OrderByDescending(s => s.DateCreated).ToList();
 
             var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
+
+            //Update to change the Corporate Paid status from 'Paid' to 'Credit'
+            foreach (var item in invoicesDto)
+            {
+                item.PaymentStatusDisplay = item.PaymentStatus.ToString();
+                if ((CompanyType.Corporate.ToString() == item.CompanyType)
+                    && (PaymentStatus.Paid == item.PaymentStatus))
+                {
+                    item.PaymentStatusDisplay = "Credit";
+                }
+            }
+
             return invoicesDto;
         }
 
@@ -400,10 +426,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     CustomerCode = user.UserChannelCode,
                     PictureUrl = user.PictureUrl
                     //added this to pass channelcode 
-                   
+
 
                 };
-         //2. Create customer data
+                //2. Create customer data
                 var result = await _customerService.CreateCustomer(customer);
 
                 if (result != null)
@@ -479,7 +505,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             //Get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
-            
+
             var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode.ToLower() == currentUser.UserChannelCode.ToLower());
 
             if (wallet == null)
@@ -502,5 +528,62 @@ namespace GIGLS.Services.Business.CustomerPortal
             items.Add("SENSITIVE");
             return items;
         }
+
+        public async Task<SignResponseDTO> SignUp(UserDTO user)
+        {
+            var EmailUser = await _uow.User.GetUserByEmail(user.Email);
+            if (EmailUser != null)
+            {
+                throw new GenericException("Email already Exists!");
+            }
+
+            var PhoneNumberUser = await _uow.User.GetUserByPhoneNumber(user.PhoneNumber);
+            if (PhoneNumberUser != null)
+            {
+                throw new GenericException("PhoneNumber already Exists!");
+            }
+
+            var registeredUser = await Register(user);
+            var result = await SendOTPForRegisteredUser(registeredUser);
+
+            return result;
+        }
+
+        private async Task<SignResponseDTO> SendOTPForRegisteredUser(UserDTO user)
+        {
+            var responseDto = new SignResponseDTO();
+
+            var Otp = await _otpService.GenerateOTP(user);
+            var message = await _otpService.SendOTP(Otp);
+
+            string[] CombinedMessage = message.Split(',');
+
+            var EmailResponse = CombinedMessage[0];
+            var PhoneResponse = CombinedMessage[1];
+
+            if (EmailResponse == "Accepted")
+            {
+                responseDto.EmailSent = true;
+            }
+            if (PhoneResponse == "OK")
+            {
+                responseDto.PhoneSent = true;
+            }
+
+            return responseDto;
+        }
+
+        public async Task<SignResponseDTO> ResendOTP(UserDTO user)
+        {
+            var registeredUser = await _otpService.CheckDetails(user.Email);
+            if (registeredUser == null)
+            {
+                throw new GenericException("User has not registered!");
+            }
+
+            var result = await SendOTPForRegisteredUser(registeredUser);
+            return result;
+        }
+
     }
 }

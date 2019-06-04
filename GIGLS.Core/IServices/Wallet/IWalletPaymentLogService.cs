@@ -16,5 +16,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task RemoveWalletPaymentLog(int walletPaymentLogId);
         Task PaystackPaymentService(WalletPaymentLogDTO WalletPaymentInfo);
         Tuple<Task<List<WalletPaymentLogView>>, int> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto);
+        Task AddWalletPaymentLogMobile(WalletPaymentLogDTO walletPaymentLogDto);
     }
 }

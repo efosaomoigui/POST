@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Shipments;
+using GIGLS.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -7,6 +8,7 @@ namespace GIGLS.Core.IServices.Shipments
     public interface IManifestWaybillMappingService : IServiceDependencyMarker
     {
         Task<List<ManifestWaybillMappingDTO>> GetAllManifestWaybillMappings();
+        Task<List<ManifestWaybillMappingDTO>> GetAllManifestWaybillMappings(DateFilterCriteria dateFilterCriteria);
         Task MappingManifestToWaybills(string manifest, List<string> Waybills);
         Task MappingManifestToWaybillsMobile(string manifest, List<string> waybills);
         Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifest(string manifestcode);

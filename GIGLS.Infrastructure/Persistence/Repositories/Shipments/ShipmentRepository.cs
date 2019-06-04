@@ -91,10 +91,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                  CompanyType = r.CompanyType,
                                                  CustomerCode = r.CustomerCode,
-                                                 Description = r.Description
+                                                 Description = r.Description,
+                                                 SenderAddress = r.SenderAddress,
+                                                 SenderState = r.SenderState,
+                                                 ApproximateItemsWeight = r.ApproximateItemsWeight
                                                  //DepartureTerminalName = r.DepartureTerminal.Name,
                                                  //DestinationTerminalName = r.DestinationTerminal.Name       
-                                                 //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
+                                                 //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()z
                                              }).ToList();
 
 
@@ -122,8 +125,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                     shipment = shipment.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
                 }
 
-
-                var count = shipment.Count();
+                var count = 0;
                 //shipment = shipment.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count);
 
 
@@ -188,6 +190,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        CompanyType = r.CompanyType,
                                        CustomerCode = r.CustomerCode,
                                        Description = r.Description,
+                                       SenderAddress = r.SenderAddress,
+                                       SenderState = r.SenderState,
+                                       ReprintCounterStatus = r.ReprintCounterStatus,
+                                       ApproximateItemsWeight = r.ApproximateItemsWeight,
                                        Invoice = Context.Invoice.Where(c => c.Waybill == r.Waybill).Select(x => new InvoiceDTO
                                        {
                                            InvoiceId = x.InvoiceId,
@@ -201,7 +207,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            IsInternational = x.IsInternational
                                        }).FirstOrDefault()
                                        //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
-                                   }).OrderByDescending(x => x.DateCreated).Take(20).ToList();
+                                   }).OrderByDescending(x => x.DateCreated).Take(10).ToList();
+
+                    //var count = shipment.Count();
+                    count = shipmentDto.Count();
 
                     return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto), count);
                 }
@@ -261,6 +270,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                    CompanyType = r.CompanyType,
                                    CustomerCode = r.CustomerCode,
                                    Description = r.Description,
+                                   SenderAddress = r.SenderAddress,
+                                   SenderState = r.SenderState,
+                                   ApproximateItemsWeight = r.ApproximateItemsWeight,
                                    Invoice = Context.Invoice.Where(c => c.Waybill == r.Waybill).Select(x => new InvoiceDTO
                                    {
                                        InvoiceId = x.InvoiceId,
@@ -305,7 +317,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 }
 
                 shipmentDto = shipmentDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
-
+                count = shipmentDto.Count();
                 return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto), count);
             }
             catch (Exception)
@@ -382,7 +394,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                      CompanyType = r.CompanyType,
                                                      CustomerCode = r.CustomerCode,
-                                                     Description = r.Description
+                                                     Description = r.Description,
+                                                     SenderAddress = r.SenderAddress,
+                                                     SenderState = r.SenderState,
+                                                     ApproximateItemsWeight = r.ApproximateItemsWeight
                                                  }).ToList();
 
                 //filter
@@ -496,7 +511,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                      CompanyType = r.CompanyType,
                                                      CustomerCode = r.CustomerCode,
-                                                     Description = r.Description
+                                                     Description = r.Description,
+                                                     SenderAddress = r.SenderAddress,
+                                                     SenderState = r.SenderState,
+                                                     ApproximateItemsWeight = r.ApproximateItemsWeight
                                                  }).ToList();
 
                 //filter
@@ -663,7 +681,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                  CompanyType = r.CompanyType,
                                                  CustomerCode = r.CustomerCode,
-                                                 Description = r.Description
+                                                 Description = r.Description,
+                                                 SenderAddress = r.SenderAddress,
+                                                 SenderState = r.SenderState,
+                                                 ApproximateItemsWeight = r.ApproximateItemsWeight
                                              }).ToList();
 
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -799,7 +820,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  ShipmentPackagePrice = r.ShipmentPackagePrice,
                                                  CompanyType = r.CompanyType,
                                                  CustomerCode = r.CustomerCode,
-                                                 Description = r.Description
+                                                 Description = r.Description,
+                                                 SenderAddress = r.SenderAddress,
+                                                 SenderState = r.SenderState,
+                                                 ApproximateItemsWeight = r.ApproximateItemsWeight
                                              }).ToList();
 
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -865,7 +889,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            IsInternational = r.IsInternational,
                                            Total = r.Total,
                                            CashOnDeliveryAmount = r.CashOnDeliveryAmount,
-                                           IsCashOnDelivery = r.IsCashOnDelivery
+                                           IsCashOnDelivery = r.IsCashOnDelivery,
+                                           SenderAddress = r.SenderAddress,
+                                           SenderState = r.SenderState,
+                                           ApproximateItemsWeight = r.ApproximateItemsWeight
                                        }).FirstOrDefault();            
             return Task.FromResult(shipmentDto);
         }
@@ -910,7 +937,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                DateCreated = i.DateCreated,
                                                UserName = u.FirstName + " " + u.LastName,
                                                CompanyType = s.CompanyType,
-                                               PaymentTypeReference = i.PaymentTypeReference
+                                               PaymentTypeReference = i.PaymentTypeReference,
+                                               ApproximateItemsWeight = s.ApproximateItemsWeight
                                            }).ToList();
             var resultDto = result.OrderByDescending(x => x.DateCreated).ToList();
             return Task.FromResult(resultDto);

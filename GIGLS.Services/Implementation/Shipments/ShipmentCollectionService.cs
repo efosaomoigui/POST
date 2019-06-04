@@ -19,6 +19,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+
+
 namespace GIGLS.Services.Implementation.Shipments
 {
     public class ShipmentCollectionService : IShipmentCollectionService
@@ -213,10 +215,19 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
                 }
-
+                List<ShipmentCollection> shipmentCollection = new List<ShipmentCollection>();
                 List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
+                if (filterOptionsDto.filterValue == "0" || filterOptionsDto.filterValue== null)
+                {
 
-                var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).ToList();
+                    shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().ToList().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.DateCreated.ToString("MM/dd/yyyy") == DateTime.Now.ToString("MM/dd/yyyy")).ToList();
+                }
+                else
+                {
+                    shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).ToList();
+                }
+
+               
                 shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
 
                 int count = shipmentCollection.Count();
@@ -257,7 +268,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), count);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }

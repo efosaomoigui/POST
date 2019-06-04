@@ -15,5 +15,6 @@
         BankProcessingOrderForShipment = 11,
         BankProcessingOrderForCOD = 12, 
         BankProcessingOrderForDemurrage = 13,
+        PayOutOrder = 14
     }
 }

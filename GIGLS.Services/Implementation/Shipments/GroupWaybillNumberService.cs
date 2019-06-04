@@ -277,5 +277,28 @@ namespace GIGLS.Services.Implementation.Shipments
             var groupwaybill = await _uow.GroupWaybillNumber.GetAsync(x => x.GroupWaybillCode.Equals(groupwaybillNumber));
             return groupwaybill;
         }
+
+
+        //Change the Departure Service Centre in GroupWaybill
+        public async Task ChangeDepartureServiceInGroupWaybill(int serviceCentreId, string groupWaybillNumber, bool hasManifest = false)
+        {
+            try
+            {
+                var groupWaybill = await _uow.GroupWaybillNumber.GetAsync(x => x.GroupWaybillCode == groupWaybillNumber);
+
+                //validate the ids are in the system
+                if (groupWaybill == null)
+                {
+                    throw new GenericException($"No GroupWaybill exists for this : {groupWaybillNumber}");
+                }
+                groupWaybill.DepartureServiceCentreId = serviceCentreId;
+                groupWaybill.HasManifest = hasManifest;
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -1,13 +1,6 @@
 ﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core;
-using GIGLS.Core.Domain;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GIGLS.Core.Domain
 {
@@ -21,9 +14,12 @@ namespace GIGLS.Core.Domain
         public bool IsActive { get; set; }
 
         public string UserId { get; set; }
-        //public virtual User  User { get; set; }
 
+        //Destination Service centre
         public int ServiceCentreId { get; set; }
         public virtual ServiceCentre ServiceCentre { get; set; }
+
+        public bool HasManifest { get; set; }
+        public int DepartureServiceCentreId { get; set; }
     }
 }

@@ -140,6 +140,15 @@ namespace GIGLS.Core
 
         IPreShipmentItemMobileRepository PreShipmentItemMobile { get; set; }
 
+        IUserLoginEmailRepository UserLoginEmail { get; set; }
+
+        IMobileShipmentTrackingRepository MobileShipmentTracking { get; set; }
+        IMobilePickUpRequestsRepository MobilePickUpRequests { get; set; }
+        IMobileScanStatusRepository MobileScanStatus { get; set; }
+
+        IRegionRepository Region { get; set; }
+        IRegionServiceCentreMappingRepository RegionServiceCentreMapping { get; set; }
+
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
     }

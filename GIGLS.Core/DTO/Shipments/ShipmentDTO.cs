@@ -57,6 +57,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         //Shipment Items
         public List<ShipmentItemDTO> ShipmentItems { get; set; }
+        public double ApproximateItemsWeight { get; set; }
 
         public decimal GrandTotal { get; set; }
 
@@ -114,5 +115,11 @@ namespace GIGLS.Core.DTO.Shipments
         public string Description { get; set; }
 
         public int DepositStatus { get; set; }
+
+        public bool ReprintCounterStatus { get; set; }
+
+        //Sender's Address - added for the special case of corporate customers
+        public string SenderAddress { get; set; }
+        public string SenderState { get; set; }
     }
 }

@@ -369,6 +369,30 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IPreShipmentItemMobileRepository PreShipmentItemMobile { get; set; }
 
+
+        [Inject]
+        public IUserLoginEmailRepository UserLoginEmail { get; set; }
+
+        [Inject]
+        public IMobileShipmentTrackingRepository MobileShipmentTracking
+        {get; set;}
+
+        [Inject]
+        public IMobilePickUpRequestsRepository MobilePickUpRequests
+        { get; set; }
+
+        [Inject]
+        public IRegionRepository Region
+        { get; set; }
+
+        [Inject]
+        public IRegionServiceCentreMappingRepository RegionServiceCentreMapping
+        { get; set; }
+
+
+        [Inject]
+        public IMobileScanStatusRepository MobileScanStatus { get; set; }
+       
         public int Complete()
         {
             return _context.SaveChanges();

@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.CORE.IServices.Report;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -90,6 +91,15 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
+                //Update SenderAddress for corporate customers
+                ShipmentDTO.SenderAddress = null;
+                ShipmentDTO.SenderState = null;
+                if (ShipmentDTO.Customer[0].CompanyType == CompanyType.Corporate)
+                {
+                    ShipmentDTO.SenderAddress = ShipmentDTO.Customer[0].Address;
+                    ShipmentDTO.SenderState = ShipmentDTO.Customer[0].State;
+                }
+
                 var shipment = await _service.AddShipment(ShipmentDTO);
                 return new ServiceResponse<ShipmentDTO>
                 {
@@ -222,15 +232,31 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("unmappedgroupedwaybillsforservicecentre")]
+        //public async Task<IServiceResponse<IEnumerable<GroupWaybillNumberMappingDTO>>> GetUnmappedGroupedWaybillsForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var unmappedGroupWaybills = await _service.GetUnmappedGroupedWaybillsForServiceCentre(filterOptionsDto);
+        //        return new ServiceResponse<IEnumerable<GroupWaybillNumberMappingDTO>>
+        //        {
+        //            Object = unmappedGroupWaybills,
+        //            Total = unmappedGroupWaybills.Count
+        //        };
+        //    });
+        //}
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("unmappedgroupedwaybillsforservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<GroupWaybillNumberMappingDTO>>> GetUnmappedGroupedWaybillsForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<IEnumerable<GroupWaybillNumberDTO>>> GetUnmappedGroupedWaybillsForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var unmappedGroupWaybills = await _service.GetUnmappedGroupedWaybillsForServiceCentre(filterOptionsDto);
-                return new ServiceResponse<IEnumerable<GroupWaybillNumberMappingDTO>>
+                return new ServiceResponse<IEnumerable<GroupWaybillNumberDTO>>
                 {
                     Object = unmappedGroupWaybills,
                     Total = unmappedGroupWaybills.Count

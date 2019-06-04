@@ -26,14 +26,14 @@
             </summary>
             <param name="kernel">The kernel.</param>
         </member>
-        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetPrice(GIGLS.Core.DTO.PaymentTransactions.ThirdPartyPricingDTO)">
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetPrice(GIGLS.Core.DTO.Shipments.PreShipmentMobileDTO)">
             <summary>
             This api is used to get the price for Shipment Items
             </summary>
             <param name="thirdPartyPricingDto"></param>
             <returns></returns>
         </member>
-        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.AddPreShipment(GIGLS.Core.DTO.Shipments.ThirdPartyPreShipmentDTO)">
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.CreateShipment(GIGLS.Core.DTO.Shipments.PreShipmentMobileDTO)">
             <summary>
             This api is used to register a shipment
             </summary>
@@ -72,6 +72,20 @@
             </summary>
             <description>This api is used to login and acquire token for subsequent calls</description>
             <param name="userLoginModel"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.ViewShipment">
+            <summary>
+            This api is used to get shipments created by user
+            </summary>
+            <description>This api is used to get shipments by user</description>
+            <returns></returns>
+        </member>
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.TrackMobileShipment(System.String)">
+            <summary>
+            This api is used to track shipments created by the user
+            </summary>
+            <param name="waybillNumber"></param>
             <returns></returns>
         </member>
     </members>

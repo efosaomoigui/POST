@@ -7,6 +7,7 @@ using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.WebApi.Filters;
 using System.Linq;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -32,6 +33,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<IEnumerable<ManifestGroupWaybillNumberMappingDTO>>
                 {
                     Object = manifestGroupWayBillNumberMappings.ToList()
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("manifestbydate")]
+        public async Task<IServiceResponse<IEnumerable<ManifestGroupWaybillNumberMappingDTO>>> GetAllManifestGroupWayBillNumberMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestGroupWayBillNumberMappings = await _service.GetAllManifestGroupWayBillNumberMappings(dateFilterCriteria);
+
+                return new ServiceResponse<IEnumerable<ManifestGroupWaybillNumberMappingDTO>>
+                {
+                    Object = manifestGroupWayBillNumberMappings
                 };
             });
         }
@@ -146,6 +163,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                     Object = manifestforWaybill
                 };
             });
+        }
+
+        [GIGLSActivityAuthorize(Activity ="View")]
+        [HttpGet]
+        [Route("getmanifestsearch/{manifestCode}")]
+        public async Task<IServiceResponse<ManifestDTO>> GetManifestSearch(string manifestCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestSearch = await _service.GetManifestSearch(manifestCode);
+                return new ServiceResponse<ManifestDTO>
+                {
+                    Object = manifestSearch
+                };
+         });
         }
     }
 }

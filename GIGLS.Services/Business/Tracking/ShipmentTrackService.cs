@@ -47,8 +47,8 @@ namespace GIGLS.Services.Business.Tracking
                         //get home delivery manifest
                         var manifestQuery = _uow.ManifestWaybillMapping.GetAllAsQueryable();
                         var manifestResult = manifestQuery.Where(x => x.Waybill == waybillNumber).ToList();
-                        
-                        if(manifestResult.Count() > 0)
+
+                        if (manifestResult.Count() > 0)
                         {
                             foreach (var query in manifestResult)
                             {
@@ -71,10 +71,10 @@ namespace GIGLS.Services.Business.Tracking
                         var groupWaybillNumberMapping = _uow.GroupWaybillNumberMapping.GetAllAsQueryable();
                         var groupWaybillResult = groupWaybillNumberMapping.Where(w => w.WaybillNumber == waybillNumber).Select(x => x.GroupWaybillNumber).Distinct().ToList();
 
-                        if(groupWaybillResult.Count() > 0)
+                        if (groupWaybillResult.Count() > 0)
                         {
                             string groupWaybill = null;
-                            foreach(string s in groupWaybillResult)
+                            foreach (string s in groupWaybillResult)
                             {
                                 groupWaybill = s;
                             }
@@ -82,7 +82,7 @@ namespace GIGLS.Services.Business.Tracking
                             //Get the manifest the group waybill
                             //var manifestGroupwaybillMapping = await _uow.ManifestGroupWaybillNumberMapping.Where(s => s.GroupWaybillNumber == groupWaybill).AsQueryable();
                             var manifestGroupwaybillMapping = await _uow.ManifestGroupWaybillNumberMapping.GetAsync(x => x.GroupWaybillNumber == groupWaybill);
-                            if(manifestGroupwaybillMapping != null)
+                            if (manifestGroupwaybillMapping != null)
                             {
                                 manifest = manifestGroupwaybillMapping.ManifestCode;
                                 ManifestTypeValue = ManifestType.External.ToString();
@@ -116,7 +116,7 @@ namespace GIGLS.Services.Business.Tracking
                 ///Add Log Visit Reasons for the waybill to the first element
                 var logVisits = await _monitoringService.GetManifestVisitMonitoringByWaybill(waybillNumber);
 
-                if(logVisits.Count() > 0)
+                if (logVisits.Count() > 0)
                 {
                     result.ElementAt(0).ManifestVisitMonitorings = logVisits;
                 }
@@ -129,7 +129,76 @@ namespace GIGLS.Services.Business.Tracking
             //    var internationResult = await TrackShipmentForInternational(waybillNumber);
             //    result.ToList().AddRange(internationResult);
             //}
+
+            //Replace the placeholders in Scan Status
+            await ResolveScanStatusPlaceholders(result);
+
             return result;
+        }
+
+        private async Task<int> ResolveScanStatusPlaceholders(IEnumerable<ShipmentTrackingDTO> result)
+        {
+            //{0} = Service Centre
+            //{1} = Receiver Name
+            var strArray = new string[]
+            {
+                "SERVICE CENTRE",
+                "CUSTOMER",
+                "DEPARTURE SERVICE CENTRE",
+                "DESTINATION SERVICE CENTRE",
+            };
+
+            foreach (var shipmentTrackingDTO in result)
+            {
+                //1. {0} - Service Centre
+                if (shipmentTrackingDTO.ScanStatus.Incident.Contains("{0}"))
+                {
+                    //map the array
+                    strArray[0] = shipmentTrackingDTO.Location;
+                }
+
+                //2. {1} - Receiver Name
+                if (shipmentTrackingDTO.ScanStatus.Incident.Contains("{1}"))
+                {
+                    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(shipmentTrackingDTO.Waybill));
+                    if(shipmentCollection != null && shipmentCollection.Name != null)
+                    {
+                        //map the array
+                        strArray[1] = shipmentCollection.Name;
+                    }
+                }
+
+                //2. {2} - Departure Service Centre
+                if (shipmentTrackingDTO.ScanStatus.Incident.Contains("{2}"))
+                {
+                    //map the array
+                    strArray[2] = shipmentTrackingDTO.DepartureServiceCentre.Name;
+                }
+
+                //3. {3} - Destination Service Centre (REROUTE)
+                if (shipmentTrackingDTO.ScanStatus.Incident.Contains("{3}"))
+                {
+                    //map the array
+                    strArray[3] = shipmentTrackingDTO.DestinationServiceCentre.Name;
+
+                    //check ShipmentReroute for waybill
+                    var shipmentReroute = await _uow.ShipmentReroute.GetAsync(s => s.WaybillOld == shipmentTrackingDTO.Waybill);
+                    if(shipmentReroute != null)
+                    {
+                        //get the Rerouted Shipment information
+                        var currentShipmentInfo = await _uow.Shipment.GetAsync(s => s.Waybill == shipmentReroute.WaybillNew);
+                        var destinationServiceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == currentShipmentInfo.DestinationServiceCentreId);
+
+                        //map the array
+                        strArray[3] = destinationServiceCentre.Name;
+                    }
+                }
+
+                //populate the Incident message
+                shipmentTrackingDTO.ScanStatus.Incident =
+                    string.Format(shipmentTrackingDTO.ScanStatus.Incident, strArray);
+            }
+            return 0;
         }
 
         public async Task<List<ShipmentTrackingDTO>> TrackShipmentForInternational(string waybillNumber)
@@ -142,7 +211,7 @@ namespace GIGLS.Services.Business.Tracking
                 //String key = System.IO.File.ReadAllText(@"\\psf\Home\Documents\aftership-key.txt");
                 //ConnectionAPI connection_api_backup = new ConnectionAPI(key, "https://api-backup.aftership.com/");
 
-                String key = ConfigurationManager.AppSettings["aramex:API_KEY"];
+                string key = ConfigurationManager.AppSettings["aramex:API_KEY"];
                 ConnectionAPI connection_api = new ConnectionAPI(key, null);
 
                 //tracking:

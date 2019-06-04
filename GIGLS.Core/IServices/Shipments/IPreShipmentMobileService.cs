@@ -1,17 +1,23 @@
-﻿using GIGLS.Core.DTO.Shipments;
-using System;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.Zone;
+using GIGLS.CORE.DTO.Report;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Core.IServices.Shipments
 {
-   public interface IPreShipmentMobileService : IServiceDependencyMarker
+    public interface IPreShipmentMobileService : IServiceDependencyMarker
     {
-        
-        Task<PreShipmentMobileDTO> AddPreShipmentMobile(PreShipmentMobileDTO preShipment);
-        Task<PreShipmentMobileDTO> GetPrice(PreShipmentMobileDTO preShipment);
-
+        Task<object> AddPreShipmentMobile(PreShipmentMobileDTO preShipment);
+        Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment);
+        Task<List<PreShipmentMobileDTO>> GetShipments(BaseFilterCriteria filterOptionsDto);
+        Task<PreShipmentMobileDTO> GetPreShipmentDetail(string waybill);
+        Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser();
+        Task<List<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
+        Task<MobileShipmentTrackingHistoryDTO> TrackShipment(string waybillNumber);
+        Task<PreShipmentMobileDTO> AddMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest);
+        Task<List<MobilePickUpRequestsDTO>> GetMobilePickupRequest();
+        Task<bool> UpdateMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest);
     }
 }
