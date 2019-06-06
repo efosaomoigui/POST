@@ -9,6 +9,7 @@ using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.IServices.ServiceCentres
 {
@@ -182,6 +183,18 @@ namespace GIGLS.Services.IServices.ServiceCentres
             try
             {
                 return await _uow.ServiceCentre.GetLocalServiceCentres();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetLocalServiceCentres(int[] countryIds)
+        {
+            try
+            {
+                return await _uow.ServiceCentre.GetLocalServiceCentres(countryIds);
             }
             catch (Exception)
             {
