@@ -129,7 +129,6 @@ namespace GIGLS.Services.Implementation.User
             var userDto = Mapper.Map<UserDTO>(user);
 
             userDto.UserActiveServiceCentre = userActiveServiceCentre;
-            userDto.Country = await GetPriviledgeCountrys();
 
             return userDto;
         }
