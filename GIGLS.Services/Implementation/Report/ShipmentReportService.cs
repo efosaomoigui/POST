@@ -182,7 +182,8 @@ namespace GIGLS.Services.Implementation.Report
             //var allServiceCentreNames = _uow.ServiceCentre.GetAllAsQueryable().Select(s => new { s.ServiceCentreId, s.Name }).ToList();
 
             //Get only Nigeria Service centre 
-            var allServiceCentreNames = await _uow.ServiceCentre.GetLocalServiceCentres();
+            var countryIds = await _userService.GetPriviledgeCountryIds();
+            var allServiceCentreNames = await _uow.ServiceCentre.GetLocalServiceCentres(countryIds);
 
             var allScanStatus = _uow.ScanStatus.GetAllAsQueryable().ToList();
             foreach (var scName in allServiceCentreNames)

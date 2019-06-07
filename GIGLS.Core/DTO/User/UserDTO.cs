@@ -60,5 +60,9 @@ namespace GIGLS.Core.DTO.User
         public DateTime PasswordExpireDate { get; set; }
 
         public string CustomerId { get; set; }
+
+        //user priviledge countries
+        public List<CountryDTO> Country { get; set; }
+        public List<string> CountryName { get; set; }
     }
 }

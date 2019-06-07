@@ -152,6 +152,9 @@ namespace GIGLS.WebApi.Controllers.User
             return await HandleApiOperationAsync(async () =>
            {
                var user = await _userService.GetUserById(userId);
+               var countries = await _userService.GetPriviledgeCountrys();
+               user.Country = countries;
+               user.CountryName = countries.Select(x => x.CountryName).ToList();
                return new ServiceResponse<UserDTO>
                {
                    Object = user
