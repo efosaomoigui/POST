@@ -358,7 +358,10 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IBankProcessingOrderCodesRepository BankProcessingOrderCodes { get; set; }
 
-        //IBankProcessingOrderForShipmentAndCODRepository
+        [Inject]
+        public ICodPayOutListRepository CodPayOutList { get; set; }
+
+        //IBankProcessingOrderForShipmentAndCODRepository CodPayOutList
 
         [Inject]
         public IOTPRepository OTP { get; set; }

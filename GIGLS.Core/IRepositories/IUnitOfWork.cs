@@ -133,9 +133,11 @@ namespace GIGLS.Core
         IExpenseTypeRepository ExpenseType { get; set; }
         IExpenditureRepository Expenditure { get; set; }
         IBankProcessingOrderForShipmentAndCODRepository BankProcessingOrderForShipmentAndCOD { get; set; }
-        IBankProcessingOrderCodesRepository BankProcessingOrderCodes { get; set; } 
+        IBankProcessingOrderCodesRepository BankProcessingOrderCodes { get; set; }
+        ICodPayOutListRepository CodPayOutList { get; set; }
 
-        IOTPRepository  OTP { get; set; }
+
+        IOTPRepository OTP { get; set; }
         IPreShipmentMobileRepository PreShipmentMobile { get; set; }
 
         IPreShipmentItemMobileRepository PreShipmentItemMobile { get; set; }

@@ -228,6 +228,8 @@ namespace GIGLS.Infrastructure.Persistence
         //Bank Settlement Order
         public DbSet<BankProcessingOrderForShipmentAndCOD> BankProcessingOrderForShipmentAndCOD { get; set; }
         public DbSet<BankProcessingOrderCodes> BankProcessingOrderCodes { get; set; }
+        public DbSet<CodPayOutList> CodPayOutList { get; set; }
+
         public DbSet<PreShipmentItemMobile> PresShipmentItemMobile { get; set; }
 
         public DbSet<PreShipmentMobile> PresShipmentMobile { get; set; }

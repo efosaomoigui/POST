@@ -35,5 +35,8 @@ namespace GIGLS.Core.IServices.BankSettlement
         Task MarkAsVerified(BankProcessingOrderCodesDTO refcode);
         Task MarkAsVerified_cod(BankProcessingOrderCodesDTO refcode);
         Task MarkAsVerified_demurrage(BankProcessingOrderCodesDTO bankrefcode);
+
+        Task<List<InvoiceViewDTO>> GetCODCustomersWhoNeedPayOut();
+        Task UpdateCODCustomersWhoNeedPayOut(InvoiceViewDTO invoiceviewinfo);
     }
 }

@@ -121,5 +121,6 @@ namespace GIGLS.Core.DTO.Shipments
         //Sender's Address - added for the special case of corporate customers
         public string SenderAddress { get; set; }
         public string SenderState { get; set; }
+        public bool IsCODPaidOut { get; set; }  
     }
 }
