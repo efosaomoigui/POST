@@ -302,7 +302,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("RequestCODCustomerWhoNeedPayOut")]
-        public async Task<IServiceResponse<object>> RequestCODCustomerWhoNeedPayOut() 
+        public async Task<IServiceResponse<object>> RequestCODCustomerWhoNeedPayOut()
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -316,10 +316,10 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         }
 
         //This one searches for all new Paid Out CODs
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPut]
         [Route("UpdateCODCustomerWhoNeedPayOut")]
-        public async Task<IServiceResponse<object>> UpdateCODCustomerWhoNeedPayOut(InvoiceViewDTO invoiceinfo) 
+        public async Task<IServiceResponse<object>> UpdateCODCustomerWhoNeedPayOut(InvoiceViewDTO invoiceinfo)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -333,25 +333,25 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         }
 
         //This one searches for all new Paid Out CODs
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("ViewCustomersPaidOutCODs")]
-        public async Task<IServiceResponse<object>> ViewCustomersPaidOutCODs()
-        {
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("ViewCustomersPaidOutCODs")]
+        //public async Task<IServiceResponse<object>> ViewCustomersPaidOutCODs()
+        //{
 
-            return null;
-            //return await HandleApiOperationAsync(async () =>
-            //{
-            //    //All cash CODs from sales
-            //    var bankshipmentprocessingorders = await _bankprocessingorder.GetBankProcessingOrderForDemurrage(type);
-            //    return new ServiceResponse<object>
-            //    {
-            //        Object = bankshipmentprocessingorders.Item2,
-            //        Total = bankshipmentprocessingorders.Item3,
-            //        RefCode = bankshipmentprocessingorders.Item1
-            //    };
-            //});
-        }
+        //    return null;
+        //    //return await HandleApiOperationAsync(async () =>
+        //    //{
+        //    //    //All cash CODs from sales
+        //    //    var bankshipmentprocessingorders = await _bankprocessingorder.GetBankProcessingOrderForDemurrage(type);
+        //    //    return new ServiceResponse<object>
+        //    //    {
+        //    //        Object = bankshipmentprocessingorders.Item2,
+        //    //        Total = bankshipmentprocessingorders.Item3,
+        //    //        RefCode = bankshipmentprocessingorders.Item1
+        //    //    };
+        //    //});
+        //}
 
 
     }

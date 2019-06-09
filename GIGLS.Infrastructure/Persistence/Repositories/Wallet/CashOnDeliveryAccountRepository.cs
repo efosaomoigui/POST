@@ -70,7 +70,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Wallet
                 SqlParameter isCod = new SqlParameter("@IsCashOnDelivery", true);
                 SqlParameter isCODPaidOut = new SqlParameter("@IsCODPaidOut", false);
 
-                var result = await _context.Database.SqlQuery<InvoiceViewDTO>("CODCustomerWhoNeedPayOutSP @CompanyType, @IsCashOnDelivery @IsCODPaidOut",
+                var result = await _context.Database.SqlQuery<InvoiceViewDTO>("CODCustomerWhoNeedPayOutSP @CompanyType, @IsCashOnDelivery, @IsCODPaidOut",
                      CompanyType, isCod, isCODPaidOut).ToListAsync();
 
                 var newCodForProcessing = result.ToList(); 
