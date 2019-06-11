@@ -33,6 +33,7 @@ using System.Web.Http;
 using GIGLS.Core;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Business;
+using GIGLS.Core.Domain.BankSettlement;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -232,6 +233,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 var invoice = await _portalService.GetInvoiceByWaybill(waybill);
 
                 return new ServiceResponse<InvoiceDTO>
+                {
+                    Object = invoice
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("GetPaidCODByCustomer")]
+        public async Task<IServiceResponse<List<CodPayOutList>>> GetPaidCODByCustomer()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var invoice = await _portalService.GetPaidCODByCustomer();
+
+                return new ServiceResponse<List<CodPayOutList>>
                 {
                     Object = invoice
                 };

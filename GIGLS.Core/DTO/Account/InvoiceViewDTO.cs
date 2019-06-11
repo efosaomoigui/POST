@@ -106,4 +106,5 @@ namespace GIGLS.Core.DTO.Account
         public bool IsCODPaidOut { get; set; }
 
     }
+
 }

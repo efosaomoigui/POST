@@ -986,14 +986,32 @@ namespace GIGLS.Services.Implementation.Wallet
             return await Task.FromResult(result);
         }
 
-        //New bank processing order for COD
-        public async Task<List<InvoiceViewDTO>> GetCODCustomersWhoNeedPayOut()
+        //New Cod lists for payment
+        public async Task<List<NewInvoiceViewDTO>> GetCODCustomersWhoNeedPayOut()
         {
             var result = await _uow.CashOnDeliveryAccount.GetCODCustomersWhoNeedPayOut();
             return await Task.FromResult(result.ToList());
         }
 
-        public async Task UpdateCODCustomersWhoNeedPayOut(InvoiceViewDTO invoiceviewinfo)
+        //Cod paid out list
+        public async Task<List<CodPayOutList>> GetPaidOutCODLists()
+        {
+            var results = await _uow.CashOnDeliveryAccount.GetPaidOutCODListsAsQueryable();
+            //var resultsValues = Mapper.Map<List<GIGLS.Core.DTO.Account.NewInvoiceViewDTO>>(resultsVal);
+
+            return await Task.FromResult(results.ToList());
+        }
+
+        public async Task<List<CodPayOutList>> GetPaidOutCODListsByCustomer(string customercode) 
+        {
+            var results = await _uow.CashOnDeliveryAccount.GetPaidOutCODListsAsQueryable();
+            var resultVals = results.Where(s=>s.CustomerCode == customercode);
+
+            return await Task.FromResult(results.ToList());
+        }
+
+
+        public async Task UpdateCODCustomersWhoNeedPayOut(NewInvoiceViewDTO invoiceviewinfo)
         {
             //update shipment table after paid out has been made
             var result = await _uow.CashOnDeliveryAccount.GetShipmentByWaybill(invoiceviewinfo.Waybill);
@@ -1003,13 +1021,13 @@ namespace GIGLS.Services.Implementation.Wallet
             var payoutinfo = new CodPayOutList()
             {
                 Waybill = invoiceviewinfo.Waybill,
-                TotalAmount = invoiceviewinfo.Amount,
+                TotalAmount = invoiceviewinfo.Total??0,
                 DateAndTimeOfDeposit = DateTime.Now,
                 UserId = invoiceviewinfo.UserId,
                 CustomerCode = invoiceviewinfo.CustomerCode,
                 Name = invoiceviewinfo.Name,
-                ServiceCenter = invoiceviewinfo.DepartureServiceCentre.ServiceCentreId,
-                ScName = invoiceviewinfo.DepartureServiceCentre.Name,
+                ServiceCenter = invoiceviewinfo.DepartureServiceCentreId,
+                ScName = invoiceviewinfo.DepartureServiceCentreName,
                 IsCODPaidOut = true,
                 VerifiedBy = invoiceviewinfo.UserId
 

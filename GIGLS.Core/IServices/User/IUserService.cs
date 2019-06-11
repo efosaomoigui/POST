@@ -64,5 +64,6 @@ namespace GIGLS.Core.IServices.User
 
         Task<int[]> GetPriviledgeCountryIds();
         Task<List<CountryDTO>> GetPriviledgeCountrys();
+        Task<string> GetUserChannelCode();
     }
 }

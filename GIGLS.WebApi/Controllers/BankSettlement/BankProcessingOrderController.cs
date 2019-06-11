@@ -316,10 +316,27 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         }
 
         //This one searches for all new Paid Out CODs
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("PaidOutCODLists")]
+        public async Task<IServiceResponse<object>> PaidOutCODLists() 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //All cash CODs from sales
+                var bankshipmentprocessingorders = await _bankprocessingorder.GetPaidOutCODLists();
+                return new ServiceResponse<object>
+                {
+                    Object = bankshipmentprocessingorders
+                };
+            });
+        }
+
+        //This one searches for all new Paid Out CODs
         [GIGLSActivityAuthorize(Activity = "Create")]
-        [HttpPut]
+        [HttpPost]
         [Route("UpdateCODCustomerWhoNeedPayOut")]
-        public async Task<IServiceResponse<object>> UpdateCODCustomerWhoNeedPayOut(InvoiceViewDTO invoiceinfo)
+        public async Task<IServiceResponse<object>> UpdateCODCustomerWhoNeedPayOut(NewInvoiceViewDTO invoiceinfo)
         {
             return await HandleApiOperationAsync(async () =>
             {

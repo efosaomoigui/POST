@@ -12,6 +12,8 @@ using System.Data.SqlClient;
 using GIGLS.Core.DTO.Account;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Shipments;
+using System.Configuration;
+using GIGLS.Core.Domain.BankSettlement;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories.Wallet
 {
@@ -59,27 +61,39 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Wallet
             return Task.FromResult(shipment); 
         }
 
-        public async Task<IEnumerable<InvoiceViewDTO>> GetCODCustomersWhoNeedPayOut() 
+        public Task<IQueryable<CodPayOutList>> GetPaidOutCODListsAsQueryable() 
+        {
+            var shipment = _context.CodPayOutList.AsQueryable();
+            return Task.FromResult(shipment);
+        }
+
+        public async Task<IEnumerable<NewInvoiceViewDTO>> GetCODCustomersWhoNeedPayOut() 
         {
 
-            var cType = CompanyType.Ecommerce;
+            string CODpayoutDateStart = ConfigurationManager.AppSettings["CODpayoutDateStart"];
+            var CODpayoutDateStartValue = DateTime.MinValue;
+
+            bool success = DateTime.TryParse(CODpayoutDateStart, out CODpayoutDateStartValue);
+
+            var cType = nameof(CompanyType.Ecommerce);
 
             try
             {
-                SqlParameter CompanyType = new SqlParameter("@CompanyType", cType.ToString());
-                SqlParameter isCod = new SqlParameter("@IsCashOnDelivery", true);
-                SqlParameter isCODPaidOut = new SqlParameter("@IsCODPaidOut", false);
 
-                var result = await _context.Database.SqlQuery<InvoiceViewDTO>("CODCustomerWhoNeedPayOutSP @CompanyType, @IsCashOnDelivery, @IsCODPaidOut",
-                     CompanyType, isCod, isCODPaidOut).ToListAsync();
+                SqlParameter CompanyType = new SqlParameter("@CompanyType", cType);
+                SqlParameter isCod = new SqlParameter("@IsCashOnDelivery", (object)true ?? DBNull.Value);
+                SqlParameter isCODPaidOut = new SqlParameter("@IsCODPaidOut", (object)false ?? DBNull.Value);
+                SqlParameter codDateStart = new SqlParameter("@CodDateStart", CODpayoutDateStartValue);
+
+                var result = await _context.Database.SqlQuery<NewInvoiceViewDTO>("CODCustomerWhoNeedPayOutSP @CompanyType, @IsCashOnDelivery, @IsCODPaidOut, @CodDateStart", CompanyType, isCod, isCODPaidOut, codDateStart).ToListAsync();
 
                 var newCodForProcessing = result.ToList(); 
-                var newCodForProcessingResult = Mapper.Map<IEnumerable<InvoiceViewDTO>>(newCodForProcessing); 
+                //var newCodForProcessingResult = Mapper.Map<IEnumerable<InvoiceView2DTO>>(newCodForProcessing); 
 
-                return await Task.FromResult(newCodForProcessingResult.ToList());
+                return await Task.FromResult(newCodForProcessing);
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }

@@ -160,6 +160,19 @@ namespace GIGLS.Services.Implementation.User
 
         }
 
+        public async Task<string> GetUserChannelCode() 
+        {
+            var currentUserId = await GetCurrentUserId();
+            var user = await GetUserById(currentUserId);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!");
+            }
+
+            return user.UserChannelCode;
+        }
+
         public async Task<UserDTO> GetUserByChannelCode(string channelCode)
         {
             var user = await _unitOfWork.User.GetUserByChannelCode(channelCode);
