@@ -1585,5 +1585,47 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<bool> AddShipmentFromMobile(ShipmentDTO shipment)
+        {
+
+            try
+            {
+                
+                shipment.ApproximateItemsWeight = 0;
+
+                // add serial numbers to the ShipmentItems
+                var serialNumber = 1;
+                foreach (var shipmentItem in shipment.ShipmentItems)
+                {
+                    shipmentItem.SerialNumber = serialNumber;
+
+                    //sum item weight
+                    //check for volumetric weight
+                    if (shipmentItem.IsVolumetric)
+                    {
+                        double volume = (shipmentItem.Length * shipmentItem.Height * shipmentItem.Width) / 5000;
+                        double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
+
+                        shipment.ApproximateItemsWeight += Weight;
+                    }
+                    else
+                    {
+                        shipment.ApproximateItemsWeight += shipmentItem.Weight;
+                    }
+
+                    serialNumber++;
+                }
+                await CreateInvoice(shipment);
+                CreateGeneralLedger(shipment);
+                var newShipment = Mapper.Map<Shipment>(shipment);
+                _uow.Shipment.Add(newShipment);
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
