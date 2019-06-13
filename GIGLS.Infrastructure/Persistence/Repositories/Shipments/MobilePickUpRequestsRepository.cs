@@ -25,7 +25,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             {
 
                 var MobilePickUpRequests = _context.MobilePickUpRequests.Where(x => x.UserId == userId);
-
+           
                 var MobilePickUpRequestsDto = from mobilepickuprequest in MobilePickUpRequests
                                               select new MobilePickUpRequestsDTO
                                               {
@@ -41,7 +41,17 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                       DateCreated = x.DateCreated,
                                                       ReceiverName = x.ReceiverName,
                                                       ReceiverPhoneNumber = x.ReceiverPhoneNumber,
-                                                      SenderPhoneNumber = x.SenderPhoneNumber
+                                                      SenderPhoneNumber = x.SenderPhoneNumber,
+                                                      ReceiverLocation = new LocationDTO
+                                                       {
+                                                           Longitude = x.ReceiverLocation.Longitude,
+                                                           Latitude = x.ReceiverLocation.Latitude
+                                                       },
+                                                      SenderLocation = new LocationDTO
+                                                      {
+                                                          Longitude = x.SenderLocation.Longitude,
+                                                          Latitude = x.SenderLocation.Latitude
+                                                      }
                                                   }).FirstOrDefault()
                                               };
 

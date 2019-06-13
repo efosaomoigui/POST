@@ -757,11 +757,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("itemTypes")]
         public async Task<IServiceResponse<List<string>>> GetItemTypes()
         {
-            var ItemTypes = _portalService.GetItemTypes();
-            return new ServiceResponse<List<string>>
+            return await HandleApiOperationAsync(async () =>
             {
+               var ItemTypes = _portalService.GetItemTypes();
+               return new ServiceResponse<List<string>>
+               {
                 Object = ItemTypes,
-            };
+               };
+            }); 
         }
 
         [HttpPost]
