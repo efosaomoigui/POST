@@ -198,6 +198,32 @@ namespace GIGLS.Services.Implementation.Shipments
             return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateCreated));
         }
 
+        public async Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentWaitingForCollectionForHub()
+        {
+            //get all shipments by servicecentre
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+
+            //added for GWA and GWARIMPA service centres
+            {
+                if (serviceCenters.Length == 1)
+                {
+                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                    {
+                        serviceCenters = new int[] { 4, 294 };
+                    }
+                }
+            }
+
+            List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
+
+            var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).
+                Where(x => shipmentsWaybills.Contains(x.Waybill)).ToList();
+
+            var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
+
+            return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateCreated).Take(50));
+        }
+
         public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollection(FilterOptionsDto filterOptionsDto)
         {
             try
