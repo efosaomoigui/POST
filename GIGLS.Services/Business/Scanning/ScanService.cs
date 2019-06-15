@@ -482,7 +482,7 @@ namespace GIGLS.Services.Business.Scanning
 
         private async Task CompleteTransitWaybillProcess(ScanDTO scan, HashSet<string> waybillsInGroupWaybill, HashSet<string> waybillsInManifest)
         {
-            if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF || scan.ShipmentScanStatus == ShipmentScanStatus.SRC)
+            if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
             {
                 if (waybillsInManifest.Count() > 0)
                 {
