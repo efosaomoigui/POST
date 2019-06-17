@@ -80,6 +80,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         DateTime = DateTime.Now,
                         UserId = tracking.User,
                         ServiceCentreId = tracking.ServiceCentreId
+
                     };
                     _uow.ShipmentTracking.Add(newShipmentTracking);
 
@@ -140,8 +141,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     ShipmentTrackingId = shipmentTracking.ShipmentTrackingId,
                     TrackingType = shipmentTracking.TrackingType.ToString(),
                     Status = shipmentTracking.Status,
-                    User = shipmentTracking.User.FirstName + " " + shipmentTracking.User.LastName,
-                };
+                    User = shipmentTracking.User.FirstName + " " + shipmentTracking.User.LastName
+            };
             }
             catch (Exception)
             {

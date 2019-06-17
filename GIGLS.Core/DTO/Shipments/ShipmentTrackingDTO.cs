@@ -34,5 +34,6 @@ namespace GIGLS.Core.DTO.Shipments
 
         //Manifest Visit Monitoring
         public IEnumerable<ManifestVisitMonitoringDTO> ManifestVisitMonitorings { get; set; }
+        public ShipmentCancelDTO ShipmentCancel { get; set; }
     }
 }

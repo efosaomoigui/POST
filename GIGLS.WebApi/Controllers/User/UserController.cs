@@ -18,6 +18,7 @@ using GIGLS.WebApi.Filters;
 using GIGLS.CORE.DTO.User;
 using GIGLS.Core.IServices.Utility;
 using System.Linq;
+using GIGLS.Core.IServices.ServiceCentres;
 
 namespace GIGLS.WebApi.Controllers.User
 {
@@ -27,11 +28,14 @@ namespace GIGLS.WebApi.Controllers.User
     {
         private readonly IUserService _userService;
         private readonly IPasswordGenerator _passwordGenerator;
+        private IServiceCentreService _serviceCentreService;
 
-        public UserController(IUserService userService, IPasswordGenerator passwordGenerator) : base(nameof(UserController))
+        public UserController(IUserService userService, IPasswordGenerator passwordGenerator,
+            IServiceCentreService serviceCentreService) : base(nameof(UserController))
         {
             _userService = userService;
             _passwordGenerator = passwordGenerator;
+            _serviceCentreService = serviceCentreService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -152,9 +156,20 @@ namespace GIGLS.WebApi.Controllers.User
             return await HandleApiOperationAsync(async () =>
            {
                var user = await _userService.GetUserById(userId);
+
+               //set country
                var countries = await _userService.GetPriviledgeCountrys();
                user.Country = countries;
                user.CountryName = countries.Select(x => x.CountryName).ToList();
+
+               //set service centre
+               int[] serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+               if (serviceCenterIds.Length == 1)
+               {
+                   var serviceCentre = await _serviceCentreService.GetServiceCentreById(serviceCenterIds[0]);
+                   user.UserActiveServiceCentre = serviceCentre.Name;
+               }
+
                return new ServiceResponse<UserDTO>
                {
                    Object = user

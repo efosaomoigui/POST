@@ -9,5 +9,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string CreatedBy { get; set; }
         public DateTime ShipmentCreatedDate { get; set; }
         public string CancelledBy { get; set; }
+        public string CancelReason { get; set; }
     }
 }

@@ -249,6 +249,7 @@ namespace GIGLS.Services.Implementation.Customers
                 company.ReturnOption = companyDto.ReturnOption;
                 company.ReturnServiceCentre = companyDto.ReturnServiceCentre;
                 company.ReturnAddress = companyDto.ReturnAddress;
+                company.RcNumber = companyDto.RcNumber;
 
                 if (companyDto.ContactPersons.Any())
                 {

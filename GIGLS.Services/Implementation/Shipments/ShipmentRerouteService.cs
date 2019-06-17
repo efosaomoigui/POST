@@ -115,7 +115,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     WaybillNew = newShipment.Waybill,
                     WaybillOld = shipmentDTO.Waybill,
                     RerouteBy = user,
-                    ShipmentRerouteInitiator = initiator
+                    RerouteReason = shipmentDTO.ShipmentReroute.RerouteReason,
+                    ShipmentRerouteInitiator = initiator,
+                   
+                    
                 };
                 _uow.ShipmentReroute.Add(newShipmentReroute);
                  //complete transaction
@@ -124,7 +127,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 ////7. return new shipment 
                 return newShipment;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }

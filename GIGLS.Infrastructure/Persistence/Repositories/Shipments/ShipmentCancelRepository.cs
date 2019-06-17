@@ -28,7 +28,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                        CreatedBy = Context.Users.Where(x => x.Id == r.CreatedBy).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
                                                        ShipmentCreatedDate = r.ShipmentCreatedDate,
                                                        CancelledBy = Context.Users.Where(x => x.Id == r.CancelledBy).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
-                                                       DateCreated = r.DateCreated
+                                                       DateCreated = r.DateCreated,
+                                                       CancelReason= r.CancelReason
                                                    }).OrderByDescending(x => x.DateCreated).ToList();
 
             return Task.FromResult(shipmentDto);

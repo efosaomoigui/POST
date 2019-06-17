@@ -40,7 +40,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               TrackingType = shipmentTracking.TrackingType.ToString(),
                                               User = shipmentTracking.User.FirstName + " " + shipmentTracking.User.LastName,
                                               Status = shipmentTracking.Status,
-                                              ServiceCentreId = shipmentTracking.ServiceCentreId
+                                              ServiceCentreId = shipmentTracking.ServiceCentreId,
+                                              ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == shipmentTracking.Waybill).Select(x => new ShipmentCancelDTO
+                                              {
+                                                  CancelReason = x.CancelReason
+                                              }).FirstOrDefault(),
                                           };
                 return Task.FromResult(shipmentTrackingDto.ToList());
             }
@@ -75,6 +79,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                   Incident = x.Incident,
                                                   Reason = x.Reason,
                                                   Comment = x.Comment
+                                              }).FirstOrDefault(),
+                                              ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == shipmentTracking.Waybill).Select(x => new ShipmentCancelDTO
+                                              {
+                                                  CancelReason = x.CancelReason
                                               }).FirstOrDefault(),
                                           };
                 return Task.FromResult(shipmentTrackingDto.ToList().OrderByDescending(x => x.DateTime).ToList());

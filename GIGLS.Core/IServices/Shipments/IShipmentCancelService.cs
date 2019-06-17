@@ -8,6 +8,6 @@ namespace GIGLS.Core.IServices.Shipments
     {
         Task<List<ShipmentCancelDTO>> GetShipmentCancels();
         Task<ShipmentCancelDTO> GetShipmentCancelById(string waybill);
-        Task<object> AddShipmentCancel(string waybill);
+        Task<object> AddShipmentCancel(string waybill,ShipmentCancelDTO shipmentCancelDTO);
     }
 }
