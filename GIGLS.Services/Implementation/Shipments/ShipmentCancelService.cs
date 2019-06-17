@@ -24,7 +24,7 @@ namespace GIGLS.Services.Implementation.Shipments
             MapperConfig.Initialize();
         }
 
-        public async Task<object> AddShipmentCancel(string waybill)
+        public async Task<object> AddShipmentCancel(string waybill,ShipmentCancelDTO shipmentCancelDTO)
         {
             if (await _uow.ShipmentCancel.ExistAsync(v => v.Waybill == waybill))
             {
@@ -45,7 +45,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 Waybill = shipment.Waybill,
                 CreatedBy = shipment.UserId,
                 ShipmentCreatedDate = shipment.DateCreated,
-                CancelledBy = user
+                CancelledBy = user,
+                CancelReason = shipmentCancelDTO.CancelReason
             };
 
             _uow.ShipmentCancel.Add(newCancel);
@@ -57,6 +58,7 @@ namespace GIGLS.Services.Implementation.Shipments
             return new { waybill = newCancel.Waybill };
         }
 
+       
         public async Task<ShipmentCancelDTO> GetShipmentCancelById(string waybill)
         {
             var shipment = await _uow.ShipmentCancel.GetAsync(x => x.Waybill == waybill);

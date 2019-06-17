@@ -275,6 +275,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipmentCollectionDTO = Mapper.Map<ShipmentCollectionDTO>(shipmentCollection);
                 shipmentDto.ShipmentCollection = shipmentCollectionDTO;
 
+                if (shipmentDto.IsCancelled)
+                {
+                    //get the Cancellation Reason
+                    var desc = _uow.ShipmentCancel.SingleOrDefault(s => s.Waybill == shipmentDto.Waybill);
+                    var descCollection = Mapper.Map<ShipmentCancelDTO>(desc);
+                    shipmentDto.ShipmentCancel = descCollection;
+                }
+
                 //Demurage should be exclude from Ecommerce and Corporate customer. Only individual customer should have demurage
                 //HomeDelivery shipments should not have demurrage for Individual Shipments
                 if (customerType == CustomerType.Company ||
@@ -653,7 +661,10 @@ namespace GIGLS.Services.Implementation.Shipments
             var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
 
             shipmentDTO.Waybill = waybill;
+            
+           
             var newShipment = Mapper.Map<Shipment>(shipmentDTO);
+            //shipmentDTO.ShipmentReroute.RerouteReason = newShipment.ShipmentReroute.RerouteReason;
 
             // set declared value of the shipment
             if (shipmentDTO.IsdeclaredVal)
