@@ -298,6 +298,78 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
             });
         }
 
+        //This one searches for all new Paid Out CODs
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("RequestCODCustomerWhoNeedPayOut")]
+        public async Task<IServiceResponse<object>> RequestCODCustomerWhoNeedPayOut()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //All cash CODs from sales
+                var bankshipmentprocessingorders = await _bankprocessingorder.GetCODCustomersWhoNeedPayOut();
+                return new ServiceResponse<object>
+                {
+                    Object = bankshipmentprocessingorders
+                };
+            });
+        }
+
+        //This one searches for all new Paid Out CODs
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("PaidOutCODLists")]
+        public async Task<IServiceResponse<object>> PaidOutCODLists() 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //All cash CODs from sales
+                var bankshipmentprocessingorders = await _bankprocessingorder.GetPaidOutCODLists();
+                return new ServiceResponse<object>
+                {
+                    Object = bankshipmentprocessingorders
+                };
+            });
+        }
+
+        //This one searches for all new Paid Out CODs
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("UpdateCODCustomerWhoNeedPayOut")]
+        public async Task<IServiceResponse<object>> UpdateCODCustomerWhoNeedPayOut(NewInvoiceViewDTO invoiceinfo)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //All cash CODs from sales
+                await _bankprocessingorder.UpdateCODCustomersWhoNeedPayOut(invoiceinfo);
+
+                return new ServiceResponse<object>
+                {
+                };
+            });
+        }
+
+        //This one searches for all new Paid Out CODs
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("ViewCustomersPaidOutCODs")]
+        //public async Task<IServiceResponse<object>> ViewCustomersPaidOutCODs()
+        //{
+
+        //    return null;
+        //    //return await HandleApiOperationAsync(async () =>
+        //    //{
+        //    //    //All cash CODs from sales
+        //    //    var bankshipmentprocessingorders = await _bankprocessingorder.GetBankProcessingOrderForDemurrage(type);
+        //    //    return new ServiceResponse<object>
+        //    //    {
+        //    //        Object = bankshipmentprocessingorders.Item2,
+        //    //        Total = bankshipmentprocessingorders.Item3,
+        //    //        RefCode = bankshipmentprocessingorders.Item1
+        //    //    };
+        //    //});
+        //}
+
 
     }
 }

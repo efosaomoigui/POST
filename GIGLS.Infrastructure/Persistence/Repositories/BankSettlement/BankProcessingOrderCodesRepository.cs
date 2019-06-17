@@ -1,4 +1,5 @@
 ﻿
+using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.BankSettlement;
 using GIGLS.Core.Enums;
@@ -79,5 +80,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
             return Task.FromResult(codorder.ToList());
         }
 
+        public Task<Shipment> GetShipmentByWaybill(string waybill)
+        {
+            var shipment = Context.Shipment.Where(x => x.Waybill == waybill).FirstOrDefault();
+            return Task.FromResult(shipment);
+        }
     }
 }

@@ -41,4 +41,20 @@ namespace GIGLS.Core.Domain.BankSettlement
         public string VerifiedBy { get; set; }
 
     }
+
+    public class CodPayOutList : BaseDomain, IAuditable
+    {
+        [Key]
+        public int CodPayOutId { get; set; }
+        public string Waybill { get; set; }
+        public decimal TotalAmount { get; set; }
+        public DateTime DateAndTimeOfDeposit { get; set; }
+        public string UserId { get; set; }
+        public string CustomerCode { get; set; } 
+        public string Name { get; set; }
+        public int ServiceCenter { get; set; }
+        public string ScName { get; set; }
+        public bool IsCODPaidOut { get; set; } 
+        public string VerifiedBy { get; set; }
+    }
 }

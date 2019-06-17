@@ -17,5 +17,6 @@ namespace GIGLS.Core.DTO
         public string Waybill { get; set; }
         public string UserId { get; set; }
         public PreShipmentMobileDTO PreShipment { get; set; }
+        public string ServiceCentreCode { get; set; }
     }
 }

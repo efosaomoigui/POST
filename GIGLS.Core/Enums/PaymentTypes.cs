@@ -14,6 +14,6 @@
     public enum CODPaidOutStatus 
     {
         PaidOut,
-        NotPaidOut
+        NotPaidOut 
     }
 }

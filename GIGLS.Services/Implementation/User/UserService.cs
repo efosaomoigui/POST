@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
@@ -157,6 +158,19 @@ namespace GIGLS.Services.Implementation.User
 
             return Mapper.Map<UserDTO>(user);
 
+        }
+
+        public async Task<string> GetUserChannelCode() 
+        {
+            var currentUserId = await GetCurrentUserId();
+            var user = await GetUserById(currentUserId);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!");
+            }
+
+            return user.UserChannelCode;
         }
 
         public async Task<UserDTO> GetUserByChannelCode(string channelCode)
@@ -1073,6 +1087,54 @@ namespace GIGLS.Services.Implementation.User
                 throw new GenericException("Phone number does not exist!");
             }
             return Mapper.Map<UserDTO>(user);
+        }
+
+        public async Task<int[]> GetPriviledgeCountryIds()
+        {
+            //1. get service centres
+            int[] serviceCenterIds = await GetPriviledgeServiceCenters();
+
+            //2. get the countries based on the service centre
+            var serviceCentres =
+                _unitOfWork.ServiceCentre.GetAll("Station, Station.State").Where(s => serviceCenterIds.Contains(s.ServiceCentreId)).ToList();
+
+            //3.
+            var countryIds = new HashSet<int>();
+            foreach (var serviceCentre in serviceCentres)
+            {
+                var countryId = serviceCentre.Station.State.CountryId;
+                countryIds.Add(countryId);
+            }
+
+            return countryIds.ToArray();
+        }
+
+        public async Task<List<CountryDTO>> GetPriviledgeCountrys()
+        {
+            //1. get countries
+            int[] countryIds = await GetPriviledgeCountryIds();
+
+            //2. get the countries based on the service centre
+            var countries = _unitOfWork.Country.GetAllAsQueryable().Where(s => countryIds.Contains(s.CountryId)).ToList();
+
+            //3.
+            var uniqueCountryIds = new HashSet<int>();
+            var priviledgeCountrys = new List<CountryDTO>();
+            foreach (var country in countries)
+            {
+                if (uniqueCountryIds.Add(country.CountryId))
+                {
+                    var countryDTO = new CountryDTO()
+                    {
+                        CountryId = country.CountryId,
+                        CountryCode = country.CountryCode,
+                        CountryName = country.CountryName
+                    };
+                    priviledgeCountrys.Add(countryDTO);
+                }
+            }
+
+            return priviledgeCountrys;
         }
     }
 }

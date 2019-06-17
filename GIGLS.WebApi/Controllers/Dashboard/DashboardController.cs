@@ -1,10 +1,10 @@
-﻿using GIGLS.Core.IServices;
+﻿using GIGLS.Core.DTO.Dashboard;
+using GIGLS.Core.DTO.Report;
+using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.Dashboard;
 using GIGLS.Services.Implementation;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core.DTO.Dashboard;
-using GIGLS.Core.IServices.Dashboard;
-using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.Dashboard
 {

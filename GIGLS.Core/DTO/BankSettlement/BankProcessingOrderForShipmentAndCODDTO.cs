@@ -57,6 +57,22 @@ namespace GIGLS.Core.DTO.BankSettlement
 
     }
 
+    public class CodPayOutListDTO : BaseDomain, IAuditable 
+    {
+        [Key]
+        public int CodPayOutId { get; set; }
+        public string Waybill { get; set; }
+        public decimal TotalAmount { get; set; }
+        public DateTime DateAndTimeOfDeposit { get; set; }
+        public string UserId { get; set; }
+        public string CustomerCode { get; set; }
+        public string Name { get; set; }
+        public int ServiceCenter { get; set; }
+        public string ScName { get; set; }
+        public DepositType IsCODPaidOut { get; set; }
+        public string VerifiedBy { get; set; }
+    }
+
     public class CombiineBankOrDerDTO : BaseDomain, IAuditable  
     {
         //public BankProcessingOrderForShipmentAndCODDTO f =  new BankProcessingOrderForShipmentAndCODDTO();

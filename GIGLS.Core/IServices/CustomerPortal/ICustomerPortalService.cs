@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO;
+﻿using GIGLS.Core.Domain.BankSettlement;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
@@ -55,6 +56,8 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<UserDTO> Register(UserDTO user);
         Task<SignResponseDTO> SignUp(UserDTO user);
         Task<SignResponseDTO> ResendOTP(UserDTO user);
+
+        Task<List<CodPayOutList>> GetPaidCODByCustomer();
 
         //SLA
         Task<SLADTO> GetSLA();

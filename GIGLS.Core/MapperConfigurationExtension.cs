@@ -338,6 +338,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<MobileScanStatus, MobileScanStatusDTO>();
                 config.CreateMap<MobileScanStatusDTO, MobileScanStatus>();
+
+                config.CreateMap<CodPayOutList, NewInvoiceViewDTO>();
+                config.CreateMap<NewInvoiceViewDTO, CodPayOutList>();
             });
 
             isInit = true;

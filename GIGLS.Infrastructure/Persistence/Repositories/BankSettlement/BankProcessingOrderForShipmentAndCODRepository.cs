@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.Domain.BankSettlement;
+﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.BankSettlement;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.Enums;
@@ -34,6 +35,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                VerifiedBy = bankProcessingorderforcod.VerifiedBy
                            };
             return Task.FromResult(codorder.ToList());
+        }
+
+        public Task<Shipment> GetShipmentByWaybill(string waybill)
+        {
+            var shipment = Context.Shipment.Where(x => x.Waybill == waybill).FirstOrDefault();
+            return Task.FromResult(shipment);
         }
 
         public Task<List<BankProcessingOrderCodesDTO>> GetProcessingOrderCode()

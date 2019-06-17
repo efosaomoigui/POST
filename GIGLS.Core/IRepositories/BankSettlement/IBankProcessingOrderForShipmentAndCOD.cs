@@ -1,4 +1,5 @@
-﻿using GIGL.GIGLS.Core.Repositories;
+﻿using GIGL.GIGLS.Core.Domain;
+using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.BankSettlement;
@@ -21,9 +22,14 @@ namespace GIGLS.Core.IRepositories.BankSettlement
     public interface IBankProcessingOrderCodesRepository : IRepository<BankProcessingOrderCodes> 
     {
         Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCode(DepositType type);
-        Task<List<BankProcessingOrderCodesDTO>> GetProcessingOrderCodebyRefCode(string refcode);
+        Task<List<BankProcessingOrderCodesDTO>> GetProcessingOrderCodebyRefCode(string refcode) ;
         IQueryable<BankProcessingOrderCodesDTO> GetBankOrderProcessingCodeAsQueryable();
+        Task<Shipment> GetShipmentByWaybill(string waybill);
     }
 
-    
+    public interface ICodPayOutListRepository : IRepository<CodPayOutList>
+    {
+        //Task<Shipment> GetShipmentByWaybill(string waybill);
+    }
+
 }

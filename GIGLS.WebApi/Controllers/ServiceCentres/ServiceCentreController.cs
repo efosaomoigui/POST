@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.WebApi.Controllers.ServiceCentres  
 {
@@ -14,9 +15,11 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
     public class ServiceCentreController : BaseWebApiController
     {
         private readonly IServiceCentreService _service;
+        private readonly IUserService _userService;
 
-        public ServiceCentreController(IServiceCentreService service):base(nameof(ServiceCentreController))
+        public ServiceCentreController(IServiceCentreService service, IUserService userService) :base(nameof(ServiceCentreController))
         {
+            _userService = userService;
             _service = service;
         }
 
@@ -42,7 +45,8 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var centres = await _service.GetLocalServiceCentres();
+                var countryIds = await _userService.GetPriviledgeCountryIds();
+                var centres = await _service.GetLocalServiceCentres(countryIds);
                 return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
                 {
                     Object = centres
