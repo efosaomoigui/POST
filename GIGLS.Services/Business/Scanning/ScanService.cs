@@ -153,6 +153,7 @@ namespace GIGLS.Services.Business.Scanning
             /////////////////////////2. GroupShipment
             // check if the group waybill number exists in the system
             var groupWaybill = await _groupWaybill.GetGroupWayBillNumberForScan(scan.WaybillNumber);
+            var waybillsInGroupWaybill = new HashSet<string>();
 
             if (groupWaybill != null)
             {
@@ -181,6 +182,9 @@ namespace GIGLS.Services.Business.Scanning
                                 Waybill = groupShipment.Waybill,
                             }, scan.ShipmentScanStatus);
                         }
+                        
+                        //add to waybillsInManifest
+                        waybillsInGroupWaybill.Add(groupShipment.Waybill);
                     }
                 }
                 else
@@ -218,6 +222,7 @@ namespace GIGLS.Services.Business.Scanning
 
                             foreach (var waybill in groupShipment.WaybillNumbers)
                             {
+                                //All Transit scan to exist for different service centre
                                 //check already scanned manifest
                                 var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(waybill, scanStatus);
                                 if (!checkTrack || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD))
@@ -353,13 +358,15 @@ namespace GIGLS.Services.Business.Scanning
             //////////////////////4. Check and Create Entries for Transit Manifest
             await CheckAndCreateEntriesForTransitManifest(scan, manifest, waybillsInManifest);
 
+            //5. Update the waybill to show transit waybill has complete transit process when it arrived Final Destination in TransitWaybill
+            await CompleteTransitWaybillProcess(scan, waybillsInGroupWaybill, waybillsInManifest);
+
             cashondeliveryinfo.ForEach(a => a.ServiceCenterId = currentCenter);
             await _uow.CompleteAsync();
 
             return true;
         }
-
-
+        
         private async Task ProcessReturnWaybillFromDispatch(string waybill)
         {
             var getManifest = await _manifestWaybillService.GetActiveManifestForWaybill(waybill);
@@ -470,6 +477,42 @@ namespace GIGLS.Services.Business.Scanning
             }
 
             return true;
+        }
+
+
+        private async Task CompleteTransitWaybillProcess(ScanDTO scan, HashSet<string> waybillsInGroupWaybill, HashSet<string> waybillsInManifest)
+        {
+            if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
+            {
+                if (waybillsInManifest.Count() > 0)
+                {
+                    foreach(var waybill in waybillsInManifest)
+                    {
+                        await CompleteWaybillInTransit(waybill);
+                    }
+                }
+                else if (waybillsInGroupWaybill.Count() > 0)
+                {
+                    foreach(var waybill in waybillsInGroupWaybill)
+                    {
+                        await CompleteWaybillInTransit(waybill);
+                    }
+                }
+                else
+                {
+                    await CompleteWaybillInTransit(scan.WaybillNumber);
+                }
+            }
+        }
+
+        private async Task CompleteWaybillInTransit(string waybill)
+        {
+            var transitWaybillNumber = await _uow.TransitWaybillNumber.GetAsync(s => s.WaybillNumber == waybill);
+            if(transitWaybillNumber != null)
+            {
+                transitWaybillNumber.IsTransitCompleted = true;
+                _uow.Complete();
+            }
         }
 
         /// <summary>
