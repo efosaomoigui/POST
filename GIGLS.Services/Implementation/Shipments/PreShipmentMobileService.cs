@@ -403,7 +403,7 @@ namespace GIGLS.Services.Implementation.Shipments
                var userId = await _userService.GetCurrentUserId();
                pickuprequest.UserId = userId;
                pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
-               var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems");
+               var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
                if (preshipmentmobile != null)
                {
                     await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
