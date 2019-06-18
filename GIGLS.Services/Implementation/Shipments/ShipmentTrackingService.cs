@@ -57,10 +57,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 
                 if (scanStatus.Equals(ShipmentScanStatus.ARF))
                 {
+                    //Get shipment Details
+                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(tracking.Waybill));
+
+                    //add service centre
                     var newShipmentCollection = new ShipmentCollection
                     {
                         Waybill = tracking.Waybill,
-                        ShipmentScanStatus = scanStatus
+                        ShipmentScanStatus = scanStatus,
+                        DepartureServiceCentreId = shipment.DepartureServiceCentreId,
+                        DestinationServiceCentreId = shipment.DestinationServiceCentreId,
                     };
 
                     _uow.ShipmentCollection.Add(newShipmentCollection);

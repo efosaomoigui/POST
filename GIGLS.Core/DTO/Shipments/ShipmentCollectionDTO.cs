@@ -29,6 +29,8 @@ namespace GIGLS.CORE.DTO.Shipments
         public string UserId { get; set; }
 
         //original service centres
+        public int DepartureServiceCentreId { get; set; }
+        public int DestinationServiceCentreId { get; set; }
         public ServiceCentreDTO OriginalDepartureServiceCentre { get; set; }
         public ServiceCentreDTO OriginalDestinationServiceCentre { get; set; }
 

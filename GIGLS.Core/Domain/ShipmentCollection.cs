@@ -20,6 +20,8 @@ namespace GIGLS.CORE.Domain
         public string State { get; set; }     
         public string IndentificationUrl { get; set; }
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
+        public int DepartureServiceCentreId { get; set; }
+        public int DestinationServiceCentreId { get; set; }
 
         //Who processed the collection
         public string UserId { get; set; }

@@ -188,13 +188,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
 
-            List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
-
-            var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).ToList();
-            shipmentCollection = shipmentCollection.Where(x => shipmentsWaybills.Contains(x.Waybill)).ToList();
-
+            var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId)).ToList();
+           
             var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
-
+            
             return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateCreated));
         }
 
