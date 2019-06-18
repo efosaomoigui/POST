@@ -107,5 +107,6 @@ namespace GIGL.GIGLS.Core.Domain
         public string SenderState { get; set; }
         //Shipment reroute
         public ShipmentReroute ShipmentReroute { get; set; }
+        public bool IsCODPaidOut { get; set; }
     }
 }
