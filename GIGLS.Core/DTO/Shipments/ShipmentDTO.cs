@@ -127,5 +127,5 @@ namespace GIGLS.Core.DTO.Shipments
 
         //Reroute Reason
         public ShipmentRerouteDTO ShipmentReroute { get; set; }
-    }
+}
 }
