@@ -225,7 +225,9 @@ namespace GIGLS.Services.Business.Scanning
                                 //All Transit scan to exist for different service centre
                                 //check already scanned manifest
                                 var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(waybill, scanStatus);
-                                if (!checkTrack || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD))
+
+                                if (!checkTrack || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD) || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AST)
+                                    || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.ARP) || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.APT))
                                 {
                                     await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                                     {

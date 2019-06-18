@@ -212,17 +212,17 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException($"No GroupWaybill exists for this number: {groupWaybillNumber}");
                 }
 
-                var manifestGroupWaybillNumberMapping = _uow.ManifestGroupWaybillNumberMapping.SingleOrDefault(x => (x.ManifestCode == manifest) && (x.GroupWaybillNumber == groupWaybillNumber));
-                if (manifestGroupWaybillNumberMapping == null)
+                var manifestGroupWaybillNumberMapping = _uow.ManifestGroupWaybillNumberMapping.SingleOrDefault(x => x.ManifestCode == manifest && x.GroupWaybillNumber == groupWaybillNumber);
+                if (manifestGroupWaybillNumberMapping != null)
                 {
-                    throw new GenericException("ManifestGroupWaybillNumberMapping Does Not Exist");
+                    _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupWaybillNumberMapping);
+                    //throw new GenericException("ManifestGroupWaybillNumberMapping Does Not Exist");
+                    
+                    //set GroupWaybill HasManifest to false
+                    var groupwaybill = _uow.GroupWaybillNumber.SingleOrDefault(x => x.GroupWaybillCode == groupWaybillNumber);
+                    groupwaybill.HasManifest = false;
+                    _uow.Complete();
                 }
-                _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupWaybillNumberMapping);
-
-                //set GroupWaybill HasManifest to false
-                var groupwaybill = _uow.GroupWaybillNumber.SingleOrDefault(x => x.GroupWaybillCode == groupWaybillNumber);
-                groupwaybill.HasManifest = false;
-                _uow.Complete();
             }
             catch (Exception)
             {
