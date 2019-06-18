@@ -45,6 +45,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               {
                                                   CancelReason = x.CancelReason
                                               }).FirstOrDefault(),
+                                              ShipmentReroute = Context.ShipmentReroute.Where(c => c.WaybillOld == shipmentTracking.Waybill).Select(x => new ShipmentRerouteDTO
+                                              {
+                                                  RerouteReason = x.RerouteReason
+                                              }).FirstOrDefault(),
                                           };
                 return Task.FromResult(shipmentTrackingDto.ToList());
             }
@@ -83,6 +87,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                               ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == shipmentTracking.Waybill).Select(x => new ShipmentCancelDTO
                                               {
                                                   CancelReason = x.CancelReason
+                                              }).FirstOrDefault(),
+                                              ShipmentReroute = Context.ShipmentReroute.Where(c => c.WaybillOld == shipmentTracking.Waybill || c.WaybillNew == shipmentTracking.Waybill ) .Select(x => new ShipmentRerouteDTO
+                                              {
+                                                  RerouteReason = x.RerouteReason
                                               }).FirstOrDefault(),
                                           };
                 return Task.FromResult(shipmentTrackingDto.ToList().OrderByDescending(x => x.DateTime).ToList());
