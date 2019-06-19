@@ -441,20 +441,37 @@ namespace GIGLS.Services.Implementation.Shipments
         //Check if the Shipment has not been collected before Processing Return Shipment
         public async Task CheckShipmentCollection(string waybill)
         {
-            var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(waybill) && (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC));
+            var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(waybill));
 
-            if (shipmentCollection != null)
+            if (shipmentCollection != null && (shipmentCollection.ShipmentScanStatus == ShipmentScanStatus.OKT || shipmentCollection.ShipmentScanStatus == ShipmentScanStatus.OKC))
             {
                 throw new GenericException($"Shipment with waybill: {waybill} has been collected");
             }
 
-            var shipmentDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(waybill) && (x.ShipmentScanStatus == ShipmentScanStatus.ARF));
-
-            if (shipmentDelivered == null)
+            if (shipmentCollection != null && shipmentCollection.ShipmentScanStatus != ShipmentScanStatus.ARF)
             {
-                throw new GenericException($"Shipment with waybill: {waybill} is not available for Return Processing");
+                throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
             }
         }
+
+        //public async Task CheckShipmentCollection(string waybill)
+        //{
+        //    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(waybill) && (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC));
+
+        //    if (shipmentCollection != null)
+        //    {
+        //        throw new GenericException($"Shipment with waybill: {waybill} has been collected");
+        //    }
+
+        //    var shipmentDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(waybill) && (x.ShipmentScanStatus == ShipmentScanStatus.ARF));
+
+        //    if (shipmentDelivered == null)
+        //    {
+        //        throw new GenericException($"Shipment with waybill: {waybill} is not available for Return Processing");
+        //    }
+        //}
+
+
 
 
         public async Task ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
