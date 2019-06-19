@@ -3,6 +3,7 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
@@ -120,13 +121,16 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
-
+                //List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
+                
                 //get collected shipment
-                var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC).ToList();
+                //var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC).ToList();
 
                 //extras the current login staff shipment from the shipment collection
-                shipmentCollection = shipmentCollection.Where(x => shipmentsWaybills.Contains(x.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
+                //shipmentCollection = shipmentCollection.Where(x => shipmentsWaybills.Contains(x.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
+
+                var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC) && serviceCenters.Contains(x.DestinationServiceCentreId)).ToList();
+
                 int count = shipmentCollection.Count();
 
                 var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
@@ -171,7 +175,48 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<List<ShipmentCollectionDTO>> GetShipmentCollections(ShipmentCollectionFilterCriteria collectionFilterCriteria)
+        {
+            try
+            {
+                //get all shipments by servicecentre
+                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
+                //added for GWA and GWARIMPA service centres
+                {
+                    if (serviceCenters.Length == 1)
+                    {
+                        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                        {
+                            serviceCenters = new int[] { 4, 294 };
+                        }
+                    }
+                }
+                
+                //get startDate and endDate
+                var queryDate = collectionFilterCriteria.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+
+                //var manifestGroupwaybillMapping = Context.ManifestGroupWaybillNumberMapping.Where(s => s.IsDeleted == false && s.DateCreated >= startDate && s.DateCreated < endDate).AsQueryable();
+
+
+                var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
+                    .Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC)
+                    && serviceCenters.Contains(x.DestinationServiceCentreId) && x.DateModified >= startDate && x.DateModified < endDate);
+
+                var shipmentCollectionResult = shipmentCollection.OrderByDescending(x => x.DateModified).ToList();
+
+                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollectionResult);
+
+                return await Task.FromResult(shipmentCollectionDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        
         public async Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentWaitingForCollection()
         {
             //get all shipments by servicecentre
