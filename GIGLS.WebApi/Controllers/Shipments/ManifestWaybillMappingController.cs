@@ -73,6 +73,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
+        [Route("mapmultipleHubManifest")]
+        public async Task<IServiceResponse<bool>> MappingHUBManifestToWaybills(ManifestWaybillMappingDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.MappingHUBManifestToWaybills(data.ManifestCode, data.Waybills, 
+                    data.DepartureServiceCentreId, data.DestinationServiceCentreId);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
         [Route("mapmultiplemobile")]
         public async Task<IServiceResponse<bool>> MappingManifestToWaybillsMobile(ManifestWaybillMappingDTO data)
         {

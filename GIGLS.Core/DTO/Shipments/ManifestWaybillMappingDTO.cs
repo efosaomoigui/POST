@@ -10,7 +10,7 @@ namespace GIGLS.Core.DTO.Shipments
         public int ManifestWaybillMappingId { get; set; }
         public bool IsActive { get; set; }
 
-        public string ManifestCode { get; set; } 
+        public string ManifestCode { get; set; }
         public ManifestDTO ManifestDetails { get; set; }
 
         public string Waybill { get; set; }
@@ -24,5 +24,8 @@ namespace GIGLS.Core.DTO.Shipments
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
 
         public string DispatchRider { get; set; }
+
+        public int DepartureServiceCentreId { get; set; }
+        public int DestinationServiceCentreId { get; set; }
     }
 }

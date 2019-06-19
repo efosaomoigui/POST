@@ -181,6 +181,73 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
 
+        //map waybills to HUBManifest
+        public async Task MappingHUBManifestToWaybills(string manifest, List<string> waybills, int DepartureServiceCentreId, int DestinationServiceCentreId)
+        {
+            try
+            {
+                var serviceIds = await _userService.GetPriviledgeServiceCenters();
+                var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
+
+                //1. create the manifest if manifest does not exist
+                if (manifestObj == null)
+                {
+                    var newManifest = new Manifest
+                    {
+                        DateTime = DateTime.Now,
+                        ManifestCode = manifest,
+                        ManifestType = ManifestType.HUB
+                    };
+                    _uow.Manifest.Add(newManifest);
+                }
+
+                foreach (var waybill in waybills)
+                {
+                    //check if the waybill exist
+                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+                    if (shipment == null)
+                    {
+                        throw new GenericException($"No Waybill exists for this number: {waybill}");
+                    }
+
+                    //check if the shipment is at the final destination with a scan of ARF (WHEN SHIPMENT ARRIVED FINAL DESTINATION)
+                    //var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.Waybill == waybill);
+                    //if (shipmentCollection == null)
+                    //{
+                    //    throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
+                    //}
+                    //else
+                    //{
+                    //    //WC -- SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO RECEIVER
+                    //    shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.WC;
+                    //}
+
+                    //check if Waybill has not been added to this manifest 
+                    var isWaybillMapped = await _uow.ManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
+
+                    //if the waybill has not been added to this manifest, add it
+                    if (!isWaybillMapped)
+                    {
+                        //Add new Mapping
+                        var newMapping = new ManifestWaybillMapping
+                        {
+                            ManifestCode = manifest,
+                            Waybill = waybill,
+                            IsActive = true,
+                            ServiceCentreId = shipment.DestinationServiceCentreId
+                        };
+                        _uow.ManifestWaybillMapping.Add(newMapping);
+                    }
+                }
+
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //map waybills to Manifest for Mobile
         private async Task MappingManifestToWaybillsMobile(string manifest, List<string> waybills, int[] serviceIds)
         {
