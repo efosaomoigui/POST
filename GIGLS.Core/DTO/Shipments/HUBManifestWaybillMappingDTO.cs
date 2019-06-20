@@ -26,6 +26,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string DispatchRider { get; set; }
 
         public int DepartureServiceCentreId { get; set; }
+        public ServiceCentreDTO DepartureServiceCentre { get; set; }
         public int DestinationServiceCentreId { get; set; }
+        public ServiceCentreDTO DestinationServiceCentre { get; set; }
     }
 }

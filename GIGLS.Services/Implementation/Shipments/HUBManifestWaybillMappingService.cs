@@ -76,6 +76,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
 
+            //set the departure and destination hub
+            var allServiceCentres = _uow.ServiceCentre.GetServiceCentres().Result;
+            foreach (var manifestItem in result)
+            {
+                manifestItem.DepartureServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == manifestItem.ManifestDetails.DepartureServiceCentreId).FirstOrDefault();
+                manifestItem.DestinationServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == manifestItem.ManifestDetails.DestinationServiceCentreId).FirstOrDefault();
+            }
+
             return result.OrderByDescending(x => x.DateCreated).ToList();
         }
 

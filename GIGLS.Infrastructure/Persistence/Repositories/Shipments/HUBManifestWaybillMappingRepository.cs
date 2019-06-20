@@ -56,7 +56,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                     IsDispatched = p.IsDispatched,
                                                     IsReceived = p.IsReceived,
                                                     DispatchedBy = Context.Users.Where(d => d.Id == p.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
-                                                    ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault()
+                                                    ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
+                                                    DepartureServiceCentreId = p.DepartureServiceCentreId,
+                                                    DestinationServiceCentreId = p.DestinationServiceCentreId
                                                 }).FirstOrDefault()
                                             };
 
@@ -105,7 +107,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                     IsDispatched = p.IsDispatched,
                                                     IsReceived = p.IsReceived,
                                                     DispatchedBy = Context.Users.Where(d => d.Id == p.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
-                                                    ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault()
+                                                    ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
+                                                    DepartureServiceCentreId = p.DepartureServiceCentreId,
+                                                    DestinationServiceCentreId = p.DestinationServiceCentreId
                                                 }).FirstOrDefault()
                                             };
 
@@ -153,7 +157,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                     IsDispatched = p.IsDispatched,
                                                     IsReceived = p.IsReceived,
                                                     DispatchedBy = Context.Users.Where(d => d.Id == p.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
-                                                    ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault()
+                                                    ReceiverBy = Context.Users.Where(r => r.Id == p.ReceiverById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
+                                                    DepartureServiceCentreId = p.DepartureServiceCentreId,
+                                                    DestinationServiceCentreId = p.DestinationServiceCentreId
                                                 }).FirstOrDefault(),
                                                 DispatchRider = Context.Users.Where(u => u.Id == Context.Dispatch.Where(m => m.ManifestNumber == mgw.ManifestCode).Select(c => c.DriverDetail).FirstOrDefault()).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault()
                                             };
