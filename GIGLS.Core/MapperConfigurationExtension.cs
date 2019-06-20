@@ -338,6 +338,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<MobileScanStatus, MobileScanStatusDTO>();
                 config.CreateMap<MobileScanStatusDTO, MobileScanStatus>();
+
+                config.CreateMap<HUBManifestWaybillMapping, HUBManifestWaybillMappingDTO>();
+                config.CreateMap<HUBManifestWaybillMappingDTO, HUBManifestWaybillMapping>();
             });
 
             isInit = true;
