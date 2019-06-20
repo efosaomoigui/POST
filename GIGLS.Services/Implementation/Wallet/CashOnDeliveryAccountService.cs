@@ -50,38 +50,14 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 cashOnDeliveryAccountDto.UserId = await _userService.GetCurrentUserId();
             }
-
-            //it cause error when initiate to process payment sheet for COD settlement  
-            //Added for COD Settlement
-            //await _codSettlementSheetService.AddCODSettlementSheet(new CODSettlementSheetDTO()
-            //{
-            //    Waybill = cashOnDeliveryAccountDto.Waybill,
-            //    Amount = cashOnDeliveryAccountDto.Amount,
-            //    ReceivedCOD = false,
-            //    ReceiverAgentId = cashOnDeliveryAccountDto.UserId
-            //});
-
-
+            
             //create COD Account and all COD Account for the wallet
             cashOnDeliveryAccountDto.Wallet = null;
             var newCODAccount = Mapper.Map<CashOnDeliveryAccount>(cashOnDeliveryAccountDto);
             newCODAccount.WalletId = wallet.WalletId;
             newCODAccount.UserId = cashOnDeliveryAccountDto.UserId;
             _uow.CashOnDeliveryAccount.Add(newCODAccount);
-            await _uow.CompleteAsync();
-
-            ////add to wallet transaction and wallet
-            //await _walletService.UpdateWallet(wallet.WalletId, new WalletTransactionDTO
-            //{
-            //    Amount = cashOnDeliveryAccountDto.Amount,
-            //    CreditDebitType = cashOnDeliveryAccountDto.CreditDebitType,
-            //    WalletId = wallet.WalletId,
-            //    Description = cashOnDeliveryAccountDto.Description,
-            //    UserId = cashOnDeliveryAccountDto.UserId,
-            //    Waybill = cashOnDeliveryAccountDto.Waybill
-            //});
-
-
+            
             //create entry in WalletTransaction table
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             if (serviceCenterIds.Length <= 0)
@@ -90,8 +66,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
                 serviceCenterIds[0] = defaultServiceCenter.ServiceCentreId;
             }
-
-
+            
             CreditDebitType creditType;
             var description = "";
             if (cashOnDeliveryAccountDto.CreditDebitType == CreditDebitType.Credit)
