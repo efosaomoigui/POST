@@ -196,7 +196,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         DateTime = DateTime.Now,
                         ManifestCode = manifest,
-                        ManifestType = ManifestType.HUB
+                        ManifestType = ManifestType.HUB,
+                        DepartureServiceCentreId = DepartureServiceCentreId,
+                        DestinationServiceCentreId = DestinationServiceCentreId
                     };
                     _uow.Manifest.Add(newManifest);
                 }
@@ -210,17 +212,17 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException($"No Waybill exists for this number: {waybill}");
                     }
 
-                    //check if the shipment is at the final destination with a scan of ARF (WHEN SHIPMENT ARRIVED FINAL DESTINATION)
-                    //var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.Waybill == waybill);
-                    //if (shipmentCollection == null)
-                    //{
-                    //    throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
-                    //}
-                    //else
-                    //{
-                    //    //WC -- SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO RECEIVER
-                    //    shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.WC;
-                    //}
+                    //check if the shipment is at the DepartureServiceCentre with a scan of ARF (WHEN SHIPMENT ARRIVED FINAL DESTINATION)
+                    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.Waybill == waybill);
+                    if (shipmentCollection == null)
+                    {
+                        throw new GenericException($"Shipment with waybill: {waybill} is not at the Departure Service Centre.");
+                    }
+                    else
+                    {
+                        //HUBWC -- //SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO HUB
+                        shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.HUBWC;
+                    }
 
                     //check if Waybill has not been added to this manifest 
                     var isWaybillMapped = await _uow.ManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
