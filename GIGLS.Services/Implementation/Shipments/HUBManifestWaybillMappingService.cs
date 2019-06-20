@@ -627,6 +627,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         waybillMapping.ManifestDetails.ReceiverBy = dispatch.ReceivedBy;
                     }
 
+                    //set the departure and destination hub
+                    var allServiceCentres = _uow.ServiceCentre.GetServiceCentres().Result;
+                    waybillMapping.DepartureServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == waybillMapping.ManifestDetails.DepartureServiceCentreId).FirstOrDefault();
+                    waybillMapping.DestinationServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == waybillMapping.ManifestDetails.DestinationServiceCentreId).FirstOrDefault();
+
                     resultList.Add(waybillMapping);
                 }
 
@@ -643,11 +648,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //check if the user is at the service centre
-                var serviceCentreIds = await _userService.GetPriviledgeServiceCenters();
-
-                var activeManifest = await _uow.HUBManifestWaybillMapping.GetAsync(x => x.Waybill == waybill && x.IsActive == true && serviceCentreIds.Contains(x.ServiceCentreId));
-
+                var activeManifest = await _uow.HUBManifestWaybillMapping.GetAsync(x => x.Waybill == waybill && x.IsActive == true);
                 if (activeManifest == null)
                 {
                     throw new GenericException($"There is no active Manifest for this Waybill {waybill}");
@@ -665,6 +666,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     activeManifestDto.ManifestDetails.DispatchedBy = dispatch.DispatchedBy;
                     activeManifestDto.ManifestDetails.ReceiverBy = dispatch.ReceivedBy;
                 }
+
+                //set the departure and destination hub
+                var allServiceCentres = _uow.ServiceCentre.GetServiceCentres().Result;
+                activeManifestDto.DepartureServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == activeManifestDto.ManifestDetails.DepartureServiceCentreId).FirstOrDefault();
+                activeManifestDto.DestinationServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == activeManifestDto.ManifestDetails.DestinationServiceCentreId).FirstOrDefault();
 
                 return activeManifestDto;
             }
