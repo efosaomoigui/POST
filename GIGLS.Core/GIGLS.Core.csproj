@@ -168,6 +168,7 @@
     <Compile Include="Domain\GroupWaybillNumberMapping.cs" />
     <Compile Include="Domain\Haulage.cs" />
     <Compile Include="Domain\HaulageDistanceMapping.cs" />
+    <Compile Include="Domain\HUBManifestWaybillMapping.cs" />
     <Compile Include="Domain\InternationalRequestReceiver.cs" />
     <Compile Include="Domain\InternationalRequestReceiverItem.cs" />
     <Compile Include="Domain\Location.cs" />
@@ -339,6 +340,7 @@
     <Compile Include="DTO\Shipments\FilterOptionsDto.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberDTO.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberMappingDTO.cs" />
+    <Compile Include="DTO\Shipments\HUBManifestWaybillMappingDTO.cs" />
     <Compile Include="DTO\Shipments\LogVisitReasonDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestGroupWaybillNumberMappingDTO.cs" />
@@ -522,6 +524,7 @@
     <Compile Include="IRepositories\ShipmentScan\IScanStatusRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IHUBManifestWaybillMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\ILogVisitReasonRepository.cs" />
     <Compile Include="IRepositories\Shipments\IMobilePickUpRequestsRepository.cs" />
     <Compile Include="IRepositories\Shipments\IMobileShipmentTrackingRepository.cs" />
@@ -644,6 +647,7 @@
     <Compile Include="IServices\ShipmentScan\IScanStatusService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberMappingService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberService.cs" />
+    <Compile Include="IServices\Shipments\IHUBManifestWaybillMappingService.cs" />
     <Compile Include="IServices\Shipments\ILogVisitReasonService.cs" />
     <Compile Include="IServices\Shipments\IMobilePickUpRequestsService.cs" />
     <Compile Include="IServices\Shipments\IMobileShipmentTrackingService.cs" />

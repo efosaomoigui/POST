@@ -12,13 +12,13 @@ using GIGLS.CORE.DTO.Report;
 namespace GIGLS.WebApi.Controllers.Shipments
 {
     [Authorize(Roles = "Shipment, ViewAdmin")]
-    [RoutePrefix("api/manifestwaybillmapping")]
-    public class ManifestWaybillMappingController : BaseWebApiController
+    [RoutePrefix("api/hubmanifestwaybillmapping")]
+    public class HUBManifestWaybillMappingController : BaseWebApiController
     {
-        private readonly IManifestWaybillMappingService _service;
+        private readonly IHUBManifestWaybillMappingService _service;
         private readonly IScanService _scan;
-        public ManifestWaybillMappingController(IManifestWaybillMappingService service, IScanService scan)
-            : base(nameof(ManifestWaybillMappingController))
+        public HUBManifestWaybillMappingController(IHUBManifestWaybillMappingService service, IScanService scan)
+            : base(nameof(HUBManifestWaybillMappingController))
         {
             _service = service;
             _scan = scan;
@@ -27,13 +27,13 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
-        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetAllManifestWaybillMappings()
+        public async Task<IServiceResponse<List<HUBManifestWaybillMappingDTO>>> GetAllHUBManifestWaybillMappings()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var manifestGroupWayBillNumberMappings = await _service.GetAllManifestWaybillMappings();
+                var manifestGroupWayBillNumberMappings = await _service.GetAllHUBManifestWaybillMappings();
 
-                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                return new ServiceResponse<List<HUBManifestWaybillMappingDTO>>
                 {
                     Object = manifestGroupWayBillNumberMappings
                 };
@@ -43,13 +43,13 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("manifestbydate")]
-        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetAllManifestWaybillMappings(DateFilterCriteria dateFilterCriteria)
+        public async Task<IServiceResponse<List<HUBManifestWaybillMappingDTO>>> GetAllHUBManifestWaybillMappings(DateFilterCriteria dateFilterCriteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var manifestGroupWayBillNumberMappings = await _service.GetAllManifestWaybillMappings(dateFilterCriteria);
+                var manifestGroupWayBillNumberMappings = await _service.GetAllHUBManifestWaybillMappings(dateFilterCriteria);
 
-                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                return new ServiceResponse<List<HUBManifestWaybillMappingDTO>>
                 {
                     Object = manifestGroupWayBillNumberMappings
                 };
@@ -59,7 +59,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapmultiple")]
-        public async Task<IServiceResponse<bool>> MappingManifestToWaybills(ManifestWaybillMappingDTO data)
+        public async Task<IServiceResponse<bool>> MappingManifestToWaybills(HUBManifestWaybillMappingDTO data)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -73,8 +73,24 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
+        [Route("mapmultipleHubManifest")]
+        public async Task<IServiceResponse<bool>> MappingHUBManifestToWaybills(HUBManifestWaybillMappingDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.MappingHUBManifestToWaybills(data.ManifestCode, data.Waybills,
+                    data.DepartureServiceCentreId, data.DestinationServiceCentreId);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
         [Route("mapmultiplemobile")]
-        public async Task<IServiceResponse<bool>> MappingManifestToWaybillsMobile(ManifestWaybillMappingDTO data)
+        public async Task<IServiceResponse<bool>> MappingManifestToWaybillsMobile(HUBManifestWaybillMappingDTO data)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -89,13 +105,13 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("waybillsinmanifest/{manifest}")]
-        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetWaybillsInManifest(string manifest)
+        public async Task<IServiceResponse<List<HUBManifestWaybillMappingDTO>>> GetWaybillsInManifest(string manifest)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var groupWaybillNumbersInManifest = await _service.GetWaybillsInManifest(manifest);
 
-                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                return new ServiceResponse<List<HUBManifestWaybillMappingDTO>>
                 {
                     Object = groupWaybillNumbersInManifest
                 };
@@ -105,13 +121,13 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("waybillsinmanifestfordispatch")]
-        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetWaybillsInManifestForDispatch()
+        public async Task<IServiceResponse<List<HUBManifestWaybillMappingDTO>>> GetWaybillsInManifestForDispatch()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var groupWaybillNumbersInManifest = await _service.GetWaybillsInManifestForDispatch();
 
-                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                return new ServiceResponse<List<HUBManifestWaybillMappingDTO>>
                 {
                     Object = groupWaybillNumbersInManifest
                 };
@@ -122,13 +138,13 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("manifestforwaybill/{waybill}")]
-        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetManifestForWaybill(string waybill)
+        public async Task<IServiceResponse<List<HUBManifestWaybillMappingDTO>>> GetManifestForWaybill(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var manifestDTO = await _service.GetManifestForWaybill(waybill);
 
-                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                return new ServiceResponse<List<HUBManifestWaybillMappingDTO>>
                 {
                     Object = manifestDTO
                 };
@@ -138,13 +154,13 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("activemanifestforwaybill/{waybill}")]
-        public async Task<IServiceResponse<ManifestWaybillMappingDTO>> GetActiveManifestForWaybill(string waybill)
+        public async Task<IServiceResponse<HUBManifestWaybillMappingDTO>> GetActiveManifestForWaybill(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var manifestDTO = await _service.GetActiveManifestForWaybill(waybill);
 
-                return new ServiceResponse<ManifestWaybillMappingDTO>
+                return new ServiceResponse<HUBManifestWaybillMappingDTO>
                 {
                     Object = manifestDTO
                 };
@@ -170,7 +186,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("returnwaybillsinManifest")]
-        public async Task<IServiceResponse<bool>> ReturnWaybillsInManifest(ManifestWaybillMappingDTO data)
+        public async Task<IServiceResponse<bool>> ReturnWaybillsInManifest(HUBManifestWaybillMappingDTO data)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -218,13 +234,13 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("manifestwaitingforsignoff")]
-        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetManifestWaitingForSignOff()
+        public async Task<IServiceResponse<List<HUBManifestWaybillMappingDTO>>> GetManifestWaitingForSignOff()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var manifestGroupWayBillNumberMappings = await _service.GetManifestWaitingForSignOff();
 
-                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                return new ServiceResponse<List<HUBManifestWaybillMappingDTO>>
                 {
                     Object = manifestGroupWayBillNumberMappings
                 };
@@ -234,13 +250,13 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("manifesthistoryforwaybill/{waybill}")]
-        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetManifestHistoryForWaybill(string waybill)
+        public async Task<IServiceResponse<List<HUBManifestWaybillMappingDTO>>> GetManifestHistoryForWaybill(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var manifestDTO = await _service.GetManifestHistoryForWaybill(waybill);
 
-                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                return new ServiceResponse<List<HUBManifestWaybillMappingDTO>>
                 {
                     Object = manifestDTO
                 };

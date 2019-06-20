@@ -149,6 +149,8 @@ namespace GIGLS.Core
         IRegionRepository Region { get; set; }
         IRegionServiceCentreMappingRepository RegionServiceCentreMapping { get; set; }
 
+        IHUBManifestWaybillMappingRepository HUBManifestWaybillMapping { get; set; }
+
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
     }

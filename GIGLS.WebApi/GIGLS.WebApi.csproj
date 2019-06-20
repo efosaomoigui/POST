@@ -341,6 +341,7 @@
     <Compile Include="Controllers\Shipments\ForWebJobsController.cs" />
     <Compile Include="Controllers\Shipments\GroupWaybillNumberController.cs" />
     <Compile Include="Controllers\Shipments\GroupWaybillNumberMappingController.cs" />
+    <Compile Include="Controllers\Shipments\HUBManifestWaybillMappingController.cs" />
     <Compile Include="Controllers\Shipments\LogVisitReasonController.cs" />
     <Compile Include="Controllers\Shipments\ManifestController.cs" />
     <Compile Include="Controllers\Shipments\ManifestGroupWaybillNumberMappingController.cs" />

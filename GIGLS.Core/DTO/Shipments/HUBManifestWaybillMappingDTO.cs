@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Shipments
 {
-    public class ManifestWaybillMappingDTO : BaseDomainDTO
+    public class HUBManifestWaybillMappingDTO : BaseDomainDTO
     {
-        public int ManifestWaybillMappingId { get; set; }
+        public int HUBManifestWaybillMappingId { get; set; }
         public bool IsActive { get; set; }
 
         public string ManifestCode { get; set; }
@@ -24,5 +24,8 @@ namespace GIGLS.Core.DTO.Shipments
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
 
         public string DispatchRider { get; set; }
+
+        public int DepartureServiceCentreId { get; set; }
+        public int DestinationServiceCentreId { get; set; }
     }
 }
