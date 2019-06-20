@@ -42,13 +42,14 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly ISpecialDomesticPackageService _specialdomesticpackageservice;
         private readonly IMobileShipmentTrackingService _mobiletrackingservice;
         private readonly IMobilePickUpRequestsService _mobilepickuprequestservice;
-       
+        private readonly IDomesticRouteZoneMapService _domesticroutezonemapservice;
+
 
         public PreShipmentMobileService(IUnitOfWork uow,IShipmentService shipmentService,IDeliveryOptionService deliveryService,
             IServiceCentreService centreService,IUserServiceCentreMappingService userServiceCentre,INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService,IWalletService walletService,IWalletTransactionService walletTransactionService,
             IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice, IMobileShipmentTrackingService mobiletrackingservice,
-            IMobilePickUpRequestsService mobilepickuprequestservice)
+            IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -63,6 +64,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _specialdomesticpackageservice = specialdomesticpackageservice;
             _mobiletrackingservice = mobiletrackingservice;
             _mobilepickuprequestservice = mobilepickuprequestservice;
+            _domesticroutezonemapservice = domesticroutezonemapservice;
             MapperConfig.Initialize();
         }
 
@@ -70,6 +72,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
                 var newPreShipment = await CreatePreShipment(preShipment);
                 await _uow.CompleteAsync();
                 bool IsBalanceSufficient = true;
@@ -81,7 +84,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     IsBalanceSufficient = false;
                 }
 
-                return new { waybill = newPreShipment.Waybill, message = message, IsBalanceSufficient};
+                return new { waybill = newPreShipment.Waybill, message = message, IsBalanceSufficient, Zone = zoneid.ZoneId};
             }
             catch (Exception)
             {
@@ -405,7 +408,15 @@ namespace GIGLS.Services.Implementation.Shipments
                pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
                if (preshipmentmobile != null)
-               {
+                {
+                    if (pickuprequest.ServiceCentreCode != null)
+                    {
+                        var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickuprequest.ServiceCentreCode);
+                        preshipmentmobile.ReceiverAddress = DestinationServiceCentreId.Address;
+                        preshipmentmobile.ReceiverLocation.Latitude = DestinationServiceCentreId.Latitude;
+                        preshipmentmobile.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude;
+
+                    }
                     await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
                     preshipmentmobile.shipmentstatus = "Assigned for Pickup";
                     await _uow.CompleteAsync();
@@ -440,8 +451,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         ShipmentScanStatus = ShipmentScanStatus.MSHC
                     });
                     var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems");
-                    var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickuprequest.ServiceCentreCode);
                     var DepartureStation = await _uow.Station.GetAsync(s => s.StationId == preshipmentmobile.SenderStationId);
+                    var DestinationStation = await _uow.Station.GetAsync(s => s.StationId == preshipmentmobile.ReceiverStationId);
                     var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
                     var userId = await _userService.GetCurrentUserId();
                     var MobileShipment = new ShipmentDTO {
@@ -457,7 +468,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         SenderAddress = preshipmentmobile.SenderAddress,
                         IsCashOnDelivery = false,
                         CustomerCode = preshipmentmobile.CustomerCode,
-                        DestinationServiceCentreId = DestinationServiceCentreId.ServiceCentreId,
+                        DestinationServiceCentreId = DestinationStation.SuperServiceCentreId,
                         DepartureServiceCentreId = DepartureStation.SuperServiceCentreId,
                         CustomerId = CustomerId.IndividualCustomerId,
                         UserId = userId,
@@ -524,6 +535,38 @@ namespace GIGLS.Services.Implementation.Shipments
                 return mobilerequests;
             }
             catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool>UpdatePreShipmentMobileDetails(PreShipmentItemMobileDTO Preshipmentmobile)
+        {
+            try
+            {
+                
+                var preShipment = await _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == Preshipmentmobile.PreShipmentMobileId && s.PreShipmentItemMobileId == Preshipmentmobile.PreShipmentItemMobileId);
+                if (preShipment == null)
+                {
+                    throw new GenericException("PreShipmentItem Does Not Exist");
+                }
+                preShipment.CalculatedPrice = Preshipmentmobile.CalculatedPrice;
+                preShipment.Description = Preshipmentmobile.Description;
+                preShipment.EstimatedPrice = Preshipmentmobile.EstimatedPrice;
+                preShipment.ImageUrl = Preshipmentmobile.ImageUrl;
+                preShipment.IsVolumetric = Preshipmentmobile.IsVolumetric;
+                preShipment.ItemName = Preshipmentmobile.ItemName;
+                preShipment.ItemType = Preshipmentmobile.ItemType;
+                preShipment.Length = Preshipmentmobile.Length;
+                preShipment.Quantity = Preshipmentmobile.Quantity;
+                preShipment.Weight = Preshipmentmobile.Weight;
+                preShipment.Width = Preshipmentmobile.Width;
+                preShipment.Height = Preshipmentmobile.Height;
+                
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception)
             {
                 throw;
             }
