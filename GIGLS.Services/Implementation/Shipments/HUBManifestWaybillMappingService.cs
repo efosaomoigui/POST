@@ -695,7 +695,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //update shipment collection centre
-                var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.WC);
+                var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.HUBWC);
 
                 if (shipmentCollection != null)
                 {
