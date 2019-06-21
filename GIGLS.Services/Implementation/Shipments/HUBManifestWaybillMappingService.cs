@@ -228,8 +228,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else
                     {
-                        //HUBWC -- //SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO HUB
-                        shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.HUBWC;
+                        //DPC -- //SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO HUB
+                        shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.DPC;
                     }
 
                     //check if Waybill has not been added to this manifest 
@@ -700,7 +700,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //update shipment collection centre
-                var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.HUBWC);
+                var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.DPC);
 
                 if (shipmentCollection != null)
                 {
@@ -728,74 +728,42 @@ namespace GIGLS.Services.Implementation.Shipments
                 var manifestDTO = await _manifestService.GetManifestByCode(manifest);
                 var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
 
-                List<CashOnDeliveryRegisterAccount> codRegisterCollectsForASingleWaybillList = new List<CashOnDeliveryRegisterAccount>();
                 foreach (var waybill in waybills)
                 {
-                    //1a. check and return only delivered shipments
-                    var shipmentCollectionDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.OKT);
-                    if (shipmentCollectionDelivered != null)
-                    {
-                        //Update CashOnDevliveryRegisterAccount As  Cash Recieved at Service Center
-                        var codRegisterCollectsForASingleWaybill = _uow.CashOnDeliveryRegisterAccount.Find(s => s.Waybill == waybill).FirstOrDefault();
-
-                        if (codRegisterCollectsForASingleWaybill != null)
-                        {
-                            codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
-                            codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
-                            codRegisterCollectsForASingleWaybillList.Add(codRegisterCollectsForASingleWaybill);
-                        }
-                        continue;
-                    }
-
-
                     //1. check if the waybill is in the manifest 
                     var manifestWaybillMapping = await _uow.HUBManifestWaybillMapping.GetAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
 
                     if (manifestWaybillMapping == null)
                     {
-                        throw new GenericException($"Waybill {waybill} does not mapped to the manifest {manifest}");
+                        throw new GenericException($"Waybill {waybill} is not mapped to the manifest {manifest}");
                     }
 
-                    //2. check if the user is at the final destination centre of the shipment
-                    if (serviceIds.Length == 1 && serviceIds[0] == manifestWaybillMapping.ServiceCentreId)
+                    //update manifestWaybillMapping status for the waybill
+                    manifestWaybillMapping.IsActive = false;
+
+                    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill);
+                    if (shipmentCollection == null)
                     {
-                        //update manifestWaybillMapping status for the waybill
-                        manifestWaybillMapping.IsActive = false;
-
-                        //3. check if the waybill has not been delivered 
-                        var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.WC);
-                        //var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill);
-                        if (shipmentCollection == null)
-                        {
-                            throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
-                        }
-                        else
-                        {
-                            //Update shipment collection to make it available at collection centre
-                            shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.ARF;
-
-                            //Add scan status to  the tracking page
-                            var newShipmentTracking = new ShipmentTracking
-                            {
-                                Waybill = waybill,
-                                Location = serviceCenter.Name,
-                                Status = ShipmentScanStatus.SRC.ToString(),
-                                DateTime = DateTime.Now,
-                                UserId = user,
-                                ServiceCentreId = serviceCenter.ServiceCentreId
-                            };
-                            _uow.ShipmentTracking.Add(newShipmentTracking);
-                        }
+                        throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
                     }
                     else
                     {
-                        throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+                        //Update shipment collection to make it available at collection centre
+                        shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.ARF;
+
+                        //Add scan status to  the tracking page
+                        var newShipmentTracking = new ShipmentTracking
+                        {
+                            Waybill = waybill,
+                            Location = serviceCenter.Name,
+                            Status = ShipmentScanStatus.ARP.ToString(),
+                            DateTime = DateTime.Now,
+                            UserId = user,
+                            ServiceCentreId = serviceCenter.ServiceCentreId
+                        };
+                        _uow.ShipmentTracking.Add(newShipmentTracking);
                     }
                 }
-
-                //update codRegisterCollectsForASingleWaybillList in the db
-                codRegisterCollectsForASingleWaybillList.ForEach(s => s.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter);
-
                 await _uow.CompleteAsync();
             }
             catch (Exception)
