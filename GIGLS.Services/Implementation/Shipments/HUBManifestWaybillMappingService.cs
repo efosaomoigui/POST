@@ -404,10 +404,15 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var manifestDTO = await _manifestService.GetManifestByCode(manifestcode);
+
+                //needed to set the departure and destination hub
+                var allServiceCentres = _uow.ServiceCentre.GetServiceCentres().Result;
+                //set the departure and destination hub
+                manifestDTO.DepartureServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == manifestDTO.DepartureServiceCentreId).FirstOrDefault();
+                manifestDTO.DestinationServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == manifestDTO.DestinationServiceCentreId).FirstOrDefault();
+
                 var manifestWaybillMappingList = await _uow.HUBManifestWaybillMapping.FindAsync(x => x.ManifestCode == manifestDTO.ManifestCode);
-
                 var manifestWaybillNumberMappingDto = Mapper.Map<List<HUBManifestWaybillMappingDTO>>(manifestWaybillMappingList.ToList());
-
                 foreach (var manifestwaybill in manifestWaybillNumberMappingDto)
                 {
                     manifestwaybill.ManifestDetails = manifestDTO;
