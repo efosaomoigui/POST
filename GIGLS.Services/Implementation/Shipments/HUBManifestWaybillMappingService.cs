@@ -194,7 +194,8 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var serviceIds = await _userService.GetPriviledgeServiceCenters();
+                var serviceCenter = await _uow.ServiceCentre.GetAsync(DepartureServiceCentreId);
+                string user = await _userService.GetCurrentUserId();
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
 
                 //1. create the manifest if manifest does not exist
@@ -230,6 +231,19 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         //DPC -- //SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO HUB
                         shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.DPC;
+
+                        //Add scan status to  the tracking page
+                        var newShipmentTracking = new ShipmentTracking
+                        {
+                            Waybill = waybill,
+                            Location = serviceCenter.Name,
+                            Status = ShipmentScanStatus.DPC.ToString(),
+                            DateTime = DateTime.Now,
+                            UserId = user,
+                            ServiceCentreId = serviceCenter.ServiceCentreId
+                        };
+                        _uow.ShipmentTracking.Add(newShipmentTracking);
+
                     }
 
                     //check if Waybill has not been added to this manifest 
