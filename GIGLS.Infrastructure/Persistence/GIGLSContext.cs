@@ -245,7 +245,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<RegionServiceCentreMapping> RegionServiceCentreMappings { get; set; }
         public DbSet<MobileScanStatus> MobileScanStatus { get; set; }
 
-
+        public DbSet<HUBManifestWaybillMapping> HUBManifestWaybillMapping { get; set; }
 
         #endregion
 

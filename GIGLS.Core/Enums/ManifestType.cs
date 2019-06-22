@@ -4,6 +4,7 @@
     {
         External,
         Internal,
-        Delivery
+        Delivery,
+        HUB
     }
 }

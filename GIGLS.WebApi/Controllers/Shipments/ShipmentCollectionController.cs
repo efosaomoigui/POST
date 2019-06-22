@@ -148,6 +148,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("waitingforcollectionforhub")]
+        public async Task<IServiceResponse<IEnumerable<ShipmentCollectionDTO>>> GetShipmentWaitingForCollectionForHub()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.GetShipmentWaitingForCollectionForHub();
+
+                return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("waitingforcollection_search")]
         public async Task<IServiceResponse<IEnumerable<ShipmentCollectionDTO>>> GetShipmentWaitingForCollection([FromUri]FilterOptionsDto filterOptionsDto)
         {

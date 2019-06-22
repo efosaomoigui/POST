@@ -266,6 +266,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 centre.Code = service.Code;
                 centre.TargetAmount = service.TargetAmount;
                 centre.TargetOrder = service.TargetOrder;
+                centre.IsHUB = service.IsHUB;
                 _uow.Complete();
             }
             catch (Exception ex)
