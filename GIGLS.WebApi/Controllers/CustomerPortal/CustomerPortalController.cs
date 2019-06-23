@@ -974,6 +974,22 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
+
+        [HttpPost]
+        [Route("updatepreshipmentmobile")]
+        public async Task<IServiceResponse<bool>> UpdatePreshipmentMobile(PreShipmentItemMobileDTO preshipment)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _preshipmentmobileService.UpdatePreShipmentMobileDetails(preshipment);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = flag
+                };
+            });
+        }
+
     }
 }

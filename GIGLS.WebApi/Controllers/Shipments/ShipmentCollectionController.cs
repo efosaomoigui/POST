@@ -6,6 +6,7 @@ using System.Web.Http;
 using GIGLS.CORE.IServices.Shipments;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.WebApi.Filters;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -48,6 +49,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 {
                     Object = await shipmentCollectionTuple.Item1,
                     Total = shipmentCollectionTuple.Item2
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("bydate")]
+        public async Task<IServiceResponse<IEnumerable<ShipmentCollectionDTO>>> GetAllShipmentCollectionsByDate(ShipmentCollectionFilterCriteria collectionFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentCollections = await _service.GetShipmentCollections(collectionFilterCriteria);
+
+                return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
+                {
+                    Object = shipmentCollections
                 };
             });
         }
@@ -121,6 +138,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _service.GetShipmentWaitingForCollection();
+
+                return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("waitingforcollectionforhub")]
+        public async Task<IServiceResponse<IEnumerable<ShipmentCollectionDTO>>> GetShipmentWaitingForCollectionForHub()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _service.GetShipmentWaitingForCollectionForHub();
 
                 return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
                 {

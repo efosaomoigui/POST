@@ -886,7 +886,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //6.added for Transitwaybills
                 var transitWaybillNumberList = allTransitWaybillNumberList.Where(s =>
-                    serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false).ToList();
+                    serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false && s.IsTransitCompleted == false).ToList();
                 
                 foreach (var item in transitWaybillNumberList)
                 {
@@ -1034,7 +1034,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //6.added for Transitwaybills
                 var transitWaybillNumberList = allTransitWaybillNumberList.Where(s =>
-                    serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false).ToList();
+                    serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false && s.IsTransitCompleted == false).ToList();
                 
                 foreach (var item in transitWaybillNumberList)
                 {
