@@ -233,7 +233,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
 
-            var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId)).ToList();
+            var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
+                .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId)).ToList();
            
             var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
             
@@ -283,58 +284,74 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
                 }
-                List<ShipmentCollection> shipmentCollection = new List<ShipmentCollection>();
-                List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();       
-                if (filterOptionsDto.filterValue == "0" || filterOptionsDto.filterValue== null)
-                {
 
-                    shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().ToList().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.DateCreated.ToString("MM/dd/yyyy") == DateTime.Now.ToString("MM/dd/yyyy")).ToList();
-                }
-                else
-                {
-                    shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).ToList();
-                }
+                var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
+                .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId));
 
-               
-                shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
+                //Get the total count of the shipments awaiting collection for the service centre
+                int shipmentCollectionCount = shipmentCollection.Count();
 
-                int count = shipmentCollection.Count();
-                
-                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
+                DateTime backwardDatebyNumberofDays = DateTime.Today.AddDays(-filterOptionsDto.count);
 
-                if (filterOptionsDto != null)
-                {
-                    //filter
-                    var filter = filterOptionsDto.filter;
-                    var filterValue = filterOptionsDto.filterValue;
-                    if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
-                    {
-                        shipmentCollectionDto = shipmentCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null
-                            && (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
-                    }
+                //filter the data by using count which serve as the number of days to display
+                var shipmentCollectionResult = shipmentCollection.Where(x => x.DateCreated >= backwardDatebyNumberofDays).ToList();
 
-                    //sort
-                    var sortorder = filterOptionsDto.sortorder;
-                    var sortvalue = filterOptionsDto.sortvalue;
+                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollectionResult.OrderByDescending(x => x.DateCreated));
 
-                    if (!string.IsNullOrEmpty(sortorder) && !string.IsNullOrEmpty(sortvalue))
-                    {
-                        System.Reflection.PropertyInfo prop = typeof(ShipmentCollection).GetProperty(sortvalue);
+                return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), shipmentCollectionCount);
 
-                        if (sortorder == "0")
-                        {
-                            shipmentCollectionDto = shipmentCollectionDto.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
-                        }
-                        else
-                        {
-                            shipmentCollectionDto = shipmentCollectionDto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
-                        }
-                    }
+                //List<ShipmentCollection> shipmentCollection = new List<ShipmentCollection>();
+                //List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();       
+                //if (filterOptionsDto.filterValue == "0" || filterOptionsDto.filterValue== null)
+                //{
 
-                    shipmentCollectionDto = shipmentCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
-                }
+                //    shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().ToList().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.DateCreated.ToString("MM/dd/yyyy") == DateTime.Now.ToString("MM/dd/yyyy")).ToList();
+                //}
+                //else
+                //{
+                //    shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).ToList();
+                //}
 
-                return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), count);
+
+                //shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
+
+                //int count = shipmentCollection.Count();
+
+                //var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
+
+                //if (filterOptionsDto != null)
+                //{
+                //    //filter
+                //    var filter = filterOptionsDto.filter;
+                //    var filterValue = filterOptionsDto.filterValue;
+                //    if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
+                //    {
+                //        shipmentCollectionDto = shipmentCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null
+                //            && (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
+                //    }
+
+                //    //sort
+                //    var sortorder = filterOptionsDto.sortorder;
+                //    var sortvalue = filterOptionsDto.sortvalue;
+
+                //    if (!string.IsNullOrEmpty(sortorder) && !string.IsNullOrEmpty(sortvalue))
+                //    {
+                //        System.Reflection.PropertyInfo prop = typeof(ShipmentCollection).GetProperty(sortvalue);
+
+                //        if (sortorder == "0")
+                //        {
+                //            shipmentCollectionDto = shipmentCollectionDto.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                //        }
+                //        else
+                //        {
+                //            shipmentCollectionDto = shipmentCollectionDto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                //        }
+                //    }
+
+                //    shipmentCollectionDto = shipmentCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
+                //}
+
+                //return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), count);
             }
             catch (Exception ex)
             {
