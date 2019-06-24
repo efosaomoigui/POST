@@ -1271,6 +1271,16 @@ namespace GIGLS.Services.Implementation.Shipments
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var invoices = await _uow.Shipment.GetSalesForServiceCentre(accountFilterCriteria, serviceCenterIds);
 
+            //Update to change the Corporate Paid status from 'Paid' to 'Credit'
+            foreach(var item in invoices)
+            {
+                item.PaymentStatusDisplay = item.PaymentStatus.ToString();
+                if ((CompanyType.Corporate.ToString() == item.CompanyType))
+                {
+                    item.PaymentStatusDisplay = "Credit";
+                }
+            }
+
             var dailySalesDTO = new DailySalesDTO()
             {
                 StartDate = (DateTime)accountFilterCriteria.StartDate,
