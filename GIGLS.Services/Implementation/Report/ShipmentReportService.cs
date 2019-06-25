@@ -295,10 +295,13 @@ namespace GIGLS.Services.Implementation.Report
             //1b. For waybill to be collected it must have satisfy the follwoing Shipment Scan Status
             //Collected by customer (OKC & OKT), Return (SSR), Reroute (SRR) : All status satisfy IsShipmentCollected above
             //shipments that have arrived destination service centre or cancelled should not be displayed in expected shipments
+            //var shipmetCollection = _uow.ShipmentCollection.GetAllAsQueryable()
+            //    .Where(x => serviceCenterId.Contains(x.DestinationServiceCentreId) && !(x.ShipmentScanStatus == ShipmentScanStatus.OKC && x.ShipmentScanStatus == ShipmentScanStatus.OKT
+            //    && x.ShipmentScanStatus == ShipmentScanStatus.SSR && x.ShipmentScanStatus == ShipmentScanStatus.SRR
+            //    && x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.ShipmentScanStatus == ShipmentScanStatus.SSC)).Select(w => w.Waybill);
+
             var shipmetCollection = _uow.ShipmentCollection.GetAllAsQueryable()
-                .Where(x => !(x.ShipmentScanStatus == ShipmentScanStatus.OKC && x.ShipmentScanStatus == ShipmentScanStatus.OKT
-                && x.ShipmentScanStatus == ShipmentScanStatus.SSR && x.ShipmentScanStatus == ShipmentScanStatus.SRR
-                && x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.ShipmentScanStatus == ShipmentScanStatus.SSC)).Select(w => w.Waybill);
+                .Where(x => serviceCenterId.Contains(x.DestinationServiceCentreId)).Select(w => w.Waybill);
 
             //1c. remove all the waybills that at the collection center from the income shipments
             allShipmentsResult = allShipmentsResult.Where(s => !shipmetCollection.Contains(s));
