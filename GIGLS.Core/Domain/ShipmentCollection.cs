@@ -22,6 +22,7 @@ namespace GIGLS.CORE.Domain
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
         public int DepartureServiceCentreId { get; set; }
         public int DestinationServiceCentreId { get; set; }
+        public bool IsCashOnDelivery { get; set; }
 
         //Who processed the collection
         public string UserId { get; set; }
