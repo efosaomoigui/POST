@@ -122,7 +122,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
-                
+
                 //get collected shipment
                 //var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC).ToList();
 
@@ -192,7 +192,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
                 }
-                
+
                 //get startDate and endDate
                 var queryDate = collectionFilterCriteria.getStartDateAndEndDate();
                 var startDate = queryDate.Item1;
@@ -216,7 +216,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        
+
         public async Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentWaitingForCollection()
         {
             //get all shipments by servicecentre
@@ -235,16 +235,16 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
                 .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId)).ToList();
-           
+
             var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
-            
+
             return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateCreated));
         }
 
-        public async Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentWaitingForCollectionForHub()
+        public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollectionForHub(int pageIndex, int pageSize)
         {
             //get all shipments by servicecentre
-            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
             //added for GWA and GWARIMPA service centres
             {
@@ -259,12 +259,15 @@ namespace GIGLS.Services.Implementation.Shipments
 
             List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
-            var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).
-                Where(x => shipmentsWaybills.Contains(x.Waybill)).ToList();
+            var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().
+                Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).
+                Where(x => shipmentsWaybills.Contains(x.Waybill)).OrderByDescending(x => x.DateCreated);
+            var shipmentCollectionTotalCount = shipmentCollection.Count();
 
-            var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
+            var shipmentCollectionList = shipmentCollection.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
 
-            return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateCreated).Take(50));
+            var shipmentCollectionListDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollectionList);
+            return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionListDto), shipmentCollectionTotalCount);
         }
 
         public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollection(FilterOptionsDto filterOptionsDto)
@@ -396,7 +399,7 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentCollection.ShipmentScanStatus = shipmentCollectionDto.ShipmentScanStatus;
             shipmentCollection.UserId = shipmentCollectionDto.UserId;
 
-           // var collectionServiceCenter = shipmentCollectionDto.OriginalDestinationServiceCentre;
+            // var collectionServiceCenter = shipmentCollectionDto.OriginalDestinationServiceCentre;
 
             //Add Collected Scan to Scan History
             var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
@@ -406,7 +409,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 Waybill = shipmentCollectionDto.Waybill,
                 User = shipmentCollectionDto.UserId,
             }, shipmentCollectionDto.ShipmentScanStatus);
-            
+
             var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
 
             //cash collected on Delivery
@@ -422,7 +425,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     codStatushistory = CODStatushistory.RecievedAtServiceCenter;
                 }
-                
+
                 await _cashOnDeliveryAccountService.AddCashOnDeliveryAccount(new CashOnDeliveryAccountDTO
                 {
                     Amount = (decimal)shipmentCollectionDto.CashOnDeliveryAmount,
@@ -465,7 +468,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
 
                     //Add the the selected cod information and set it in the codregister account
-                    _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryinfo);                    
+                    _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryinfo);
                 }
             }
 
@@ -486,11 +489,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     Waybill = shipmentCollectionDto.Waybill,
                     PaymentServiceType = PaymentServiceType.Demurage,
                     PaymentType = shipmentCollectionDto.PaymentType,
-                    PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference                    
+                    PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference
                 };
 
                 //insert demurrage in the database
-                var demurrageinformation = new DemurrageRegisterAccount() 
+                var demurrageinformation = new DemurrageRegisterAccount()
                 {
                     Waybill = shipmentCollectionDto.Waybill,
                     RefCode = null,
@@ -500,10 +503,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     DepositStatus = DepositStatus.Unprocessed,
                     PaymentType = shipmentCollectionDto.PaymentType,
                     PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference,
-                    DEMStatusHistory  = CODStatushistory.RecievedAtServiceCenter,
+                    DEMStatusHistory = CODStatushistory.RecievedAtServiceCenter,
                     ServiceCenterCode = getServiceCenterCode[0].Code
                 };
-                
+
                 _uow.DemurrageRegisterAccount.Add(demurrageinformation);
                 _uow.GeneralLedger.Add(generalLedger);
             }
