@@ -125,17 +125,21 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (serviceCenters.Length > 0)
                 {
                     //Get shipments coming to the service centre 
-                    var shipmentResult = allShipments.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).ToList();
+                    //var shipmentResult = allShipments.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).ToList();
+                    allShipments = allShipments.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId));
 
                     //For waybill to be collected it must have satisfy the follwoing Shipment Scan Status
                     //Collected by customer (OKC & OKT), Return (SSR), Reroute (SRR) : All status satisfy IsShipmentCollected above
                     //shipments that have arrived destination service centre should not be displayed in expected shipments
-                    List<string> shipmetCollection = _uow.ShipmentCollection.GetAllAsQueryable()
-                        .Where(x => !(x.ShipmentScanStatus == ShipmentScanStatus.OKC && x.ShipmentScanStatus == ShipmentScanStatus.OKT
-                        && x.ShipmentScanStatus == ShipmentScanStatus.SSR && x.ShipmentScanStatus == ShipmentScanStatus.SRR)).Select(w => w.Waybill).ToList();
+                    //List<string> shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
+                    //    .Where(x => serviceCenters.Contains(x.DestinationServiceCentreId) && !(x.ShipmentScanStatus == ShipmentScanStatus.OKC && x.ShipmentScanStatus == ShipmentScanStatus.OKT
+                    //    && x.ShipmentScanStatus == ShipmentScanStatus.SSR && x.ShipmentScanStatus == ShipmentScanStatus.SRR)).Select(w => w.Waybill).ToList();
+
+                    var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
+                        .Where(x => serviceCenters.Contains(x.DestinationServiceCentreId)).Select(w => w.Waybill).Distinct();
 
                     //remove all the waybills that at the collection center from the income shipments
-                    shipmentResult = shipmentResult.Where(s => !shipmetCollection.Contains(s.Waybill)).ToList();
+                    var shipmentResult = allShipments.Where(s => !shipmentCollection.Contains(s.Waybill)).ToList();
                     incomingShipments = Mapper.Map<List<InvoiceViewDTO>>(shipmentResult);
                 }
 

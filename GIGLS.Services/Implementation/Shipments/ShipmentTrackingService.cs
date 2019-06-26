@@ -67,6 +67,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         ShipmentScanStatus = scanStatus,
                         DepartureServiceCentreId = shipment.DepartureServiceCentreId,
                         DestinationServiceCentreId = shipment.DestinationServiceCentreId,
+                        IsCashOnDelivery = shipment.IsCashOnDelivery
                     };
 
                     _uow.ShipmentCollection.Add(newShipmentCollection);
