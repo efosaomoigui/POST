@@ -241,7 +241,7 @@ namespace GIGLS.Services.Implementation.Shipments
             return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateCreated));
         }
 
-        public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollectionForHub(int pageIndex, int pageSize)
+        public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollectionForHub(FilterOptionsDto filterOptionsDto)
         {
             //get all shipments by servicecentre
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
@@ -261,10 +261,18 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().
                 Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).
-                Where(x => shipmentsWaybills.Contains(x.Waybill)).OrderByDescending(x => x.DateCreated);
+                Where(x => shipmentsWaybills.Contains(x.Waybill));
+
+            //add WaybillFilter
+            if(filterOptionsDto.WaybillFilter != null && filterOptionsDto.WaybillFilter.Length > 0)
+            {
+                shipmentCollection = shipmentCollection.Where(s => s.Waybill.Contains(filterOptionsDto.WaybillFilter));
+            }
+
+            //get total count
             var shipmentCollectionTotalCount = shipmentCollection.Count();
 
-            var shipmentCollectionList = shipmentCollection.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
+            var shipmentCollectionList = shipmentCollection.OrderByDescending(x => x.DateCreated).Skip((filterOptionsDto.PageIndex - 1) * filterOptionsDto.PageSize).Take(filterOptionsDto.PageSize).ToList();
 
             var shipmentCollectionListDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollectionList);
             return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionListDto), shipmentCollectionTotalCount);

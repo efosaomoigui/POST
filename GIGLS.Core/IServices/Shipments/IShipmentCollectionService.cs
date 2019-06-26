@@ -28,7 +28,7 @@ namespace GIGLS.CORE.IServices.Shipments
         Task<IEnumerable<ShipmentCollectionDTO>> GetEcommerceOverDueShipmentsGLOBAL();
         Task<IEnumerable<ShipmentCollectionDTO>> GetEcommerceOverDueShipments();
 
-        System.Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollectionForHub(int pageIndex, int pageSize);
+        System.Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollectionForHub(FilterOptionsDto filterOptionsDto);
 
     }
 }
