@@ -88,7 +88,6 @@ namespace GIGLS.Services.Implementation.Shipments
                         DateTime = DateTime.Now,
                         UserId = tracking.User,
                         ServiceCentreId = tracking.ServiceCentreId
-
                     };
                     _uow.ShipmentTracking.Add(newShipmentTracking);
 
@@ -97,7 +96,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     //send sms and email
                     await sendSMSEmail(tracking, scanStatus);
                 }
-                
+
+                //use to optimise shipment progress for shipment that has depart service centre
+                //update shipment table if the scan status contain any of the following : TRO, DSC, DTR
+                if (scanStatus.Equals(ShipmentScanStatus.DSC) || scanStatus.Equals(ShipmentScanStatus.TRO) || scanStatus.Equals(ShipmentScanStatus.DTR))
+                {
+                    //Get shipment Details
+                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(tracking.Waybill));
+
+                    //update shipment if the user belong to original departure service centre
+                    if(shipment.DepartureServiceCentreId == tracking.ServiceCentreId && shipment.ShipmentScanStatus != scanStatus)
+                    {
+                        shipment.ShipmentScanStatus = scanStatus;
+                    }
+                }
+
                 await _uow.CompleteAsync();
                 return new { Id };
                 //return new { Id = newShipmentTracking.ShipmentTrackingId };

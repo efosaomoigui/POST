@@ -96,5 +96,8 @@ namespace GIGLS.Core.View
         public DepositStatus DepositStatus { get; set; }
 
         public bool ReprintCounterStatus { get; set; }
+
+        //use to optimise shipment progress for shipment that has depart service centre
+        public ShipmentScanStatus ShipmentScanStatus { get; set; }
     }
 }

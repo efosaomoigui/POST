@@ -149,8 +149,8 @@ namespace GIGLS.Services.Implementation.Fleets
             if (listOfWaybills.Count > 0)
             {
                 //Scan all waybills attached to this manifestNumber
-                string status = ShipmentScanStatus.WC.ToString();
-                await ScanWaybillsInManifest(listOfWaybills, currentUserId, userServiceCentreId, status);
+                //ShipmentScanStatus status = ShipmentScanStatus.WC;
+                await ScanWaybillsInManifest(listOfWaybills, currentUserId, userServiceCentreId, ShipmentScanStatus.WC);
             }
 
             return 0;
@@ -184,8 +184,8 @@ namespace GIGLS.Services.Implementation.Fleets
             else
             {
                 //Scan all waybills attached to this manifestNumber
-                string status = ShipmentScanStatus.DSC.ToString();
-                await ScanWaybillsInManifest(listOfWaybills.ToList(), currentUserId, userServiceCentreId, status);
+                //string status = ShipmentScanStatus.DSC.ToString();
+                await ScanWaybillsInManifest(listOfWaybills.ToList(), currentUserId, userServiceCentreId, ShipmentScanStatus.DSC);
             }
             return 0;
         }
@@ -195,7 +195,7 @@ namespace GIGLS.Services.Implementation.Fleets
         /// are scan.
         /// </summary>
 
-        private async Task ScanWaybillsInManifest(List<string> waybills, string currentUserId, int userServiceCentreId, string scanStatus)
+        private async Task ScanWaybillsInManifest(List<string> waybills, string currentUserId, int userServiceCentreId, ShipmentScanStatus scanStatus)
         {
             var serviceCenter = await _uow.ServiceCentre.GetAsync(userServiceCentreId);
 
@@ -205,12 +205,27 @@ namespace GIGLS.Services.Implementation.Fleets
                 {
                     Waybill = item,
                     Location = serviceCenter.Name,
-                    Status = scanStatus,
+                    Status = scanStatus.ToString(),
                     DateTime = DateTime.Now,
                     UserId = currentUserId,
                     ServiceCentreId = serviceCenter.ServiceCentreId
                 };
+
                 _uow.ShipmentTracking.Add(newShipmentTracking);
+
+                //use to optimise shipment progress for shipment that has depart service centre
+                //update shipment table if the scan status contain any of the following : TRO, DSC, DTR
+                if (scanStatus.Equals(ShipmentScanStatus.DSC) || scanStatus.Equals(ShipmentScanStatus.TRO) || scanStatus.Equals(ShipmentScanStatus.DTR))
+                {
+                    //Get shipment Details
+                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(item));
+
+                    //update shipment if the user belong to original departure service centre
+                    if (shipment.DepartureServiceCentreId == serviceCenter.ServiceCentreId && shipment.ShipmentScanStatus != scanStatus)
+                    {
+                        shipment.ShipmentScanStatus = scanStatus; 
+                    }
+                }
             }
         }
 

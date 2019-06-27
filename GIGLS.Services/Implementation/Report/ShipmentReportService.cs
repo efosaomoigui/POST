@@ -349,11 +349,14 @@ namespace GIGLS.Services.Implementation.Report
 
             allShipmentsQueryable = allShipmentsQueryable.Where(s => serviceCenterId.Contains(s.DepartureServiceCentreId));
 
-            var shipmentTrackingHistory = _uow.ShipmentTracking.GetAllAsQueryable()
-                .Where(x => serviceCenterId.Contains(x.ServiceCentreId) && (x.Status == ShipmentScanStatus.DSC.ToString()
-                || x.Status == ShipmentScanStatus.TRO.ToString() || x.Status == ShipmentScanStatus.DTR.ToString())).Select(x => x.Waybill).Distinct();
+            //var shipmentTrackingHistory = _uow.ShipmentTracking.GetAllAsQueryable()
+            //    .Where(x => serviceCenterId.Contains(x.ServiceCentreId) && (x.Status == ShipmentScanStatus.DSC.ToString()
+            //    || x.Status == ShipmentScanStatus.TRO.ToString() || x.Status == ShipmentScanStatus.DTR.ToString())).Select(x => x.Waybill).Distinct();
 
-            allShipmentsQueryable = allShipmentsQueryable.Where(s => !shipmentTrackingHistory.Contains(s.Waybill));
+            //allShipmentsQueryable = allShipmentsQueryable.Where(s => !shipmentTrackingHistory.Contains(s.Waybill));
+
+            allShipmentsQueryable = allShipmentsQueryable.Where(x => !(x.ShipmentScanStatus == ShipmentScanStatus.DSC 
+            || x.ShipmentScanStatus == ShipmentScanStatus.TRO || x.ShipmentScanStatus == ShipmentScanStatus.DTR));
 
             dashboardDTO.TotalShipmentOrdered = allShipmentsQueryable.Count();
             
@@ -514,10 +517,13 @@ namespace GIGLS.Services.Implementation.Report
                 allShipmentsQueryable = allShipmentsQueryable.Where(x => x.CashOnDeliveryAmount > 0);
             }
 
-            var shipmentTrackingHistory = _uow.ShipmentTracking.GetAllAsQueryable()
-                .Where(x => x.Status == ShipmentScanStatus.DSC.ToString() || x.Status == ShipmentScanStatus.DPC.ToString()).Select(x => x.Waybill).Distinct();
+            allShipmentsQueryable = allShipmentsQueryable.Where(x => !(x.ShipmentScanStatus == ShipmentScanStatus.DSC
+            || x.ShipmentScanStatus == ShipmentScanStatus.TRO || x.ShipmentScanStatus == ShipmentScanStatus.DTR));
 
-            allShipmentsQueryable = allShipmentsQueryable.Where(s => !shipmentTrackingHistory.Contains(s.Waybill));
+            //var shipmentTrackingHistory = _uow.ShipmentTracking.GetAllAsQueryable()
+            //    .Where(x => x.Status == ShipmentScanStatus.DSC.ToString() || x.Status == ShipmentScanStatus.DPC.ToString()).Select(x => x.Waybill).Distinct();
+
+            //allShipmentsQueryable = allShipmentsQueryable.Where(s => !shipmentTrackingHistory.Contains(s.Waybill));
 
             dashboardDTO = Mapper.Map<List<InvoiceViewDTO>>(allShipmentsQueryable.OrderByDescending(x => x.DateCreated).ToList());
 
