@@ -25,5 +25,6 @@ namespace GIGLS.CORE.Domain
 
         //Who processed the collection
         public string UserId { get; set; }
+        public Demurrage Demurrage { get; set; }
     }
 }

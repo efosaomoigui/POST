@@ -1,7 +1,11 @@
-﻿namespace GIGLS.Core.DTO.Shipments
+﻿using GIGL.GIGLS.Core.Domain;
+using System;
+
+namespace GIGLS.Core.Domain
 {
-    public class DemurrageDTO
+    public class Demurrage : BaseDomain, IAuditable
     {
+        public int DemurrageId { get; set; }
         public int DayCount { get; set; }
         public decimal Amount { get; set; }
         public string WaybillNumber { get; set; }

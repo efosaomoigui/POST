@@ -146,6 +146,7 @@
     <Compile Include="Domain\CountryRouteZoneMap.cs" />
     <Compile Include="Domain\DeliveryOption.cs" />
     <Compile Include="Domain\DeliveryOptionPrice.cs" />
+    <Compile Include="Domain\Demurrage.cs" />
     <Compile Include="Domain\Devices\Device.cs" />
     <Compile Include="Domain\Devices\DeviceManagement.cs" />
     <Compile Include="Domain\Dispatch.cs" />
@@ -522,6 +523,7 @@
     <Compile Include="IRepositories\ServiceCentres\IUserServiceCentreMappingRepository.cs" />
     <Compile Include="IRepositories\ShipmentScan\IMobileScanStatusRepository.cs" />
     <Compile Include="IRepositories\ShipmentScan\IScanStatusRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IDemurrageRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberRepository.cs" />
     <Compile Include="IRepositories\Shipments\ILogVisitReasonRepository.cs" />

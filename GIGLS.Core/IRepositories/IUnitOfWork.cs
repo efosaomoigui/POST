@@ -150,6 +150,7 @@ namespace GIGLS.Core
 
         IRegionRepository Region { get; set; }
         IRegionServiceCentreMappingRepository RegionServiceCentreMapping { get; set; }
+        IDemurrageRepository Demurrage { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
