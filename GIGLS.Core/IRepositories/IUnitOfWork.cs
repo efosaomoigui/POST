@@ -150,6 +150,7 @@ namespace GIGLS.Core
 
         IRegionRepository Region { get; set; }
         IRegionServiceCentreMappingRepository RegionServiceCentreMapping { get; set; }
+        IDemurrageRepository Demurrage { get; set; }
 
         IHUBManifestWaybillMappingRepository HUBManifestWaybillMapping { get; set; }
 

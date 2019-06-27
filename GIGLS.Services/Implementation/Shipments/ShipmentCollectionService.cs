@@ -517,6 +517,18 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 _uow.DemurrageRegisterAccount.Add(demurrageinformation);
                 _uow.GeneralLedger.Add(generalLedger);
+
+                //insert demurage into demurage entity 
+                var newDemurrage = new Demurrage
+                {
+                    WaybillNumber = shipmentCollectionDto.Waybill,
+                    Amount = shipmentCollectionDto.Demurrage.Amount,
+                    AmountPaid = shipmentCollectionDto.Demurrage.AmountPaid,
+                    ApprovedBy = shipmentCollectionDto.Demurrage.ApprovedBy,
+
+                };
+                _uow.Demurrage.Add(newDemurrage);
+
             }
 
             //update invoice as shipment collected
