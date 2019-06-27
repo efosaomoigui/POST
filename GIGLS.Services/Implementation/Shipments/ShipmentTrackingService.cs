@@ -105,7 +105,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(tracking.Waybill));
 
                     //update shipment if the user belong to original departure service centre
-                    if(shipment.DepartureServiceCentreId == tracking.ServiceCentreId)
+                    if(shipment.DepartureServiceCentreId == tracking.ServiceCentreId && shipment.ShipmentScanStatus != scanStatus)
                     {
                         shipment.ShipmentScanStatus = scanStatus;
                     }
