@@ -30,6 +30,7 @@ namespace GIGLS.Services.Business.Scanning
         private readonly IDispatchService _dispatchService;
         private readonly ITransitWaybillNumberService _transitWaybillNumberService;
         private readonly IManifestWaybillMappingService _manifestWaybillService;
+        private readonly IHUBManifestWaybillMappingService _hubmanifestWaybillService;
         private readonly IUnitOfWork _uow;
 
 
@@ -37,7 +38,8 @@ namespace GIGLS.Services.Business.Scanning
             IGroupWaybillNumberMappingService groupService, IGroupWaybillNumberService groupWaybill,
             IManifestService manifestService, IManifestGroupWaybillNumberMappingService groupManifest,
             IUserService userService, IScanStatusService scanService, IDispatchService dispatchService,
-            ITransitWaybillNumberService transitWaybillNumberService, IManifestWaybillMappingService manifestWaybillService, IUnitOfWork uow)
+            ITransitWaybillNumberService transitWaybillNumberService, IManifestWaybillMappingService manifestWaybillService,
+            IHUBManifestWaybillMappingService hubmanifestWaybillService, IUnitOfWork uow)
         {
             _shipmentService = shipmentService;
             _shipmentTrackingService = shipmentTrackingService;
@@ -50,9 +52,10 @@ namespace GIGLS.Services.Business.Scanning
             _dispatchService = dispatchService;
             _transitWaybillNumberService = transitWaybillNumberService;
             _manifestWaybillService = manifestWaybillService;
+            _hubmanifestWaybillService = hubmanifestWaybillService;
             _uow = uow;
         }
-        
+
         public async Task<bool> ScanMultipleShipment(List<ScanDTO> scanList)
         {
             bool result = false;
@@ -117,7 +120,7 @@ namespace GIGLS.Services.Business.Scanning
                     return true;
                 }
                 else
-                {                    
+                {
                     ////if the scan status is AD and ARF is not yet scanned for the shipment, throw an error
                     //if (scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD))
                     //{
@@ -130,7 +133,7 @@ namespace GIGLS.Services.Business.Scanning
                     //}
 
                     //check if the waybill has not been scan for the same status before
-                    var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);                                      
+                    var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);
 
                     if (!checkTrack || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD))
                     {
@@ -153,6 +156,7 @@ namespace GIGLS.Services.Business.Scanning
             /////////////////////////2. GroupShipment
             // check if the group waybill number exists in the system
             var groupWaybill = await _groupWaybill.GetGroupWayBillNumberForScan(scan.WaybillNumber);
+            var waybillsInGroupWaybill = new HashSet<string>();
 
             if (groupWaybill != null)
             {
@@ -181,6 +185,9 @@ namespace GIGLS.Services.Business.Scanning
                                 Waybill = groupShipment.Waybill,
                             }, scan.ShipmentScanStatus);
                         }
+                        
+                        //add to waybillsInManifest
+                        waybillsInGroupWaybill.Add(groupShipment.Waybill);
                     }
                 }
                 else
@@ -218,9 +225,12 @@ namespace GIGLS.Services.Business.Scanning
 
                             foreach (var waybill in groupShipment.WaybillNumbers)
                             {
+                                //All Transit scan to exist for different service centre
                                 //check already scanned manifest
                                 var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(waybill, scanStatus);
-                                if (!checkTrack || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD))
+
+                                if (!checkTrack || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD) || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AST)
+                                    || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.ARP) || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.APT))
                                 {
                                     await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
                                     {
@@ -266,7 +276,6 @@ namespace GIGLS.Services.Business.Scanning
 
 
                 //Delivery Manifest
-
                 if (manifest.ManifestType == ManifestType.Delivery)
                 {
                     var waybillInManifestList = await _manifestWaybillService.GetWaybillsInManifest(manifest.ManifestCode);
@@ -339,10 +348,50 @@ namespace GIGLS.Services.Business.Scanning
                         throw new GenericException($"No Shipment attached to this Manifest: {scan.WaybillNumber} ");
                     }
 
-                    
+
                     return true;
                 }
 
+                //HUB Manifest
+                if (manifest.ManifestType == ManifestType.HUB)
+                {
+                    var waybillInHUBManifestList = await _hubmanifestWaybillService.GetWaybillsInManifest(manifest.ManifestCode);
+                    if (waybillInHUBManifestList.Count > 0)
+                    {
+                        //if the shipment scan status is shipment arrive HUB then
+                        //update Dispatch Receiver and manifest receiver id
+                        if (scan.ShipmentScanStatus == ShipmentScanStatus.ARP)
+                        {
+                            //Process Shipment Return to Service centre for repackaging
+                            var waybills = waybillInHUBManifestList.Select(s => s.Waybill).ToList();
+                            await _hubmanifestWaybillService.ReturnWaybillsInManifest(manifest.ManifestCode, waybills);
+
+                            var dispatch = await _dispatchService.GetDispatchManifestCode(scan.WaybillNumber);
+                            if (dispatch != null)
+                            {
+                                //get the user that login
+                                var userId = await _userService.GetCurrentUserId();
+                                var user = await _userService.GetUserById(userId);
+
+                                string reciever = user.FirstName + " " + user.LastName;
+                                dispatch.ReceivedBy = reciever;
+
+                                //update manifest also
+                                var manifestObj = await _manifestService.GetManifestByCode(scan.WaybillNumber);
+                                if (manifestObj != null)
+                                {
+                                    manifestObj.IsReceived = true;
+                                    manifestObj.ReceiverBy = userId;
+                                    await _manifestService.UpdateManifest(manifestObj.ManifestId, manifestObj);
+                                }
+
+                                await _dispatchService.UpdateDispatch(dispatch.DispatchId, dispatch);
+                            }
+                        }
+                        return true;
+                    }
+
+                }
             }
 
             if (shipment == null && groupWaybill == null && manifest == null)
@@ -353,13 +402,15 @@ namespace GIGLS.Services.Business.Scanning
             //////////////////////4. Check and Create Entries for Transit Manifest
             await CheckAndCreateEntriesForTransitManifest(scan, manifest, waybillsInManifest);
 
+            //5. Update the waybill to show transit waybill has complete transit process when it arrived Final Destination in TransitWaybill
+            await CompleteTransitWaybillProcess(scan, waybillsInGroupWaybill, waybillsInManifest);
+
             cashondeliveryinfo.ForEach(a => a.ServiceCenterId = currentCenter);
             await _uow.CompleteAsync();
 
             return true;
         }
-
-
+        
         private async Task ProcessReturnWaybillFromDispatch(string waybill)
         {
             var getManifest = await _manifestWaybillService.GetActiveManifestForWaybill(waybill);
@@ -470,6 +521,42 @@ namespace GIGLS.Services.Business.Scanning
             }
 
             return true;
+        }
+
+
+        private async Task CompleteTransitWaybillProcess(ScanDTO scan, HashSet<string> waybillsInGroupWaybill, HashSet<string> waybillsInManifest)
+        {
+            if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
+            {
+                if (waybillsInManifest.Count() > 0)
+                {
+                    foreach(var waybill in waybillsInManifest)
+                    {
+                        await CompleteWaybillInTransit(waybill);
+                    }
+                }
+                else if (waybillsInGroupWaybill.Count() > 0)
+                {
+                    foreach(var waybill in waybillsInGroupWaybill)
+                    {
+                        await CompleteWaybillInTransit(waybill);
+                    }
+                }
+                else
+                {
+                    await CompleteWaybillInTransit(scan.WaybillNumber);
+                }
+            }
+        }
+
+        private async Task CompleteWaybillInTransit(string waybill)
+        {
+            var transitWaybillNumber = await _uow.TransitWaybillNumber.GetAsync(s => s.WaybillNumber == waybill);
+            if(transitWaybillNumber != null)
+            {
+                transitWaybillNumber.IsTransitCompleted = true;
+                _uow.Complete();
+            }
         }
 
         /// <summary>

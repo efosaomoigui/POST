@@ -11,5 +11,10 @@
         public string filter { get; set; }
         public string filterValue { get; set; }
         public bool? IsInternational { get; set; }
+
+        //
+        public int PageIndex { get; set; }
+        public int PageSize { get; set; }
+        public string WaybillFilter { get; set; }
     }
 }

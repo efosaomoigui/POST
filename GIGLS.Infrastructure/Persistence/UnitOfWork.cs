@@ -358,7 +358,10 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IBankProcessingOrderCodesRepository BankProcessingOrderCodes { get; set; }
 
-        //IBankProcessingOrderForShipmentAndCODRepository
+        [Inject]
+        public ICodPayOutListRepository CodPayOutList { get; set; }
+
+        //IBankProcessingOrderForShipmentAndCODRepository CodPayOutList
 
         [Inject]
         public IOTPRepository OTP { get; set; }
@@ -392,7 +395,11 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IMobileScanStatusRepository MobileScanStatus { get; set; }
-       
+
+        [Inject]
+        public IHUBManifestWaybillMappingRepository HUBManifestWaybillMapping { get; set; }
+
+
         public int Complete()
         {
             return _context.SaveChanges();

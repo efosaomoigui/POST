@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
-    public class ManifestWaybillMappingService : IManifestWaybillMappingService
+    public class HUBManifestWaybillMappingService : IHUBManifestWaybillMappingService
     {
         private readonly IUnitOfWork _uow;
         private readonly IManifestService _manifestService;
@@ -27,7 +27,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly ICustomerService _customerService;
         private readonly IShipmentService _shipmentService;
 
-        public ManifestWaybillMappingService(IUnitOfWork uow, IManifestService manifestService,
+        public HUBManifestWaybillMappingService(IUnitOfWork uow, IManifestService manifestService,
             IUserService userService, ICustomerService customerService, IShipmentService shipmentService)
         {
             _uow = uow;
@@ -38,16 +38,16 @@ namespace GIGLS.Services.Implementation.Shipments
             MapperConfig.Initialize();
         }
 
-        public async Task<List<ManifestWaybillMappingDTO>> GetAllManifestWaybillMappings()
+        public async Task<List<HUBManifestWaybillMappingDTO>> GetAllHUBManifestWaybillMappings()
         {
             //var serviceIds = await _userService.GetPriviledgeServiceCenters();
-            //return await _uow.ManifestWaybillMapping.GetManifestWaybillMappings(serviceIds);
+            //return await _uow.HUBManifestWaybillMapping.GetHUBManifestWaybillMappings(serviceIds);
 
             var resultSet = new HashSet<string>();
-            var result = new List<ManifestWaybillMappingDTO>();
+            var result = new List<HUBManifestWaybillMappingDTO>();
 
             var serviceIds = _userService.GetPriviledgeServiceCenters().Result;
-            var manifestWaybillMapings = await _uow.ManifestWaybillMapping.GetManifestWaybillMappings(serviceIds);
+            var manifestWaybillMapings = await _uow.HUBManifestWaybillMapping.GetHUBManifestWaybillMappings(serviceIds);
 
             foreach (var item in manifestWaybillMapings)
             {
@@ -60,13 +60,13 @@ namespace GIGLS.Services.Implementation.Shipments
             return result.OrderByDescending(x => x.DateCreated).ToList();
         }
 
-        public async Task<List<ManifestWaybillMappingDTO>> GetAllManifestWaybillMappings(DateFilterCriteria dateFilterCriteria)
+        public async Task<List<HUBManifestWaybillMappingDTO>> GetAllHUBManifestWaybillMappings(DateFilterCriteria dateFilterCriteria)
         {
             var resultSet = new HashSet<string>();
-            var result = new List<ManifestWaybillMappingDTO>();
+            var result = new List<HUBManifestWaybillMappingDTO>();
 
             var serviceIds = _userService.GetPriviledgeServiceCenters().Result;
-            var manifestWaybillMapings = await _uow.ManifestWaybillMapping.GetManifestWaybillMappings(serviceIds, dateFilterCriteria);
+            var manifestWaybillMapings = await _uow.HUBManifestWaybillMapping.GetHUBManifestWaybillMappings(serviceIds, dateFilterCriteria);
 
             foreach (var item in manifestWaybillMapings)
             {
@@ -74,6 +74,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     result.Add(item);
                 }
+            }
+
+            //set the departure and destination hub
+            var allServiceCentres = _uow.ServiceCentre.GetServiceCentres().Result;
+            foreach (var manifestItem in result)
+            {
+                manifestItem.DepartureServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == manifestItem.ManifestDetails.DepartureServiceCentreId).FirstOrDefault();
+                manifestItem.DestinationServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == manifestItem.ManifestDetails.DestinationServiceCentreId).FirstOrDefault();
             }
 
             return result.OrderByDescending(x => x.DateCreated).ToList();
@@ -88,7 +96,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //1. check if any of the waybills has not been mapped to a manifest 
                 // and has not been process for return in case it was not delivered (i.e still active) that day
-                var isWaybillMappedActive = _uow.ManifestWaybillMapping.GetAllAsQueryable();
+                var isWaybillMappedActive = _uow.HUBManifestWaybillMapping.GetAllAsQueryable();
                 isWaybillMappedActive = isWaybillMappedActive.Where(x => x.IsActive == true && waybills.Contains(x.Waybill));
 
                 var isWaybillsMappedActiveResult = isWaybillMappedActive.Select(x => x.Waybill).Distinct().ToList();
@@ -146,30 +154,114 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //check if the waybill has been mapped to a manifest 
                     //and it has not been process for return in case it was not delivered (i.e still active) that day
-                    //var isWaybillMappedActive = await _uow.ManifestWaybillMapping.ExistAsync(x => x.Waybill == waybill && x.IsActive == true);
+                    //var isWaybillMappedActive = await _uow.HUBManifestWaybillMapping.ExistAsync(x => x.Waybill == waybill && x.IsActive == true);
                     //if (isWaybillMappedActive)
                     //{
                     //    throw new GenericException($"Waybill {waybill} has already been manifested");
                     //}
 
                     //check if Waybill has not been added to this manifest 
-                    var isWaybillMapped = await _uow.ManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
+                    var isWaybillMapped = await _uow.HUBManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
 
                     //if the waybill has not been added to this manifest, add it
                     if (!isWaybillMapped)
                     {
                         //Add new Mapping
-                        var newMapping = new ManifestWaybillMapping
+                        var newMapping = new HUBManifestWaybillMapping
                         {
                             ManifestCode = manifest,
                             Waybill = waybill,
                             IsActive = true,
                             ServiceCentreId = shipment.DestinationServiceCentreId
                         };
-                        _uow.ManifestWaybillMapping.Add(newMapping);
+                        _uow.HUBManifestWaybillMapping.Add(newMapping);
                     }
 
                     //automatic scan all the way also
+                }
+
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        //map waybills to HUBManifest
+        public async Task MappingHUBManifestToWaybills(string manifest, List<string> waybills, int DepartureServiceCentreId, int DestinationServiceCentreId)
+        {
+            try
+            {
+                var serviceCenter = await _uow.ServiceCentre.GetAsync(DepartureServiceCentreId);
+                string user = await _userService.GetCurrentUserId();
+                var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
+
+                //1. create the manifest if manifest does not exist
+                if (manifestObj == null)
+                {
+                    var newManifest = new Manifest
+                    {
+                        DateTime = DateTime.Now,
+                        ManifestCode = manifest,
+                        ManifestType = ManifestType.HUB,
+                        DepartureServiceCentreId = DepartureServiceCentreId,
+                        DestinationServiceCentreId = DestinationServiceCentreId
+                    };
+                    _uow.Manifest.Add(newManifest);
+                }
+
+                foreach (var waybill in waybills)
+                {
+                    //check if the waybill exist
+                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+                    if (shipment == null)
+                    {
+                        throw new GenericException($"No Waybill exists for this number: {waybill}");
+                    }
+
+                    //check if the shipment is at the DepartureServiceCentre with a scan of ARF (WHEN SHIPMENT ARRIVED FINAL DESTINATION)
+                    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.Waybill == waybill);
+                    if (shipmentCollection == null)
+                    {
+                        throw new GenericException($"Shipment with waybill: {waybill} is not at the Departure Service Centre.");
+                    }
+                    else
+                    {
+                        //DPC -- //SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO HUB
+                        shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.DPC;
+
+                        //Add scan status to  the tracking page
+                        var newShipmentTracking = new ShipmentTracking
+                        {
+                            Waybill = waybill,
+                            Location = serviceCenter.Name,
+                            Status = ShipmentScanStatus.DPC.ToString(),
+                            DateTime = DateTime.Now,
+                            UserId = user,
+                            ServiceCentreId = serviceCenter.ServiceCentreId
+                        };
+                        _uow.ShipmentTracking.Add(newShipmentTracking);
+
+                    }
+
+                    //check if Waybill has not been added to this manifest 
+                    var isWaybillMapped = await _uow.HUBManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
+
+                    //if the waybill has not been added to this manifest, add it
+                    if (!isWaybillMapped)
+                    {
+                        //Add new Mapping
+                        var newMapping = new HUBManifestWaybillMapping
+                        {
+                            ManifestCode = manifest,
+                            Waybill = waybill,
+                            IsActive = true,
+                            ServiceCentreId = shipment.DestinationServiceCentreId
+                        };
+                        _uow.HUBManifestWaybillMapping.Add(newMapping);
+                    }
                 }
 
                 _uow.Complete();
@@ -187,7 +279,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //1. check if the waybill has been mapped to a manifest 
                 // and it has not been process for return in case it was not delivered (i.e still active) that day
-                var isWaybillMappedActive = _uow.ManifestWaybillMapping.GetAllAsQueryable();
+                var isWaybillMappedActive = _uow.HUBManifestWaybillMapping.GetAllAsQueryable();
                 isWaybillMappedActive = isWaybillMappedActive.Where(x => x.IsActive == true && waybills.Contains(x.Waybill));
 
                 List<string> isWaybillsMappedActiveResult = isWaybillMappedActive.Select(x => x.Waybill).Distinct().ToList();
@@ -226,20 +318,20 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
 
                     //check if Waybill has not been added to this manifest 
-                    var isWaybillMapped = await _uow.ManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
+                    var isWaybillMapped = await _uow.HUBManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
 
                     //if the waybill has not been added to this manifest, add it
                     if (!isWaybillMapped)
                     {
                         //Add new Mapping
-                        var newMapping = new ManifestWaybillMapping
+                        var newMapping = new HUBManifestWaybillMapping
                         {
                             ManifestCode = manifest,
                             Waybill = waybill,
                             IsActive = true,
                             ServiceCentreId = serviceIds[0]
                         };
-                        _uow.ManifestWaybillMapping.Add(newMapping);
+                        _uow.HUBManifestWaybillMapping.Add(newMapping);
                     }
                 }
 
@@ -321,15 +413,20 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Get Waybills In Manifest
-        public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifest(string manifestcode)
+        public async Task<List<HUBManifestWaybillMappingDTO>> GetWaybillsInManifest(string manifestcode)
         {
             try
             {
                 var manifestDTO = await _manifestService.GetManifestByCode(manifestcode);
-                var manifestWaybillMappingList = await _uow.ManifestWaybillMapping.FindAsync(x => x.ManifestCode == manifestDTO.ManifestCode);
 
-                var manifestWaybillNumberMappingDto = Mapper.Map<List<ManifestWaybillMappingDTO>>(manifestWaybillMappingList.ToList());
+                //needed to set the departure and destination hub
+                var allServiceCentres = _uow.ServiceCentre.GetServiceCentres().Result;
+                //set the departure and destination hub
+                manifestDTO.DepartureServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == manifestDTO.DepartureServiceCentreId).FirstOrDefault();
+                manifestDTO.DestinationServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == manifestDTO.DestinationServiceCentreId).FirstOrDefault();
 
+                var manifestWaybillMappingList = await _uow.HUBManifestWaybillMapping.FindAsync(x => x.ManifestCode == manifestDTO.ManifestCode);
+                var manifestWaybillNumberMappingDto = Mapper.Map<List<HUBManifestWaybillMappingDTO>>(manifestWaybillMappingList.ToList());
                 foreach (var manifestwaybill in manifestWaybillNumberMappingDto)
                 {
                     manifestwaybill.ManifestDetails = manifestDTO;
@@ -368,7 +465,7 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Get Waybills In Manifest for Dispatch
-        public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatchOld()
+        public async Task<List<HUBManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatchOld()
         {
             try
             {
@@ -403,13 +500,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (currentUserDispatch == null)
                 {
                     //return an empty list
-                    return new List<ManifestWaybillMappingDTO>();
+                    return new List<HUBManifestWaybillMappingDTO>();
                 }
 
                 var manifestDTO = await _manifestService.GetManifestByCode(currentUserDispatch.ManifestNumber);
-                var manifestWaybillMappingList = await _uow.ManifestWaybillMapping.FindAsync(x => x.ManifestCode == manifestDTO.ManifestCode);
+                var manifestWaybillMappingList = await _uow.HUBManifestWaybillMapping.FindAsync(x => x.ManifestCode == manifestDTO.ManifestCode);
 
-                var manifestWaybillNumberMappingDto = Mapper.Map<List<ManifestWaybillMappingDTO>>(manifestWaybillMappingList.ToList());
+                var manifestWaybillNumberMappingDto = Mapper.Map<List<HUBManifestWaybillMappingDTO>>(manifestWaybillMappingList.ToList());
 
                 foreach (var manifestwaybill in manifestWaybillNumberMappingDto)
                 {
@@ -434,7 +531,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch()
+        public async Task<List<HUBManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch()
         {
             try
             {
@@ -448,7 +545,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (userDispatchsCount == 0)
                 {
                     //return an empty list
-                    return new List<ManifestWaybillMappingDTO>();
+                    return new List<HUBManifestWaybillMappingDTO>();
                 }
                 else
                 {
@@ -464,18 +561,18 @@ namespace GIGLS.Services.Implementation.Shipments
                     deliveryManifestCodeArray.Contains(s.ManifestNumber)).ToList();
                 }
 
-                List<ManifestWaybillMappingDTO> manifestWaybillNumberMappingDto = new List<ManifestWaybillMappingDTO>();
+                List<HUBManifestWaybillMappingDTO> manifestWaybillNumberMappingDto = new List<HUBManifestWaybillMappingDTO>();
 
                 foreach (var manifestcode in userDispatchs)
                 {
                     //Get all waybills mapped to a manifest
-                    var manifestWaybillMappingList = await _uow.ManifestWaybillMapping.FindAsync(x => x.ManifestCode == manifestcode.ManifestNumber);
+                    var manifestWaybillMappingList = await _uow.HUBManifestWaybillMapping.FindAsync(x => x.ManifestCode == manifestcode.ManifestNumber);
 
                     //Get manifest detail
                     var manifestDTO = await _manifestService.GetManifestByCode(manifestcode.ManifestNumber);
 
                     //map the data to the DTO
-                    var manifestMappingDto = Mapper.Map<List<ManifestWaybillMappingDTO>>(manifestWaybillMappingList.ToList());
+                    var manifestMappingDto = Mapper.Map<List<HUBManifestWaybillMappingDTO>>(manifestWaybillMappingList.ToList());
 
                     //add manifest details to the dto
                     foreach (var waybill in manifestMappingDto)
@@ -517,14 +614,14 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Get All Manifests that a Waybill has been mapped to
-        public async Task<List<ManifestWaybillMappingDTO>> GetManifestForWaybill(string waybill)
+        public async Task<List<HUBManifestWaybillMappingDTO>> GetManifestForWaybill(string waybill)
         {
             try
             {
                 //check if the user is at the service centre
                 var serviceCentreIds = await _userService.GetPriviledgeServiceCenters();
 
-                var waybillMappingList = await _uow.ManifestWaybillMapping.FindAsync(x => x.Waybill == waybill && serviceCentreIds.Contains(x.ServiceCentreId));
+                var waybillMappingList = await _uow.HUBManifestWaybillMapping.FindAsync(x => x.Waybill == waybill && serviceCentreIds.Contains(x.ServiceCentreId));
 
                 if (waybillMappingList == null)
                 {
@@ -532,7 +629,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //add to list
-                List<ManifestWaybillMappingDTO> resultList = new List<ManifestWaybillMappingDTO>();
+                List<HUBManifestWaybillMappingDTO> resultList = new List<HUBManifestWaybillMappingDTO>();
 
                 foreach (var waybillmapped in waybillMappingList)
                 {
@@ -540,7 +637,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var manifestDTO = await _manifestService.GetManifestByCode(waybillmapped.ManifestCode);
                     var dispatch = await _uow.Dispatch.GetAsync(d => d.ManifestNumber == waybillmapped.ManifestCode);
 
-                    var waybillMapping = Mapper.Map<ManifestWaybillMappingDTO>(waybillmapped);
+                    var waybillMapping = Mapper.Map<HUBManifestWaybillMappingDTO>(waybillmapped);
                     waybillMapping.ManifestDetails = manifestDTO;
 
                     if (dispatch != null)
@@ -548,6 +645,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         waybillMapping.ManifestDetails.DispatchedBy = dispatch.DispatchedBy;
                         waybillMapping.ManifestDetails.ReceiverBy = dispatch.ReceivedBy;
                     }
+
+                    //set the departure and destination hub
+                    var allServiceCentres = _uow.ServiceCentre.GetServiceCentres().Result;
+                    waybillMapping.DepartureServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == waybillMapping.ManifestDetails.DepartureServiceCentreId).FirstOrDefault();
+                    waybillMapping.DestinationServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == waybillMapping.ManifestDetails.DestinationServiceCentreId).FirstOrDefault();
 
                     resultList.Add(waybillMapping);
                 }
@@ -561,15 +663,11 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Get active Manifest that a Waybill is mapped to
-        public async Task<ManifestWaybillMappingDTO> GetActiveManifestForWaybill(string waybill)
+        public async Task<HUBManifestWaybillMappingDTO> GetActiveManifestForWaybill(string waybill)
         {
             try
             {
-                //check if the user is at the service centre
-                var serviceCentreIds = await _userService.GetPriviledgeServiceCenters();
-
-                var activeManifest = await _uow.ManifestWaybillMapping.GetAsync(x => x.Waybill == waybill && x.IsActive == true && serviceCentreIds.Contains(x.ServiceCentreId));
-
+                var activeManifest = await _uow.HUBManifestWaybillMapping.GetAsync(x => x.Waybill == waybill && x.IsActive == true);
                 if (activeManifest == null)
                 {
                     throw new GenericException($"There is no active Manifest for this Waybill {waybill}");
@@ -577,7 +675,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //get the manifest and dispatch detail for the waybill
                 var manifestDTO = await _manifestService.GetManifestByCode(activeManifest.ManifestCode);
-                var activeManifestDto = Mapper.Map<ManifestWaybillMappingDTO>(activeManifest);
+                var activeManifestDto = Mapper.Map<HUBManifestWaybillMappingDTO>(activeManifest);
                 activeManifestDto.ManifestDetails = manifestDTO;
 
                 var dispatchList = await _uow.Dispatch.FindAsync(d => d.ManifestNumber == activeManifest.ManifestCode);
@@ -587,6 +685,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     activeManifestDto.ManifestDetails.DispatchedBy = dispatch.DispatchedBy;
                     activeManifestDto.ManifestDetails.ReceiverBy = dispatch.ReceivedBy;
                 }
+
+                //set the departure and destination hub
+                var allServiceCentres = _uow.ServiceCentre.GetServiceCentres().Result;
+                activeManifestDto.DepartureServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == activeManifestDto.ManifestDetails.DepartureServiceCentreId).FirstOrDefault();
+                activeManifestDto.DestinationServiceCentre = allServiceCentres.Where(s => s.ServiceCentreId == activeManifestDto.ManifestDetails.DestinationServiceCentreId).FirstOrDefault();
 
                 return activeManifestDto;
             }
@@ -603,7 +706,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var manifestDTO = await _manifestService.GetManifestByCode(manifest);
 
-                var manifestWaybillMapping = await _uow.ManifestWaybillMapping.GetAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
+                var manifestWaybillMapping = await _uow.HUBManifestWaybillMapping.GetAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
 
                 if (manifestWaybillMapping == null)
                 {
@@ -611,14 +714,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //update shipment collection centre
-                var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.WC);
+                var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.DPC);
 
                 if (shipmentCollection != null)
                 {
                     shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.ARF;
                 }
 
-                _uow.ManifestWaybillMapping.Remove(manifestWaybillMapping);
+                _uow.HUBManifestWaybillMapping.Remove(manifestWaybillMapping);
                 _uow.Complete();
             }
             catch (Exception)
@@ -637,76 +740,48 @@ namespace GIGLS.Services.Implementation.Shipments
                 string user = await _userService.GetCurrentUserId();
 
                 var manifestDTO = await _manifestService.GetManifestByCode(manifest);
-                var getServiceCenterCode = await _userService.GetCurrentServiceCenter(); 
+                var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
 
-                List<CashOnDeliveryRegisterAccount> codRegisterCollectsForASingleWaybillList = new List<CashOnDeliveryRegisterAccount>();
                 foreach (var waybill in waybills)
                 {
-                    //1a. check and return only delivered shipments
-                    var shipmentCollectionDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.OKT);
-                    if (shipmentCollectionDelivered != null)
-                    {
-                        //Update CashOnDevliveryRegisterAccount As  Cash Recieved at Service Center
-                        var codRegisterCollectsForASingleWaybill = _uow.CashOnDeliveryRegisterAccount.Find(s => s.Waybill == waybill).FirstOrDefault();
-
-                        if (codRegisterCollectsForASingleWaybill != null)
-                        {
-                            codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
-                            codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
-                            codRegisterCollectsForASingleWaybillList.Add(codRegisterCollectsForASingleWaybill);
-                        }
-                        continue;
-                    }
-
-
                     //1. check if the waybill is in the manifest 
-                    var manifestWaybillMapping = await _uow.ManifestWaybillMapping.GetAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
+                    var manifestWaybillMapping = await _uow.HUBManifestWaybillMapping.GetAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
 
                     if (manifestWaybillMapping == null)
                     {
-                        throw new GenericException($"Waybill {waybill} does not mapped to the manifest {manifest}");
+                        throw new GenericException($"Waybill {waybill} is not mapped to the manifest {manifest}");
                     }
 
-                    //2. check if the user is at the final destination centre of the shipment
-                    if (serviceIds.Length == 1 && serviceIds[0] == manifestWaybillMapping.ServiceCentreId)
+                    //update manifestWaybillMapping status for the waybill
+                    manifestWaybillMapping.IsActive = false;
+
+                    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill);
+                    if (shipmentCollection == null)
                     {
-                        //update manifestWaybillMapping status for the waybill
-                        manifestWaybillMapping.IsActive = false;
-
-                        //3. check if the waybill has not been delivered 
-                        var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.WC);
-                        //var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill);
-                        if (shipmentCollection == null)
-                        {
-                            throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
-                        }
-                        else
-                        {
-                            //Update shipment collection to make it available at collection centre
-                            shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.ARF;
-
-                            //Add scan status to  the tracking page
-                            var newShipmentTracking = new ShipmentTracking
-                            {
-                                Waybill = waybill,
-                                Location = serviceCenter.Name,
-                                Status = ShipmentScanStatus.SRC.ToString(),
-                                DateTime = DateTime.Now,
-                                UserId = user,
-                                ServiceCentreId = serviceCenter.ServiceCentreId
-                            };
-                            _uow.ShipmentTracking.Add(newShipmentTracking);
-                        }
+                        throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
                     }
                     else
                     {
-                        throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+                        //Update shipment collection to make it available at collection centre
+                        shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.ARF;
+
+                        //Update the Destination Service Centre on the Shipment to the Current HUB
+                        var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+                        shipment.DestinationServiceCentreId = serviceCenter.ServiceCentreId;
+
+                        //Add scan status to  the tracking page
+                        var newShipmentTracking = new ShipmentTracking
+                        {
+                            Waybill = waybill,
+                            Location = serviceCenter.Name,
+                            Status = ShipmentScanStatus.ARP.ToString(),
+                            DateTime = DateTime.Now,
+                            UserId = user,
+                            ServiceCentreId = serviceCenter.ServiceCentreId
+                        };
+                        _uow.ShipmentTracking.Add(newShipmentTracking);
                     }
                 }
-
-                //update codRegisterCollectsForASingleWaybillList in the db
-                codRegisterCollectsForASingleWaybillList.ForEach(s => s.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter);
-
                 await _uow.CompleteAsync();
             }
             catch (Exception)
@@ -727,7 +802,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF);
                 var shipmentCollection = _uow.ShipmentCollection.GetAll()
                     .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).Select(x => x.Waybill);
-                
+
                 //2. Get shipment details for the service centre that are at the collection centre using the waybill and service centre
                 var InvoicesBySC = _uow.Invoice.GetAllInvoiceShipments();
 
@@ -738,11 +813,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     InvoicesBySC = InvoicesBySC.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId));
                 }
-                
+
                 ////final list
                 InvoicesBySC = InvoicesBySC.Where(s => shipmentCollection.Contains(s.Waybill));
                 var InvoicesBySCList = InvoicesBySC.ToList();
-                
+
                 shipmentsBySC = (from r in InvoicesBySCList
                                  select new ShipmentDTO()
                                  {
@@ -769,7 +844,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                      {
                                          Code = r.DestinationServiceCentreCode,
                                          Name = r.DestinationServiceCentreName
-                                     },                                     
+                                     },
                                      PaymentStatus = r.PaymentStatus,
                                      ReceiverAddress = r.ReceiverAddress,
                                      ReceiverCity = r.ReceiverCity,
@@ -798,17 +873,17 @@ namespace GIGLS.Services.Implementation.Shipments
 
 
         //get manifest waiting to signoff
-        public async Task<List<ManifestWaybillMappingDTO>> GetManifestWaitingForSignOff()
+        public async Task<List<HUBManifestWaybillMappingDTO>> GetManifestWaitingForSignOff()
         {
             var resultSet = new HashSet<string>();
-            var result = new List<ManifestWaybillMappingDTO>();
+            var result = new List<HUBManifestWaybillMappingDTO>();
 
             var serviceIds = _userService.GetPriviledgeServiceCenters().Result;
 
             //get delivery manifest that have been dispatched but not received
             var manifests = _uow.Manifest.GetAll().Where(x => x.ManifestType == ManifestType.Delivery && x.IsDispatched == true && x.IsReceived == false).Select(m => m.ManifestCode).Distinct().ToList();
 
-            var manifestWaybillMapings = await _uow.ManifestWaybillMapping.GetManifestWaybillWaitingForSignOff(serviceIds, manifests);
+            var manifestWaybillMapings = await _uow.HUBManifestWaybillMapping.GetHUBManifestWaybillWaitingForSignOff(serviceIds, manifests);
 
             foreach (var item in manifestWaybillMapings)
             {
@@ -822,11 +897,11 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //get all manifests that the waybill pass through 
-        public async Task<List<ManifestWaybillMappingDTO>> GetManifestHistoryForWaybill(string waybill)
+        public async Task<List<HUBManifestWaybillMappingDTO>> GetManifestHistoryForWaybill(string waybill)
         {
             try
             {
-                List<ManifestWaybillMappingDTO> resultList = new List<ManifestWaybillMappingDTO>();
+                List<HUBManifestWaybillMappingDTO> resultList = new List<HUBManifestWaybillMappingDTO>();
 
                 //This part hanlde internal and external manifest
                 // 1.Get waybill in a Group Waybill
@@ -842,7 +917,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         var manifestDTO = await _manifestService.GetManifestByCode(manifestGroupWaybillMapings.ManifestCode);
                         var dispatch = await _uow.Dispatch.GetAsync(d => d.ManifestNumber == manifestGroupWaybillMapings.ManifestCode);
 
-                        ManifestWaybillMappingDTO manifest = new ManifestWaybillMappingDTO();
+                        HUBManifestWaybillMappingDTO manifest = new HUBManifestWaybillMappingDTO();
                         manifest.DateCreated = manifestGroupWaybillMapings.DateCreated;
                         manifest.DateModified = manifestGroupWaybillMapings.DateModified;
                         manifest.ManifestCode = manifestGroupWaybillMapings.ManifestCode;
@@ -860,7 +935,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //This part hanlde delivery manifest
-                var waybillMappingList = await _uow.ManifestWaybillMapping.FindAsync(x => x.Waybill == waybill);
+                var waybillMappingList = await _uow.HUBManifestWaybillMapping.FindAsync(x => x.Waybill == waybill);
 
                 if (waybillMappingList != null)
                 {
@@ -870,7 +945,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         var manifestDTO = await _manifestService.GetManifestByCode(waybillmapped.ManifestCode);
                         var dispatch = await _uow.Dispatch.GetAsync(d => d.ManifestNumber == waybillmapped.ManifestCode);
 
-                        var waybillMapping = Mapper.Map<ManifestWaybillMappingDTO>(waybillmapped);
+                        var waybillMapping = Mapper.Map<HUBManifestWaybillMappingDTO>(waybillmapped);
                         waybillMapping.ManifestDetails = manifestDTO;
 
                         if (dispatch != null)
@@ -891,4 +966,5 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
     }
+
 }

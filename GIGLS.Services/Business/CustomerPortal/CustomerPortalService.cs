@@ -34,6 +34,8 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.View;
 using GIGLS.Services.Implementation;
 using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.BankSettlement;
+using GIGLS.Core.Domain.BankSettlement;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -53,6 +55,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IWalletPaymentLogService _wallepaymenttlogService;
         private readonly ISLAService _slaService;
         private readonly IOTPService _otpService;
+        private readonly IBankShipmentSettlementService _iBankShipmentSettlementService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
@@ -188,6 +191,16 @@ namespace GIGLS.Services.Business.CustomerPortal
             return invoice;
         }
 
+        public async Task<List<CodPayOutList>> GetPaidCODByCustomer()
+        {
+
+            var userchannelcode = await _userService.GetUserChannelCode();
+            var codsValues = await _iBankShipmentSettlementService.GetPaidOutCODListsByCustomer(userchannelcode); 
+            //var customersCods = codsValues.Where(s=>s.CustomerCode == userchannelcode).ToList(); 
+
+            return codsValues;
+        }
+
         public async Task<IEnumerable<InvoiceViewDTO>> GetInvoices()
         {
             //get the current login user 
@@ -293,7 +306,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<List<ServiceCentreDTO>> GetLocalServiceCentres()
         {
-            return await _uow.ServiceCentre.GetLocalServiceCentres();
+            var countryIds = await _userService.GetPriviledgeCountryIds();
+            return await _uow.ServiceCentre.GetLocalServiceCentres(countryIds);
         }
 
         public async Task<IEnumerable<DeliveryOptionDTO>> GetDeliveryOptions()

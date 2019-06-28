@@ -13,5 +13,6 @@ namespace GIGLS.Core.DTO.Shipments
 
         public string UserId { get; set; }
         public bool IsGrouped { get; set; }
+        public bool IsTransitCompleted { get; set; }
     }
 }

@@ -16,6 +16,7 @@ namespace GIGLS.Core.Domain
         public string WaybillOld { get; set; }
 
         public string RerouteBy { get; set; }
+        public string RerouteReason { get; set; }
 
         public ShipmentRerouteInitiator ShipmentRerouteInitiator { get; set; }
     }

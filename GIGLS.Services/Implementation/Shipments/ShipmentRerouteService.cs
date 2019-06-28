@@ -105,17 +105,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 //5.5 Create new shipment
                 var newShipment = await _shipmentService.AddShipment(originalShipment);
 
-
                 ////6. create new shipment reroute
                 var user = await _userService.GetCurrentUserId();
                 ShipmentRerouteInitiator initiator = shipmentDTO.GrandTotal > 0 ? ShipmentRerouteInitiator.Customer : ShipmentRerouteInitiator.Staff;
+                string rerouteReason = shipmentDTO.ShipmentReroute == null ? null : shipmentDTO.ShipmentReroute.RerouteReason;
 
                 var newShipmentReroute = new ShipmentReroute
                 {
                     WaybillNew = newShipment.Waybill,
                     WaybillOld = shipmentDTO.Waybill,
                     RerouteBy = user,
-                    ShipmentRerouteInitiator = initiator
+                    RerouteReason = rerouteReason,
+                    ShipmentRerouteInitiator = initiator                
                 };
                 _uow.ShipmentReroute.Add(newShipmentReroute);
                  //complete transaction
@@ -124,7 +125,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 ////7. return new shipment 
                 return newShipment;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }

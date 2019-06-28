@@ -57,10 +57,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 
                 if (scanStatus.Equals(ShipmentScanStatus.ARF))
                 {
+                    //Get shipment Details
+                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(tracking.Waybill));
+
+                    //add service centre
                     var newShipmentCollection = new ShipmentCollection
                     {
                         Waybill = tracking.Waybill,
-                        ShipmentScanStatus = scanStatus
+                        ShipmentScanStatus = scanStatus,
+                        DepartureServiceCentreId = shipment.DepartureServiceCentreId,
+                        DestinationServiceCentreId = shipment.DestinationServiceCentreId,
+                        IsCashOnDelivery = shipment.IsCashOnDelivery
                     };
 
                     _uow.ShipmentCollection.Add(newShipmentCollection);
@@ -69,7 +76,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 //check if the waybill has not been scan for the status before
                 bool shipmentTracking = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill.Equals(tracking.Waybill) && x.Status.Equals(tracking.Status));
 
-                if (!shipmentTracking || scanStatus.Equals(ShipmentScanStatus.AD))
+                if (!shipmentTracking || scanStatus.Equals(ShipmentScanStatus.AD) || scanStatus.Equals(ShipmentScanStatus.AST)
+                    || scanStatus.Equals(ShipmentScanStatus.DST) || scanStatus.Equals(ShipmentScanStatus.ARP) || scanStatus.Equals(ShipmentScanStatus.APT))
                 {
                     var newShipmentTracking = new ShipmentTracking
                     {
@@ -88,7 +96,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     //send sms and email
                     await sendSMSEmail(tracking, scanStatus);
                 }
-                
+
+                //use to optimise shipment progress for shipment that has depart service centre
+                //update shipment table if the scan status contain any of the following : TRO, DSC, DTR
+                if (scanStatus.Equals(ShipmentScanStatus.DSC) || scanStatus.Equals(ShipmentScanStatus.TRO) || scanStatus.Equals(ShipmentScanStatus.DTR))
+                {
+                    //Get shipment Details
+                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(tracking.Waybill));
+
+                    //update shipment if the user belong to original departure service centre
+                    if(shipment.DepartureServiceCentreId == tracking.ServiceCentreId && shipment.ShipmentScanStatus != scanStatus)
+                    {
+                        shipment.ShipmentScanStatus = scanStatus;
+                    }
+                }
+
                 await _uow.CompleteAsync();
                 return new { Id };
                 //return new { Id = newShipmentTracking.ShipmentTrackingId };
@@ -140,8 +162,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     ShipmentTrackingId = shipmentTracking.ShipmentTrackingId,
                     TrackingType = shipmentTracking.TrackingType.ToString(),
                     Status = shipmentTracking.Status,
-                    User = shipmentTracking.User.FirstName + " " + shipmentTracking.User.LastName,
-                };
+                    User = shipmentTracking.User.FirstName + " " + shipmentTracking.User.LastName
+            };
             }
             catch (Exception)
             {

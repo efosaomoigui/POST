@@ -42,12 +42,14 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly ISpecialDomesticPackageService _specialdomesticpackageservice;
         private readonly IMobileShipmentTrackingService _mobiletrackingservice;
         private readonly IMobilePickUpRequestsService _mobilepickuprequestservice;
-             
+        private readonly IDomesticRouteZoneMapService _domesticroutezonemapservice;
+
+
         public PreShipmentMobileService(IUnitOfWork uow,IShipmentService shipmentService,IDeliveryOptionService deliveryService,
             IServiceCentreService centreService,IUserServiceCentreMappingService userServiceCentre,INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService,IWalletService walletService,IWalletTransactionService walletTransactionService,
             IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice, IMobileShipmentTrackingService mobiletrackingservice,
-            IMobilePickUpRequestsService mobilepickuprequestservice)
+            IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -62,6 +64,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _specialdomesticpackageservice = specialdomesticpackageservice;
             _mobiletrackingservice = mobiletrackingservice;
             _mobilepickuprequestservice = mobilepickuprequestservice;
+            _domesticroutezonemapservice = domesticroutezonemapservice;
             MapperConfig.Initialize();
         }
 
@@ -69,6 +72,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
                 var newPreShipment = await CreatePreShipment(preShipment);
                 await _uow.CompleteAsync();
                 bool IsBalanceSufficient = true;
@@ -80,7 +84,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     IsBalanceSufficient = false;
                 }
 
-                return new { waybill = newPreShipment.Waybill, message = message, IsBalanceSufficient};
+                return new { waybill = newPreShipment.Waybill, message = message, IsBalanceSufficient, Zone = zoneid.ZoneId};
             }
             catch (Exception)
             {
@@ -103,6 +107,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 var price = (wallet.Balance - Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal));
                 var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
                 preShipmentDTO.Waybill = waybill;
+                if(preShipmentDTO.PreShipmentItems.Count == 0)
+                {
+                    throw new GenericException("Shipment Items cannot be empty");
+                }
                 foreach (var item in preShipmentDTO.PreShipmentItems)
                 {
                     if (!string.IsNullOrEmpty(item.Value))
@@ -398,9 +406,17 @@ namespace GIGLS.Services.Implementation.Shipments
                var userId = await _userService.GetCurrentUserId();
                pickuprequest.UserId = userId;
                pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
-               var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems");
+               var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
                if (preshipmentmobile != null)
-               {
+                {
+                    if (pickuprequest.ServiceCentreCode != null)
+                    {
+                        var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickuprequest.ServiceCentreCode);
+                        preshipmentmobile.ReceiverAddress = DestinationServiceCentreId.Address;
+                        preshipmentmobile.ReceiverLocation.Latitude = DestinationServiceCentreId.Latitude;
+                        preshipmentmobile.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude;
+
+                    }
                     await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
                     preshipmentmobile.shipmentstatus = "Assigned for Pickup";
                     await _uow.CompleteAsync();
@@ -434,9 +450,54 @@ namespace GIGLS.Services.Implementation.Shipments
                         WaybillNumber = pickuprequest.Waybill,
                         ShipmentScanStatus = ShipmentScanStatus.MSHC
                     });
-                    var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
+                    var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems");
+                    var DepartureStation = await _uow.Station.GetAsync(s => s.StationId == preshipmentmobile.SenderStationId);
+                    var DestinationStation = await _uow.Station.GetAsync(s => s.StationId == preshipmentmobile.ReceiverStationId);
+                    var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+                    var userId = await _userService.GetCurrentUserId();
+                    var MobileShipment = new ShipmentDTO {
+                        Waybill = preshipmentmobile.Waybill,
+                        ReceiverName = preshipmentmobile.ReceiverName,
+                        ReceiverPhoneNumber = preshipmentmobile.ReceiverPhoneNumber,
+                        ReceiverEmail = preshipmentmobile.ReceiverEmail,
+                        ReceiverAddress = preshipmentmobile.ReceiverAddress,
+                        DeliveryOptionId = 1,
+                        GrandTotal = preshipmentmobile.GrandTotal,
+                        Insurance = preshipmentmobile.InsuranceValue,
+                        Vat = preshipmentmobile.Vat,
+                        SenderAddress = preshipmentmobile.SenderAddress,
+                        IsCashOnDelivery = false,
+                        CustomerCode = preshipmentmobile.CustomerCode,
+                        DestinationServiceCentreId = DestinationStation.SuperServiceCentreId,
+                        DepartureServiceCentreId = DepartureStation.SuperServiceCentreId,
+                        CustomerId = CustomerId.IndividualCustomerId,
+                        UserId = userId,
+                        PickupOptions = PickupOptions.HOMEDELIVERY,
+                        IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
+                        ShipmentPackagePrice = preshipmentmobile.GrandTotal,
+                        ApproximateItemsWeight = 0.00,
+                        ReprintCounterStatus = false,
+                        Value = preshipmentmobile.Value,
+                        PaymentStatus = PaymentStatus.Paid,
+                        ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
+                        {
+                        Description = s.Description,
+                        IsVolumetric = s.IsVolumetric,
+                        Weight = s.Weight,
+                        Nature = s.ItemType,
+                        Price = (decimal)s.CalculatedPrice,
+                        Quantity = s.Quantity,
+                        Length = (double)s.Length,
+                        Width = (double)s.Width,
+                        Height = (double)s.Height
+
+                        }).ToList()
+                     };
+                    var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
                     preshipmentmobile.shipmentstatus = "Picked up";
+                    preshipmentmobile.IsConfirmed = true;
                     await _uow.CompleteAsync();
+
 
                 }
                 if(pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
@@ -461,7 +522,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 return true;
 
             }
-            catch
+            catch(Exception ex)
             {
                 throw;
             }
@@ -474,6 +535,38 @@ namespace GIGLS.Services.Implementation.Shipments
                 return mobilerequests;
             }
             catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool>UpdatePreShipmentMobileDetails(PreShipmentItemMobileDTO Preshipmentmobile)
+        {
+            try
+            {
+                
+                var preShipment = await _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == Preshipmentmobile.PreShipmentMobileId && s.PreShipmentItemMobileId == Preshipmentmobile.PreShipmentItemMobileId);
+                if (preShipment == null)
+                {
+                    throw new GenericException("PreShipmentItem Does Not Exist");
+                }
+                preShipment.CalculatedPrice = Preshipmentmobile.CalculatedPrice;
+                preShipment.Description = Preshipmentmobile.Description;
+                preShipment.EstimatedPrice = Preshipmentmobile.EstimatedPrice;
+                preShipment.ImageUrl = Preshipmentmobile.ImageUrl;
+                preShipment.IsVolumetric = Preshipmentmobile.IsVolumetric;
+                preShipment.ItemName = Preshipmentmobile.ItemName;
+                preShipment.ItemType = Preshipmentmobile.ItemType;
+                preShipment.Length = Preshipmentmobile.Length;
+                preShipment.Quantity = Preshipmentmobile.Quantity;
+                preShipment.Weight = Preshipmentmobile.Weight;
+                preShipment.Width = Preshipmentmobile.Width;
+                preShipment.Height = Preshipmentmobile.Height;
+                
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch (Exception)
             {
                 throw;
             }

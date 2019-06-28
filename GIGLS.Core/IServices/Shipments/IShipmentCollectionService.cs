@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.IServices;
+﻿using GIGLS.Core.DTO.Report;
+using GIGLS.Core.IServices;
 using GIGLS.CORE.DTO.Shipments;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ namespace GIGLS.CORE.IServices.Shipments
     public interface IShipmentCollectionService : IServiceDependencyMarker
     {
         Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentCollections();
+        Task<List<ShipmentCollectionDTO>> GetShipmentCollections(ShipmentCollectionFilterCriteria collectionFilterCriteria);
         System.Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentCollections(FilterOptionsDto filterOptionsDto);
         Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentWaitingForCollection();
         System.Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollection(FilterOptionsDto filterOptionsDto);
@@ -25,6 +27,8 @@ namespace GIGLS.CORE.IServices.Shipments
 
         Task<IEnumerable<ShipmentCollectionDTO>> GetEcommerceOverDueShipmentsGLOBAL();
         Task<IEnumerable<ShipmentCollectionDTO>> GetEcommerceOverDueShipments();
+
+        System.Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollectionForHub(FilterOptionsDto filterOptionsDto);
 
     }
 }

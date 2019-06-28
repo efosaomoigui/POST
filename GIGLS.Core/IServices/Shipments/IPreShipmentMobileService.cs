@@ -19,5 +19,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<PreShipmentMobileDTO> AddMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest);
         Task<List<MobilePickUpRequestsDTO>> GetMobilePickupRequest();
         Task<bool> UpdateMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest);
+        Task <bool> UpdatePreShipmentMobileDetails(PreShipmentItemMobileDTO Preshipmentmobile);
     }
 }

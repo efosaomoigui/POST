@@ -1,5 +1,8 @@
-﻿using GIGL.GIGLS.Core.Repositories;
+﻿using GIGL.GIGLS.Core.Domain;
+using GIGL.GIGLS.Core.Repositories;
+using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using System.Collections.Generic;
@@ -12,8 +15,10 @@ namespace GIGLS.Core.IRepositories.Wallet
     {
         Task<IEnumerable<CashOnDeliveryAccountDTO>> GetCashOnDeliveryAccountAsync();
         Task<IEnumerable<CashOnDeliveryAccountDTO>> GetCashOnDeliveryAccountAsync(CODStatus codStatus);
-        IQueryable<CashOnDeliveryAccount> GetCODCollectedAsQueryable(); 
+        IQueryable<CashOnDeliveryAccount> GetCODCollectedAsQueryable();
+        Task<IEnumerable<NewInvoiceViewDTO>> GetCODCustomersWhoNeedPayOut();
+        Task<Shipment> GetShipmentByWaybill(string waybill);
+        Task<IQueryable<CodPayOutList>> GetPaidOutCODListsAsQueryable();
     }
-
 
 }

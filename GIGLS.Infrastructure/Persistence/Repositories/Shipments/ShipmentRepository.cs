@@ -94,7 +94,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  Description = r.Description,
                                                  SenderAddress = r.SenderAddress,
                                                  SenderState = r.SenderState,
-                                                 ApproximateItemsWeight = r.ApproximateItemsWeight
+                                                 ApproximateItemsWeight = r.ApproximateItemsWeight,
+
+                                                 ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
+                                                 {
+                                                     CancelReason = x.CancelReason
+                                                 }).FirstOrDefault(),
                                                  //DepartureTerminalName = r.DepartureTerminal.Name,
                                                  //DestinationTerminalName = r.DestinationTerminal.Name       
                                                  //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()z
@@ -194,6 +199,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        SenderState = r.SenderState,
                                        ReprintCounterStatus = r.ReprintCounterStatus,
                                        ApproximateItemsWeight = r.ApproximateItemsWeight,
+                                       ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
+                                       {
+                                           CancelReason = x.CancelReason
+                                       }).FirstOrDefault(),
                                        Invoice = Context.Invoice.Where(c => c.Waybill == r.Waybill).Select(x => new InvoiceDTO
                                        {
                                            InvoiceId = x.InvoiceId,
@@ -273,6 +282,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                    SenderAddress = r.SenderAddress,
                                    SenderState = r.SenderState,
                                    ApproximateItemsWeight = r.ApproximateItemsWeight,
+                                   ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
+                                   {
+                                       CancelReason = x.CancelReason
+                                   }).FirstOrDefault(),
                                    Invoice = Context.Invoice.Where(c => c.Waybill == r.Waybill).Select(x => new InvoiceDTO
                                    {
                                        InvoiceId = x.InvoiceId,
@@ -514,7 +527,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      Description = r.Description,
                                                      SenderAddress = r.SenderAddress,
                                                      SenderState = r.SenderState,
-                                                     ApproximateItemsWeight = r.ApproximateItemsWeight
+                                                     ApproximateItemsWeight = r.ApproximateItemsWeight,
                                                  }).ToList();
 
                 //filter
@@ -684,7 +697,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  Description = r.Description,
                                                  SenderAddress = r.SenderAddress,
                                                  SenderState = r.SenderState,
-                                                 ApproximateItemsWeight = r.ApproximateItemsWeight
+                                                 ApproximateItemsWeight = r.ApproximateItemsWeight,
+                                                 ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
+                                                 {
+                                                     CancelReason = x.CancelReason
+                                                 }).FirstOrDefault()
                                              }).ToList();
 
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -823,7 +840,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  Description = r.Description,
                                                  SenderAddress = r.SenderAddress,
                                                  SenderState = r.SenderState,
-                                                 ApproximateItemsWeight = r.ApproximateItemsWeight
+                                                 ApproximateItemsWeight = r.ApproximateItemsWeight,
+                                                 ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
+                                                 {
+                                                     CancelReason = x.CancelReason
+                                                 }).FirstOrDefault(),
                                              }).ToList();
 
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -892,8 +913,14 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            IsCashOnDelivery = r.IsCashOnDelivery,
                                            SenderAddress = r.SenderAddress,
                                            SenderState = r.SenderState,
-                                           ApproximateItemsWeight = r.ApproximateItemsWeight
-                                       }).FirstOrDefault();            
+                                           ApproximateItemsWeight = r.ApproximateItemsWeight,
+                                           ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
+                                           {
+                                               CancelReason = x.CancelReason
+                                           }).FirstOrDefault(),
+
+                                       }).FirstOrDefault();      
+            
             return Task.FromResult(shipmentDto);
         }
 

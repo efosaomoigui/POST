@@ -121,6 +121,7 @@
     <Compile Include="Persistence\Repositories\Account\InvoiceRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\InvoiceShipmentRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\VATRepository.cs" />
+    <Compile Include="Persistence\Repositories\BankSettlement\CodPayOutListRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\BankProcessingOrderCodesRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\BankProcessingOrderForShipmentAndCODRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\CODSettlementSheetRepository.cs" />
@@ -172,6 +173,7 @@
     <Compile Include="Persistence\Repositories\ShipmentScan\ScanStatusRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\HUBManifestWaybillMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\LogVisitReasonRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\MobilePickUpRequestsRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\MobileShipmentTrackingRepository.cs" />

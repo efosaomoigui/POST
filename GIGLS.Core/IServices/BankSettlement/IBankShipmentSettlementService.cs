@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Account;
+﻿using GIGLS.Core.Domain.BankSettlement;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.BankSettlement;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
@@ -35,5 +36,11 @@ namespace GIGLS.Core.IServices.BankSettlement
         Task MarkAsVerified(BankProcessingOrderCodesDTO refcode);
         Task MarkAsVerified_cod(BankProcessingOrderCodesDTO refcode);
         Task MarkAsVerified_demurrage(BankProcessingOrderCodesDTO bankrefcode);
+
+        Task<List<NewInvoiceViewDTO>> GetCODCustomersWhoNeedPayOut();
+        Task UpdateCODCustomersWhoNeedPayOut(NewInvoiceViewDTO invoiceviewinfo);
+
+        Task<List<CodPayOutList>> GetPaidOutCODLists();
+        Task<List<CodPayOutList>> GetPaidOutCODListsByCustomer(string customercode);
     }
 }
