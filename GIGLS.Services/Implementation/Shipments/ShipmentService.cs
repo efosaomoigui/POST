@@ -279,6 +279,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipmentCollectionDTO = Mapper.Map<ShipmentCollectionDTO>(shipmentCollection);
                 shipmentDto.ShipmentCollection = shipmentCollectionDTO;
 
+                //get Invoice if it exists
+                var invoice = _uow.Invoice.SingleOrDefault(s => s.Waybill == shipmentDto.Waybill);
+                var invoiceDTO = Mapper.Map<InvoiceDTO>(invoice);
+                shipmentDto.Invoice = invoiceDTO;
+
                 if (shipmentDto.IsCancelled)
                 {
                     //get the Cancellation Reason
@@ -287,28 +292,44 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentDto.ShipmentCancel = descCollection;
                 }
 
-                //Demurage should be exclude from Ecommerce and Corporate customer. Only individual customer should have demurage
-                //HomeDelivery shipments should not have demurrage for Individual Shipments
-                if (customerType == CustomerType.Company ||
-                    shipmentDto.PickupOptions == PickupOptions.HOMEDELIVERY)
+                if (shipmentDto.Invoice.IsShipmentCollected)
                 {
-                    //set Default Demurrage info in ShipmentDTO for Company customer
-                    shipmentDto.Demurrage = new DemurrageDTO
-                    {
-                        Amount = 0,
-                        DayCount = 0,
-                        WaybillNumber = shipmentDto.Waybill
-                    };
-                }
-                else
-                {
-                    //get Demurrage information for Individual customer
-                    GetDemurrageInformation(shipmentDto);
+                    var demurrage = await _uow.Demurrage.GetAsync(s => s.WaybillNumber == shipmentDto.Waybill);
+                    var demurrageDTO = Mapper.Map<DemurrageDTO>(demurrage);
+                    shipmentDto.Demurrage = demurrageDTO;
                 }
 
+                //Demurage should be exclude from Ecommerce and Corporate customer. Only individual customer should have demurage
+                //HomeDelivery shipments should not have demurrage for Individual Shipments
+                else
+                {
+                    if (customerType == CustomerType.Company ||
+                        shipmentDto.PickupOptions == PickupOptions.HOMEDELIVERY)
+                    {
+                        //set Default Demurrage info in ShipmentDTO for Company customer
+                        shipmentDto.Demurrage = new DemurrageDTO
+                        {
+                            Amount = 0,
+                            DayCount = 0,
+                            WaybillNumber = shipmentDto.Waybill
+                        };
+                    }
+                    else
+                    {
+                        //get Demurrage information for Individual customer
+                        GetDemurrageInformation(shipmentDto);
+                    }
+                }
+                
                 //Set the Senders AAddress for the Shipment in the CustomerDetails
                 shipmentDto.CustomerDetails.Address = shipmentDto.SenderAddress ?? shipmentDto.CustomerDetails.Address;
                 shipmentDto.CustomerDetails.State = shipmentDto.SenderState ?? shipmentDto.CustomerDetails.State;
+
+                ////get demurrage info 
+                //var demurrage = _uow.Demurrage.
+                //    SingleOrDefault(s => s.WaybillNumber == shipmentDto.Waybill);
+                //var demurrageDTO = Mapper.Map<DemurrageDTO>(demurrage);
+                //shipmentDto.Demurrage = demurrageDTO;
 
                 return shipmentDto;
             }
@@ -347,7 +368,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     Amount = price,
                     DayCount = demurrageDays,
-                    WaybillNumber = shipmentDto.Waybill
+                    WaybillNumber = shipmentDto.Waybill,
                 };
                 return;
             }

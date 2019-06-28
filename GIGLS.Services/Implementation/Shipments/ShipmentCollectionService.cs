@@ -490,7 +490,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     DateOfEntry = DateTime.Now,
                     ServiceCentreId = getServiceCenterCode[0].ServiceCentreId, //serviceCenters[0],
                     UserId = shipmentCollectionDto.UserId,
-                    Amount = shipmentCollectionDto.Demurrage.Amount,
+                    Amount = shipmentCollectionDto.Demurrage.AmountPaid,
                     CreditDebitType = CreditDebitType.Credit,
                     Description = "Payment for Demurrage",
                     IsDeferred = false,
@@ -506,7 +506,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     Waybill = shipmentCollectionDto.Waybill,
                     RefCode = null,
                     UserId = shipmentCollectionDto.UserId,
-                    Amount = (decimal)shipmentCollectionDto.Demurrage.Amount,
+                    Amount = (decimal)shipmentCollectionDto.Demurrage.AmountPaid,
                     ServiceCenterId = getServiceCenterCode[0].ServiceCentreId,
                     DepositStatus = DepositStatus.Unprocessed,
                     PaymentType = shipmentCollectionDto.PaymentType,
@@ -514,21 +514,22 @@ namespace GIGLS.Services.Implementation.Shipments
                     DEMStatusHistory = CODStatushistory.RecievedAtServiceCenter,
                     ServiceCenterCode = getServiceCenterCode[0].Code
                 };
-
-                _uow.DemurrageRegisterAccount.Add(demurrageinformation);
-                _uow.GeneralLedger.Add(generalLedger);
-
-                //insert demurage into demurage entity 
+                
+                //insert demurage into demurrage entity 
                 var newDemurrage = new Demurrage
                 {
+                    DayCount = shipmentCollectionDto.Demurrage.DayCount,
                     WaybillNumber = shipmentCollectionDto.Waybill,
                     Amount = shipmentCollectionDto.Demurrage.Amount,
                     AmountPaid = shipmentCollectionDto.Demurrage.AmountPaid,
                     ApprovedBy = shipmentCollectionDto.Demurrage.ApprovedBy,
-
+                    ServiceCenterId = getServiceCenterCode[0].ServiceCentreId,
+                    ServiceCenterCode = getServiceCenterCode[0].Code
                 };
-                _uow.Demurrage.Add(newDemurrage);
 
+                _uow.DemurrageRegisterAccount.Add(demurrageinformation);
+                _uow.Demurrage.Add(newDemurrage);
+                _uow.GeneralLedger.Add(generalLedger);
             }
 
             //update invoice as shipment collected
