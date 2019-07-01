@@ -153,6 +153,10 @@ namespace GIGLS.Core
 
         IHUBManifestWaybillMappingRepository HUBManifestWaybillMapping { get; set; }
 
+        ICategoryRepository Category { get; set; }
+
+        ISubCategoryRepository SubCategory { get; set; }
+
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
     }

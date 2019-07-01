@@ -170,6 +170,7 @@
     <Compile Include="Implementation\Account\VATService.cs" />
     <Compile Include="Implementation\BankSettlement\BankShipmentSettlementService.cs" />
     <Compile Include="Implementation\BankSettlement\CODSettlementSheetService.cs" />
+    <Compile Include="Implementation\CategoryService.cs" />
     <Compile Include="Implementation\Client\ClientNodeService.cs" />
     <Compile Include="Implementation\CountryService.cs" />
     <Compile Include="Implementation\Customers\CompanyContactPersonService.cs" />
@@ -252,6 +253,7 @@
     <Compile Include="Implementation\Stocks\StockRequestService.cs" />
     <Compile Include="Implementation\Stocks\StockSupplyDetailsService.cs" />
     <Compile Include="Implementation\Stores\StoreService.cs" />
+    <Compile Include="Implementation\SubCategoryService.cs" />
     <Compile Include="Implementation\User\UserService.cs" />
     <Compile Include="Implementation\Utility\EnumHelper.cs" />
     <Compile Include="Implementation\Utility\GlobalPropertyService.cs" />
