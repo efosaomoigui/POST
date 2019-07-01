@@ -764,6 +764,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         //Update shipment collection to make it available at collection centre
                         shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.ARF;
+                        shipmentCollection.DestinationServiceCentreId = serviceCenter.ServiceCentreId;
 
                         //Update the Destination Service Centre on the Shipment to the Current HUB
                         var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);

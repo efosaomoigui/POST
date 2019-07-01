@@ -108,5 +108,8 @@ namespace GIGL.GIGLS.Core.Domain
         //Shipment reroute
         public ShipmentReroute ShipmentReroute { get; set; }
         public bool IsCODPaidOut { get; set; }
+
+        //use to optimise shipment progress for shipment that has depart service centre
+        public ShipmentScanStatus ShipmentScanStatus { get; set; }
     }
 }
