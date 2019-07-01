@@ -806,7 +806,8 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<List<InvoiceViewDTO>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto, bool filterByDestinationSC = false)
         {
             try
-            {//1. get shipments for that Service Centre
+            {
+                //1. get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false);
 
@@ -844,17 +845,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var invoice = shipmentItem;
 
-                    if (invoice.PaymentStatus == PaymentStatus.Paid)
+                    if (invoice.PaymentStatus == PaymentStatus.Paid || shipmentItem.CompanyType == CompanyType.Corporate.ToString())
                     {
                         paidShipments.Add(shipmentItem);
                     }
-                    else
-                    if (invoice.PaymentStatus == PaymentStatus.Pending &&
-                        shipmentItem.CompanyType == CompanyType.Corporate.ToString())
-                    {
-                        paidShipments.Add(shipmentItem);
-                    }
-
                 }
 
                 //3. get all grouped waybills for that Service Centre
@@ -954,6 +948,8 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //1. get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+
+                //cant we filter by scan status too??
                 var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false);
 
                 //apply filters for Service Centre
@@ -990,20 +986,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var invoice = shipmentItem;
 
-                    if (invoice.PaymentStatus == PaymentStatus.Paid)
+                    if (invoice.PaymentStatus == PaymentStatus.Paid || shipmentItem.CompanyType == CompanyType.Corporate.ToString())
                     {
                         paidShipments.Add(shipmentItem);
                     }
-                    else
-                    if (invoice.PaymentStatus == PaymentStatus.Pending &&
-                        shipmentItem.CompanyType == CompanyType.Corporate.ToString())
-                    {
-                        paidShipments.Add(shipmentItem);
-                    }
-
                 }
 
                 //3. get all grouped waybills for that Service Centre
+                //once the waybills in group mapping for service centre grow to millions, the result will slow, need optimisation ???
                 var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappingWaybills(serviceCenters);
 
                 //4. filter the two lists
