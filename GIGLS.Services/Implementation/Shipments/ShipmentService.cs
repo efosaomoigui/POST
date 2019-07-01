@@ -302,8 +302,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         var demurrageDTO = Mapper.Map<DemurrageDTO>(demurrage);
                         shipmentDto.Demurrage = demurrageDTO;
                     }
-
-
+                    
                     //Demurage should be exclude from Ecommerce and Corporate customer. Only individual customer should have demurage
                     //HomeDelivery shipments should not have demurrage for Individual Shipments
                     else

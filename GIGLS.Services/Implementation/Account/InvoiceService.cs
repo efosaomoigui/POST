@@ -238,15 +238,13 @@ namespace GIGLS.Services.Implementation.Account
             {
                 var demurage = await _uow.Demurrage.GetAsync(s => s.WaybillNumber == invoiceDTO.Waybill);
 
-                if (demurage.Amount > 0)
+                if (demurage != null)
                 {
                     invoiceDTO.Shipment.Demurrage.AmountPaid = demurage.AmountPaid;
                     invoiceDTO.Shipment.Demurrage.ApprovedBy = demurage.ApprovedBy;
                 }
-            }
-            
+            }         
            
-
             //get wallet number
             if (invoiceDTO.Customer.CustomerType == CustomerType.Company)
             {
