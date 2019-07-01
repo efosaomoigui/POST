@@ -281,7 +281,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentDto.ShipmentCancel = descCollection;
                 }
 
-
                 //only if the shipment is collected
                 //get ShipmentCollection if it exists
                 var shipmentCollection = _uow.ShipmentCollection.
@@ -289,52 +288,47 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipmentCollectionDTO = Mapper.Map<ShipmentCollectionDTO>(shipmentCollection);
                 shipmentDto.ShipmentCollection = shipmentCollectionDTO;
 
-                
+
                 if (shipmentCollection != null)
                 {
                     //get Invoice if it exists
                     var invoice = _uow.Invoice.SingleOrDefault(s => s.Waybill == shipmentDto.Waybill);
                     var invoiceDTO = Mapper.Map<InvoiceDTO>(invoice);
                     shipmentDto.Invoice = invoiceDTO;
-                    
+
                     if (shipmentDto.Invoice.IsShipmentCollected)
                     {
                         var demurrage = await _uow.Demurrage.GetAsync(s => s.WaybillNumber == shipmentDto.Waybill);
                         var demurrageDTO = Mapper.Map<DemurrageDTO>(demurrage);
                         shipmentDto.Demurrage = demurrageDTO;
                     }
-                }
 
-                //Demurage should be exclude from Ecommerce and Corporate customer. Only individual customer should have demurage
-                //HomeDelivery shipments should not have demurrage for Individual Shipments
-                else
-                {
-                    if (customerType == CustomerType.Company || shipmentDto.PickupOptions == PickupOptions.HOMEDELIVERY)
-                    {
-                        //set Default Demurrage info in ShipmentDTO for Company customer
-                        shipmentDto.Demurrage = new DemurrageDTO
-                        {
-                            Amount = 0,
-                            DayCount = 0,
-                            WaybillNumber = shipmentDto.Waybill
-                        };
-                    }
+
+                    //Demurage should be exclude from Ecommerce and Corporate customer. Only individual customer should have demurage
+                    //HomeDelivery shipments should not have demurrage for Individual Shipments
                     else
                     {
-                        //get Demurrage information for Individual customer
-                        await GetDemurrageInformation(shipmentDto);
+                        if (customerType == CustomerType.Company || shipmentDto.PickupOptions == PickupOptions.HOMEDELIVERY)
+                        {
+                            //set Default Demurrage info in ShipmentDTO for Company customer
+                            shipmentDto.Demurrage = new DemurrageDTO
+                            {
+                                Amount = 0,
+                                DayCount = 0,
+                                WaybillNumber = shipmentDto.Waybill
+                            };
+                        }
+                        else
+                        {
+                            //get Demurrage information for Individual customer
+                            await GetDemurrageInformation(shipmentDto);
+                        }
                     }
                 }
                 
                 //Set the Senders AAddress for the Shipment in the CustomerDetails
                 shipmentDto.CustomerDetails.Address = shipmentDto.SenderAddress ?? shipmentDto.CustomerDetails.Address;
                 shipmentDto.CustomerDetails.State = shipmentDto.SenderState ?? shipmentDto.CustomerDetails.State;
-
-                ////get demurrage info 
-                //var demurrage = _uow.Demurrage.
-                //    SingleOrDefault(s => s.WaybillNumber == shipmentDto.Waybill);
-                //var demurrageDTO = Mapper.Map<DemurrageDTO>(demurrage);
-                //shipmentDto.Demurrage = demurrageDTO;
 
                 return shipmentDto;
             }
