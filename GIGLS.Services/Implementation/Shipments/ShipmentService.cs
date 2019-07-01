@@ -273,17 +273,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     s => s.CustomerId == shipmentDto.CustomerId && s.CustomerType == customerType);
                 shipmentDto.WalletNumber = customerWallet?.WalletNumber;
 
-                //get ShipmentCollection if it exists
-                var shipmentCollection = _uow.ShipmentCollection.
-                    SingleOrDefault(s => s.Waybill == shipmentDto.Waybill);
-                var shipmentCollectionDTO = Mapper.Map<ShipmentCollectionDTO>(shipmentCollection);
-                shipmentDto.ShipmentCollection = shipmentCollectionDTO;
-
-                //get Invoice if it exists
-                var invoice = _uow.Invoice.SingleOrDefault(s => s.Waybill == shipmentDto.Waybill);
-                var invoiceDTO = Mapper.Map<InvoiceDTO>(invoice);
-                shipmentDto.Invoice = invoiceDTO;
-
                 if (shipmentDto.IsCancelled)
                 {
                     //get the Cancellation Reason
@@ -292,19 +281,35 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentDto.ShipmentCancel = descCollection;
                 }
 
-                if (shipmentDto.Invoice.IsShipmentCollected)
+
+                //only if the shipment is collected
+                //get ShipmentCollection if it exists
+                var shipmentCollection = _uow.ShipmentCollection.
+                    SingleOrDefault(s => s.Waybill == shipmentDto.Waybill);
+                var shipmentCollectionDTO = Mapper.Map<ShipmentCollectionDTO>(shipmentCollection);
+                shipmentDto.ShipmentCollection = shipmentCollectionDTO;
+
+                
+                if (shipmentCollection != null)
                 {
-                    var demurrage = await _uow.Demurrage.GetAsync(s => s.WaybillNumber == shipmentDto.Waybill);
-                    var demurrageDTO = Mapper.Map<DemurrageDTO>(demurrage);
-                    shipmentDto.Demurrage = demurrageDTO;
+                    //get Invoice if it exists
+                    var invoice = _uow.Invoice.SingleOrDefault(s => s.Waybill == shipmentDto.Waybill);
+                    var invoiceDTO = Mapper.Map<InvoiceDTO>(invoice);
+                    shipmentDto.Invoice = invoiceDTO;
+                    
+                    if (shipmentDto.Invoice.IsShipmentCollected)
+                    {
+                        var demurrage = await _uow.Demurrage.GetAsync(s => s.WaybillNumber == shipmentDto.Waybill);
+                        var demurrageDTO = Mapper.Map<DemurrageDTO>(demurrage);
+                        shipmentDto.Demurrage = demurrageDTO;
+                    }
                 }
 
                 //Demurage should be exclude from Ecommerce and Corporate customer. Only individual customer should have demurage
                 //HomeDelivery shipments should not have demurrage for Individual Shipments
                 else
                 {
-                    if (customerType == CustomerType.Company ||
-                        shipmentDto.PickupOptions == PickupOptions.HOMEDELIVERY)
+                    if (customerType == CustomerType.Company || shipmentDto.PickupOptions == PickupOptions.HOMEDELIVERY)
                     {
                         //set Default Demurrage info in ShipmentDTO for Company customer
                         shipmentDto.Demurrage = new DemurrageDTO
@@ -317,7 +322,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     else
                     {
                         //get Demurrage information for Individual customer
-                        GetDemurrageInformation(shipmentDto);
+                        await GetDemurrageInformation(shipmentDto);
                     }
                 }
                 
