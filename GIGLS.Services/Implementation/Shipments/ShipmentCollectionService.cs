@@ -523,6 +523,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     Amount = shipmentCollectionDto.Demurrage.Amount,
                     AmountPaid = shipmentCollectionDto.Demurrage.AmountPaid,
                     ApprovedBy = shipmentCollectionDto.Demurrage.ApprovedBy,
+                    UserId = shipmentCollection.UserId,
                     ServiceCenterId = getServiceCenterCode[0].ServiceCentreId,
                     ServiceCenterCode = getServiceCenterCode[0].Code
                 };
