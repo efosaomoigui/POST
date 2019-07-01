@@ -125,6 +125,7 @@
     <Compile Include="Persistence\Repositories\BankSettlement\BankProcessingOrderCodesRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\BankProcessingOrderForShipmentAndCODRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\CODSettlementSheetRepository.cs" />
+    <Compile Include="Persistence\Repositories\CategoryRepository.cs" />
     <Compile Include="Persistence\Repositories\Client\ClientNodeRepository.cs" />
     <Compile Include="Persistence\Repositories\CountryRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\CompanyContactPersonRepository.cs" />
@@ -206,6 +207,7 @@
     <Compile Include="Persistence\Repositories\Stocks\StockRequestRepository.cs" />
     <Compile Include="Persistence\Repositories\Stocks\StockSupplyDetailsRepository.cs" />
     <Compile Include="Persistence\Repositories\Stores\StoreRepository.cs" />
+    <Compile Include="Persistence\Repositories\SubCategoryRepository.cs" />
     <Compile Include="Persistence\Repositories\UserLoginEmailRepository.cs" />
     <Compile Include="Persistence\Repositories\User\UserRepository.cs" />
     <Compile Include="Persistence\Repositories\Utility\GlobalPropertyRepository.cs" />

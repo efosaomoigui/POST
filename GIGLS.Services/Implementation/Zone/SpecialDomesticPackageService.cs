@@ -110,5 +110,10 @@ namespace GIGLS.Services.Implementation.Zone
             package.Status = status;
             await _uow.CompleteAsync();
         }
+
+        Task<List<SpecialDomesticPackageDTO>> ISpecialDomesticPackageService.GetSpecialDomesticPackages()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

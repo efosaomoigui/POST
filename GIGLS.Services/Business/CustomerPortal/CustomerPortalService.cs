@@ -315,9 +315,30 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _uow.DeliveryOption.GetDeliveryOptions();
         }
 
-        public Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages()
+        public Task<List<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages()
         {
-            return Task.FromResult(Mapper.Map<IEnumerable<SpecialDomesticPackage>, IEnumerable<SpecialDomesticPackageDTO>>(_uow.SpecialDomesticPackage.GetAll()));
+
+            var result = _uow.SpecialDomesticPackage.GetAll();
+            var packages = from s in result
+                           select new SpecialDomesticPackageDTO
+                           {
+                               SpecialDomesticPackageType = s.SpecialDomesticPackageType,
+                               Status = s.Status,
+                               SubCategory = new SubCategoryDTO
+                               {
+                                   SubCategoryName = s.SubCategory.SubCategoryName,
+                                   Category = new CategoryDTO
+                                   {
+                                       CategoryId = s.SubCategory.Category.CategoryId,
+                                       CategoryName = s.SubCategory.Category.CategoryName
+                                   },
+                                   SubCategoryId = s.SubCategory.SubCategoryId,
+                                   Weight = s.SubCategory.Weight
+                               }
+
+
+                           };
+            return Task.FromResult(packages.ToList());
         }
 
         public async Task<IEnumerable<HaulageDTO>> GetHaulages()

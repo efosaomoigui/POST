@@ -399,6 +399,12 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IHUBManifestWaybillMappingRepository HUBManifestWaybillMapping { get; set; }
 
+        [Inject]
+        public ICategoryRepository Category { get; set; }
+
+        [Inject]
+        public ISubCategoryRepository SubCategory { get; set; }
+
 
         public int Complete()
         {

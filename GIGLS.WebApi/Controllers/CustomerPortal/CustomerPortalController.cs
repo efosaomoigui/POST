@@ -51,10 +51,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         private readonly IWalletService _walletService;
         private readonly IWalletTransactionService _walletTransactionService;
         private readonly IServiceCentreService _service;
+        private readonly ICategoryService _categoryservice;
+        private readonly ISubCategoryService _subcategoryservice;
 
 
         public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IOTPService otpService,
-            IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService, IWalletService walletService, IWalletTransactionService walletTransactionService, IServiceCentreService service) : base(nameof(CustomerPortalController))
+            IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService, IWalletService walletService, IWalletTransactionService walletTransactionService, IServiceCentreService service,
+            ICategoryService categoryservice, ISubCategoryService subcategoryservice) : base(nameof(CustomerPortalController))
         {
             // _uow = uow;
             _userService = userService;
@@ -66,6 +69,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             _walletService = walletService;
             _walletTransactionService = walletTransactionService;
             _service = service;
+            _categoryservice = categoryservice;
+            _subcategoryservice = subcategoryservice;
         }
 
 
@@ -382,15 +387,23 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("specialdomesticpackage")]
-        public async Task<IServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>> GetSpecialDomesticPackages()
+        public async Task<IServiceResponse<SpecialResultDTO>> GetSpecialDomesticPackages()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var packages = await _portalService.GetSpecialDomesticPackages();
-
-                return new ServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>
+                var Categories = await _categoryservice.GetCategories();
+                var Subcategories = await _subcategoryservice.GetSubCategories();
+                var result = new SpecialResultDTO
                 {
-                    Object = packages
+                    Specialpackages = packages,
+                    Categories = Categories,
+                    SubCategories = Subcategories
+
+                };
+                return new ServiceResponse<SpecialResultDTO>
+                {
+                    Object = result
                 };
             });
         }
