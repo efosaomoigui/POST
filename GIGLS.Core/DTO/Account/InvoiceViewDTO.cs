@@ -29,7 +29,7 @@ namespace GIGLS.Core.DTO.Account
         public decimal Insurance { get; set; }
         public decimal Vat { get; set; }
         public decimal Total { get; set; }
-        public decimal CashOnDeliveryAmount { get; set; }
+        public decimal? CashOnDeliveryAmount { get; set; }
         public bool IsCancelled { get; set; }
         public decimal ShipmentPackagePrice { get; set; }
         public bool IsInternational { get; set; }
