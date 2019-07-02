@@ -15,6 +15,7 @@ using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.CORE.IServices.Shipments;
 using GIGLS.CORE.Domain;
 using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -61,6 +62,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 return result.ToList().OrderByDescending(x => x.DateCreated).Take(100);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<GroupWaybillNumberMappingDTO>> GetAllGroupWayBillNumberMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            try
+            {
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var groupWaybillMapings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(serviceCenters, dateFilterCriteria);                
+                return groupWaybillMapings;
             }
             catch (Exception)
             {
