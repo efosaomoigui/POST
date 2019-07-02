@@ -1,7 +1,11 @@
-﻿namespace GIGLS.Core.DTO.Shipments
+﻿using GIGL.GIGLS.Core.Domain;
+using System;
+
+namespace GIGLS.Core.Domain
 {
-    public class DemurrageDTO
+    public class Demurrage : BaseDomain, IAuditable
     {
+        public int DemurrageId { get; set; }
         public int DayCount { get; set; }
         public decimal Amount { get; set; }
         public string WaybillNumber { get; set; }
@@ -13,8 +17,8 @@
 
         //who processed the release
         public string UserId { get; set; }
-
         public int ServiceCenterId { get; set; }
         public string ServiceCenterCode { get; set; }
+
     }
 }

@@ -98,6 +98,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         public DbSet<ShipmentDeliveryOptionMapping> ShipmentDeliveryOptionMapping { get; set; }
 
+        public DbSet<Demurrage> Demurrage { get; set; }
         //customer
         public DbSet<Company> Company { get; set; }
         public DbSet<CompanyContactPerson> CompanyContactPerson { get; set; }
