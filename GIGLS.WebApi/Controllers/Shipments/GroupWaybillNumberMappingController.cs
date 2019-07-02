@@ -7,6 +7,7 @@ using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.WebApi.Filters;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -28,6 +29,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 var mappings = await _service.GetAllGroupWayBillNumberMappings();
+                return new ServiceResponse<IEnumerable<GroupWaybillNumberMappingDTO>>
+                {
+                    Object = mappings
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("groupbydate")]
+        public async Task<IServiceResponse<IEnumerable<GroupWaybillNumberMappingDTO>>> GetGroupWaybillNumberMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var mappings = await _service.GetAllGroupWayBillNumberMappings(dateFilterCriteria);
                 return new ServiceResponse<IEnumerable<GroupWaybillNumberMappingDTO>>
                 {
                     Object = mappings
