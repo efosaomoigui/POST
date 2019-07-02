@@ -344,6 +344,12 @@ namespace GIGLS.Core
 
                 config.CreateMap<CodPayOutList, NewInvoiceViewDTO>();
                 config.CreateMap<NewInvoiceViewDTO, CodPayOutList>();
+
+                config.CreateMap<Category, CategoryDTO>();
+                config.CreateMap<CategoryDTO, Category>();
+
+                config.CreateMap<SubCategory, SubCategoryDTO>();
+                config.CreateMap<SubCategoryDTO, SubCategory>();
             });
 
             isInit = true;

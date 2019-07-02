@@ -9,5 +9,7 @@ namespace GIGLS.Core.IRepositories.Zone
     public interface ISpecialDomesticPackageRepository : IRepository<SpecialDomesticPackage>
     {
         Task<List<SpecialDomesticPackage>> GetSpecialDomesticZones();
+        
+
     }
 }

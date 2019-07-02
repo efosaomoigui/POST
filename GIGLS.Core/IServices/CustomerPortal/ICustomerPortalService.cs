@@ -38,7 +38,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         int GetStatesTotal();
         Task<List<ServiceCentreDTO>> GetLocalServiceCentres();
         Task<IEnumerable<DeliveryOptionDTO>> GetDeliveryOptions();
-        Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
+        Task<List<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
         Task<IEnumerable<HaulageDTO>> GetHaulages();
         Task<IEnumerable<InsuranceDTO>> GetInsurances();
         Task<IEnumerable<VATDTO>> GetVATs();

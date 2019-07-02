@@ -139,6 +139,7 @@
     <Compile Include="Domain\BankSettlement\BankProcessingOrderForShipmentAndCOD.cs" />
     <Compile Include="Domain\BankSettlement\CODSettlementSheet.cs" />
     <Compile Include="Domain\BaseDomain.cs" />
+    <Compile Include="Domain\Category.cs" />
     <Compile Include="Domain\ClientNode.cs" />
     <Compile Include="Domain\Company.cs" />
     <Compile Include="Domain\CompanyContactPerson.cs" />
@@ -233,6 +234,7 @@
     <Compile Include="Domain\StockRequestPart.cs" />
     <Compile Include="Domain\StockSupplyDetails.cs" />
     <Compile Include="Domain\Store.cs" />
+    <Compile Include="Domain\SubCategory.cs" />
     <Compile Include="Domain\SubNav.cs" />
     <Compile Include="Domain\SubSubNav.cs" />
     <Compile Include="Domain\TransitWaybillNumber.cs" />
@@ -269,6 +271,7 @@
     <Compile Include="DTO\BankSettlement\BankProcessingOrderForShipmentAndCODDTO.cs" />
     <Compile Include="DTO\BankSettlement\CODSettlementSheetDTO.cs" />
     <Compile Include="DTO\BaseDomainDTO.cs" />
+    <Compile Include="DTO\CategoryDTO.cs" />
     <Compile Include="DTO\Client\ClientNodeDTO.cs" />
     <Compile Include="DTO\CountryDTO.cs" />
     <Compile Include="DTO\Customers\CompanyContactPersonDTO.cs" />
@@ -382,6 +385,7 @@
     <Compile Include="DTO\Stocks\StockRequestPartDTO.cs" />
     <Compile Include="DTO\Stocks\StockSupplyDetailsDTO.cs" />
     <Compile Include="DTO\Stores\StoreDTO.cs" />
+    <Compile Include="DTO\SubCategoryDTO.cs" />
     <Compile Include="DTO\UserLoginEmailDTO.cs" />
     <Compile Include="DTO\User\AddClaimDto.cs" />
     <Compile Include="DTO\User\ClaimDto.cs" />
@@ -497,6 +501,7 @@
     <Compile Include="IRepositories\Haulage\IPackingListRepository.cs" />
     <Compile Include="IRepositories\Haulage\IHaulageRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
+    <Compile Include="IRepositories\ICategoryRepository.cs" />
     <Compile Include="IRepositories\ICountryRepository.cs" />
     <Compile Include="IRepositories\IMessageRepository.cs" />
     <Compile Include="IRepositories\INotificationRepository.cs" />
@@ -504,6 +509,7 @@
     <Compile Include="IRepositories\IOTPRepository.cs" />
     <Compile Include="IRepositories\IRepository.cs" />
     <Compile Include="IRepositories\IStateRepository.cs" />
+    <Compile Include="IRepositories\ISubCategoryRepository.cs" />
     <Compile Include="IRepositories\IUnitOfWork.cs" />
     <Compile Include="IRepositories\IUserLoginEmailRepository.cs" />
     <Compile Include="IRepositories\JobCards\IJobCardManagementPartRepository.cs" />
@@ -619,6 +625,7 @@
     <Compile Include="IServices\Haulage\IHaulageDistanceMappingPriceService.cs" />
     <Compile Include="IServices\Haulage\IHaulageService.cs" />
     <Compile Include="IServices\Haulage\IPackingListService.cs" />
+    <Compile Include="IServices\ICategoryService.cs" />
     <Compile Include="IServices\ICountryService.cs" />
     <Compile Include="IServices\IMessageService.cs" />
     <Compile Include="IServices\IMobileResponse.cs" />
@@ -628,6 +635,7 @@
     <Compile Include="IServices\IServiceDependencyMarker.cs" />
     <Compile Include="IServices\IServiceReponse.cs" />
     <Compile Include="IServices\IStateService.cs" />
+    <Compile Include="IServices\ISubCategoryService.cs" />
     <Compile Include="IServices\JobCards\IJobCardManagementPartService.cs" />
     <Compile Include="IServices\JobCards\IJobCardManagementService.cs" />
     <Compile Include="IServices\JobCards\IJobCardService.cs" />

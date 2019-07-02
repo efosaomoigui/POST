@@ -400,6 +400,12 @@ namespace GIGLS.Infrastructure.Persistence
         public IHUBManifestWaybillMappingRepository HUBManifestWaybillMapping
         { get; set; }
 
+        [Inject]
+        public ICategoryRepository Category { get; set; }
+
+        [Inject]
+        public ISubCategoryRepository SubCategory { get; set; }
+
 
         [Inject]
         public IMobileScanStatusRepository MobileScanStatus { get; set; }
