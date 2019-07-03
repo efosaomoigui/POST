@@ -22,7 +22,7 @@ namespace GIGLS.Core.DTO.Zone
 
     public class SpecialResultDTO : BaseDomainDTO
     {
-        public List<SpecialDomesticPackageDTO> Specialpackages { get; set; }
+        public IEnumerable<SpecialDomesticPackageDTO> Specialpackages { get; set; }
         public List<CategoryDTO> Categories { get; set; }
 
         public List<SubCategoryDTO> SubCategories { get; set; }

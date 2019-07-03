@@ -387,23 +387,15 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("specialdomesticpackage")]
-        public async Task<IServiceResponse<SpecialResultDTO>> GetSpecialDomesticPackages()
+        public async Task<IServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>> GetSpecialDomesticPackages()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var packages = await _portalService.GetSpecialDomesticPackages();
-                var Categories = await _categoryservice.GetCategories();
-                var Subcategories = await _subcategoryservice.GetSubCategories();
-                var result = new SpecialResultDTO
+                
+                return new ServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>
                 {
-                    Specialpackages = packages,
-                    Categories = Categories,
-                    SubCategories = Subcategories
-
-                };
-                return new ServiceResponse<SpecialResultDTO>
-                {
-                    Object = result
+                    Object = packages
                 };
             });
         }
@@ -901,14 +893,15 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
         [HttpGet]
         [Route("getspecialpackages")]
-        public async Task<IServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>> GetSpecialPackages()
+        public async Task<IServiceResponse<SpecialResultDTO>> GetSpecialPackages()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var specialpackages = await _preshipmentmobileService.GetSpecialDomesticPackages();
-                 return new ServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>
+                var packages = await _preshipmentmobileService.GetSpecialPackages();
+                
+             return new ServiceResponse<SpecialResultDTO>
                 {
-                    Object = specialpackages
+                    Object = packages
                 };
             });
         }
@@ -1000,6 +993,22 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<bool>
                 {
                     Object = flag
+                };
+            });
+        }
+
+
+        [HttpGet]
+        [Route("getpreshipmentindispute")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetPreshipmentInDispute()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = await _preshipmentmobileService.GetDisputePreShipment();
+
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = shipments
                 };
             });
         }

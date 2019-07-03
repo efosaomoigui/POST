@@ -38,7 +38,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         int GetStatesTotal();
         Task<List<ServiceCentreDTO>> GetLocalServiceCentres();
         Task<IEnumerable<DeliveryOptionDTO>> GetDeliveryOptions();
-        Task<List<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
+        Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
         Task<IEnumerable<HaulageDTO>> GetHaulages();
         Task<IEnumerable<InsuranceDTO>> GetInsurances();
         Task<IEnumerable<VATDTO>> GetVATs();
@@ -67,5 +67,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<Tuple<Task<List<WalletPaymentLogDTO>>, int>> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto);
 
         List<string> GetItemTypes();
+
+       
     }
 }

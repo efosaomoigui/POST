@@ -24,6 +24,7 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.DTO;
+using GIGLS.Core.IServices;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -43,13 +44,15 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IMobileShipmentTrackingService _mobiletrackingservice;
         private readonly IMobilePickUpRequestsService _mobilepickuprequestservice;
         private readonly IDomesticRouteZoneMapService _domesticroutezonemapservice;
+        private readonly ICategoryService _categoryservice;
+        private readonly ISubCategoryService _subcategoryservice;
 
 
         public PreShipmentMobileService(IUnitOfWork uow,IShipmentService shipmentService,IDeliveryOptionService deliveryService,
             IServiceCentreService centreService,IUserServiceCentreMappingService userServiceCentre,INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService,IWalletService walletService,IWalletTransactionService walletTransactionService,
             IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice, IMobileShipmentTrackingService mobiletrackingservice,
-            IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice)
+            IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -65,6 +68,8 @@ namespace GIGLS.Services.Implementation.Shipments
             _mobiletrackingservice = mobiletrackingservice;
             _mobilepickuprequestservice = mobilepickuprequestservice;
             _domesticroutezonemapservice = domesticroutezonemapservice;
+            _subcategoryservice = subcategoryservice;
+            _categoryservice = categoryservice;
             MapperConfig.Initialize();
         }
 
@@ -351,18 +356,42 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
 
-        public async Task<List<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages()
+        public async Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages()
         {
-            var specialpackages = await _specialdomesticpackageservice.GetSpecialDomesticPackages();
-            var special = specialpackages.ToList();
-            special.Add(new SpecialDomesticPackageDTO
-            {
-                Name = "Other",
-                Status = true,
-                SpecialDomesticPackageType = SpecialDomesticPackageType.Special
-            });
-            return special;
+            var result = _uow.SpecialDomesticPackage.GetAll();
+            var packages = from s in result
+                           select new SpecialDomesticPackageDTO
+                           {
+                               SpecialDomesticPackageType = s.SpecialDomesticPackageType,
+                               Status = s.Status,
+                               SubCategory = new SubCategoryDTO
+                               {
+                                   SubCategoryName = s.SubCategory.SubCategoryName,
+                                   Category = new CategoryDTO
+                                   {
+                                       CategoryId = s.SubCategory.Category.CategoryId,
+                                       CategoryName = s.SubCategory.Category.CategoryName
+                                   },
+                                   SubCategoryId = s.SubCategory.SubCategoryId,
+                                   CategoryId = s.SubCategory.CategoryId,
+                                   Weight = s.SubCategory.Weight
+                               }
+
+
+                           };
+            return packages;
         }
+        public async Task<List<CategoryDTO>> GetCategories()
+        {
+            var categories = await _categoryservice.GetCategories();
+            return categories;
+        }
+        public async Task<List<SubCategoryDTO>> GetSubCategories()
+        {
+            var subcategories = await _subcategoryservice.GetSubCategories();
+            return subcategories;
+        }
+
         public async Task ScanMobileShipment(ScanDTO scan)
         {
             // verify the waybill number exists in the system
@@ -409,9 +438,10 @@ namespace GIGLS.Services.Implementation.Shipments
                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
                if (preshipmentmobile != null)
                 {
-                    if (pickuprequest.ServiceCentreCode != null)
+                    if (pickuprequest.ServiceCentreId != null)
                     {
-                        var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickuprequest.ServiceCentreCode);
+                        int id = Convert.ToInt32(pickuprequest.ServiceCentreId);
+                        var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == id);
                         preshipmentmobile.ReceiverAddress = DestinationServiceCentreId.Address;
                         preshipmentmobile.ReceiverLocation.Latitude = DestinationServiceCentreId.Latitude;
                         preshipmentmobile.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude;
@@ -519,6 +549,12 @@ namespace GIGLS.Services.Implementation.Shipments
                         ShipmentScanStatus = ShipmentScanStatus.SSC
                     });
                 }
+                if (pickuprequest.Status == MobilePickUpRequestStatus.Dispute.ToString())
+                {
+                    var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Dispute.ToString();
+                    await _uow.CompleteAsync();
+                }
                 return true;
 
             }
@@ -570,6 +606,40 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+
+        public async Task<SpecialResultDTO> GetSpecialPackages()
+        {
+            try
+            {
+                var packages = await GetSpecialDomesticPackages();
+                var Categories = await GetCategories();
+                var Subcategories = await GetSubCategories();
+                var result = new SpecialResultDTO
+                {
+                    Specialpackages = packages.ToList(),
+                    Categories = Categories,
+                    SubCategories = Subcategories
+
+                };
+                return result;
+            }
+            catch(Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<PreShipmentMobileDTO>> GetDisputePreShipment()
+        {
+            var user = await _userService.GetCurrentUserId();
+
+            var shipments = _uow.PreShipmentMobile.FindAsync(s => s.UserId == user && s.shipmentstatus == MobilePickUpRequestStatus.Dispute.ToString(), "PreShipmentItems").Result;
+            var shipment = shipments.OrderByDescending(s => s.DateCreated);
+            var newPreShipment = Mapper.Map<List<PreShipmentMobileDTO>>(shipment);
+            return newPreShipment;
+            
         }
     }
 }
