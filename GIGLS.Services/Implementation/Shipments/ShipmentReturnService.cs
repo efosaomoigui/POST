@@ -99,15 +99,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //update the Receiver Details for returned shipments
                 await UpdateReceiverDetailsReturnedShipment(shipment);
-
-                //update shipment collection status to Returnstatus
-                var shipmentCollection = await _collectionService.GetShipmentCollectionById(waybill);
-                shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.SSR;
-                await _collectionService.UpdateShipmentCollection(shipmentCollection);
-
+                
                 //Create new shipment
                 var newShipment = await _shipmentService.AddShipment(shipment);
-
+                
                 //create new shipment return
                 var newShipmentReturn = new ShipmentReturn
                 {
@@ -118,6 +113,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     //Discount =                
                 };
                 _uow.ShipmentReturn.Add(newShipmentReturn);
+                
+                //update shipment collection status to Returnstatus
+                var shipmentCollection = await _collectionService.GetShipmentCollectionById(waybill);
+                shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.SSR;
+                await _collectionService.UpdateShipmentCollection(shipmentCollection);
 
                 //complete transaction
                 await _uow.CompleteAsync();
