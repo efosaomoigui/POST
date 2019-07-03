@@ -33,8 +33,8 @@ namespace GIGLS.Services.Implementation
             var newSubCategory = new SubCategory
             {
                 SubCategoryName = subcategory.SubCategoryName,
-                Weight = subcategory.Weight,
-                CategoryId = subcategory.Category.CategoryId
+                Weight = (decimal)subcategory.Weight,
+                CategoryId = (int)subcategory.Category.CategoryId
                 
             };
 
@@ -72,8 +72,8 @@ namespace GIGLS.Services.Implementation
                 throw new GenericException("SUBCATEGORY INFORMATION DOES NOT EXIST");
             }
             state.SubCategoryName = subcategory.SubCategoryName.Trim();
-            state.Weight = subcategory.Weight;
-            state.CategoryId = subcategory.CategoryId;
+            state.Weight = (decimal)subcategory.Weight;
+            state.CategoryId = (int)subcategory.CategoryId;
             await _uow.CompleteAsync();
         }
     }

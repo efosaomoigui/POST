@@ -9,7 +9,7 @@ namespace GIGLS.Core.DTO
 {
     public class CategoryDTO : BaseDomainDTO
     {
-        public int CategoryId { get; set; }
+        public int? CategoryId { get; set; }
         public string CategoryName { get; set; }
     }
 }
