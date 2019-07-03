@@ -173,7 +173,6 @@ namespace GIGLS.WebApi.Controllers.User
                //set user active country
                if (countries.Count == 1)
                {
-                   var serviceCentre = await _serviceCentreService.GetServiceCentreById(serviceCenterIds[0]);
                    user.UserActiveCountry = countries[0];
                }
 

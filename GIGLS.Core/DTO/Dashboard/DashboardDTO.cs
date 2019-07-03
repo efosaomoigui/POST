@@ -23,6 +23,8 @@ namespace GIGLS.Core.DTO.Dashboard
         public decimal TargetAmount { get; set; }
         public int TargetOrder { get; set; }
         public decimal WalletBalance { get; set; }
+
+        public CountryDTO UserActiveCountry { get; set; }
     }
 
 }
