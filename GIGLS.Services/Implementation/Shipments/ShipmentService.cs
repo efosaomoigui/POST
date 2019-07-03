@@ -828,7 +828,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //1. get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false);
+                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false && s.IsGrouped == false);
 
                 //apply filters for Service Centre
                 if (serviceCenters.Length > 0)
@@ -871,12 +871,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //3. get all grouped waybills for that Service Centre
-                var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappingWaybills(serviceCenters);
+                //var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappingWaybills(serviceCenters);
 
                 //4. filter the two lists
                 //var groupedWaybillsAsStringList = groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber);
-                var groupedWaybillsAsHashSet = new HashSet<string>(groupWayBillNumberMappings);
-                var ungroupedWaybills = paidShipments.Where(s => !groupedWaybillsAsHashSet.Contains(s.Waybill)).ToList();
+                //var groupedWaybillsAsHashSet = new HashSet<string>(groupWayBillNumberMappings);
+                //var ungroupedWaybills = paidShipments.Where(s => !groupedWaybillsAsHashSet.Contains(s.Waybill)).ToList();
+                var ungroupedWaybills = paidShipments;
 
                 //5. Ensure the waybills are in this ServiceCentre from the TransitWaybill entity
                 //Get TransitWaybillNumber as a querable list
@@ -968,8 +969,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //1. get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
-                //cant we filter by scan status too??
-                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false);
+                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false && s.IsGrouped == false);
 
                 //apply filters for Service Centre
                 if (serviceCenters.Length > 0)
@@ -1013,12 +1013,13 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //3. get all grouped waybills for that Service Centre
                 //once the waybills in group mapping for service centre grow to millions, the result will slow, need optimisation ???
-                var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappingWaybills(serviceCenters);
+                //var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappingWaybills(serviceCenters);
 
                 //4. filter the two lists
                 //var groupedWaybillsAsStringList = groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber);
-                var groupedWaybillsAsHashSet = new HashSet<string>(groupWayBillNumberMappings);
-                var ungroupedWaybills = paidShipments.Where(s => !groupedWaybillsAsHashSet.Contains(s.Waybill)).ToList();
+                //var groupedWaybillsAsHashSet = new HashSet<string>(groupWayBillNumberMappings);
+                //var ungroupedWaybills = paidShipments.Where(s => !groupedWaybillsAsHashSet.Contains(s.Waybill)).ToList();
+                var ungroupedWaybills = paidShipments;
 
 
                 //5. Ensure the waybills are in this ServiceCentre from the TransitWaybill entity

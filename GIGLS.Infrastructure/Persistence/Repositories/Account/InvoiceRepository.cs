@@ -275,7 +275,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               PaymentMethod = i.PaymentMethod,
                               CashOnDeliveryAmount = s.CashOnDeliveryAmount,
                               ReprintCounterStatus = s.ReprintCounterStatus,
-                              ShipmentScanStatus = s.ShipmentScanStatus
+                              ShipmentScanStatus = s.ShipmentScanStatus,
+                              IsGrouped = s.IsGrouped
                           });
             return result;
         }

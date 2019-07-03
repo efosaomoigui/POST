@@ -73,9 +73,21 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var resultSet = new HashSet<string>();
+                var result = new List<GroupWaybillNumberMappingDTO>();
+
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var groupWaybillMapings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(serviceCenters, dateFilterCriteria);                
-                return groupWaybillMapings;
+                var groupWaybillMapings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappings(serviceCenters, dateFilterCriteria);
+
+                foreach (var item in groupWaybillMapings)
+                {
+                    if (resultSet.Add(item.GroupWaybillNumber))
+                    {
+                        result.Add(item);
+                    }
+                }
+
+                return result.ToList();
             }
             catch (Exception)
             {
@@ -153,8 +165,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
-
+        
         //Get WaybillNumbers In Group
         public async Task<GroupWaybillNumberMappingDTO> GetWaybillNumbersInGroup(int groupWaybillNumberId)
         {
@@ -309,7 +320,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
 
                     _uow.GroupWaybillNumber.Add(newGroupWaybill);
-                    await _uow.CompleteAsync();
+                    //await _uow.CompleteAsync();
                 }
 
                 //ensure that the Manifest containing the Groupwaybill has not been dispatched
@@ -325,7 +336,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 foreach (var waybillNumber in waybillNumberList)
                 {
-                    var shipmentDTO = await _shipmentService.GetShipment(waybillNumber);
+                    //var shipmentDTO = await _shipmentService.GetShipment(waybillNumber);
+                    var shipmentDTO = await _uow.Shipment.GetAsync(x => x.Waybill == waybillNumber);
+
                     if (shipmentDTO == null)
                     {
                         throw new GenericException($"No Shipment exists for this : {waybillNumber}");
@@ -350,6 +363,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         };
                         _uow.GroupWaybillNumberMapping.Add(newMapping);
 
+                        //Mark the waybill that it has been Grouped
+                        shipmentDTO.IsGrouped = true;
+
                         //check if waybill is a transitWaybill then update entry
                         var transitWaybill = _uow.TransitWaybillNumber.SingleOrDefault(s => s.WaybillNumber == shipmentDTO.Waybill);
                         if(transitWaybill != null)
@@ -359,7 +375,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                _uow.Complete();
+                await _uow.CompleteAsync();
+                //_uow.Complete();
             }
             catch (Exception)
             {
@@ -373,7 +390,8 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var groupWaybillNumberDTO = await _groupWaybillNumberService.GetGroupWayBillNumberById(groupWaybillNumber);
-                var shipmentDTO = await _shipmentService.GetShipment(waybillNumber);
+                //var shipmentDTO = await _shipmentService.GetShipment(waybillNumber);
+                var shipmentDTO = await _uow.Shipment.GetAsync(x => x.Waybill == waybillNumber);
 
                 //validate the ids are in the system
                 if (groupWaybillNumberDTO == null)
@@ -399,7 +417,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var groupWaybillNumberMapping = _uow.GroupWaybillNumberMapping.SingleOrDefault(x => (x.GroupWaybillNumber == groupWaybillNumber) && (x.WaybillNumber == waybillNumber));
                 if (groupWaybillNumberMapping == null)
                 {
-                    throw new GenericException("GroupWaybillNumberMapping Does Not Exist");
+                    throw new GenericException("GroupWaybillNumberMapping does not exist");
                 }
                 _uow.GroupWaybillNumberMapping.Remove(groupWaybillNumberMapping);
 
@@ -415,6 +433,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (overdueShipment != null)
                 {
                     overdueShipment.OverdueShipmentStatus = OverdueShipmentStatus.UnGrouped;
+                }
+
+                //Mark the waybill that it has not been Grouped
+                if(groupWaybillNumberDTO.DepartureServiceCentreId == shipmentDTO.DepartureServiceCentreId)
+                {
+                    shipmentDTO.IsGrouped = false;
                 }
 
                 await _uow.CompleteAsync();
