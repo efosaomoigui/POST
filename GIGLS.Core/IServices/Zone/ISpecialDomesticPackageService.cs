@@ -6,7 +6,7 @@ namespace GIGLS.Core.IServices.Zone
 {
     public interface ISpecialDomesticPackageService : IServiceDependencyMarker
     {
-        Task<List<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
+        Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
         Task<SpecialDomesticPackageDTO> GetSpecialDomesticPackageById(int SpecialDomesticId);
         Task<object> AddSpecialDomesticPackage(SpecialDomesticPackageDTO SpecialDomestic);
         Task UpdateSpecialDomesticPackage(int SpecialDomesticZoneId, SpecialDomesticPackageDTO SpecialDomestic);

@@ -111,9 +111,6 @@ namespace GIGLS.Services.Implementation.Zone
             await _uow.CompleteAsync();
         }
 
-        Task<List<SpecialDomesticPackageDTO>> ISpecialDomesticPackageService.GetSpecialDomesticPackages()
-        {
-            throw new System.NotImplementedException();
-        }
+       
     }
 }

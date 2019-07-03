@@ -11,6 +11,7 @@ namespace GIGLS.Core.Enums
         Accepted,
         Confirmed,
         Rejected,
-        Delivered
+        Delivered,
+        Dispute
     }
 }

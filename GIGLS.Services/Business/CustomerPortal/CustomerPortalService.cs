@@ -37,6 +37,7 @@ using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Core.Domain.BankSettlement;
 
+
 namespace GIGLS.Services.Business.CustomerPortal
 {
     public class CustomerPortalService : ICustomerPortalService
@@ -315,30 +316,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _uow.DeliveryOption.GetDeliveryOptions();
         }
 
-        public Task<List<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages()
+        public Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages()
         {
 
-            var result = _uow.SpecialDomesticPackage.GetAll();
-            var packages = from s in result
-                           select new SpecialDomesticPackageDTO
-                           {
-                               SpecialDomesticPackageType = s.SpecialDomesticPackageType,
-                               Status = s.Status,
-                               SubCategory = new SubCategoryDTO
-                               {
-                                   SubCategoryName = s.SubCategory.SubCategoryName,
-                                   Category = new CategoryDTO
-                                   {
-                                       CategoryId = s.SubCategory.Category.CategoryId,
-                                       CategoryName = s.SubCategory.Category.CategoryName
-                                   },
-                                   SubCategoryId = s.SubCategory.SubCategoryId,
-                                   Weight = s.SubCategory.Weight
-                               }
-
-
-                           };
-            return Task.FromResult(packages.ToList());
+            return Task.FromResult(Mapper.Map<IEnumerable<SpecialDomesticPackage>, IEnumerable<SpecialDomesticPackageDTO>>(_uow.SpecialDomesticPackage.GetAll()));
         }
 
         public async Task<IEnumerable<HaulageDTO>> GetHaulages()
@@ -559,7 +540,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             items.Add("FRAGILE");
             items.Add("KEEP AT ROOM TEMPERATURE");
             items.Add("KEEP UPRIGHT");
-            items.Add("REFRIGERATED ON ARRIVA");
+            items.Add("REFRIGERATED ON ARRIVAL");
             items.Add("SENSITIVE");
             return items;
         }
@@ -619,6 +600,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             var result = await SendOTPForRegisteredUser(registeredUser);
             return result;
         }
-
+       
     }
 }

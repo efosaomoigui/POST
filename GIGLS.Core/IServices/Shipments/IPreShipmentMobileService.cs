@@ -14,11 +14,13 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<PreShipmentMobileDTO>> GetShipments(BaseFilterCriteria filterOptionsDto);
         Task<PreShipmentMobileDTO> GetPreShipmentDetail(string waybill);
         Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser();
-        Task<List<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
+        Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
         Task<MobileShipmentTrackingHistoryDTO> TrackShipment(string waybillNumber);
         Task<PreShipmentMobileDTO> AddMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest);
         Task<List<MobilePickUpRequestsDTO>> GetMobilePickupRequest();
         Task<bool> UpdateMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest);
         Task <bool> UpdatePreShipmentMobileDetails(PreShipmentItemMobileDTO Preshipmentmobile);
+        Task<SpecialResultDTO> GetSpecialPackages();
+        Task<List<PreShipmentMobileDTO>> GetDisputePreShipment();
     }
 }
