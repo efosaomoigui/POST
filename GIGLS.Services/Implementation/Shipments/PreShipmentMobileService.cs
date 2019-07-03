@@ -617,7 +617,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var Subcategories = await GetSubCategories();
                 var result = new SpecialResultDTO
                 {
-                    Specialpackages = packages,
+                    Specialpackages = packages.ToList(),
                     Categories = Categories,
                     SubCategories = Subcategories
 
