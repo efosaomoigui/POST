@@ -9,6 +9,7 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.IServices.User;
 using System.Linq;
 using GIGLS.CORE.DTO.Report;
+using GIGL.GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -144,14 +145,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 //validate the ids are in the system
                 if (manifestObj == null)
                 {
-                    await _manifestService.AddManifest(
-                        new ManifestDTO
-                        {
-                            ManifestCode = manifest,
-                            DateTime = DateTime.Now,
-                            //DispatchedBy = userId
-                        });
-                    //throw new GenericException($"No Manifest exists for this code: {manifest}");
+                    var newManifest = new Manifest
+                    {
+                        DateTime = DateTime.Now,
+                        ManifestCode = manifest
+                    };
+                    _uow.Manifest.Add(newManifest);
                 }
 
                 foreach (var groupWaybillNumber in groupWaybillNumberList)
@@ -185,8 +184,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         groupWaybill.HasManifest = true;
                     }
                 }
-
-                _uow.Complete();
+                await _uow.CompleteAsync();
             }
             catch (Exception)
             {
@@ -216,7 +214,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (manifestGroupWaybillNumberMapping != null)
                 {
                     _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupWaybillNumberMapping);
-                    //throw new GenericException("ManifestGroupWaybillNumberMapping Does Not Exist");
                     
                     //set GroupWaybill HasManifest to false
                     var groupwaybill = _uow.GroupWaybillNumber.SingleOrDefault(x => x.GroupWaybillCode == groupWaybillNumber);
