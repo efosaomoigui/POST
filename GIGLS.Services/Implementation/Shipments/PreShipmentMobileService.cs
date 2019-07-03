@@ -438,9 +438,10 @@ namespace GIGLS.Services.Implementation.Shipments
                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
                if (preshipmentmobile != null)
                 {
-                    if (pickuprequest.ServiceCentreCode != null)
+                    if (pickuprequest.ServiceCentreId != null)
                     {
-                        var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickuprequest.ServiceCentreCode);
+                        int id = Convert.ToInt32(pickuprequest.ServiceCentreId);
+                        var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == id);
                         preshipmentmobile.ReceiverAddress = DestinationServiceCentreId.Address;
                         preshipmentmobile.ReceiverLocation.Latitude = DestinationServiceCentreId.Latitude;
                         preshipmentmobile.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude;
