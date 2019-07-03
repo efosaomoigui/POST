@@ -170,6 +170,13 @@ namespace GIGLS.WebApi.Controllers.User
                    user.UserActiveServiceCentre = serviceCentre.Name;
                }
 
+               //set user active country
+               if (countries.Count == 1)
+               {
+                   var serviceCentre = await _serviceCentreService.GetServiceCentreById(serviceCenterIds[0]);
+                   user.UserActiveCountry = countries[0];
+               }
+
                return new ServiceResponse<UserDTO>
                {
                    Object = user
@@ -420,7 +427,7 @@ namespace GIGLS.WebApi.Controllers.User
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var vals = (claim.SystemRole !=null) ? "." + claim.SystemRole : ""; 
+                var vals = (claim.SystemRole != null) ? "." + claim.SystemRole : "";
                 var val = claim.claimValue + vals;
                 Claim cl = new Claim(claim.claimType, val);
                 var result = await _userService.AddClaimAsync(claim.userId, cl);
@@ -445,7 +452,7 @@ namespace GIGLS.WebApi.Controllers.User
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var val = claim.claimValue+"."+claim.SystemRole;
+                var val = claim.claimValue + "." + claim.SystemRole;
                 Claim cl = new Claim(claim.claimType, val);
                 var result = await _userService.RemoveClaimAsync(claim.userId, cl);
 
@@ -543,7 +550,7 @@ namespace GIGLS.WebApi.Controllers.User
                 }
             });
         }
-                
+
         [AllowAnonymous]
         [HttpPost]
         [Route("api/user/login")]
@@ -565,7 +572,7 @@ namespace GIGLS.WebApi.Controllers.User
 
             return await HandleApiOperationAsync(async () =>
             {
-                
+
                 using (var client = new HttpClient())
                 {
                     //setup client
@@ -591,7 +598,7 @@ namespace GIGLS.WebApi.Controllers.User
 
                     //get access token from response body
                     var responseJson = await responseMessage.Content.ReadAsStringAsync();
-                    var jObject = JObject.Parse(responseJson);                                      
+                    var jObject = JObject.Parse(responseJson);
 
                     getTokenResponse = jObject.GetValue("access_token").ToString();
 
@@ -614,7 +621,7 @@ namespace GIGLS.WebApi.Controllers.User
 
                 if (!result)
                 {
-                    throw new GenericException("Operation could not complete update successfully");    
+                    throw new GenericException("Operation could not complete update successfully");
                 }
 
                 return new ServiceResponse<bool>
@@ -667,7 +674,7 @@ namespace GIGLS.WebApi.Controllers.User
                 };
             });
         }
-        
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPut]
         [Route("api/user/changepassword/{userid}/{currentPassword}/{newPassword}")]

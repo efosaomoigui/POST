@@ -1128,7 +1128,10 @@ namespace GIGLS.Services.Implementation.User
                     {
                         CountryId = country.CountryId,
                         CountryCode = country.CountryCode,
-                        CountryName = country.CountryName
+                        CountryName = country.CountryName,
+                        CurrencyRatio = country.CurrencyRatio,
+                        CurrencyCode = country.CurrencyCode,
+                        CurrencySymbol = country.CurrencySymbol
                     };
                     priviledgeCountrys.Add(countryDTO);
                 }
