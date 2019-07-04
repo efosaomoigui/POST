@@ -440,8 +440,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     if (pickuprequest.ServiceCentreId != null)
                     {
-                        int id = Convert.ToInt32(pickuprequest.ServiceCentreId);
-                        var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == id);
+                        
+                        var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickuprequest.ServiceCentreId);
                         preshipmentmobile.ReceiverAddress = DestinationServiceCentreId.Address;
                         preshipmentmobile.ReceiverLocation.Latitude = DestinationServiceCentreId.Latitude;
                         preshipmentmobile.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude;
