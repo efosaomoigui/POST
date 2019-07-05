@@ -65,6 +65,7 @@ namespace GIGLS.Core.DTO.User
         public List<CountryDTO> Country { get; set; }
         public List<string> CountryName { get; set; }
 
+        public int UserActiveCountryId { get; set; }
         public CountryDTO UserActiveCountry { get; set; }
     }
 }

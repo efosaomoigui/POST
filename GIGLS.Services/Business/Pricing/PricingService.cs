@@ -800,6 +800,24 @@ namespace GIGLS.Services.Business.Pricing
                     throw new GenericException($"The CurrencyRatio for this country ({userActiveCountry.CountryName}) has not been assigned. Kindly inform the administrator.");
                 }
             }
+            else
+            {
+                //Use default country
+                var currentUserId = await _userService.GetCurrentUserId();
+                var currentUser = await _userService.GetUserById(currentUserId);
+                var countryId = currentUser.UserActiveCountryId;
+
+                if (countryId > 0)
+                {
+                    var country = await _uow.Country.GetAsync(countryId);
+                    countryCurrencyRatio = country.CurrencyRatio;
+                }
+                else
+                {
+                    //throw exception
+                    throw new GenericException($"You have not been assigned an Active Country. Kindly inform the administrator.");
+                }
+            }
 
             return countryCurrencyRatio;
         }

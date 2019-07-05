@@ -29,13 +29,15 @@ namespace GIGLS.WebApi.Controllers.User
         private readonly IUserService _userService;
         private readonly IPasswordGenerator _passwordGenerator;
         private IServiceCentreService _serviceCentreService;
+        private ICountryService _countryService;
 
         public UserController(IUserService userService, IPasswordGenerator passwordGenerator,
-            IServiceCentreService serviceCentreService) : base(nameof(UserController))
+            IServiceCentreService serviceCentreService, ICountryService countryService) : base(nameof(UserController))
         {
             _userService = userService;
             _passwordGenerator = passwordGenerator;
             _serviceCentreService = serviceCentreService;
+            _countryService = countryService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -157,23 +159,34 @@ namespace GIGLS.WebApi.Controllers.User
            {
                var user = await _userService.GetUserById(userId);
 
-               //set country
-               var countries = await _userService.GetPriviledgeCountrys();
-               user.Country = countries;
-               user.CountryName = countries.Select(x => x.CountryName).ToList();
-
                //set service centre
-               int[] serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+               int[] serviceCenterIds = await _userService.GetPriviledgeServiceCenters(userId);
                if (serviceCenterIds.Length == 1)
                {
                    var serviceCentre = await _serviceCentreService.GetServiceCentreById(serviceCenterIds[0]);
                    user.UserActiveServiceCentre = serviceCentre.Name;
                }
 
-               //set user active country
-               if (countries.Count == 1)
+
+               //set country from PriviledgeCountrys
+               var countries = await _userService.GetPriviledgeCountrys(userId);
+               user.Country = countries;
+               user.CountryName = countries.Select(x => x.CountryName).ToList();
+
+               //If UserActive Country is already set in the UserEntity, use that value
+               if (user.UserActiveCountryId > 0)
                {
-                   user.UserActiveCountry = countries[0];
+                   var userActiveCountry = await _countryService.GetCountryById(user.UserActiveCountryId);
+                   user.UserActiveCountry = userActiveCountry;
+                   user.UserActiveCountryId = userActiveCountry.CountryId;
+               }
+               else
+               {
+                   //set user active country
+                   if (countries.Count == 1)
+                   {
+                       user.UserActiveCountry = countries[0];
+                   }
                }
 
                return new ServiceResponse<UserDTO>
@@ -630,6 +643,30 @@ namespace GIGLS.WebApi.Controllers.User
             });
 
         }
+
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpGet]
+        [Route("api/user/countrySettings/{userid}/{countryId}")]
+        public async Task<IServiceResponse<bool>> UserActiveCountrySettings(string userid, int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _userService.UserActiveCountrySettings(userid, countryId);
+
+                if (!result)
+                {
+                    throw new GenericException("Operation could not complete update successfully");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+
+        }
+
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
