@@ -111,6 +111,7 @@ namespace GIGLS.Services.Implementation.Messaging
             var result = "";
             try
             {
+                //Need optimisation
                 var smsMessages = await _messageService.GetSmsAsync();
                 messageDTO = smsMessages.FirstOrDefault(s => s.MessageType == messageType);
 
@@ -150,6 +151,8 @@ namespace GIGLS.Services.Implementation.Messaging
                 };
 
                 var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
+
+                //need optimisation
                 var invoiceList = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).ToList();
                 var invoice = invoiceList.FirstOrDefault();
                 if (invoice != null)

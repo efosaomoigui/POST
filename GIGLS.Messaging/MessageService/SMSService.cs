@@ -1,17 +1,9 @@
 ﻿using System.Threading.Tasks;
 using System.Configuration;
-using Twilio;
-using Twilio.Rest.Api.V2010.Account;
-using Twilio.Types;
-using Twilio.Exceptions;
 using GIGLS.Core.IMessage;
 using GIGLS.Core.DTO;
-using System.Web.Script.Serialization;
 using System.Net;
-using System.IO;
 using System;
-using System.Text;
-using System.Security.Cryptography;
 
 namespace GIGLS.Messaging.MessageService
 {
@@ -34,7 +26,11 @@ namespace GIGLS.Messaging.MessageService
                 var smsApiKey = ConfigurationManager.AppSettings["smsApiKey"];
                 var smsFrom = ConfigurationManager.AppSettings["smsFrom"];
 
-                var finalURL = $"{smsURL}&api_key={smsApiKey}&to={message.To}&from={smsFrom}&sms={message.FinalBody}&response=json&unicode=0";
+                //Scriptwall url format 
+                //var finalURL = $"{smsURL}&api_key={smsApiKey}&to={message.To}&from={smsFrom}&sms={message.FinalBody}&response=json&unicode=0";
+
+                //ogosms url format
+                var finalURL = $"{smsURL}&password={smsApiKey}&sender={smsFrom}&numbers={message.To}&message={message.FinalBody}";
                 var httpWebRequest = (HttpWebRequest)WebRequest.Create(finalURL);
 
                 using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
@@ -50,7 +46,7 @@ namespace GIGLS.Messaging.MessageService
 
             return await Task.FromResult(result);
         }
-
+        
         //// Use NuGet to install Twilio 
         //private async Task<bool> ConfigSendGridasync(MessageDTO message)
         //{
