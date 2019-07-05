@@ -15,10 +15,13 @@ namespace GIGLS.WebApi.Controllers.Dashboard
     {
         private readonly IDashboardService _dashboardService;
         private readonly IUserService _userService;
-        public DashboardController(IDashboardService dashboardService, IUserService userService) :base(nameof(DashboardController))
+        private ICountryService _countryService;
+        public DashboardController(IDashboardService dashboardService, IUserService userService,
+            ICountryService countryService) : base(nameof(DashboardController))
         {
             _dashboardService = dashboardService;
             _userService = userService;
+            _countryService = countryService;
         }
 
         //[GIGLSActivityAuthorize(Activity = "View")]
@@ -45,11 +48,26 @@ namespace GIGLS.WebApi.Controllers.Dashboard
             {
                 var dashboard = await _dashboardService.GetDashboard(dashboardFilterCriteria);
 
-                //set user active country
+                //set user active country from PriviledgeCountrys
                 var countries = await _userService.GetPriviledgeCountrys();
                 if (countries.Count == 1)
                 {
                     dashboard.UserActiveCountry = countries[0];
+                }
+                else
+                {
+                    //If UserActive Country is already set in the UserEntity, use that value
+                    string currentUserId = await _userService.GetCurrentUserId();
+                    var currentUser = await _userService.GetUserById(currentUserId);
+
+                    if (currentUser.UserActiveCountryId > 0)
+                    {
+                        var userActiveCountry = await _countryService.GetCountryById(currentUser.UserActiveCountryId);
+                        if(userActiveCountry.CurrencySymbol != null)
+                        {
+                            dashboard.UserActiveCountry = userActiveCountry;
+                        }
+                    }
                 }
 
                 return new ServiceResponse<DashboardDTO>
