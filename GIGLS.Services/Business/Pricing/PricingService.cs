@@ -810,7 +810,15 @@ namespace GIGLS.Services.Business.Pricing
                 if (countryId > 0)
                 {
                     var country = await _uow.Country.GetAsync(countryId);
-                    countryCurrencyRatio = country.CurrencyRatio;
+                    if (country.CurrencyRatio > 0)
+                    {
+                        countryCurrencyRatio = country.CurrencyRatio;
+                    }
+                    else
+                    {
+                        //throw exception
+                        throw new GenericException($"The CurrencyRatio for this country ({country.CountryName}) has not been assigned. Kindly inform the administrator.");
+                    }
                 }
                 else
                 {
