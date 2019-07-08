@@ -156,44 +156,48 @@ namespace GIGLS.WebApi.Controllers.User
         public async Task<IServiceResponse<UserDTO>> GetUser(string userId)
         {
             return await HandleApiOperationAsync(async () =>
-           {
-               var user = await _userService.GetUserById(userId);
+            {
+                var user = await _userService.GetUserById(userId);
 
-               //set service centre
-               int[] serviceCenterIds = await _userService.GetPriviledgeServiceCenters(userId);
-               if (serviceCenterIds.Length == 1)
-               {
-                   var serviceCentre = await _serviceCentreService.GetServiceCentreById(serviceCenterIds[0]);
-                   user.UserActiveServiceCentre = serviceCentre.Name;
-               }
+                //Use only for Employees
+                if (user.UserChannelType == Core.Enums.UserChannelType.Employee)
+                {
+                    //set service centre
+                    int[] serviceCenterIds = await _userService.GetPriviledgeServiceCenters(userId);
+                    if (serviceCenterIds.Length == 1)
+                    {
+                        var serviceCentre = await _serviceCentreService.GetServiceCentreById(serviceCenterIds[0]);
+                        user.UserActiveServiceCentre = serviceCentre.Name;
+                    }
 
 
-               //set country from PriviledgeCountrys
-               var countries = await _userService.GetPriviledgeCountrys(userId);
-               user.Country = countries;
-               user.CountryName = countries.Select(x => x.CountryName).ToList();
+                    //set country from PriviledgeCountrys
+                    var countries = await _userService.GetPriviledgeCountrys(userId);
+                    user.Country = countries;
+                    user.CountryName = countries.Select(x => x.CountryName).ToList();
 
-               //If UserActive Country is already set in the UserEntity, use that value
-               if (user.UserActiveCountryId > 0)
-               {
-                   var userActiveCountry = await _countryService.GetCountryById(user.UserActiveCountryId);
-                   user.UserActiveCountry = userActiveCountry;
-                   user.UserActiveCountryId = userActiveCountry.CountryId;
-               }
-               else
-               {
-                   //set user active country
-                   if (countries.Count == 1)
-                   {
-                       user.UserActiveCountry = countries[0];
-                   }
-               }
+                    //If UserActive Country is already set in the UserEntity, use that value
+                    if (user.UserActiveCountryId > 0)
+                    {
+                        var userActiveCountry = await _countryService.GetCountryById(user.UserActiveCountryId);
+                        user.UserActiveCountry = userActiveCountry;
+                        user.UserActiveCountryId = userActiveCountry.CountryId;
+                    }
+                    else
+                    {
+                        //set user active country
+                        if (countries.Count == 1)
+                        {
+                            user.UserActiveCountry = countries[0];
+                        }
+                    }
+                }
 
-               return new ServiceResponse<UserDTO>
-               {
-                   Object = user
-               };
-           });
+                return new ServiceResponse<UserDTO>
+                {
+                    Object = user
+                };
+            });
         }
 
         [GIGLSActivityAuthorize(Activity = "Delete")]
@@ -202,20 +206,20 @@ namespace GIGLS.WebApi.Controllers.User
         public async Task<IServiceResponse<bool>> Deleteuser(string userId)
         {
             return await HandleApiOperationAsync(async () =>
-           {
-               var result = await _userService.RemoveUser(userId);
-               if (!result.Succeeded)
-               {
-                   throw new GenericException("Operation could not complete delete successfully: ", $"{GetErrorResult(result)}");
-               }
+            {
+                var result = await _userService.RemoveUser(userId);
+                if (!result.Succeeded)
+                {
+                    throw new GenericException("Operation could not complete delete successfully: ", $"{GetErrorResult(result)}");
+                }
 
 
-               return new ServiceResponse<bool>
-               {
-                   Object = true
-               };
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
 
-           });
+            });
         }
 
         [GIGLSActivityAuthorize(Activity = "Update")]
