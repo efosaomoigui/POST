@@ -4,6 +4,7 @@ using GIGLS.Core.IMessage;
 using GIGLS.Core.DTO;
 using System.Net;
 using System;
+using System.IO;
 
 namespace GIGLS.Messaging.MessageService
 {
@@ -15,7 +16,7 @@ namespace GIGLS.Messaging.MessageService
             return result;
         }
 
-        // Use Scriptwall Sms
+        // Use OGO Sms
         private async Task<string> ConfigSendGridasync(MessageDTO message)
         {
             string result = "";
@@ -26,11 +27,53 @@ namespace GIGLS.Messaging.MessageService
                 var smsApiKey = ConfigurationManager.AppSettings["smsApiKey"];
                 var smsFrom = ConfigurationManager.AppSettings["smsFrom"];
 
-                //Scriptwall url format 
-                //var finalURL = $"{smsURL}&api_key={smsApiKey}&to={message.To}&from={smsFrom}&sms={message.FinalBody}&response=json&unicode=0";
-
                 //ogosms url format
-                var finalURL = $"{smsURL}&password={smsApiKey}&sender={smsFrom}&numbers={message.To}&message={message.FinalBody}";
+                var finalURL = $"{smsURL}&password={smsApiKey}&sender={smsFrom}&numbers={message.To}&message={message.FinalBody}&response=json&unicode=0";
+                var httpWebRequest = (HttpWebRequest)WebRequest.Create(finalURL);
+
+                using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
+                {
+                    using (var sr = new StreamReader(httpResponse.GetResponseStream()))
+                    {
+                        result = sr.ReadToEnd();
+                    }
+                }
+
+                result = GetOGOSMSResponseMessage(result);
+            }
+            catch (Exception ex)
+            {
+                // An exception occurred making the REST call
+                throw ex;
+            }
+
+            return await Task.FromResult(result);
+        }
+
+        private string GetOGOSMSResponseMessage(string reponseMessage)
+        {
+            var message = ConfigurationManager.AppSettings[reponseMessage];
+
+            if (message == null)
+            {
+                message = reponseMessage;
+            }
+            return message;
+        }
+
+        // Use Scriptwall Sms
+        private async Task<string> ConfigSendGridasyncScriptwallSMS(MessageDTO message)
+        {
+            string result = "";
+
+            try
+            {
+                var smsURL = ConfigurationManager.AppSettings["smsURL"];
+                var smsApiKey = ConfigurationManager.AppSettings["smsApiKey"];
+                var smsFrom = ConfigurationManager.AppSettings["smsFrom"];
+
+                //Scriptwall url format
+                var finalURL = $"{smsURL}&api_key={smsApiKey}&to={message.To}&from={smsFrom}&sms={message.FinalBody}&response=json&unicode=0";
                 var httpWebRequest = (HttpWebRequest)WebRequest.Create(finalURL);
 
                 using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
