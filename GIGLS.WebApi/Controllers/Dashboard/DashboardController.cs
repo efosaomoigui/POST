@@ -4,6 +4,7 @@ using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Dashboard;
 using GIGLS.Core.IServices.User;
 using GIGLS.Services.Implementation;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -63,12 +64,17 @@ namespace GIGLS.WebApi.Controllers.Dashboard
                     if (currentUser.UserActiveCountryId > 0)
                     {
                         var userActiveCountry = await _countryService.GetCountryById(currentUser.UserActiveCountryId);
-                        if(userActiveCountry.CurrencySymbol != null)
+                        if (userActiveCountry.CurrencySymbol != null)
                         {
                             dashboard.UserActiveCountry = userActiveCountry;
                         }
                     }
                 }
+
+                //set ActiveCountries
+                var allCountries = await _countryService.GetCountries();
+                var activeCountries = allCountries.Where(s => s.IsActive == true).ToList();
+                dashboard.ActiveCountries = activeCountries;
 
                 return new ServiceResponse<DashboardDTO>
                 {

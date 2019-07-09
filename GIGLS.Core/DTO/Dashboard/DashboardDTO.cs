@@ -25,6 +25,7 @@ namespace GIGLS.Core.DTO.Dashboard
         public decimal WalletBalance { get; set; }
 
         public CountryDTO UserActiveCountry { get; set; }
+        public List<CountryDTO> ActiveCountries { get; set; }
     }
 
 }

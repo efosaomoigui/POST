@@ -97,6 +97,7 @@ namespace GIGLS.Services.Implementation
                 country.CurrencySymbol = countryDto.CurrencySymbol;
                 country.CurrencyCode = countryDto.CurrencyCode;
                 country.CurrencyRatio = countryDto.CurrencyRatio;
+                country.IsActive = countryDto.IsActive;
                 _uow.Complete();
             }
             catch (Exception)
