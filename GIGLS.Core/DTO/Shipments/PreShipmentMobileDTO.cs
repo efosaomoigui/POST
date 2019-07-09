@@ -102,6 +102,8 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsDelivered { get; set; }
         public int TrackingId { get; set; }
 
+        public string VehicleType { get; set; }
+
 
     }
 }

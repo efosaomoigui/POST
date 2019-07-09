@@ -28,6 +28,8 @@ namespace GIGLS.WebApi.Controllers.Business
             return await HandleApiOperationAsync(async () =>
             {
                 var price = await _pricing.GetPrice(pricingDto);
+                var countryCurrencyRatio = await _pricing.GetCountryCurrencyRatio();
+                price = price * countryCurrencyRatio;
 
                 return new ServiceResponse<decimal>
                 {
@@ -44,6 +46,8 @@ namespace GIGLS.WebApi.Controllers.Business
             return await HandleApiOperationAsync(async () =>
             {
                 var price = await _pricing.GetHaulagePrice(haulagePricingDto);
+                var countryCurrencyRatio = await _pricing.GetCountryCurrencyRatio();
+                price = price * countryCurrencyRatio;
 
                 return new ServiceResponse<decimal>
                 {
@@ -60,6 +64,8 @@ namespace GIGLS.WebApi.Controllers.Business
             return await HandleApiOperationAsync(async () =>
             {
                 var price = await _pricing.GetInternationalPrice(pricingDto);
+                var countryCurrencyRatio = await _pricing.GetCountryCurrencyRatio();
+                price = price * countryCurrencyRatio;
 
                 return new ServiceResponse<decimal>
                 {
