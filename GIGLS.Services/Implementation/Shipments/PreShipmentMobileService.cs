@@ -523,9 +523,9 @@ namespace GIGLS.Services.Implementation.Shipments
                             Nature = s.ItemType,
                             Price = (decimal)s.CalculatedPrice,
                             Quantity = s.Quantity,
-                            Length = (double)s.Length,
-                            Width = (double)s.Width,
-                            Height = (double)s.Height
+                            //Length = (double)s.Length,
+                            //Width = (double)s.Width,
+                            //Height = (double)s.Height
 
                         }).ToList()
                     };
