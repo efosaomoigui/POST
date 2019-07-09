@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using GIGLS.Core.DTO.Fleets;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,6 +18,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task RemoveGroupWaybillNumberFromManifest(string manifest, string groupWaybillNumber);
         Task<ManifestGroupWaybillNumberMappingDTO> GetManifestForWaybill(string waybill);
         Task<ManifestDTO> GetManifestSearch(string manifestCode);
-
+        Task<List<ManifestWaybillMappingDTO>> GetWaybillsInListOfManifest(string captainId);
     }
 }

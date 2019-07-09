@@ -84,6 +84,22 @@ namespace GIGLS.WebApi.Controllers.dispatchs
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("captain")]
+        public async Task<IServiceResponse<List<DispatchDTO>>> GetDispatchCaptainByName(string captain)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var dispatch = await _dispatchService.GetDispatchCaptainByName(captain);
+
+                return new ServiceResponse<List<DispatchDTO>>
+                {
+                    Object = dispatch
+            };
+            });
+        }
+
 
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]

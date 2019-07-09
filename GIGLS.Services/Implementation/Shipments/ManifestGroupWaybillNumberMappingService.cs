@@ -1,15 +1,15 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
-using System.Collections.Generic;
-using GIGLS.Infrastructure;
-using GIGLS.Core.IServices.Shipments;
-using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
-using System.Linq;
 using GIGLS.CORE.DTO.Report;
-using GIGL.GIGLS.Core.Domain;
+using GIGLS.Infrastructure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -19,15 +19,17 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IManifestService _manifestService;
         private readonly IGroupWaybillNumberService _groupWaybillNumberService;
         private readonly IUserService _userService;
+        private readonly IManifestWaybillMappingService _manifestWaybillMappingService;
 
         public ManifestGroupWaybillNumberMappingService(IUnitOfWork uow,
             IManifestService manifestService, IGroupWaybillNumberService groupWaybillNumberService,
-            IUserService userService)
+            IUserService userService, IManifestWaybillMappingService manifestWaybillMappingService)
         {
             _uow = uow;
             _manifestService = manifestService;
             _groupWaybillNumberService = groupWaybillNumberService;
             _userService = userService;
+            _manifestWaybillMappingService = manifestWaybillMappingService;
             MapperConfig.Initialize();
         }
 
@@ -132,6 +134,42 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //Get Waybills in a list of objects containing manifests
+        public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInListOfManifest(string captainId)
+        {
+            try
+            {
+                List<ManifestWaybillMappingDTO> finalResult = new List<ManifestWaybillMappingDTO>();
+
+                //0. Add search filter by date
+
+                //1. get all dispatch for that captain
+                var dispatchResult = await _uow.Dispatch.FindAsync(x => x.DriverDetail.Equals(captainId));
+
+                //2. get the manifest waybill mapping
+                foreach (var dispatch in dispatchResult)
+                {
+                    //check if it is a dispatch manifest - Delivery
+                    var manifest = await _uow.Manifest.GetAsync(s => s.ManifestCode == dispatch.ManifestNumber);
+
+                    if (manifest.ManifestType == Core.Enums.ManifestType.Delivery)
+                    {
+                        var mwp = await _manifestWaybillMappingService.GetWaybillsInManifest(dispatch.ManifestNumber);
+                        finalResult.AddRange(mwp);
+                    }
+                }
+
+
+                finalResult = finalResult.OrderBy(s => s.DateCreated).Take(30).ToList();
+                return finalResult;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+
         //map groupWaybillNumber to Manifest
         public async Task MappingManifestToGroupWaybillNumber(string manifest, List<string> groupWaybillNumberList)
         {
@@ -214,7 +252,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (manifestGroupWaybillNumberMapping != null)
                 {
                     _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupWaybillNumberMapping);
-                    
+
                     //set GroupWaybill HasManifest to false
                     var groupwaybill = _uow.GroupWaybillNumber.SingleOrDefault(x => x.GroupWaybillCode == groupWaybillNumber);
                     groupwaybill.HasManifest = false;
@@ -251,8 +289,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 //group the result by manifest                
                 var resultGroup = manifestGroupWaybillMapings.GroupBy(x => x.ManifestCode).ToList();
                 var result = new List<ManifestGroupWaybillNumberMappingDTO>();
-                
-                foreach(var resultGrp in resultGroup)
+
+                foreach (var resultGrp in resultGroup)
                 {
                     result.Add(resultGrp.FirstOrDefault());
                 }
@@ -274,14 +312,14 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException($"No Manifest exists for this Waybill: {waybill}");
             }
-            
+
             //check if the user is at the service centre
             var serviceCentreIds = await _userService.GetPriviledgeServiceCenters();
             string groupwaybill = null;
 
-            if(serviceCentreIds.Length > 0)
+            if (serviceCentreIds.Length > 0)
             {
-                foreach(var s in groupWaybillNumberMapping.ToList())
+                foreach (var s in groupWaybillNumberMapping.ToList())
                 {
                     if (serviceCentreIds.Contains(s.DepartureServiceCentreId))
                     {
@@ -289,7 +327,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
             }
-            
+
             //2. Use the Groupwaybill to get manifest
             var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappingsUsingGroupWaybill(groupwaybill);
 
@@ -307,8 +345,8 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var manifestDTO = await _manifestService.GetManifestByCode(manifestCode);
-               
-                var DispatchName =  _uow.User.GetUserById(manifestDTO.DispatchedBy).Result;
+
+                var DispatchName = _uow.User.GetUserById(manifestDTO.DispatchedBy).Result;
                 if (DispatchName != null)
                 {
                     manifestDTO.DispatchedBy = DispatchName.FirstName + " " + DispatchName.LastName;
@@ -319,7 +357,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     manifestDTO.ReceiverBy = RecieverName.FirstName + " " + RecieverName.LastName;
                 }
-                
+
                 return manifestDTO;
             }
             catch (Exception)

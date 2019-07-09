@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.WebApi.Filters;
 using System.Linq;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.Fleets;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -130,6 +131,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<List<GroupWaybillNumberDTO>>
                 {
                     Object = groupWaybillNumbersInManifest
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("waybillsinmanifest")]
+        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetWaybillsInListOfManifest([FromUri]string captainId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var WaybillNumbersInMannifest = await _service.GetWaybillsInListOfManifest(captainId);
+
+                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                {
+                    Object = WaybillNumbersInMannifest
                 };
             });
         }

@@ -307,6 +307,26 @@ namespace GIGLS.Services.Implementation.Fleets
             }
         }
 
+        public async Task<List<DispatchDTO>> GetDispatchCaptainByName(string captain)
+        {
+            try
+            {
+                var dispatchResult = await _uow.Dispatch.FindAsync(x => x.DriverDetail.Equals(captain));
+               
+                if (dispatchResult.Count() == 0)
+                {
+                    return null;
+                }
+                var dispatchDTO = Mapper.Map<List<DispatchDTO>>(dispatchResult);
+
+                return dispatchDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<DispatchDTO>> GetDispatchs()
         {
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
