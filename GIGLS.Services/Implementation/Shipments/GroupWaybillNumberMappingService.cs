@@ -468,6 +468,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 await MappingWaybillNumberToGroup(groupWaybillNumber, waybillNumberList);
 
                 //3. Save into OverdueShipment as grouped status
+                //update shipment collection as GroupedForWarehouse and remove overshipment 
                 var currentUserId = await _userService.GetCurrentUserId();
                 foreach (var waybill in waybillNumberList)
                 {

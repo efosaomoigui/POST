@@ -621,7 +621,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && s.CompanyType != CompanyType.Ecommerce.ToString() && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
+                List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable()
+                    .Where(s => s.IsCancelled == false && s.CompanyType != CompanyType.Ecommerce.ToString() 
+                    && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
                 // filter by global property for OverDueShipments
                 var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount).Result;

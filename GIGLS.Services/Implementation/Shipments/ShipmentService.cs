@@ -1506,10 +1506,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //get all warehouse service centre
-                var allServiceCenters = await _centreService.GetServiceCentres();
-                allServiceCenters = allServiceCenters.Where(s => warehouseServiceCentres.Contains(s.Code));
+                var allServiceCenters = await _centreService.GetServiceCentreByCode(warehouseServiceCentres);
 
-                return allServiceCenters.ToList();
+                return allServiceCenters;
             }
             catch (Exception)
             {
