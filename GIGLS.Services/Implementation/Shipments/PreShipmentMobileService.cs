@@ -78,6 +78,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
+                preShipment.ZoneMapping = zoneid.ZoneId;
                 var newPreShipment = await CreatePreShipment(preShipment);
                 await _uow.CompleteAsync();
                 bool IsBalanceSufficient = true;
@@ -510,8 +511,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         ShipmentPackagePrice = preshipmentmobile.GrandTotal,
                         ApproximateItemsWeight = 0.00,
                         ReprintCounterStatus = false,
+                        CustomerType = preshipmentmobile.CustomerType,
                         Value = preshipmentmobile.Value,
                         PaymentStatus = PaymentStatus.Paid,
+                        IsFromMobile = true,
                         ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
                         {
                             Description = s.Description,
@@ -535,12 +538,24 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
                 {
-                    await ScanMobileShipment(new ScanDTO
-                    {
-                        WaybillNumber = pickuprequest.Waybill,
-                        ShipmentScanStatus = ShipmentScanStatus.AHD
-                    });
                     var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
+                    if (preshipmentmobile.ZoneMapping == 1)
+                    {
+                        await ScanMobileShipment(new ScanDTO
+                        {
+                            WaybillNumber = pickuprequest.Waybill,
+                            ShipmentScanStatus = ShipmentScanStatus.MAHD
+                        });
+                    }
+                    else
+                    {
+                        await ScanMobileShipment(new ScanDTO
+                        {
+                            WaybillNumber = pickuprequest.Waybill,
+                            ShipmentScanStatus = ShipmentScanStatus.MSVC
+                        });
+
+                    }
                     preshipmentmobile.shipmentstatus = "Shipment Delivered";
                     await _uow.CompleteAsync();
                 }

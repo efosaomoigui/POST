@@ -769,6 +769,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private async Task<string> CreateInvoice(ShipmentDTO shipmentDTO)
         {
+            var invoice = new Invoice();
             var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
             var invoiceNo = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Invoice, departureServiceCentre.Code);
 
@@ -778,18 +779,36 @@ namespace GIGLS.Services.Implementation.Shipments
                 var company = await _companyService.GetCompanyById(shipmentDTO.CustomerId);
                 settlementPeriod = company.SettlementPeriod;
             }
-
-            var invoice = new Invoice()
+            //added this check for Mobile Shipments
+            if (shipmentDTO.IsFromMobile == true)
             {
-                InvoiceNo = invoiceNo,
-                Amount = shipmentDTO.GrandTotal,
-                PaymentStatus = PaymentStatus.Pending,
-                Waybill = shipmentDTO.Waybill,
-                PaymentDate = DateTime.Now,
-                DueDate = DateTime.Now.AddDays(settlementPeriod),
-                IsInternational = shipmentDTO.IsInternational,
-                ServiceCentreId = departureServiceCentre.ServiceCentreId
-            };
+                invoice = new Invoice()
+                {
+                    InvoiceNo = invoiceNo,
+                    Amount = shipmentDTO.GrandTotal,
+                    PaymentStatus = PaymentStatus.Paid,
+                    Waybill = shipmentDTO.Waybill,
+                    PaymentDate = DateTime.Now,
+                    PaymentMethod = PaymentType.Wallet.ToString(),
+                    DueDate = DateTime.Now.AddDays(settlementPeriod),
+                    IsInternational = shipmentDTO.IsInternational,
+                    ServiceCentreId = departureServiceCentre.ServiceCentreId
+                };
+            }
+            else
+            {
+                 invoice = new Invoice()
+                {
+                    InvoiceNo = invoiceNo,
+                    Amount = shipmentDTO.GrandTotal,
+                    PaymentStatus = PaymentStatus.Pending,
+                    Waybill = shipmentDTO.Waybill,
+                    PaymentDate = DateTime.Now,
+                    DueDate = DateTime.Now.AddDays(settlementPeriod),
+                    IsInternational = shipmentDTO.IsInternational,
+                    ServiceCentreId = departureServiceCentre.ServiceCentreId
+                };
+            }
 
             _uow.Invoice.Add(invoice);
             return invoiceNo;
@@ -1522,7 +1541,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
             try
             {
-                
                 shipment.ApproximateItemsWeight = 0;
 
                 // add serial numbers to the ShipmentItems

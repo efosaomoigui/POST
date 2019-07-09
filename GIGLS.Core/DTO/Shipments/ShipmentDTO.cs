@@ -127,5 +127,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         //Reroute Reason
         public ShipmentRerouteDTO ShipmentReroute { get; set; }
+
+        public bool IsFromMobile { get; set; }
 }
 }
