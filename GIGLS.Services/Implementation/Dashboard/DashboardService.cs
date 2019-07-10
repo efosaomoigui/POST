@@ -891,6 +891,13 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             int[] serviceCenterIds = { };   // empty array
             var serviceCentreShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+            
+            //filter by country
+            if(dashboardFilterCriteria.ActiveCountryId != null && dashboardFilterCriteria.ActiveCountryId > 0)
+            {
+                //serviceCentreShipmentsQueryable = serviceCentreShipmentsQueryable.Where(s =>
+                //s.);
+            }
 
             //set for TargetAmount and TargetOrder
             var serviceCentres = await _serviceCenterService.GetServiceCentres();

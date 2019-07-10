@@ -750,6 +750,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
             }
 
+            ////--start--///Set the DepartureCountryId and DestinationCountryId
+            var departureServC =  _uow.ServiceCentre.Get(shipmentDTO.DepartureServiceCentreId);
+            var departureStation =  _uow.Station.Get(departureServC.StationId);
+            var departureState =  _uow.State.Get(departureStation.StateId);
+            var departureCountryId = departureState.CountryId;
+
+            var destinationServC = _uow.ServiceCentre.Get(shipmentDTO.DestinationServiceCentreId);
+            var destinationStation = _uow.Station.Get(destinationServC.StationId);
+            var destinationState = _uow.State.Get(destinationStation.StateId);
+            var destinationCountryId = destinationState.CountryId;
+            ////--end--///Set the DepartureCountryId and DestinationCountryId
+
             _uow.Shipment.Add(newShipment);
             //await _uow.CompleteAsync();
 

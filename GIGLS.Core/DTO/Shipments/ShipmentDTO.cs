@@ -123,9 +123,13 @@ namespace GIGLS.Core.DTO.Shipments
         public string SenderState { get; set; }
 
         //Cancelled Reason
-        public  ShipmentCancelDTO ShipmentCancel { get; set; }
+        public ShipmentCancelDTO ShipmentCancel { get; set; }
 
         //Reroute Reason
         public ShipmentRerouteDTO ShipmentReroute { get; set; }
-}
+
+        //Country info
+        public int DepartureCountryId { get; set; }
+        public int DestinationCountryId { get; set; }
+    }
 }
