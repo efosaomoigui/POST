@@ -14,5 +14,6 @@ namespace GIGLS.Core.DTO.Partnership
         public string Destination { get; set; }
         public string Departure { get; set; }
         public decimal AmountReceived { get; set; }
+        public string Waybill { get; set; }
     }
 }

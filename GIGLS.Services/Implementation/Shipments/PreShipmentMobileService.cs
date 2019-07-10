@@ -586,7 +586,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         Destination = preshipmentmobile.ReceiverAddress,
                         Departure = preshipmentmobile.SenderAddress,
-                        AmountReceived = price
+                        AmountReceived = price,
+                        Waybill = preshipmentmobile.Waybill
                     };
                     var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
                     preshipmentmobile.shipmentstatus = "Shipment Delivered";
