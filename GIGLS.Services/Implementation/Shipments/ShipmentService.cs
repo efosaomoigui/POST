@@ -655,13 +655,17 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<ShipmentDTO> CreateShipment(ShipmentDTO shipmentDTO)
         {
             await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
-            await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
+            var destinationSC = await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
 
             //Get SuperCentre for Home Delivery
             if (shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
             {
-                var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
-                shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
+                //also check that the destination is not a hub
+                if(destinationSC.IsHUB == true)
+                {
+                    var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
+                    shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
+                }
             }
 
             // get deliveryOptionIds and set the first value in shipment
