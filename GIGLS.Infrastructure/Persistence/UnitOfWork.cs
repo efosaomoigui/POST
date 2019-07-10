@@ -409,7 +409,10 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IMobileScanStatusRepository MobileScanStatus { get; set; }
-       
+
+        [Inject]
+        public IPartnerTransactionsRepository PartnerTransactions { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

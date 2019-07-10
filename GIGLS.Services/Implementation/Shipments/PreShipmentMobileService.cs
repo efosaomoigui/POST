@@ -25,6 +25,8 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.DTO;
 using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.Partnership;
+using GIGLS.Core.DTO.Partnership;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -46,13 +48,15 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IDomesticRouteZoneMapService _domesticroutezonemapservice;
         private readonly ICategoryService _categoryservice;
         private readonly ISubCategoryService _subcategoryservice;
+        private readonly IPartnerTransactionsService _partnertransactionservice;
 
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
             IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice, IMobileShipmentTrackingService mobiletrackingservice,
-            IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice)
+            IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice,
+            IPartnerTransactionsService partnertransactionservice)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -70,6 +74,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _domesticroutezonemapservice = domesticroutezonemapservice;
             _subcategoryservice = subcategoryservice;
             _categoryservice = categoryservice;
+            _partnertransactionservice = partnertransactionservice;
             MapperConfig.Initialize();
         }
 
@@ -476,6 +481,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest);
+                var userId = await _userService.GetCurrentUserId();
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Confirmed.ToString())
                 {
                     await ScanMobileShipment(new ScanDTO
@@ -487,7 +493,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var DepartureStation = await _uow.Station.GetAsync(s => s.StationId == preshipmentmobile.SenderStationId);
                     var DestinationStation = await _uow.Station.GetAsync(s => s.StationId == preshipmentmobile.ReceiverStationId);
                     var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                    var userId = await _userService.GetCurrentUserId();
+                   
                     var MobileShipment = new ShipmentDTO
                     {
                         Waybill = preshipmentmobile.Waybill,
@@ -538,7 +544,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
                 {
-                    var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
+                    
+                    var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "SenderLocation,ReceiverLocation");
                     if (preshipmentmobile.ZoneMapping == 1)
                     {
                         await ScanMobileShipment(new ScanDTO
@@ -556,6 +563,32 @@ namespace GIGLS.Services.Implementation.Shipments
                         });
 
                     }
+                    var Location = new LocationDTO
+                    {
+                        DestinationLatitude = (double)preshipmentmobile.ReceiverLocation.Latitude,
+                        DestinationLongitude = (double)preshipmentmobile.ReceiverLocation.Longitude,
+                        OriginLatitude = (double)preshipmentmobile.SenderLocation.Latitude,
+                        OriginLongitude = (double)preshipmentmobile.SenderLocation.Longitude
+                    };
+
+                    RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
+                    var Partner = new PartnerPayDTO
+                    {
+                        Distance = details.rows[0].elements[0].distance.value.ToString(),
+                        Time = details.rows[0].elements[0].duration.value.ToString(),
+                        ShipmentPrice = (decimal)preshipmentmobile.CalculatedTotal
+                    };
+                    decimal price = await _partnertransactionservice.GetPriceForPartner(Partner);
+                    var partneruser = await _userService.GetUserById(userId);
+                    var wallet = _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode).Result;
+                    wallet.Balance = wallet.Balance + price;
+                    var partnertransactions = new PartnerTransactionsDTO
+                    {
+                        Destination = preshipmentmobile.ReceiverAddress,
+                        Departure = preshipmentmobile.SenderAddress,
+                        AmountReceived = price
+                    };
+                    var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
                     preshipmentmobile.shipmentstatus = "Shipment Delivered";
                     await _uow.CompleteAsync();
                 }
@@ -701,6 +734,22 @@ namespace GIGLS.Services.Implementation.Shipments
             var shipment = shipments.OrderByDescending(s => s.DateCreated);
             var newPreShipment = Mapper.Map<List<PreShipmentMobileDTO>>(shipment);
             return newPreShipment;
+
+        }
+        public async Task<SummaryTransactionsDTO> GetPartnerWalletTransactions()
+        {
+            var user = await _userService.GetCurrentUserId();
+            var transactions = _uow.PartnerTransactions.FindAsync(s => s.UserId == user).Result;
+            var partneruser = await _userService.GetUserById(user);
+            var wallet = _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode).Result;
+            transactions = transactions.OrderByDescending(s => s.DateCreated);
+            var TotalTransactions = Mapper.Map<List<PartnerTransactionsDTO>>(transactions);
+            var summary = new SummaryTransactionsDTO
+            {
+                WalletBalance = wallet.Balance,
+                Transactions = TotalTransactions
+            };
+            return summary;
 
         }
     }

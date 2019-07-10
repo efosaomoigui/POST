@@ -350,6 +350,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<SubCategory, SubCategoryDTO>();
                 config.CreateMap<SubCategoryDTO, SubCategory>();
+
+                config.CreateMap<PartnerTransactions, PartnerTransactionsDTO>();
+                config.CreateMap<PartnerTransactionsDTO, PartnerTransactions>();
             });
 
             isInit = true;
