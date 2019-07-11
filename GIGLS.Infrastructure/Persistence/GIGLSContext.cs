@@ -252,6 +252,8 @@ namespace GIGLS.Infrastructure.Persistence
 
         public DbSet<SubCategory> SubCategory { get; set; }
 
+        public DbSet<PartnerTransactions> PartnerTransactions { get; set; }
+
         #endregion
 
 

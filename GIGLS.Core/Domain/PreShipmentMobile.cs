@@ -103,6 +103,6 @@ namespace GIGLS.Core.Domain
 
         public string VehicleType { get; set; }
 
-
+        public int? ZoneMapping { get; set; }
     }
 }

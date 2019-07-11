@@ -417,10 +417,14 @@
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP %286%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP1.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP2.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP3.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %286%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy1.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy2.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy3.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm - FTP1.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevmm - Web Deploy.pubxml" />

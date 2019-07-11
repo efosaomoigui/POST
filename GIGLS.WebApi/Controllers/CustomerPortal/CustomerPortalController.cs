@@ -34,6 +34,7 @@ using GIGLS.Core;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.Domain.BankSettlement;
+using GIGLS.Core.DTO.Partnership;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -1009,6 +1010,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<List<PreShipmentMobileDTO>>
                 {
                     Object = shipments
+                };
+            });
+        }
+        [HttpGet]
+        [Route("getpartnerwallettransactions")]
+        public async Task<IServiceResponse<SummaryTransactionsDTO>> GetPartnerwalletTransactions()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var totalTransactions = await _preshipmentmobileService.GetPartnerWalletTransactions();
+
+                return new ServiceResponse<SummaryTransactionsDTO>
+                {
+                    Object = totalTransactions
                 };
             });
         }

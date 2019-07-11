@@ -158,6 +158,8 @@ namespace GIGLS.Core
 
         ISubCategoryRepository SubCategory { get; set; }
 
+        IPartnerTransactionsRepository PartnerTransactions { get; set; }
+
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
     }

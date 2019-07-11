@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.CORE.DTO.Report;
@@ -22,5 +23,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task <bool> UpdatePreShipmentMobileDetails(PreShipmentItemMobileDTO Preshipmentmobile);
         Task<SpecialResultDTO> GetSpecialPackages();
         Task<List<PreShipmentMobileDTO>> GetDisputePreShipment();
+        Task<SummaryTransactionsDTO> GetPartnerWalletTransactions();
     }
 }

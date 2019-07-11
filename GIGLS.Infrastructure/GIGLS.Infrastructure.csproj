@@ -162,6 +162,7 @@
     <Compile Include="Persistence\Repositories\OTPRepository.cs" />
     <Compile Include="Persistence\Repositories\Partnership\PartnerApplicationRepository.cs" />
     <Compile Include="Persistence\Repositories\Partnership\PartnerRepository.cs" />
+    <Compile Include="Persistence\Repositories\Partnership\PartnerTransactionsRepository.cs" />
     <Compile Include="Persistence\Repositories\PaymentTransactions\PaymentPartialTransactionRepository.cs" />
     <Compile Include="Persistence\Repositories\PaymentTransactions\PaymentTransactionRepository.cs" />
     <Compile Include="Persistence\Repositories\Repository.cs" />
