@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Services.Implementation;
@@ -28,6 +29,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 var shipmentcancelled = await _service.GetShipmentCancels();
+
+                return new ServiceResponse<List<ShipmentCancelDTO>>
+                {
+                    Object = shipmentcancelled
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("search")]
+        public async Task<IServiceResponse<List<ShipmentCancelDTO>>> GetAllShipmentCancel(ShipmentCollectionFilterCriteria collectionFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentcancelled = await _service.GetShipmentCancels(collectionFilterCriteria);
 
                 return new ServiceResponse<List<ShipmentCancelDTO>>
                 {

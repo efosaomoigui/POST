@@ -270,7 +270,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             //filter the data by using count which serve as the number of days to display
-            DateTime backwardDatebyNumberofDays = DateTime.Today.AddDays(-180);
+            DateTime backwardDatebyNumberofDays = DateTime.Today.AddDays(-30);
             shipmentCollection = shipmentCollection.Where(x => x.DateCreated >= backwardDatebyNumberofDays);
 
             //get total count
