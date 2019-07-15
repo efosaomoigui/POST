@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Dashboard;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Dashboard;
@@ -47,13 +48,13 @@ namespace GIGLS.WebApi.Controllers.Dashboard
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var dashboard = await _dashboardService.GetDashboard(dashboardFilterCriteria);
+                CountryDTO userActiveCountry = null;
 
                 //set user active country from PriviledgeCountrys
                 var countries = await _userService.GetPriviledgeCountrys();
                 if (countries.Count == 1)
                 {
-                    dashboard.UserActiveCountry = countries[0];
+                    userActiveCountry = countries[0];
                 }
                 else
                 {
@@ -63,18 +64,26 @@ namespace GIGLS.WebApi.Controllers.Dashboard
 
                     if (currentUser.UserActiveCountryId > 0)
                     {
-                        var userActiveCountry = await _countryService.GetCountryById(currentUser.UserActiveCountryId);
-                        if (userActiveCountry.CurrencySymbol != null)
+                        var userActiveCountryFromEntity = await _countryService.GetCountryById(currentUser.UserActiveCountryId);
+                        if (userActiveCountryFromEntity.CurrencySymbol != null)
                         {
-                            dashboard.UserActiveCountry = userActiveCountry;
+                            userActiveCountry = userActiveCountryFromEntity;
                         }
                     }
                 }
+
+                //filter based on UserActiveCountry
+                if(userActiveCountry != null)
+                {
+                    dashboardFilterCriteria.ActiveCountryId = userActiveCountry.CountryId;
+                }
+                var dashboard = await _dashboardService.GetDashboard(dashboardFilterCriteria);
 
                 //set ActiveCountries
                 var allCountries = await _countryService.GetCountries();
                 var activeCountries = allCountries.Where(s => s.IsActive == true).ToList();
                 dashboard.ActiveCountries = activeCountries;
+                dashboard.UserActiveCountry = userActiveCountry;
 
                 return new ServiceResponse<DashboardDTO>
                 {
