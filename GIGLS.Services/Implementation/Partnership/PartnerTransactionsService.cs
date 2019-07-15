@@ -66,7 +66,7 @@ namespace GIGLS.Services.Implementation.Partnership
             var TotalAmountBasedonTime = actualTimeinMinutes * 2;
             var TotalAmountBasedonShipment = partnerpay.ShipmentPrice * 0.05M;
             var TotalPrice = TotalAmountBasedonDistance + TotalAmountBasedonTime + TotalAmountBasedonShipment;
-            return TotalPrice;
+            return await Task.FromResult(TotalPrice);
         }
         public async Task<object> AddPartnerPaymentLog(PartnerTransactionsDTO walletPaymentLogDto)
         {

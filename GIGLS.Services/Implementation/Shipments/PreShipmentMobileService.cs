@@ -370,6 +370,7 @@ namespace GIGLS.Services.Implementation.Shipments
                            {
                                SpecialDomesticPackageId = s.SpecialDomesticPackageId,
                                SpecialDomesticPackageType = s.SpecialDomesticPackageType,
+                               Name = s.Name,
                                Status = s.Status,
                                SubCategory = new SubCategoryDTO
                                {
