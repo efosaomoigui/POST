@@ -661,7 +661,7 @@ namespace GIGLS.Services.Implementation.Shipments
             if (shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
             {
                 //also check that the destination is not a hub
-                if(destinationSC.IsHUB == true)
+                if(destinationSC.IsHUB != true)
                 {
                     var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
                     shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
