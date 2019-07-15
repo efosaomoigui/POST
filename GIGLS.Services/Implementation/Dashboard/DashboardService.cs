@@ -115,7 +115,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             return dashboardDTO;
         }
-        
+
         private async Task<DashboardDTO> GetDashboardForServiceCentreOld(int serviceCenterId)
         {
             var dashboardDTO = new DashboardDTO();
@@ -188,7 +188,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             return dashboardDTO;
         }
-        
+
         private async Task<DashboardDTO> GetDashboardForServiceCentre(int serviceCenterId)
         {
             int currentYear = DateTime.Now.Year;
@@ -204,11 +204,11 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated.Year == currentYear);
             var serviceCentreShipments = allShipmentsQueryable.Where(s => serviceCenterId == s.DepartureServiceCentreId);
-                        
+
             // get shipment ordered
             var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
             dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
-            
+
             // set properties
             dashboardDTO.ServiceCentre = serviceCentre;
             dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.DateCreated.Year == currentYear && serviceCenterId == s.DepartureServiceCentreId).Count();
@@ -233,7 +233,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             return dashboardDTO;
         }
-        
+
         private async Task<DashboardDTO> GetDashboardForStationOld(int stationId)
         {
             var dashboardDTO = new DashboardDTO();
@@ -309,12 +309,12 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             return dashboardDTO;
         }
-        
+
         private async Task<DashboardDTO> GetDashboardForStation(int stationId)
         {
             int currentYear = DateTime.Now.Year;
             var dashboardDTO = new DashboardDTO();
-            
+
             //get the station
             var stationDTO = await _stationService.GetStationById(stationId);
             dashboardDTO.Station = stationDTO;
@@ -322,20 +322,20 @@ namespace GIGLS.Services.Implementation.Dashboard
             // get the service centre
             var serviceCentres = await _serviceCenterService.GetServiceCentresByStationId(stationId);
             int[] serviceCenterIds = serviceCentres.Select(s => s.ServiceCentreId).ToArray();
-            
+
             var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated.Year == currentYear);
             var serviceCentreShipments = allShipments.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId));
-            
+
             //set for TargetAmount and TargetOrder
             dashboardDTO.TargetOrder = serviceCentres.Where(s => s.StationId == stationId).Sum(s => s.TargetOrder);
             dashboardDTO.TargetAmount = serviceCentres.Where(s => s.StationId == stationId).Sum(s => s.TargetAmount);
-            
+
             // get shipment ordered
             var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
             dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
-            
+
             // set properties
-            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.DateCreated.Year == currentYear && serviceCenterIds.Contains(s.DepartureServiceCentreId)).Count();            
+            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.DateCreated.Year == currentYear && serviceCenterIds.Contains(s.DepartureServiceCentreId)).Count();
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
 
             //customers
@@ -476,7 +476,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             return dashboardDTO;
         }
-        
+
         private async Task<DashboardDTO> GetDashboardForGlobal()
         {
             int currentYear = DateTime.Now.Year;
@@ -493,11 +493,11 @@ namespace GIGLS.Services.Implementation.Dashboard
             // get shipment ordered
             var shipmentsOrderedByServiceCenter = serviceCentreShipmentsQueryable.ToList().AsQueryable();
             dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
-            
+
             // set properties
             dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.DateCreated.Year == currentYear).Count();
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
-            
+
             //customers
             int accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated.Year == currentYear).Count();
             int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated.Year == currentYear).Count();
@@ -505,7 +505,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             // MostRecentOrder
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
-            
+
             // populate customer
             //await PopulateCustomer(dashboardDTO);
 
@@ -554,19 +554,19 @@ namespace GIGLS.Services.Implementation.Dashboard
                 if (currentMonth == month)
                 {
                     dashboardDTO.CurrentMonthGraphData = graphData;
-                }                
+                }
             }
 
             dashboardDTO.GraphData = graphDataList;
 
             await Task.FromResult(0);
         }
-        
+
         private int GetTotalCutomersCount(IQueryable<InvoiceView> shipmentsOrderedByServiceCenter)
         {
             var count = (from shipment in shipmentsOrderedByServiceCenter select shipment).
                 GroupBy(g => new { g.CustomerType, g.CustomerId }).Count();
-            
+
             return count;
         }
 
@@ -668,7 +668,7 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             return serviceCenterIds;
         }
-        
+
         public async Task<DashboardDTO> GetDashboard(DashboardFilterCriteria dashboardFilterCriteria)
         {
             var dashboardDTO = new DashboardDTO();
@@ -692,7 +692,7 @@ namespace GIGLS.Services.Implementation.Dashboard
                 {
                     throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
                 }
-                
+
                 if (claimValue[0] == "Public")
                 {
                     dashboardDTO = new DashboardDTO()
@@ -891,12 +891,19 @@ namespace GIGLS.Services.Implementation.Dashboard
 
             int[] serviceCenterIds = { };   // empty array
             var serviceCentreShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
-            
+
             //filter by country
-            if(dashboardFilterCriteria.ActiveCountryId != null && dashboardFilterCriteria.ActiveCountryId > 0)
+            var TotalShipmentDeliveredQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s =>
+                s.IsShipmentCollected == true
+                && s.DateCreated >= startDate
+                && s.DateCreated < endDate);
+            if (dashboardFilterCriteria.ActiveCountryId != null && dashboardFilterCriteria.ActiveCountryId > 0)
             {
-                //serviceCentreShipmentsQueryable = serviceCentreShipmentsQueryable.Where(s =>
-                //s.);
+                serviceCentreShipmentsQueryable = serviceCentreShipmentsQueryable.Where(s =>
+                    s.DepartureCountryId == dashboardFilterCriteria.ActiveCountryId);
+
+                TotalShipmentDeliveredQueryable = TotalShipmentDeliveredQueryable.Where(s =>
+                    s.DepartureCountryId == dashboardFilterCriteria.ActiveCountryId);
             }
 
             //set for TargetAmount and TargetOrder
@@ -909,7 +916,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             dashboardDTO.ShipmentsOrderedByServiceCenter = shipmentsOrderedByServiceCenter;
 
             // set properties
-            dashboardDTO.TotalShipmentDelivered = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == true && s.DateCreated >= startDate && s.DateCreated < endDate).Count();
+            dashboardDTO.TotalShipmentDelivered = TotalShipmentDeliveredQueryable.Count();
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
 
             //customers
@@ -941,15 +948,15 @@ namespace GIGLS.Services.Implementation.Dashboard
             //use this date as the next year of when we launched Agility to cater for
             //month we have not launch agility that will be empty
             int year = 2018;
-            
+
             // fill GraphDataDTO by month
             for (int month = 1; month <= 12; month++)
             {
                 var thisMonthShipments = shipmentsOrderedByServiceCenter.Where(
                     s => s.DateCreated.Month == month);
-                
+
                 var firstDataToGetYear = thisMonthShipments.FirstOrDefault();
-                if(firstDataToGetYear != null)
+                if (firstDataToGetYear != null)
                 {
                     year = firstDataToGetYear.DateCreated.Year;
                 }
