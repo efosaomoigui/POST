@@ -13,5 +13,6 @@ namespace GIGLS.Core.IServices.MessagingLog
         Task<object> AddEmailSendLog(EmailSendLogDTO messageDto);
         Task UpdateEmailSendLog(int messageId, EmailSendLogDTO messageDto);
         Task RemoveEmailSendLog(int messageId);
+        Task<List<EmailSendLogDTO>> GetEmailSendLog(string email);
     }
 }
