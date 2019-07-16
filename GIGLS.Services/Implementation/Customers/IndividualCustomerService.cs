@@ -170,6 +170,11 @@ namespace GIGLS.Services.Implementation.Customers
                 }
 
                 IndividualCustomerDTO individual = Mapper.Map<IndividualCustomerDTO>(customer);
+
+                //get all countries and set the country name
+                var userCountry = await _uow.Country.GetAsync(individual.UserActiveCountryId);
+                individual.UserActiveCountryName = userCountry?.CountryName;
+
                 return individual;
             }
             catch (Exception)
@@ -190,6 +195,11 @@ namespace GIGLS.Services.Implementation.Customers
                 //}
 
                 IndividualCustomerDTO individual = Mapper.Map<IndividualCustomerDTO>(customer);
+
+                //get all countries and set the country name
+                var userCountry = await _uow.Country.GetAsync(individual.UserActiveCountryId);
+                individual.UserActiveCountryName = userCountry?.CountryName;
+
                 return individual;
             }
             catch (Exception)
