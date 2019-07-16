@@ -5,7 +5,6 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core;
 using GIGLS.Infrastructure;
 using GIGLS.Core.Domain;
-using AutoMapper;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.DTO.Report;
 
