@@ -276,7 +276,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               CashOnDeliveryAmount = s.CashOnDeliveryAmount,
                               ReprintCounterStatus = s.ReprintCounterStatus,
                               ShipmentScanStatus = s.ShipmentScanStatus,
-                              IsGrouped = s.IsGrouped
+                              IsGrouped = s.IsGrouped,
+                              DepartureCountryId = s.DepartureCountryId,
+                              DestinationCountryId = s.DestinationCountryId
                           });
             return result;
         }
@@ -327,7 +329,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               DepositStatus = s.DepositStatus,
                               PaymentMethod = i.PaymentMethod,
                               PickupOptions = s.PickupOptions,
-                              IsCancelled = s.IsCancelled
+                              IsCancelled = s.IsCancelled,
+                              DepartureCountryId = s.DepartureCountryId,
+                              DestinationCountryId = s.DestinationCountryId
                           });
             return result;
         }

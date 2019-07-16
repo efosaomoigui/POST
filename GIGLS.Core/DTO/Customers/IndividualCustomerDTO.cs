@@ -27,5 +27,9 @@ namespace GIGLS.Core.DTO.Customers
         public List<ShipmentDTO> CustomerShipments { get; set; }
 
         public string Password { get; set; }
+
+        //User Active CountryId
+        public int UserActiveCountryId { get; set; }
+        public string UserActiveCountryName { get; set; }
     }
 }

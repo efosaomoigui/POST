@@ -8,5 +8,6 @@
         public string CurrencySymbol { get; set; }
         public string CurrencyCode { get; set; }
         public decimal CurrencyRatio { get; set; }
+        public bool IsActive { get; set; }
     }
 }

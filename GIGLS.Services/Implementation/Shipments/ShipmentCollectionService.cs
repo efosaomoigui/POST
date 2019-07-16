@@ -264,13 +264,24 @@ namespace GIGLS.Services.Implementation.Shipments
                 Where(x => shipmentsWaybills.Contains(x.Waybill));
 
             //add WaybillFilter
-            if(filterOptionsDto.WaybillFilter != null && filterOptionsDto.WaybillFilter.Length > 0)
+            if (filterOptionsDto.WaybillFilter != null && filterOptionsDto.WaybillFilter.Length > 0)
             {
                 shipmentCollection = shipmentCollection.Where(s => s.Waybill.Contains(filterOptionsDto.WaybillFilter));
             }
 
             //filter the data by using count which serve as the number of days to display
             DateTime backwardDatebyNumberofDays = DateTime.Today.AddDays(-30);
+            var hubManifestDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HUBManifestDaysToDisplay).Result;
+            if (hubManifestDaysCountObj != null)
+            {
+                int globalProp = 0;
+                var hubManifestDaysCount = hubManifestDaysCountObj.Value;
+                int.TryParse(hubManifestDaysCount, out globalProp);
+                if (globalProp > 0)
+                {
+                    backwardDatebyNumberofDays = DateTime.Today.AddDays(-1 * (globalProp));
+                }
+            }
             shipmentCollection = shipmentCollection.Where(x => x.DateCreated >= backwardDatebyNumberofDays);
 
             //get total count
@@ -518,7 +529,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     DEMStatusHistory = CODStatushistory.RecievedAtServiceCenter,
                     ServiceCenterCode = getServiceCenterCode[0].Code
                 };
-                
+
                 //insert demurage into demurrage entity 
                 var newDemurrage = new Demurrage
                 {
@@ -626,7 +637,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable()
-                    .Where(s => s.IsCancelled == false && s.CompanyType != CompanyType.Ecommerce.ToString() 
+                    .Where(s => s.IsCancelled == false && s.CompanyType != CompanyType.Ecommerce.ToString()
                     && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
                 // filter by global property for OverDueShipments

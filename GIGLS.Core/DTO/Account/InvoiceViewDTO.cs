@@ -105,6 +105,9 @@ namespace GIGLS.Core.DTO.Account
 
         public bool IsCODPaidOut { get; set; }
 
+        //Country info
+        public int DepartureCountryId { get; set; }
+        public int DestinationCountryId { get; set; }
     }
 
 }

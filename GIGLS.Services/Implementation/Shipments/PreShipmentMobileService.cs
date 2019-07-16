@@ -210,15 +210,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (!string.IsNullOrEmpty(preShipmentItem.Value))
                 {
                     DeclaredValue += Convert.ToDecimal(preShipmentItem.Value);
-                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + Convert.ToDecimal(preShipmentItem.Value);
+                    var DeclaredValueForPreShipment = Convert.ToDecimal(preShipmentItem.Value);
+                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M);
                     preShipment.IsdeclaredVal = true;
                 }
                 Price += (decimal)preShipmentItem.CalculatedPrice;
             };
-            int EstimatedDeclaredPrice = Convert.ToInt32(DeclaredValue);
+            decimal EstimatedDeclaredPrice = Convert.ToDecimal(DeclaredValue);
             preShipment.DeliveryPrice = Price;
-            preShipment.Vat = (decimal)(Convert.ToInt32(preShipment.DeliveryPrice) * 0.05);
-            preShipment.InsuranceValue = (decimal)(EstimatedDeclaredPrice * 0.01);
+            preShipment.Vat = (decimal)(preShipment.DeliveryPrice * 0.05M);
+            preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
             preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice + preShipment.Vat + preShipment.InsuranceValue);
             preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal / 100d, 0) * 100;
             preShipment.Value = DeclaredValue;
