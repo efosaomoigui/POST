@@ -40,5 +40,8 @@ namespace GIGLS.Core.DTO.Customers
 
         public List<CompanyContactPersonDTO> ContactPersons { get; set; }
         public List<ShipmentDTO> CompanyShipments { get; set; }
+
+        //User Active CountryId
+        public int UserActiveCountryId { get; set; }
     }
 }

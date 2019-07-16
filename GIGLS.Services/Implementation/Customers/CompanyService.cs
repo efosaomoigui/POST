@@ -118,7 +118,8 @@ namespace GIGLS.Services.Implementation.Customers
                     UserChannelCode = newCompany.CustomerCode,
                     UserChannelPassword = password,
                     UserChannelType = userChannelType,
-                    PasswordExpireDate = DateTime.Now
+                    PasswordExpireDate = DateTime.Now,
+                    UserActiveCountryId = newCompany.UserActiveCountryId
                 });
 
                 //complete
@@ -250,6 +251,7 @@ namespace GIGLS.Services.Implementation.Customers
                 company.ReturnServiceCentre = companyDto.ReturnServiceCentre;
                 company.ReturnAddress = companyDto.ReturnAddress;
                 company.RcNumber = companyDto.RcNumber;
+                company.UserActiveCountryId = companyDto.UserActiveCountryId;
 
                 if (companyDto.ContactPersons.Any())
                 {
@@ -271,6 +273,7 @@ namespace GIGLS.Services.Implementation.Customers
                 user.LastName = companyDto.Name;
                 user.FirstName = companyDto.Name;
                 user.Email = companyDto.Email;
+                user.UserActiveCountryId = companyDto.UserActiveCountryId;
 
                 await _userService.UpdateUser(user.Id, user);
 
@@ -370,7 +373,8 @@ namespace GIGLS.Services.Implementation.Customers
                             Username = newCompany.CustomerCode,
                             UserChannelCode = newCompany.CustomerCode,
                             UserChannelPassword = password,
-                            UserChannelType = userChannelType
+                            UserChannelType = userChannelType,
+                            UserActiveCountryId = newCompany.UserActiveCountryId
                         });
                     }
                     catch (Exception)
