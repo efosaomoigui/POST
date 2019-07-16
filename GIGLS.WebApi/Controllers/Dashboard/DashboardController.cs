@@ -77,6 +77,8 @@ namespace GIGLS.WebApi.Controllers.Dashboard
                 {
                     dashboardFilterCriteria.ActiveCountryId = userActiveCountry.CountryId;
                 }
+
+                //Actual call
                 var dashboard = await _dashboardService.GetDashboard(dashboardFilterCriteria);
 
                 //set ActiveCountries

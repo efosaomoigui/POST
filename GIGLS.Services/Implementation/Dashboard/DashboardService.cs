@@ -904,6 +904,15 @@ namespace GIGLS.Services.Implementation.Dashboard
 
                 TotalShipmentDeliveredQueryable = TotalShipmentDeliveredQueryable.Where(s =>
                     s.DepartureCountryId == dashboardFilterCriteria.ActiveCountryId);
+
+                //customers
+                int accountCustomer = _uow.Company.GetAllAsQueryable().
+                    Where(c => c.DateCreated >= startDate && c.DateCreated < endDate &&
+                    c.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId).Count();
+                int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().
+                    Where(i => i.DateCreated >= startDate && i.DateCreated < endDate &&
+                    i.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId).Count();
+                dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
             }
 
             //set for TargetAmount and TargetOrder
@@ -918,11 +927,6 @@ namespace GIGLS.Services.Implementation.Dashboard
             // set properties
             dashboardDTO.TotalShipmentDelivered = TotalShipmentDeliveredQueryable.Count();
             dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
-
-            //customers
-            int accountCustomer = _uow.Company.GetAllAsQueryable().Where(c => c.DateCreated >= startDate && c.DateCreated < endDate).Count();
-            int individualCustomer = _uow.IndividualCustomer.GetAllAsQueryable().Where(i => i.DateCreated >= startDate && i.DateCreated < endDate).Count();
-            dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
 
             // MostRecentOrder
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
