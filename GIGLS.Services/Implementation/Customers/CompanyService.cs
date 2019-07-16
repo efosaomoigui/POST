@@ -218,6 +218,10 @@ namespace GIGLS.Services.Implementation.Customers
                     }).ToList();
                 }
 
+                //get all countries and set the country name
+                var userCountry = await _uow.Country.GetAsync(companyDto.UserActiveCountryId);
+                companyDto.UserActiveCountryName = userCountry?.CountryName;
+
                 return companyDto;
             }
             catch (Exception)

@@ -43,5 +43,6 @@ namespace GIGLS.Core.DTO.Customers
 
         //User Active CountryId
         public int UserActiveCountryId { get; set; }
+        public string UserActiveCountryName { get; set; }
     }
 }
