@@ -118,6 +118,20 @@ namespace GIGLS.WebApi.Controllers.User
             });
         }
 
+        [GIGLSActivityAuthorize(Activity ="View")]
+        [HttpGet]
+        [Route("api/user/dispatchriders")]
+        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetDispatchRiders()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var users = await _userService.GetDispatchRiders();
+                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                {
+                    Object = users
+                };
+            });
+        }
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]

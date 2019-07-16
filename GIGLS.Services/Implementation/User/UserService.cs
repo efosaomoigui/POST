@@ -105,6 +105,11 @@ namespace GIGLS.Services.Implementation.User
             return _unitOfWork.User.GetDispatchCaptains();
         }
 
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchRiders()
+        {
+            return _unitOfWork.User.GetDispatchRiders();
+        }
+
         //Get a user by Id using Guid from identity implement of EF
         public async Task<UserDTO> GetUserById(string Id)
         {

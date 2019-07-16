@@ -6,6 +6,7 @@ using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.Fleets;
@@ -359,6 +360,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (shipmentCollectionObj != null)
                     {
                         manifestwaybill.ShipmentScanStatus = shipmentCollectionObj.ShipmentScanStatus;
+                        var strings = manifestwaybill.ShipmentScanStatus.ToString();
+                        var scanList = await _uow.ScanStatus.GetAsync(x => x.Code == strings);
+                       
+                        var scanListDto = Mapper.Map<ScanStatusDTO>(scanList);
+                        manifestwaybill.ScanDescription = scanListDto.Incident;
+                        
                     }
                 }
 

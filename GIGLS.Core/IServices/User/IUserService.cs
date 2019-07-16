@@ -17,7 +17,8 @@ namespace GIGLS.Core.IServices.User
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCorporateCustomerUsers();
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsers();
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetSystemUsers();
-        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchCaptains();        
+        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchCaptains();
+        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchRiders();
         Task<UserDTO> GetUserById(string userId);
         Task<UserDTO> GetUserByEmail(string email);
         Task<UserDTO> GetUserById(int userId);

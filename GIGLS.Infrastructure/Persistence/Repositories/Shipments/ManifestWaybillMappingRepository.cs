@@ -1,8 +1,10 @@
 ﻿using GIGLS.Core.IRepositories.Shipments;
+using GIGLS.Core.IRepositories.Fleets;
 using GIGLS.Core.Domain;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.Fleets;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -110,6 +112,34 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                             };
 
             return await Task.FromResult(manifestWaybillMappingDTO.OrderByDescending(x => x.DateCreated).ToList());
+        }
+
+        public async Task<List<DispatchDTO>> GetWaybillsinManifestMappings(string captainId,DateFilterCriteria dateFilterCriteria)
+        {
+            //get startDate and EndDate
+            var queryDate = dateFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+
+            var waybills = Context.Dispatch.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.DriverDetail.Equals(captainId)).AsQueryable();
+            //waybills = waybills.Where(s => captainId.Equals(s.DriverDetail));
+            var waybillManifestMappingDTO = from mgw in waybills
+                                            select new DispatchDTO
+                                            {
+                                                DateCreated = mgw.DateCreated,
+                                                DateModified = mgw.DateModified,
+                                                Amount = mgw.Amount,
+                                                ManifestNumber = mgw.ManifestNumber,
+                                                RegistrationNumber = mgw.RegistrationNumber,
+                                                DepartureId = mgw.DepartureId,
+                                                DispatchId = mgw.DispatchId,
+                                                DriverDetail = mgw.DriverDetail,
+                                                ReceivedBy = mgw.ReceivedBy,
+                                                
+
+                                            };
+            return await Task.FromResult(waybillManifestMappingDTO.OrderByDescending(x => x.DateCreated).ToList());
         }
 
         public async Task<List<ManifestWaybillMappingDTO>> GetManifestWaybillWaitingForSignOff(int[] serviceCentreIds, List<string> manifests)

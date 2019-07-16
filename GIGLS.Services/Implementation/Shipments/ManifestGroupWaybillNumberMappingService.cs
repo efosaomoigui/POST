@@ -134,7 +134,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        //Get Waybills in a list of objects containing manifests
+        //Get  30 Waybills in a list of objects containing manifests for Riders Delivery Progress Page
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInListOfManifest(string captainId)
         {
             try
@@ -145,22 +145,24 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //1. get all dispatch for that captain
                 var dispatchResult = await _uow.Dispatch.FindAsync(x => x.DriverDetail.Equals(captainId));
+                dispatchResult = dispatchResult.OrderBy(s => s.DateCreated).Take(30);
 
                 //2. get the manifest waybill mapping
                 foreach (var dispatch in dispatchResult)
                 {
                     //check if it is a dispatch manifest - Delivery
-                    var manifest = await _uow.Manifest.GetAsync(s => s.ManifestCode == dispatch.ManifestNumber);
+                    //var manifest = await _uow.Manifest.GetAsync(s => s.ManifestCode == dispatch.ManifestNumber);
 
-                    if (manifest.ManifestType == Core.Enums.ManifestType.Delivery)
-                    {
+                    //if (manifest.ManifestType == Core.Enums.ManifestType.Delivery)
+                    //{
                         var mwp = await _manifestWaybillMappingService.GetWaybillsInManifest(dispatch.ManifestNumber);
+                    
                         finalResult.AddRange(mwp);
-                    }
+                    //}
                 }
 
 
-                finalResult = finalResult.OrderBy(s => s.DateCreated).Take(30).ToList();
+                //finalResult = finalResult.OrderBy(s => s.DateCreated).Take(30).ToList();
                 return finalResult;
             }
             catch (Exception)
@@ -168,6 +170,34 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
 
+        }
+
+        //Get waybills according to date range selected for Riders Delivery Progress Page
+        public async Task<List<ManifestWaybillMappingDTO>> GetAllWaybillsinListOfManifest(string captainId, DateFilterCriteria dateFilterCriteria)
+        {
+            try
+            {
+                List<ManifestWaybillMappingDTO> finalResult = new List<ManifestWaybillMappingDTO>();
+
+                //var dispatchResult = await _uow.Dispatch.FindAsync(x => x.DriverDetail.Equals(captainId));
+                
+                var dispatchresult = await _uow.ManifestWaybillMapping.GetWaybillsinManifestMappings(captainId, dateFilterCriteria);
+
+                foreach (var dispatch in dispatchresult)
+                {
+                    //var manifest = await _uow.Manifest.GetAsync(s => s.ManifestCode == dispatch.ManifestNumber);
+                    //if (manifest.ManifestType == Core.Enums.ManifestType.Delivery)
+                    //{
+                        var mwp = await _manifestWaybillMappingService.GetWaybillsInManifest(dispatch.ManifestNumber);
+                        finalResult.AddRange(mwp);
+                    //}
+                }
+                return finalResult;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         //map groupWaybillNumber to Manifest
