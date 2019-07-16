@@ -73,7 +73,7 @@ namespace GIGLS.WebApi.Controllers.Dashboard
                 }
 
                 //filter based on UserActiveCountry
-                if(userActiveCountry != null)
+                if(dashboardFilterCriteria.ActiveCountryId == null && userActiveCountry != null)
                 {
                     dashboardFilterCriteria.ActiveCountryId = userActiveCountry.CountryId;
                 }
