@@ -85,6 +85,16 @@ namespace GIGLS.WebApi.Controllers.Dashboard
                 dashboard.ActiveCountries = activeCountries;
                 dashboard.UserActiveCountry = userActiveCountry;
 
+                //set the filtered country
+                if (dashboardFilterCriteria.ActiveCountryId != null && dashboardFilterCriteria.ActiveCountryId > 0)
+                {
+                    var UserActiveCountryForFilter = await _countryService.GetCountryById((int)dashboardFilterCriteria.ActiveCountryId);
+                    if (UserActiveCountryForFilter != null)
+                    {
+                        dashboard.UserActiveCountryForFilter = UserActiveCountryForFilter;
+                    }
+                }
+
                 return new ServiceResponse<DashboardDTO>
                 {
                     Object = dashboard

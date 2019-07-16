@@ -26,6 +26,7 @@ namespace GIGLS.Core.DTO.Dashboard
 
         public CountryDTO UserActiveCountry { get; set; }
         public List<CountryDTO> ActiveCountries { get; set; }
+        public CountryDTO UserActiveCountryForFilter { get; set; }
     }
 
 }
