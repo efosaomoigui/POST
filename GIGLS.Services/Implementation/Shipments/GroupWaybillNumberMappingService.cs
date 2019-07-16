@@ -233,6 +233,14 @@ namespace GIGLS.Services.Implementation.Shipments
                         continue;
                     }
 
+                    //who mapped the group
+                    string userName = groupWaybillNumberMapping.UserId;
+                    var mappedUser = await _uow.User.GetUserById(groupWaybillNumberMapping.UserId);
+                    if(mappedUser != null)
+                    {
+                        userName = mappedUser.FirstName + " " + mappedUser.LastName;
+                    }
+
                     resultList.Add(new WaybillNumberDTO { WaybillCode = shipmentDTO.Waybill });
                     shipmentList.Add(new ShipmentDTO
                     {
@@ -251,7 +259,13 @@ namespace GIGLS.Services.Implementation.Shipments
                             Name = shipmentDTO.DestinationServiceCentreName,
                             Code = shipmentDTO.DestinationServiceCentreCode,
                             ServiceCentreId = shipmentDTO.DestinationServiceCentreId
-                        }
+                        },
+
+                        //use shipment DateCreated to represent Date Mapped
+                        DateCreated = groupWaybillNumberMapping.DateMapped,
+
+                        //use userId to represent who mapped the waybill to group
+                        UserId = userName
                     });
 
                     waybills.Add(shipmentDTO.Waybill);
@@ -268,6 +282,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         Code = shipmentDTO.DestinationServiceCentreCode,
                         ServiceCentreId = shipmentDTO.DestinationServiceCentreId
                     };
+                    
                 }
 
                 var groupWaybillNumberMappingDTO = new GroupWaybillNumberMappingDTO
@@ -307,9 +322,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Error processing request. The login user is not assign to any service centre nor has the right privilege");
                 }
                 
+                var currentUserId = await _userService.GetCurrentUserId();
+
                 if (groupwaybillObj == null)
                 {                    
-                    var currentUserId = await _userService.GetCurrentUserId();
                     var newGroupWaybill = new GroupWaybillNumber
                     {
                         GroupWaybillCode = groupWaybillNumber,
@@ -360,6 +376,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             DepartureServiceCentreId = departureServiceCenterId,
                             DestinationServiceCentreId = serviceCenterId,
                             OriginalDepartureServiceCentreId = departureServiceCenterId,
+                            UserId = currentUserId
                         };
                         _uow.GroupWaybillNumberMapping.Add(newMapping);
 
@@ -376,7 +393,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 await _uow.CompleteAsync();
-                //_uow.Complete();
             }
             catch (Exception)
             {
