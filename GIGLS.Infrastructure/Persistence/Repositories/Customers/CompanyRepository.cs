@@ -52,7 +52,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        ReturnAddress = c.ReturnAddress,
                                        DateCreated = c.DateCreated,
                                        DateModified = c.DateModified,
-                                       WalletBalance = w.Balance
+                                       WalletBalance = w.Balance,
+                                       UserActiveCountryId = c.UserActiveCountryId
                                    };
                 return Task.FromResult(companiesDto.ToList());
             }

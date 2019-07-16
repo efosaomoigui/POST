@@ -95,6 +95,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  SenderAddress = r.SenderAddress,
                                                  SenderState = r.SenderState,
                                                  ApproximateItemsWeight = r.ApproximateItemsWeight,
+                                                 DepartureCountryId = r.DepartureCountryId,
+                                                 DestinationCountryId = r.DestinationCountryId,
 
                                                  ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
                                                  {
@@ -199,6 +201,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        SenderState = r.SenderState,
                                        ReprintCounterStatus = r.ReprintCounterStatus,
                                        ApproximateItemsWeight = r.ApproximateItemsWeight,
+                                       DepartureCountryId = r.DepartureCountryId,
+                                       DestinationCountryId = r.DestinationCountryId,
                                        ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
                                        {
                                            CancelReason = x.CancelReason
@@ -282,6 +286,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                    SenderAddress = r.SenderAddress,
                                    SenderState = r.SenderState,
                                    ApproximateItemsWeight = r.ApproximateItemsWeight,
+                                   DepartureCountryId = r.DepartureCountryId,
+                                   DestinationCountryId = r.DestinationCountryId,
                                    ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
                                    {
                                        CancelReason = x.CancelReason
@@ -410,7 +416,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      Description = r.Description,
                                                      SenderAddress = r.SenderAddress,
                                                      SenderState = r.SenderState,
-                                                     ApproximateItemsWeight = r.ApproximateItemsWeight
+                                                     ApproximateItemsWeight = r.ApproximateItemsWeight,
+                                                     DepartureCountryId = r.DepartureCountryId,
+                                                     DestinationCountryId = r.DestinationCountryId
                                                  }).ToList();
 
                 //filter
@@ -528,6 +536,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      SenderAddress = r.SenderAddress,
                                                      SenderState = r.SenderState,
                                                      ApproximateItemsWeight = r.ApproximateItemsWeight,
+                                                     DepartureCountryId = r.DepartureCountryId,
+                                                     DestinationCountryId = r.DestinationCountryId,
                                                  }).ToList();
 
                 //filter
@@ -698,6 +708,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  SenderAddress = r.SenderAddress,
                                                  SenderState = r.SenderState,
                                                  ApproximateItemsWeight = r.ApproximateItemsWeight,
+                                                 DepartureCountryId = r.DepartureCountryId,
+                                                 DestinationCountryId = r.DestinationCountryId,
                                                  ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
                                                  {
                                                      CancelReason = x.CancelReason
@@ -841,6 +853,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  SenderAddress = r.SenderAddress,
                                                  SenderState = r.SenderState,
                                                  ApproximateItemsWeight = r.ApproximateItemsWeight,
+                                                 DepartureCountryId = r.DepartureCountryId,
+                                                 DestinationCountryId = r.DestinationCountryId,
                                                  ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
                                                  {
                                                      CancelReason = x.CancelReason
@@ -914,6 +928,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            SenderAddress = r.SenderAddress,
                                            SenderState = r.SenderState,
                                            ApproximateItemsWeight = r.ApproximateItemsWeight,
+                                           DepartureCountryId = r.DepartureCountryId,
+                                           DestinationCountryId = r.DestinationCountryId,
                                            ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
                                            {
                                                CancelReason = x.CancelReason

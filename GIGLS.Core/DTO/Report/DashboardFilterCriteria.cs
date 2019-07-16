@@ -61,5 +61,7 @@ namespace GIGLS.Core.DTO.Report
 
             return new Tuple<DateTime, DateTime>(startDate, endDate.AddDays(1));
         }
+
+        public int? ActiveCountryId { get; set; }
     }
 }
