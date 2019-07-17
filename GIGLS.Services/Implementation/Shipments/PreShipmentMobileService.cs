@@ -83,11 +83,9 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 //null DateCreated
-                if (preShipment.DateCreated == null )
-                {
-                    preShipment.DateCreated = DateTime.Now;
-                }
-
+               
+                preShipment.DateCreated = DateTime.Now;
+               
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
                 preShipment.ZoneMapping = zoneid.ZoneId;
                 var newPreShipment = await CreatePreShipment(preShipment);
