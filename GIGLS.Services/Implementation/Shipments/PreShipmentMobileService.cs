@@ -138,6 +138,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 newPreShipment.IsConfirmed = false;
                 newPreShipment.IsDelivered = false;
                 newPreShipment.shipmentstatus = "Shipment created";
+                newPreShipment.DateCreated = DateTime.Now;
                 preShipmentDTO.IsBalanceSufficient = true;
                 _uow.PreShipmentMobile.Add(newPreShipment);
                 await _uow.CompleteAsync();
