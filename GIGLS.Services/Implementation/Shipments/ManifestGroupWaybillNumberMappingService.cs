@@ -1,6 +1,8 @@
-﻿using GIGL.GIGLS.Core.Domain;
+﻿using AutoMapper;
+using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
@@ -138,58 +140,68 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInListOfManifest(string captainId)
         {
             try
-            {
-                List<ManifestWaybillMappingDTO> finalResult = new List<ManifestWaybillMappingDTO>();
-
-                //0. Add search filter by date
-
-                //1. get all dispatch for that captain
+            {                
+                //1. get all dispatch for that captain -- update this to get the data from the database instead of app memory
                 var dispatchResult = await _uow.Dispatch.FindAsync(x => x.DriverDetail.Equals(captainId));
                 dispatchResult = dispatchResult.OrderBy(s => s.DateCreated).Take(30);
 
+                var dispatchResultDTO = Mapper.Map<List<DispatchDTO>>(dispatchResult);
+
                 //2. get the manifest waybill mapping
-                foreach (var dispatch in dispatchResult)
-                {
-                    //check if it is a dispatch manifest - Delivery
-                    //var manifest = await _uow.Manifest.GetAsync(s => s.ManifestCode == dispatch.ManifestNumber);
-
-                    //if (manifest.ManifestType == Core.Enums.ManifestType.Delivery)
-                    //{
-                        var mwp = await _manifestWaybillMappingService.GetWaybillsInManifest(dispatch.ManifestNumber);
-                    
-                        finalResult.AddRange(mwp);
-                    //}
-                }
-
-
-                //finalResult = finalResult.OrderBy(s => s.DateCreated).Take(30).ToList();
+                var finalResult = await GetWaybillsInManifestForDispatch(dispatchResultDTO);
                 return finalResult;
             }
             catch (Exception)
             {
                 throw;
             }
-
         }
 
         //Get waybills according to date range selected for Riders Delivery Progress Page
         public async Task<List<ManifestWaybillMappingDTO>> GetAllWaybillsinListOfManifest(string captainId, DateFilterCriteria dateFilterCriteria)
         {
             try
-            {
-                List<ManifestWaybillMappingDTO> finalResult = new List<ManifestWaybillMappingDTO>();
-
-                //var dispatchResult = await _uow.Dispatch.FindAsync(x => x.DriverDetail.Equals(captainId));
-                
+            {                                
                 var dispatchresult = await _uow.ManifestWaybillMapping.GetWaybillsinManifestMappings(captainId, dateFilterCriteria);
 
-                foreach (var dispatch in dispatchresult)
+                //2. get the manifest waybill mapping
+                var finalResult = await GetWaybillsInManifestForDispatch(dispatchresult);
+                return finalResult;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch(IEnumerable<DispatchDTO> dispatchList)
+        {
+            try
+            {
+                List<ManifestWaybillMappingDTO> finalResult = new List<ManifestWaybillMappingDTO>();
+                
+                foreach (var dispatch in dispatchList)
                 {
-                    //var manifest = await _uow.Manifest.GetAsync(s => s.ManifestCode == dispatch.ManifestNumber);
-                    //if (manifest.ManifestType == Core.Enums.ManifestType.Delivery)
-                    //{
+                    //for only delivery manifest
+                    var manifest = await _uow.Manifest.GetAsync(s => s.ManifestCode == dispatch.ManifestNumber && s.ManifestType == Core.Enums.ManifestType.Delivery);
+
+                    if (manifest != null)
+                    {
                         var mwp = await _manifestWaybillMappingService.GetWaybillsInManifest(dispatch.ManifestNumber);
                         finalResult.AddRange(mwp);
+                    }
+
+                    //Assuming the want both
+                    //var manifest = await _uow.Manifest.GetAsync(s => s.ManifestCode == dispatch.ManifestNumber);
+
+                    //if (manifest.ManifestType == Core.Enums.ManifestType.Delivery)
+                    //{
+                    //    var deliveryManifest = await _manifestWaybillMappingService.GetWaybillsInManifest(dispatch.ManifestNumber);
+                    //    finalResult.AddRange(deliveryManifest);
+                    //}
+                    //else
+                    //{
+                    //    //get all waybills in other manifest 
                     //}
                 }
                 return finalResult;

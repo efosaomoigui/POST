@@ -123,7 +123,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
 
             var waybills = Context.Dispatch.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.DriverDetail.Equals(captainId)).AsQueryable();
-            //waybills = waybills.Where(s => captainId.Equals(s.DriverDetail));
             var waybillManifestMappingDTO = from mgw in waybills
                                             select new DispatchDTO
                                             {
@@ -135,9 +134,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                 DepartureId = mgw.DepartureId,
                                                 DispatchId = mgw.DispatchId,
                                                 DriverDetail = mgw.DriverDetail,
-                                                ReceivedBy = mgw.ReceivedBy,
-                                                
-
+                                                ReceivedBy = mgw.ReceivedBy
                                             };
             return await Task.FromResult(waybillManifestMappingDTO.OrderByDescending(x => x.DateCreated).ToList());
         }
