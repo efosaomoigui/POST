@@ -312,8 +312,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     ScanStatus = scan.ShipmentScanStatus.ToString()
                 };
 
-                //2bsend message
-                await _messageSenderService.SendGenericEmailMessage(MessageType.SSC, messageExtensionDTO);
+                //2b. send message
+                await _messageSenderService.SendGenericEmailMessage(MessageType.SSC_Email, messageExtensionDTO);
             }
 
             return true;
