@@ -11,6 +11,7 @@ using GIGLS.Core.IServices.User;
 using System.Linq;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.IMessageService;
+using GIGLS.Core.DTO.User;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -38,7 +39,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     tracking.User = await _userService.GetCurrentUserId();
                 }
 
-                if(tracking.Location == null)
+                if (tracking.Location == null)
                 {
                     var UserServiceCenters = await _userService.GetPriviledgeServiceCenters();
 
@@ -54,7 +55,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     tracking.Location = serviceCenter.Name;
                     tracking.ServiceCentreId = serviceCenter.ServiceCentreId;
                 }
-                
+
                 if (scanStatus.Equals(ShipmentScanStatus.ARF))
                 {
                     //Get shipment Details
@@ -105,7 +106,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(tracking.Waybill));
 
                     //update shipment if the user belong to original departure service centre
-                    if(shipment.DepartureServiceCentreId == tracking.ServiceCentreId && shipment.ShipmentScanStatus != scanStatus)
+                    if (shipment.DepartureServiceCentreId == tracking.ServiceCentreId && shipment.ShipmentScanStatus != scanStatus)
                     {
                         shipment.ShipmentScanStatus = scanStatus;
                     }
@@ -125,9 +126,9 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<bool> sendSMSEmail(ShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus)
         {
             var messageType = MessageType.ShipmentCreation;
-            foreach(var item in Enum.GetValues(typeof(MessageType)).Cast<MessageType>())
+            foreach (var item in Enum.GetValues(typeof(MessageType)).Cast<MessageType>())
             {
-                if(item.ToString() == scanStatus.ToString())
+                if (item.ToString() == scanStatus.ToString())
                 {
                     messageType = (MessageType)Enum.Parse(typeof(MessageType), scanStatus.ToString());
                     break;
@@ -163,7 +164,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     TrackingType = shipmentTracking.TrackingType.ToString(),
                     Status = shipmentTracking.Status,
                     User = shipmentTracking.User.FirstName + " " + shipmentTracking.User.LastName
-            };
+                };
             }
             catch (Exception)
             {
@@ -282,5 +283,41 @@ namespace GIGLS.Services.Implementation.Shipments
             bool shipmentTracking = await _uow.ShipmentTracking.ExistAsync(x => x.Waybill.Equals(waybill) && x.Status.Equals(status));
             return shipmentTracking;
         }
+
+        public async Task<bool> SendEmailForAttemptedScanOfCancelledShipments(ScanDTO scan)
+        {
+            //1a. Get the ServiceCenter Agent
+            var currentUserId = await _userService.GetCurrentUserId();
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var currentServiceCenterId = serviceCenterIds[0];
+
+            var userDTO = await _userService.GetUserById(currentUserId);
+            var serviceCentreDTO = await _uow.ServiceCentre.GetAsync(currentServiceCenterId);
+
+            //1b. Get all the Regional Managers assigned to the ServiceCentre where Scan took place
+            List<UserDTO> allRegionalManagers = new List<UserDTO>();
+            allRegionalManagers.Add(userDTO);
+
+            //2. Use a loop to send to all Regional Managers
+            foreach (var regionalManager in allRegionalManagers)
+            {
+                //2a. Create MessageExtensionDTO to hold custom message info
+                var messageExtensionDTO = new MessageExtensionDTO()
+                {
+                    ShipmentScanStatus = scan.ShipmentScanStatus,
+                    RegionalManagerName = regionalManager.FirstName + " " + regionalManager.LastName,
+                    RegionalManagerEmail = regionalManager.Email,
+                    ServiceCenterAgentName = userDTO.Email,
+                    ServiceCenterName = serviceCentreDTO.Name,
+                    ScanStatus = scan.ShipmentScanStatus.ToString()
+                };
+
+                //2bsend message
+                await _messageSenderService.SendGenericEmailMessage(MessageType.SSC, messageExtensionDTO);
+            }
+
+            return true;
+        }
+
     }
 }
