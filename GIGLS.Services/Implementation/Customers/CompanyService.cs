@@ -194,11 +194,16 @@ namespace GIGLS.Services.Implementation.Customers
                 }
 
                 CompanyDTO companyDto = Mapper.Map<CompanyDTO>(company);
-                var serviceCentre = await _uow.ServiceCentre.GetAsync(company.ReturnServiceCentre);
-                if(serviceCentre != null)
+
+                if (companyDto.ReturnServiceCentre > 0)
                 {
-                    companyDto.ReturnServiceCentreName = serviceCentre.Name;
-                }
+                    var serviceCentre = await _uow.ServiceCentre.GetAsync(company.ReturnServiceCentre);
+
+                    if (serviceCentre != null)
+                    {
+                        companyDto.ReturnServiceCentreName = serviceCentre.Name;
+                    }
+                }                
 
                 var contactPersons = _uow.CompanyContactPerson.Find(x => x.CompanyId == companyDto.CompanyId).ToList();
 
