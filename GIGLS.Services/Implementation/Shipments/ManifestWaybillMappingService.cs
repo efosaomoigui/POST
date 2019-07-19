@@ -6,8 +6,10 @@ using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Customers;
+using GIGLS.Core.IServices.Fleets;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.CORE.DTO.Report;
@@ -26,6 +28,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUserService _userService;
         private readonly ICustomerService _customerService;
         private readonly IShipmentService _shipmentService;
+        public readonly IDispatchService _dispatchService;
 
         public ManifestWaybillMappingService(IUnitOfWork uow, IManifestService manifestService,
             IUserService userService, ICustomerService customerService, IShipmentService shipmentService)
@@ -35,6 +38,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _userService = userService;
             _customerService = customerService;
             _shipmentService = shipmentService;
+            
             MapperConfig.Initialize();
         }
 
@@ -356,6 +360,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (shipmentCollectionObj != null)
                     {
                         manifestwaybill.ShipmentScanStatus = shipmentCollectionObj.ShipmentScanStatus;
+                        var strings = manifestwaybill.ShipmentScanStatus.ToString();
+                        var scanList = await _uow.ScanStatus.GetAsync(x => x.Code == strings);
+                       
+                        var scanListDto = Mapper.Map<ScanStatusDTO>(scanList);
+                        manifestwaybill.ScanDescription = scanListDto.Incident;
+                        
                     }
                 }
 
@@ -366,7 +376,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
         //Get Waybills In Manifest for Dispatch
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatchOld()
         {
@@ -560,6 +569,14 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        ////Get All Waybills in Manifests that has been mapped to a rider
+        //public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsForDrivers(string riderId)
+        //{
+        //    try
+        //    {
+        //        var riderWaybillList = await _uow.ManifestWaybillMapping.FindAsync(x => x.)
+        //    }
+        //}
         //Get active Manifest that a Waybill is mapped to
         public async Task<ManifestWaybillMappingDTO> GetActiveManifestForWaybill(string waybill)
         {
