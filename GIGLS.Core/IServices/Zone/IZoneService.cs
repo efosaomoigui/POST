@@ -13,5 +13,7 @@ namespace GIGLS.Core.IServices.Zone
         Task UpdateZone(int zoneId, ZoneDTO zone);
         Task UpdateZone(int zoneId, bool status);
         Task DeleteZone(int zoneId);
+        Task<bool> UpdateAllPriceByZone(ZonePercentDTO zonePercent);
+        Task<bool> UpdateAllPriceByWeight(WeightPercentDTO weightPercentDTO);
     }
 }
