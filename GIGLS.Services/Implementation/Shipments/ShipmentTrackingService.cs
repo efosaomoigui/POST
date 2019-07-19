@@ -310,7 +310,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     RegionalManagerEmail = regionalManager.Email,
                     ServiceCenterAgentName = userDTO.Email,
                     ServiceCenterName = serviceCentreDTO.Name,
-                    ScanStatus = scan.ShipmentScanStatus.ToString()
+                    ScanStatus = scan.ShipmentScanStatus.ToString(),
+                    WaybillNumber = scan.WaybillNumber
                 };
 
                 //2b. send message

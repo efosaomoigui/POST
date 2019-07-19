@@ -10,5 +10,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string ServiceCenterName { get; set; }
         public string ScanStatus { get; set; }
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
+        public string WaybillNumber { get; set; }
     }
 }
