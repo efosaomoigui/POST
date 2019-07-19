@@ -311,5 +311,39 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                 throw;
             }
         }
+
+        public Task<List<ServiceCentreDTO>> GetServiceCentreByCode(string[] code)
+        {
+            try
+            {
+                var centres = _context.ServiceCentre.Where(x => code.Contains(x.Code));
+
+                var centreDto = from s in centres
+                                join sc in _context.Station on s.StationId equals sc.StationId
+                                select new ServiceCentreDTO
+                                {
+                                    Name = s.Name,
+                                    Address = s.Address,
+                                    City = s.City,
+                                    Email = s.Email,
+                                    PhoneNumber = s.PhoneNumber,
+                                    ServiceCentreId = s.ServiceCentreId,
+                                    Code = s.Code,
+                                    IsActive = s.IsActive,
+                                    TargetAmount = s.TargetAmount,
+                                    TargetOrder = s.TargetOrder,
+                                    StationId = s.StationId,
+                                    StationName = sc.StationName,
+                                    StationCode = sc.StationCode,
+                                    IsDefault = s.IsDefault,
+                                    IsHUB = s.IsHUB
+                                };
+                return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -10,6 +10,7 @@ namespace GIGLS.Core.IServices.ServiceCentres
         Task<ServiceCentreDTO> GetServiceCentreById(int serviceCentreId);
         Task<ServiceCentreDTO> GetServiceCentreForHomeDelivery(int serviceCentreId);
         Task<ServiceCentreDTO> GetServiceCentreByCode(string serviceCentreCode);
+        Task<List<ServiceCentreDTO>> GetServiceCentreByCode(string[] code);
         Task<object> AddServiceCentre(ServiceCentreDTO service);
         Task UpdateServiceCentre(int serviceCentreId, ServiceCentreDTO service);
         Task DeleteServiceCentre(int serviceCentreId);

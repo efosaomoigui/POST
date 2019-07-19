@@ -5,8 +5,8 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core;
 using GIGLS.Infrastructure;
 using GIGLS.Core.Domain;
-using AutoMapper;
 using GIGLS.Core.IServices.User;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -61,19 +61,17 @@ namespace GIGLS.Services.Implementation.Shipments
        
         public async Task<ShipmentCancelDTO> GetShipmentCancelById(string waybill)
         {
-            var shipment = await _uow.ShipmentCancel.GetAsync(x => x.Waybill == waybill);
-
-            if (shipment == null)
-            {
-                throw new GenericException($"Shipment with waybill {waybill} does not exist");
-            }
-
-            return Mapper.Map<ShipmentCancelDTO>(shipment);
+            return await _uow.ShipmentCancel.GetShipmentCancels(waybill);
         }
 
         public async Task<List<ShipmentCancelDTO>> GetShipmentCancels()
         {
             return await _uow.ShipmentCancel.GetShipmentCancels();
+        }
+
+        public async Task<List<ShipmentCancelDTO>> GetShipmentCancels(ShipmentCollectionFilterCriteria collectionFilterCriteria)
+        {
+            return await _uow.ShipmentCancel.GetShipmentCancels(collectionFilterCriteria);
         }
     }
 }

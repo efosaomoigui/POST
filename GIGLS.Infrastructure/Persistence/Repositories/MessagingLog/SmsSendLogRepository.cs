@@ -21,53 +21,21 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.MessagingLog
         {
             try
             {
-                DateTime StartDate = filter.StartDate.GetValueOrDefault().Date;
-                DateTime EndDate = filter.EndDate?.Date ?? StartDate;
-
-                var messages = Context.SmsSendLog.AsQueryable();
-
-                //If No Date Supply
-                if (!filter.StartDate.HasValue && !filter.EndDate.HasValue)
-                {
-                    var Today = DateTime.Today.AddDays(-1);
-                    var nextDay = DateTime.Today.AddDays(1).Date;
-                    messages = messages.Where(x => x.DateCreated >= Today && x.DateCreated < nextDay);
-                }
-
-                if (filter.StartDate.HasValue && filter.EndDate.HasValue)
-                {
-                    if (filter.StartDate.Equals(filter.EndDate))
-                    {
-                        var nextDay = DateTime.Today.AddDays(1).Date;
-                        messages = messages.Where(x => x.DateCreated >= StartDate && x.DateCreated < nextDay);
-                    }
-                    else
-                    {
-                        var dayAfterEndDate = EndDate.AddDays(1).Date;
-                        messages = messages.Where(x => x.DateCreated >= StartDate && x.DateCreated < dayAfterEndDate);
-                    }
-                }
-
-                if (filter.StartDate.HasValue && !filter.EndDate.HasValue)
-                {
-                    var nextDay = DateTime.Today.AddDays(1).Date;
-                    messages = messages.Where(x => x.DateCreated >= StartDate && x.DateCreated < nextDay);
-                }
-
-                if (filter.EndDate.HasValue && !filter.StartDate.HasValue)
-                {
-                    var dayAfterEndDate = EndDate.AddDays(1).Date;
-                    messages = messages.Where(x => x.DateCreated < dayAfterEndDate);
-                }
+                //get startDate and endDate
+                var queryDate = filter.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+                
+                var messages = Context.SmsSendLog.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).AsQueryable();
 
                 if (filter.Status.HasValue)
                 {
                     messages = messages.Where(x => x.Status == filter.Status);
                 }
 
-                var result = messages.ToList();
-                var messageDto = Mapper.Map<IEnumerable<SmsSendLogDTO>>(result);
-                return Task.FromResult(messageDto.OrderByDescending(x => x.DateCreated).ToList());
+                var result = messages.OrderByDescending(x => x.DateCreated).ToList();
+                var messageDto = Mapper.Map<List<SmsSendLogDTO>>(result);
+                return Task.FromResult(messageDto);
             }
             catch (Exception)
             {

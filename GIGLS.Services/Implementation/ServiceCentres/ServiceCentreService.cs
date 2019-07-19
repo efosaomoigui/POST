@@ -98,6 +98,11 @@ namespace GIGLS.Services.IServices.ServiceCentres
             }
         }
 
+        public async Task<List<ServiceCentreDTO>> GetServiceCentreByCode(string[] code)
+        {
+            return await _uow.ServiceCentre.GetServiceCentreByCode(code);
+        }
+
         public async Task<ServiceCentreDTO> GetServiceCentreById(int serviceCentreId)
         {
             try
@@ -315,6 +320,6 @@ namespace GIGLS.Services.IServices.ServiceCentres
             {
                 throw;
             }
-        }
+        }        
     }
 }

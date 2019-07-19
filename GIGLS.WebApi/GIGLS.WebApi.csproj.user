@@ -17,7 +17,7 @@
     <WebStackScaffolding_IsReferencingScriptLibrariesSelected>True</WebStackScaffolding_IsReferencingScriptLibrariesSelected>
     <WebStackScaffolding_LayoutPageFile />
     <WebStackScaffolding_IsAsyncSelected>False</WebStackScaffolding_IsAsyncSelected>
-    <NameOfLastUsedPublishProfile>agilitysystemapidevm - Web Deploy</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>agilitysystemapidevm - Web Deploy3</NameOfLastUsedPublishProfile>
     <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
   </PropertyGroup>
   <ProjectExtensions>
@@ -41,6 +41,17 @@
           </StartWorkingDirectory>
           <EnableENC>True</EnableENC>
           <AlwaysStartWebServerOnDebug>True</AlwaysStartWebServerOnDebug>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>52970</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost/giglsresourceapi/</IISUrl>
+          <OverrideIISAppRootUrl>True</OverrideIISAppRootUrl>
+          <IISAppRootUrl>http://localhost:52970/</IISAppRootUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
         </WebProjectProperties>
       </FlavorProperties>
     </VisualStudio>

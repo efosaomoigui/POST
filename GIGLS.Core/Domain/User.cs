@@ -37,6 +37,9 @@ namespace GIGL.GIGLS.Core.Domain
 
         public DateTime PasswordExpireDate { get; set; }
 
+        //User Active CountryId
+        public int UserActiveCountryId { get; set; }
+
         //public async Task GenerateUserIdentityAsync(Microsoft.AspNet.Identity.UserManager manager)
         //{
         //    return await GenerateUserIdentityAsync(manager, DefaultAuthenticationTypes.ApplicationCookie);

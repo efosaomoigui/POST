@@ -14,5 +14,10 @@ namespace GIGLS.Core.DTO
         public string CountryCode { get; set; }
 
         public List<StateDTO> States { get; set; }
+
+        public string CurrencySymbol { get; set; }
+        public string CurrencyCode { get; set; }
+        public decimal CurrencyRatio { get; set; }
+        public bool IsActive { get; set; }
     }
 }

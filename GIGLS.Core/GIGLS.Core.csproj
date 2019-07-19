@@ -181,6 +181,7 @@
     <Compile Include="Domain\Notification.cs" />
     <Compile Include="Domain\OTP.cs" />
     <Compile Include="Domain\OverdueShipment.cs" />
+    <Compile Include="Domain\Partnership\PartnerTransactions.cs" />
     <Compile Include="Domain\PreShipmentItemMobile.cs" />
     <Compile Include="Domain\PreShipmentManifestMapping.cs" />
     <Compile Include="Domain\ManifestWaybillMapping.cs" />
@@ -317,8 +318,12 @@
     <Compile Include="DTO\NotificationDTO.cs" />
     <Compile Include="DTO\OnlinePayment\PaystackWebhookDTO.cs" />
     <Compile Include="DTO\OTPDTO.cs" />
+    <Compile Include="DTO\Partnership\RootObject.cs" />
     <Compile Include="DTO\Partnership\PartnerApplicationDto.cs" />
     <Compile Include="DTO\Partnership\PartnerDto.cs" />
+    <Compile Include="DTO\Partnership\PartnerPayDTO.cs" />
+    <Compile Include="DTO\Partnership\PartnerTransactionsDTO.cs" />
+    <Compile Include="DTO\Partnership\SummaryTransactionsDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\HaulagePricingDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PaymentPartialTransactionDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PaymentPartialTransactionProcessDTO.cs" />
@@ -510,6 +515,7 @@
     <Compile Include="IRepositories\INotificationRepository.cs" />
     <Compile Include="IRepositories\InternationalRequest\IInternationalRequestReceiverRepository.cs" />
     <Compile Include="IRepositories\IOTPRepository.cs" />
+    <Compile Include="IRepositories\Partnership\IPartnerTransactionsRepository.cs" />
     <Compile Include="IRepositories\IRepository.cs" />
     <Compile Include="IRepositories\IStateRepository.cs" />
     <Compile Include="IRepositories\ISubCategoryRepository.cs" />
@@ -649,6 +655,7 @@
     <Compile Include="IServices\Nav\ISubSubNavService.cs" />
     <Compile Include="IServices\Partnership\IPartnerApplicationService.cs" />
     <Compile Include="IServices\Partnership\IPartnerService.cs" />
+    <Compile Include="IServices\Partnership\IPartnerTransactionsService.cs" />
     <Compile Include="IServices\PaymentTransactions\IPaymentPartialTransactionService.cs" />
     <Compile Include="IServices\PaymentTransactions\IPaymentTransactionService.cs" />
     <Compile Include="IServices\Report\IAccountReportService.cs" />

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
+using System.Linq;
 
 namespace GIGLS.WebApi.Controllers
 {
@@ -14,9 +15,12 @@ namespace GIGLS.WebApi.Controllers
     public class IndividualCustomerController : BaseWebApiController
     {
         private readonly IIndividualCustomerService _service;
-        public IndividualCustomerController(IIndividualCustomerService service) : base(nameof(IndividualCustomerController))
+        private ICountryService _countryService;
+
+        public IndividualCustomerController(IIndividualCustomerService service, ICountryService countryService) : base(nameof(IndividualCustomerController))
         {
             _service = service;
+            _countryService = countryService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -27,6 +31,15 @@ namespace GIGLS.WebApi.Controllers
             return await HandleApiOperationAsync(async () =>
            {
                var customers = await _service.GetIndividualCustomers();
+
+               //get all countries and set the country name
+               var allCountries = await _countryService.GetCountries();
+
+               foreach (var customer in customers)
+               {
+                   var country = allCountries.FirstOrDefault(s => s.CountryId == customer.UserActiveCountryId);
+                   customer.UserActiveCountryName = country?.CountryName;
+               }
 
                return new ServiceResponse<List<IndividualCustomerDTO>>
                {

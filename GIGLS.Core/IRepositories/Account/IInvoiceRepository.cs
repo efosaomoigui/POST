@@ -19,6 +19,8 @@ namespace GIGLS.Core.IRepositories.Account
         IQueryable<CustomerView> GetAllFromCustomerView();
         IQueryable<InvoiceView> GetInvoicesForReminderAsync();
         IQueryable<InvoiceView> GetAllFromInvoiceAndShipments();
-        IQueryable<InvoiceView> GetAllInvoiceShipments(); //GetInvoicesFromViewAsyncFromSP
+        IQueryable<InvoiceView> GetAllInvoiceShipments();
+        IQueryable<InvoiceView> GetCustomerTransactions();
+        IQueryable<InvoiceView> GetCustomerInvoices();
     }
 }

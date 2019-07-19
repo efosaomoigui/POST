@@ -10,7 +10,7 @@ namespace GIGLS.Core.DTO.Shipments
     public class PreShipmentMobileDTO : BaseDomainDTO
     {
         public int PreShipmentMobileId { get; set; }
-        
+        public new DateTime? DateCreated { get; set; }
         public string Waybill { get; set; }
 
         //Senders' Information
@@ -102,6 +102,8 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsDelivered { get; set; }
         public int TrackingId { get; set; }
 
+        public string VehicleType { get; set; }
 
+        public int? ZoneMapping { get; set; }
     }
 }

@@ -17,7 +17,8 @@ namespace GIGLS.Core.IServices.User
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCorporateCustomerUsers();
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsers();
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetSystemUsers();
-        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchCaptains();        
+        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchCaptains();
+        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchRiders();
         Task<UserDTO> GetUserById(string userId);
         Task<UserDTO> GetUserByEmail(string email);
         Task<UserDTO> GetUserById(int userId);
@@ -65,5 +66,11 @@ namespace GIGLS.Core.IServices.User
         Task<int[]> GetPriviledgeCountryIds();
         Task<List<CountryDTO>> GetPriviledgeCountrys();
         Task<string> GetUserChannelCode();
+
+        Task<bool> UserActiveCountrySettings(string userid, int countryId);
+
+        Task<int[]> GetPriviledgeServiceCenters(string currentUserId);
+        Task<int[]> GetPriviledgeCountryIds(string currentUserId);
+        Task<List<CountryDTO>> GetPriviledgeCountrys(string currentUserId);
     }
 }

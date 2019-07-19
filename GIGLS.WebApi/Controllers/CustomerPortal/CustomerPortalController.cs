@@ -16,7 +16,6 @@ using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
-using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
@@ -27,13 +26,12 @@ using System.Configuration;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core;
 using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.IServices.Business;
 using GIGLS.Core.Domain.BankSettlement;
+using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -76,7 +74,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("transaction")]
-        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentCollectionFilterCriteria f_Criteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -1009,6 +1007,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<List<PreShipmentMobileDTO>>
                 {
                     Object = shipments
+                };
+            });
+        }
+        [HttpGet]
+        [Route("getpartnerwallettransactions")]
+        public async Task<IServiceResponse<SummaryTransactionsDTO>> GetPartnerwalletTransactions()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var totalTransactions = await _preshipmentmobileService.GetPartnerWalletTransactions();
+
+                return new ServiceResponse<SummaryTransactionsDTO>
+                {
+                    Object = totalTransactions
                 };
             });
         }

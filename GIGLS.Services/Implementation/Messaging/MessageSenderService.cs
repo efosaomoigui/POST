@@ -111,6 +111,7 @@ namespace GIGLS.Services.Implementation.Messaging
             var result = "";
             try
             {
+                //Need optimisation
                 var smsMessages = await _messageService.GetSmsAsync();
                 messageDTO = smsMessages.FirstOrDefault(s => s.MessageType == messageType);
 
@@ -150,8 +151,15 @@ namespace GIGLS.Services.Implementation.Messaging
                 };
 
                 var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
-                var invoiceList = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).ToList();
-                var invoice = invoiceList.FirstOrDefault();
+
+                ////need optimisation
+                //var invoiceList = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).ToList();
+                //var invoice = invoiceList.FirstOrDefault();
+
+                var invoice = _uow.Invoice.GetAllInvoiceShipments().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).FirstOrDefault();
+
+                //1. CustomerType, CustomerId
+
                 if (invoice != null)
                 {
                     //get CustomerDetails
@@ -185,7 +193,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[6] = demurragePrice;
                     strArray[7] = invoice.ReceiverName;
                     strArray[8] = invoice.Description;
-                    strArray[9] = invoice.Amount.ToString();
+                    strArray[9] = invoice.GrandTotal.ToString();
                     strArray[10] = invoice.DateCreated.ToLongDateString();
                     strArray[11] = invoice.DateCreated.ToShortTimeString();
 

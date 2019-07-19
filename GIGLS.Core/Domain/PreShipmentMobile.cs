@@ -101,6 +101,8 @@ namespace GIGLS.Core.Domain
 
         public string shipmentstatus { get; set; }
 
+        public string VehicleType { get; set; }
 
+        public int? ZoneMapping { get; set; }
     }
 }
