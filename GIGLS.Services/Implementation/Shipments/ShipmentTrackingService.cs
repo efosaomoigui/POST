@@ -12,6 +12,7 @@ using System.Linq;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.DTO.User;
+using GIGLS.Core.IServices.ServiceCentres;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -297,6 +298,7 @@ namespace GIGLS.Services.Implementation.Shipments
             //1b. Get all the Regional Managers assigned to the ServiceCentre where Scan took place
             List<UserDTO> allRegionalManagers = new List<UserDTO>();
             allRegionalManagers.Add(userDTO);
+            allRegionalManagers = await GetAllRegionalManagersForServiceCentre(currentServiceCenterId);
 
             //2. Use a loop to send to all Regional Managers
             foreach (var regionalManager in allRegionalManagers)
@@ -319,5 +321,21 @@ namespace GIGLS.Services.Implementation.Shipments
             return true;
         }
 
+        private async Task<List<UserDTO>> GetAllRegionalManagersForServiceCentre(int currentServiceCenterId)
+        {
+            List<UserDTO> allRegionalManagers = new List<UserDTO>();
+
+            //1. get the unique regions for that service centre
+            var regionSCMappingIds = _uow.RegionServiceCentreMapping.GetAllAsQueryable().Where(s =>
+                        s.ServiceCentreId == currentServiceCenterId).Select(s => s.RegionId).Distinct().ToList();
+
+            //2. get all users that are regional managers
+            //var regionalManagers = _uow.
+
+
+
+
+            return allRegionalManagers;
+        }
     }
 }
