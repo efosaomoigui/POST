@@ -13,6 +13,7 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.IServices.ServiceCentres;
+using AutoMapper;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -293,12 +294,10 @@ namespace GIGLS.Services.Implementation.Shipments
             var currentServiceCenterId = serviceCenterIds[0];
 
             var userDTO = await _userService.GetUserById(currentUserId);
-            var serviceCentreDTO = await _uow.ServiceCentre.GetAsync(currentServiceCenterId);
+            var serviceCentreDTO = _uow.ServiceCentre.Get(currentServiceCenterId);
 
             //1b. Get all the Regional Managers assigned to the ServiceCentre where Scan took place
-            List<UserDTO> allRegionalManagers = new List<UserDTO>();
-            allRegionalManagers.Add(userDTO);
-            allRegionalManagers = await GetAllRegionalManagersForServiceCentre(currentServiceCenterId);
+            List<UserDTO> allRegionalManagers = await GetAllRegionalManagersForServiceCentre(currentServiceCenterId);
 
             //2. Use a loop to send to all Regional Managers
             foreach (var regionalManager in allRegionalManagers)
@@ -323,19 +322,50 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private async Task<List<UserDTO>> GetAllRegionalManagersForServiceCentre(int currentServiceCenterId)
         {
-            List<UserDTO> allRegionalManagers = new List<UserDTO>();
+            List<UserDTO> filteredRegionalManagers = new List<UserDTO>();
 
             //1. get the unique regions for that service centre
             var regionSCMappingIds = _uow.RegionServiceCentreMapping.GetAllAsQueryable().Where(s =>
                         s.ServiceCentreId == currentServiceCenterId).Select(s => s.RegionId).Distinct().ToList();
 
+            if (regionSCMappingIds.Count <= 0)
+            {
+                return filteredRegionalManagers;
+            }
+
             //2. get all users that are regional managers
-            //var regionalManagers = _uow.
+            var allEmployees = await _uow.User.GetUsers();
+            var regionalManagers = allEmployees.Where(s => s.Designation == "Regional Manager");
 
+            //3. Loop thru each Regional Manager
+            foreach (var regionalManager in regionalManagers)
+            {
+                //3a. Get user claims
+                var userClaims = await _uow.User.GetClaimsAsync(regionalManager.Id);
+                string[] claimValue = null;
+                foreach (var claim in userClaims)
+                {
+                    if (claim.Type == "Privilege")
+                    {
+                        claimValue = claim.Value.Split(':');   // format stringName:stringValue
+                    }
+                }
 
+                //
+                if (claimValue != null && claimValue[0] == "Region")
+                {
+                    var regionId = int.Parse(claimValue[1]);
 
+                    if (regionSCMappingIds.Contains(regionId))
+                    {
+                        //Add to filteredRegionalManagers
+                        var regionalManagerDTO = Mapper.Map<UserDTO>(regionalManager);
+                        filteredRegionalManagers.Add(regionalManagerDTO);
+                    }
+                }
+            }
 
-            return allRegionalManagers;
+            return filteredRegionalManagers;
         }
     }
 }
