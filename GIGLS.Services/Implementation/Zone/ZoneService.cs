@@ -147,9 +147,8 @@ namespace GIGLS.Services.Implementation.Zone
                 {
                     if (zonePercent.CustomerType == "ECommerce")
                     {
-                        var priceList = _uow.DomesticZonePrice.GetAll()
-                                                        .Where(x => x.RegularEcommerceType.Equals(RegularEcommerceType.Ecommerce))
-                                                         .ToList();
+                        var priceList = _uow.DomesticZonePrice.GetAllAsQueryable().Where(x => x.RegularEcommerceType == RegularEcommerceType.Ecommerce).ToList();
+
                         foreach (var entry in priceList)
                         {
                             var entryPrice = entry.Price;
@@ -164,12 +163,12 @@ namespace GIGLS.Services.Implementation.Zone
                         }
                     }
 
-                    if (zonePercent.PriceType == "Individual")
+                    if (zonePercent.CustomerType == "Individual")
                     {
-                        var priceList = _uow.DomesticZonePrice.GetAll()
-                                                                .Where(x => x.RegularEcommerceType.Equals(RegularEcommerceType.Regular))
-                                                                .ToList();
-                        foreach(var entry in priceList)
+                        //var priceList = _uow.DomesticZonePrice.GetAllAsQueryable().Where(x => x.RegularEcommerceType.Equals(RegularEcommerceType.Regular)).ToList();
+                        var priceList = _uow.DomesticZonePrice.GetAllAsQueryable().Where(x => x.RegularEcommerceType == RegularEcommerceType.Regular).ToList();
+
+                        foreach (var entry in priceList)
                         {
                             var entryPrice = entry.Price;
                             var entryPercent = zonePercent.Zones.Where(x => x.ZoneId.Equals(entry.ZoneId))
@@ -179,7 +178,6 @@ namespace GIGLS.Services.Implementation.Zone
                             //set new Price
                             entry.Price = newPrice;
                         }
-                                                                
                     }
                 }
                 //For Special Category
@@ -196,7 +194,8 @@ namespace GIGLS.Services.Implementation.Zone
                         //set new Price
                         entry.Price = newPrice;
                     }
-                }
+                }                             
+
                 _uow.Complete();
                 return true;
             }
