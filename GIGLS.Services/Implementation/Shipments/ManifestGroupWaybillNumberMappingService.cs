@@ -140,11 +140,12 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInListOfManifest(string captainId)
         {
             try
-            {                
+            {
                 //1. get all dispatch for that captain -- update this to get the data from the database instead of app memory
-                var dispatchResult = await _uow.Dispatch.FindAsync(x => x.DriverDetail.Equals(captainId));
-                dispatchResult = dispatchResult.OrderBy(s => s.DateCreated).Take(30);
-
+                var dispatchResult = _uow.Dispatch.GetAll().Where(x => x.DriverDetail.Equals(captainId))
+                                                                    .OrderBy(x => x.DateCreated)
+                                                                    .Take(30)
+                                                                    .ToList();
                 var dispatchResultDTO = Mapper.Map<List<DispatchDTO>>(dispatchResult);
 
                 //2. get the manifest waybill mapping
