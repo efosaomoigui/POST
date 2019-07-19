@@ -34,5 +34,6 @@ namespace GIGL.GIGLS.Core.Domain
         public string Password { get; set; }
 
         public virtual ICollection<Shipment> Shipments { get; set; }
+        public bool IsRegisteredFromMobile { get; set; }
     }
 }

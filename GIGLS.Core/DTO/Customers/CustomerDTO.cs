@@ -53,5 +53,6 @@ namespace GIGLS.Core.DTO.Customers
 
         //User Active CountryId
         public int UserActiveCountryId { get; set; }
+        public bool IsFromMobile { get; set; }
     }
 }

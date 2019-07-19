@@ -19,5 +19,10 @@ namespace GIGLS.Core.DTO.Partnership
         public string IdentificationNumber { get; set; }
         public int WalletId { get; set; }
         public string WalletPan { get; set; }
+        public string UserId { get; set; }
+        public bool IsActivated { get; set; }
+        public string VehicleType { get; set; }
+
+        public string PictureUrl { get; set; }
     }
 }

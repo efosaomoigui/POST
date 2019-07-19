@@ -51,17 +51,26 @@ namespace GIGLS.Services.Implementation.Customers
 
                 var newCustomer = Mapper.Map<IndividualCustomer>(customer);
 
-                //get the SC Agent priviledge country
-                var countryIds = await _userService.GetPriviledgeCountryIds();
-                if(countryIds.Length > 0)
+                //added to add customers from Mobile
+                if (customer.IsFromMobile != true)
                 {
-                    newCustomer.UserActiveCountryId = countryIds[0];
+                    //get the SC Agent priviledge country
+                    var countryIds = await _userService.GetPriviledgeCountryIds();
+                    if (countryIds.Length > 0)
+                    {
+                        newCustomer.UserActiveCountryId = countryIds[0];
+                    }
                 }
 
                 //generate customer code
                 var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
                     NumberGeneratorType.CustomerCodeIndividual);
                 newCustomer.CustomerCode = customerCode;
+                //added this line of code for mobile registration
+                if(customer.IsFromMobile ==true)
+                {
+                    newCustomer.IsRegisteredFromMobile = true;
+                }
 
                 _uow.IndividualCustomer.Add(newCustomer);
 

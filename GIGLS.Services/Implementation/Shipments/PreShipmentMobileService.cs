@@ -635,28 +635,28 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<bool> UpdatePreShipmentMobileDetails(PreShipmentItemMobileDTO Preshipmentmobile)
+        public async Task<bool> UpdatePreShipmentMobileDetails(PreShipmentItemMobileDTO preshipmentmobile)
         {
             try
             {
 
-                var preShipment = await _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == Preshipmentmobile.PreShipmentMobileId && s.PreShipmentItemMobileId == Preshipmentmobile.PreShipmentItemMobileId);
+                var preShipment = await _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == preshipmentmobile.PreShipmentMobileId && s.PreShipmentItemMobileId == preshipmentmobile.PreShipmentItemMobileId);
                 if (preShipment == null)
                 {
                     throw new GenericException("PreShipmentItem Does Not Exist");
                 }
-                preShipment.CalculatedPrice = Preshipmentmobile.CalculatedPrice;
-                preShipment.Description = Preshipmentmobile.Description;
-                preShipment.EstimatedPrice = Preshipmentmobile.EstimatedPrice;
-                preShipment.ImageUrl = Preshipmentmobile.ImageUrl;
-                preShipment.IsVolumetric = Preshipmentmobile.IsVolumetric;
-                preShipment.ItemName = Preshipmentmobile.ItemName;
-                preShipment.ItemType = Preshipmentmobile.ItemType;
-                preShipment.Length = Preshipmentmobile.Length;
-                preShipment.Quantity = Preshipmentmobile.Quantity;
-                preShipment.Weight = Preshipmentmobile.Weight;
-                preShipment.Width = Preshipmentmobile.Width;
-                preShipment.Height = Preshipmentmobile.Height;
+                preShipment.CalculatedPrice = preshipmentmobile.CalculatedPrice;
+                preShipment.Description = preshipmentmobile.Description;
+                preShipment.EstimatedPrice = preshipmentmobile.EstimatedPrice;
+                preShipment.ImageUrl = preshipmentmobile.ImageUrl;
+                preShipment.IsVolumetric = preshipmentmobile.IsVolumetric;
+                preShipment.ItemName = preshipmentmobile.ItemName;
+                preShipment.ItemType = preshipmentmobile.ItemType;
+                preShipment.Length = preshipmentmobile.Length;
+                preShipment.Quantity = preshipmentmobile.Quantity;
+                preShipment.Weight = preshipmentmobile.Weight;
+                preShipment.Width = preshipmentmobile.Width;
+                preShipment.Height = preshipmentmobile.Height;
 
                 await _uow.CompleteAsync();
                 return true;

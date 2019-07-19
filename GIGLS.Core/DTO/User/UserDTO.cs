@@ -67,5 +67,7 @@ namespace GIGLS.Core.DTO.User
 
         public int UserActiveCountryId { get; set; }
         public CountryDTO UserActiveCountry { get; set; }
+        public string VehicleType { get; set; }
+        public bool IsFromMobile { get; set; }
     }
 }

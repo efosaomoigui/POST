@@ -36,7 +36,10 @@ using GIGLS.Services.Implementation;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Core.Domain.BankSettlement;
-
+using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.Domain.Partnership;
+using GIGLS.Core.IServices.Utility;
+using GIGL.GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -57,13 +60,14 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ISLAService _slaService;
         private readonly IOTPService _otpService;
         private readonly IBankShipmentSettlementService _iBankShipmentSettlementService;
+        private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService, ICustomerService customerService,
             IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
-            ISLAService slaService, IOTPService otpService)
+            ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -79,6 +83,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             _wallepaymenttlogService = wallepaymenttlogService;
             _slaService = slaService;
             _otpService = otpService;
+            _iBankShipmentSettlementService = iBankShipmentSettlementService;
+            _numberGeneratorMonitorService = numberGeneratorMonitorService;
             MapperConfig.Initialize();
         }
 
@@ -440,7 +446,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                     CompanyType = companyType,
                     Password = user.Password,
                     CustomerCode = user.UserChannelCode,
-                    PictureUrl = user.PictureUrl
+                    PictureUrl = user.PictureUrl,
+                    IsFromMobile = user.IsFromMobile
                     //added this to pass channelcode 
 
 
@@ -547,21 +554,197 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<SignResponseDTO> SignUp(UserDTO user)
         {
-            var EmailUser = await _uow.User.GetUserByEmail(user.Email);
-            if (EmailUser != null)
-            {
-                throw new GenericException("Email already Exists!");
-            }
+            var result = new SignResponseDTO();
+                if (user.UserChannelType == UserChannelType.Partner)
+                {
+                  var EmailUser = await _uow.User.GetUserByEmail(user.Email);
 
-            var PhoneNumberUser = await _uow.User.GetUserByPhoneNumber(user.PhoneNumber);
-            if (PhoneNumberUser != null)
-            {
-                throw new GenericException("PhoneNumber already Exists!");
-            }
+                  if (EmailUser != null)
+                  {
+                    var emailpartnerdetails = await _uow.Partner.GetAsync(s => s.Email == user.Email);
+                    if (emailpartnerdetails != null)
+                    {
+                        throw new GenericException("Email already Exists as a Partner!");
+                    }
+                    var phonepartnerdetails = await _uow.Partner.GetAsync(s => s.PhoneNumber == user.PhoneNumber);
+                    if (phonepartnerdetails != null)
+                    {
+                        throw new GenericException("Phone already Exists as a Partner!");
+                    }
+                    else 
+                    {
+                        var partnerDTO = new PartnerDTO
+                        {
+                             PartnerType = PartnerType.Individual,
+                             PartnerName = user.FirstName + "" + user.LastName,
+                             PartnerCode = EmailUser.UserChannelCode,
+                             FirstName  = user.FirstName,
+                             LastName = user.LastName,
+                             Email = user.Email,
+                             PhoneNumber = user.PhoneNumber,
+                             UserId = EmailUser.Id,
+                             IsActivated = false,
+                             VehicleType =user.VehicleType
 
-            var registeredUser = await Register(user);
-            var result = await SendOTPForRegisteredUser(registeredUser);
+                        };
+                        var FinalPartner = Mapper.Map<Partner>(partnerDTO);
+                        _uow.Partner.Add(FinalPartner);
+                        EmailUser.UserChannelPassword = user.Password;
+                        var u = _userService.ResetPassword(EmailUser.Id, user.Password);
+                        await _uow.CompleteAsync();
+                        result = await SendOTPForRegisteredUser(user);
+                    }
+                   
+                    
 
+                  }
+                  if(EmailUser == null)
+                  {
+                    var emailpartnerdetails = await _uow.Partner.GetAsync(s => s.Email == user.Email);
+                    if (emailpartnerdetails != null)
+                    {
+                        throw new GenericException("Email already Exists on Partners!");
+                    }
+                    var phonepartnerdetails = await _uow.Partner.GetAsync(s => s.PhoneNumber == user.PhoneNumber);
+                    if (phonepartnerdetails != null)
+                    {
+                        throw new GenericException("Phone already Exists on Partners!");
+                    }
+                    var PartnerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
+                    NumberGeneratorType.Partner);
+                    var Partneruser = new UserDTO()
+                    {
+                        ConfirmPassword = user.Password,
+                        Department = PartnerType.Individual.ToString(),
+                        DateCreated = DateTime.Now,
+                        Designation = PartnerType.Individual.ToString(),
+                        Email = user.Email,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Organisation = CustomerType.IndividualCustomer.ToString(),
+                        Password = user.Password,
+                        PhoneNumber = user.PhoneNumber,
+                        UserType = UserType.Regular,
+                        Username = PartnerCode,
+                        UserChannelCode = PartnerCode,
+                        UserChannelPassword = user.Password,
+                        UserChannelType = UserChannelType.Partner,
+                        PasswordExpireDate = DateTime.Now,
+                        UserActiveCountryId = user.UserActiveCountryId,
+                      
+                       
+                    };
+                    var FinalUser = Mapper.Map<User>(Partneruser);
+                    FinalUser.Id = Guid.NewGuid().ToString();
+                    FinalUser.DateCreated = DateTime.Now.Date;
+                    FinalUser.DateModified = DateTime.Now.Date;
+                    FinalUser.PasswordExpireDate = DateTime.Now;
+                    FinalUser.UserName = (user.UserChannelType == UserChannelType.Partner) ? user.Email : user.UserChannelCode;
+                    var u = await _uow.User.RegisterUser(FinalUser, user.Password);
+                    var partnerDTO = new PartnerDTO
+                    {
+                        PartnerType = PartnerType.Individual,
+                        PartnerName = user.FirstName + " " + user.LastName,
+                        PartnerCode = FinalUser.UserChannelCode,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber,
+                        UserId = FinalUser.Id,
+                        IsActivated = false,
+                        VehicleType = user.VehicleType
+
+                    };
+                    var FinalPartner = Mapper.Map<Partner>(partnerDTO);
+                    _uow.Partner.Add(FinalPartner);
+                    _uow.Complete();
+                    await _walletService.AddWallet(new WalletDTO
+                    {
+                        CustomerId = FinalPartner.PartnerId,
+                        CustomerType = CustomerType.IndividualCustomer,
+                        CustomerCode = FinalPartner.PartnerCode,
+                        CompanyType = CustomerType.IndividualCustomer.ToString()
+                    });
+                    result = await SendOTPForRegisteredUser(user);
+                }
+                  
+                }
+                else if (user.UserChannelType == UserChannelType.IndividualCustomer)
+                {
+                var EmailUser = await _uow.User.GetUserByEmail(user.Email);
+                if (EmailUser != null)
+                {
+                    var emailcustomerdetails = await _uow.IndividualCustomer.GetAsync(s => s.Email == user.Email);
+                    if (emailcustomerdetails != null)
+                    {
+                        if (emailcustomerdetails.IsRegisteredFromMobile == true)
+                        {
+                            throw new GenericException("Email already Exists on Customers!");
+                        }
+                        if (emailcustomerdetails.IsRegisteredFromMobile!=true)
+                        {
+                            emailcustomerdetails.IsRegisteredFromMobile = true;
+                            emailcustomerdetails.Email = user.Email;
+                            emailcustomerdetails.Password = user.Password;
+                            EmailUser.UserChannelPassword = user.Password;
+                            emailcustomerdetails.PhoneNumber = user.PhoneNumber;
+                            await _uow.CompleteAsync();
+                            var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
+                            result = await SendOTPForRegisteredUser(user);
+
+                        }
+                       
+                    }
+                    var phonecustomerdetails = await _uow.IndividualCustomer.GetAsync(s => s.PhoneNumber == user.PhoneNumber);
+                    if (phonecustomerdetails != null)
+                    {
+                        if (phonecustomerdetails.IsRegisteredFromMobile == true)
+                        {
+                            throw new GenericException("Phone already Exists on Customers!");
+                        }
+                        if (phonecustomerdetails.IsRegisteredFromMobile !=true)
+                        {
+                            phonecustomerdetails.IsRegisteredFromMobile = true;
+                            phonecustomerdetails.Email = user.Email;
+                            phonecustomerdetails.Password = user.Password;
+                            phonecustomerdetails.PhoneNumber = user.PhoneNumber;
+                            EmailUser.UserChannelPassword = user.Password;
+                            await _uow.CompleteAsync();
+                            var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
+                            result = await SendOTPForRegisteredUser(user);
+
+                        }
+                    }
+                    else
+                    {
+                        var customer = new IndividualCustomerDTO
+                        {
+                            Email = user.Email,
+                            PhoneNumber = user.PhoneNumber,
+                            FirstName = user.FirstName,
+                            LastName = user.LastName,
+                            Password = user.Password,
+                            CustomerCode = EmailUser.UserChannelCode,
+                            PictureUrl = user.PictureUrl,
+                            userId = EmailUser.Id,
+                            IsRegisteredFromMobile = true
+                            //added this to pass channelcode };
+                        };
+                        var individualCustomer = Mapper.Map<IndividualCustomer>(customer);
+                        EmailUser.UserChannelPassword = user.Password;
+                        var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
+                         _uow.IndividualCustomer.Add(individualCustomer);
+                        await _uow.CompleteAsync();
+                        result = await SendOTPForRegisteredUser(user);
+                    }
+                }
+                else
+                {
+                    user.IsFromMobile = true;
+                    var registeredUser = await Register(user);
+                    result = await SendOTPForRegisteredUser(registeredUser);
+                  }
+                }
             return result;
         }
 
