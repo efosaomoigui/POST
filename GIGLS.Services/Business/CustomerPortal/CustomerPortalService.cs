@@ -36,7 +36,7 @@ using GIGLS.Services.Implementation;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Core.Domain.BankSettlement;
-
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -83,21 +83,28 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
 
 
-        public async Task<List<InvoiceViewDTO>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
+        public async Task<List<InvoiceViewDTO>> GetShipmentTransactions(ShipmentCollectionFilterCriteria f_Criteria)
         {
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
-           
-            var invoices = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.CustomerCode == currentUser.UserChannelCode).ToList();
 
-            if (f_Criteria.IsDashBoard)
+            var invoices = new List<InvoiceView>();
+
+            var invoiceQuery = _uow.Invoice.GetCustomerTransactions();
+
+            if (f_Criteria.IsDashboard)
             {
-                invoices = invoices.OrderByDescending(s => s.DateCreated).Take(5).ToList();
+                invoices = invoiceQuery.Where(s => s.CustomerCode == currentUser.UserChannelCode).OrderByDescending(s => s.DateCreated).Take(5).ToList();
             }
             else
             {
-                invoices = invoices.OrderByDescending(s => s.DateCreated).ToList();
+                //get startDate and endDate
+                var queryDate = f_Criteria.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+
+                invoices = invoiceQuery.Where(x => x.CustomerCode == currentUser.UserChannelCode && x.DateCreated >= startDate && x.DateCreated < endDate).OrderByDescending(s => s.DateCreated).ToList();
             }
 
             var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
@@ -207,8 +214,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
-
-            var invoices = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.CustomerCode == currentUser.UserChannelCode).ToList();
+            
+            var invoices = _uow.Invoice.GetCustomerInvoices().Where(s => s.CustomerCode == currentUser.UserChannelCode).OrderByDescending(s => s.DateCreated).ToList();
             invoices = invoices.OrderByDescending(s => s.DateCreated).ToList();
 
             var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
@@ -232,12 +239,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             //1. Verify the waybill is attached to the login user
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
+            
+            var invoices = _uow.Shipment.GetAllAsQueryable().Where(s => s.CustomerCode == currentUser.UserChannelCode && s.Waybill == waybillNumber).FirstOrDefault();
 
-            var invoices =
-                _uow.Invoice.GetAllFromInvoiceView().Where(s =>
-                s.CustomerCode == currentUser.UserChannelCode && s.Waybill == waybillNumber).ToList();
-
-            if (invoices.Count > 0)
+            if (invoices != null)
             {
                 var result = await _iShipmentTrackService.TrackShipment(waybillNumber);
                 return result;
@@ -282,11 +287,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (wallet != null)
             {
-                var invoices = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.CustomerCode == currentUser.UserChannelCode).ToList();
-                var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
-
-                // 
-                dashboardDTO.TotalShipmentOrdered = invoices.Count();
+                int invoices = _uow.Shipment.GetAllAsQueryable().Where(s => s.CustomerCode == currentUser.UserChannelCode && s.IsCancelled == false).Count();
+                dashboardDTO.TotalShipmentOrdered = invoices;
                 dashboardDTO.WalletBalance = wallet.Balance;
             }
 

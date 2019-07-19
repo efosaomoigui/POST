@@ -10,7 +10,6 @@ using AutoMapper;
 using GIGLS.CORE.DTO.Report;
 using System;
 using GIGLS.Core.View;
-using GIGLS.Core.Domain.Wallet;
 using System.Data.SqlClient;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
@@ -232,8 +231,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             return Task.FromResult(invoicesResult.OrderByDescending(x => x.DateCreated).ToList());
         }
-
-
+        
         public IQueryable<InvoiceView> GetAllFromInvoiceView()
         {
             var invoices = _GIGLSContextForView.InvoiceView.AsQueryable();
@@ -336,6 +334,47 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             return result;
         }
 
+        public IQueryable<InvoiceView> GetCustomerTransactions()
+        {
+            var shipments = Context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false);
 
+            var result = (from s in shipments
+                          join i in Context.Invoice on s.Waybill equals i.Waybill
+                          join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
+                          join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                          select new InvoiceView
+                          {
+                              Waybill = s.Waybill,
+                              CustomerCode = s.CustomerCode,
+                              DateCreated = s.DateCreated,
+                              ReceiverEmail = s.ReceiverEmail,
+                              ReceiverName = s.ReceiverName,
+                              PickupOptions = s.PickupOptions,
+                              Description = s.Description,
+                              GrandTotal = i.Amount,
+                              DepartureServiceCentreName = dept.Name,
+                              DestinationServiceCentreName = dest.Name
+                          });
+            return result;
+        }
+
+        public IQueryable<InvoiceView> GetCustomerInvoices()
+        {
+            var shipments = Context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false);
+
+            var result = (from s in shipments
+                          join i in Context.Invoice on s.Waybill equals i.Waybill
+                          select new InvoiceView
+                          {
+                              Waybill = s.Waybill,
+                              CustomerCode = s.CustomerCode,
+                              DateCreated = s.DateCreated,
+                              Amount = i.Amount,
+                              InvoiceNo = i.InvoiceNo,
+                              PaymentMethod = i.PaymentMethod,
+                              PaymentStatus = i.PaymentStatus
+                          });
+            return result;
+        }
     }
 }

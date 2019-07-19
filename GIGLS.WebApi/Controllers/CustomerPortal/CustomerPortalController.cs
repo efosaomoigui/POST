@@ -35,6 +35,7 @@ using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -77,7 +78,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("transaction")]
-        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentCollectionFilterCriteria f_Criteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
