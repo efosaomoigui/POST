@@ -222,23 +222,26 @@ namespace GIGLS.Services.Implementation.Zone
 
                 if (weightPercentDTO.PriceType == "Special")
                 {
-                    if (weightPercentDTO.WeightOne > 0)
-                    {
-                        var priceList = _uow.SpecialDomesticZonePrice.FindAsync(x => x.Weight <= 2.00M).Result.ToList();
-                        UpdateAllSpecialDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightOne);
-                    }
 
-                    if (weightPercentDTO.WeightTwo > 0)
-                    {
-                        var priceList = _uow.SpecialDomesticZonePrice.FindAsync(x => x.Weight > 2.00M && x.Weight <= 4.00M).Result.ToList();
-                        UpdateAllSpecialDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightTwo);
-                    }
+                    throw new GenericException("No price updated. Currently working on it.......");
 
-                    if (weightPercentDTO.WeightThree > 0)
-                    {
-                        var priceList = _uow.SpecialDomesticZonePrice.FindAsync(x => x.Weight > 4.00M).Result.ToList();
-                        UpdateAllSpecialDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightThree);
-                    }
+                    //if (weightPercentDTO.WeightOne > 0)
+                    //{
+                    //    var priceList = _uow.SpecialDomesticZonePrice.FindAsync(x => x.Weight <= 2.00M).Result.ToList();
+                    //    UpdateAllSpecialDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightOne);
+                    //}
+
+                    //if (weightPercentDTO.WeightTwo > 0)
+                    //{
+                    //    var priceList = _uow.SpecialDomesticZonePrice.FindAsync(x => x.Weight > 2.00M && x.Weight <= 4.00M).Result.ToList();
+                    //    UpdateAllSpecialDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightTwo);
+                    //}
+
+                    //if (weightPercentDTO.WeightThree > 0)
+                    //{
+                    //    var priceList = _uow.SpecialDomesticZonePrice.FindAsync(x => x.Weight > 4.00M).Result.ToList();
+                    //    UpdateAllSpecialDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightThree);
+                    //}
                 }
 
                 await _uow.CompleteAsync();
