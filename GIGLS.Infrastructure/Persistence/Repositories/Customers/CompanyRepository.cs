@@ -26,7 +26,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 var companies = Context.Company;
                 var companiesDto = from c in companies
                                    join w in Context.Wallets on c.CustomerCode equals w.CustomerCode
-                                   join sc in Context.ServiceCentre on c.ReturnServiceCentre equals sc.ServiceCentreId
                                    select new CompanyDTO
                                    {
                                        CompanyId = c.CompanyId,
@@ -46,7 +45,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        CustomerCategory = c.CustomerCategory,
                                        ReturnOption = c.ReturnOption,
                                        ReturnServiceCentre = c.ReturnServiceCentre,
-                                       ReturnServiceCentreName = sc.Name,
+                                       ReturnServiceCentreName = Context.ServiceCentre.Where(x => x.ServiceCentreId == c.ReturnServiceCentre).Select(x => x.Name).FirstOrDefault(),
                                        ReturnAddress = c.ReturnAddress,
                                        DateCreated = c.DateCreated,
                                        DateModified = c.DateModified,
