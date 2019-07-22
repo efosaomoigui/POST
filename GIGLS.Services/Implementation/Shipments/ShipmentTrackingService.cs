@@ -296,12 +296,18 @@ namespace GIGLS.Services.Implementation.Shipments
             var userDTO = await _userService.GetUserById(currentUserId);
             var serviceCentreDTO = _uow.ServiceCentre.Get(currentServiceCenterId);
 
+            //get all scan status
+            var allScanStatus = _uow.ScanStatus.GetAll().ToList();
+
             //1b. Get all the Regional Managers assigned to the ServiceCentre where Scan took place
             List<UserDTO> allRegionalManagers = await GetAllRegionalManagersForServiceCentre(currentServiceCenterId);
 
             //2. Use a loop to send to all Regional Managers
             foreach (var regionalManager in allRegionalManagers)
             {
+                var scanStatusReason = allScanStatus.Where(s => s.Code == scan.ShipmentScanStatus.ToString()).
+                    Select(s => s.Reason).FirstOrDefault();
+
                 //2a. Create MessageExtensionDTO to hold custom message info
                 var messageExtensionDTO = new MessageExtensionDTO()
                 {
@@ -310,7 +316,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     RegionalManagerEmail = regionalManager.Email,
                     ServiceCenterAgentName = userDTO.Email,
                     ServiceCenterName = serviceCentreDTO.Name,
-                    ScanStatus = scan.ShipmentScanStatus.ToString(),
+                    ScanStatus = scanStatusReason,
                     WaybillNumber = scan.WaybillNumber
                 };
 
