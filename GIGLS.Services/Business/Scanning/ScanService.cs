@@ -81,6 +81,9 @@ namespace GIGLS.Services.Business.Scanning
             //2. check if the shipment has not been cancelled (DSC)
             if (shipment != null && shipment.IsCancelled)
             {
+                //Send Email to Regional Managers whenever this occurs
+                bool emailSentResult = await SendEmailOnAttemptedScanOfCancelledShipment(scan);
+
                 throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already cancelled, no further scan is required!");
             }
 
@@ -410,7 +413,15 @@ namespace GIGLS.Services.Business.Scanning
 
             return true;
         }
-        
+
+        private async Task<bool> SendEmailOnAttemptedScanOfCancelledShipment(ScanDTO scan)
+        {
+            //send emails
+            var result = await _shipmentTrackingService.SendEmailForAttemptedScanOfCancelledShipments(scan);
+
+            return result;
+        }
+
         private async Task ProcessReturnWaybillFromDispatch(string waybill)
         {
             var getManifest = await _manifestWaybillService.GetActiveManifestForWaybill(waybill);

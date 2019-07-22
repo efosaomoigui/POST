@@ -469,6 +469,45 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.ToEmail = invoiceViewDTO.Email;
             }
 
+            //3. obj is MessageExtensionDTO
+            if (obj is MessageExtensionDTO)
+            {
+                var strArray = new string[]
+                 {
+                    "Regional Manager Name",
+                    "Service Center Agent Name",
+                    "Service Center Name",
+                    "Scan Status",
+                    "Date Time of Scan",
+                    "WaybillNumber"
+                 };
+
+                var messageExtensionDTO = (MessageExtensionDTO)obj;
+                //map the array
+                strArray[0] = messageExtensionDTO.RegionalManagerName;
+                strArray[1] = messageExtensionDTO.ServiceCenterAgentName;
+                strArray[2] = messageExtensionDTO.ServiceCenterName;
+                strArray[3] = messageExtensionDTO.ScanStatus;
+                strArray[4] = $"{DateTime.Now.ToLongDateString()} : {DateTime.Now.ToLongTimeString()}";
+                strArray[5] = messageExtensionDTO.WaybillNumber;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject =
+                    string.Format(messageDTO.Subject, strArray);
+
+
+                //populate the message template
+                messageDTO.FinalBody =
+                    string.Format(messageDTO.Body, strArray);
+
+
+                messageDTO.ToEmail = messageExtensionDTO.RegionalManagerEmail;
+            }
+
+
             return await Task.FromResult(verifySendEmail);
         }
 

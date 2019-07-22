@@ -356,6 +356,7 @@
     <Compile Include="DTO\Shipments\ManifestDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestGroupWaybillNumberMappingDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestVisitMonitoringDTO.cs" />
+    <Compile Include="DTO\Shipments\MessageExtensionDTO.cs" />
     <Compile Include="DTO\Shipments\MobilePriceDTO.cs" />
     <Compile Include="DTO\Shipments\MobileShipmentTrackingHistoryDTO.cs" />
     <Compile Include="DTO\Shipments\OverdueShipmentDTO.cs" />
