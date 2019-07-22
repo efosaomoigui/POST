@@ -187,17 +187,41 @@ namespace GIGLS.Services.Implementation.Zone
                         if(weightPercentDTO.WeightOne > 0)
                         {
                             var priceList = _uow.DomesticZonePrice.FindAsync(x => x.RegularEcommerceType == RegularEcommerceType.Ecommerce && (x.Weight <= 2.00M)).Result.ToList();
-                            UpdateAllDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightOne);
+                            if (weightPercentDTO.ModificationType == "Increase")
+                            {
+                                UpdateAllDomesticZonePriceUsingWeightIncrement(priceList, weightPercentDTO.WeightOne);
+                            }
+                            
+                            else if (weightPercentDTO.ModificationType == "Decrease")
+                            {
+                                UpdateAllDomesticZonePriceUsingWeightDecrement(priceList, weightPercentDTO.WeightOne);
+                            }
                         }
+
                         if (weightPercentDTO.WeightTwo > 0)
                         {
                             var priceList = _uow.DomesticZonePrice.FindAsync(x => x.RegularEcommerceType == RegularEcommerceType.Ecommerce && (x.Weight > 2.00M && x.Weight <= 4.00M)).Result.ToList();
-                            UpdateAllDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightTwo);
+                            if (weightPercentDTO.ModificationType == "Increase")
+                            {
+                                UpdateAllDomesticZonePriceUsingWeightIncrement(priceList, weightPercentDTO.WeightTwo);
+                            }
+                            else if (weightPercentDTO.ModificationType == "Decrease")
+                            {
+                                UpdateAllDomesticZonePriceUsingWeightDecrement(priceList, weightPercentDTO.WeightTwo);
+                            }
+
                         }
                         if (weightPercentDTO.WeightThree > 0)
                         {
                             var priceList = _uow.DomesticZonePrice.FindAsync(x => x.RegularEcommerceType == RegularEcommerceType.Ecommerce && (x.Weight > 4.00M)).Result.ToList();
-                            UpdateAllDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightThree);
+                            if (weightPercentDTO.ModificationType == "Increase")
+                            {
+                                UpdateAllDomesticZonePriceUsingWeightIncrement(priceList, weightPercentDTO.WeightThree);
+                            }
+                            else if (weightPercentDTO.ModificationType == "Decrease")
+                            {
+                                UpdateAllDomesticZonePriceUsingWeightDecrement(priceList, weightPercentDTO.WeightThree);
+                            }
                         }
                     }
                     if (weightPercentDTO.CustomerType == "Individual")
@@ -205,43 +229,70 @@ namespace GIGLS.Services.Implementation.Zone
                         if (weightPercentDTO.WeightOne > 0)
                         {
                             var priceList = _uow.DomesticZonePrice.FindAsync(x => x.RegularEcommerceType == RegularEcommerceType.Regular && (x.Weight <= 2.00M)).Result.ToList();
-                            UpdateAllDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightOne);
+                            if (weightPercentDTO.ModificationType == "Increase")
+                            {
+                                UpdateAllDomesticZonePriceUsingWeightIncrement(priceList, weightPercentDTO.WeightOne);
+                            }
+                            else if (weightPercentDTO.ModificationType == "Decrease")
+                            {
+                                UpdateAllDomesticZonePriceUsingWeightDecrement(priceList, weightPercentDTO.WeightOne);
+                            }
                         }
                         if (weightPercentDTO.WeightTwo > 0)
                         {
                             var priceList = _uow.DomesticZonePrice.FindAsync(x => x.RegularEcommerceType == RegularEcommerceType.Regular && (x.Weight > 2.00M && x.Weight <= 4.00M)).Result.ToList();
-                            UpdateAllDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightTwo);
+                            if (weightPercentDTO.ModificationType == "Increase")
+                            {
+                                UpdateAllDomesticZonePriceUsingWeightIncrement(priceList, weightPercentDTO.WeightTwo);
+                            }
+                            else if (weightPercentDTO.ModificationType == "Decrease")
+                            {
+                                UpdateAllDomesticZonePriceUsingWeightDecrement(priceList, weightPercentDTO.WeightTwo);
+                            }
                         }
                         if (weightPercentDTO.WeightThree > 0)
                         {
                             var priceList = _uow.DomesticZonePrice.FindAsync(x => x.RegularEcommerceType == RegularEcommerceType.Regular && (x.Weight > 4.00M)).Result.ToList();
-                            UpdateAllDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightThree);
+                            if (weightPercentDTO.ModificationType == "Increase")
+                            {
+                                UpdateAllDomesticZonePriceUsingWeightIncrement(priceList, weightPercentDTO.WeightThree);
+                            }
+                            else if (weightPercentDTO.ModificationType == "Decrease")
+                            {
+                                UpdateAllDomesticZonePriceUsingWeightDecrement(priceList, weightPercentDTO.WeightThree);
+                            }
                         }
                     }
                 }
 
                 if (weightPercentDTO.PriceType == "Special")
                 {
+                    if (weightPercentDTO.WeightOne > 0)
+                    {
+                        var priceList = _uow.SpecialDomesticPackage.Find(x => x.Weight <= 2.00M)
+                                                                    .Select(x => x.SpecialDomesticPackageId)
+                                                                    .ToList();
 
-                    throw new GenericException("No price updated. Currently working on it.......");
+                        UpdateAllSpecialDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightOne,weightPercentDTO);
+                    }
 
-                    //if (weightPercentDTO.WeightOne > 0)
-                    //{
-                    //    var priceList = _uow.SpecialDomesticZonePrice.FindAsync(x => x.Weight <= 2.00M).Result.ToList();
-                    //    UpdateAllSpecialDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightOne);
-                    //}
+                    if (weightPercentDTO.WeightTwo > 0)
+                    {
+                        var priceList = _uow.SpecialDomesticPackage.Find(x => x.Weight > 2.00M && x.Weight <= 4.00M)
+                                                                    .Select(x => x.SpecialDomesticPackageId)
+                                                                    .ToList();
 
-                    //if (weightPercentDTO.WeightTwo > 0)
-                    //{
-                    //    var priceList = _uow.SpecialDomesticZonePrice.FindAsync(x => x.Weight > 2.00M && x.Weight <= 4.00M).Result.ToList();
-                    //    UpdateAllSpecialDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightTwo);
-                    //}
+                        UpdateAllSpecialDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightTwo, weightPercentDTO);
+                    }
 
-                    //if (weightPercentDTO.WeightThree > 0)
-                    //{
-                    //    var priceList = _uow.SpecialDomesticZonePrice.FindAsync(x => x.Weight > 4.00M).Result.ToList();
-                    //    UpdateAllSpecialDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightThree);
-                    //}
+                    if (weightPercentDTO.WeightThree > 0)
+                    {
+                        var priceList = _uow.SpecialDomesticPackage.Find(x => x.Weight > 4.00M)
+                                                                    .Select(x => x.SpecialDomesticPackageId)
+                                                                    .ToList();
+
+                        UpdateAllSpecialDomesticZonePriceUsingWeight(priceList, weightPercentDTO.WeightThree, weightPercentDTO);
+                    }
                 }
 
                 await _uow.CompleteAsync();
@@ -259,7 +310,15 @@ namespace GIGLS.Services.Implementation.Zone
             {
                 var entryPrice = entry.Price;
                 var entryPercent = zonePercent.Zones.Where(x => x.ZoneId == entry.ZoneId).Select(x => x.ZonePercent).FirstOrDefault();
-                var newPrice = entryPrice * (1 + (entryPercent / 100));
+                var newPrice = 0.0M;
+                if (zonePercent.ModificationType == "Increase")
+                {
+                    newPrice = entryPrice * (1 + (entryPercent / 100));
+                }
+                else if (zonePercent.ModificationType == "Decrease")
+                {
+                    newPrice = entryPrice * (1 - (entryPercent / 100));
+                }
                 //set new Price
                 entry.Price = newPrice;
             }
@@ -271,30 +330,63 @@ namespace GIGLS.Services.Implementation.Zone
             {
                 var entryPrice = entry.Price;
                 var entryPercent = zonePercent.Zones.Where(x => x.ZoneId == entry.ZoneId).Select(x => x.ZonePercent).FirstOrDefault();
-                var newPrice = entryPrice * (1 + (entryPercent / 100));
+                var newPrice = 0.0M;
+                if (zonePercent.ModificationType == "Increase")
+                {
+                    newPrice = entryPrice * (1 + (entryPercent / 100));
+                }
+                else if (zonePercent.ModificationType == "Decrease")
+                {
+                    newPrice = entryPrice * (1 - (entryPercent / 100));
+                }
 
                 //set new Price
                 entry.Price = newPrice;
             }
         }
 
-        private void UpdateAllDomesticZonePriceUsingWeight(List<DomesticZonePrice> priceList, decimal weightPercent)
+        private void UpdateAllDomesticZonePriceUsingWeightIncrement(List<DomesticZonePrice> priceList, decimal weightPercent)
         {
             foreach (var entry in priceList)
             {
                 var entryPrice = entry.Price;
+
                 var newPrice = entryPrice * (1 + (weightPercent / 100));
                 entry.Price = newPrice;
             }
         }
-
-        private void UpdateAllSpecialDomesticZonePriceUsingWeight(List<SpecialDomesticZonePrice> priceList, decimal weightPercent)
+        public void UpdateAllDomesticZonePriceUsingWeightDecrement(List<DomesticZonePrice> priceList, decimal weightPercent)
         {
-            foreach (var entry in priceList)
+            foreach(var entry in priceList)
             {
                 var entryPrice = entry.Price;
-                var newPrice = entryPrice * (1 + (weightPercent / 100));
+
+                var newPrice = entryPrice * (1 - (weightPercent / 100));
                 entry.Price = newPrice;
+            }
+        }
+
+        private void UpdateAllSpecialDomesticZonePriceUsingWeight(List<int> priceList, decimal weightPercent, WeightPercentDTO weightPercentDTOs)
+        {
+
+            foreach (var entry in priceList)
+            {
+                var prices = _uow.SpecialDomesticZonePrice.GetAll().Where(x => x.SpecialDomesticPackageId == entry)
+                                                                    .ToList();
+                foreach(var price in prices)
+                {
+                    var entryPrice = price.Price;
+                    if (weightPercentDTOs.ModificationType == "Increase")
+                    {
+                        var newPrice = entryPrice * (1 + (weightPercent / 100));
+                        price.Price = newPrice;
+                    }
+                    else if (weightPercentDTOs.ModificationType == "Decrease")
+                    {
+                        var newPrice = entryPrice * (1 - (weightPercent / 100));
+                        price.Price = newPrice;
+                    }
+                }
             }
         }
     }

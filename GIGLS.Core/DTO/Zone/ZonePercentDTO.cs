@@ -8,6 +8,7 @@ namespace GIGLS.Core.DTO.Zone
         public string Category { get; set; }
         public string PriceType { get; set; }
         public string CustomerType { get; set; }
+        public string ModificationType { get; set; }
         public List<ZoneDTO> Zones { get; set; }
     }
 }
