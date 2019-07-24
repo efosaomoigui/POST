@@ -1,4 +1,5 @@
 ﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,5 +38,7 @@ namespace GIGLS.Core.Domain
 
        //Agility Calculations
         public decimal? CalculatedPrice { get; set; }
+        public int? SpecialPackageId { get; set; }
+        public ShipmentType ShipmentType { get; set; }
     }
 }
