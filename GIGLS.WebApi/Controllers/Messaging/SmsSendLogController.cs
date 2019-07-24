@@ -70,21 +70,22 @@ namespace GIGLS.WebApi.Controllers.Messaging
             });
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
-        //[HttpGet]
-        //[Route("{phoneNumber}/phonenumber")]
-        //public async Task<IServiceResponse<List<SmsSendLogDTO>>> GetSmsSendLog(string phoneNumber)
-        //{
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-        //        var messages = await _messageService.GetSmsSendLog(phoneNumber);
 
-        //        return new ServiceResponse<List<SmsSendLogDTO>>
-        //        {
-        //            Object = messages
-        //        };
-        //    });
-        //}
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("phonenumber")]
+        public async Task<IServiceResponse<List<SmsSendLogDTO>>> GetSmsSendLog([FromUri]string phoneNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var messages = await _messageService.GetSmsSendLog(phoneNumber);
+
+                return new ServiceResponse<List<SmsSendLogDTO>>
+                {
+                    Object = messages
+                };
+            });
+        }
 
     }
 }
