@@ -193,7 +193,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     DepartureStationId = preShipment.SenderStationId,
                     DestinationStationId = preShipment.ReceiverStationId,
                     Weight = (decimal)preShipmentItem.Weight,
-                    SpecialPackageId = preShipmentItem.SpecialPackageId,
+                    SpecialPackageId = (int)preShipmentItem.SpecialPackageId,
                     ShipmentType = preShipmentItem.ShipmentType
                 };
 
