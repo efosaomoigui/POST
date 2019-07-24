@@ -7,6 +7,8 @@ using GIGL.GIGLS.Core.Domain;
 using System.Collections.Generic;
 using GIGLS.Infrastructure;
 using GIGLS.Core.Enums;
+using AutoMapper;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -147,6 +149,16 @@ namespace GIGLS.Services.Implementation.Zone
             {
                 throw;
             }
+        }
+
+        public async Task UpdateAllDomesticPriceByZone(DomesticZonePriceDTO domesticZonePriceDTO)
+        {
+            //try
+            //{
+            //    var prices = _uow.DomesticZonePrice.GetAll().ToList();
+            //    //prices.
+
+            //}
         }
     }
 }

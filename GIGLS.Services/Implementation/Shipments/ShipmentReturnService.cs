@@ -68,6 +68,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 int departure = shipment.DepartureServiceCentreId;
                 shipment.DepartureServiceCentreId = shipment.DestinationServiceCentreId;
                 shipment.DestinationServiceCentreId = departure;
+                shipment.PickupOptions = PickupOptions.SERVICECENTER;
 
                 //change ecommerce customer destination address to their return address
                 if (shipment.CustomerDetails.CompanyType == CompanyType.Ecommerce)

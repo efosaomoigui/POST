@@ -356,6 +356,7 @@
     <Compile Include="DTO\Shipments\ManifestDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestGroupWaybillNumberMappingDTO.cs" />
     <Compile Include="DTO\Shipments\ManifestVisitMonitoringDTO.cs" />
+    <Compile Include="DTO\Shipments\MessageExtensionDTO.cs" />
     <Compile Include="DTO\Shipments\MobilePriceDTO.cs" />
     <Compile Include="DTO\Shipments\MobileShipmentTrackingHistoryDTO.cs" />
     <Compile Include="DTO\Shipments\OverdueShipmentDTO.cs" />
@@ -419,7 +420,9 @@
     <Compile Include="DTO\Zone\SpecialDomesticZonePriceDTO.cs" />
     <Compile Include="DTO\Zone\WeightLimitDTO.cs" />
     <Compile Include="DTO\Zone\WeightLimitPriceDTO.cs" />
+    <Compile Include="DTO\Zone\WeightPercentDTO.cs" />
     <Compile Include="DTO\Zone\ZoneDTO.cs" />
+    <Compile Include="DTO\Zone\ZonePercentDTO.cs" />
     <Compile Include="Enums\DepositType.cs" />
     <Compile Include="Enums\AccountType.cs" />
     <Compile Include="Enums\CODStatus.cs" />
@@ -434,6 +437,7 @@
     <Compile Include="Enums\FleetType.cs" />
     <Compile Include="Enums\Gender.cs" />
     <Compile Include="Enums\GlobalPropertyType.cs" />
+    <Compile Include="Enums\IncrementType.cs" />
     <Compile Include="Enums\InventoryType.cs" />
     <Compile Include="Enums\JobCardMaintenanceStatus.cs" />
     <Compile Include="Enums\JobCardStatus.cs" />
