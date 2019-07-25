@@ -6,7 +6,7 @@ using GIGLS.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+ 
 namespace GIGLS.Core.IRepositories.Account
 {
     public interface IInvoiceRepository : IRepository<Invoice>
@@ -22,5 +22,6 @@ namespace GIGLS.Core.IRepositories.Account
         IQueryable<InvoiceView> GetAllInvoiceShipments();
         IQueryable<InvoiceView> GetCustomerTransactions();
         IQueryable<InvoiceView> GetCustomerInvoices();
+        Task<List<InvoiceViewDTO>> GetInvoicesFromViewWithDeliveryTimeAsyncFromSP(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds); 
     }
 }
