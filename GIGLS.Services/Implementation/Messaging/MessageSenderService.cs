@@ -479,7 +479,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     "Service Center Name",
                     "Scan Status",
                     "Date Time of Scan",
-                    "WaybillNumber"
+                    "WaybillNumber",
+                    "CancelledOrCollected"
                  };
 
                 var messageExtensionDTO = (MessageExtensionDTO)obj;
@@ -490,6 +491,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[3] = messageExtensionDTO.ScanStatus;
                 strArray[4] = $"{DateTime.Now.ToLongDateString()} : {DateTime.Now.ToLongTimeString()}";
                 strArray[5] = messageExtensionDTO.WaybillNumber;
+                strArray[6] = messageExtensionDTO.CancelledOrCollected;
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
