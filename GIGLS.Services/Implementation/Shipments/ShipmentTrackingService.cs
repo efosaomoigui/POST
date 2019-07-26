@@ -317,7 +317,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     ServiceCenterAgentName = userDTO.Email,
                     ServiceCenterName = serviceCentreDTO.Name,
                     ScanStatus = scanStatusReason,
-                    WaybillNumber = scan.WaybillNumber
+                    WaybillNumber = scan.WaybillNumber,
+                    CancelledOrCollected = scan.CancelledOrCollected
                 };
 
                 //2b. send message

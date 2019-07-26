@@ -126,6 +126,48 @@ namespace GIGLS.Services.Implementation.Report
 
             return invoices;
         }
-        
+
+        public async Task<List<InvoiceViewDTO>> GetInvoiceReportsFromViewPlusDeliveryTime(AccountFilterCriteria accountFilterCriteria) 
+        {
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var invoices = await _uow.Invoice.GetInvoicesFromViewWithDeliveryTimeAsyncFromSP(accountFilterCriteria, serviceCenterIds);
+
+            foreach (var item in invoices)
+            {
+                //get CustomerDetails
+                if (item.CustomerType.Contains("Individual"))
+                {
+                    item.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
+
+                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), item.CustomerType);
+                //var customerDetails = await _shipmentService.GetCustomer(item.CustomerId, customerType);
+                var customerDetails = new CustomerDTO()
+                {
+                    CustomerType = customerType,
+                    CustomerCode = item.CustomerCode,
+                    Email = item.Email,
+                    PhoneNumber = item.PhoneNumber,
+                    CompanyId = item.CompanyId.GetValueOrDefault(),
+                    Name = item.Name,
+                    IndividualCustomerId = item.IndividualCustomerId.GetValueOrDefault(),
+                    FirstName = item.FirstName,
+                    LastName = item.LastName
+                };
+
+                item.CustomerDetails = customerDetails;
+
+                //Update to change the Corporate Paid status from 'Paid' to 'Credit'
+                item.PaymentStatusDisplay = item.PaymentStatus.ToString();
+                if ((CompanyType.Corporate.ToString() == item.CompanyType)
+                    && (PaymentStatus.Paid == item.PaymentStatus))
+                {
+                    item.PaymentStatusDisplay = "Credit";
+                }
+            }
+
+            return invoices;
+        }
+
     }
 }

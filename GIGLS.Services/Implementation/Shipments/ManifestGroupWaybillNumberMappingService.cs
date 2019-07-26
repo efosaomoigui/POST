@@ -141,11 +141,13 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var baselineDate = DateTime.Today.AddDays(-30);
+
+                
                 //1. get all dispatch for that captain -- update this to get the data from the database instead of app memory
-                var dispatchResult = _uow.Dispatch.GetAll().Where(x => x.DriverDetail.Equals(captainId))
-                                                                    .OrderBy(x => x.DateCreated)
-                                                                    .Take(30)
-                                                                    .ToList();
+                var dispatchResult = _uow.Dispatch.GetAll().Where(x => x.DriverDetail.Equals(captainId) && x.DateCreated >= baselineDate)
+                                                            .ToList();
+                                                                    
                 var dispatchResultDTO = Mapper.Map<List<DispatchDTO>>(dispatchResult);
 
                 //2. get the manifest waybill mapping
