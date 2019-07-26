@@ -200,7 +200,7 @@ namespace GIGLS.Services.Implementation.Zone
 
                         if (weightPercentDTO.WeightTwo > 0)
                         {
-                            var priceList = _uow.DomesticZonePrice.FindAsync(x => x.RegularEcommerceType == RegularEcommerceType.Ecommerce && (x.Weight > 2.00M && x.Weight <= 4.00M)).Result.ToList();
+                            var priceList = _uow.DomesticZonePrice.FindAsync(x => x.RegularEcommerceType == RegularEcommerceType.Ecommerce && (x.Weight >= 2.50M && x.Weight <= 4.50M)).Result.ToList();
                             if (weightPercentDTO.ModificationType ==  ModificationType.Increase)
                             {
                                 UpdateAllDomesticZonePriceUsingWeightIncrement(priceList, weightPercentDTO.WeightTwo, weightPercentDTO);
@@ -213,7 +213,7 @@ namespace GIGLS.Services.Implementation.Zone
                         }
                         if (weightPercentDTO.WeightThree > 0)
                         {
-                            var priceList = _uow.DomesticZonePrice.FindAsync(x => x.RegularEcommerceType == RegularEcommerceType.Ecommerce && (x.Weight > 4.00M)).Result.ToList();
+                            var priceList = _uow.DomesticZonePrice.FindAsync(x => x.RegularEcommerceType == RegularEcommerceType.Ecommerce && (x.Weight > 4.50M)).Result.ToList();
                             if (weightPercentDTO.ModificationType == ModificationType.Increase)
                             {
                                 UpdateAllDomesticZonePriceUsingWeightIncrement(priceList, weightPercentDTO.WeightThree, weightPercentDTO);
@@ -240,7 +240,7 @@ namespace GIGLS.Services.Implementation.Zone
                         }
                         if (weightPercentDTO.WeightTwo > 0)
                         {
-                            var priceList = _uow.DomesticZonePrice.FindAsync(x => x.RegularEcommerceType == RegularEcommerceType.Regular && (x.Weight > 2.00M && x.Weight <= 4.00M)).Result.ToList();
+                            var priceList = _uow.DomesticZonePrice.FindAsync(x => x.RegularEcommerceType == RegularEcommerceType.Regular && (x.Weight >= 2.50M && x.Weight <= 4.50M)).Result.ToList();
                             if (weightPercentDTO.ModificationType == ModificationType.Increase)
                             {
                                 UpdateAllDomesticZonePriceUsingWeightIncrement(priceList, weightPercentDTO.WeightTwo, weightPercentDTO);
@@ -252,7 +252,7 @@ namespace GIGLS.Services.Implementation.Zone
                         }
                         if (weightPercentDTO.WeightThree > 0)
                         {
-                            var priceList = _uow.DomesticZonePrice.FindAsync(x => x.RegularEcommerceType == RegularEcommerceType.Regular && (x.Weight > 4.00M)).Result.ToList();
+                            var priceList = _uow.DomesticZonePrice.FindAsync(x => x.RegularEcommerceType == RegularEcommerceType.Regular && (x.Weight > 4.50M)).Result.ToList();
                             if (weightPercentDTO.ModificationType == ModificationType.Increase)
                             {
                                 UpdateAllDomesticZonePriceUsingWeightIncrement(priceList, weightPercentDTO.WeightThree, weightPercentDTO);
@@ -278,7 +278,7 @@ namespace GIGLS.Services.Implementation.Zone
 
                     if (weightPercentDTO.WeightTwo > 0)
                     {
-                        var priceList = _uow.SpecialDomesticPackage.Find(x => x.Weight > 2.00M && x.Weight <= 4.00M)
+                        var priceList = _uow.SpecialDomesticPackage.Find(x => x.Weight >= 2.50M && x.Weight <= 4.50M)
                                                                     .Select(x => x.SpecialDomesticPackageId)
                                                                     .ToList();
 
@@ -287,7 +287,7 @@ namespace GIGLS.Services.Implementation.Zone
 
                     if (weightPercentDTO.WeightThree > 0)
                     {
-                        var priceList = _uow.SpecialDomesticPackage.Find(x => x.Weight > 4.00M)
+                        var priceList = _uow.SpecialDomesticPackage.Find(x => x.Weight > 4.50M)
                                                                     .Select(x => x.SpecialDomesticPackageId)
                                                                     .ToList();
 
