@@ -73,15 +73,22 @@ namespace GIGLS.Services.Implementation.Shipments
                 //change ecommerce customer destination address to their return address
                 if (shipment.CustomerDetails.CompanyType == CompanyType.Ecommerce)
                 {
-                    if (shipment.CustomerDetails.ReturnOption != null)
+                    if(shipment.CustomerDetails.ReturnOption == null || shipment.CustomerDetails.ReturnServiceCentre < 1)
                     {
-                        shipment.PickupOptions = (PickupOptions)Enum.Parse(typeof(PickupOptions), shipment.CustomerDetails.ReturnOption);
+                        throw new GenericException($"Return can not be initiated for {shipment.CustomerDetails.CustomerName} at this time, as he has not specified a return address. Merchant should contact the e-commerce team and provide a valid return address.");
                     }
+                    else
+                    {
+                        if (shipment.CustomerDetails.ReturnOption != null)
+                        {
+                            shipment.PickupOptions = (PickupOptions)Enum.Parse(typeof(PickupOptions), shipment.CustomerDetails.ReturnOption);
+                        }
 
-                    if (shipment.CustomerDetails.ReturnServiceCentre > 0)
-                    {
-                        shipment.DestinationServiceCentreId = shipment.CustomerDetails.ReturnServiceCentre;
-                    }
+                        if (shipment.CustomerDetails.ReturnServiceCentre > 0)
+                        {
+                            shipment.DestinationServiceCentreId = shipment.CustomerDetails.ReturnServiceCentre;
+                        }
+                    }                    
                 }
 
                 //Check if the user is a staff at final destination
