@@ -82,6 +82,7 @@ namespace GIGLS.Services.Business.Scanning
             if (shipment != null && shipment.IsCancelled)
             {
                 //Send Email to Regional Managers whenever this occurs
+                scan.CancelledOrCollected = "Cancelled";
                 bool emailSentResult = await SendEmailOnAttemptedScanOfCancelledShipment(scan);
 
                 throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already cancelled, no further scan is required!");
@@ -104,6 +105,10 @@ namespace GIGLS.Services.Business.Scanning
 
             if (shipmentCollected != null)
             {
+                //Send Email to Regional Managers whenever this occurs
+                scan.CancelledOrCollected = "Collected";
+                bool emailSentResult = await SendEmailOnAttemptedScanOfCancelledShipment(scan);
+
                 throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already collected, no further scan is required!");
             }
 
