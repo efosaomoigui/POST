@@ -777,6 +777,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.PreShipmentItemMobile.Remove(preshipmentitemmobile);
                 }
                 var PreshipmentPriceDTO = await GetPrice(preShipment);
+                preshipmentmobilegrandtotal.shipmentstatus = "Resolved";
                 var difference = ((decimal)preshipmentmobilegrandtotal.CalculatedTotal - PreshipmentPriceDTO.GrandTotal);
                 var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preShipment.CustomerCode);
                 updatedwallet.Balance = updatedwallet.Balance + (decimal)difference;
