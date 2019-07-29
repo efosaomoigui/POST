@@ -982,7 +982,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("updatepreshipmentmobile")]
-        public async Task<IServiceResponse<bool>> UpdatePreshipmentMobile(PreShipmentItemMobileDTO preshipment)
+        public async Task<IServiceResponse<bool>> UpdatePreshipmentMobile(List<PreShipmentItemMobileDTO> preshipment)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -1021,6 +1021,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<SummaryTransactionsDTO>
                 {
                     Object = totalTransactions
+                };
+            });
+        }
+        [HttpPost]
+        [Route("resolvedsipute")]
+        public async Task<object> ResolveDispute(PreShipmentMobileDTO shipment)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _preshipmentmobileService.ResolveDisputeForMobile(shipment);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
                 };
             });
         }
