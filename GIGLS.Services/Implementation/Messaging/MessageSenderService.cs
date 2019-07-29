@@ -147,17 +147,19 @@ namespace GIGLS.Services.Implementation.Messaging
                     "Shipment Description",
                     "Total Shipment Amount",
                     "Shipment Creation Date",
-                    "Shipment Creation Time"
+                    "Shipment Creation Time",
+                    "Shipment Fee",
+                    "Currency Symbol"
                 };
 
                 var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
-
+                
                 ////need optimisation
                 //var invoiceList = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).ToList();
                 //var invoice = invoiceList.FirstOrDefault();
 
                 var invoice = _uow.Invoice.GetAllInvoiceShipments().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).FirstOrDefault();
-
+                var country = _uow.Country.Find(s => s.CountryId == invoice.DepartureCountryId).FirstOrDefault();
                 //1. CustomerType, CustomerId
 
                 if (invoice != null)
@@ -182,7 +184,9 @@ namespace GIGLS.Services.Implementation.Messaging
                     var customerName = customerObj.CustomerName;
                     var waybill = shipmentTrackingDTO.Waybill;
                     var demurrageAmount = demurragePrice;
+                    
 
+                    
                     //map the array
                     strArray[0] = customerName;
                     strArray[1] = waybill;
@@ -196,6 +200,9 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[9] = invoice.GrandTotal.ToString();
                     strArray[10] = invoice.DateCreated.ToLongDateString();
                     strArray[11] = invoice.DateCreated.ToShortTimeString();
+                    strArray[12] = invoice.GrandTotal.ToString();
+                    strArray[13] = country.CurrencySymbol;
+                    
 
                     //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
                     if (messageDTO.MessageType == MessageType.ARF &&
