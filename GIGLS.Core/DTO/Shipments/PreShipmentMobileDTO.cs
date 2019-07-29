@@ -105,5 +105,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string VehicleType { get; set; }
 
         public int? ZoneMapping { get; set; }
+        public List<int> DeletedItems { get; set; }
     }
 }
