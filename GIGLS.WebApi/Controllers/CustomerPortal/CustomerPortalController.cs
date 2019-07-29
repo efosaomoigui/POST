@@ -1025,7 +1025,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
         [HttpPost]
-        [Route("resolvedsipute")]
+        [Route("resolvedispute")]
         public async Task<object> ResolveDispute(PreShipmentMobileDTO shipment)
         {
             return await HandleApiOperationAsync(async () =>
