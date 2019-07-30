@@ -39,5 +39,6 @@ namespace GIGLS.Core.DTO.Shipments
         //Agility Calculations
         public decimal? CalculatedPrice { get; set; }
         public int? SpecialPackageId { get; set; }
+        public bool IsCancelled { get; set; }
     }
 }

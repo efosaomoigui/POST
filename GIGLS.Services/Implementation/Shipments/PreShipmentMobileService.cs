@@ -140,6 +140,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 newPreShipment.IsDelivered = false;
                 newPreShipment.shipmentstatus = "Shipment created";
                 newPreShipment.DateCreated = DateTime.Now;
+                newPreShipment.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
                 preShipmentDTO.IsBalanceSufficient = true;
                 _uow.PreShipmentMobile.Add(newPreShipment);
                 await _uow.CompleteAsync();
@@ -635,30 +636,32 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<bool> UpdatePreShipmentMobileDetails(PreShipmentItemMobileDTO preshipmentmobile)
+        public async Task<bool> UpdatePreShipmentMobileDetails(List<PreShipmentItemMobileDTO> preshipmentmobile)
         {
             try
             {
-
-                var preShipment = await _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == preshipmentmobile.PreShipmentMobileId && s.PreShipmentItemMobileId == preshipmentmobile.PreShipmentItemMobileId);
-                if (preShipment == null)
+                foreach (var preShipment in preshipmentmobile)
                 {
-                    throw new GenericException("PreShipmentItem Does Not Exist");
-                }
-                preShipment.CalculatedPrice = preshipmentmobile.CalculatedPrice;
-                preShipment.Description = preshipmentmobile.Description;
-                preShipment.EstimatedPrice = preshipmentmobile.EstimatedPrice;
-                preShipment.ImageUrl = preshipmentmobile.ImageUrl;
-                preShipment.IsVolumetric = preshipmentmobile.IsVolumetric;
-                preShipment.ItemName = preshipmentmobile.ItemName;
-                preShipment.ItemType = preshipmentmobile.ItemType;
-                preShipment.Length = preshipmentmobile.Length;
-                preShipment.Quantity = preshipmentmobile.Quantity;
-                preShipment.Weight = preshipmentmobile.Weight;
-                preShipment.Width = preshipmentmobile.Width;
-                preShipment.Height = preshipmentmobile.Height;
+                    var preshipment = await _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == preShipment.PreShipmentMobileId && s.PreShipmentItemMobileId == preShipment.PreShipmentItemMobileId);
+                    if (preShipment == null)
+                    {
+                        throw new GenericException("PreShipmentItem Does Not Exist");
+                    }
+                    preshipment.CalculatedPrice = preShipment.CalculatedPrice;
+                    preshipment.Description = preShipment.Description;
+                    preshipment.EstimatedPrice = preShipment.EstimatedPrice;
+                    preshipment.ImageUrl = preShipment.ImageUrl;
+                    preshipment.IsVolumetric = preShipment.IsVolumetric;
+                    preshipment.ItemName = preShipment.ItemName;
+                    preshipment.ItemType = preShipment.ItemType;
+                    preshipment.Length = preShipment.Length;
+                    preshipment.Quantity = preShipment.Quantity;
+                    preshipment.Weight = preShipment.Weight;
+                    preshipment.Width = preShipment.Width;
+                    preshipment.Height = preShipment.Height;
 
-                await _uow.CompleteAsync();
+                    await _uow.CompleteAsync();
+                }
                 return true;
             }
             catch (Exception)
@@ -759,6 +762,32 @@ namespace GIGLS.Services.Implementation.Shipments
             };
             return summary;
 
+        }
+
+        public async Task<object> ResolveDisputeForMobile(PreShipmentMobileDTO preShipment)
+        {
+            try
+            {
+               var preshipmentmobilegrandtotal = _uow.PreShipmentMobile.GetAsync(s => s.PreShipmentMobileId == preShipment.PreShipmentMobileId).Result;
+               bool IsResolved = false;
+                foreach (var id in preShipment.DeletedItems)
+                {
+                    var preshipmentitemmobile = _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == preShipment.PreShipmentMobileId && s.PreShipmentItemMobileId == id).Result;
+                    preshipmentitemmobile.IsCancelled = true;
+                    _uow.PreShipmentItemMobile.Remove(preshipmentitemmobile);
+                }
+                var PreshipmentPriceDTO = await GetPrice(preShipment);
+                preshipmentmobilegrandtotal.shipmentstatus = "Resolved";
+                var difference = ((decimal)preshipmentmobilegrandtotal.CalculatedTotal - PreshipmentPriceDTO.GrandTotal);
+                var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preShipment.CustomerCode);
+                updatedwallet.Balance = updatedwallet.Balance + (decimal)difference;
+                await _uow.CompleteAsync();
+                return new { IsResolved = true};
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }
