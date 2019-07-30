@@ -1,14 +1,25 @@
 ﻿using GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGL.GIGLS.Core.Domain
 {
     public class ShipmentTracking : BaseDomain
     {
         public int ShipmentTrackingId { get; set; }
+
+        [Required]
+        [MaxLength(100)]
+        [Index]
         public string Waybill { get; set; }
+
         public string Location { get; set; }
+
+        [Required]
+        [MaxLength(50)]
+        [Index]
         public string Status { get; set; }
         public DateTime DateTime { get; set; }
         public TrackingType TrackingType  { get; set; }
