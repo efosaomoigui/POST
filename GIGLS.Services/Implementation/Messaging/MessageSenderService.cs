@@ -159,11 +159,12 @@ namespace GIGLS.Services.Implementation.Messaging
                 //var invoice = invoiceList.FirstOrDefault();
 
                 var invoice = _uow.Invoice.GetAllInvoiceShipments().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).FirstOrDefault();
-                var country = _uow.Country.Find(s => s.CountryId == invoice.DepartureCountryId).FirstOrDefault();
-                //1. CustomerType, CustomerId
 
                 if (invoice != null)
                 {
+                    //Get Country Currency Symbol
+                    var country = _uow.Country.Find(s => s.CountryId == invoice.DepartureCountryId).FirstOrDefault();
+
                     //get CustomerDetails
                     if (invoice.CustomerType.Contains("Individual"))
                     {
@@ -184,9 +185,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     var customerName = customerObj.CustomerName;
                     var waybill = shipmentTrackingDTO.Waybill;
                     var demurrageAmount = demurragePrice;
-                    
 
-                    
+
                     //map the array
                     strArray[0] = customerName;
                     strArray[1] = waybill;
