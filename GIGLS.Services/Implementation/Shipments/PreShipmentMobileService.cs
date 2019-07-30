@@ -769,17 +769,26 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-               var preshipmentmobilegrandtotal = _uow.PreShipmentMobile.GetAsync(s => s.PreShipmentMobileId == preShipment.PreShipmentMobileId).Result;
+                var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preShipment.CustomerCode);
+                var preshipmentmobilegrandtotal = _uow.PreShipmentMobile.GetAsync(s => s.PreShipmentMobileId == preShipment.PreShipmentMobileId).Result;
                 foreach (var id in preShipment.DeletedItems.ToList())
                 {
                     var preshipmentitemmobile = _uow.PreShipmentItemMobile.GetAsync(s =>s.PreShipmentItemMobileId == id && s.PreShipmentMobileId == preShipment.PreShipmentMobileId).Result;
                     preshipmentitemmobile.IsCancelled = true;
                     _uow.PreShipmentItemMobile.Remove(preshipmentitemmobile);
                 }
+
                 var PreshipmentPriceDTO = await GetPrice(preShipment);
                 preshipmentmobilegrandtotal.shipmentstatus = "Resolved";
                 var difference = ((decimal)preshipmentmobilegrandtotal.CalculatedTotal - PreshipmentPriceDTO.GrandTotal);
-                var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preShipment.CustomerCode);
+                if(difference < 0.00M)
+                {
+                    var newdiff = Math.Abs((decimal)difference);
+                    if(newdiff > updatedwallet.Balance)
+                    {
+                        throw new GenericException("Insufficient Wallet Balance");
+                    }
+                }
                 updatedwallet.Balance = updatedwallet.Balance + (decimal)difference;
                 var pickuprequests = _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preShipment.Waybill).Result;
                 pickuprequests.Status = "Resolved";
