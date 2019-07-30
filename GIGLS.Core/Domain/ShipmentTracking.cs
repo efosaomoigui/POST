@@ -10,15 +10,13 @@ namespace GIGL.GIGLS.Core.Domain
     {
         public int ShipmentTrackingId { get; set; }
 
-        [Required]
         [MaxLength(100)]
         [Index]
         public string Waybill { get; set; }
 
         public string Location { get; set; }
 
-        [Required]
-        [MaxLength(50)]
+        [MaxLength(100)]
         [Index]
         public string Status { get; set; }
         public DateTime DateTime { get; set; }
