@@ -1027,10 +1027,25 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [HttpPost]
         [Route("resolvedispute")]
         public async Task<object> ResolveDispute(PreShipmentMobileDTO shipment)
+
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var flag = await _preshipmentmobileService.ResolveDisputeForMobile(shipment);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+        [HttpPost]
+        [Route("cancelshipment/{waybillNumber}")]
+        public async Task<object> CancelShipment(string waybillNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _preshipmentmobileService.CancelShipment(waybillNumber);
 
                 return new ServiceResponse<object>
                 {
