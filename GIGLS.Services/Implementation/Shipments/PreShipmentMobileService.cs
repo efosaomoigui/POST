@@ -27,6 +27,7 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Partnership;
 using GIGLS.Core.DTO.Partnership;
+using System.Configuration;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -763,14 +764,13 @@ namespace GIGLS.Services.Implementation.Shipments
             return summary;
 
         }
-
+        
         public async Task<object> ResolveDisputeForMobile(PreShipmentMobileDTO preShipment)
         {
             try
             {
                var preshipmentmobilegrandtotal = _uow.PreShipmentMobile.GetAsync(s => s.PreShipmentMobileId == preShipment.PreShipmentMobileId).Result;
-               bool IsResolved = false;
-                foreach (var id in preShipment.DeletedItems)
+                foreach (var id in preShipment.DeletedItems.ToList())
                 {
                     var preshipmentitemmobile = _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == preShipment.PreShipmentMobileId && s.PreShipmentItemMobileId == id).Result;
                     preshipmentitemmobile.IsCancelled = true;
@@ -781,6 +781,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 var difference = ((decimal)preshipmentmobilegrandtotal.CalculatedTotal - PreshipmentPriceDTO.GrandTotal);
                 var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preShipment.CustomerCode);
                 updatedwallet.Balance = updatedwallet.Balance + (decimal)difference;
+                var pickuprequests = _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preShipment.Waybill).Result;
+                pickuprequests.Status = "Resolved";
                 await _uow.CompleteAsync();
                 return new { IsResolved = true};
             }
@@ -789,5 +791,45 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        public async Task<object> CancelShipment(string Waybill)
+        {
+            try
+            {
+                var preshipmentmobile = _uow.PreShipmentMobile.GetAsync(s => s.Waybill == Waybill,"PreShipmentItems").Result;
+                if(preshipmentmobile==null)
+                {
+                    throw new GenericException("Shipment does not exist");
+                }
+                var pickuprice = ConfigurationManager.AppSettings["Pickupprice"];
+                var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+                foreach (var id in preshipmentmobile.PreShipmentItems.ToList())
+                {
+                    var preshipmentitmmobile = _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == preshipmentmobile.PreShipmentMobileId && s.PreShipmentItemMobileId == id.PreShipmentItemMobileId).Result;
+                    preshipmentitmmobile.IsCancelled = true;
+                    _uow.PreShipmentItemMobile.Remove(preshipmentitmmobile);
+                }
+                var pickuprequests = _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill).Result;
+                if (pickuprequests != null)
+                {
+                    pickuprequests.Status = "Cancelled";
+                    updatedwallet.Balance = ((updatedwallet.Balance + (decimal)preshipmentmobile.CalculatedTotal) - Convert.ToDecimal(pickuprice));
+                    preshipmentmobile.shipmentstatus = "Cancelled";
+                    await _uow.CompleteAsync();
+                }
+                else
+                {
+                    preshipmentmobile.shipmentstatus = "Cancelled";
+                    updatedwallet.Balance = ((updatedwallet.Balance + (decimal)preshipmentmobile.CalculatedTotal));
+                    await _uow.CompleteAsync();
+                }
+                return new { IsCancelled = true };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

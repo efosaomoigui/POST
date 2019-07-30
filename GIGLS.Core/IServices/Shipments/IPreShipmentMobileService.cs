@@ -25,5 +25,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<PreShipmentMobileDTO>> GetDisputePreShipment();
         Task<SummaryTransactionsDTO> GetPartnerWalletTransactions();
         Task<object> ResolveDisputeForMobile(PreShipmentMobileDTO preShipment);
+        Task<object> CancelShipment(string Waybill);
     }
 }
