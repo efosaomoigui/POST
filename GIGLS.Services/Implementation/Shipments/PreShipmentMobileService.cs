@@ -50,6 +50,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly ICategoryService _categoryservice;
         private readonly ISubCategoryService _subcategoryservice;
         private readonly IPartnerTransactionsService _partnertransactionservice;
+        private readonly IGlobalPropertyService _globalPropertyService;
 
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, IDeliveryOptionService deliveryService,
@@ -57,7 +58,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
             IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice, IMobileShipmentTrackingService mobiletrackingservice,
             IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice,
-            IPartnerTransactionsService partnertransactionservice)
+            IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -76,6 +77,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _subcategoryservice = subcategoryservice;
             _categoryservice = categoryservice;
             _partnertransactionservice = partnertransactionservice;
+            _globalPropertyService = globalPropertyService;
             MapperConfig.Initialize();
         }
 
@@ -810,7 +812,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Shipment does not exist");
                 }
-                var pickuprice = ConfigurationManager.AppSettings["Pickupprice"];
+                var pickuprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpPrice);
                 var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
                 foreach (var id in preshipmentmobile.PreShipmentItems.ToList())
                 {
@@ -822,7 +824,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (pickuprequests != null)
                 {
                     pickuprequests.Status = "Cancelled";
-                    updatedwallet.Balance = ((updatedwallet.Balance + (decimal)preshipmentmobile.CalculatedTotal) - Convert.ToDecimal(pickuprice));
+                    updatedwallet.Balance = ((updatedwallet.Balance + (decimal)preshipmentmobile.CalculatedTotal) - Convert.ToDecimal(pickuprice.Value));
                     preshipmentmobile.shipmentstatus = "Cancelled";
                     await _uow.CompleteAsync();
                 }
