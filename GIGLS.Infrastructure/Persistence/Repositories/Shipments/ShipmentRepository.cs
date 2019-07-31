@@ -970,6 +970,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var endDate = queryDate.Item2;
             shipments = shipments.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate);
 
+            //filter by country Id
+            if(accountFilterCriteria.CountryId > 0)
+            {
+                shipments = shipments.Where(s => s.DepartureCountryId == accountFilterCriteria.CountryId);
+            }
+
             List<InvoiceViewDTO> result = (from s in shipments
                                            join i in Context.Invoice on s.Waybill equals i.Waybill
                                            join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
