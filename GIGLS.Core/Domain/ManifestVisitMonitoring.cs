@@ -1,10 +1,13 @@
 ﻿using GIGL.GIGLS.Core.Domain;
+using System.ComponentModel.DataAnnotations;
 
 namespace GIGLS.Core.Domain
 {
     public class ManifestVisitMonitoring : BaseDomain
     {
         public int ManifestVisitMonitoringId { get; set; }
+
+        [MaxLength(100), MinLength(5)]
         public string Waybill { get; set; }
         public string Address { get; set; }
         public string ReceiverName { get; set; }
