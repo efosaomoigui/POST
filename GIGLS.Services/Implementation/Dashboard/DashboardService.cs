@@ -913,6 +913,12 @@ namespace GIGLS.Services.Implementation.Dashboard
                     Where(i => i.DateCreated >= startDate && i.DateCreated < endDate &&
                     i.UserActiveCountryId == dashboardFilterCriteria.ActiveCountryId).Count();
                 dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
+
+                //Update the ActiveCountryId in the User entity
+                string currentUserId = await _userService.GetCurrentUserId();
+                var userEntity = await _uow.User.GetUserById(currentUserId);
+                userEntity.UserActiveCountryId = (int)dashboardFilterCriteria.ActiveCountryId;
+                _uow.Complete();
             }
 
             //set for TargetAmount and TargetOrder
