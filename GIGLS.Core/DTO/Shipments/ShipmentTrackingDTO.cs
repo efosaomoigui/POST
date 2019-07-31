@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string Location { get; set; }
         public string Status { get; set; }
         public DateTime DateTime { get; set; }
-        public string TrackingType { get; set; }
+        public TrackingType TrackingType { get; set; }
         public string User { get; set; }
         public string Waybill { get; set; }
         public string Manifest { get; set; }
