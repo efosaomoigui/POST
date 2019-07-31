@@ -97,6 +97,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  ApproximateItemsWeight = r.ApproximateItemsWeight,
                                                  DepartureCountryId = r.DepartureCountryId,
                                                  DestinationCountryId = r.DestinationCountryId,
+                                                 CurrencyRatio = r.CurrencyRatio,
 
                                                  ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
                                                  {
@@ -203,6 +204,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        ApproximateItemsWeight = r.ApproximateItemsWeight,
                                        DepartureCountryId = r.DepartureCountryId,
                                        DestinationCountryId = r.DestinationCountryId,
+                                       CurrencyRatio = r.CurrencyRatio,
                                        ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
                                        {
                                            CancelReason = x.CancelReason
@@ -288,6 +290,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                    ApproximateItemsWeight = r.ApproximateItemsWeight,
                                    DepartureCountryId = r.DepartureCountryId,
                                    DestinationCountryId = r.DestinationCountryId,
+                                   CurrencyRatio = r.CurrencyRatio,
                                    ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
                                    {
                                        CancelReason = x.CancelReason
@@ -418,7 +421,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      SenderState = r.SenderState,
                                                      ApproximateItemsWeight = r.ApproximateItemsWeight,
                                                      DepartureCountryId = r.DepartureCountryId,
-                                                     DestinationCountryId = r.DestinationCountryId
+                                                     DestinationCountryId = r.DestinationCountryId,
+                                                     CurrencyRatio = r.CurrencyRatio,
                                                  }).ToList();
 
                 //filter
@@ -538,6 +542,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                      ApproximateItemsWeight = r.ApproximateItemsWeight,
                                                      DepartureCountryId = r.DepartureCountryId,
                                                      DestinationCountryId = r.DestinationCountryId,
+                                                     CurrencyRatio = r.CurrencyRatio,
                                                  }).ToList();
 
                 //filter
@@ -710,6 +715,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  ApproximateItemsWeight = r.ApproximateItemsWeight,
                                                  DepartureCountryId = r.DepartureCountryId,
                                                  DestinationCountryId = r.DestinationCountryId,
+                                                 CurrencyRatio = r.CurrencyRatio,
                                                  ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
                                                  {
                                                      CancelReason = x.CancelReason
@@ -855,6 +861,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  ApproximateItemsWeight = r.ApproximateItemsWeight,
                                                  DepartureCountryId = r.DepartureCountryId,
                                                  DestinationCountryId = r.DestinationCountryId,
+                                                 CurrencyRatio = r.CurrencyRatio,
                                                  ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
                                                  {
                                                      CancelReason = x.CancelReason
@@ -930,6 +937,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            ApproximateItemsWeight = r.ApproximateItemsWeight,
                                            DepartureCountryId = r.DepartureCountryId,
                                            DestinationCountryId = r.DestinationCountryId,
+                                           CurrencyRatio = r.CurrencyRatio,
                                            ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
                                            {
                                                CancelReason = x.CancelReason
