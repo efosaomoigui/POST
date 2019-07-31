@@ -17,7 +17,6 @@ namespace GIGL.GIGLS.Core.Domain
         public string Location { get; set; }
 
         [MaxLength(100)]
-        [Index]
         public string Status { get; set; }
         public DateTime DateTime { get; set; }
         public TrackingType TrackingType  { get; set; }
