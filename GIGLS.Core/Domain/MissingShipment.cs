@@ -1,10 +1,13 @@
 ﻿using GIGL.GIGLS.Core.Domain;
+using System.ComponentModel.DataAnnotations;
 
 namespace GIGLS.Core.Domain
 {
     public class MissingShipment : BaseDomain, IAuditable
     {
         public int MissingShipmentId { get; set; }
+
+        [MaxLength(100), MinLength(5)]
         public string Waybill { get; set; }
         public double SettlementAmount { get; set; }
         public string Comment { get; set; }
