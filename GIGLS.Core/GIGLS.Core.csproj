@@ -177,6 +177,7 @@
     <Compile Include="Domain\LogVisitReason.cs" />
     <Compile Include="Domain\ManifestVisitMonitoring.cs" />
     <Compile Include="Domain\MobilePickUpRequests.cs" />
+    <Compile Include="Domain\MobileRating.cs" />
     <Compile Include="Domain\MobileShipmentTracking.cs" />
     <Compile Include="Domain\Notification.cs" />
     <Compile Include="Domain\OTP.cs" />
@@ -311,6 +312,7 @@
     <Compile Include="DTO\MessagingLog\MessageFilterOption.cs" />
     <Compile Include="DTO\MessagingLog\SmsSendLogDTO.cs" />
     <Compile Include="DTO\MobilePickUpRequestsDTO.cs" />
+    <Compile Include="DTO\MobileRatingDTO.cs" />
     <Compile Include="DTO\MobileShipmentTrackingDTO.cs" />
     <Compile Include="DTO\Nav\MainNavDTO.cs" />
     <Compile Include="DTO\Nav\SubNavDTO.cs" />
