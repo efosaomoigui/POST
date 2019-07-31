@@ -155,6 +155,7 @@
     <Compile Include="Persistence\Repositories\MessageRepository.cs" />
     <Compile Include="Persistence\Repositories\MessagingLog\EmailSendLogRepository.cs" />
     <Compile Include="Persistence\Repositories\MessagingLog\SmsSendLogRepository.cs" />
+    <Compile Include="Persistence\Repositories\MobileRatingRepository.cs" />
     <Compile Include="Persistence\Repositories\Nav\MainNavRepository.cs" />
     <Compile Include="Persistence\Repositories\Nav\SubNavRepository.cs" />
     <Compile Include="Persistence\Repositories\Nav\SubSubNavRepository.cs" />

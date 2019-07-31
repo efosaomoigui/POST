@@ -160,6 +160,8 @@ namespace GIGLS.Core
 
         IPartnerTransactionsRepository PartnerTransactions { get; set; }
 
+        IMobileRatingRepository MobileRating { get; set; }
+
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
     }

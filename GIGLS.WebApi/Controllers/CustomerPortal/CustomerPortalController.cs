@@ -1053,6 +1053,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        [HttpPost]
+        [Route("addratings")]
+        public async Task<object> Addratings(MobileRatingDTO rating)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _preshipmentmobileService.AddRatings(rating);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
 
     }
 }

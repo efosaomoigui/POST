@@ -203,6 +203,7 @@
     <Compile Include="Implementation\Messaging\MessageSenderService.cs" />
     <Compile Include="Implementation\Messaging\NotificationService.cs" />
     <Compile Include="Implementation\Messaging\SmsSendLogService.cs" />
+    <Compile Include="Implementation\MobileRatingService.cs" />
     <Compile Include="Implementation\Nav\MainNavService.cs" />
     <Compile Include="Implementation\Nav\SubNavService.cs" />
     <Compile Include="Implementation\Nav\SubSubNavService.cs" />

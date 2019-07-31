@@ -16,18 +16,26 @@ namespace GIGLS.Core.DTO
         public string PartnerCode { get; set; }
 
         public string CustomerCode { get; set; }
-        public int CustomerRating { get; set; }
+        public double? CustomerRating { get; set; }
         public string UserChannelCode { get; set; }
 
         public string UserId { get; set; }
 
-        public int Rating { get; set; }
-        public UserChannelType UserChannelType { get; set; }
+        public double? Rating { get; set; }
+        public string UserChannelType { get; set; }
 
-        public int PartnerRating { get; set; }
+        public double? PartnerRating { get; set; }
 
         public string CustomerId { get; set; }
 
         public string PartnerId { get; set; }
+        public bool IsRatedByCustomer { get; set; }
+
+        public bool IsRatedByPartner { get; set; }
+        public string CommentByCustomer { get; set; }
+
+        public string CommentByPartner { get; set; }
+        public DateTime? DateCustomerRated { get; set; }
+        public DateTime? DatePartnerRated { get; set; }
     }
 }

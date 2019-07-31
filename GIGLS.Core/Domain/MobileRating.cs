@@ -10,17 +10,24 @@ namespace GIGLS.Core.Domain
     {
         public int MobileRatingId { get; set; }
         public string Waybill { get; set; }
-        public string Comment { get; set; }
+        public string CommentByCustomer { get; set; }
+
+        public string CommentByPartner { get; set; }
+
         public string PartnerCode { get; set; }
 
         public string CustomerCode { get; set; }
-        public int CustomerRating { get; set; }
+        public double? CustomerRating { get; set; }
 
-        public int PartnerRating { get; set; }
+        public double? PartnerRating { get; set; }
 
-        public string CustomerId { get; set; }
+        public bool IsRatedByCustomer { get; set; }
 
-        public string PartnerId { get; set; }
+        public bool IsRatedByPartner { get; set; }
+
+        public DateTime? DateCustomerRated { get; set; }
+        public DateTime? DatePartnerRated { get; set; }
+
 
 
 

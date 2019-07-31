@@ -254,6 +254,8 @@ namespace GIGLS.Infrastructure.Persistence
 
         public DbSet<PartnerTransactions> PartnerTransactions { get; set; }
 
+        public DbSet<MobileRating> MobileRating { get; set; }
+
         #endregion
 
 

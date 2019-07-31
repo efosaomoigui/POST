@@ -51,6 +51,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly ISubCategoryService _subcategoryservice;
         private readonly IPartnerTransactionsService _partnertransactionservice;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly IMobileRatingService _mobileratingService;
 
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, IDeliveryOptionService deliveryService,
@@ -58,7 +59,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
             IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice, IMobileShipmentTrackingService mobiletrackingservice,
             IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice,
-            IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService)
+            IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMobileRatingService mobileratingService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -78,6 +79,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _categoryservice = categoryservice;
             _partnertransactionservice = partnertransactionservice;
             _globalPropertyService = globalPropertyService;
+            _mobileratingService = mobileratingService;
             MapperConfig.Initialize();
         }
 
@@ -840,6 +842,73 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+
+        public async Task<object> AddRatings(MobileRatingDTO rating)
+        {
+            try
+            {
+                var user = await _userService.GetCurrentUserId();
+                var partneruser = await _userService.GetUserById(user);
+                var existingrating = _uow.MobileRating.GetAsync(s => s.Waybill == rating.Waybill).Result;
+                if (existingrating != null)
+                {
+                    if (rating.UserChannelType == UserChannelType.IndividualCustomer.ToString())
+                    {
+                        if(existingrating.IsRatedByCustomer == true)
+                        {
+                            throw new GenericException("Customer has rated this Partner already!");
+                        }
+                        existingrating.CustomerCode = partneruser.UserChannelCode;
+                        existingrating.PartnerRating = rating.Rating;
+                        existingrating.CommentByCustomer = rating.Comment;
+                        existingrating.IsRatedByCustomer = true;
+                        existingrating.DateCustomerRated = DateTime.Now;
+                    }
+                    if (rating.UserChannelType == UserChannelType.Partner.ToString())
+                    {
+                        if (existingrating.IsRatedByPartner == true)
+                        {
+                            throw new GenericException("Partner has rated this Customer already!");
+                        }
+                        existingrating.PartnerCode = partneruser.UserChannelCode;
+                        existingrating.CustomerRating = rating.Rating;
+                        existingrating.CommentByPartner = rating.Comment;
+                        existingrating.IsRatedByPartner = true;
+                        existingrating.DatePartnerRated = DateTime.Now;
+                    }
+                    await _uow.CompleteAsync();
+                }
+                else
+                {
+                    if (rating.UserChannelType == UserChannelType.IndividualCustomer.ToString())
+                    {
+                        rating.CustomerCode = partneruser.UserChannelCode;
+                        rating.PartnerRating = rating.Rating;
+                        rating.CommentByCustomer = rating.Comment;
+                        rating.IsRatedByCustomer = true;
+                        rating.DateCustomerRated = DateTime.Now;
+                    }
+                    if (rating.UserChannelType == UserChannelType.Partner.ToString())
+                    {
+                        rating.PartnerCode = partneruser.UserChannelCode;
+                        rating.CustomerRating = rating.Rating;
+                        rating.CommentByPartner = rating.Comment;
+                        rating.IsRatedByPartner = true;
+                        rating.DatePartnerRated = DateTime.Now;
+                    }
+                    var ratings = Mapper.Map<MobileRating>(rating);
+                    _uow.MobileRating.Add(ratings);
+                    await _uow.CompleteAsync();
+                }
+                return new { IsRated = true };
+            }
+            catch(Exception)
+            {
+                throw;
+            }
+
         }
 
     }

@@ -353,6 +353,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<PartnerTransactions, PartnerTransactionsDTO>();
                 config.CreateMap<PartnerTransactionsDTO, PartnerTransactions>();
+
+                config.CreateMap<MobileRating, MobileRatingDTO>();
+                config.CreateMap<MobileRatingDTO, MobileRating>();
             });
 
             isInit = true;
