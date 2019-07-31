@@ -1332,9 +1332,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 EndDate = (DateTime)accountFilterCriteria.EndDate,
                 Invoices = invoices,
                 SalesCount = invoices.Count,
-                TotalSales = invoices.Sum(s => s.Amount)
+                TotalSales = invoices.Where(s => s.PaymentStatus == PaymentStatus.Paid).Sum(s => s.Amount),
             };
-
+            
             return dailySalesDTO;
         }
 
