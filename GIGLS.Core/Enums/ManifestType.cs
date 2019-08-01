@@ -3,7 +3,7 @@
     public enum ManifestType
     {
         External,
-        Internal,
+        Transit,
         Delivery,
         HUB
     }

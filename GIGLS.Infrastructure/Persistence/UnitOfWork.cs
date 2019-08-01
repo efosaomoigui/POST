@@ -392,13 +392,29 @@ namespace GIGLS.Infrastructure.Persistence
         public IRegionServiceCentreMappingRepository RegionServiceCentreMapping
         { get; set; }
 
+        [Inject]
+        public IDemurrageRepository Demurrage
+        { get; set; }
+
+        [Inject]
+        public IHUBManifestWaybillMappingRepository HUBManifestWaybillMapping
+        { get; set; }
+
+        [Inject]
+        public ICategoryRepository Category { get; set; }
+
+        [Inject]
+        public ISubCategoryRepository SubCategory { get; set; }
+
 
         [Inject]
         public IMobileScanStatusRepository MobileScanStatus { get; set; }
 
         [Inject]
-        public IHUBManifestWaybillMappingRepository HUBManifestWaybillMapping { get; set; }
+        public IPartnerTransactionsRepository PartnerTransactions { get; set; }
 
+        [Inject]
+        public IMobileRatingRepository MobileRating { get; set; }
 
         public int Complete()
         {

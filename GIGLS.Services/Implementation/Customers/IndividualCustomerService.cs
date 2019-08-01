@@ -51,10 +51,26 @@ namespace GIGLS.Services.Implementation.Customers
 
                 var newCustomer = Mapper.Map<IndividualCustomer>(customer);
 
+                //added to add customers from Mobile
+                if (customer.IsFromMobile != true)
+                {
+                    //get the SC Agent priviledge country
+                    var countryIds = await _userService.GetPriviledgeCountryIds();
+                    if (countryIds.Length > 0)
+                    {
+                        newCustomer.UserActiveCountryId = countryIds[0];
+                    }
+                }
+
                 //generate customer code
                 var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
                     NumberGeneratorType.CustomerCodeIndividual);
                 newCustomer.CustomerCode = customerCode;
+                //added this line of code for mobile registration
+                if(customer.IsFromMobile ==true)
+                {
+                    newCustomer.IsRegisteredFromMobile = true;
+                }
 
                 _uow.IndividualCustomer.Add(newCustomer);
 
@@ -103,7 +119,8 @@ namespace GIGLS.Services.Implementation.Customers
                         UserChannelCode = newCustomer.CustomerCode,
                         UserChannelPassword = password,
                         UserChannelType = UserChannelType.IndividualCustomer,
-                        PasswordExpireDate = DateTime.Now
+                        PasswordExpireDate = DateTime.Now,
+                        UserActiveCountryId = newCustomer.UserActiveCountryId
                     });
                 }
                 catch (Exception)
@@ -162,6 +179,11 @@ namespace GIGLS.Services.Implementation.Customers
                 }
 
                 IndividualCustomerDTO individual = Mapper.Map<IndividualCustomerDTO>(customer);
+
+                //get all countries and set the country name
+                var userCountry = await _uow.Country.GetAsync(individual.UserActiveCountryId);
+                individual.UserActiveCountryName = userCountry?.CountryName;
+
                 return individual;
             }
             catch (Exception)
@@ -182,6 +204,11 @@ namespace GIGLS.Services.Implementation.Customers
                 //}
 
                 IndividualCustomerDTO individual = Mapper.Map<IndividualCustomerDTO>(customer);
+
+                //get all countries and set the country name
+                var userCountry = await _uow.Country.GetAsync(individual.UserActiveCountryId);
+                individual.UserActiveCountryName = userCountry?.CountryName;
+
                 return individual;
             }
             catch (Exception)
@@ -208,7 +235,8 @@ namespace GIGLS.Services.Implementation.Customers
                     State = s.State,
                     DateModified = s.DateModified,
                     DateCreated = s.DateCreated,
-                    CustomerCode = s.CustomerCode
+                    CustomerCode = s.CustomerCode,
+                    UserActiveCountryId = s.UserActiveCountryId
                 }).ToList();
 
                 return await Task.FromResult(customers);
@@ -238,6 +266,7 @@ namespace GIGLS.Services.Implementation.Customers
             customer.PhoneNumber = customerDto.PhoneNumber;
             customer.State = customerDto.State;
             customer.Password = customerDto.Password;
+            customer.UserActiveCountryId = customerDto.UserActiveCountryId;
             
             var user = await _userService.GetUserByChannelCode(customer.CustomerCode);
             user.FirstName = customerDto.FirstName;
@@ -245,6 +274,7 @@ namespace GIGLS.Services.Implementation.Customers
             user.PhoneNumber = customerDto.PhoneNumber;
             user.Email = customerDto.Email;
             user.PictureUrl = customerDto.PictureUrl;
+            user.UserActiveCountryId = customerDto.UserActiveCountryId;
             await _userService.UpdateUser(user.Id, user);
             await _uow.CompleteAsync();
            

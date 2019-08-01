@@ -7,5 +7,6 @@ namespace GIGLS.Core.DTO.Zone
         public int ZoneId { get; set; }
         public string ZoneName { get; set; }
         public bool Status { get; set; }
+        public decimal ZonePercent { get; set; }
     }
 }

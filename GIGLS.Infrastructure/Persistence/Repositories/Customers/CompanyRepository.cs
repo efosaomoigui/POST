@@ -23,10 +23,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
         {
             try
             {
-                //var companies = Context.Company.ToList();
-                //var companiesDto = Mapper.Map<List<CompanyDTO>>(companies);
-                //return Task.FromResult(companiesDto);
-
                 var companies = Context.Company;
                 var companiesDto = from c in companies
                                    join w in Context.Wallets on c.CustomerCode equals w.CustomerCode
@@ -49,10 +45,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        CustomerCategory = c.CustomerCategory,
                                        ReturnOption = c.ReturnOption,
                                        ReturnServiceCentre = c.ReturnServiceCentre,
+                                       ReturnServiceCentreName = Context.ServiceCentre.Where(x => x.ServiceCentreId == c.ReturnServiceCentre).Select(x => x.Name).FirstOrDefault(),
                                        ReturnAddress = c.ReturnAddress,
                                        DateCreated = c.DateCreated,
                                        DateModified = c.DateModified,
-                                       WalletBalance = w.Balance
+                                       WalletBalance = w.Balance,
+                                       UserActiveCountryId = c.UserActiveCountryId
                                    };
                 return Task.FromResult(companiesDto.ToList());
             }

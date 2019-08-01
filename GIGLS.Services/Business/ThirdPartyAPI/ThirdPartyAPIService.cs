@@ -159,11 +159,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
 
-            var invoices =
-                _uow.Invoice.GetAllFromInvoiceView().Where(s =>
-                s.CustomerCode == currentUser.UserChannelCode && s.Waybill == waybillNumber).ToList();
+            var invoices = _uow.Shipment.GetAllAsQueryable().Where(s => s.CustomerCode == currentUser.UserChannelCode && s.Waybill == waybillNumber).FirstOrDefault();
 
-            if (invoices.Count > 0)
+            if (invoices != null)
             {
                 var result = await _iShipmentTrackService.TrackShipment(waybillNumber);
                 return result;
@@ -259,11 +257,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (wallet != null)
             {
-                var invoices = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.CustomerCode == currentUser.UserChannelCode).ToList();
-                var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
-
-                // 
-                dashboardDTO.TotalShipmentOrdered = invoices.Count();
+                int invoices = _uow.Shipment.GetAllAsQueryable().Where(s => s.CustomerCode == currentUser.UserChannelCode && s.IsCancelled == false).Count();
+                dashboardDTO.TotalShipmentOrdered = invoices;
                 dashboardDTO.WalletBalance = wallet.Balance;
             }
 

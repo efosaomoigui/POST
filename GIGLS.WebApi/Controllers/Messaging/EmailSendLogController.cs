@@ -69,6 +69,21 @@ namespace GIGLS.WebApi.Controllers.Messaging
                 };
             });
         }
-               
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{email}/email")]
+        public async Task<IServiceResponse<List<EmailSendLogDTO>>> GetEmailSendLog([FromUri]string email)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var messages = await _messageService.GetEmailSendLog(email);
+
+                return new ServiceResponse<List<EmailSendLogDTO>>
+                {
+                    Object = messages
+                };
+            });
+        }
     }
 }

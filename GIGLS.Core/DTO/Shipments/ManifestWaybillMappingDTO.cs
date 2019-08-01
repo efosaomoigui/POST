@@ -22,6 +22,7 @@ namespace GIGLS.Core.DTO.Shipments
         public ServiceCentreDTO ServiceCentre { get; set; }
 
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
+        public string ScanDescription { get; set;}
 
         public string DispatchRider { get; set; }
     }

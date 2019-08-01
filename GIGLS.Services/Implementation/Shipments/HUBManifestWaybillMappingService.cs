@@ -376,9 +376,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //2. Get the shipment details of all the waybills that we want to manifest again by 
                 // check if the waybill is not cancelled, Home Delivery and the user that want to manifest it is at the final service centre of the waybills  
-                var InvoicesBySC = _uow.Invoice.GetAllFromInvoiceView();
+                //var InvoicesBySC = _uow.Invoice.GetAllFromInvoiceView();
                 //InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && x.PickupOptions == PickupOptions.HOMEDELIVERY && waybills.Contains(x.Waybill));
-                InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && waybills.Contains(x.Waybill));
+                //InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && waybills.Contains(x.Waybill));
+                var InvoicesBySC = _uow.Shipment.GetAllAsQueryable().Where(x => waybills.Contains(x.Waybill) && x.IsCancelled == false && x.IsDeleted == false);
 
                 //filter if the shipment is at the final service centre
                 if (serviceCenters.Length > 0)
@@ -764,6 +765,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         //Update shipment collection to make it available at collection centre
                         shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.ARF;
+                        shipmentCollection.DestinationServiceCentreId = serviceCenter.ServiceCentreId;
 
                         //Update the Destination Service Centre on the Shipment to the Current HUB
                         var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);

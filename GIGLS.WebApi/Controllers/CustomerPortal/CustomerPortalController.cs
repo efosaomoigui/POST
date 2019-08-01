@@ -16,7 +16,6 @@ using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
-using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
@@ -27,13 +26,12 @@ using System.Configuration;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core;
 using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.IServices.Business;
 using GIGLS.Core.Domain.BankSettlement;
+using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -51,10 +49,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         private readonly IWalletService _walletService;
         private readonly IWalletTransactionService _walletTransactionService;
         private readonly IServiceCentreService _service;
+        private readonly ICategoryService _categoryservice;
+        private readonly ISubCategoryService _subcategoryservice;
 
 
         public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IOTPService otpService,
-            IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService, IWalletService walletService, IWalletTransactionService walletTransactionService, IServiceCentreService service) : base(nameof(CustomerPortalController))
+            IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService, IWalletService walletService, IWalletTransactionService walletTransactionService, IServiceCentreService service,
+            ICategoryService categoryservice, ISubCategoryService subcategoryservice) : base(nameof(CustomerPortalController))
         {
             // _uow = uow;
             _userService = userService;
@@ -66,12 +67,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             _walletService = walletService;
             _walletTransactionService = walletTransactionService;
             _service = service;
+            _categoryservice = categoryservice;
+            _subcategoryservice = subcategoryservice;
         }
 
 
         [HttpPost]
         [Route("transaction")]
-        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentCollectionFilterCriteria f_Criteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -387,7 +390,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return await HandleApiOperationAsync(async () =>
             {
                 var packages = await _portalService.GetSpecialDomesticPackages();
-
+                
                 return new ServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>
                 {
                     Object = packages
@@ -888,14 +891,15 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
         [HttpGet]
         [Route("getspecialpackages")]
-        public async Task<IServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>> GetSpecialPackages()
+        public async Task<IServiceResponse<SpecialResultDTO>> GetSpecialPackages()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var specialpackages = await _preshipmentmobileService.GetSpecialDomesticPackages();
-                 return new ServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>
+                var packages = await _preshipmentmobileService.GetSpecialPackages();
+                
+             return new ServiceResponse<SpecialResultDTO>
                 {
-                    Object = specialpackages
+                    Object = packages
                 };
             });
         }
@@ -978,13 +982,86 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("updatepreshipmentmobile")]
-        public async Task<IServiceResponse<bool>> UpdatePreshipmentMobile(PreShipmentItemMobileDTO preshipment)
+        public async Task<IServiceResponse<bool>> UpdatePreshipmentMobile(List<PreShipmentItemMobileDTO> preshipment)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var flag = await _preshipmentmobileService.UpdatePreShipmentMobileDetails(preshipment);
 
                 return new ServiceResponse<bool>
+                {
+                    Object = flag
+                };
+            });
+        }
+
+
+        [HttpGet]
+        [Route("getpreshipmentindispute")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetPreshipmentInDispute()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = await _preshipmentmobileService.GetDisputePreShipment();
+
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = shipments
+                };
+            });
+        }
+        [HttpGet]
+        [Route("getpartnerwallettransactions")]
+        public async Task<IServiceResponse<SummaryTransactionsDTO>> GetPartnerwalletTransactions()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var totalTransactions = await _preshipmentmobileService.GetPartnerWalletTransactions();
+
+                return new ServiceResponse<SummaryTransactionsDTO>
+                {
+                    Object = totalTransactions
+                };
+            });
+        }
+        [HttpPost]
+        [Route("resolvedispute")]
+        public async Task<object> ResolveDispute(PreShipmentMobileDTO shipment)
+
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _preshipmentmobileService.ResolveDisputeForMobile(shipment);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+        [HttpPost]
+        [Route("cancelshipment/{waybillNumber}")]
+        public async Task<object> CancelShipment(string waybillNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _preshipmentmobileService.CancelShipment(waybillNumber);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+        [HttpPost]
+        [Route("addratings")]
+        public async Task<object> Addratings(MobileRatingDTO rating)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _preshipmentmobileService.AddRatings(rating);
+
+                return new ServiceResponse<object>
                 {
                     Object = flag
                 };

@@ -16,5 +16,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task UpdateShipmentTracking(int trackingId, ShipmentTrackingDTO tracking);
         Task DeleteShipmentTracking(int trackingId);
         Task<bool> CheckShipmentTracking(string waybill, string status);
+        Task<bool> SendEmailForAttemptedScanOfCancelledShipments(ScanDTO scan);
     }
 }

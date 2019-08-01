@@ -23,6 +23,9 @@ namespace GIGL.GIGLS.Core.Domain
         public string State { get; set; }
         public string Address { get; set; }
 
+        //User Active CountryId
+        public int UserActiveCountryId { get; set; }
+
         [MaxLength(20), MinLength(3)]
         [Index(IsUnique = true)]
         public string PhoneNumber { get; set; }
@@ -31,5 +34,6 @@ namespace GIGL.GIGLS.Core.Domain
         public string Password { get; set; }
 
         public virtual ICollection<Shipment> Shipments { get; set; }
+        public bool IsRegisteredFromMobile { get; set; }
     }
 }

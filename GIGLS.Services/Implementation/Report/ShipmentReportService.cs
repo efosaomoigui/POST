@@ -340,7 +340,8 @@ namespace GIGLS.Services.Implementation.Report
             dashboardDTO.TotalShipmentAwaitingCollection = shipmentsInWaybillsResult.Count();
 
             //3. Get Total Shipment Created that has not depart service centre
-            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments()
+                .Where(s => s.PaymentStatus == PaymentStatus.Paid && s.DateCreated >= startDate && s.DateCreated < endDate);
 
             if (baseFilterCriteria.IsCOD)
             {
@@ -509,7 +510,8 @@ namespace GIGLS.Services.Implementation.Report
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
             
-            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments()
+                .Where(s => s.PaymentStatus == PaymentStatus.Paid && s.DateCreated >= startDate && s.DateCreated < endDate);
             allShipmentsQueryable = allShipmentsQueryable.Where(s => serviceCenterId.Contains(s.DepartureServiceCentreId));
 
             if (baseFilterCriteria.IsCOD)

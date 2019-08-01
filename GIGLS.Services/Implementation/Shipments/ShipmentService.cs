@@ -273,12 +273,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     s => s.CustomerId == shipmentDto.CustomerId && s.CustomerType == customerType);
                 shipmentDto.WalletNumber = customerWallet?.WalletNumber;
 
-                //get ShipmentCollection if it exists
-                var shipmentCollection = _uow.ShipmentCollection.
-                    SingleOrDefault(s => s.Waybill == shipmentDto.Waybill);
-                var shipmentCollectionDTO = Mapper.Map<ShipmentCollectionDTO>(shipmentCollection);
-                shipmentDto.ShipmentCollection = shipmentCollectionDTO;
-
                 if (shipmentDto.IsCancelled)
                 {
                     //get the Cancellation Reason
@@ -287,23 +281,48 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentDto.ShipmentCancel = descCollection;
                 }
 
-                //Demurage should be exclude from Ecommerce and Corporate customer. Only individual customer should have demurage
-                //HomeDelivery shipments should not have demurrage for Individual Shipments
-                if (customerType == CustomerType.Company ||
-                    shipmentDto.PickupOptions == PickupOptions.HOMEDELIVERY)
+                //only if the shipment is collected
+                //get ShipmentCollection if it exists
+                var shipmentCollection = _uow.ShipmentCollection.
+                    SingleOrDefault(s => s.Waybill == shipmentDto.Waybill);
+                var shipmentCollectionDTO = Mapper.Map<ShipmentCollectionDTO>(shipmentCollection);
+                shipmentDto.ShipmentCollection = shipmentCollectionDTO;
+
+
+                if (shipmentCollection != null)
                 {
-                    //set Default Demurrage info in ShipmentDTO for Company customer
-                    shipmentDto.Demurrage = new DemurrageDTO
+                    //get Invoice if it exists
+                    var invoice = _uow.Invoice.SingleOrDefault(s => s.Waybill == shipmentDto.Waybill);
+                    var invoiceDTO = Mapper.Map<InvoiceDTO>(invoice);
+                    shipmentDto.Invoice = invoiceDTO;
+
+                    if (shipmentDto.Invoice.IsShipmentCollected)
                     {
-                        Amount = 0,
-                        DayCount = 0,
-                        WaybillNumber = shipmentDto.Waybill
-                    };
-                }
-                else
-                {
-                    //get Demurrage information for Individual customer
-                    GetDemurrageInformation(shipmentDto);
+                        var demurrage = await _uow.Demurrage.GetAsync(s => s.WaybillNumber == shipmentDto.Waybill);
+                        var demurrageDTO = Mapper.Map<DemurrageDTO>(demurrage);
+                        shipmentDto.Demurrage = demurrageDTO;
+                    }
+
+                    //Demurage should be exclude from Ecommerce and Corporate customer. Only individual customer should have demurage
+                    //HomeDelivery shipments should not have demurrage for Individual Shipments
+                    else
+                    {
+                        if (customerType == CustomerType.Company || shipmentDto.PickupOptions == PickupOptions.HOMEDELIVERY)
+                        {
+                            //set Default Demurrage info in ShipmentDTO for Company customer
+                            shipmentDto.Demurrage = new DemurrageDTO
+                            {
+                                Amount = 0,
+                                DayCount = 0,
+                                WaybillNumber = shipmentDto.Waybill
+                            };
+                        }
+                        else
+                        {
+                            //get Demurrage information for Individual customer
+                            await GetDemurrageInformation(shipmentDto);
+                        }
+                    }
                 }
 
                 //Set the Senders AAddress for the Shipment in the CustomerDetails
@@ -347,7 +366,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     Amount = price,
                     DayCount = demurrageDays,
-                    WaybillNumber = shipmentDto.Waybill
+                    WaybillNumber = shipmentDto.Waybill,
                 };
                 return;
             }
@@ -636,13 +655,17 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<ShipmentDTO> CreateShipment(ShipmentDTO shipmentDTO)
         {
             await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
-            await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
+            var destinationSC = await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
 
             //Get SuperCentre for Home Delivery
             if (shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
             {
-                var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
-                shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
+                //also check that the destination is not a hub
+                if(destinationSC.IsHUB != true)
+                {
+                    var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
+                    shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
+                }
             }
 
             // get deliveryOptionIds and set the first value in shipment
@@ -665,8 +688,8 @@ namespace GIGLS.Services.Implementation.Shipments
             var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
 
             shipmentDTO.Waybill = waybill;
-            
-           
+
+
             var newShipment = Mapper.Map<Shipment>(shipmentDTO);
             //shipmentDTO.ShipmentReroute.RerouteReason = newShipment.ShipmentReroute.RerouteReason;
 
@@ -731,6 +754,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
             }
 
+            ////--start--///Set the DepartureCountryId and DestinationCountryId
+            var departureCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DepartureServiceCentreId);
+            var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DestinationServiceCentreId);
+
+            newShipment.DepartureCountryId = departureCountry.CountryId;
+            newShipment.DestinationCountryId = destinationCountry.CountryId;
+            ////--end--///Set the DepartureCountryId and DestinationCountryId
+
             _uow.Shipment.Add(newShipment);
             //await _uow.CompleteAsync();
 
@@ -750,6 +781,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private async Task<string> CreateInvoice(ShipmentDTO shipmentDTO)
         {
+            var invoice = new Invoice();
             var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
             var invoiceNo = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Invoice, departureServiceCentre.Code);
 
@@ -759,18 +791,36 @@ namespace GIGLS.Services.Implementation.Shipments
                 var company = await _companyService.GetCompanyById(shipmentDTO.CustomerId);
                 settlementPeriod = company.SettlementPeriod;
             }
-
-            var invoice = new Invoice()
+            //added this check for Mobile Shipments
+            if (shipmentDTO.IsFromMobile == true)
             {
-                InvoiceNo = invoiceNo,
-                Amount = shipmentDTO.GrandTotal,
-                PaymentStatus = PaymentStatus.Pending,
-                Waybill = shipmentDTO.Waybill,
-                PaymentDate = DateTime.Now,
-                DueDate = DateTime.Now.AddDays(settlementPeriod),
-                IsInternational = shipmentDTO.IsInternational,
-                ServiceCentreId = departureServiceCentre.ServiceCentreId
-            };
+                invoice = new Invoice()
+                {
+                    InvoiceNo = invoiceNo,
+                    Amount = shipmentDTO.GrandTotal,
+                    PaymentStatus = PaymentStatus.Paid,
+                    Waybill = shipmentDTO.Waybill,
+                    PaymentDate = DateTime.Now,
+                    PaymentMethod = PaymentType.Wallet.ToString(),
+                    DueDate = DateTime.Now.AddDays(settlementPeriod),
+                    IsInternational = shipmentDTO.IsInternational,
+                    ServiceCentreId = departureServiceCentre.ServiceCentreId
+                };
+            }
+            else
+            {
+                 invoice = new Invoice()
+                {
+                    InvoiceNo = invoiceNo,
+                    Amount = shipmentDTO.GrandTotal,
+                    PaymentStatus = PaymentStatus.Pending,
+                    Waybill = shipmentDTO.Waybill,
+                    PaymentDate = DateTime.Now,
+                    DueDate = DateTime.Now.AddDays(settlementPeriod),
+                    IsInternational = shipmentDTO.IsInternational,
+                    ServiceCentreId = departureServiceCentre.ServiceCentreId
+                };
+            }
 
             _uow.Invoice.Add(invoice);
             return invoiceNo;
@@ -795,7 +845,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             _uow.GeneralLedger.Add(generalLedger);
         }
-        
+
         //This is used because I don't want an Exception to be thrown when calling it
         public async Task<Shipment> GetShipmentForScan(string waybill)
         {
@@ -806,9 +856,10 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<List<InvoiceViewDTO>> GetUnGroupedWaybillsForServiceCentre(FilterOptionsDto filterOptionsDto, bool filterByDestinationSC = false)
         {
             try
-            {//1. get shipments for that Service Centre
+            {
+                //1. get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false);
+                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false && s.IsGrouped == false);
 
                 //apply filters for Service Centre
                 if (serviceCenters.Length > 0)
@@ -844,26 +895,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var invoice = shipmentItem;
 
-                    if (invoice.PaymentStatus == PaymentStatus.Paid)
+                    if (invoice.PaymentStatus == PaymentStatus.Paid || shipmentItem.CompanyType == CompanyType.Corporate.ToString())
                     {
                         paidShipments.Add(shipmentItem);
                     }
-                    else
-                    if (invoice.PaymentStatus == PaymentStatus.Pending &&
-                        shipmentItem.CompanyType == CompanyType.Corporate.ToString())
-                    {
-                        paidShipments.Add(shipmentItem);
-                    }
-
                 }
 
                 //3. get all grouped waybills for that Service Centre
-                var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappingWaybills(serviceCenters);
+                //var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappingWaybills(serviceCenters);
 
                 //4. filter the two lists
                 //var groupedWaybillsAsStringList = groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber);
-                var groupedWaybillsAsHashSet = new HashSet<string>(groupWayBillNumberMappings);
-                var ungroupedWaybills = paidShipments.Where(s => !groupedWaybillsAsHashSet.Contains(s.Waybill)).ToList();
+                //var groupedWaybillsAsHashSet = new HashSet<string>(groupWayBillNumberMappings);
+                //var ungroupedWaybills = paidShipments.Where(s => !groupedWaybillsAsHashSet.Contains(s.Waybill)).ToList();
+                var ungroupedWaybills = paidShipments;
 
                 //5. Ensure the waybills are in this ServiceCentre from the TransitWaybill entity
                 //Get TransitWaybillNumber as a querable list
@@ -891,7 +936,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //6.added for Transitwaybills
                 var transitWaybillNumberList = allTransitWaybillNumberList.Where(s =>
                     serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false && s.IsTransitCompleted == false).ToList();
-                
+
                 foreach (var item in transitWaybillNumberList)
                 {
                     var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().FirstOrDefault(s => s.IsShipmentCollected == false && s.Waybill == item.WaybillNumber);
@@ -947,14 +992,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        
+
         public async Task<List<InvoiceView>> GetUnGroupedWaybillsForServiceCentreDropDown(FilterOptionsDto filterOptionsDto, bool filterByDestinationSC = false)
         {
             try
             {
                 //1. get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false);
+
+                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false && s.IsGrouped == false);
 
                 //apply filters for Service Centre
                 if (serviceCenters.Length > 0)
@@ -990,33 +1036,28 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var invoice = shipmentItem;
 
-                    if (invoice.PaymentStatus == PaymentStatus.Paid)
+                    if (invoice.PaymentStatus == PaymentStatus.Paid || shipmentItem.CompanyType == CompanyType.Corporate.ToString())
                     {
                         paidShipments.Add(shipmentItem);
                     }
-                    else
-                    if (invoice.PaymentStatus == PaymentStatus.Pending &&
-                        shipmentItem.CompanyType == CompanyType.Corporate.ToString())
-                    {
-                        paidShipments.Add(shipmentItem);
-                    }
-
                 }
 
                 //3. get all grouped waybills for that Service Centre
-                var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappingWaybills(serviceCenters);
+                //once the waybills in group mapping for service centre grow to millions, the result will slow, need optimisation ???
+                //var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappingWaybills(serviceCenters);
 
                 //4. filter the two lists
                 //var groupedWaybillsAsStringList = groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber);
-                var groupedWaybillsAsHashSet = new HashSet<string>(groupWayBillNumberMappings);
-                var ungroupedWaybills = paidShipments.Where(s => !groupedWaybillsAsHashSet.Contains(s.Waybill)).ToList();
+                //var groupedWaybillsAsHashSet = new HashSet<string>(groupWayBillNumberMappings);
+                //var ungroupedWaybills = paidShipments.Where(s => !groupedWaybillsAsHashSet.Contains(s.Waybill)).ToList();
+                var ungroupedWaybills = paidShipments;
 
 
                 //5. Ensure the waybills are in this ServiceCentre from the TransitWaybill entity
 
                 //Get TransitWaybillNumber as a querable list
                 var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable().Where(x => x.IsTransitCompleted == false).ToList();
-                
+
                 // final ungroupedList
                 var finalUngroupedList = new List<InvoiceView>();
                 foreach (var item in ungroupedWaybills)
@@ -1039,7 +1080,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //6.added for Transitwaybills
                 var transitWaybillNumberList = allTransitWaybillNumberList.Where(s =>
                     serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false && s.IsTransitCompleted == false).ToList();
-                
+
                 foreach (var item in transitWaybillNumberList)
                 {
                     var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().FirstOrDefault(s => s.IsShipmentCollected == false && s.Waybill == item.WaybillNumber);
@@ -1057,7 +1098,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         finalUngroupedList.Add(shipment);
                     }
                 }
-                                                                                                                                        
+
                 return finalUngroupedList;
             }
             catch (Exception)
@@ -1147,7 +1188,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        
+
         public async Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentres()
         {
             try
@@ -1160,11 +1201,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     groupwaybills = groupwaybills.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
                 }
-                                
+
                 //Filter the service centre details using the destination of the waybill
                 var allServiceCenters = _uow.ServiceCentre.GetAllAsQueryable();
                 var result = allServiceCenters.Where(s => groupwaybills.Any(x => x.ServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
-                
+
                 //Fetch all Service Centre including their Station Detail into Memory
                 var allServiceCenterDTOs = await _centreService.GetServiceCentres();
 
@@ -1276,7 +1317,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var invoices = await _uow.Shipment.GetSalesForServiceCentre(accountFilterCriteria, serviceCenterIds);
 
             //Update to change the Corporate Paid status from 'Paid' to 'Credit'
-            foreach(var item in invoices)
+            foreach (var item in invoices)
             {
                 item.PaymentStatusDisplay = item.PaymentStatus.ToString();
                 if ((CompanyType.Corporate.ToString() == item.CompanyType))
@@ -1291,9 +1332,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 EndDate = (DateTime)accountFilterCriteria.EndDate,
                 Invoices = invoices,
                 SalesCount = invoices.Count,
-                TotalSales = invoices.Sum(s => s.Amount)
+                TotalSales = invoices.Where(s => s.PaymentStatus == PaymentStatus.Paid).Sum(s => s.Amount),
             };
-
+            
             return dailySalesDTO;
         }
 
@@ -1496,10 +1537,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //get all warehouse service centre
-                var allServiceCenters = await _centreService.GetServiceCentres();
-                allServiceCenters = allServiceCenters.Where(s => warehouseServiceCentres.Contains(s.Code));
+                var allServiceCenters = await _centreService.GetServiceCentreByCode(warehouseServiceCentres);
 
-                return allServiceCenters.ToList();
+                return allServiceCenters;
             }
             catch (Exception)
             {
@@ -1544,7 +1584,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 await _uow.CompleteAsync();
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw ex;
             }

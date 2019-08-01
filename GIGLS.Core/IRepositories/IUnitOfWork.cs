@@ -150,8 +150,17 @@ namespace GIGLS.Core
 
         IRegionRepository Region { get; set; }
         IRegionServiceCentreMappingRepository RegionServiceCentreMapping { get; set; }
+        IDemurrageRepository Demurrage { get; set; }
 
         IHUBManifestWaybillMappingRepository HUBManifestWaybillMapping { get; set; }
+
+        ICategoryRepository Category { get; set; }
+
+        ISubCategoryRepository SubCategory { get; set; }
+
+        IPartnerTransactionsRepository PartnerTransactions { get; set; }
+
+        IMobileRatingRepository MobileRating { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

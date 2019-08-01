@@ -5,14 +5,13 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.SLA;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
-using GIGLS.Core.View;
-using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using Microsoft.AspNet.Identity;
 using System;
@@ -23,7 +22,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
 {
     public interface ICustomerPortalService : IServiceDependencyMarker
     {
-        Task<List<InvoiceViewDTO>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria);
+        Task<List<InvoiceViewDTO>> GetShipmentTransactions(ShipmentCollectionFilterCriteria f_Criteria);
         Task<WalletTransactionSummaryDTO> GetWalletTransactions();
         Task<IEnumerable<InvoiceViewDTO>> GetInvoices();
         Task<InvoiceDTO> GetInvoiceByWaybill(string waybill);
@@ -67,5 +66,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<Tuple<Task<List<WalletPaymentLogDTO>>, int>> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto);
 
         List<string> GetItemTypes();
+
+       
     }
 }

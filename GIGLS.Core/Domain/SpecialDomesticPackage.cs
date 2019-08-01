@@ -9,5 +9,10 @@ namespace GIGLS.Core.Domain
         public bool Status { get; set; }
         public decimal Weight { get; set; }
         public SpecialDomesticPackageType SpecialDomesticPackageType { get; set; }
+
+        //new properties added for categorization
+        public virtual SubCategory SubCategory { get; set; }
+
+        
     }
 }

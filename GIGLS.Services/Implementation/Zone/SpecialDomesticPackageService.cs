@@ -110,5 +110,7 @@ namespace GIGLS.Services.Implementation.Zone
             package.Status = status;
             await _uow.CompleteAsync();
         }
+
+       
     }
 }

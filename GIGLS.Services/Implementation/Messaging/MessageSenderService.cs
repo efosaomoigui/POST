@@ -111,6 +111,7 @@ namespace GIGLS.Services.Implementation.Messaging
             var result = "";
             try
             {
+                //Need optimisation
                 var smsMessages = await _messageService.GetSmsAsync();
                 messageDTO = smsMessages.FirstOrDefault(s => s.MessageType == messageType);
 
@@ -146,14 +147,24 @@ namespace GIGLS.Services.Implementation.Messaging
                     "Shipment Description",
                     "Total Shipment Amount",
                     "Shipment Creation Date",
-                    "Shipment Creation Time"
+                    "Shipment Creation Time",
+                    "Shipment Fee",
+                    "Currency Symbol"
                 };
 
                 var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
-                var invoiceList = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).ToList();
-                var invoice = invoiceList.FirstOrDefault();
+                
+                ////need optimisation
+                //var invoiceList = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).ToList();
+                //var invoice = invoiceList.FirstOrDefault();
+
+                var invoice = _uow.Invoice.GetAllInvoiceShipments().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).FirstOrDefault();
+
                 if (invoice != null)
                 {
+                    //Get Country Currency Symbol
+                    var country = _uow.Country.Find(s => s.CountryId == invoice.DepartureCountryId).FirstOrDefault();
+
                     //get CustomerDetails
                     if (invoice.CustomerType.Contains("Individual"))
                     {
@@ -175,6 +186,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     var waybill = shipmentTrackingDTO.Waybill;
                     var demurrageAmount = demurragePrice;
 
+
                     //map the array
                     strArray[0] = customerName;
                     strArray[1] = waybill;
@@ -185,9 +197,12 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[6] = demurragePrice;
                     strArray[7] = invoice.ReceiverName;
                     strArray[8] = invoice.Description;
-                    strArray[9] = invoice.Amount.ToString();
+                    strArray[9] = invoice.GrandTotal.ToString();
                     strArray[10] = invoice.DateCreated.ToLongDateString();
                     strArray[11] = invoice.DateCreated.ToShortTimeString();
+                    strArray[12] = invoice.GrandTotal.ToString();
+                    strArray[13] = country.CurrencySymbol;
+                    
 
                     //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
                     if (messageDTO.MessageType == MessageType.ARF &&
@@ -460,6 +475,47 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.To = invoiceViewDTO.PhoneNumber;
                 messageDTO.ToEmail = invoiceViewDTO.Email;
             }
+
+            //3. obj is MessageExtensionDTO
+            if (obj is MessageExtensionDTO)
+            {
+                var strArray = new string[]
+                 {
+                    "Regional Manager Name",
+                    "Service Center Agent Name",
+                    "Service Center Name",
+                    "Scan Status",
+                    "Date Time of Scan",
+                    "WaybillNumber",
+                    "CancelledOrCollected"
+                 };
+
+                var messageExtensionDTO = (MessageExtensionDTO)obj;
+                //map the array
+                strArray[0] = messageExtensionDTO.RegionalManagerName;
+                strArray[1] = messageExtensionDTO.ServiceCenterAgentName;
+                strArray[2] = messageExtensionDTO.ServiceCenterName;
+                strArray[3] = messageExtensionDTO.ScanStatus;
+                strArray[4] = $"{DateTime.Now.ToLongDateString()} : {DateTime.Now.ToLongTimeString()}";
+                strArray[5] = messageExtensionDTO.WaybillNumber;
+                strArray[6] = messageExtensionDTO.CancelledOrCollected;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject =
+                    string.Format(messageDTO.Subject, strArray);
+
+
+                //populate the message template
+                messageDTO.FinalBody =
+                    string.Format(messageDTO.Body, strArray);
+
+
+                messageDTO.ToEmail = messageExtensionDTO.RegionalManagerEmail;
+            }
+
 
             return await Task.FromResult(verifySendEmail);
         }

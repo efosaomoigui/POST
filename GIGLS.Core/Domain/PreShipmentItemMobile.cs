@@ -1,4 +1,5 @@
 ﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,8 +35,11 @@ namespace GIGLS.Core.Domain
         //Foreign key information
         public int PreShipmentMobileId { get; set; }
         public virtual PreShipmentMobile PreShipment { get; set; }
-
+         
        //Agility Calculations
         public decimal? CalculatedPrice { get; set; }
+        public int? SpecialPackageId { get; set; }
+        public ShipmentType ShipmentType { get; set; }
+        public bool IsCancelled { get; set; }
     }
 }

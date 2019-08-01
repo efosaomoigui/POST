@@ -26,6 +26,8 @@
         globalpropertiesreminderdate,
         UserLoginEmailSendInterval,
         ReprintFeatureStartDate,  //the date to start using this service
-        ReprintDays  //the number of  days to allow for reprint
+        ReprintDays,  //the number of  days to allow for reprint
+        HUBManifestDaysToDisplay,
+        PickUpPrice
     }
 }

@@ -93,7 +93,6 @@ namespace GIGLS.Services.Implementation.Messaging
             }
         }
 
-
         public async Task<EmailSendLogDTO> GetEmailSendLogById(int messageId)
         {
             var message = await _uow.EmailSendLog.GetAsync(messageId);
@@ -103,6 +102,12 @@ namespace GIGLS.Services.Implementation.Messaging
                 throw new GenericException("MESSAGE INFORMATION DOES NOT EXIST");
             }
             return Mapper.Map<EmailSendLogDTO>(message);
+        }
+
+        public async Task<List<EmailSendLogDTO>> GetEmailSendLog(string email)
+        {
+            var message = await _uow.EmailSendLog.FindAsync(x => x.To == email);
+            return Mapper.Map<List<EmailSendLogDTO>>(message.OrderByDescending(x => x.DateCreated));
         }
 
         public async Task RemoveEmailSendLog(int messageId)

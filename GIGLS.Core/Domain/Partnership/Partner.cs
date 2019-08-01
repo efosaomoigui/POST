@@ -17,6 +17,11 @@ namespace GIGLS.Core.Domain.Partnership
         public string Address { get; set; }
 
         public virtual PartnerType PartnerType { get; set; }
+        public string UserId { get; set; }
+        public bool IsActivated { get; set; }
+        public string VehicleType { get; set; }
+
+        public string PictureUrl { get; set; }
 
         // Foreign Key
        // public int PartnerApplicationId { get; set; }

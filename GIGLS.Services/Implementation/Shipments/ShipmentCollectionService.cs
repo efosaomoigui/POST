@@ -257,17 +257,36 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
 
-            List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
+            //filter the data by using count which serve as the number of days to display
+            DateTime backwardDatebyNumberofDays = DateTime.Today.AddDays(-30);
+            var hubManifestDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HUBManifestDaysToDisplay).Result;
+            if (hubManifestDaysCountObj != null)
+            {
+                int globalProp = 0;
+                var hubManifestDaysCount = hubManifestDaysCountObj.Value;
+                int.TryParse(hubManifestDaysCount, out globalProp);
+                if (globalProp > 0)
+                {
+                    backwardDatebyNumberofDays = DateTime.Today.AddDays(-1 * (globalProp));
+                }
+            }
+
+            List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => 
+                s.IsCancelled == false && 
+                serviceCenters.Contains(s.DestinationServiceCentreId) &&
+                s.DateCreated >= backwardDatebyNumberofDays).Select(x => x.Waybill).Distinct().ToList();
 
             var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().
                 Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).
                 Where(x => shipmentsWaybills.Contains(x.Waybill));
 
             //add WaybillFilter
-            if(filterOptionsDto.WaybillFilter != null && filterOptionsDto.WaybillFilter.Length > 0)
+            if (filterOptionsDto.WaybillFilter != null && filterOptionsDto.WaybillFilter.Length > 0)
             {
                 shipmentCollection = shipmentCollection.Where(s => s.Waybill.Contains(filterOptionsDto.WaybillFilter));
             }
+
+            shipmentCollection = shipmentCollection.Where(x => x.DateCreated >= backwardDatebyNumberofDays);
 
             //get total count
             var shipmentCollectionTotalCount = shipmentCollection.Count();
@@ -490,7 +509,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     DateOfEntry = DateTime.Now,
                     ServiceCentreId = getServiceCenterCode[0].ServiceCentreId, //serviceCenters[0],
                     UserId = shipmentCollectionDto.UserId,
-                    Amount = shipmentCollectionDto.Demurrage.Amount,
+                    Amount = shipmentCollectionDto.Demurrage.AmountPaid,
                     CreditDebitType = CreditDebitType.Credit,
                     Description = "Payment for Demurrage",
                     IsDeferred = false,
@@ -506,7 +525,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     Waybill = shipmentCollectionDto.Waybill,
                     RefCode = null,
                     UserId = shipmentCollectionDto.UserId,
-                    Amount = (decimal)shipmentCollectionDto.Demurrage.Amount,
+                    Amount = (decimal)shipmentCollectionDto.Demurrage.AmountPaid,
                     ServiceCenterId = getServiceCenterCode[0].ServiceCentreId,
                     DepositStatus = DepositStatus.Unprocessed,
                     PaymentType = shipmentCollectionDto.PaymentType,
@@ -515,7 +534,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     ServiceCenterCode = getServiceCenterCode[0].Code
                 };
 
+                //insert demurage into demurrage entity 
+                var newDemurrage = new Demurrage
+                {
+                    DayCount = shipmentCollectionDto.Demurrage.DayCount,
+                    WaybillNumber = shipmentCollectionDto.Waybill,
+                    Amount = shipmentCollectionDto.Demurrage.Amount,
+                    AmountPaid = shipmentCollectionDto.Demurrage.AmountPaid,
+                    ApprovedBy = shipmentCollectionDto.Demurrage.ApprovedBy,
+                    UserId = shipmentCollection.UserId,
+                    ServiceCenterId = getServiceCenterCode[0].ServiceCentreId,
+                    ServiceCenterCode = getServiceCenterCode[0].Code
+                };
+
                 _uow.DemurrageRegisterAccount.Add(demurrageinformation);
+                _uow.Demurrage.Add(newDemurrage);
                 _uow.GeneralLedger.Add(generalLedger);
             }
 
@@ -607,7 +640,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && s.CompanyType != CompanyType.Ecommerce.ToString() && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
+                List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable()
+                    .Where(s => s.IsCancelled == false && s.CompanyType != CompanyType.Ecommerce.ToString()
+                    && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
                 // filter by global property for OverDueShipments
                 var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount).Result;

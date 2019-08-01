@@ -10,7 +10,6 @@ using AutoMapper;
 using GIGLS.CORE.DTO.Report;
 using System;
 using GIGLS.Core.View;
-using GIGLS.Core.Domain.Wallet;
 using System.Data.SqlClient;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
@@ -139,7 +138,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             return invoices;
 
-        }
+        } 
 
         //Stored Procedure version
         //var salesPeople = await context.Database.SqlQuery<SalesPerson>("AllSalesPeople").ToListAsync();
@@ -167,6 +166,39 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             var invoices = 
            await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTO>("NewInvoiceViewSP @IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CompanyType, @IsCashOnDelivery",  
+                iscancelled, startDate, endDate, paymentStatus, departureServiceCentreId, stationId, CompanyType, isCod).ToListAsync();
+
+            var result = invoices.ToList();
+            var invoicesResult = Mapper.Map<IEnumerable<InvoiceViewDTO>>(result);
+
+            return await Task.FromResult(invoicesResult.ToList()); // Task.FromResult(invoicesResult.OrderByDescending(x => x.DateCreated).ToList());
+        }
+
+        public async Task<List<InvoiceViewDTO>> GetInvoicesFromViewWithDeliveryTimeAsyncFromSP(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
+        {
+            DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
+            DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
+
+            var queryDate = accountFilterCriteria.getStartDateAndEndDate();
+            
+
+            //declare parameters for the stored procedure
+            SqlParameter iscancelled = new SqlParameter("@IsCancelled", (object)accountFilterCriteria.IsCancelled?? DBNull.Value);
+            SqlParameter startDate = new SqlParameter("@StartDate", queryDate.Item1);
+            SqlParameter endDate = new SqlParameter("@EndDate", queryDate.Item2);
+            
+            SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", Convert.ToInt32(accountFilterCriteria.PaymentStatus));//accountFilterCriteria.PaymentStatus
+
+            var sc = (serviceCentreIds.Length > 0) ? serviceCentreIds[0] : 0; 
+            //SqlParameter paymentMethod = new SqlParameter("@paymentMethod", accountFilterCriteria.p);
+            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
+
+            SqlParameter stationId = new SqlParameter("@StationId", accountFilterCriteria.StationId);
+            SqlParameter CompanyType = new SqlParameter("@CompanyType", (object)accountFilterCriteria.CompanyType?? DBNull.Value);
+            SqlParameter isCod = new SqlParameter("@IsCashOnDelivery", (object)accountFilterCriteria.IsCashOnDelivery??DBNull.Value);
+
+            var invoices = 
+           await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTO>("NewInvoiceViewSPWithDeliveryTime @IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CompanyType, @IsCashOnDelivery",  
                 iscancelled, startDate, endDate, paymentStatus, departureServiceCentreId, stationId, CompanyType, isCod).ToListAsync();
 
             var result = invoices.ToList();
@@ -232,8 +264,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             return Task.FromResult(invoicesResult.OrderByDescending(x => x.DateCreated).ToList());
         }
-
-
+        
         public IQueryable<InvoiceView> GetAllFromInvoiceView()
         {
             var invoices = _GIGLSContextForView.InvoiceView.AsQueryable();
@@ -275,7 +306,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               PaymentMethod = i.PaymentMethod,
                               CashOnDeliveryAmount = s.CashOnDeliveryAmount,
                               ReprintCounterStatus = s.ReprintCounterStatus,
-                              ShipmentScanStatus = s.ShipmentScanStatus
+                              ShipmentScanStatus = s.ShipmentScanStatus,
+                              IsGrouped = s.IsGrouped,
+                              DepartureCountryId = s.DepartureCountryId,
+                              DestinationCountryId = s.DestinationCountryId
                           });
             return result;
         }
@@ -326,11 +360,54 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               DepositStatus = s.DepositStatus,
                               PaymentMethod = i.PaymentMethod,
                               PickupOptions = s.PickupOptions,
-                              IsCancelled = s.IsCancelled
+                              IsCancelled = s.IsCancelled,
+                              DepartureCountryId = s.DepartureCountryId,
+                              DestinationCountryId = s.DestinationCountryId
                           });
             return result;
         }
 
+        public IQueryable<InvoiceView> GetCustomerTransactions()
+        {
+            var shipments = Context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false);
 
+            var result = (from s in shipments
+                          join i in Context.Invoice on s.Waybill equals i.Waybill
+                          join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
+                          join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                          select new InvoiceView
+                          {
+                              Waybill = s.Waybill,
+                              CustomerCode = s.CustomerCode,
+                              DateCreated = s.DateCreated,
+                              ReceiverEmail = s.ReceiverEmail,
+                              ReceiverName = s.ReceiverName,
+                              PickupOptions = s.PickupOptions,
+                              Description = s.Description,
+                              GrandTotal = i.Amount,
+                              DepartureServiceCentreName = dept.Name,
+                              DestinationServiceCentreName = dest.Name
+                          });
+            return result;
+        }
+
+        public IQueryable<InvoiceView> GetCustomerInvoices()
+        {
+            var shipments = Context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false);
+
+            var result = (from s in shipments
+                          join i in Context.Invoice on s.Waybill equals i.Waybill
+                          select new InvoiceView
+                          {
+                              Waybill = s.Waybill,
+                              CustomerCode = s.CustomerCode,
+                              DateCreated = s.DateCreated,
+                              Amount = i.Amount,
+                              InvoiceNo = i.InvoiceNo,
+                              PaymentMethod = i.PaymentMethod,
+                              PaymentStatus = i.PaymentStatus
+                          });
+            return result;
+        }
     }
 }

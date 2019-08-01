@@ -99,5 +99,10 @@ namespace GIGLS.Core.View
 
         //use to optimise shipment progress for shipment that has depart service centre
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
+        public bool IsGrouped { get; set; }
+
+        //Country info
+        public int DepartureCountryId { get; set; }
+        public int DestinationCountryId { get; set; }
     }
 }

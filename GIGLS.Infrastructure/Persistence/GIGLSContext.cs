@@ -98,6 +98,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         public DbSet<ShipmentDeliveryOptionMapping> ShipmentDeliveryOptionMapping { get; set; }
 
+        public DbSet<Demurrage> Demurrage { get; set; }
         //customer
         public DbSet<Company> Company { get; set; }
         public DbSet<CompanyContactPerson> CompanyContactPerson { get; set; }
@@ -246,6 +247,14 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<MobileScanStatus> MobileScanStatus { get; set; }
 
         public DbSet<HUBManifestWaybillMapping> HUBManifestWaybillMapping { get; set; }
+
+        public DbSet<Category> Category { get; set; }
+
+        public DbSet<SubCategory> SubCategory { get; set; }
+
+        public DbSet<PartnerTransactions> PartnerTransactions { get; set; }
+
+        public DbSet<MobileRating> MobileRating { get; set; }
 
         #endregion
 

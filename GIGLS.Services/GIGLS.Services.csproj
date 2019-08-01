@@ -170,6 +170,7 @@
     <Compile Include="Implementation\Account\VATService.cs" />
     <Compile Include="Implementation\BankSettlement\BankShipmentSettlementService.cs" />
     <Compile Include="Implementation\BankSettlement\CODSettlementSheetService.cs" />
+    <Compile Include="Implementation\CategoryService.cs" />
     <Compile Include="Implementation\Client\ClientNodeService.cs" />
     <Compile Include="Implementation\CountryService.cs" />
     <Compile Include="Implementation\Customers\CompanyContactPersonService.cs" />
@@ -202,12 +203,14 @@
     <Compile Include="Implementation\Messaging\MessageSenderService.cs" />
     <Compile Include="Implementation\Messaging\NotificationService.cs" />
     <Compile Include="Implementation\Messaging\SmsSendLogService.cs" />
+    <Compile Include="Implementation\MobileRatingService.cs" />
     <Compile Include="Implementation\Nav\MainNavService.cs" />
     <Compile Include="Implementation\Nav\SubNavService.cs" />
     <Compile Include="Implementation\Nav\SubSubNavService.cs" />
     <Compile Include="Implementation\OTPService.cs" />
     <Compile Include="Implementation\Partnership\PartnerApplicationService.cs" />
     <Compile Include="Implementation\Partnership\PartnerService.cs" />
+    <Compile Include="Implementation\Partnership\PartnerTransactionsService.cs" />
     <Compile Include="Implementation\PaymentTransactions\PaymentPartialTransactionService.cs" />
     <Compile Include="Implementation\PaymentTransactions\PaymentTransactionService.cs" />
     <Compile Include="Implementation\Report\AccountReportService.cs" />
@@ -252,6 +255,7 @@
     <Compile Include="Implementation\Stocks\StockRequestService.cs" />
     <Compile Include="Implementation\Stocks\StockSupplyDetailsService.cs" />
     <Compile Include="Implementation\Stores\StoreService.cs" />
+    <Compile Include="Implementation\SubCategoryService.cs" />
     <Compile Include="Implementation\User\UserService.cs" />
     <Compile Include="Implementation\Utility\EnumHelper.cs" />
     <Compile Include="Implementation\Utility\GlobalPropertyService.cs" />
