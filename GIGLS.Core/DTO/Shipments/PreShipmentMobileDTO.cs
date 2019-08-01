@@ -106,5 +106,13 @@ namespace GIGLS.Core.DTO.Shipments
 
         public int? ZoneMapping { get; set; }
         public List<int> DeletedItems { get; set; }
+
+        public bool IsRated { get; set; }
+
+        public string PartnerFirstName { get; set; }
+
+        public string PartnerLastName { get; set; }
+
+        public string PartnerImageUrl { get; set; }
     }
 }
