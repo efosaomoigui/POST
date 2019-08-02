@@ -741,7 +741,9 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                         return new ServiceResponse<JObject>
                         {
-                            Object = jObject
+                            Object = jObject,
+                            VehicleType = user.VehicleType
+
                         };
                     }
                 });
