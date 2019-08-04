@@ -364,6 +364,28 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               CompanyType = r.CompanyType,
                                                               CustomerCode = r.CustomerCode
                                                           }).ToList();
+                foreach(var Shipment in shipmentDto)
+                {
+                   
+                    var PartnerId = _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == Shipment.Waybill).Result;
+                    if (PartnerId != null)
+                    {
+                        var partneruser = await _uow.User.GetUserById(PartnerId.UserId);
+                        Shipment.PartnerFirstName = partneruser.FirstName;
+                        Shipment.PartnerLastName = partneruser.LastName;
+                        Shipment.PartnerImageUrl = partneruser.PictureUrl;
+                    }
+                    var rating  = _uow.MobileRating.GetAsync(j => j.Waybill == Shipment.Waybill).Result;
+                    if(rating != null)
+                    {
+                        Shipment.IsRated = rating.IsRatedByCustomer;
+                    }
+                    else
+                    {
+                        Shipment.IsRated = false;
+                    }
+
+                }
 
                 return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
             }

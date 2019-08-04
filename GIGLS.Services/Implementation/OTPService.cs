@@ -95,6 +95,11 @@ namespace GIGLS.Services.Implementation
             {
                 user.Trim();
                 registerUser = await _UserService.GetUserByEmail(user);
+                var vehicle = _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode).Result;
+                if(vehicle!= null)
+                {
+                    registerUser.VehicleType = vehicle.VehicleType;
+                }
             }
             else
             {
@@ -106,6 +111,11 @@ namespace GIGLS.Services.Implementation
                         user = "+234" + user.Remove(0, 1);
                     };
                     registerUser = await _UserService.GetUserByPhone(user);
+                    var vehicle = _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode).Result;
+                    if (vehicle != null)
+                    {
+                        registerUser.VehicleType = vehicle.VehicleType;
+                    }
                 }
                 else
                 {

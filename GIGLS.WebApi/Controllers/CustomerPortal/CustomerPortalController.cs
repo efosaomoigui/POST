@@ -694,6 +694,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
 
             var user = await _otpService.CheckDetails(UserDetail);
+            var vehicle = user.VehicleType;
             if (user.Username != null)
             {
                 user.Username = user.Username.Trim();
@@ -738,10 +739,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                         var jObject = JObject.Parse(responseJson);
 
                         getTokenResponse = jObject.GetValue("access_token").ToString();
-
                         return new ServiceResponse<JObject>
                         {
+                            VehicleType = vehicle,
                             Object = jObject
+                            
+
                         };
                     }
                 });
