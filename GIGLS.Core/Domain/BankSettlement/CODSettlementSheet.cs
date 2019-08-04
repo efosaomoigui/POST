@@ -1,5 +1,4 @@
-﻿using GIGLS.Core.Enums;
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -14,6 +13,7 @@ namespace GIGLS.Core.Domain.BankSettlement
         [Index(IsUnique = true)]
         public string Waybill { get; set; }
 
+        [MaxLength(100)]
         public string ReceiverAgentId { get; set; }
         public decimal Amount { get; set; }
         public DateTime? DateSettled { get; set; }

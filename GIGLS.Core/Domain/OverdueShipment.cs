@@ -16,6 +16,7 @@ namespace GIGLS.CORE.Domain
         public OverdueShipmentStatus OverdueShipmentStatus { get; set; }
 
         //Who processed the collection
+        [MaxLength(128)]
         public string UserId { get; set; }
     }
 }

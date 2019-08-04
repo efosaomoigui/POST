@@ -75,6 +75,7 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal? ActualAmountCollected { get; set; }
 
         //General Details comes with role user
+        [MaxLength(128)]
         public string UserId { get; set; }
 
         public bool IsdeclaredVal { get; set; }

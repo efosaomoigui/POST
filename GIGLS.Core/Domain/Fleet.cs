@@ -10,6 +10,8 @@ namespace GIGL.GIGLS.Core.Domain
     {
         [Key]
         public int FleetId { get; set; }
+
+        [MaxLength(100)]
         public string RegistrationNumber { get; set; }
         public string ChassisNumber { get; set; }
         public string EngineNumber { get; set; }

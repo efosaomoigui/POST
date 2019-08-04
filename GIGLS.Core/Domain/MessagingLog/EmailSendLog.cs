@@ -12,6 +12,8 @@ namespace GIGLS.Core.Domain.MessagingLog
         public string From { get; set; }
         public string Message { get; set; }
         public MessagingLogStatus Status { get; set; }
+
+        [MaxLength(128)]
         public string User { get; set; }
         public string ResultStatus { get; set; }
         public string ResultDescription { get; set; }

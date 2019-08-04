@@ -25,6 +25,7 @@ namespace GIGLS.CORE.Domain
         public bool IsCashOnDelivery { get; set; }
 
         //Who processed the collection
+        [MaxLength(128)]
         public string UserId { get; set; }
     }
 }

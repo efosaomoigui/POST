@@ -1,5 +1,4 @@
 ﻿using GIGLS.Core.Enums;
-using GIGLS.Core.Domain;
 using System;
 
 namespace GIGLS.Core.Domain.Wallet
