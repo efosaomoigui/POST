@@ -26,6 +26,8 @@ namespace GIGLS.Core.Domain.BankSettlement
         public int ServiceCenterId { get; set; }
         public string ServiceCenter { get; set; }
         public DepositStatus Status { get; set; }
+
+        [MaxLength(128)]
         public string VerifiedBy { get; set; }
     }
     
@@ -33,6 +35,8 @@ namespace GIGLS.Core.Domain.BankSettlement
     {
         [Key]
         public int CodeId { get; set; }
+
+        [MaxLength(100)]
         public string Code { get; set; }
         public decimal TotalAmount { get; set; }
         public DateTime DateAndTimeOfDeposit { get; set; }
@@ -55,6 +59,8 @@ namespace GIGLS.Core.Domain.BankSettlement
     {
         [Key]
         public int CodPayOutId { get; set; }
+
+        [MaxLength(100)]
         public string Waybill { get; set; }
         public decimal TotalAmount { get; set; }
         public DateTime DateAndTimeOfDeposit { get; set; }
