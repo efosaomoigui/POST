@@ -23,9 +23,16 @@ namespace GIGLS.Core.Domain
         public bool IsActive { get; set; }
 
         //Dispatch
+        [MaxLength(100)]
         public string RegistrationNumber { get; set; }
+
+        [MaxLength(100)]
         public string DriverDetail { get; set; }
+
+        [MaxLength(100)]
         public string DispatchedBy { get; set; }
+
+        [MaxLength(100)]
         public string ReceivedBy { get; set; }
     }
 }

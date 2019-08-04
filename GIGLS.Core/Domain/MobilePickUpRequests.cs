@@ -6,6 +6,8 @@ namespace GIGLS.Core.Domain
     public class MobilePickUpRequests : BaseDomain
     {
         public int MobilePickUpRequestsId { get; set; }
+
+        [MaxLength(100)]
         public string Status { get; set; }
 
         [MaxLength(100)]

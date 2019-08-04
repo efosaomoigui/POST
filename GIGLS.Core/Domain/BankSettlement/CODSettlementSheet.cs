@@ -17,11 +17,9 @@ namespace GIGLS.Core.Domain.BankSettlement
         public string ReceiverAgentId { get; set; }
         public decimal Amount { get; set; }
         public DateTime? DateSettled { get; set; }
+
+        [MaxLength(100)]
         public string CollectionAgentId { get; set; }
         public bool ReceivedCOD { get; set; }
-    }
-
-   
-    
-    
+    }     
 }

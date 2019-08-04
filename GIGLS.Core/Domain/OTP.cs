@@ -13,6 +13,8 @@ namespace GIGLS.Core.Domain
 
         [MaxLength(100)]
         public string PhoneNumber { get; set; }
+
+        [MaxLength(100)]
         public string EmailAddress { get; set; }
     }
 }

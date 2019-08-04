@@ -61,6 +61,8 @@ namespace GIGLS.Core.Domain.BankSettlement
 
         [MaxLength(128)]
         public string UserId { get; set; }
+
+        [MaxLength(100)]
         public string CustomerCode { get; set; } 
         public string Name { get; set; }
         public int ServiceCenter { get; set; }
