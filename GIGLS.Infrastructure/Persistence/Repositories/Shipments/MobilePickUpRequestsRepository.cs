@@ -72,7 +72,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                 var MobilePickUpRequests = _context.MobilePickUpRequests.Where(x => x.UserId == userId).ToList();
 
                 var MobilePickUpRequestsDto = from mobilepickuprequest in MobilePickUpRequests
-                                              where mobilepickuprequest.DateCreated.Month == DateTime.Now.Month && mobilepickuprequest.DateCreated.Year== DateTime.Now.Year
+                                              where mobilepickuprequest.DateCreated.Month == DateTime.Now.Month && mobilepickuprequest.DateCreated.Year== DateTime.Now.Year && mobilepickuprequest.Status == "Delivered"
                                               select new MobilePickUpRequestsDTO
                                               {
                                                   DateCreated = mobilepickuprequest.DateCreated,
