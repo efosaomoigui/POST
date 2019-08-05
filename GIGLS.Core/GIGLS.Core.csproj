@@ -320,6 +320,7 @@
     <Compile Include="DTO\NotificationDTO.cs" />
     <Compile Include="DTO\OnlinePayment\PaystackWebhookDTO.cs" />
     <Compile Include="DTO\OTPDTO.cs" />
+    <Compile Include="DTO\PartnerMonthlyTransactionsDTO.cs" />
     <Compile Include="DTO\Partnership\RootObject.cs" />
     <Compile Include="DTO\Partnership\PartnerApplicationDto.cs" />
     <Compile Include="DTO\Partnership\PartnerDto.cs" />

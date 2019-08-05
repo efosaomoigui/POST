@@ -933,5 +933,19 @@ namespace GIGLS.Services.Implementation.Shipments
 
         }
 
+
+        public async Task<PartnerMonthlyTransactionsDTO> GetMonthlyPartnerTransactions()
+        {
+            try
+            {
+                var mobilerequests = await _mobilepickuprequestservice.GetMonthlyTransactions();
+                return mobilerequests;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
     }
 }

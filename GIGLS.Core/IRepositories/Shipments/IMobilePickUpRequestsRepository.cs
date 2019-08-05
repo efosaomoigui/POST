@@ -9,5 +9,6 @@ namespace GIGLS.Core.IRepositories.Shipments
     public interface IMobilePickUpRequestsRepository :IRepository<MobilePickUpRequests>
     {
         Task <List<MobilePickUpRequestsDTO>> GetMobilePickUpRequestsAsync(string userId);
+        Task<List<MobilePickUpRequestsDTO>> GetMobilePickUpRequestsAsyncMonthly(string userId);
     }
 }
