@@ -1071,5 +1071,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpGet]
+        [Route("partnermonthlytransactions")]
+        public async Task<IServiceResponse<PartnerMonthlyTransactionsDTO>> PartnerMonthlyTransactions()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var transactions = await _preshipmentmobileService.GetMonthlyPartnerTransactions();
+
+                return new ServiceResponse<PartnerMonthlyTransactionsDTO>
+                {
+                    Object = transactions
+                };
+            });
+        }
+
     }
 }

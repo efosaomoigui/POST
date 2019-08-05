@@ -13,7 +13,8 @@ namespace GIGLS.Core.IServices
         decimal Total { get; set; }
         string RefCode { get; set; }
         BankProcessingOrderCodesDTO Shipmentcodref { get; set; }
-        Dictionary<string, IEnumerable<string>> ValidationErrors { get; set; } 
-  
-    }
+        Dictionary<string, IEnumerable<string>> ValidationErrors { get; set; }
+        string VehicleType { get; set; }
+
+}
 }
