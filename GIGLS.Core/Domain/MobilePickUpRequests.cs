@@ -15,5 +15,9 @@ namespace GIGLS.Core.Domain
         //foreign key information
         public string UserId { get; set; }
         public virtual User User { get; set; }
+
+        public string Reason { get; set; }
+        [MaxLength(100)]
+        public string PartnerCode { get; set; }
     }
 }
