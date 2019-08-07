@@ -1,21 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace GIGLS.Core.Domain
 {
     public class MobileRating : BaseDomain, IAuditable
     {
         public int MobileRatingId { get; set; }
+
+        [MaxLength(100)]
         public string Waybill { get; set; }
         public string CommentByCustomer { get; set; }
 
         public string CommentByPartner { get; set; }
 
+        [MaxLength(100)]
         public string PartnerCode { get; set; }
 
+        [MaxLength(100)]
         public string CustomerCode { get; set; }
         public double? CustomerRating { get; set; }
 

@@ -1,5 +1,5 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
+﻿using GIGLS.Core.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace GIGLS.Core.Domain.Partnership
 {
@@ -11,6 +11,8 @@ namespace GIGLS.Core.Domain.Partnership
         public string LastName { get; set; }
         public string CompanyName { get; set; }
         public string Email { get; set; }
+
+        [MaxLength(100)]
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
         public string CompanyRcNumber { get; set; }
@@ -25,7 +27,7 @@ namespace GIGLS.Core.Domain.Partnership
         public int? IdentificationTypeId { get; set; }
         public virtual IdentificationType IdentificationType { get; set; }
 
-        public int? ApproverId { get; set; }
-        public virtual User Approver { get; set; }
+        [MaxLength(128)]
+        public string ApproverId { get; set; }
     }
 }

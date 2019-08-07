@@ -176,35 +176,39 @@ namespace GIGLS.WebApi.Controllers.User
                 //Use only for Employees
                 if (user.UserChannelType == Core.Enums.UserChannelType.Employee)
                 {
-                    //set service centre
-                    int[] serviceCenterIds = await _userService.GetPriviledgeServiceCenters(userId);
-                    if (serviceCenterIds.Length == 1)
-                    {
-                        var serviceCentre = await _serviceCentreService.GetServiceCentreById(serviceCenterIds[0]);
-                        user.UserActiveServiceCentre = serviceCentre.Name;
-                    }
+                    var userClaims = await _userService.GetClaimsAsync(user.Id);
 
-
-                    //set country from PriviledgeCountrys
-                    var countries = await _userService.GetPriviledgeCountrys(userId);
-                    user.Country = countries;
-                    user.CountryName = countries.Select(x => x.CountryName).ToList();
-
-                    //If UserActive Country is already set in the UserEntity, use that value
-                    if (user.UserActiveCountryId > 0)
+                    if(userClaims.Count() > 0)
                     {
-                        var userActiveCountry = await _countryService.GetCountryById(user.UserActiveCountryId);
-                        user.UserActiveCountry = userActiveCountry;
-                        user.UserActiveCountryId = userActiveCountry.CountryId;
-                    }
-                    else
-                    {
-                        //set user active country
-                        if (countries.Count == 1)
+                        //set service centre
+                        int[] serviceCenterIds = await _userService.GetPriviledgeServiceCenters(userId);
+                        if (serviceCenterIds.Length == 1)
                         {
-                            user.UserActiveCountry = countries[0];
+                            var serviceCentre = await _serviceCentreService.GetServiceCentreById(serviceCenterIds[0]);
+                            user.UserActiveServiceCentre = serviceCentre.Name;
                         }
-                    }
+                        
+                        //set country from PriviledgeCountrys
+                        var countries = await _userService.GetPriviledgeCountrys(userId);
+                        user.Country = countries;
+                        user.CountryName = countries.Select(x => x.CountryName).ToList();
+
+                        //If UserActive Country is already set in the UserEntity, use that value
+                        if (user.UserActiveCountryId > 0)
+                        {
+                            var userActiveCountry = await _countryService.GetCountryById(user.UserActiveCountryId);
+                            user.UserActiveCountry = userActiveCountry;
+                            user.UserActiveCountryId = userActiveCountry.CountryId;
+                        }
+                        else
+                        {
+                            //set user active country
+                            if (countries.Count == 1)
+                            {
+                                user.UserActiveCountry = countries[0];
+                            }
+                        }
+                    }                                     
                 }
 
                 return new ServiceResponse<UserDTO>

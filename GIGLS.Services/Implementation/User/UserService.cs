@@ -113,29 +113,35 @@ namespace GIGLS.Services.Implementation.User
         //Get a user by Id using Guid from identity implement of EF
         public async Task<UserDTO> GetUserById(string Id)
         {
-            string userActiveServiceCentre = null;
+            //string userActiveServiceCentre = null;
 
             var user = _unitOfWork.User.GetUserById(Id).Result;
 
-            if (user != null)
-            {
-                var activeCentre = _unitOfWork.UserServiceCentreMapping.GetAsync(x => x.IsActive == true && x.User.Id.Equals(Id)).Result;
-                if (activeCentre != null)
-                {
-                    var serviceCentre = _unitOfWork.ServiceCentre.GetAsync(x => x.ServiceCentreId == activeCentre.ServiceCentreId).Result;
-                    userActiveServiceCentre = serviceCentre.Name;
-                }
-            }
-            else
+            if(user == null)
             {
                 throw new GenericException("User does not exist!");
             }
 
             var userDto = Mapper.Map<UserDTO>(user);
 
-            userDto.UserActiveServiceCentre = userActiveServiceCentre;
+            return await Task.FromResult(userDto);
 
-            return userDto;
+            //We dont used User Service Centre Mapping again
+            //if (user != null)
+            //{
+            //    var activeCentre = _unitOfWork.UserServiceCentreMapping.GetAsync(x => x.IsActive == true && x.User.Id.Equals(Id)).Result;
+            //    if (activeCentre != null)
+            //    {
+            //        var serviceCentre = _unitOfWork.ServiceCentre.GetAsync(x => x.ServiceCentreId == activeCentre.ServiceCentreId).Result;
+            //        userActiveServiceCentre = serviceCentre.Name;
+            //    }
+            //}
+            //else
+            //{
+            //    throw new GenericException("User does not exist!");
+            //}
+
+            //userDto.UserActiveServiceCentre = userActiveServiceCentre;
         }
 
         public async Task<UserDTO> GetUserByEmail(string email)

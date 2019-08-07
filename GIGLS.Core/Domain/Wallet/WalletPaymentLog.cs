@@ -18,6 +18,8 @@ namespace GIGLS.Core.Domain.Wallet
         public decimal Amount { get; set; }
         public string TransactionStatus { get; set; }
         public string TransactionResponse { get; set; }
+
+        [MaxLength(128)]
         public string UserId { get; set; }
 
         public bool IsWalletCredited { get; set; }

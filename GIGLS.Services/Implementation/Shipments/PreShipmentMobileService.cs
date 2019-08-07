@@ -28,6 +28,7 @@ using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Partnership;
 using GIGLS.Core.DTO.Partnership;
 using System.Configuration;
+using GIGLS.Core.IMessage;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -52,6 +53,8 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IPartnerTransactionsService _partnertransactionservice;
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IMobileRatingService _mobileratingService;
+        private readonly ISMSService _SmsService;
+        private readonly IEmailService _EmailService;
 
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, IDeliveryOptionService deliveryService,
@@ -59,7 +62,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
             IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice, IMobileShipmentTrackingService mobiletrackingservice,
             IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice,
-            IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMobileRatingService mobileratingService)
+            IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMobileRatingService mobileratingService, ISMSService SmsService, IEmailService EmailService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -80,6 +83,9 @@ namespace GIGLS.Services.Implementation.Shipments
             _partnertransactionservice = partnertransactionservice;
             _globalPropertyService = globalPropertyService;
             _mobileratingService = mobileratingService;
+            _SmsService = SmsService;
+            _EmailService = EmailService;
+
             MapperConfig.Initialize();
         }
 
@@ -184,6 +190,14 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
+            var Pickuprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpPrice);
+            if (preShipment.PreShipmentItems.Count()==0)
+            {
+                throw new GenericException("No Preshipitem was added");
+            }
+            var PickupValue = Convert.ToDecimal(Pickuprice.Value);
+            var ShipmentCount = preShipment.PreShipmentItems.Count();
+            var IndividualPrice = PickupValue / ShipmentCount;
             var user = await _userService.GetUserById(preShipment.UserId);
             var Price = 0.0M;
             decimal DeclaredValue = 0.0M;
@@ -207,16 +221,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
                     preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                 }
                 if (preShipmentItem.ShipmentType == ShipmentType.Special)
                 {
                     preShipmentItem.CalculatedPrice = await _pricingService.GetMobileSpecialPrice(PriceDTO);
                     preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                 }
                 else if (preShipmentItem.ShipmentType == ShipmentType.Regular)
                 {
                     preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
                     preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                 }
                 if (!string.IsNullOrEmpty(preShipmentItem.Value))
                 {
@@ -236,11 +253,10 @@ namespace GIGLS.Services.Implementation.Shipments
             preShipment.Value = DeclaredValue;
             var returnprice = new MobilePriceDTO()
             {
-                PreshipmentMobile = preShipment,
-                DeliveryPrice = preShipment.DeliveryPrice,
-                Vat = preShipment.Vat,
-                InsuranceValue = preShipment.InsuranceValue,
-                GrandTotal = (decimal)preShipment.CalculatedTotal
+                MainCharge = preShipment.Vat + preShipment.InsuranceValue,
+                ServiceCharge = preShipment.DeliveryPrice,
+                GrandTotal = preShipment.Vat + preShipment.InsuranceValue + preShipment.DeliveryPrice,
+                PreshipmentMobile = preShipment
             };
             return returnprice;
         }
@@ -364,6 +380,28 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               CompanyType = r.CompanyType,
                                                               CustomerCode = r.CustomerCode
                                                           }).ToList();
+                foreach(var Shipment in shipmentDto)
+                {
+                   
+                    var PartnerId = _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == Shipment.Waybill).Result;
+                    if (PartnerId != null)
+                    {
+                        var partneruser = await _uow.User.GetUserById(PartnerId.UserId);
+                        Shipment.PartnerFirstName = partneruser.FirstName;
+                        Shipment.PartnerLastName = partneruser.LastName;
+                        Shipment.PartnerImageUrl = partneruser.PictureUrl;
+                    }
+                    var rating  = _uow.MobileRating.GetAsync(j => j.Waybill == Shipment.Waybill).Result;
+                    if(rating != null)
+                    {
+                        Shipment.IsRated = rating.IsRatedByCustomer;
+                    }
+                    else
+                    {
+                        Shipment.IsRated = false;
+                    }
+
+                }
 
                 return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
             }
@@ -619,6 +657,29 @@ namespace GIGLS.Services.Implementation.Shipments
                     var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Dispute.ToString();
                     await _uow.CompleteAsync();
+                }
+                if (pickuprequest.Status == MobilePickUpRequestStatus.LogVisit.ToString())
+                {
+                    var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
+                    var Mobilerequest = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill);
+                    Mobilerequest.Status = MobilePickUpRequestStatus.Visited.ToString();
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Visited.ToString();
+                    await _uow.CompleteAsync();
+                    //MessageDTO SMSmessage = new MessageDTO
+                    //{
+                    //    To = preshipmentmobile.SenderPhoneNumber,
+                    //    FinalBody = $"Your  is {user.Otp}"
+                    //};
+                    //MessageDTO Emailmessage = new MessageDTO
+                    //{
+                    //    CustomerName = "",
+                    //    ReceiverName = "",
+                    //    Subject = "OTP",
+                    //    ToEmail = preshipmentmobile,
+                    //    FinalBody = $"Thank you for registering .Your OTP is {user.Otp}"
+                    //};
+                    //var EmailResponse = await _EmailService.SendAsync(Emailmessage);
+                    //var Smsresponse = await _SmsService.SendAsync(SMSmessage);
                 }
                 return true;
 
@@ -909,6 +970,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
 
+        }
+
+
+        public async Task<PartnerMonthlyTransactionsDTO> GetMonthlyPartnerTransactions()
+        {
+            try
+            {
+                var mobilerequests = await _mobilepickuprequestservice.GetMonthlyTransactions();
+                return mobilerequests;
+            }
+            catch
+            {
+                throw;
+            }
         }
 
     }

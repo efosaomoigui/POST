@@ -75,5 +75,30 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+
+        public async Task<PartnerMonthlyTransactionsDTO> GetMonthlyTransactions()
+        {
+            try
+            {
+                var userid = await _userservice.GetCurrentUserId();
+                var mobilerequests = await _uow.MobilePickUpRequests.GetMobilePickUpRequestsAsyncMonthly(userid);
+                var Count = _uow.MobilePickUpRequests.FindAsync(x => x.UserId == userid && x.DateCreated.Month == DateTime.Now.Month && x.DateCreated.Year == DateTime.Now.Year && x.Status =="Delivered").Result.Count();
+                var TotalDelivery = Count;
+                var TotalEarnings =  await _uow.PartnerTransactions.FindAsync(s => s.UserId == userid && s.DateCreated.Month == DateTime.Now.Month && s.DateCreated.Year == DateTime.Now.Year);
+                var TotalEarning = TotalEarnings.Sum(x =>x.AmountReceived);
+                var totaltransactions = new PartnerMonthlyTransactionsDTO
+                {
+                  MonthlyDelivery = mobilerequests,
+                  TotalDelivery = TotalDelivery,
+                  MonthlyTransactions = TotalEarning
+                };
+                return totaltransactions;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

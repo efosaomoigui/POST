@@ -15,11 +15,14 @@ namespace GIGLS.Core.Domain
         public int ServiceCentreId { get; set; }
         public virtual ServiceCentre ServiceCentre { get; set; }
 
+        [MaxLength(128)]
         public string UserId { get; set; }
         public decimal Amount { get; set; }
         public CreditDebitType CreditDebitType { get; set; }
         public string Description { get; set; }
         public bool IsDeferred { get; set; }
+
+        [MaxLength(100)]
         public string Waybill { get; set; }
         public string ClientNodeId { get; set; }
         public PaymentType PaymentType { get; set; }

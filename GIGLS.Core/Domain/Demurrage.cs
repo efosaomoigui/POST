@@ -1,5 +1,4 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using System;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace GIGLS.Core.Domain
 {
@@ -8,6 +7,8 @@ namespace GIGLS.Core.Domain
         public int DemurrageId { get; set; }
         public int DayCount { get; set; }
         public decimal Amount { get; set; }
+
+        [MaxLength(100), MinLength(5)]
         public string WaybillNumber { get; set; }
         public decimal AmountPaid { get; set; }
 
@@ -16,9 +17,11 @@ namespace GIGLS.Core.Domain
         public string ApprovedId { get; set; }
 
         //who processed the release
+        [MaxLength(128)]
         public string UserId { get; set; }
         public int ServiceCenterId { get; set; }
-        public string ServiceCenterCode { get; set; }
 
+        [MaxLength(50)]
+        public string ServiceCenterCode { get; set; }
     }
 }

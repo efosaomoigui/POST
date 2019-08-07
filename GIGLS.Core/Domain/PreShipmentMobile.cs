@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GIGLS.Core.Domain
 {
@@ -25,9 +22,13 @@ namespace GIGLS.Core.Domain
         public decimal Value { get; set; }
         public DateTime? DeliveryTime { get; set; }
        
-
+        [MaxLength(100)]
         public string CustomerType { get; set; }
+
+        [MaxLength(100)]
         public string CompanyType { get; set; }
+
+        [MaxLength(100)]
         public string CustomerCode { get; set; }
 
         //Receivers Information
@@ -67,6 +68,7 @@ namespace GIGLS.Core.Domain
 
         
         //General Details comes with role user
+        [MaxLength(100)]
         public string UserId { get; set; }
 
         public bool IsdeclaredVal { get; set; }
@@ -104,5 +106,9 @@ namespace GIGLS.Core.Domain
         public string VehicleType { get; set; }
 
         public int? ZoneMapping { get; set; }
+
+        public string PictureName { get; set; }
+
+        public DateTime? PictureDate { get; set; }
     }
 }

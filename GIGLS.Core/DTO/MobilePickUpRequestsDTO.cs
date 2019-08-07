@@ -18,5 +18,9 @@ namespace GIGLS.Core.DTO
         public string UserId { get; set; }
         public PreShipmentMobileDTO PreShipment { get; set; }
         public string ServiceCentreId { get; set; }
+
+        public string Reason { get; set; }
+
+
     }
 }

@@ -15,6 +15,7 @@ namespace GIGLS.Core.Domain
         [Index(IsUnique = true)]
         public string WaybillOld { get; set; }
 
+        [MaxLength(128)]
         public string RerouteBy { get; set; }
         public string RerouteReason { get; set; }
 

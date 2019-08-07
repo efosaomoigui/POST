@@ -13,6 +13,7 @@ namespace GIGLS.Core.Domain
         public string GroupWaybillCode { get; set; }
         public bool IsActive { get; set; }
 
+        [MaxLength(128)]
         public string UserId { get; set; }
 
         //Destination Service centre

@@ -36,7 +36,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                               Location = shipmentTracking.Location,
                                               Waybill = shipmentTracking.Waybill,
                                               MobileShipmentTrackingId = shipmentTracking.MobileShipmentTrackingId,
-                                              TrackingType = shipmentTracking.TrackingType.ToString(),
+                                              TrackingType = shipmentTracking.TrackingType,
                                               User = shipmentTracking.User.FirstName + " " + shipmentTracking.User.LastName,
                                               Status = shipmentTracking.Status,
                                               ScanStatus = Context.MobileScanStatus.Where(c => c.Code == shipmentTracking.Status).Select(x => new MobileScanStatusDTO

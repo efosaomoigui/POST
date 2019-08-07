@@ -15,5 +15,9 @@ namespace GIGLS.Core.DTO.Shipments
 
         public decimal? Discount { get; set; }
         public PreShipmentMobileDTO PreshipmentMobile { get; set; }
+
+        public decimal? MainCharge { get; set; }
+
+        public decimal? ServiceCharge { get; set; }
     }
 }

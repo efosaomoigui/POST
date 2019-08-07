@@ -12,6 +12,11 @@ namespace GIGLS.Core.Enums
         Confirmed,
         Rejected,
         Delivered,
-        Dispute
+        Dispute,
+        LogVisit,
+        ProceedToPickUp,
+        Cancelled,
+        Arrived,
+        Visited
     }
 }

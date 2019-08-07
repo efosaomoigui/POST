@@ -1,6 +1,4 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGLS.Core.Domain
@@ -9,7 +7,6 @@ namespace GIGLS.Core.Domain
     {
         public Region()
         {
-            //ServiceCentres = new HashSet<ServiceCentre>();
         }
 
         public int RegionId { get; set; }
@@ -18,6 +15,5 @@ namespace GIGLS.Core.Domain
         [Index(IsUnique = true)]
         public string RegionName { get; set; }
 
-        //public virtual ICollection<ServiceCentre> ServiceCentres { get; set; }
     }
 }

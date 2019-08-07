@@ -49,7 +49,7 @@ namespace GIGLS.Services.Implementation.Shipments
             await _uow.CompleteAsync();
         }
 
-        public async Task AddShipmentReturn(string waybill)
+        public async Task<string> AddShipmentReturn(string waybill)
         {
             try
             {
@@ -129,6 +129,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //complete transaction
                 await _uow.CompleteAsync();
+
+                return newShipment.Waybill;
             }
             catch (Exception)
             {

@@ -1,7 +1,6 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
-using System;
 
 namespace GIGL.GIGLS.Core.Domain
 {

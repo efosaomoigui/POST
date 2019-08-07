@@ -100,7 +100,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     DateTime = shipmentTracking.DateTime,
                     Location = shipmentTracking.Location,
                     MobileShipmentTrackingId = shipmentTracking.MobileShipmentTrackingId,
-                    TrackingType = shipmentTracking.TrackingType.ToString(),
+                    TrackingType = shipmentTracking.TrackingType,
                     Status = shipmentTracking.Status,
                     User = shipmentTracking.User.FirstName + " " + shipmentTracking.User.LastName,
                 };

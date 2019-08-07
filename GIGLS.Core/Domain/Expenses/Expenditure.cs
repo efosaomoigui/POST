@@ -17,6 +17,7 @@ namespace GIGLS.Core.Domain.Expenses
         public int ServiceCentreId { get; set; }
         public virtual ServiceCentre ServiceCentre { get; set; }
 
+        [MaxLength(128)]
         public string UserId { get; set; }
     }
 }

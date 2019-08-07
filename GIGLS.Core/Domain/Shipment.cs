@@ -24,9 +24,15 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal Value { get; set; }
         public DateTime? DeliveryTime { get; set; }
         public PaymentStatus PaymentStatus { get; set; }
+
+        [MaxLength(100)]
         public string CustomerType { get; set; }
         public int CustomerId { get; set; }
+
+        [MaxLength(100)]
         public string CompanyType { get; set; }
+
+        [MaxLength(100)]
         public string CustomerCode { get; set; }
 
         //Receivers Information
@@ -69,6 +75,7 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal? ActualAmountCollected { get; set; }
 
         //General Details comes with role user
+        [MaxLength(128)]
         public string UserId { get; set; }
 
         public bool IsdeclaredVal { get; set; }
