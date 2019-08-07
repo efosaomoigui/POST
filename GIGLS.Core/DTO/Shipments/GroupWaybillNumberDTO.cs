@@ -23,5 +23,6 @@ namespace GIGLS.Core.DTO.Shipments
         public ServiceCentre DestinationServiceCentre { get; set; }
 
         public List<string> WaybillNumbers { get; set; }
+        public List<object> WaybillsWithDate { get; set; }
     }
 }
