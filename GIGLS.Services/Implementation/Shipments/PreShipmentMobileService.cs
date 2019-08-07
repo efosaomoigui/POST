@@ -255,7 +255,8 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 MainCharge = preShipment.Vat + preShipment.InsuranceValue,
                 ServiceCharge = preShipment.DeliveryPrice,
-                GrandTotal = preShipment.Vat + preShipment.InsuranceValue + preShipment.DeliveryPrice
+                GrandTotal = preShipment.Vat + preShipment.InsuranceValue + preShipment.DeliveryPrice,
+                PreshipmentMobile = preShipment
             };
             return returnprice;
         }
