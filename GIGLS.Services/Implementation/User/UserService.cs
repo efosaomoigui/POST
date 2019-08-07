@@ -1,14 +1,18 @@
 ﻿using AutoMapper;
+using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.CORE.Domain;
 using GIGLS.Infrastructure;
+using GIGLS.Services.Implementation.Utility;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
@@ -865,6 +869,37 @@ namespace GIGLS.Services.Implementation.User
             await _unitOfWork.CompleteAsync();
             return result;
         }
+        public async Task<IdentityResult> ForgotPassword(string email, string password)
+        {
+            var user = await _unitOfWork.User.GetUserByEmail(email);
+            //string password = await _passwordGenerator.Generate();
+            var result = new IdentityResult();
+            if (user == null)
+            {
+                //throw new GenericException("....");
+            }
+            if (user != null)
+            {
+                result = await ResetPassword(user.Id, password);
+                await _unitOfWork.CompleteAsync();
+                
+            }
+            return result;
+        }
+
+        //public async Task<bool> SendEmailForForgotPassword(string email, string password)
+        //{
+        //    //send emails
+        //    //1a. Create PasswordMesssageDTO to hold custom message info
+        //    var passwordMessage = new PasswordMessageDTO()
+        //    {
+        //        Password = password,
+        //        UserEmail = email
+        //    };
+        //    //2b. send message
+        //    await _messageSenderService.SendGenericEmailMessage(MessageType.SSC_Email, passwordMessage);
+        //    return true;
+        //}
 
         /// <summary>
         /// Code for first migration
