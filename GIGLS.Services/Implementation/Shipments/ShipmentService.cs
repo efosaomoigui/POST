@@ -778,6 +778,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 _uow.ShipmentDeliveryOptionMapping.Add(deliveryOptionMapping);
             }
 
+            //set before returning
+            shipmentDTO.DepartureCountryId = departureCountry.CountryId;
+            shipmentDTO.DestinationCountryId = destinationCountry.CountryId;
+
             return shipmentDTO;
         }
 
