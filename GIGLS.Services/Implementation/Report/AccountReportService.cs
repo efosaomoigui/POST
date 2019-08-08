@@ -59,7 +59,7 @@ namespace GIGLS.Services.Implementation.Report
         {
             //filter by User Active Country
             var userActiveCountry = await _userService.GetUserActiveCountry();
-            accountFilterCriteria.CountryId = userActiveCountry?.CountryId;
+            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             accountFilterCriteria.PaymentServiceType = PaymentServiceType.Demurage;
@@ -91,6 +91,11 @@ namespace GIGLS.Services.Implementation.Report
 
         public async Task<List<InvoiceViewDTO>> GetInvoiceReportsFromView(AccountFilterCriteria accountFilterCriteria)
         {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
+
+
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var invoices = await _uow.Invoice.GetInvoicesFromViewAsyncFromSP(accountFilterCriteria, serviceCenterIds);
 

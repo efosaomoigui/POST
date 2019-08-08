@@ -1324,7 +1324,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //filter by User Active Country
             var userActiveCountry = await _userService.GetUserActiveCountry();
-            accountFilterCriteria.CountryId = userActiveCountry?.CountryId;
+            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var invoices = await _uow.Shipment.GetSalesForServiceCentre(accountFilterCriteria, serviceCenterIds);
