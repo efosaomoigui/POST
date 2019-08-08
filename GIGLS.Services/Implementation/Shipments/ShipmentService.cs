@@ -1258,6 +1258,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<DailySalesDTO> GetDailySales(AccountFilterCriteria accountFilterCriteria)
         {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
+
+
             //set defaults
             if (accountFilterCriteria.StartDate == null)
             {
