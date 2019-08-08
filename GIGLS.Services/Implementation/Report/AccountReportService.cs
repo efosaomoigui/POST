@@ -57,6 +57,10 @@ namespace GIGLS.Services.Implementation.Report
 
         public async Task<List<GeneralLedgerDTO>> GetDemurageReports(AccountFilterCriteria accountFilterCriteria)
         {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            accountFilterCriteria.CountryId = userActiveCountry?.CountryId;
+
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             accountFilterCriteria.PaymentServiceType = PaymentServiceType.Demurage;
             var generalLedgerDTO = await _uow.GeneralLedger.GetGeneralLedgersAsync(accountFilterCriteria, serviceCenterIds);

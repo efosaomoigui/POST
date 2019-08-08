@@ -547,6 +547,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 // create the shipment and shipmentItems
                 var newShipment = await CreateShipment(shipmentDTO);
+                shipmentDTO.DepartureCountryId = newShipment.DepartureCountryId;
 
                 // create the Invoice and GeneralLedger
                 await CreateInvoice(shipmentDTO);
@@ -661,7 +662,7 @@ namespace GIGLS.Services.Implementation.Shipments
             if (shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
             {
                 //also check that the destination is not a hub
-                if(destinationSC.IsHUB != true)
+                if (destinationSC.IsHUB != true)
                 {
                     var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
                     shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
@@ -805,12 +806,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     PaymentMethod = PaymentType.Wallet.ToString(),
                     DueDate = DateTime.Now.AddDays(settlementPeriod),
                     IsInternational = shipmentDTO.IsInternational,
-                    ServiceCentreId = departureServiceCentre.ServiceCentreId
+                    ServiceCentreId = departureServiceCentre.ServiceCentreId,
+                    CountryId = shipmentDTO.DepartureCountryId
                 };
             }
             else
             {
-                 invoice = new Invoice()
+                invoice = new Invoice()
                 {
                     InvoiceNo = invoiceNo,
                     Amount = shipmentDTO.GrandTotal,
@@ -819,7 +821,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     PaymentDate = DateTime.Now,
                     DueDate = DateTime.Now.AddDays(settlementPeriod),
                     IsInternational = shipmentDTO.IsInternational,
-                    ServiceCentreId = departureServiceCentre.ServiceCentreId
+                    ServiceCentreId = departureServiceCentre.ServiceCentreId,
+                    CountryId = shipmentDTO.DepartureCountryId
                 };
             }
 
@@ -840,7 +843,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 Description = "Payment for Shipment",
                 IsDeferred = true,
                 Waybill = shipmentDTO.Waybill,
-                IsInternational = shipmentDTO.IsInternational
+                IsInternational = shipmentDTO.IsInternational,
+                CountryId = shipmentDTO.DepartureCountryId
                 //ClientNodeId = shipment.c
             };
 
@@ -1557,7 +1561,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             try
             {
-                
+
                 shipment.ApproximateItemsWeight = 0;
 
                 // add serial numbers to the ShipmentItems

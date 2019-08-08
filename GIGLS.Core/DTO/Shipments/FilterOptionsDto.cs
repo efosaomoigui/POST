@@ -16,5 +16,7 @@
         public int PageIndex { get; set; }
         public int PageSize { get; set; }
         public string WaybillFilter { get; set; }
+
+        public int? CountryId { get; set; }
     }
 }

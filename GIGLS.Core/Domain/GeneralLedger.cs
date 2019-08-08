@@ -26,5 +26,7 @@ namespace GIGLS.Core.Domain
         public string PaymentTypeReference { get; set; }
         public PaymentServiceType PaymentServiceType { get; set; }
         public bool IsInternational { get; set; }
+
+        public int CountryId { get; set; }
     }
 }
