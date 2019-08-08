@@ -871,18 +871,14 @@ namespace GIGLS.Services.Implementation.User
         }
         public async Task<IdentityResult> ForgotPassword(string email, string password)
         {
-            var user = await _unitOfWork.User.GetUserByEmail(email);
-            //string password = await _passwordGenerator.Generate();
             var result = new IdentityResult();
-            if (user == null)
-            {
-                //throw new GenericException("....");
-            }
+
+            var user = await _unitOfWork.User.GetUserByEmail(email);            
+
             if (user != null)
             {
                 result = await ResetPassword(user.Id, password);
-                await _unitOfWork.CompleteAsync();
-                
+                await _unitOfWork.CompleteAsync();                
             }
             return result;
         }

@@ -787,10 +787,13 @@ namespace GIGLS.WebApi.Controllers.User
                 string password = await _passwordGenerator.Generate();
 
                 var user = await _userService.ForgotPassword(email,password);
+
+                //what if user is null, will this executed???
                 if (!user.Succeeded)
                 {
-                    throw new GenericException("Incorrect Email");
+                    throw new GenericException("Operation could not be completed, Kindly provide valid email address");
                 }
+
                 if (user != null)
                 {
                     //send emails
@@ -800,6 +803,7 @@ namespace GIGLS.WebApi.Controllers.User
                         Password = password,
                         UserEmail = email
                     };
+
                     //2b. send message
                     await _messageSenderService.SendGenericEmailMessage(MessageType.SSC_Email, passwordMessage);
                 }
