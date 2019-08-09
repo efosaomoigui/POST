@@ -29,5 +29,6 @@ namespace GIGLS.Core.Domain
 
         [MaxLength(100)]
         public string PaymentTypeReference { get; set; }
+        public int CountryId { get; set; }
     }
 }

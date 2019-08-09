@@ -120,7 +120,7 @@ namespace GIGLS.WebApi.Controllers.User
             });
         }
 
-        [GIGLSActivityAuthorize(Activity ="View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("api/user/dispatchriders")]
         public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetDispatchRiders()
@@ -178,7 +178,7 @@ namespace GIGLS.WebApi.Controllers.User
                 {
                     var userClaims = await _userService.GetClaimsAsync(user.Id);
 
-                    if(userClaims.Count() > 0)
+                    if (userClaims.Count() > 0)
                     {
                         //set service centre
                         int[] serviceCenterIds = await _userService.GetPriviledgeServiceCenters(userId);
@@ -187,7 +187,7 @@ namespace GIGLS.WebApi.Controllers.User
                             var serviceCentre = await _serviceCentreService.GetServiceCentreById(serviceCenterIds[0]);
                             user.UserActiveServiceCentre = serviceCentre.Name;
                         }
-                        
+
                         //set country from PriviledgeCountrys
                         var countries = await _userService.GetPriviledgeCountrys(userId);
                         user.Country = countries;
@@ -199,6 +199,13 @@ namespace GIGLS.WebApi.Controllers.User
                             var userActiveCountry = await _countryService.GetCountryById(user.UserActiveCountryId);
                             user.UserActiveCountry = userActiveCountry;
                             user.UserActiveCountryId = userActiveCountry.CountryId;
+
+                            //If countries is empty, use UserActiveCountry
+                            if (countries.Count == 0)
+                            {
+                                user.Country = new Core.DTO.CountryDTO[] { userActiveCountry }.ToList();
+                                user.CountryName = new String[] { userActiveCountry.CountryName }.ToList();
+                            }
                         }
                         else
                         {
@@ -208,7 +215,7 @@ namespace GIGLS.WebApi.Controllers.User
                                 user.UserActiveCountry = countries[0];
                             }
                         }
-                    }                                     
+                    }
                 }
 
                 return new ServiceResponse<UserDTO>

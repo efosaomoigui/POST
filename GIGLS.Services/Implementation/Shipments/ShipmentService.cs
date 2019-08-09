@@ -547,6 +547,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 // create the shipment and shipmentItems
                 var newShipment = await CreateShipment(shipmentDTO);
+                shipmentDTO.DepartureCountryId = newShipment.DepartureCountryId;
 
                 // create the Invoice and GeneralLedger
                 await CreateInvoice(shipmentDTO);
@@ -661,7 +662,7 @@ namespace GIGLS.Services.Implementation.Shipments
             if (shipmentDTO.PickupOptions == PickupOptions.HOMEDELIVERY)
             {
                 //also check that the destination is not a hub
-                if(destinationSC.IsHUB != true)
+                if (destinationSC.IsHUB != true)
                 {
                     var serviceCentreForHomeDelivery = await _centreService.GetServiceCentreForHomeDelivery(shipmentDTO.DestinationServiceCentreId);
                     shipmentDTO.DestinationServiceCentreId = serviceCentreForHomeDelivery.ServiceCentreId;
@@ -760,6 +761,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             newShipment.DepartureCountryId = departureCountry.CountryId;
             newShipment.DestinationCountryId = destinationCountry.CountryId;
+            newShipment.CurrencyRatio = departureCountry.CurrencyRatio;
             ////--end--///Set the DepartureCountryId and DestinationCountryId
 
             _uow.Shipment.Add(newShipment);
@@ -775,6 +777,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
                 _uow.ShipmentDeliveryOptionMapping.Add(deliveryOptionMapping);
             }
+
+            //set before returning
+            shipmentDTO.DepartureCountryId = departureCountry.CountryId;
+            shipmentDTO.DestinationCountryId = destinationCountry.CountryId;
 
             return shipmentDTO;
         }
@@ -804,12 +810,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     PaymentMethod = PaymentType.Wallet.ToString(),
                     DueDate = DateTime.Now.AddDays(settlementPeriod),
                     IsInternational = shipmentDTO.IsInternational,
-                    ServiceCentreId = departureServiceCentre.ServiceCentreId
+                    ServiceCentreId = departureServiceCentre.ServiceCentreId,
+                    CountryId = shipmentDTO.DepartureCountryId
                 };
             }
             else
             {
-                 invoice = new Invoice()
+                invoice = new Invoice()
                 {
                     InvoiceNo = invoiceNo,
                     Amount = shipmentDTO.GrandTotal,
@@ -818,7 +825,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     PaymentDate = DateTime.Now,
                     DueDate = DateTime.Now.AddDays(settlementPeriod),
                     IsInternational = shipmentDTO.IsInternational,
-                    ServiceCentreId = departureServiceCentre.ServiceCentreId
+                    ServiceCentreId = departureServiceCentre.ServiceCentreId,
+                    CountryId = shipmentDTO.DepartureCountryId
                 };
             }
 
@@ -839,7 +847,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 Description = "Payment for Shipment",
                 IsDeferred = true,
                 Waybill = shipmentDTO.Waybill,
-                IsInternational = shipmentDTO.IsInternational
+                IsInternational = shipmentDTO.IsInternational,
+                CountryId = shipmentDTO.DepartureCountryId
                 //ClientNodeId = shipment.c
             };
 
@@ -1249,6 +1258,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<DailySalesDTO> GetDailySales(AccountFilterCriteria accountFilterCriteria)
         {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
+
+
             //set defaults
             if (accountFilterCriteria.StartDate == null)
             {
@@ -1312,6 +1326,10 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 accountFilterCriteria.EndDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
             }
+
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var invoices = await _uow.Shipment.GetSalesForServiceCentre(accountFilterCriteria, serviceCenterIds);
@@ -1552,7 +1570,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             try
             {
-                
+
                 shipment.ApproximateItemsWeight = 0;
 
                 // add serial numbers to the ShipmentItems

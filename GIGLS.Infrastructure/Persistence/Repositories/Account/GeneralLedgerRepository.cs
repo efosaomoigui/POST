@@ -71,6 +71,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             var endDate = queryDate.Item2;
             generalLedgers = generalLedgers.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate);
 
+            //filter by country Id
+            if (accountFilterCriteria.CountryId > 0)
+            {
+                generalLedgers = generalLedgers.Where(s => s.CountryId == accountFilterCriteria.CountryId);
+            }
 
             if (accountFilterCriteria.creditDebitType.HasValue)
             {
