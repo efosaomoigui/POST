@@ -7,6 +7,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
@@ -29,15 +30,17 @@ namespace GIGLS.Services.Implementation.User
         private IServiceCentreService _serviceCentreService;
         private IRegionServiceCentreMappingService _regionServiceCentreMappingService;
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
+        private ICountryService _countryService;
 
         public UserService(IUnitOfWork uow, IServiceCentreService serviceCentreService,
             IRegionServiceCentreMappingService regionServiceCentreMappingService,
-            INumberGeneratorMonitorService numberGeneratorMonitorService)
+            INumberGeneratorMonitorService numberGeneratorMonitorService,ICountryService countryService)
         {
             _unitOfWork = uow;
             _serviceCentreService = serviceCentreService;
             _regionServiceCentreMappingService = regionServiceCentreMappingService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
+            _countryService = countryService;
             MapperConfig.Initialize();
         }
 
@@ -1306,6 +1309,32 @@ namespace GIGLS.Services.Implementation.User
                 throw ex;
             }
             return result;
+        }
+
+        public async Task<CountryDTO> GetUserActiveCountry()
+        {
+            CountryDTO userActiveCountry = null;
+            //set user active country from PriviledgeCountrys
+            var countries = await GetPriviledgeCountrys();
+            if (countries.Count == 1)
+            {
+                userActiveCountry = countries[0];
+            }
+            else
+            {
+                //If UserActive Country is already set in the UserEntity, use that value
+                string currentUserId = await GetCurrentUserId();
+                var currentUser = await GetUserById(currentUserId);
+                if (currentUser.UserActiveCountryId > 0)
+                {
+                    var userActiveCountryFromEntity = await _countryService.GetCountryById(currentUser.UserActiveCountryId);
+                    if (userActiveCountryFromEntity.CurrencySymbol != null)
+                    {
+                        userActiveCountry = userActiveCountryFromEntity;
+                    }
+                }
+            }
+            return userActiveCountry;
         }
     }
 }
