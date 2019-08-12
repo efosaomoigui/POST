@@ -19,6 +19,9 @@ using GIGLS.CORE.DTO.User;
 using GIGLS.Core.IServices.Utility;
 using System.Linq;
 using GIGLS.Core.IServices.ServiceCentres;
+using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.WebApi.Controllers.User
 {
@@ -30,14 +33,16 @@ namespace GIGLS.WebApi.Controllers.User
         private readonly IPasswordGenerator _passwordGenerator;
         private IServiceCentreService _serviceCentreService;
         private ICountryService _countryService;
+        private readonly IMessageSenderService _messageSenderService;
 
         public UserController(IUserService userService, IPasswordGenerator passwordGenerator,
-            IServiceCentreService serviceCentreService, ICountryService countryService) : base(nameof(UserController))
+            IServiceCentreService serviceCentreService, ICountryService countryService, IMessageSenderService messageSenderService) : base(nameof(UserController))
         {
             _userService = userService;
             _passwordGenerator = passwordGenerator;
             _serviceCentreService = serviceCentreService;
             _countryService = countryService;
+            _messageSenderService = messageSenderService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -782,6 +787,46 @@ namespace GIGLS.WebApi.Controllers.User
                 };
             });
         }
+
+        [AllowAnonymous]
+        [HttpPut]
+        [Route("api/user/forgotpassword/{email}")]
+        public async Task<IServiceResponse<bool>> ForgotPassword(string email)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                string password = await _passwordGenerator.Generate();
+
+                var user = await _userService.ForgotPassword(email,password);
+
+                //what if user is null, will this execute???
+                if (!user.Succeeded)
+                {
+                    throw new GenericException("Operation could not be completed, Kindly provide valid email address");
+                }
+
+                if (user != null)
+                {
+                    //send emails
+                    //1a. Create PasswordMesssageDTO to hold custom message info
+                    var passwordMessage = new PasswordMessageDTO()
+                    {
+                        Password = password,
+                        UserEmail = email
+                    };
+
+                    //2b. send message
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.SSC_Email, passwordMessage);
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+       
     }
 
 }

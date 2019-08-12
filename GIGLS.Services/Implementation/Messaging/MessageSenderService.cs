@@ -516,7 +516,24 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.ToEmail = messageExtensionDTO.RegionalManagerEmail;
             }
 
+            //4. obj is PasswordMessageDTO
+            if (obj is PasswordMessageDTO)
+            {
+                var strArray = new string[]
+                {
+                    "Password"
+                };
+                var passwordMessageDTO = (PasswordMessageDTO)obj;
 
+                strArray[0] = passwordMessageDTO.Password;
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+
+                messageDTO.ToEmail = passwordMessageDTO.UserEmail;
+            }
+
+            
             return await Task.FromResult(verifySendEmail);
         }
 
