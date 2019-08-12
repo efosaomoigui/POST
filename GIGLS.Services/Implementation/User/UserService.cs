@@ -882,21 +882,7 @@ namespace GIGLS.Services.Implementation.User
             }
             return result;
         }
-
-        //public async Task<bool> SendEmailForForgotPassword(string email, string password)
-        //{
-        //    //send emails
-        //    //1a. Create PasswordMesssageDTO to hold custom message info
-        //    var passwordMessage = new PasswordMessageDTO()
-        //    {
-        //        Password = password,
-        //        UserEmail = email
-        //    };
-        //    //2b. send message
-        //    await _messageSenderService.SendGenericEmailMessage(MessageType.SSC_Email, passwordMessage);
-        //    return true;
-        //}
-
+                
         /// <summary>
         /// Code for first migration
         /// 1. Reset the users password
