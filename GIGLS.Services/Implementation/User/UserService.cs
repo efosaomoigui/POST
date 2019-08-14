@@ -120,29 +120,16 @@ namespace GIGLS.Services.Implementation.User
         //Get a user by Id using Guid from identity implement of EF
         public async Task<UserDTO> GetUserById(string Id)
         {
-            string userActiveServiceCentre = null;
-
             var user = _unitOfWork.User.GetUserById(Id).Result;
 
-            if (user != null)
-            {
-                var activeCentre = _unitOfWork.UserServiceCentreMapping.GetAsync(x => x.IsActive == true && x.User.Id.Equals(Id)).Result;
-                if (activeCentre != null)
-                {
-                    var serviceCentre = _unitOfWork.ServiceCentre.GetAsync(x => x.ServiceCentreId == activeCentre.ServiceCentreId).Result;
-                    userActiveServiceCentre = serviceCentre.Name;
-                }
-            }
-            else
+            if (user == null)
             {
                 throw new GenericException("User does not exist!");
             }
 
             var userDto = Mapper.Map<UserDTO>(user);
 
-            userDto.UserActiveServiceCentre = userActiveServiceCentre;
-
-            return userDto;
+            return await Task.FromResult(userDto);
         }
 
         public async Task<UserDTO> GetUserByEmail(string email)
@@ -155,7 +142,6 @@ namespace GIGLS.Services.Implementation.User
             }
 
             return Mapper.Map<UserDTO>(user);
-
         }
 
         //Get a user by Id using int custom UserId added to users table
@@ -169,7 +155,6 @@ namespace GIGLS.Services.Implementation.User
             }
 
             return Mapper.Map<UserDTO>(user);
-
         }
 
         public async Task<string> GetUserChannelCode()
@@ -195,7 +180,6 @@ namespace GIGLS.Services.Implementation.User
             }
 
             return Mapper.Map<UserDTO>(user);
-
         }
 
 

@@ -47,9 +47,7 @@ namespace GIGL.GIGLS.Core.Repositories
 
         void Add(TEntity entity);
         void AddRange(IEnumerable<TEntity> entities);
-
-        void AddRange2(IQueryable<TEntity> entities);
-
+        
         void Remove(TEntity entity);
         void RemoveRange(IEnumerable<TEntity> entities);        
     }
