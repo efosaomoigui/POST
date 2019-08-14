@@ -796,27 +796,21 @@ namespace GIGLS.WebApi.Controllers.User
             return await HandleApiOperationAsync(async () =>
             {
                 string password = await _passwordGenerator.Generate();
-
                 var user = await _userService.ForgotPassword(email,password);
 
-                //what if user is null, will this execute???
-                if (!user.Succeeded)
+                if (user.Succeeded)
                 {
-                    throw new GenericException("Operation could not be completed, Kindly provide valid email address");
-                }
-
-                if (user != null)
-                {
-                    //send emails
-                    //1a. Create PasswordMesssageDTO to hold custom message info
                     var passwordMessage = new PasswordMessageDTO()
                     {
                         Password = password,
                         UserEmail = email
                     };
 
-                    //2b. send message
                     await _messageSenderService.SendGenericEmailMessage(MessageType.SSC_Email, passwordMessage);
+                }
+                else
+                {
+                    throw new GenericException("Operation could not be completed, Kindly provide valid email address");
                 }
 
                 return new ServiceResponse<bool>
@@ -824,13 +818,6 @@ namespace GIGLS.WebApi.Controllers.User
                     Object = true
                 };
             });
-        }
-
-       
+        }       
     }
-
 }
-
-
-
-
