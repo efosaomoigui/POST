@@ -788,7 +788,26 @@ namespace GIGLS.WebApi.Controllers.User
 
                 var user = await _userService.ForgotPassword(email,password);
 
-                //what if user is null, will this execute???
+                //Azeez code
+                if (user.Succeeded)
+                {
+                    //send emails
+                    //1a. Create PasswordMesssageDTO to hold custom message info
+                    var passwordMessage = new PasswordMessageDTO()
+                    {
+                        Password = password,
+                        UserEmail = email
+                    };
+
+                    //2b. send message
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.SSC_Email, passwordMessage);
+                }
+                else
+                {
+                    throw new GenericException("Operation could not be completed, Kindly provide valid email address");
+                }
+
+                //Lola Code
                 if (!user.Succeeded)
                 {
                     throw new GenericException("Operation could not be completed, Kindly provide valid email address");
