@@ -785,21 +785,16 @@ namespace GIGLS.WebApi.Controllers.User
             return await HandleApiOperationAsync(async () =>
             {
                 string password = await _passwordGenerator.Generate();
-
                 var user = await _userService.ForgotPassword(email,password);
 
-                //Azeez code
                 if (user.Succeeded)
                 {
-                    //send emails
-                    //1a. Create PasswordMesssageDTO to hold custom message info
                     var passwordMessage = new PasswordMessageDTO()
                     {
                         Password = password,
                         UserEmail = email
                     };
 
-                    //2b. send message
                     await _messageSenderService.SendGenericEmailMessage(MessageType.SSC_Email, passwordMessage);
                 }
                 else
@@ -807,38 +802,11 @@ namespace GIGLS.WebApi.Controllers.User
                     throw new GenericException("Operation could not be completed, Kindly provide valid email address");
                 }
 
-                //Lola Code
-                if (!user.Succeeded)
-                {
-                    throw new GenericException("Operation could not be completed, Kindly provide valid email address");
-                }
-
-                if (user != null)
-                {
-                    //send emails
-                    //1a. Create PasswordMesssageDTO to hold custom message info
-                    var passwordMessage = new PasswordMessageDTO()
-                    {
-                        Password = password,
-                        UserEmail = email
-                    };
-
-                    //2b. send message
-                    await _messageSenderService.SendGenericEmailMessage(MessageType.SSC_Email, passwordMessage);
-                }
-
                 return new ServiceResponse<bool>
                 {
                     Object = true
                 };
             });
-        }
-
-       
+        }       
     }
-
 }
-
-
-
-
