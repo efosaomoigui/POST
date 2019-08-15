@@ -125,5 +125,8 @@ namespace GIGL.GIGLS.Core.Domain
         public int DepartureCountryId { get; set; }
         public int DestinationCountryId { get; set; }
 
+        //new property for mobile
+        public string DeliveryNumber { get; set; }
+
     }
 }

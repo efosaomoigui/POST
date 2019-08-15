@@ -31,5 +31,9 @@ namespace GIGLS.Services.Implementation
 
         public Dictionary<string, IEnumerable<string>> ValidationErrors { get; set; }
         public string VehicleType { get; set; }
+
+        public string ReferrerCode { get; set; }
+
+        public double AverageRatings { get; set; }
     }
 }

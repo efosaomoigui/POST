@@ -32,6 +32,7 @@ using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -689,20 +690,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("login/{UserDetail}/{Password}")]
-        public async Task<IServiceResponse<JObject>> Login(string UserDetail, string Password)
+        [Route("login")]
+        public async Task<IServiceResponse<JObject>> Login(MobileLoginDTO logindetail)
         {
 
-            var user = await _otpService.CheckDetails(UserDetail);
+            var user = await _otpService.CheckDetails(logindetail.UserDetail);
             var vehicle = user.VehicleType;
             if (user.Username != null)
             {
                 user.Username = user.Username.Trim();
             }
 
-            if (Password != null)
+            if (logindetail.Password != null)
             {
-                Password = Password.Trim();
+                logindetail.Password = logindetail.Password.Trim();
             }
             if (user != null && user.IsActive == true)
             {
@@ -723,7 +724,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             {
                          new KeyValuePair<string, string>("grant_type", "password"),
                          new KeyValuePair<string, string>("Username", user.Username),
-                         new KeyValuePair<string, string>("Password", Password),
+                         new KeyValuePair<string, string>("Password", logindetail.Password),
                          });
 
                         //setup login data
@@ -733,7 +734,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                         {
                             throw new GenericException("Operation could not complete login successfully:");
                         }
-
+                        else
+                        {
+                            if (logindetail.UserChannelType == UserChannelType.IndividualCustomer.ToString())
+                            {
+                                var response = await _preshipmentmobileService.CreateCustomer(user.UserChannelCode);
+                            }
+                        }
                         //get access token from response body
                         var responseJson = await responseMessage.Content.ReadAsStringAsync();
                         var jObject = JObject.Parse(responseJson);
@@ -742,8 +749,9 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                         return new ServiceResponse<JObject>
                         {
                             VehicleType = vehicle,
-                            Object = jObject
-                            
+                            Object = jObject,
+                            ReferrerCode = user.Referrercode,
+                            AverageRatings = user.AverageRatings
 
                         };
                     }
@@ -1086,5 +1094,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+
+        [HttpPost]
+        [Route("adddeliverynumber")]
+        public async Task<IServiceResponse<bool>> UpdateDeliveryNumber(MobileShipmentNumberDTO detail)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _preshipmentmobileService.UpdateDeliveryNumber(detail);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = response
+                };
+            });
+        }
     }
 }

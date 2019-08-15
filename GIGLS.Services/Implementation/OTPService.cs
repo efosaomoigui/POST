@@ -10,6 +10,9 @@ using AutoMapper;
 using GIGLS.Core.IServices.User;
 using System.Text.RegularExpressions;
 using GIGLS.Infrastructure;
+using GIGLS.Core.IServices.Utility;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation
 {
@@ -19,13 +22,16 @@ namespace GIGLS.Services.Implementation
         private readonly ISMSService _SmsService;
         private readonly IEmailService _EmailService;
         private readonly IUserService _UserService;
+        private readonly IPasswordGenerator _codegenerator;
 
-        public OTPService(IUnitOfWork uow, ISMSService MessageService, IEmailService EmailService, IUserService UserService)
+        public OTPService(IUnitOfWork uow, ISMSService MessageService, IEmailService EmailService, IUserService UserService,
+            IPasswordGenerator codegenerator)
         {
             _uow = uow;
             _SmsService = MessageService;
             _EmailService = EmailService;
             _UserService = UserService;
+            _codegenerator = codegenerator;
             MapperConfig.Initialize();
         }
         public async Task<UserDTO> IsOTPValid(int OTP)
@@ -100,6 +106,28 @@ namespace GIGLS.Services.Implementation
                 {
                     registerUser.VehicleType = vehicle.VehicleType;
                 }
+                var referrerCode = _uow.ReferrerCode.GetAsync(s => s.UserCode == registerUser.UserChannelCode).Result;
+                if (referrerCode != null)
+                {
+                    registerUser.Referrercode = referrerCode.Referrercode;
+                }
+                else
+                {
+                    var code = await _codegenerator.Generate(5);
+                    var referrerCodeDTO = new ReferrerCodeDTO
+                    {
+                        Referrercode = code,
+                        UserId = registerUser.Id,
+                        UserCode = registerUser.UserChannelCode
+
+                    };
+                    var referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
+                    _uow.ReferrerCode.Add(referrercode);
+                    await _uow.CompleteAsync();
+                    registerUser.Referrercode = referrercode.Referrercode;
+                }
+                var averageratings = await GetAverageRating(registerUser.UserChannelCode);
+                registerUser.AverageRatings = averageratings;
             }
             else
             {
@@ -116,6 +144,28 @@ namespace GIGLS.Services.Implementation
                     {
                         registerUser.VehicleType = vehicle.VehicleType;
                     }
+                    var referrerCode = _uow.ReferrerCode.GetAsync(s => s.UserCode == registerUser.UserChannelCode).Result;
+                    if (referrerCode != null)
+                    {
+                        registerUser.Referrercode = referrerCode.Referrercode;
+                    }
+                    else
+                    {
+                        var code = await _codegenerator.Generate(5);
+                        var referrerCodeDTO = new ReferrerCodeDTO
+                        {
+                            Referrercode = code,
+                            UserId = registerUser.Id,
+                            UserCode = registerUser.UserChannelCode
+
+                        };
+                        var referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
+                        _uow.ReferrerCode.Add(referrercode);
+                        await _uow.CompleteAsync();
+                        registerUser.Referrercode = referrercode.Referrercode;
+                    }
+                    var averageratings = await GetAverageRating(registerUser.UserChannelCode);
+                    registerUser.AverageRatings = averageratings;
                 }
                 else
                 {
@@ -125,5 +175,16 @@ namespace GIGLS.Services.Implementation
             return registerUser;
 
         }
+
+        public async Task<double> GetAverageRating(string CustomerCode)
+        {
+            var ratings = await _uow.MobileRating.FindAsync(s=>s.CustomerCode == CustomerCode || s.PartnerCode == CustomerCode);
+            var count = ratings.Count();
+            var averageratings = ratings.Sum(x=>x.CustomerRating);
+            averageratings = (averageratings / count);
+            var rating = (double)averageratings;
+            return rating;
+        }
+
     }
 }

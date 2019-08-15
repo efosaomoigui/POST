@@ -178,6 +178,7 @@
     <Compile Include="Implementation\Customers\CustomerService.cs" />
     <Compile Include="Implementation\Customers\IndividualCustomerService.cs" />
     <Compile Include="Implementation\Dashboard\DashboardService.cs" />
+    <Compile Include="Implementation\DeliveryNumberService.cs" />
     <Compile Include="Implementation\Devices\DeviceManagementService.cs" />
     <Compile Include="Implementation\Devices\DeviceService.cs" />
     <Compile Include="Implementation\Expenses\ExpenseTypeService.cs" />
@@ -213,6 +214,7 @@
     <Compile Include="Implementation\Partnership\PartnerTransactionsService.cs" />
     <Compile Include="Implementation\PaymentTransactions\PaymentPartialTransactionService.cs" />
     <Compile Include="Implementation\PaymentTransactions\PaymentTransactionService.cs" />
+    <Compile Include="Implementation\ReferrerCodeService.cs" />
     <Compile Include="Implementation\Report\AccountReportService.cs" />
     <Compile Include="Implementation\Report\ShipmentReportService.cs" />
     <Compile Include="Implementation\ServiceCentres\RegionService.cs" />

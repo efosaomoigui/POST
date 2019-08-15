@@ -131,6 +131,7 @@
     <Compile Include="Persistence\Repositories\Customers\CompanyContactPersonRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\CompanyRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\IndividualCustomerRepository.cs" />
+    <Compile Include="Persistence\Repositories\DeliveryNumberRepository.cs" />
     <Compile Include="Persistence\Repositories\Devices\DeviceManagementRepository.cs" />
     <Compile Include="Persistence\Repositories\Devices\DeviceRepository.cs" />
     <Compile Include="Persistence\Repositories\Expenses\ExpenditureRepository.cs" />
@@ -166,6 +167,7 @@
     <Compile Include="Persistence\Repositories\Partnership\PartnerTransactionsRepository.cs" />
     <Compile Include="Persistence\Repositories\PaymentTransactions\PaymentPartialTransactionRepository.cs" />
     <Compile Include="Persistence\Repositories\PaymentTransactions\PaymentTransactionRepository.cs" />
+    <Compile Include="Persistence\Repositories\ReferrerCodeRepository.cs" />
     <Compile Include="Persistence\Repositories\Repository.cs" />
     <Compile Include="Persistence\Repositories\ServiceCentres\RegionRepository.cs" />
     <Compile Include="Persistence\Repositories\ServiceCentres\RegionServiceCentreMappingRepository.cs" />

@@ -284,6 +284,39 @@ namespace GIGLS.Services.Implementation.Messaging
                 }
             }
 
+            if (obj is MobileMessageDTO)
+            {
+                var strArray = new string[]
+                 {
+                     "Sender Name",
+                     "Sender Email",
+                    "WaybillNumber"
+
+                 };
+
+                var mobileMessageDTO = (MobileMessageDTO)obj;
+                //map the array
+                strArray[0] = mobileMessageDTO.SenderName;
+                strArray[1] = mobileMessageDTO.WaybillNumber;
+                strArray[2] = mobileMessageDTO.SenderName;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject =
+                    string.Format(messageDTO.Subject, strArray);
+
+
+                //populate the message template
+                messageDTO.FinalBody =
+                    string.Format(messageDTO.Body, strArray);
+
+
+                messageDTO.To = mobileMessageDTO.SenderPhoneNumber;
+                messageDTO.ToEmail = mobileMessageDTO.SenderEmail;
+            }
+
             //resolve phone numbers to +2347011111111
             var toPhoneNumber = messageDTO.To;
             //1
@@ -514,6 +547,39 @@ namespace GIGLS.Services.Implementation.Messaging
 
 
                 messageDTO.ToEmail = messageExtensionDTO.RegionalManagerEmail;
+            }
+
+
+            //4 obj is MobileMessageDTO
+            if (obj is MobileMessageDTO)
+            {
+                var strArray = new string[]
+                 {
+                     "Sender Name",
+                     "Sender Email",
+                    "WaybillNumber"
+                    
+                 };
+
+                var mobileMessageDTO = (MobileMessageDTO)obj;
+                //map the array
+                strArray[0] = mobileMessageDTO.SenderName;
+                strArray[1] = mobileMessageDTO.WaybillNumber;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject =
+                    string.Format(messageDTO.Subject, strArray);
+
+
+                //populate the message template
+                messageDTO.FinalBody =
+                    string.Format(messageDTO.Body, strArray);
+
+
+                messageDTO.ToEmail = mobileMessageDTO.SenderEmail;
             }
 
 

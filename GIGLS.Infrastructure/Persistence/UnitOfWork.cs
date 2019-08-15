@@ -416,6 +416,12 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IMobileRatingRepository MobileRating { get; set; }
 
+        [Inject]
+        public IReferrerCodeRepository ReferrerCode { get; set; }
+
+        [Inject]
+        public IDeliveryNumberRepository DeliveryNumber { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

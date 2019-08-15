@@ -162,6 +162,10 @@ namespace GIGLS.Core
 
         IMobileRatingRepository MobileRating { get; set; }
 
+        IReferrerCodeRepository ReferrerCode { get; set; }
+
+        IDeliveryNumberRepository DeliveryNumber { get; set; }
+
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
     }

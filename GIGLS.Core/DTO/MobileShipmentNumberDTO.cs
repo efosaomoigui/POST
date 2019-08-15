@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.DTO
 {
-   public  class SignResponseDTO
+    public class MobileShipmentNumberDTO
     {
-        public bool PhoneSent { get; set; }
-        public bool EmailSent { get; set; }
-
+        public string DeliveryNumber { get; set; }
+        public string WayBill { get; set; }
     }
 }
