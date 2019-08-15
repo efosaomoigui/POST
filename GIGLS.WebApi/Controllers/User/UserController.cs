@@ -806,7 +806,7 @@ namespace GIGLS.WebApi.Controllers.User
                         UserEmail = email
                     };
 
-                    await _messageSenderService.SendGenericEmailMessage(MessageType.SSC_Email, passwordMessage);
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
                 }
                 else
                 {

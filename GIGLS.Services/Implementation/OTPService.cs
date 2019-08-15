@@ -183,6 +183,10 @@ namespace GIGLS.Services.Implementation
             var averageratings = ratings.Sum(x=>x.CustomerRating);
             averageratings = (averageratings / count);
             var rating = (double)averageratings;
+            if(rating == 0)
+            {
+                rating = 0.00;
+            }
             return rating;
         }
 

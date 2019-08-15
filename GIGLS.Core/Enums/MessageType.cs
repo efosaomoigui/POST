@@ -32,6 +32,7 @@
         IEMAIL, //FOR DUE INVOICES FOR CORPORATE CLIENTS
         WEMAIL, //WALLET BALANCES AT 10K AND 5K FOR CORPORATE CLIENTS
         SSC_Email,  //Message Type for use in sending email
-        MATD  //Message for Attempted Delivery
+        MATD,  //Message for Attempted Delivery
+        PEmail //Message Type for Forgot Password
     } 
 }
