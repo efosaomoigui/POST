@@ -182,11 +182,11 @@ namespace GIGLS.Services.Implementation
             var count = ratings.Count();
             var averageratings = ratings.Sum(x=>x.CustomerRating);
             averageratings = (averageratings / count);
-            var rating = (double)averageratings;
-            if(rating == 0)
+            if(averageratings.ToString() == "NaN")
             {
-                rating = 0.00;
+                averageratings = 0.00;
             }
+            var rating = (double)averageratings;
             return rating;
         }
 
