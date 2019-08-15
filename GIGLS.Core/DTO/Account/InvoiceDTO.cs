@@ -20,6 +20,7 @@ namespace GIGLS.Core.DTO.Account
         public bool IsInternational { get; set; }
         public int ServiceCentreId { get; set; }
         public bool IsShipmentCollected { get; set; }
+        public int CountryId { get; set; }
 
         public ServiceCenreDTO ServiceCentre { get; set; }
 

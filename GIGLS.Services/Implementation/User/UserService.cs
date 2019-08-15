@@ -1,14 +1,19 @@
 ﻿using AutoMapper;
+using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.CORE.Domain;
 using GIGLS.Infrastructure;
+using GIGLS.Services.Implementation.Utility;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
@@ -25,15 +30,17 @@ namespace GIGLS.Services.Implementation.User
         private IServiceCentreService _serviceCentreService;
         private IRegionServiceCentreMappingService _regionServiceCentreMappingService;
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
+        private ICountryService _countryService;
 
         public UserService(IUnitOfWork uow, IServiceCentreService serviceCentreService,
             IRegionServiceCentreMappingService regionServiceCentreMappingService,
-            INumberGeneratorMonitorService numberGeneratorMonitorService)
+            INumberGeneratorMonitorService numberGeneratorMonitorService,ICountryService countryService)
         {
             _unitOfWork = uow;
             _serviceCentreService = serviceCentreService;
             _regionServiceCentreMappingService = regionServiceCentreMappingService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
+            _countryService = countryService;
             MapperConfig.Initialize();
         }
 
@@ -113,11 +120,9 @@ namespace GIGLS.Services.Implementation.User
         //Get a user by Id using Guid from identity implement of EF
         public async Task<UserDTO> GetUserById(string Id)
         {
-            //string userActiveServiceCentre = null;
-
             var user = _unitOfWork.User.GetUserById(Id).Result;
 
-            if(user == null)
+            if (user == null)
             {
                 throw new GenericException("User does not exist!");
             }
@@ -125,23 +130,6 @@ namespace GIGLS.Services.Implementation.User
             var userDto = Mapper.Map<UserDTO>(user);
 
             return await Task.FromResult(userDto);
-
-            //We dont used User Service Centre Mapping again
-            //if (user != null)
-            //{
-            //    var activeCentre = _unitOfWork.UserServiceCentreMapping.GetAsync(x => x.IsActive == true && x.User.Id.Equals(Id)).Result;
-            //    if (activeCentre != null)
-            //    {
-            //        var serviceCentre = _unitOfWork.ServiceCentre.GetAsync(x => x.ServiceCentreId == activeCentre.ServiceCentreId).Result;
-            //        userActiveServiceCentre = serviceCentre.Name;
-            //    }
-            //}
-            //else
-            //{
-            //    throw new GenericException("User does not exist!");
-            //}
-
-            //userDto.UserActiveServiceCentre = userActiveServiceCentre;
         }
 
         public async Task<UserDTO> GetUserByEmail(string email)
@@ -154,7 +142,6 @@ namespace GIGLS.Services.Implementation.User
             }
 
             return Mapper.Map<UserDTO>(user);
-
         }
 
         //Get a user by Id using int custom UserId added to users table
@@ -168,7 +155,6 @@ namespace GIGLS.Services.Implementation.User
             }
 
             return Mapper.Map<UserDTO>(user);
-
         }
 
         public async Task<string> GetUserChannelCode()
@@ -194,7 +180,6 @@ namespace GIGLS.Services.Implementation.User
             }
 
             return Mapper.Map<UserDTO>(user);
-
         }
 
 
@@ -871,7 +856,20 @@ namespace GIGLS.Services.Implementation.User
             await _unitOfWork.CompleteAsync();
             return result;
         }
+        public async Task<IdentityResult> ForgotPassword(string email, string password)
+        {
+            var result = new IdentityResult();
 
+            var user = await _unitOfWork.User.GetUserByEmail(email);            
+
+            if (user != null)
+            {
+                result = await ResetPassword(user.Id, password);
+                await _unitOfWork.CompleteAsync();                
+            }
+            return result;
+        }
+                
         /// <summary>
         /// Code for first migration
         /// 1. Reset the users password
@@ -1295,6 +1293,32 @@ namespace GIGLS.Services.Implementation.User
                 throw ex;
             }
             return result;
+        }
+
+        public async Task<CountryDTO> GetUserActiveCountry()
+        {
+            CountryDTO userActiveCountry = null;
+            //set user active country from PriviledgeCountrys
+            var countries = await GetPriviledgeCountrys();
+            if (countries.Count == 1)
+            {
+                userActiveCountry = countries[0];
+            }
+            else
+            {
+                //If UserActive Country is already set in the UserEntity, use that value
+                string currentUserId = await GetCurrentUserId();
+                var currentUser = await GetUserById(currentUserId);
+                if (currentUser.UserActiveCountryId > 0)
+                {
+                    var userActiveCountryFromEntity = await _countryService.GetCountryById(currentUser.UserActiveCountryId);
+                    if (userActiveCountryFromEntity.CurrencySymbol != null)
+                    {
+                        userActiveCountry = userActiveCountryFromEntity;
+                    }
+                }
+            }
+            return userActiveCountry;
         }
     }
 }

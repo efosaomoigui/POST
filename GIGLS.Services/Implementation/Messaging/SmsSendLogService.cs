@@ -118,6 +118,12 @@ namespace GIGLS.Services.Implementation.Messaging
             return Mapper.Map<List<SmsSendLogDTO>>(message.OrderByDescending(x => x.DateCreated));
         }
 
+        public async Task<List<SmsSendLogDTO>> GetSmsSendLogs(string waybill)
+        {
+            var message = await _uow.SmsSendLog.FindAsync(x => x.Message.Contains(waybill));
+            return Mapper.Map<List<SmsSendLogDTO>>(message.OrderByDescending(x => x.DateCreated));
+        }
+
         public async Task RemoveSmsSendLog(int messageId)
         {
             var message = await _uow.SmsSendLog.GetAsync(messageId);

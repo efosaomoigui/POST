@@ -14,5 +14,6 @@ namespace GIGLS.CORE.DTO.Report
         public PaymentServiceType? PaymentServiceType { get; set; }
         public bool? IsCashOnDelivery { get; set; } = false;
         public bool? IsCancelled { get; set; } = false;
+        public int CountryId { get; set; }
     }
 }

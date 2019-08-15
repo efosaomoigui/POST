@@ -313,6 +313,7 @@
     <Compile Include="DTO\MessageDTO.cs" />
     <Compile Include="DTO\MessagingLog\EmailSendLogDTO.cs" />
     <Compile Include="DTO\MessagingLog\MessageFilterOption.cs" />
+    <Compile Include="DTO\MessagingLog\PasswordMessageDTO.cs" />
     <Compile Include="DTO\MessagingLog\SmsSendLogDTO.cs" />
     <Compile Include="DTO\MobileLoginDTO.cs" />
     <Compile Include="DTO\MobileMessageDTO.cs" />

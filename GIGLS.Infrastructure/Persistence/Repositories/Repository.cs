@@ -113,12 +113,7 @@ namespace GIGLS.Infrastructure.Persistence.Repository
         {
             Context.Set<TEntity>().AddRange(entities);
         }
-
-        public void AddRange2(IQueryable<TEntity> entities)
-        {
-            Context.Set<TEntity>().AddRange(entities);
-        }
-
+        
         public void Remove(TEntity entity)
         {
             Context.Set<TEntity>().Remove(entity);
