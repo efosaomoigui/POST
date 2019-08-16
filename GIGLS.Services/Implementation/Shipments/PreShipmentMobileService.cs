@@ -94,22 +94,18 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 //null DateCreated
-               
                 preShipment.DateCreated = DateTime.Now;
-               
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
                 preShipment.ZoneMapping = zoneid.ZoneId;
                 var newPreShipment = await CreatePreShipment(preShipment);
                 await _uow.CompleteAsync();
                 bool IsBalanceSufficient = true;
                 string message = "Shipment created successfully";
-
                 if (newPreShipment.IsBalanceSufficient == false)
                 {
                     message = "Insufficient Wallet Balance";
                     IsBalanceSufficient = false;
                 }
-
                 return new { waybill = newPreShipment.Waybill, message = message, IsBalanceSufficient, Zone = zoneid.ZoneId };
             }
             catch (Exception)
@@ -123,11 +119,8 @@ namespace GIGLS.Services.Implementation.Shipments
             // get the current user info
             var currentUser = await _userService.GetCurrentUserId();
             preShipmentDTO.UserId = currentUser;
-
             var PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
-
             var wallet = await _walletService.GetWalletBalance();
-
             if (wallet.Balance >= Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal))
             {
                 var price = (wallet.Balance - Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal));
@@ -173,7 +166,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     PaymentType = PaymentType.Online,
                     UserId = newPreShipment.UserId
                 };
-
                 var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
 
                 var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
@@ -207,7 +199,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Quantity cannot be zero");
                 }
-
                 var PriceDTO = new PricingDTO
                 {
                     DepartureStationId = preShipment.SenderStationId,
@@ -216,7 +207,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     SpecialPackageId = (int)preShipmentItem.SpecialPackageId,
                     ShipmentType = preShipmentItem.ShipmentType
                 };
-
                 if (preShipmentItem.ShipmentType == ShipmentType.Ecommerce)
                 {
                     preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
@@ -275,7 +265,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
                     endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
-
                 }
                 var allShipmentsResult = allShipments.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
 
@@ -331,7 +320,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
                 }
-
                 return await Task.FromResult(Shipmentdto);
             }
             catch (Exception)
@@ -382,7 +370,6 @@ namespace GIGLS.Services.Implementation.Shipments
                                                           }).ToList();
                 foreach(var Shipment in shipmentDto)
                 {
-                   
                     var PartnerId = _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == Shipment.Waybill).Result;
                     if (PartnerId != null)
                     {
@@ -400,9 +387,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         Shipment.IsRated = false;
                     }
-
                 }
-
                 return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
             }
             catch (Exception)
@@ -596,7 +581,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
                 {
-                    
                     var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "SenderLocation,ReceiverLocation");
                     if (preshipmentmobile.ZoneMapping == 1)
                     {
@@ -818,7 +802,6 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<List<PreShipmentMobileDTO>> GetDisputePreShipment()
         {
             var user = await _userService.GetCurrentUserId();
-
             var shipments = _uow.PreShipmentMobile.FindAsync(s => s.UserId == user && s.shipmentstatus == MobilePickUpRequestStatus.Dispute.ToString(), "PreShipmentItems").Result;
             var shipment = shipments.OrderByDescending(s => s.DateCreated);
             var newPreShipment = Mapper.Map<List<PreShipmentMobileDTO>>(shipment);
@@ -869,7 +852,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 var PreshipmentPriceDTO = await GetPrice(preShipment);
-                preshipmentmobilegrandtotal.shipmentstatus = "Resolved";
+                preshipmentmobilegrandtotal.shipmentstatus = MobilePickUpRequestStatus.Resolved.ToString();
                 var difference = ((decimal)preshipmentmobilegrandtotal.CalculatedTotal - PreshipmentPriceDTO.GrandTotal);
                 if(difference < 0.00M)
                 {
@@ -881,7 +864,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 updatedwallet.Balance = updatedwallet.Balance + (decimal)difference;
                 var pickuprequests = _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preShipment.Waybill).Result;
-                pickuprequests.Status = "Resolved";
+                pickuprequests.Status = MobilePickUpRequestStatus.Resolved.ToString();
                 await _uow.CompleteAsync();
                 return new { IsResolved = true};
             }
@@ -911,14 +894,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 var pickuprequests = _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill).Result;
                 if (pickuprequests != null)
                 {
-                    pickuprequests.Status = "Cancelled";
+                    var user = await _userService.GetUserById(pickuprequests.UserId);
+                    pickuprequests.Status = MobilePickUpRequestStatus.Cancelled.ToString();
                     updatedwallet.Balance = ((updatedwallet.Balance + (decimal)preshipmentmobile.CalculatedTotal) - Convert.ToDecimal(pickuprice.Value));
-                    preshipmentmobile.shipmentstatus = "Cancelled";
+                    var Partnersprice = (0.4M * Convert.ToDecimal(pickuprice.Value));
+                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+                    wallet.Balance = wallet.Balance + Partnersprice;
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
                     await _uow.CompleteAsync();
                 }
                 else
                 {
-                    preshipmentmobile.shipmentstatus = "Cancelled";
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
                     updatedwallet.Balance = ((updatedwallet.Balance + (decimal)preshipmentmobile.CalculatedTotal));
                     await _uow.CompleteAsync();
                 }
@@ -1047,7 +1034,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-               
+                var userId = await _userService.GetCurrentUserId();
                 var number = await _uow.DeliveryNumber.GetAsync(s => s.Number == detail.DeliveryNumber);
                 if (number == null)
                 {
@@ -1062,6 +1049,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     else
                     {
                         number.IsUsed = true;
+                        number.UserId = userId;
                         var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == detail.WayBill);
                         if (shipment != null)
                         {

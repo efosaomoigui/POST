@@ -362,6 +362,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<DeliveryNumber, DeliveryNumberDTO>();
                 config.CreateMap<DeliveryNumberDTO, DeliveryNumber>();
+
+                config.CreateMap<VehicleType,VehicleTypeDTO>();
+                config.CreateMap<VehicleTypeDTO, VehicleType>();
             });
 
             isInit = true;

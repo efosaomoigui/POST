@@ -248,6 +248,7 @@
     <Compile Include="Domain\UserServiceCentreMapping.cs" />
     <Compile Include="Domain\Utility\GlobalProperty.cs" />
     <Compile Include="Domain\VAT.cs" />
+    <Compile Include="Domain\Partnership\VehicleType.cs" />
     <Compile Include="Domain\Vendor.cs" />
     <Compile Include="Domain\Wallet\AccountSummary.cs" />
     <Compile Include="Domain\Wallet\AccountTransaction.cs" />
@@ -334,6 +335,7 @@
     <Compile Include="DTO\Partnership\PartnerPayDTO.cs" />
     <Compile Include="DTO\Partnership\PartnerTransactionsDTO.cs" />
     <Compile Include="DTO\Partnership\SummaryTransactionsDTO.cs" />
+    <Compile Include="DTO\Partnership\VehicleTypeDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\HaulagePricingDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PaymentPartialTransactionDTO.cs" />
     <Compile Include="DTO\PaymentTransactions\PaymentPartialTransactionProcessDTO.cs" />
@@ -548,6 +550,7 @@
     <Compile Include="IRepositories\Nav\ISubSubNavRepository.cs" />
     <Compile Include="IRepositories\Partnership\IPartnerApplicationRepository.cs" />
     <Compile Include="IRepositories\Partnership\IPartnerRepository.cs" />
+    <Compile Include="IRepositories\Partnership\IVehicleTypeRepository.cs" />
     <Compile Include="IRepositories\PaymentTransactions\IPaymentPartialTransactionRepository.cs" />
     <Compile Include="IRepositories\PaymentTransactions\IPaymentTransactionRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IRegionRepository.cs" />
@@ -676,6 +679,7 @@
     <Compile Include="IServices\Partnership\IPartnerApplicationService.cs" />
     <Compile Include="IServices\Partnership\IPartnerService.cs" />
     <Compile Include="IServices\Partnership\IPartnerTransactionsService.cs" />
+    <Compile Include="IServices\Partnership\IVehicleTypeService.cs" />
     <Compile Include="IServices\PaymentTransactions\IPaymentPartialTransactionService.cs" />
     <Compile Include="IServices\PaymentTransactions\IPaymentTransactionService.cs" />
     <Compile Include="IServices\Report\IAccountReportService.cs" />

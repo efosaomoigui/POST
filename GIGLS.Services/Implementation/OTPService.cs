@@ -13,6 +13,7 @@ using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.Utility;
 using System.Collections.Generic;
 using System.Linq;
+using GIGLS.Core.DTO.Partnership;
 
 namespace GIGLS.Services.Implementation
 {
@@ -101,10 +102,30 @@ namespace GIGLS.Services.Implementation
             {
                 user.Trim();
                 registerUser = await _UserService.GetUserByEmail(user);
-                var vehicle = _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode).Result;
-                if(vehicle!= null)
+                var VehicleType = _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode).Result;
+                if (VehicleType != null)
                 {
-                    registerUser.VehicleType = vehicle.VehicleType;
+                    if (VehicleType.VehicleType != null)
+                    {
+                        var vehicletypeDTO = new VehicleTypeDTO
+                        {
+                            Partnercode = registerUser.UserChannelCode,
+                            Vehicletype = VehicleType.VehicleType
+                        };
+                        var vehicletype = Mapper.Map<VehicleType>(vehicletypeDTO);
+                        _uow.VehicleType.Add(vehicletype);
+                        VehicleType.VehicleType = null;
+                        await _uow.CompleteAsync();
+                    }
+                }
+                var vehicle = _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode).Result.ToList();
+                if(vehicle.Count() != 0)
+                {
+                    foreach (var item in vehicle)
+                    {
+                        registerUser.VehicleType = new List<string>();
+                        registerUser.VehicleType.Add(item.Vehicletype);
+                    }
                 }
                 var referrerCode = _uow.ReferrerCode.GetAsync(s => s.UserCode == registerUser.UserChannelCode).Result;
                 if (referrerCode != null)
@@ -139,10 +160,30 @@ namespace GIGLS.Services.Implementation
                         user = "+234" + user.Remove(0, 1);
                     };
                     registerUser = await _UserService.GetUserByPhone(user);
-                    var vehicle = _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode).Result;
-                    if (vehicle != null)
+                    var VehicleType = _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode).Result;
+                    if (VehicleType != null)
                     {
-                        registerUser.VehicleType = vehicle.VehicleType;
+                        if (VehicleType.VehicleType != null)
+                        {
+                            var vehicletypeDTO = new VehicleTypeDTO
+                            {
+                                Partnercode = registerUser.UserChannelCode,
+                                Vehicletype = VehicleType.VehicleType
+                            };
+                            var vehicletype = Mapper.Map<VehicleType>(vehicletypeDTO);
+                            _uow.VehicleType.Add(vehicletype);
+                            VehicleType.VehicleType = null;
+                            await _uow.CompleteAsync();
+                        }
+                    }
+                    var vehicle = _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode).Result.ToList();
+                    if (vehicle.Count() != 0)
+                    {
+                        foreach (var item in vehicle)
+                        {
+                            registerUser.VehicleType = new List<string>();
+                            registerUser.VehicleType.Add(item.Vehicletype);
+                        }
                     }
                     var referrerCode = _uow.ReferrerCode.GetAsync(s => s.UserCode == registerUser.UserChannelCode).Result;
                     if (referrerCode != null)

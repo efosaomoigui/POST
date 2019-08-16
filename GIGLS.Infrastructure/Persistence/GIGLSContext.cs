@@ -260,6 +260,8 @@ namespace GIGLS.Infrastructure.Persistence
 
         public DbSet<DeliveryNumber> DeliveryNumber { get; set; }
 
+        public DbSet<VehicleType> VehicleType { get; set; }
+
         #endregion
 
 

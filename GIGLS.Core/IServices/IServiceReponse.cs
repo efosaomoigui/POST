@@ -14,7 +14,7 @@ namespace GIGLS.Core.IServices
         string RefCode { get; set; }
         BankProcessingOrderCodesDTO Shipmentcodref { get; set; }
         Dictionary<string, IEnumerable<string>> ValidationErrors { get; set; }
-        string VehicleType { get; set; }
+        List<string> VehicleType { get; set; }
 
 }
 }

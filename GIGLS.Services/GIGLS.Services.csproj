@@ -212,6 +212,7 @@
     <Compile Include="Implementation\Partnership\PartnerApplicationService.cs" />
     <Compile Include="Implementation\Partnership\PartnerService.cs" />
     <Compile Include="Implementation\Partnership\PartnerTransactionsService.cs" />
+    <Compile Include="Implementation\Partnership\VehicleTypeService.cs" />
     <Compile Include="Implementation\PaymentTransactions\PaymentPartialTransactionService.cs" />
     <Compile Include="Implementation\PaymentTransactions\PaymentTransactionService.cs" />
     <Compile Include="Implementation\ReferrerCodeService.cs" />

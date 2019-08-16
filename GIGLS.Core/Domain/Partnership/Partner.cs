@@ -30,7 +30,6 @@ namespace GIGLS.Core.Domain.Partnership
         [MaxLength(128)]
         public string UserId { get; set; }
         public bool IsActivated { get; set; }
-
         [MaxLength(100)]
         public string VehicleType { get; set; }
 
