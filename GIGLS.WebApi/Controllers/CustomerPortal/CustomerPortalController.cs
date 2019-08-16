@@ -740,6 +740,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             {
                                 var response = await _preshipmentmobileService.CreateCustomer(user.UserChannelCode);
                             }
+                            if (logindetail.UserChannelType == UserChannelType.Partner.ToString())
+                            {
+                                var response = await _preshipmentmobileService.CreatePartner(user.UserChannelCode);
+                            }
                         }
                         //get access token from response body
                         var responseJson = await responseMessage.Content.ReadAsStringAsync();

@@ -30,6 +30,7 @@ using GIGLS.Core.IMessage;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.DTO.Customers;
 using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.Domain.Partnership;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -900,6 +901,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     var Partnersprice = (0.4M * Convert.ToDecimal(pickuprice.Value));
                     var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == user.UserChannelCode);
                     wallet.Balance = wallet.Balance + Partnersprice;
+                    var partnertransactions = new PartnerTransactionsDTO
+                    {
+                        Destination = preshipmentmobile.ReceiverAddress,
+                        Departure = preshipmentmobile.SenderAddress,
+                        AmountReceived = Partnersprice,
+                        Waybill = preshipmentmobile.Waybill
+                    };
+                    var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
                     await _uow.CompleteAsync();
                 }
@@ -1020,6 +1029,38 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                     var individualCustomer = Mapper.Map<IndividualCustomer>(customerDTO);
                     _uow.IndividualCustomer.Add(individualCustomer);
+                    await _uow.CompleteAsync();
+                }
+                return true; ;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> CreatePartner(string CustomerCode)
+        {
+            try
+            {
+                var user = await _userService.GetUserByChannelCode(CustomerCode);
+                var partner = await _uow.Partner.GetAsync(s => s.PartnerCode == CustomerCode);
+                if (partner == null)
+                {
+                    var partnerDTO = new PartnerDTO
+                    {
+                        PartnerType = PartnerType.Individual,
+                        PartnerName = user.FirstName + "" + user.LastName,
+                        PartnerCode = user.UserChannelCode,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber,
+                        UserId = user.Id,
+                        IsActivated = false,
+                    };
+                    var FinalPartner = Mapper.Map<Partner>(partnerDTO);
+                    _uow.Partner.Add(FinalPartner);
                     await _uow.CompleteAsync();
                 }
                 return true; ;
