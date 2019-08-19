@@ -1110,5 +1110,39 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        public async Task<bool> deleterecord(string detail)
+        {
+            try
+            {
+                var user = await _userService.GetUserByEmail(detail);
+                if(user != null)
+                {
+                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+                    if (wallet != null)
+                    {
+                        _uow.Wallet.Remove(wallet);
+                    }
+                    var userDTO = await _uow.User.Remove(user.Id);
+                }
+                var Customer = await _uow.IndividualCustomer.GetAsync(s => s.Email == detail);
+                if (Customer != null)
+                {
+                    _uow.IndividualCustomer.Remove(Customer);
+                }
+                
+                var partner = await _uow.Partner.GetAsync(s => s.Email == detail);
+                if (partner != null)
+                {
+                    _uow.Partner.Remove(partner);
+                }
+                await _uow.CompleteAsync();
+                return true; ;
+            }
+            catch
+            {
+                throw;
+            }
+        }
     }
 }

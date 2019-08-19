@@ -319,7 +319,13 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<List<ServiceCentreDTO>> GetLocalServiceCentres()
         {
-            var countryIds = await _userService.GetPriviledgeCountryIds();
+            var countryIds = new int[]{ };
+            try {
+               countryIds = await _userService.GetPriviledgeCountryIds(); }
+            catch
+            {
+
+            }
             return await _uow.ServiceCentre.GetLocalServiceCentres(countryIds);
         }
 
@@ -1128,6 +1134,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var result = await SendOTPForRegisteredUser(registeredUser);
             return result;
         }
-       
+        
+
     }
 }

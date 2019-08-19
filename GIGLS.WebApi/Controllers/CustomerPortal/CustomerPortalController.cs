@@ -33,6 +33,9 @@ using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.Enums;
+using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.IMessageService;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -52,11 +55,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         private readonly IServiceCentreService _service;
         private readonly ICategoryService _categoryservice;
         private readonly ISubCategoryService _subcategoryservice;
+        private readonly IPasswordGenerator _passwordGenerator;
+        private readonly IMessageSenderService _messageSenderService;
 
 
         public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IOTPService otpService,
             IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService, IWalletService walletService, IWalletTransactionService walletTransactionService, IServiceCentreService service,
-            ICategoryService categoryservice, ISubCategoryService subcategoryservice) : base(nameof(CustomerPortalController))
+            ICategoryService categoryservice, ISubCategoryService subcategoryservice, IPasswordGenerator passwordGenerator, IMessageSenderService messageSenderService) : base(nameof(CustomerPortalController))
         {
             // _uow = uow;
             _userService = userService;
@@ -70,6 +75,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             _service = service;
             _categoryservice = categoryservice;
             _subcategoryservice = subcategoryservice;
+            _passwordGenerator = passwordGenerator;
+            _messageSenderService = messageSenderService;
         }
 
 
@@ -1110,6 +1117,52 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<bool>
                 {
                     Object = response
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("deleterecord")]
+        public async Task<IServiceResponse<bool>> DeleteRecord(UserDTO user)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _preshipmentmobileService.deleterecord(user.Email);
+                return new ServiceResponse<bool>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("forgotpassword")]
+        public async Task<IServiceResponse<bool>> ForgotPassword(UserDTO user)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                string password = await _passwordGenerator.Generate();
+                var User = await _userService.ForgotPassword(user.Email, password);
+
+                if (User.Succeeded)
+                {
+                    var passwordMessage = new PasswordMessageDTO()
+                    {
+                        Password = password,
+                        UserEmail = user.Email
+                    };
+
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
+                }
+                else
+                {
+                    throw new GenericException("Operation could not be completed");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
                 };
             });
         }
