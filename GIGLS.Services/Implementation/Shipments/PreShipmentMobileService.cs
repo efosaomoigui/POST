@@ -1144,5 +1144,62 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        public async Task<bool> VerifyPartnerDetails(PartnerDTO partner)
+        {
+            try
+            {
+                var Partner = await _uow.Partner.GetAsync(s => s.Email == partner.Email);
+                if(Partner != null)
+                {
+                    Partner.Address = partner.Address;
+                    Partner.Email = partner.Email;
+                    Partner.FirstName = partner.FirstName;
+                    Partner.IsActivated = true;
+                    Partner.LastName = partner.LastName;
+                    Partner.OptionalPhoneNumber = partner.OptionalPhoneNumber;
+                    Partner.PartnerName = partner.PartnerName;
+                    Partner.PhoneNumber = partner.PhoneNumber;
+                    Partner.PictureUrl = partner.PictureUrl;
+                    Partner.AccountName = partner.AccountName;
+                    Partner.AccountNumber = partner.AccountNumber;
+                    Partner.BankName = partner.BankName;
+                    if(partner.VehicleTypeDetails.Count()== 0)
+                    {
+                        throw new GenericException("Partner does not any Vehicle attached. Kindly review!!");
+                    }
+                    foreach(var vehicle in partner.VehicleTypeDetails)
+                    {
+                       var VehicleDetails = await _uow.VehicleType.GetAsync(s => s.Vehicletype == vehicle.Vehicletype && s.Partnercode == partner.PartnerCode);
+                       if(VehicleDetails!= null)
+                        {
+                           VehicleDetails.VehiceInsurancePolicyDetails = vehicle.VehiceInsurancePolicyDetails;
+                           VehicleDetails.VehiceRoadWorthinessDetails = vehicle.VehiceRoadWorthinessDetails;
+                           VehicleDetails.VehicleLicenseExpiryDate = vehicle.VehicleLicenseExpiryDate;
+                           VehicleDetails.VehicleLicenseImageDetails = vehicle.VehicleLicenseImageDetails;
+                           VehicleDetails.VehicleLicenseNumber = vehicle.VehicleLicenseNumber;
+                           VehicleDetails.VehicleParticularsDetails = vehicle.VehicleParticularsDetails;
+                           VehicleDetails.VehiclePlateNumber = vehicle.VehiclePlateNumber;
+                           VehicleDetails.Vehicletype = vehicle.Vehicletype;
+                          
+                        }
+                        else{
+                           var Vehicle = Mapper.Map<VehicleType>(vehicle);
+                           _uow.VehicleType.Add(Vehicle);
+                        }
+                    }
+                    await _uow.CompleteAsync();
+                }
+                else
+                {
+                    throw new GenericException("Partner Information does not exist!");
+                }
+                return true;
+            }
+            catch
+            {
+                throw;
+            }
+        }
     }
 }
