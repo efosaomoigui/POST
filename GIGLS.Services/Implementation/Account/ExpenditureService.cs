@@ -58,11 +58,22 @@ namespace GIGLS.Services.Implementation.Account
 
             _uow.Expenditure.Add(expenditure);
 
+            ////--start--///Set the DepartureCountryId
+            int countryIdFromServiceCentreId = 0;
+            try
+            {
+                var departureCountry = await _uow.Country.GetCountryByServiceCentreId(expenditure.ServiceCentreId);
+                countryIdFromServiceCentreId = departureCountry.CountryId;
+            }
+            catch (Exception) { }
+            ////--end--///Set the DepartureCountryId
+
             //Add record to general ledger
             var generalLedger = new GeneralLedger()
             {
                 DateOfEntry = DateTime.Now,
                 ServiceCentreId = expenditure.ServiceCentreId,
+                CountryId = countryIdFromServiceCentreId,
                 UserId = expenditure.UserId,
                 Amount = expenditure.Amount,
                 CreditDebitType = CreditDebitType.Debit,

@@ -1476,11 +1476,23 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //2.3 Create new entry in General Ledger for Invoice amount (debit)
                     var currentUserId = await _userService.GetCurrentUserId();
+
+                    ////--start--///Set the DepartureCountryId
+                    int countryIdFromServiceCentreId = 0;
+                    try
+                    {
+                        var departureCountry = await _uow.Country.GetCountryByServiceCentreId(shipment.DepartureServiceCentreId);
+                        countryIdFromServiceCentreId = departureCountry.CountryId;
+                    }
+                    catch (Exception) { }
+                    ////--end--///Set the DepartureCountryId
+
                     var generalLedger = new GeneralLedger()
                     {
                         DateOfEntry = DateTime.Now,
 
                         ServiceCentreId = shipment.DepartureServiceCentreId,
+                        CountryId = countryIdFromServiceCentreId,
                         UserId = currentUserId,
                         Amount = invoice.Amount,
                         CreditDebitType = CreditDebitType.Debit,
