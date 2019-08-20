@@ -18,5 +18,6 @@ namespace GIGLS.Core.DTO
 
         public string CustomerName { get; set; }
         public string ReceiverName { get; set; }
+        public string Waybill { get; set; }
     }
 }

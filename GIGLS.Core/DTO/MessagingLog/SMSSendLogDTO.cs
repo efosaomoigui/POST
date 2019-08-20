@@ -13,5 +13,6 @@ namespace GIGLS.Core.DTO.MessagingLog
         public string User { get; set; }
         public string ResultStatus { get; set; }
         public string ResultDescription { get; set; }
+        public string Waybill { get; set; }
     }
 }

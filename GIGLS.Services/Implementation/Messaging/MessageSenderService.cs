@@ -264,6 +264,12 @@ namespace GIGLS.Services.Implementation.Messaging
                     messageDTO.FinalBody =
                         string.Format(messageDTO.Body, strArray);
 
+                    //populate the waybill
+                    if(waybill != null)
+                    {
+                        messageDTO.Waybill = waybill;
+                    }
+
                     if ("CUSTOMER" == messageDTO.To.Trim())
                     {
                         messageDTO.To = customerObj.PhoneNumber;
@@ -320,6 +326,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     DateModified = DateTime.Now,
                     From = messageDTO.From,
                     To = messageDTO.To,
+                    Waybill = messageDTO.Waybill,
                     Message = messageDTO.FinalBody,
                     Status = exceptiomMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
                     ResultStatus = result,
