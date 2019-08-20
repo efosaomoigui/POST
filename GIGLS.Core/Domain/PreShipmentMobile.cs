@@ -107,8 +107,6 @@ namespace GIGLS.Core.Domain
 
         public int? ZoneMapping { get; set; }
 
-        public string PictureName { get; set; }
-
-        public DateTime? PictureDate { get; set; }
+       
     }
 }
