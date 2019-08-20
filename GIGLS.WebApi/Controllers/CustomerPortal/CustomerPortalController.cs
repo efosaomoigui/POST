@@ -1166,5 +1166,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPost]
+        [Route("verifypartnerdetails")]
+        public async Task<IServiceResponse<bool>> VerifyPartnerDetails(PartnerDTO partner)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _preshipmentmobileService.VerifyPartnerDetails(partner);
+                return new ServiceResponse<bool>
+                {
+                    Object = response
+                };
+            });
+        }
     }
 }
