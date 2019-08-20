@@ -41,5 +41,8 @@ namespace GIGLS.Core.Domain
         public int? SpecialPackageId { get; set; }
         public ShipmentType ShipmentType { get; set; }
         public bool IsCancelled { get; set; }
+        public string PictureName { get; set; }
+
+        public DateTime? PictureDate { get; set; }
     }
 }
