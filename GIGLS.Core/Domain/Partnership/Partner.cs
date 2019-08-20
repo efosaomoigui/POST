@@ -35,6 +35,11 @@ namespace GIGLS.Core.Domain.Partnership
 
         public string PictureUrl { get; set; }
 
+        public string BankName { get; set; }
+        public int? AccountNumber { get; set; }
+
+        public string AccountName { get; set; }
+
         // Foreign Key
        // public int PartnerApplicationId { get; set; }
         //public virtual PartnerApplication PartnerApplication { get; set; }

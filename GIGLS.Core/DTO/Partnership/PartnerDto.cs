@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Partnership
 {
@@ -21,8 +22,13 @@ namespace GIGLS.Core.DTO.Partnership
         public string WalletPan { get; set; }
         public string UserId { get; set; }
         public bool IsActivated { get; set; }
-        public string VehicleType { get; set; }
+        public List<string> VehicleType { get; set; }
+        public List<VehicleTypeDTO> VehicleTypeDetails { get; set; }
 
         public string PictureUrl { get; set; }
+        public string BankName { get; set; }
+        public int? AccountNumber { get; set; }
+
+        public string AccountName { get; set; }
     }
 }
