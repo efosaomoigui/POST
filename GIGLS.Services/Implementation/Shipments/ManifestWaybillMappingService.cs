@@ -364,21 +364,21 @@ namespace GIGLS.Services.Implementation.Shipments
                 foreach (var waybill in waybills)
                 {
                     //check if the waybill exist
-                    var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                    var shipment = await _uow.PreShipment.GetAsync(x => x.Waybill == waybill);
                     if (shipment == null)
                     {
                         throw new GenericException($"No Waybill exists for this number: {waybill}");
                     }
 
                     //check if the user is at the final destination centre of the shipment
-                    if (serviceIds.Length == 1 && serviceIds[0] == shipment.DestinationServiceCentreId)
-                    {
+                    //if (serviceIds.Length == 1 && serviceIds[0] == shipment.DestinationServiceCentreId)
+                    //{
                         
-                    }
-                    else
-                    {
-                        throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
-                    }
+                    //}
+                    //else
+                    //{
+                    //    throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+                    //}
 
                     //check if the shipment is at the final destination with a scan of ARF (WHEN SHIPMENT ARRIVED FINAL DESTINATION)
                     var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.Waybill == waybill);
