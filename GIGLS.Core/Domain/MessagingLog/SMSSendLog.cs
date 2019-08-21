@@ -17,6 +17,8 @@ namespace GIGLS.Core.Domain.MessagingLog
         public string User { get; set; }
         public string ResultStatus { get; set; }
         public string ResultDescription { get; set; }
+
+        [MaxLength(100)]
         public string Waybill { get; set; }
     }
 }
