@@ -1201,5 +1201,35 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        public async Task<PartnerDTO> GetPartnerDetails(string Email)
+        {
+            var partnerdto = new PartnerDTO();
+            try
+            {
+                var Partner = await _uow.Partner.GetAsync(s => s.Email == Email);
+                if (Partner != null)
+                {
+                    partnerdto = Mapper.Map<PartnerDTO>(Partner);
+                   
+                        var VehicleDetails = await _uow.VehicleType.FindAsync(s =>s.Partnercode == partnerdto.PartnerCode);
+                        if (VehicleDetails != null)
+                        {
+                          var vehicles = Mapper.Map<List<VehicleTypeDTO>>(VehicleDetails);
+                          partnerdto.VehicleTypeDetails = vehicles;
+                        }
+                        
+                }
+                else
+                {
+                    throw new GenericException("Partner Information does not exist!");
+                }
+                return partnerdto;
+            }
+            catch
+            {
+                throw;
+            }
+        }
     }
 }

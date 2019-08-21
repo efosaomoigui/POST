@@ -34,5 +34,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> CreatePartner(string CustomerCode);
         Task<bool> deleterecord(string detail);
         Task<bool> VerifyPartnerDetails(PartnerDTO partner);
+
+        Task<PartnerDTO> GetPartnerDetails(string EmailId);
     }
 }

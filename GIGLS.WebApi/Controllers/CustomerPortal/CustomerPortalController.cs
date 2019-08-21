@@ -1180,5 +1180,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("getallpartnerdetails")]
+        public async Task<IServiceResponse<PartnerDTO>> GetAllPartnerDetails(PartnerDTO partner)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _preshipmentmobileService.GetPartnerDetails(partner.Email);
+                return new ServiceResponse<PartnerDTO>
+                {
+                    Object = response
+                };
+            });
+        }
     }
 }
