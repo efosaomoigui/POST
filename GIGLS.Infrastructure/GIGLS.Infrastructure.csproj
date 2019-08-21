@@ -185,6 +185,8 @@
     <Compile Include="Persistence\Repositories\Shipments\MobilePickUpRequestsRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\MobileShipmentTrackingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\OverdueShipmentRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\PickupManifestRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\PickupManifestWaybillMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\PreShipmentItemMobileRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\PreShipmentManifestMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ManifestWaybillMappingRepository.cs" />

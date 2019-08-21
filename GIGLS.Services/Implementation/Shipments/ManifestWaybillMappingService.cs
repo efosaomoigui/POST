@@ -326,7 +326,99 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+        //map waybill to Manifest (Pickup)
+        public async Task MappingManifestToWaybillsPickup(string manifest, List<string> waybills)
+        {
+            try
+            {
+                var serviceIds = await _userService.GetPriviledgeServiceCenters();
 
+                //1. check if any of the waybills has not been mapped to a manifest 
+                // and has not been process for return in case it was not delivered (i.e still active) that day
+                var isWaybillMappedActive = _uow.PickupManifestWaybillMapping.GetAllAsQueryable();
+                isWaybillMappedActive = isWaybillMappedActive.Where(x => x.IsActive == true && waybills.Contains(x.Waybill));
+
+                var isWaybillsMappedActiveResult = isWaybillMappedActive.Select(x => x.Waybill).Distinct().ToList();
+
+                if (isWaybillsMappedActiveResult.Count() > 0)
+                {
+                    throw new GenericException($"Error: Manifest cannot be created. " +
+                               $"The following waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
+                }
+
+
+                var manifestObj = await _uow.PickupManifest.GetAsync(x => x.ManifestCode.Equals(manifest));
+
+                //create the manifest if manifest does not exist
+                if (manifestObj == null)
+                {
+                    var newManifest = new PickupManifest
+                    {
+                        DateTime = DateTime.Now,
+                        ManifestCode = manifest,
+                        ManifestType = ManifestType.Pickup
+                    };
+                    _uow.PickupManifest.Add(newManifest);
+                }
+
+                foreach (var waybill in waybills)
+                {
+                    //check if the waybill exist
+                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+                    if (shipment == null)
+                    {
+                        throw new GenericException($"No Waybill exists for this number: {waybill}");
+                    }
+
+                    //check if the user is at the final destination centre of the shipment
+                    if (serviceIds.Length == 1 && serviceIds[0] == shipment.DestinationServiceCentreId)
+                    {
+                    }
+                    else
+                    {
+                        throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+                    }
+
+                    //check if the shipment is at the final destination with a scan of ARF (WHEN SHIPMENT ARRIVED FINAL DESTINATION)
+                    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.Waybill == waybill);
+                    if (shipmentCollection == null)
+                    {
+                        throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
+                    }
+                    else
+                    {
+                        //WC -- SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO RECEIVER
+                        shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.WC;
+                    }
+
+                    
+                    //check if Waybill has not been added to this manifest 
+                    var isWaybillMapped = await _uow.PickupManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
+
+                    //if the waybill has not been added to this manifest, add it
+                    if (!isWaybillMapped)
+                    {
+                        //Add new Mapping
+                        var newMapping = new PickupManifestWaybillMapping
+                        {
+                            ManifestCode = manifest,
+                            Waybill = waybill,
+                            IsActive = true,
+                            ServiceCentreId = shipment.DestinationServiceCentreId
+                        };
+                        _uow.PickupManifestWaybillMapping.Add(newMapping);
+                    }
+
+                    //automatic scan all the way also
+                }
+
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+
+            }
+        }
         //Get Waybills In Manifest
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifest(string manifestcode)
         {

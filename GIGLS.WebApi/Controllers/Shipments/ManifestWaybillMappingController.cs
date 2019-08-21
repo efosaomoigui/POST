@@ -86,6 +86,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("mapmultiplepickup")]
+        public async Task<IServiceResponse<bool>> MappingManifestToWaybillsPickup(PickupManifestWaybillMappingDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.MappingManifestToWaybillsPickup(data.ManifestCode, data.Waybills);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("waybillsinmanifest/{manifest}")]

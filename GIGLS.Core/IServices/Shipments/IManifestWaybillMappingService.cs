@@ -21,5 +21,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ShipmentDTO>> GetUnMappedWaybillsForDeliveryManifestByServiceCentre();
         Task<List<ManifestWaybillMappingDTO>> GetManifestWaitingForSignOff();
         Task<List<ManifestWaybillMappingDTO>> GetManifestHistoryForWaybill(string waybill);
+        Task MappingManifestToWaybillsPickup(string manifest, List<string> waybills);
     }
 }
