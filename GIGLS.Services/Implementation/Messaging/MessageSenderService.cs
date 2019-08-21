@@ -154,10 +154,6 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
                 
-                ////need optimisation
-                //var invoiceList = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).ToList();
-                //var invoice = invoiceList.FirstOrDefault();
-
                 var invoice = _uow.Invoice.GetAllInvoiceShipments().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).FirstOrDefault();
 
                 if (invoice != null)
@@ -183,13 +179,12 @@ namespace GIGLS.Services.Implementation.Messaging
 
                     //
                     var customerName = customerObj.CustomerName;
-                    var waybill = shipmentTrackingDTO.Waybill;
                     var demurrageAmount = demurragePrice;
 
 
                     //map the array
                     strArray[0] = customerName;
-                    strArray[1] = waybill;
+                    strArray[1] = invoice.Waybill;
                     strArray[2] = invoice.DepartureServiceCentreName;
                     strArray[3] = invoice.DestinationServiceCentreName;
                     strArray[4] = invoice.ReceiverAddress;
@@ -258,12 +253,14 @@ namespace GIGLS.Services.Implementation.Messaging
                     //C. populate the message subject
                     messageDTO.Subject =
                         string.Format(messageDTO.Subject, strArray);
-
-
+                    
                     //populate the message template
                     messageDTO.FinalBody =
                         string.Format(messageDTO.Body, strArray);
 
+                    //populate the waybill
+                    messageDTO.Waybill = invoice.Waybill;
+                    
                     if ("CUSTOMER" == messageDTO.To.Trim())
                     {
                         messageDTO.To = customerObj.PhoneNumber;
@@ -353,16 +350,15 @@ namespace GIGLS.Services.Implementation.Messaging
                     DateModified = DateTime.Now,
                     From = messageDTO.From,
                     To = messageDTO.To,
+                    Waybill = messageDTO.Waybill,
                     Message = messageDTO.FinalBody,
                     Status = exceptiomMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
                     ResultStatus = result,
                     ResultDescription = exceptiomMessage
                 });
             }
-            catch (Exception ex)
-            {
+            catch (Exception ) { }
 
-            }
             return true;
         }
 
@@ -382,10 +378,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     ResultDescription = exceptiomMessage
                 });
             }
-            catch (Exception ex)
-            {
+            catch (Exception){   }
 
-            }
             return true;
         }
 
