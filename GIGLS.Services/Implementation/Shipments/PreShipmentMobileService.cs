@@ -1218,7 +1218,6 @@ namespace GIGLS.Services.Implementation.Shipments
                           var vehicles = Mapper.Map<List<VehicleTypeDTO>>(VehicleDetails);
                           partnerdto.VehicleTypeDetails = vehicles;
                         }
-                        
                 }
                 else
                 {
