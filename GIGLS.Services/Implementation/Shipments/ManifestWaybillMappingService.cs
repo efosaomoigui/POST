@@ -364,7 +364,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 foreach (var waybill in waybills)
                 {
                     //check if the waybill exist
-                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+                    var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
                     if (shipment == null)
                     {
                         throw new GenericException($"No Waybill exists for this number: {waybill}");
@@ -373,6 +373,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     //check if the user is at the final destination centre of the shipment
                     if (serviceIds.Length == 1 && serviceIds[0] == shipment.DestinationServiceCentreId)
                     {
+                        
                     }
                     else
                     {

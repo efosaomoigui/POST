@@ -5,7 +5,7 @@ namespace GIGLS.Core.Domain
 {
     public class PickupManifestWaybillMapping : BaseDomain
     {
-        public int ManifestWaybillMappingId { get; set; }
+        public int PickupManifestWaybillMappingId { get; set; }
         public bool IsActive { get; set; }
 
         [MaxLength(100), MinLength(5)]

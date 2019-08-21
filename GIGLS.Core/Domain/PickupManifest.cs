@@ -8,7 +8,7 @@ namespace GIGL.GIGLS.Core.Domain
 {
     public class PickupManifest : BaseDomain
     {
-        public int ManifestId { get; set; }
+        public int PickupManifestId { get; set; }
 
         [MaxLength(100), MinLength(5)]
         [Index(IsUnique = true)]
