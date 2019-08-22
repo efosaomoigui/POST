@@ -527,7 +527,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
         [AllowAnonymous]
         [HttpPost]
         [Route("register")]
