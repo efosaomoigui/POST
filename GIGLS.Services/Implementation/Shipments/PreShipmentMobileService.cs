@@ -1134,6 +1134,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 var partner = await _uow.Partner.GetAsync(s => s.Email == detail);
                 if (partner != null)
                 {
+                    var vehicles = await _uow.VehicleType.FindAsync(s => s.Partnercode == partner.PartnerCode);
+                    if (vehicles.Count() > 0)
+                    {
+                        foreach (var vehicle in vehicles)
+                        {
+                            _uow.VehicleType.Remove(vehicle);
+                        }
+                    }
                     _uow.Partner.Remove(partner);
                 }
                 await _uow.CompleteAsync();
@@ -1164,6 +1172,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     Partner.AccountName = partner.AccountName;
                     Partner.AccountNumber = partner.AccountNumber;
                     Partner.BankName = partner.BankName;
+                    Partner.VehicleLicenseExpiryDate = partner.VehicleLicenseExpiryDate;
+                    Partner.VehicleLicenseImageDetails = partner.VehicleLicenseImageDetails;
+                    Partner.VehicleLicenseNumber = partner.VehicleLicenseNumber;
                     if(partner.VehicleTypeDetails.Count()== 0)
                     {
                         throw new GenericException("Partner does not any Vehicle attached. Kindly review!!");
@@ -1175,9 +1186,6 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                            VehicleDetails.VehiceInsurancePolicyDetails = vehicle.VehiceInsurancePolicyDetails;
                            VehicleDetails.VehiceRoadWorthinessDetails = vehicle.VehiceRoadWorthinessDetails;
-                           VehicleDetails.VehicleLicenseExpiryDate = vehicle.VehicleLicenseExpiryDate;
-                           VehicleDetails.VehicleLicenseImageDetails = vehicle.VehicleLicenseImageDetails;
-                           VehicleDetails.VehicleLicenseNumber = vehicle.VehicleLicenseNumber;
                            VehicleDetails.VehicleParticularsDetails = vehicle.VehicleParticularsDetails;
                            VehicleDetails.VehiclePlateNumber = vehicle.VehiclePlateNumber;
                            VehicleDetails.Vehicletype = vehicle.Vehicletype;
@@ -1230,5 +1238,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+
+        
     }
 }

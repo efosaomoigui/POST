@@ -739,7 +739,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                         if (!responseMessage.IsSuccessStatusCode)
                         {
-                            throw new GenericException("Operation could not complete login successfully:");
+                            throw new GenericException("Incorrect Login Details");
                         }
                         else
                         {
@@ -751,6 +751,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             {
                                 var response = await _preshipmentmobileService.CreatePartner(user.UserChannelCode);
                             }
+                            
                         }
                         //get access token from response body
                         var responseJson = await responseMessage.Content.ReadAsStringAsync();
@@ -762,7 +763,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             VehicleType = vehicle,
                             Object = jObject,
                             ReferrerCode = user.Referrercode,
-                            AverageRatings = user.AverageRatings
+                            AverageRatings = user.AverageRatings,
+                            IsVerified = user.IsVerified
 
                         };
                     }
