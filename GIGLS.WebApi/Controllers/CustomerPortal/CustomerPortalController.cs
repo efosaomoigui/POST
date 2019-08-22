@@ -739,7 +739,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                         if (!responseMessage.IsSuccessStatusCode)
                         {
-                            throw new GenericException("Operation could not complete login successfully:");
+                            throw new GenericException("Incorrect Login Details");
                         }
                         else
                         {
@@ -750,6 +750,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             if (logindetail.UserChannelType == UserChannelType.Partner.ToString())
                             {
                                 var response = await _preshipmentmobileService.CreatePartner(user.UserChannelCode);
+                            }
+                            if (logindetail.UserChannelType == UserChannelType.Partner.ToString())
+                            {
+                                var response = await _preshipmentmobileService.IsPartnerActivated(user.UserChannelCode);
+                                if(response!=true)
+                                {
+                                    throw new GenericException("Partner has not been verified");
+                                }
                             }
                         }
                         //get access token from response body
