@@ -97,11 +97,23 @@ namespace GIGLS.Services.Implementation.Fleets
                     manifestEntity.ManifestType = dispatchDTO.ManifestType;
                 }
 
+                ////--start--///Set the DepartureCountryId
+                int countryIdFromServiceCentreId = 0;
+                try
+                {
+                    var departureCountry = await _uow.Country.GetCountryByServiceCentreId(userServiceCentreId);
+                    countryIdFromServiceCentreId = departureCountry.CountryId;
+                }
+                catch (Exception) { }
+                ////--end--///Set the DepartureCountryId
+
+
                 //update General Ledger
                 var generalLedger = new GeneralLedger()
                 {
                     DateOfEntry = DateTime.Now,
                     ServiceCentreId = userServiceCentreId,
+                    CountryId = countryIdFromServiceCentreId,
                     UserId = currentUserId,
                     Amount = dispatchDTO.Amount,
                     CreditDebitType = CreditDebitType.Debit,

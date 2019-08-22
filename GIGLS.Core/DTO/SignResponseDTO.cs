@@ -10,5 +10,6 @@ namespace GIGLS.Core.DTO
     {
         public bool PhoneSent { get; set; }
         public bool EmailSent { get; set; }
+
     }
 }

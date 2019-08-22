@@ -28,5 +28,13 @@ namespace GIGLS.Core.IServices.Shipments
         Task<object> CancelShipment(string Waybill);
         Task<object> AddRatings(MobileRatingDTO rating);
         Task<PartnerMonthlyTransactionsDTO> GetMonthlyPartnerTransactions();
+        Task<bool> CreateCustomer(string CustomerCode);
+
+        Task<bool> UpdateDeliveryNumber(MobileShipmentNumberDTO detail);
+        Task<bool> CreatePartner(string CustomerCode);
+        Task<bool> deleterecord(string detail);
+        Task<bool> VerifyPartnerDetails(PartnerDTO partner);
+
+        Task<PartnerDTO> GetPartnerDetails(string EmailId);
     }
 }

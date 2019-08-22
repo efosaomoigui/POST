@@ -154,10 +154,6 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
                 
-                ////need optimisation
-                //var invoiceList = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).ToList();
-                //var invoice = invoiceList.FirstOrDefault();
-
                 var invoice = _uow.Invoice.GetAllInvoiceShipments().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).FirstOrDefault();
 
                 if (invoice != null)
@@ -183,13 +179,12 @@ namespace GIGLS.Services.Implementation.Messaging
 
                     //
                     var customerName = customerObj.CustomerName;
-                    var waybill = shipmentTrackingDTO.Waybill;
                     var demurrageAmount = demurragePrice;
 
 
                     //map the array
                     strArray[0] = customerName;
-                    strArray[1] = waybill;
+                    strArray[1] = invoice.Waybill;
                     strArray[2] = invoice.DepartureServiceCentreName;
                     strArray[3] = invoice.DestinationServiceCentreName;
                     strArray[4] = invoice.ReceiverAddress;
@@ -258,12 +253,14 @@ namespace GIGLS.Services.Implementation.Messaging
                     //C. populate the message subject
                     messageDTO.Subject =
                         string.Format(messageDTO.Subject, strArray);
-
-
+                    
                     //populate the message template
                     messageDTO.FinalBody =
                         string.Format(messageDTO.Body, strArray);
 
+                    //populate the waybill
+                    messageDTO.Waybill = invoice.Waybill;
+                    
                     if ("CUSTOMER" == messageDTO.To.Trim())
                     {
                         messageDTO.To = customerObj.PhoneNumber;
@@ -282,6 +279,39 @@ namespace GIGLS.Services.Implementation.Messaging
                         messageDTO.ToEmail = invoice.ReceiverEmail;
                     }
                 }
+            }
+
+            if (obj is MobileMessageDTO)
+            {
+                var strArray = new string[]
+                 {
+                     "Sender Name",
+                     "Sender Email",
+                    "WaybillNumber"
+
+                 };
+
+                var mobileMessageDTO = (MobileMessageDTO)obj;
+                //map the array
+                strArray[0] = mobileMessageDTO.SenderName;
+                strArray[1] = mobileMessageDTO.WaybillNumber;
+                strArray[2] = mobileMessageDTO.SenderName;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject =
+                    string.Format(messageDTO.Subject, strArray);
+
+
+                //populate the message template
+                messageDTO.FinalBody =
+                    string.Format(messageDTO.Body, strArray);
+
+
+                messageDTO.To = mobileMessageDTO.SenderPhoneNumber;
+                messageDTO.ToEmail = mobileMessageDTO.SenderEmail;
             }
 
             //resolve phone numbers to +2347011111111
@@ -320,16 +350,15 @@ namespace GIGLS.Services.Implementation.Messaging
                     DateModified = DateTime.Now,
                     From = messageDTO.From,
                     To = messageDTO.To,
+                    Waybill = messageDTO.Waybill,
                     Message = messageDTO.FinalBody,
                     Status = exceptiomMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
                     ResultStatus = result,
                     ResultDescription = exceptiomMessage
                 });
             }
-            catch (Exception ex)
-            {
+            catch (Exception ) { }
 
-            }
             return true;
         }
 
@@ -349,10 +378,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     ResultDescription = exceptiomMessage
                 });
             }
-            catch (Exception ex)
-            {
+            catch (Exception){   }
 
-            }
             return true;
         }
 
@@ -517,6 +544,57 @@ namespace GIGLS.Services.Implementation.Messaging
             }
 
 
+            //4 obj is MobileMessageDTO
+            if (obj is MobileMessageDTO)
+            {
+                var strArray = new string[]
+                 {
+                     "Sender Name",
+                     "Sender Email",
+                    "WaybillNumber"
+                    
+                 };
+
+                var mobileMessageDTO = (MobileMessageDTO)obj;
+                //map the array
+                strArray[0] = mobileMessageDTO.SenderName;
+                strArray[1] = mobileMessageDTO.WaybillNumber;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject =
+                    string.Format(messageDTO.Subject, strArray);
+
+
+                //populate the message template
+                messageDTO.FinalBody =
+                    string.Format(messageDTO.Body, strArray);
+
+
+                messageDTO.ToEmail = mobileMessageDTO.SenderEmail;
+            }
+
+
+            //4. obj is PasswordMessageDTO
+            if (obj is PasswordMessageDTO)
+            {
+                var strArray = new string[]
+                {
+                    "Password"
+                };
+                var passwordMessageDTO = (PasswordMessageDTO)obj;
+
+                strArray[0] = passwordMessageDTO.Password;
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+
+                messageDTO.ToEmail = passwordMessageDTO.UserEmail;
+            }
+
+            
             return await Task.FromResult(verifySendEmail);
         }
 

@@ -10,6 +10,10 @@ using AutoMapper;
 using GIGLS.Core.IServices.User;
 using System.Text.RegularExpressions;
 using GIGLS.Infrastructure;
+using GIGLS.Core.IServices.Utility;
+using System.Collections.Generic;
+using System.Linq;
+using GIGLS.Core.DTO.Partnership;
 
 namespace GIGLS.Services.Implementation
 {
@@ -19,13 +23,16 @@ namespace GIGLS.Services.Implementation
         private readonly ISMSService _SmsService;
         private readonly IEmailService _EmailService;
         private readonly IUserService _UserService;
+        private readonly IPasswordGenerator _codegenerator;
 
-        public OTPService(IUnitOfWork uow, ISMSService MessageService, IEmailService EmailService, IUserService UserService)
+        public OTPService(IUnitOfWork uow, ISMSService MessageService, IEmailService EmailService, IUserService UserService,
+            IPasswordGenerator codegenerator)
         {
             _uow = uow;
             _SmsService = MessageService;
             _EmailService = EmailService;
             _UserService = UserService;
+            _codegenerator = codegenerator;
             MapperConfig.Initialize();
         }
         public async Task<UserDTO> IsOTPValid(int OTP)
@@ -95,11 +102,53 @@ namespace GIGLS.Services.Implementation
             {
                 user.Trim();
                 registerUser = await _UserService.GetUserByEmail(user);
-                var vehicle = _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode).Result;
-                if(vehicle!= null)
+                var VehicleType = _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode).Result;
+                if (VehicleType != null)
                 {
-                    registerUser.VehicleType = vehicle.VehicleType;
+                    if (VehicleType.VehicleType != null)
+                    {
+                        var vehicletypeDTO = new VehicleTypeDTO
+                        {
+                            Partnercode = registerUser.UserChannelCode,
+                            Vehicletype = VehicleType.VehicleType
+                        };
+                        var vehicletype = Mapper.Map<VehicleType>(vehicletypeDTO);
+                        _uow.VehicleType.Add(vehicletype);
+                        VehicleType.VehicleType = null;
+                        await _uow.CompleteAsync();
+                    }
                 }
+                var vehicle = _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode).Result.ToList();
+                if(vehicle.Count() != 0)
+                {
+                    foreach (var item in vehicle)
+                    {
+                        registerUser.VehicleType = new List<string>();
+                        registerUser.VehicleType.Add(item.Vehicletype);
+                    }
+                }
+                var referrerCode = _uow.ReferrerCode.GetAsync(s => s.UserCode == registerUser.UserChannelCode).Result;
+                if (referrerCode != null)
+                {
+                    registerUser.Referrercode = referrerCode.Referrercode;
+                }
+                else
+                {
+                    var code = await _codegenerator.Generate(5);
+                    var referrerCodeDTO = new ReferrerCodeDTO
+                    {
+                        Referrercode = code,
+                        UserId = registerUser.Id,
+                        UserCode = registerUser.UserChannelCode
+
+                    };
+                    var referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
+                    _uow.ReferrerCode.Add(referrercode);
+                    await _uow.CompleteAsync();
+                    registerUser.Referrercode = referrercode.Referrercode;
+                }
+                var averageratings = await GetAverageRating(registerUser.UserChannelCode);
+                registerUser.AverageRatings = averageratings;
             }
             else
             {
@@ -111,11 +160,53 @@ namespace GIGLS.Services.Implementation
                         user = "+234" + user.Remove(0, 1);
                     };
                     registerUser = await _UserService.GetUserByPhone(user);
-                    var vehicle = _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode).Result;
-                    if (vehicle != null)
+                    var VehicleType = _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode).Result;
+                    if (VehicleType != null)
                     {
-                        registerUser.VehicleType = vehicle.VehicleType;
+                        if (VehicleType.VehicleType != null)
+                        {
+                            var vehicletypeDTO = new VehicleTypeDTO
+                            {
+                                Partnercode = registerUser.UserChannelCode,
+                                Vehicletype = VehicleType.VehicleType
+                            };
+                            var vehicletype = Mapper.Map<VehicleType>(vehicletypeDTO);
+                            _uow.VehicleType.Add(vehicletype);
+                            VehicleType.VehicleType = null;
+                            await _uow.CompleteAsync();
+                        }
                     }
+                    var vehicle = _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode).Result.ToList();
+                    if (vehicle.Count() != 0)
+                    {
+                        foreach (var item in vehicle)
+                        {
+                            registerUser.VehicleType = new List<string>();
+                            registerUser.VehicleType.Add(item.Vehicletype);
+                        }
+                    }
+                    var referrerCode = _uow.ReferrerCode.GetAsync(s => s.UserCode == registerUser.UserChannelCode).Result;
+                    if (referrerCode != null)
+                    {
+                        registerUser.Referrercode = referrerCode.Referrercode;
+                    }
+                    else
+                    {
+                        var code = await _codegenerator.Generate(5);
+                        var referrerCodeDTO = new ReferrerCodeDTO
+                        {
+                            Referrercode = code,
+                            UserId = registerUser.Id,
+                            UserCode = registerUser.UserChannelCode
+
+                        };
+                        var referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
+                        _uow.ReferrerCode.Add(referrercode);
+                        await _uow.CompleteAsync();
+                        registerUser.Referrercode = referrercode.Referrercode;
+                    }
+                    var averageratings = await GetAverageRating(registerUser.UserChannelCode);
+                    registerUser.AverageRatings = averageratings;
                 }
                 else
                 {
@@ -125,5 +216,20 @@ namespace GIGLS.Services.Implementation
             return registerUser;
 
         }
+
+        public async Task<double> GetAverageRating(string CustomerCode)
+        {
+            var ratings = await _uow.MobileRating.FindAsync(s=>s.CustomerCode == CustomerCode || s.PartnerCode == CustomerCode);
+            var count = ratings.Count();
+            var averageratings = ratings.Sum(x=>x.CustomerRating);
+            averageratings = (averageratings / count);
+            if(averageratings.ToString() == "NaN")
+            {
+                averageratings = 0.00;
+            }
+            var rating = (double)averageratings;
+            return rating;
+        }
+
     }
 }

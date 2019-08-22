@@ -356,6 +356,15 @@ namespace GIGLS.Core
 
                 config.CreateMap<MobileRating, MobileRatingDTO>();
                 config.CreateMap<MobileRatingDTO, MobileRating>();
+
+                config.CreateMap<ReferrerCode, ReferrerCodeDTO>();
+                config.CreateMap<ReferrerCodeDTO, ReferrerCode>();
+
+                config.CreateMap<DeliveryNumber, DeliveryNumberDTO>();
+                config.CreateMap<DeliveryNumberDTO, DeliveryNumber>();
+
+                config.CreateMap<VehicleType,VehicleTypeDTO>();
+                config.CreateMap<VehicleTypeDTO, VehicleType>();
             });
 
             isInit = true;

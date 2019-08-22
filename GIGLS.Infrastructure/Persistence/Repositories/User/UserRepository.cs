@@ -10,7 +10,6 @@ using Microsoft.AspNet.Identity;
 using GIGLS.CORE.Domain;
 using System.Security.Claims;
 using GIGLS.Core.Enums;
-using GIGL.GIGLS.Core.Domain;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
 {
@@ -22,8 +21,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
         }
 
         public Task<GIGL.GIGLS.Core.Domain.User> GetUserByEmail(string email)
-        {
-            
+        {            
             var user = _userManager.Users.Where(x => x.Email.Equals(email)).FirstOrDefault();
             return Task.FromResult(user);
         }

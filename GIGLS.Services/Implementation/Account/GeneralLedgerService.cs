@@ -75,6 +75,17 @@ namespace GIGLS.Services.Implementation.Account
                 newGeneralLedger.ServiceCentreId = serviceCenterIds[0];
             }
 
+            ////--start--///Set the DepartureCountryId
+            int countryIdFromServiceCentreId = 0;
+            try
+            {
+                var departureCountry = await _uow.Country.GetCountryByServiceCentreId(newGeneralLedger.ServiceCentreId);
+                countryIdFromServiceCentreId = departureCountry.CountryId;
+            }
+            catch (Exception) { }
+            ////--end--///Set the DepartureCountryId
+            
+            newGeneralLedger.CountryId = countryIdFromServiceCentreId;
             _uow.GeneralLedger.Add(newGeneralLedger);
             await _uow.CompleteAsync();
             return new { id = newGeneralLedger.GeneralLedgerId };

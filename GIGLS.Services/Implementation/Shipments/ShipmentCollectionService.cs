@@ -503,11 +503,22 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
+                ////--start--///Set the DepartureCountryId
+                int countryIdFromServiceCentreId = 0;
+                try
+                {
+                    var departureCountry = await _uow.Country.GetCountryByServiceCentreId(getServiceCenterCode[0].ServiceCentreId);
+                    countryIdFromServiceCentreId = departureCountry.CountryId;
+                }
+                catch (Exception) { }
+                ////--end--///Set the DepartureCountryId
+
                 //update general ledger for demurrage
                 var generalLedger = new GeneralLedger()
                 {
                     DateOfEntry = DateTime.Now,
                     ServiceCentreId = getServiceCenterCode[0].ServiceCentreId, //serviceCenters[0],
+                    CountryId = countryIdFromServiceCentreId,
                     UserId = shipmentCollectionDto.UserId,
                     Amount = shipmentCollectionDto.Demurrage.AmountPaid,
                     CreditDebitType = CreditDebitType.Credit,

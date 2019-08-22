@@ -30,11 +30,18 @@ namespace GIGLS.Core.Domain.Partnership
         [MaxLength(128)]
         public string UserId { get; set; }
         public bool IsActivated { get; set; }
-
         [MaxLength(100)]
         public string VehicleType { get; set; }
 
         public string PictureUrl { get; set; }
+
+        [MaxLength(100)]
+        public string BankName { get; set; }
+        [MaxLength(100)]
+        public string AccountNumber { get; set; }
+
+        [MaxLength(100)]
+        public string AccountName { get; set; }
 
         // Foreign Key
        // public int PartnerApplicationId { get; set; }

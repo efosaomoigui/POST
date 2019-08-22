@@ -124,6 +124,10 @@ namespace GIGL.GIGLS.Core.Domain
         //Country info
         public int DepartureCountryId { get; set; }
         public int DestinationCountryId { get; set; }
+        public decimal CurrencyRatio { get; set; }
+
+        //new property for mobile
+        public string DeliveryNumber { get; set; }
 
     }
 }

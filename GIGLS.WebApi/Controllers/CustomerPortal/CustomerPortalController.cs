@@ -32,6 +32,10 @@ using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.Enums;
+using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.IMessageService;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -51,11 +55,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         private readonly IServiceCentreService _service;
         private readonly ICategoryService _categoryservice;
         private readonly ISubCategoryService _subcategoryservice;
+        private readonly IPasswordGenerator _passwordGenerator;
+        private readonly IMessageSenderService _messageSenderService;
 
 
         public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IOTPService otpService,
             IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService, IWalletService walletService, IWalletTransactionService walletTransactionService, IServiceCentreService service,
-            ICategoryService categoryservice, ISubCategoryService subcategoryservice) : base(nameof(CustomerPortalController))
+            ICategoryService categoryservice, ISubCategoryService subcategoryservice, IPasswordGenerator passwordGenerator, IMessageSenderService messageSenderService) : base(nameof(CustomerPortalController))
         {
             // _uow = uow;
             _userService = userService;
@@ -69,6 +75,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             _service = service;
             _categoryservice = categoryservice;
             _subcategoryservice = subcategoryservice;
+            _passwordGenerator = passwordGenerator;
+            _messageSenderService = messageSenderService;
         }
 
 
@@ -689,20 +697,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("login/{UserDetail}/{Password}")]
-        public async Task<IServiceResponse<JObject>> Login(string UserDetail, string Password)
+        [Route("login")]
+        public async Task<IServiceResponse<JObject>> Login(MobileLoginDTO logindetail)
         {
 
-            var user = await _otpService.CheckDetails(UserDetail);
+            var user = await _otpService.CheckDetails(logindetail.UserDetail);
             var vehicle = user.VehicleType;
             if (user.Username != null)
             {
                 user.Username = user.Username.Trim();
             }
 
-            if (Password != null)
+            if (logindetail.Password != null)
             {
-                Password = Password.Trim();
+                logindetail.Password = logindetail.Password.Trim();
             }
             if (user != null && user.IsActive == true)
             {
@@ -723,7 +731,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             {
                          new KeyValuePair<string, string>("grant_type", "password"),
                          new KeyValuePair<string, string>("Username", user.Username),
-                         new KeyValuePair<string, string>("Password", Password),
+                         new KeyValuePair<string, string>("Password", logindetail.Password),
                          });
 
                         //setup login data
@@ -733,7 +741,17 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                         {
                             throw new GenericException("Operation could not complete login successfully:");
                         }
-
+                        else
+                        {
+                            if (logindetail.UserChannelType == UserChannelType.IndividualCustomer.ToString())
+                            {
+                                var response = await _preshipmentmobileService.CreateCustomer(user.UserChannelCode);
+                            }
+                            if (logindetail.UserChannelType == UserChannelType.Partner.ToString())
+                            {
+                                var response = await _preshipmentmobileService.CreatePartner(user.UserChannelCode);
+                            }
+                        }
                         //get access token from response body
                         var responseJson = await responseMessage.Content.ReadAsStringAsync();
                         var jObject = JObject.Parse(responseJson);
@@ -742,8 +760,9 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                         return new ServiceResponse<JObject>
                         {
                             VehicleType = vehicle,
-                            Object = jObject
-                            
+                            Object = jObject,
+                            ReferrerCode = user.Referrercode,
+                            AverageRatings = user.AverageRatings
 
                         };
                     }
@@ -1086,5 +1105,94 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+
+        [HttpPost]
+        [Route("adddeliverynumber")]
+        public async Task<IServiceResponse<bool>> UpdateDeliveryNumber(MobileShipmentNumberDTO detail)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _preshipmentmobileService.UpdateDeliveryNumber(detail);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("deleterecord")]
+        public async Task<IServiceResponse<bool>> DeleteRecord(UserDTO user)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _preshipmentmobileService.deleterecord(user.Email);
+                return new ServiceResponse<bool>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("forgotpassword")]
+        public async Task<IServiceResponse<bool>> ForgotPassword(UserDTO user)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                string password = await _passwordGenerator.Generate();
+                var User = await _userService.ForgotPassword(user.Email, password);
+
+                if (User.Succeeded)
+                {
+                    var passwordMessage = new PasswordMessageDTO()
+                    {
+                        Password = password,
+                        UserEmail = user.Email
+                    };
+
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
+                }
+                else
+                {
+                    throw new GenericException("Operation could not be completed");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("verifypartnerdetails")]
+        public async Task<IServiceResponse<bool>> VerifyPartnerDetails(PartnerDTO partner)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _preshipmentmobileService.VerifyPartnerDetails(partner);
+                return new ServiceResponse<bool>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getallpartnerdetails")]
+        public async Task<IServiceResponse<PartnerDTO>> GetAllPartnerDetails(PartnerDTO partner)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _preshipmentmobileService.GetPartnerDetails(partner.Email);
+                return new ServiceResponse<PartnerDTO>
+                {
+                    Object = response
+                };
+            });
+        }
     }
 }

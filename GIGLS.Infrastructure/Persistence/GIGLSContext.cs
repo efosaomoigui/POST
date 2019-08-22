@@ -256,6 +256,12 @@ namespace GIGLS.Infrastructure.Persistence
 
         public DbSet<MobileRating> MobileRating { get; set; }
 
+        public DbSet<ReferrerCode> ReferrerCode { get; set; }
+
+        public DbSet<DeliveryNumber> DeliveryNumber { get; set; }
+
+        public DbSet<VehicleType> VehicleType { get; set; }
+
         #endregion
 
 
