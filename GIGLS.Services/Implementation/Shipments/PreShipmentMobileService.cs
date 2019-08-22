@@ -1240,22 +1240,6 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
 
-        public async Task<bool> IsPartnerActivated(string CustomerCode)
-        {
-            try
-            {
-                bool IsActivated = false;
-                var partner = await _uow.Partner.GetAsync(s => s.PartnerCode == CustomerCode);
-                if (partner != null)
-                {
-                    IsActivated = partner.IsActivated;
-                }
-                return IsActivated; 
-            }
-            catch
-            {
-                throw;
-            }
-        }
+        
     }
 }

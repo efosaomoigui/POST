@@ -751,14 +751,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             {
                                 var response = await _preshipmentmobileService.CreatePartner(user.UserChannelCode);
                             }
-                            if (logindetail.UserChannelType == UserChannelType.Partner.ToString())
-                            {
-                                var response = await _preshipmentmobileService.IsPartnerActivated(user.UserChannelCode);
-                                if(response!=true)
-                                {
-                                    throw new GenericException("Partner has not been verified");
-                                }
-                            }
+                            
                         }
                         //get access token from response body
                         var responseJson = await responseMessage.Content.ReadAsStringAsync();
@@ -770,7 +763,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             VehicleType = vehicle,
                             Object = jObject,
                             ReferrerCode = user.Referrercode,
-                            AverageRatings = user.AverageRatings
+                            AverageRatings = user.AverageRatings,
+                            IsVerified = user.IsVerified
 
                         };
                     }

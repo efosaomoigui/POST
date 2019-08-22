@@ -37,6 +37,6 @@ namespace GIGLS.Core.IServices.Shipments
 
         Task<PartnerDTO> GetPartnerDetails(string EmailId);
 
-        Task<bool> IsPartnerActivated(string CustomerCode);
+      
     }
 }
