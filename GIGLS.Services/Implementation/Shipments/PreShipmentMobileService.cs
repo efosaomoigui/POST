@@ -1121,6 +1121,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == user.UserChannelCode);
                     if (wallet != null)
                     {
+                        var transactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == wallet.WalletId);
+                        if (transactions.Count() > 0)
+                        {
+                            foreach (var transaction in transactions.ToList())
+                            {
+                                _uow.WalletTransaction.Remove(transaction);
+                            }
+                        }
                         _uow.Wallet.Remove(wallet);
                     }
                     var userDTO = await _uow.User.Remove(user.Id);
