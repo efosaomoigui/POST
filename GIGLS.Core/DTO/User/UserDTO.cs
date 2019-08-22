@@ -73,5 +73,7 @@ namespace GIGLS.Core.DTO.User
         public string Referrercode { get; set; }
 
         public double AverageRatings { get; set; }
+
+        public bool IsVerified { get; set; }
     }
 }

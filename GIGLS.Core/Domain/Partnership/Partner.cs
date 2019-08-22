@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.Enums;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace GIGLS.Core.Domain.Partnership
@@ -37,17 +38,22 @@ namespace GIGLS.Core.Domain.Partnership
 
         [MaxLength(100)]
         public string BankName { get; set; }
-        [MaxLength(100)]
-        public string AccountNumber { get; set; }
+        
+        public long? AccountNumber { get; set; }
 
         [MaxLength(100)]
         public string AccountName { get; set; }
+        public string VehicleLicenseNumber { get; set; }
+        public DateTime? VehicleLicenseExpiryDate { get; set; }
+
+        public string VehicleLicenseImageDetails { get; set; }
+
 
         // Foreign Key
-       // public int PartnerApplicationId { get; set; }
+        // public int PartnerApplicationId { get; set; }
         //public virtual PartnerApplication PartnerApplication { get; set; }
 
-       // public int WalletId { get; set; }
-      //  public virtual Wallet.Wallet Wallet { get; set; }
+        // public int WalletId { get; set; }
+        //  public virtual Wallet.Wallet Wallet { get; set; }
     }
 }
