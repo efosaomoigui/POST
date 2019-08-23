@@ -73,28 +73,15 @@ namespace GIGLS.Services.Implementation.Wallet
         //New bank processing order for shipment
         public async Task<Tuple<string, List<InvoiceViewDTO>, decimal>> GetBankProcessingOrderForShipment(DepositType type)
         {
-            //var isSCA =await _userService.CheckSCA();
-            //if (!isSCA)
-            //{
-            //    throw new GenericException("User is not a Service Center Agent!");
-            //}
-
-            var enddate = DateTime.Now;
-
             //Get Bank Deposit Module StartDate
             var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate);
             string globalpropertiesdateStr = globalpropertiesdateObj?.Value;
 
             var globalpropertiesdate = DateTime.MinValue;
             bool success = DateTime.TryParse(globalpropertiesdateStr, out globalpropertiesdate);
-
-            //Generate the refcode
-            var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
-            var refcode = await _service.GenerateNextNumber(NumberGeneratorType.BankProcessingOrderForShipment, getServiceCenterCode[0].Code);
-
+            
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
-            //var allShipments = _uow.Invoice.GetAllFromInvoiceView();
             var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
 
             allShipments = allShipments.Where(s => s.PaymentMethod == "Cash" && s.PaymentStatus == PaymentStatus.Paid);
@@ -115,18 +102,17 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             //B. combine list for partial and cash shipment
-            var cashShipments = new List<GIGLS.Core.DTO.Account.InvoiceViewDTO>();
+            var cashShipments = new List<InvoiceViewDTO>();
             if (serviceCenters.Length > 0)
             {
                 var shipmentResult = allShipments.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId)).ToList();
                 var allShipmentsPartialVals = allShipmentsPartial.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId)).ToList();
 
                 shipmentResult.AddRange(allShipmentsPartialVals);
-                cashShipments = Mapper.Map<List<GIGLS.Core.DTO.Account.InvoiceViewDTO>>(shipmentResult);
+                cashShipments = Mapper.Map<List<InvoiceViewDTO>>(shipmentResult);
             }
 
-            //var partialPaymentCash = returnPartialPaymentCashByWaybill();
-            var cashShipmentsVal = new List<GIGLS.Core.DTO.Account.InvoiceViewDTO>();
+            var cashShipmentsVal = new List<InvoiceViewDTO>();
             foreach (var item in cashShipments)
             {
                 //1. cash first
@@ -147,12 +133,20 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
                 }
             }
-
+            
             //3. sum total
             decimal total = cashShipmentsVal.Sum(s => s.GrandTotal);
+
+            //Generate the refcode
+            string refcode = "00000000";
+            if (total > 0)
+            {
+                var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
+                refcode = await _service.GenerateNextNumber(NumberGeneratorType.BankProcessingOrderForShipment, getServiceCenterCode[0].Code);
+            }
+
             var comboresult = Tuple.Create(refcode, cashShipmentsVal, total);
             return await Task.FromResult(comboresult);
-
         }
 
         private async Task<Tuple<List<PaymentPartialTransaction>, decimal>> returnPartialPaymentCashByWaybill(string waybill)
@@ -174,17 +168,6 @@ namespace GIGLS.Services.Implementation.Wallet
         //New bank processing order for Demurrage
         public async Task<Tuple<string, List<DemurrageRegisterAccountDTO>, decimal>> GetBankProcessingOrderForDemurrage(DepositType type)
         {
-            //var isSCA =await _userService.CheckSCA();
-            //if (!isSCA)
-            //{
-            //    throw new GenericException("User is not a Service Center Agent!");
-            //}
-
-            var enddate = DateTime.Now;
-
-            //Generate the refcode
-            var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
-            var refcode = await _service.GenerateNextNumber(NumberGeneratorType.BankProcessingOrderForDemurrage, getServiceCenterCode[0].Code);
             decimal total = 0;
 
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
@@ -215,6 +198,14 @@ namespace GIGLS.Services.Implementation.Wallet
                 total += item.Amount;
             }
 
+            //Generate the refcode
+            string refcode = "00000000";
+            if (total > 0)
+            {
+                var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
+                refcode = await _service.GenerateNextNumber(NumberGeneratorType.BankProcessingOrderForDemurrage, getServiceCenterCode[0].Code);
+            }
+            
             var cashdemurrage = Mapper.Map<List<DemurrageRegisterAccountDTO>>(demurrageResults);
             var comboresult = Tuple.Create(refcode, cashdemurrage, total);
             return await Task.FromResult(comboresult);
@@ -223,22 +214,11 @@ namespace GIGLS.Services.Implementation.Wallet
         //New bank processing order for COD
         public async Task<Tuple<string, List<CashOnDeliveryRegisterAccountDTO>, decimal>> GetBankProcessingOrderForCOD(DepositType type)
         {
-            //var isSCA =await _userService.CheckSCA();
-            //if (!isSCA)
-            //{
-            //    throw new GenericException("User is not a Service Center Agent!");
-            //}
-
-            var enddate = DateTime.Now;
-
-            //Generate the refcode
-            var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
-            var refcode = await _service.GenerateNextNumber(NumberGeneratorType.BankProcessingOrderForCOD, getServiceCenterCode[0].Code);
             decimal total = 0;
 
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
             var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
-            allCODs = allCODs.Where(s => s.CODStatusHistory == CODStatushistory.RecievedAtServiceCenter);
+            allCODs = allCODs.Where(s => s.CODStatusHistory == CODStatushistory.RecievedAtServiceCenter || s.CODStatusHistory == CODStatushistory.CollectedByDispatch);
             allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
 
             //added for GWA and GWARIMPA service centres
@@ -261,6 +241,14 @@ namespace GIGLS.Services.Implementation.Wallet
             foreach (var item in codResults)
             {
                 total += item.Amount;
+            }
+
+            //Generate the refcode
+            string refcode = "00000000";
+            if (total > 0)
+            {
+                var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
+                refcode = await _service.GenerateNextNumber(NumberGeneratorType.BankProcessingOrderForCOD, getServiceCenterCode[0].Code);
             }
 
             var cashcods = Mapper.Map<List<CashOnDeliveryRegisterAccountDTO>>(codResults);
@@ -349,6 +337,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 foreach (var item in bankedShipments)
                 {
                     total += item.CODAmount;
+                    item.Amount = item.CODAmount;
                 }
             }
 

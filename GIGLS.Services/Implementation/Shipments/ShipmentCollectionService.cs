@@ -440,10 +440,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //Get Destination Service centre details
             var getServiceCentreDetail = await _uow.ServiceCentre.GetAsync(shipmentCollection.DestinationServiceCentreId);
-
-
-            var serviceCentre = new ServiceCentreDTO() { };
-
+            
             //cash collected on Delivery
             if (shipmentCollectionDto.IsCashOnDelivery)
             {

@@ -38,7 +38,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _userService = userService;
             _customerService = customerService;
             _shipmentService = shipmentService;
-            
+
             MapperConfig.Initialize();
         }
 
@@ -291,7 +291,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //var InvoicesBySC = _uow.Invoice.GetAllFromInvoiceView();
                 //var InvoicesBySC = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(x => waybills.Contains(x.Waybill));
                 var InvoicesBySC = _uow.Shipment.GetAllAsQueryable().Where(x => waybills.Contains(x.Waybill) && x.IsCancelled == false && x.IsDeleted == false);
-                
+
                 //InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && x.PickupOptions == PickupOptions.HOMEDELIVERY && waybills.Contains(x.Waybill));
                 //InvoicesBySC = InvoicesBySC.Where(x => x.IsCancelled == false && waybills.Contains(x.Waybill));
 
@@ -364,11 +364,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         manifestwaybill.ShipmentScanStatus = shipmentCollectionObj.ShipmentScanStatus;
                         var scanList = await _uow.ScanStatus.GetAsync(x => x.Code == manifestwaybill.ShipmentScanStatus.ToString());
-                        
-                        if(scanList != null)
+
+                        if (scanList != null)
                         {
                             manifestwaybill.ScanDescription = scanList.Incident;
-                        }                        
+                        }
                     }
                 }
 
@@ -513,7 +513,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         manifestwaybill.ShipmentScanStatus = shipmentCollectionObj.ShipmentScanStatus;
                     }
                 }
-                
+
                 //map all the manifest code to the first in the list 
                 if (userDispatchs.Any())
                 {
@@ -658,7 +658,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 string user = await _userService.GetCurrentUserId();
 
                 var manifestDTO = await _manifestService.GetManifestByCode(manifest);
-                var getServiceCenterCode = await _userService.GetCurrentServiceCenter(); 
+                //var getServiceCenterCode = await _userService.GetCurrentServiceCenter(); 
 
                 List<CashOnDeliveryRegisterAccount> codRegisterCollectsForASingleWaybillList = new List<CashOnDeliveryRegisterAccount>();
                 foreach (var waybill in waybills)
@@ -671,23 +671,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException($"Waybill {waybill} does not mapped to the manifest {manifest}");
                     }
 
-                    //2. check and return only delivered shipments in order to update cod
-                    var shipmentCollectionDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.IsCashOnDelivery == true && (x.ShipmentScanStatus == ShipmentScanStatus.OKT) || x.ShipmentScanStatus == ShipmentScanStatus.OKC);
-                    if (shipmentCollectionDelivered != null)
-                    {
-                        //Update CashOnDevliveryRegisterAccount As  Cash Recieved at Service Center
-                        var codRegisterCollectsForASingleWaybill = _uow.CashOnDeliveryRegisterAccount.Find(s => s.Waybill == waybill).FirstOrDefault();
-
-                        if (codRegisterCollectsForASingleWaybill != null)
-                        {
-                            codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
-                            codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
-                            codRegisterCollectsForASingleWaybillList.Add(codRegisterCollectsForASingleWaybill);
-                        }
-                        continue;
-                    }                                                         
-
-                    //3. check if the user is at the final destination centre of the shipment
+                    //2. check if the user is at the final destination centre of the shipment
                     if (serviceIds.Length == 1 && serviceIds[0] == manifestWaybillMapping.ServiceCentreId)
                     {
                         //update manifestWaybillMapping status for the waybill
@@ -695,8 +679,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
                         //3. check if the waybill has not been delivered 
                         var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.WC);
-                        
-                        if(shipmentCollection != null)
+
+                        if (shipmentCollection != null)
                         {
                             //Update shipment collection to make it available at collection centre
                             shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.ARF;
@@ -717,6 +701,22 @@ namespace GIGLS.Services.Implementation.Shipments
                     else
                     {
                         throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+                    }
+
+                    //3. check and return only delivered shipments in order to update cod
+                    var shipmentCollectionDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.IsCashOnDelivery == true && (x.ShipmentScanStatus == ShipmentScanStatus.OKT) || x.ShipmentScanStatus == ShipmentScanStatus.OKC);
+                    if (shipmentCollectionDelivered != null)
+                    {
+                        //Update CashOnDevliveryRegisterAccount As  Cash Recieved at Service Center
+                        var codRegisterCollectsForASingleWaybill = _uow.CashOnDeliveryRegisterAccount.Find(s => s.Waybill == waybill).FirstOrDefault();
+
+                        if (codRegisterCollectsForASingleWaybill != null)
+                        {
+                            codRegisterCollectsForASingleWaybill.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter;
+                            codRegisterCollectsForASingleWaybill.ServiceCenterId = serviceCenter.ServiceCentreId; //getServiceCenterCode[0].ServiceCentreId;
+                            codRegisterCollectsForASingleWaybillList.Add(codRegisterCollectsForASingleWaybill);
+                        }
+                        continue;
                     }
                 }
 
@@ -742,7 +742,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF);
                 var shipmentCollection = _uow.ShipmentCollection.GetAll()
                     .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).Select(x => x.Waybill);
-                
+
                 //2. Get shipment details for the service centre that are at the collection centre using the waybill and service centre
                 var InvoicesBySC = _uow.Invoice.GetAllInvoiceShipments();
 
@@ -753,11 +753,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     InvoicesBySC = InvoicesBySC.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId));
                 }
-                
+
                 ////final list
                 InvoicesBySC = InvoicesBySC.Where(s => shipmentCollection.Contains(s.Waybill));
                 var InvoicesBySCList = InvoicesBySC.ToList();
-                
+
                 shipmentsBySC = (from r in InvoicesBySCList
                                  select new ShipmentDTO()
                                  {
@@ -784,7 +784,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                      {
                                          Code = r.DestinationServiceCentreCode,
                                          Name = r.DestinationServiceCentreName
-                                     },                                     
+                                     },
                                      PaymentStatus = r.PaymentStatus,
                                      ReceiverAddress = r.ReceiverAddress,
                                      ReceiverCity = r.ReceiverCity,
@@ -810,8 +810,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
-
+        
         //get manifest waiting to signoff
         public async Task<List<ManifestWaybillMappingDTO>> GetManifestWaitingForSignOff()
         {
