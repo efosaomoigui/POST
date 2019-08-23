@@ -574,7 +574,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }).ToList()
                     };
                     var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
-                    preshipmentmobile.shipmentstatus = "Picked up";
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.PickedUp.ToString();
                     preshipmentmobile.IsConfirmed = true;
                     await _uow.CompleteAsync();
 
@@ -627,7 +627,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         Waybill = preshipmentmobile.Waybill
                     };
                     var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
-                    preshipmentmobile.shipmentstatus = "Shipment Delivered";
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Delivered.ToString();
                     await _uow.CompleteAsync();
                     var messageextensionDTO = new MobileMessageDTO()
                     {
