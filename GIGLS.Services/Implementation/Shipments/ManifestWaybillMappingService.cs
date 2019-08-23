@@ -363,12 +363,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (shipmentCollectionObj != null)
                     {
                         manifestwaybill.ShipmentScanStatus = shipmentCollectionObj.ShipmentScanStatus;
-                        var strings = manifestwaybill.ShipmentScanStatus.ToString();
-                        var scanList = await _uow.ScanStatus.GetAsync(x => x.Code == strings);
-                       
-                        var scanListDto = Mapper.Map<ScanStatusDTO>(scanList);
-                        manifestwaybill.ScanDescription = scanListDto.Incident;
+                        var scanList = await _uow.ScanStatus.GetAsync(x => x.Code == manifestwaybill.ShipmentScanStatus.ToString());
                         
+                        if(scanList != null)
+                        {
+                            manifestwaybill.ScanDescription = scanList.Incident;
+                        }                        
                     }
                 }
 
@@ -379,6 +379,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
         //Get Waybills In Manifest for Dispatch
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatchOld()
         {
@@ -662,8 +663,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 List<CashOnDeliveryRegisterAccount> codRegisterCollectsForASingleWaybillList = new List<CashOnDeliveryRegisterAccount>();
                 foreach (var waybill in waybills)
                 {
-                    //1a. check and return only delivered shipments
-                    var shipmentCollectionDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.OKT);
+                    //1. check if the waybill is in the manifest 
+                    var manifestWaybillMapping = await _uow.ManifestWaybillMapping.GetAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
+
+                    if (manifestWaybillMapping == null)
+                    {
+                        throw new GenericException($"Waybill {waybill} does not mapped to the manifest {manifest}");
+                    }
+
+                    //2. check and return only delivered shipments in order to update cod
+                    var shipmentCollectionDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.IsCashOnDelivery == true && (x.ShipmentScanStatus == ShipmentScanStatus.OKT) || x.ShipmentScanStatus == ShipmentScanStatus.OKC);
                     if (shipmentCollectionDelivered != null)
                     {
                         //Update CashOnDevliveryRegisterAccount As  Cash Recieved at Service Center
@@ -676,18 +685,9 @@ namespace GIGLS.Services.Implementation.Shipments
                             codRegisterCollectsForASingleWaybillList.Add(codRegisterCollectsForASingleWaybill);
                         }
                         continue;
-                    }
+                    }                                                         
 
-
-                    //1. check if the waybill is in the manifest 
-                    var manifestWaybillMapping = await _uow.ManifestWaybillMapping.GetAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
-
-                    if (manifestWaybillMapping == null)
-                    {
-                        throw new GenericException($"Waybill {waybill} does not mapped to the manifest {manifest}");
-                    }
-
-                    //2. check if the user is at the final destination centre of the shipment
+                    //3. check if the user is at the final destination centre of the shipment
                     if (serviceIds.Length == 1 && serviceIds[0] == manifestWaybillMapping.ServiceCentreId)
                     {
                         //update manifestWaybillMapping status for the waybill
@@ -695,12 +695,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
                         //3. check if the waybill has not been delivered 
                         var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.WC);
-                        //var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill);
-                        if (shipmentCollection == null)
-                        {
-                            throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
-                        }
-                        else
+                        
+                        if(shipmentCollection != null)
                         {
                             //Update shipment collection to make it available at collection centre
                             shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.ARF;
@@ -726,7 +722,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //update codRegisterCollectsForASingleWaybillList in the db
                 codRegisterCollectsForASingleWaybillList.ForEach(s => s.CODStatusHistory = CODStatushistory.RecievedAtServiceCenter);
-
                 await _uow.CompleteAsync();
             }
             catch (Exception)
