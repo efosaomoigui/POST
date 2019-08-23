@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
+using System;
 using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Partnership
@@ -27,8 +28,13 @@ namespace GIGLS.Core.DTO.Partnership
 
         public string PictureUrl { get; set; }
         public string BankName { get; set; }
-        public string AccountNumber { get; set; }
+        public long? AccountNumber { get; set; }
 
         public string AccountName { get; set; }
+        public string VehicleLicenseNumber { get; set; }
+        public DateTime? VehicleLicenseExpiryDate { get; set; }
+
+        public string VehicleLicenseImageDetails { get; set; }
+
     }
 }

@@ -33,7 +33,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == PickUpRequest.Waybill);
                 if (MobilePickupRequests != null)
                 {
-                    throw new GenericException($"Shipment with waybill number: {PickUpRequest.Waybill} exists already");
+                    if (MobilePickupRequests.Status != MobilePickUpRequestStatus.Rejected.ToString())
+                    {
+                        throw new GenericException($"Shipment with waybill number: {PickUpRequest.Waybill} exists already");
+                    }
+                    
                 }
                 var newMobilePickUpRequest = Mapper.Map<MobilePickUpRequests>(PickUpRequest);
                 _uow.MobilePickUpRequests.Add(newMobilePickUpRequest);

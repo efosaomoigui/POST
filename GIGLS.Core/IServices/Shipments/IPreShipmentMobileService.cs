@@ -36,5 +36,10 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> VerifyPartnerDetails(PartnerDTO partner);
 
         Task<PartnerDTO> GetPartnerDetails(string EmailId);
+
+        Task<bool> UpdateReceiverDetails(PreShipmentMobileDTO receiver);
+
+
+
     }
 }

@@ -527,7 +527,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
         [AllowAnonymous]
         [HttpPost]
         [Route("register")]
@@ -739,7 +738,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                         if (!responseMessage.IsSuccessStatusCode)
                         {
-                            throw new GenericException("Operation could not complete login successfully:");
+                            throw new GenericException("Incorrect Login Details");
                         }
                         else
                         {
@@ -751,6 +750,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             {
                                 var response = await _preshipmentmobileService.CreatePartner(user.UserChannelCode);
                             }
+                            
                         }
                         //get access token from response body
                         var responseJson = await responseMessage.Content.ReadAsStringAsync();
@@ -762,7 +762,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             VehicleType = vehicle,
                             Object = jObject,
                             ReferrerCode = user.Referrercode,
-                            AverageRatings = user.AverageRatings
+                            AverageRatings = user.AverageRatings,
+                            IsVerified = user.IsVerified
 
                         };
                     }
@@ -1181,7 +1182,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("getallpartnerdetails")]
         public async Task<IServiceResponse<PartnerDTO>> GetAllPartnerDetails(PartnerDTO partner)
         {
@@ -1189,6 +1190,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             {
                 var response = await _preshipmentmobileService.GetPartnerDetails(partner.Email);
                 return new ServiceResponse<PartnerDTO>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("updatereceiverdetails")]
+        public async Task<IServiceResponse<bool>> UpdateReceiverDetails(PreShipmentMobileDTO receiver)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _preshipmentmobileService.UpdateReceiverDetails(receiver);
+                return new ServiceResponse<bool>
                 {
                     Object = response
                 };

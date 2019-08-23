@@ -35,5 +35,7 @@ namespace GIGLS.Services.Implementation
         public string ReferrerCode { get; set; }
 
         public double AverageRatings { get; set; }
+
+        public bool IsVerified { get; set; }
     }
 }

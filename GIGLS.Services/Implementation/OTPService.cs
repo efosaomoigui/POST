@@ -148,6 +148,8 @@ namespace GIGLS.Services.Implementation
                     registerUser.Referrercode = referrercode.Referrercode;
                 }
                 var averageratings = await GetAverageRating(registerUser.UserChannelCode);
+                var IsVerified = await IsPartnerActivated(registerUser.UserChannelCode);
+                registerUser.IsVerified = IsVerified;
                 registerUser.AverageRatings = averageratings;
             }
             else
@@ -206,7 +208,9 @@ namespace GIGLS.Services.Implementation
                         registerUser.Referrercode = referrercode.Referrercode;
                     }
                     var averageratings = await GetAverageRating(registerUser.UserChannelCode);
+                    var IsVerified = await IsPartnerActivated(registerUser.UserChannelCode);
                     registerUser.AverageRatings = averageratings;
+                    registerUser.IsVerified = IsVerified;
                 }
                 else
                 {
@@ -229,6 +233,23 @@ namespace GIGLS.Services.Implementation
             }
             var rating = (double)averageratings;
             return rating;
+        }
+        public async Task<bool> IsPartnerActivated(string CustomerCode)
+        {
+            try
+            {
+                bool IsActivated = false;
+                var partner = await _uow.Partner.GetAsync(s => s.PartnerCode == CustomerCode);
+                if (partner != null)
+                {
+                    IsActivated = partner.IsActivated;
+                }
+                return IsActivated;
+            }
+            catch
+            {
+                throw;
+            }
         }
 
     }
