@@ -114,7 +114,9 @@ namespace GIGLS.Core.DTO.Shipments
         public string PartnerLastName { get; set; }
 
         public string PartnerImageUrl { get; set; }
+        public string ActualReceiverFirstName { get; set; }
+        public string ActualReceiverLastName { get; set; }
+        public string ActualReceiverPhoneNumber { get; set; }
 
-        
     }
 }

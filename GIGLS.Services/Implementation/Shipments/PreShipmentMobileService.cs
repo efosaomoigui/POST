@@ -1251,7 +1251,29 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<bool> UpdateReceiverDetails(PreShipmentMobileDTO receiver)
+        {
+            try
+            {
+                var shipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill== receiver.Waybill);
+                if (shipment != null)
+                {
+                    shipment.ActualReceiverFirstName = receiver.ActualReceiverFirstName;
+                    shipment.ActualReceiverLastName = receiver.ActualReceiverLastName;
+                    shipment.ActualReceiverPhoneNumber = receiver.ActualReceiverPhoneNumber;
+                }
+                else
+                {
+                    throw new GenericException("Shipment Information does not exist!");
+                }
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch
+            {
+                throw;
+            }
+        }
 
-        
     }
 }

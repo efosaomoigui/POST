@@ -107,6 +107,10 @@ namespace GIGLS.Core.Domain
 
         public int? ZoneMapping { get; set; }
 
-       
+        public string ActualReceiverFirstName { get; set; }
+        public string ActualReceiverLastName { get; set; }
+        public string ActualReceiverPhoneNumber { get; set; }
+
+
     }
 }
