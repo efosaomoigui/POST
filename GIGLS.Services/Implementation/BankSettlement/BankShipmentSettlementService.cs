@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.BankSettlement;
@@ -44,7 +43,6 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<IEnumerable<InvoiceViewDTO>> GetCashShipmentSettlement()
         {
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-            //var allShipments = _uow.Invoice.GetAllFromInvoiceView();
             var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
             allShipments = allShipments.Where(s => s.PaymentMethod == "Cash" && s.PaymentStatus == PaymentStatus.Paid);
 
@@ -190,7 +188,6 @@ namespace GIGLS.Services.Implementation.Wallet
             if (serviceCenters.Length > 0)
             {
                 demurrageResults = allDemurrages.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
-
             }
 
             foreach (var item in demurrageResults)
@@ -260,17 +257,10 @@ namespace GIGLS.Services.Implementation.Wallet
         //search from the accountants end of Agility
         public async Task<Tuple<string, List<BankProcessingOrderForShipmentAndCODDTO>, decimal, List<BankProcessingOrderCodesDTO>>> SearchBankProcessingOrder2(string _refcode, DepositType type)
         {
-            //var isSCA =await _userService.CheckSCA();
-            //if (!isSCA)
-            //{
-            //    throw new GenericException("User is not a Service Center Agent!");
-            //}
-
             var bankprcessingresult = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCode(type);
             var bankprcessingresultValue = bankprcessingresult.Where(s => s.Code == _refcode.Trim()).ToList();
 
             //get the start and end date for retrieving of waybills for the bank
-            //var startdate = ReturnBankProcessDate(type);
             var refcode = _refcode.Trim();
 
             //Generate the refcode
@@ -286,16 +276,9 @@ namespace GIGLS.Services.Implementation.Wallet
         //General Search
         public async Task<Tuple<string, List<BankProcessingOrderForShipmentAndCODDTO>, decimal, BankProcessingOrderCodesDTO>> SearchBankProcessingOrder(string _refcode, DepositType type)
         {
-            //var isSCA =await _userService.CheckSCA();
-            //if (!isSCA)
-            //{
-            //    throw new GenericException("User is not a Service Center Agent!");
-            //}
             var bankprcessingresult = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCode(type);
             var bankprcessingresultValue = bankprcessingresult.Where(s => s.Code == _refcode.Trim()).FirstOrDefault();
 
-            //get the start and end date for retrieving of waybills for the bank
-            //var startdate = ReturnBankProcessDate(type);
             var refcode = _refcode.Trim();
 
             //Generate the refcode
@@ -304,8 +287,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
             var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrders(type);
-            var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == refcode.Trim());
-
+            var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == refcode);
 
             //added for GWA and GWARIMPA service centres
             {
@@ -346,6 +328,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 foreach (var item in bankedShipments)
                 {
                     total += item.DemurrageAmount;
+                    item.Amount = item.DemurrageAmount;
                 }
             }
 
@@ -355,17 +338,10 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<Tuple<string, List<BankProcessingOrderForShipmentAndCODDTO>, decimal, BankProcessingOrderCodesDTO>> SearchBankProcessingOrder3(string _refcode, DepositType type)
         {
-            //var isSCA =await _userService.CheckSCA();
-            //if (!isSCA)
-            //{
-            //    throw new GenericException("User is not a Service Center Agent!");
-            //}
-
             var bankprcessingresult = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCode(type);
             var bankprcessingresultValue = bankprcessingresult.Where(s => s.Code == _refcode.Trim()).FirstOrDefault();
 
             //get the start and end date for retrieving of waybills for the bank
-            //var startdate = ReturnBankProcessDate(type);
             var refcode = _refcode.Trim();
 
             //Generate the refcode
@@ -379,7 +355,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var bankedShipments = new List<BankProcessingOrderForShipmentAndCODDTO>();
 
-            //var shipmentResult = accompanyWaybillsVals.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
             bankedShipments = accompanyWaybillsVals.OrderByDescending(s => s.DateCreated).ToList(); // Mapper.Map<List<BankProcessingOrderForShipmentAndCODDTO>>(shipmentResult);
 
             if (type == DepositType.Shipment)
@@ -418,7 +393,7 @@ namespace GIGLS.Services.Implementation.Wallet
             decimal total = 0;
 
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-            //var allShipments = _uow.Invoice.GetAllFromInvoiceView();
+
             var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
 
             //Get Bank Deposit Module StartDate
@@ -443,11 +418,11 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
             }
 
-            var cashShipments = new List<GIGLS.Core.DTO.Account.InvoiceViewDTO>();
+            var cashShipments = new List<InvoiceViewDTO>();
             if (serviceCenters.Length > 0)
             {
                 var shipmentResult = allShipments.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId)).ToList();
-                cashShipments = Mapper.Map<List<GIGLS.Core.DTO.Account.InvoiceViewDTO>>(shipmentResult);
+                cashShipments = Mapper.Map<List<InvoiceViewDTO>>(shipmentResult);
             }
 
             foreach (var item in cashShipments)
@@ -729,8 +704,6 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var bankorder = _uow.BankProcessingOrderCodes.Find(s => s.Code == bankrefcode.Code.Trim()).FirstOrDefault();
 
-            //var bankorder =  _uow.BankProcessingOrderCodes.GetAll();
-            //var bankordervalue = bankorder.Where(s => s.Code == bankrefcode.CodeId);
             if (bankorder == null)
             {
                 throw new GenericException("Bank Order Request Does not Exist!");
@@ -746,7 +719,6 @@ namespace GIGLS.Services.Implementation.Wallet
             var globalpropertiesdate = DateTime.MinValue;
             bool success = DateTime.TryParse(globalpropertiesdateStr, out globalpropertiesdate);
 
-            //var serviceCenters = _userService.GetPriviledgeServiceCenters();
             var serviceCenters = await _userService.GetCurrentServiceCenter();
             var currentCenter = serviceCenters[0].ServiceCentreId;
             var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
@@ -762,7 +734,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //update Shipment
             nonDepsitedValue.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
-
             await _uow.CompleteAsync();
         }
 
@@ -770,8 +741,6 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var bankorder = _uow.BankProcessingOrderCodes.Find(s => s.Code == bankrefcode.Code).FirstOrDefault();
 
-            //var bankorder =  _uow.BankProcessingOrderCodes.GetAll();
-            //var bankordervalue = bankorder.Where(s => s.Code == bankrefcode.CodeId);
             if (bankorder == null)
             {
                 throw new GenericException("Bank Order Request Does not Exist!");
@@ -783,7 +752,6 @@ namespace GIGLS.Services.Implementation.Wallet
             //Verifield by
             var user = await _userService.retUser();
             bankorder.UserId = user.Id;
-            //bankorder.FullName = user.FirstName + " " + user.LastName;
             bankorder.VerifiedBy = user.FirstName + " " + user.LastName;
 
             var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
@@ -813,8 +781,6 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var bankorder = _uow.BankProcessingOrderCodes.Find(s => s.Code == bankrefcode.Code).FirstOrDefault();
 
-            //var bankorder =  _uow.BankProcessingOrderCodes.GetAll();
-            //var bankordervalue = bankorder.Where(s => s.Code == bankrefcode.CodeId);
             if (bankorder == null)
             {
                 throw new GenericException("Bank Order Request Does not Exist!");
@@ -846,8 +812,6 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var bankorder = _uow.BankProcessingOrderCodes.Find(s => s.Code == bankrefcode.Code).FirstOrDefault();
 
-            //var bankorder =  _uow.BankProcessingOrderCodes.GetAll();
-            //var bankordervalue = bankorder.Where(s => s.Code == bankrefcode.CodeId);
             if (bankorder == null)
             {
                 throw new GenericException("Bank Order Request Does not Exist!");
@@ -874,8 +838,6 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var bankorder = _uow.BankProcessingOrderCodes.Find(s => s.Code == bankrefcode.Code).FirstOrDefault();
 
-            //var bankorder =  _uow.BankProcessingOrderCodes.GetAll();
-            //var bankordervalue = bankorder.Where(s => s.Code == bankrefcode.CodeId);
             if (bankorder == null)
             {
                 throw new GenericException("Bank Order Request Does not Exist!");
@@ -884,19 +846,12 @@ namespace GIGLS.Services.Implementation.Wallet
             //Verifield by
             var user = await _userService.retUser();
             bankorder.UserId = user.Id;
-            //bankorder.FullName = user.FirstName + " " + user.LastName;
             bankorder.VerifiedBy = user.FirstName + " " + user.LastName;
 
-            //var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
             var allDemurrages = _uow.DemurrageRegisterAccount.GetDemurrageAsQueryable();
             allDemurrages = allDemurrages.Where(s => s.DepositStatus == DepositStatus.Deposited && s.RefCode == bankrefcode.Code);
 
-            //allCODs = allCODs.Where(s => s.RefCode == bankrefcode.Code);
             var allDemurragesResult = allDemurrages.ToList();
-            //var codsforservicecenter = allCODs.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
-
-            //var serviceCenters2 = await _userService.GetCurrentServiceCenter();
-            //var currentCenter = serviceCenters2[0].ServiceCentreId;
             var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
 
             //update BankProcessingOrderForShipmentAndCOD
@@ -914,8 +869,6 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var bankorder = _uow.BankProcessingOrderCodes.Find(s => s.Code == bankrefcode.Code).FirstOrDefault();
 
-            //var bankorder =  _uow.BankProcessingOrderCodes.GetAll();
-            //var bankordervalue = bankorder.Where(s => s.Code == bankrefcode.CodeId);
             if (bankorder == null)
             {
                 throw new GenericException("Bank Order Request Does not Exist!");
@@ -924,19 +877,12 @@ namespace GIGLS.Services.Implementation.Wallet
             //Verifield by
             var user = await _userService.retUser();
             bankorder.UserId = user.Id;
-            //bankorder.FullName = user.FirstName + " " + user.LastName;
             bankorder.VerifiedBy = user.FirstName + " " + user.LastName;
 
-            //var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
             var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
             allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Deposited && s.RefCode == bankrefcode.Code);
 
-            //allCODs = allCODs.Where(s => s.RefCode == bankrefcode.Code);
             var allCODsResult = allCODs.ToList();
-            //var codsforservicecenter = allCODs.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
-
-            //var serviceCenters2 = await _userService.GetCurrentServiceCenter();
-            //var currentCenter = serviceCenters2[0].ServiceCentreId;
             var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
 
             //update BankProcessingOrderForShipmentAndCOD
@@ -954,10 +900,6 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var bankorder = await _uow.BankProcessingOrderForShipmentAndCOD.GetAsync(refcodeobj.ProcessingOrderId);
             bankorder.Status = DepositStatus.Deposited;
-
-            //var bankorderforshipmentandcod = Mapper.Map<BankProcessingOrderForShipmentAndCOD>(bankorder);
-            //_uow.BankProcessingOrderForShipmentAndCOD.Add(bankorderforshipmentandcod);
-
             await _uow.CompleteAsync();
         }
 
@@ -986,8 +928,6 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<List<CodPayOutList>> GetPaidOutCODLists()
         {
             var results = await _uow.CashOnDeliveryAccount.GetPaidOutCODListsAsQueryable();
-            //var resultsValues = Mapper.Map<List<GIGLS.Core.DTO.Account.NewInvoiceViewDTO>>(resultsVal);
-
             return await Task.FromResult(results.ToList());
         }
 
@@ -1004,7 +944,7 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             //update shipment table after paid out has been made
             var result = await _uow.CashOnDeliveryAccount.GetShipmentByWaybill(invoiceviewinfo.Waybill);
-            result.IsCODPaidOut = true; //(int)CODPaidOutStatus.PaidOut;
+            result.IsCODPaidOut = true; 
 
             //insert in the cod payout table
             var payoutinfo = new CodPayOutList()
@@ -1026,6 +966,5 @@ namespace GIGLS.Services.Implementation.Wallet
 
             await _uow.CompleteAsync();
         }
-
     }
 }
