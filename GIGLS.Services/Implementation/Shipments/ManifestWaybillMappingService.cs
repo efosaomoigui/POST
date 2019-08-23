@@ -512,13 +512,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         manifestwaybill.ShipmentScanStatus = shipmentCollectionObj.ShipmentScanStatus;
                     }
                 }
-
-                //[{string.Join(", ", deliveryManifestCodeArray)}]");
-                // var deliveryManifestCodeArray = manifestObjects.Select(s => s.ManifestCode).ToList();
-
+                
                 //map all the manifest code to the first in the list 
-                var userDispatchsArray = userDispatchs.Select(u => u.ManifestNumber).ToList();
-                manifestWaybillNumberMappingDto[0].ManifestCode = string.Join(", ", userDispatchsArray);
+                if (userDispatchs.Any())
+                {
+                    var userDispatchsArray = userDispatchs.Select(u => u.ManifestNumber).ToList();
+                    manifestWaybillNumberMappingDto[0].ManifestCode = string.Join(", ", userDispatchsArray);
+                }
 
                 return manifestWaybillNumberMappingDto;
             }
