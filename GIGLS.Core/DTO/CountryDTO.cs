@@ -19,5 +19,6 @@ namespace GIGLS.Core.DTO
         public string CurrencyCode { get; set; }
         public decimal CurrencyRatio { get; set; }
         public bool IsActive { get; set; }
+        public string PhoneNumberCode { get; set; }
     }
 }

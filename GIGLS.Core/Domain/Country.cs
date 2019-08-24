@@ -13,5 +13,8 @@ namespace GIGLS.Core.Domain
         public string CurrencyCode { get; set; }
         public decimal CurrencyRatio { get; set; }
         public bool IsActive { get; set; }
+
+        [MaxLength(10)]
+        public string PhoneNumberCode { get; set; }
     }
 }
