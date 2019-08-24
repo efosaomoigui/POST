@@ -14,5 +14,6 @@ namespace GIGLS.Core.DTO.Haulage
 
         public decimal Price { get; set; }
 
+        public int CountryId { get; set; }
     }
 }

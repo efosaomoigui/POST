@@ -9,7 +9,7 @@ namespace GIGLS.Core.IServices.Zone
     {
         Task<IEnumerable<DomesticZonePriceDTO>> GetDomesticZonePrices();
         Task<DomesticZonePriceDTO> GetDomesticZonePriceById(int domesticZonePriceId);
-        Task<decimal> GetDomesticZonePrice(int zoneId, decimal weight, RegularEcommerceType regularEcommerceType);
+        Task<decimal> GetDomesticZonePrice(int zoneId, decimal weight, RegularEcommerceType regularEcommerceType, int countryId);
         Task<object> AddDomesticZonePrice(DomesticZonePriceDTO domesticZonePrice);
         Task UpdateDomesticZonePrice(int domesticZonePriceId, DomesticZonePriceDTO domesticZonePrice);
         Task DeleteDomesticZonePrice(int domesticZonePriceId);

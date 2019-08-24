@@ -142,7 +142,7 @@ namespace GIGLS.Services.Implementation.Zone
             }
         }
 
-        public async Task<decimal> GetSpecialZonePrice(int package, int zone, decimal weight = 0)
+        public async Task<decimal> GetSpecialZonePrice(int package, int zone, int countryId, decimal weight = 0)
         {
             try
             {
@@ -150,7 +150,10 @@ namespace GIGLS.Services.Implementation.Zone
 
                 var specialPackage = await _packageService.GetSpecialDomesticPackageById(package);
 
-                var specialDomestic = await _uow.SpecialDomesticZonePrice.GetAsync(s => s.SpecialDomesticPackageId == package && s.ZoneId == zone);
+                var specialDomestic = await _uow.SpecialDomesticZonePrice.GetAsync(s => 
+                    s.SpecialDomesticPackageId == package && 
+                    s.ZoneId == zone &&
+                    s.CountryId == countryId);
                 if (specialDomestic == null)
                 {
                     throw new GenericException("Special Zone Price not yet set for selected parameters");

@@ -71,11 +71,11 @@ namespace GIGLS.Services.Implementation.Zone
             }
         }
 
-        public async Task<decimal> GetDomesticZonePrice(int zoneId, decimal weight, RegularEcommerceType regularEcommerceType)
+        public async Task<decimal> GetDomesticZonePrice(int zoneId, decimal weight, RegularEcommerceType regularEcommerceType, int countryId)
         {
             try
             {
-                var zone = await _uow.DomesticZonePrice.GetDomesticZonePrice(zoneId, weight, regularEcommerceType);
+                var zone = await _uow.DomesticZonePrice.GetDomesticZonePrice(zoneId, weight, regularEcommerceType, countryId);
 
                 if (zone == null)
                 {

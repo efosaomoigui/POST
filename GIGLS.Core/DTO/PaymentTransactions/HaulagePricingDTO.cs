@@ -5,5 +5,6 @@
         public int DepartureServiceCentreId { get; set; }
         public int DestinationServiceCentreId { get; set; }
         public int Haulageid { get; set; }
+        public int CountryId { get; set; }
     }
 }
