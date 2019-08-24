@@ -19,6 +19,7 @@ namespace GIGLS.Core.Enums
         Arrived,
         Visited,
         EnrouteToPickUp,
-        Resolved
+        Resolved,
+        PickedUp
     }
 }

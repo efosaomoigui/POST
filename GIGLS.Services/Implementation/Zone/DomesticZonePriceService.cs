@@ -151,14 +151,5 @@ namespace GIGLS.Services.Implementation.Zone
             }
         }
 
-        public async Task UpdateAllDomesticPriceByZone(DomesticZonePriceDTO domesticZonePriceDTO)
-        {
-            //try
-            //{
-            //    var prices = _uow.DomesticZonePrice.GetAll().ToList();
-            //    //prices.
-
-            //}
-        }
     }
 }

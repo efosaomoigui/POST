@@ -1195,5 +1195,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPost]
+        [Route("updatereceiverdetails")]
+        public async Task<IServiceResponse<bool>> UpdateReceiverDetails(PreShipmentMobileDTO receiver)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _preshipmentmobileService.UpdateReceiverDetails(receiver);
+                return new ServiceResponse<bool>
+                {
+                    Object = response
+                };
+            });
+        }
     }
 }

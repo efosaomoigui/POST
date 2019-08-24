@@ -292,7 +292,6 @@ namespace GIGLS.Services.Implementation.Fleets
                 var dispatch = dispatchResult.FirstOrDefault();
                 if (dispatch == null)
                 {
-                    //throw new GenericException("Information does not Exist");
                     return null;
                 }
 

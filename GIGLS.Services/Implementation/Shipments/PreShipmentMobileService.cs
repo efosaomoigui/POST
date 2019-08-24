@@ -479,7 +479,14 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var userId = await _userService.GetCurrentUserId();
                 pickuprequest.UserId = userId;
-                pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
+                if(pickuprequest.Status== MobilePickUpRequestStatus.Rejected.ToString())
+                {
+                    pickuprequest.Status = MobilePickUpRequestStatus.Rejected.ToString();
+                }
+                else
+                {
+                    pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
+                }
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
                 if (preshipmentmobile != null)
                 {
@@ -494,6 +501,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
                     preshipmentmobile.shipmentstatus = "Assigned for Pickup";
+                    if(pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
+                    {
+                        preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Rejected.ToString();
+                    }
+                    else
+                    {
+                        preshipmentmobile.shipmentstatus = "Assigned for Pickup";
+                    }
                     await _uow.CompleteAsync();
                     var newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
 
@@ -575,7 +590,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }).ToList()
                     };
                     var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
-                    preshipmentmobile.shipmentstatus = "Picked up";
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.PickedUp.ToString();
                     preshipmentmobile.IsConfirmed = true;
                     await _uow.CompleteAsync();
 
@@ -628,7 +643,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         Waybill = preshipmentmobile.Waybill
                     };
                     var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
-                    preshipmentmobile.shipmentstatus = "Shipment Delivered";
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Delivered.ToString();
                     await _uow.CompleteAsync();
                     var messageextensionDTO = new MobileMessageDTO()
                     {
@@ -833,6 +848,10 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preShipment.CustomerCode);
                 var preshipmentmobilegrandtotal = _uow.PreShipmentMobile.GetAsync(s => s.PreShipmentMobileId == preShipment.PreShipmentMobileId).Result;
+                if(preshipmentmobilegrandtotal.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobilegrandtotal.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString())
+                {
+                    throw new GenericException("This Shipment cannot be placed in Dispute, because it has been" + " " + preshipmentmobilegrandtotal.shipmentstatus) ;
+                }
                 foreach (var id in preShipment.DeletedItems.ToList())
                 {
                     var preshipmentitemmobile = _uow.PreShipmentItemMobile.GetAsync(s =>s.PreShipmentItemMobileId == id && s.PreShipmentMobileId == preShipment.PreShipmentMobileId).Result;
@@ -1248,7 +1267,29 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<bool> UpdateReceiverDetails(PreShipmentMobileDTO receiver)
+        {
+            try
+            {
+                var shipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill== receiver.Waybill);
+                if (shipment != null)
+                {
+                    shipment.ActualReceiverFirstName = receiver.ActualReceiverFirstName;
+                    shipment.ActualReceiverLastName = receiver.ActualReceiverLastName;
+                    shipment.ActualReceiverPhoneNumber = receiver.ActualReceiverPhoneNumber;
+    }
+                else
+                {
+                    throw new GenericException("Shipment Information does not exist!");
+                }
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch
+            {
+                throw;
+            }
+        }
 
-        
     }
 }
