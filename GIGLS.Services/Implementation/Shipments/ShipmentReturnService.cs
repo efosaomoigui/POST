@@ -183,7 +183,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         IsVolumetric = item.IsVolumetric,
                         Width = decimal.Parse(item.Width.ToString()),
                         Length = decimal.Parse(item.Length.ToString()),
-                        Height = decimal.Parse(item.Height.ToString())
+                        Height = decimal.Parse(item.Height.ToString()),
+                        CountryId = shipment.DepartureCountryId
                     });
 
                     item.Price = itemPrice;
