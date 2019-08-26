@@ -1246,7 +1246,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (Partner != null)
                 {
                     partnerdto = Mapper.Map<PartnerDTO>(Partner);
-                   
                         var VehicleDetails = await _uow.VehicleType.FindAsync(s =>s.Partnercode == partnerdto.PartnerCode);
                         if (VehicleDetails != null)
                         {
