@@ -169,8 +169,7 @@ namespace GIGLS.Services.Implementation.Zone
 
                 await _uow.CompleteAsync();
                 return true;
-            }
-            
+            }            
             catch (Exception)
             {
                 throw;
