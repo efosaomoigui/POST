@@ -355,9 +355,16 @@ namespace GIGLS.Services.Implementation.Shipments
             var price = 0;
             var demurrageDays = 0;
 
+            var userActiveCountryId = 1;
+            try
+            {
+                userActiveCountryId = await _userService.GetUserActiveCountryId();
+            }
+            catch (Exception ex) { }
+
             //get GlobalProperty
-            var demurrageCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurrageDayCount);
-            var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice);
+            var demurrageCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurrageDayCount, userActiveCountryId);
+            var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice, userActiveCountryId);
 
             //validate
             if (demurrageCountObj == null || demurragePriceObj == null)
@@ -489,10 +496,17 @@ namespace GIGLS.Services.Implementation.Shipments
         //
         public async Task<bool> RePrintCountUpdater()
         {
+            var userActiveCountryId = 1;
+            try
+            {
+                userActiveCountryId = await _userService.GetUserActiveCountryId();
+            }
+            catch (Exception ex) { }
+
             try
             {
                 //Get the global properties of the number of days to allow reprint to stop
-                var globalpropertiesreprintlimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReprintDays);
+                var globalpropertiesreprintlimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReprintDays, userActiveCountryId);
                 string globalpropertiesreprintStr = globalpropertiesreprintlimitObj?.Value;
 
                 var globalpropertiesreprintcounter = 0;
@@ -501,7 +515,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //===========================================================================
 
                 //Get the global properties of the date to start using this service
-                var globalpropertiesreObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReprintFeatureStartDate);
+                var globalpropertiesreObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReprintFeatureStartDate, userActiveCountryId);
                 string globalpropertiesdateStr = globalpropertiesreObj?.Value;
 
                 var globalpropertiesreprintdate = DateTime.MinValue;
@@ -1554,11 +1568,18 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<List<ServiceCentreDTO>> GetAllWarehouseServiceCenters()
         {
+            var userActiveCountryId = 1;
+            try
+            {
+                userActiveCountryId = await _userService.GetUserActiveCountryId();
+            }
+            catch (Exception ex) { }
+
             try
             {
                 string[] warehouseServiceCentres = { };
                 // filter by global property for warehouse service centre
-                var warehouseServiceCentreObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.WarehouseServiceCentre).Result;
+                var warehouseServiceCentreObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.WarehouseServiceCentre, userActiveCountryId).Result;
                 if (warehouseServiceCentreObj != null)
                 {
                     var warehouseServiceCentre = warehouseServiceCentreObj.Value;

@@ -258,9 +258,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
 
+
+            var userActiveCountryId = 1;
+            try
+            {
+                userActiveCountryId = _userService.GetUserActiveCountryId().Result;
+            }
+            catch (Exception ex) { }
+
             //filter the data by using count which serve as the number of days to display
             DateTime backwardDatebyNumberofDays = DateTime.Today.AddDays(-30);
-            var hubManifestDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HUBManifestDaysToDisplay).Result;
+            var hubManifestDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HUBManifestDaysToDisplay, userActiveCountryId).Result;
             if (hubManifestDaysCountObj != null)
             {
                 int globalProp = 0;
@@ -653,12 +661,19 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
+                var userActiveCountryId = 1;
+                try
+                {
+                    userActiveCountryId = _userService.GetUserActiveCountryId().Result;
+                }
+                catch (Exception ex) { }
+
                 List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable()
                     .Where(s => s.IsCancelled == false && s.CompanyType != CompanyType.Ecommerce.ToString()
                     && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount).Result;
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount, userActiveCountryId).Result;
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count' has not been set. Kindly contact admin.");
@@ -742,10 +757,17 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
+                var userActiveCountryId = 1;
+                try
+                {
+                    userActiveCountryId = _userService.GetUserActiveCountryId().Result;
+                }
+                catch (Exception ex) { }
+
                 List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && s.CompanyType == CompanyType.Ecommerce.ToString() && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount).Result;
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId).Result;
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count for Ecommerce customer' has not been set. Kindly contact admin.");
@@ -814,10 +836,17 @@ namespace GIGLS.Services.Implementation.Shipments
         //---Added for global customer care and ecommerce
         public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetOverDueShipmentsGLOBAL(FilterOptionsDto filterOptionsDto)
         {
+            var userActiveCountryId = 1;
+            try
+            {
+                userActiveCountryId = _userService.GetUserActiveCountryId().Result;
+            }
+            catch (Exception ex) { }
+
             try
             {
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount).Result;
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount, userActiveCountryId).Result;
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count' has not been set. Kindly contact admin.");
@@ -884,10 +913,17 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<IEnumerable<ShipmentCollectionDTO>> GetOverDueShipmentsGLOBAL()
         {
+            var userActiveCountryId = 1;
+            try
+            {
+                userActiveCountryId = await _userService.GetUserActiveCountryId();
+            }
+            catch (Exception ex) { }
+
             try
             {
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount).Result;
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount, userActiveCountryId).Result;
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count' has not been set. Kindly contact admin.");
@@ -922,10 +958,17 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetEcommerceOverDueShipmentsGLOBAL(FilterOptionsDto filterOptionsDto)
         {
+            var userActiveCountryId = 1;
+            try
+            {
+                userActiveCountryId = _userService.GetUserActiveCountryId().Result;
+            }
+            catch (Exception ex) { }
+
             try
             {
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount).Result;
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId).Result;
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count for Ecommerce customer' has not been set. Kindly contact admin.");
@@ -992,10 +1035,17 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<IEnumerable<ShipmentCollectionDTO>> GetEcommerceOverDueShipmentsGLOBAL()
         {
+            var userActiveCountryId = 1;
+            try
+            {
+                userActiveCountryId = await _userService.GetUserActiveCountryId();
+            }
+            catch (Exception ex) { }
+
             try
             {
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount).Result;
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId).Result;
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count for Ecommerce customer' has not been set. Kindly contact admin.");
@@ -1044,10 +1094,17 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
+                var userActiveCountryId = 1;
+                try
+                {
+                    userActiveCountryId = await _userService.GetUserActiveCountryId();
+                }
+                catch (Exception ex) { }
+
                 List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && s.CompanyType == CompanyType.Ecommerce.ToString() && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount).Result;
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId).Result;
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count for Ecommerce customer' has not been set. Kindly contact admin.");

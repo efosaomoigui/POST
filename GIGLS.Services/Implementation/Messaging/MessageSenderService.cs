@@ -11,6 +11,7 @@ using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.MessagingLog;
+using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using System;
 using System.Linq;
@@ -29,10 +30,12 @@ namespace GIGLS.Services.Implementation.Messaging
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ISmsSendLogService _iSmsSendLogService;
         private readonly IEmailSendLogService _iEmailSendLogService;
+        private readonly IUserService _userService;
 
         public MessageSenderService(IUnitOfWork uow, IEmailService emailService, ISMSService sMSService,
             IMessageService messageService,
             ICustomerService customerService,
+            IUserService userService,
             ISmsSendLogService iSmsSendLogService, IEmailSendLogService iEmailSendLogService,
             IGlobalPropertyService globalPropertyService)
         {
@@ -45,6 +48,7 @@ namespace GIGLS.Services.Implementation.Messaging
             _globalPropertyService = globalPropertyService;
             _iSmsSendLogService = iSmsSendLogService;
             _iEmailSendLogService = iEmailSendLogService;
+            _userService = userService;
         }
 
         public async Task<bool> SendMessage(MessageType messageType, EmailSmsType emailSmsType, object obj)
@@ -167,12 +171,19 @@ namespace GIGLS.Services.Implementation.Messaging
                     CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), invoice.CustomerType);
                     var customerObj = await _customerService.GetCustomer(invoice.CustomerId, customerType);
 
+                    var userActiveCountryId = 1;
+                    try
+                    {
+                        userActiveCountryId = await _userService.GetUserActiveCountryId();
+                    }
+                    catch (Exception ex) { }
+
                     //Get DemurrageDayCount from GlobalProperty
-                    var demurrageDayCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurrageDayCount);
+                    var demurrageDayCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurrageDayCount, userActiveCountryId);
                     var demurrageDayCount = demurrageDayCountObj.Value;
 
                     //Get DemurragePrice from GlobalProperty
-                    var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice);
+                    var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice, userActiveCountryId);
                     var demurragePrice = demurragePriceObj.Value;
 
                     //
@@ -606,11 +617,18 @@ namespace GIGLS.Services.Implementation.Messaging
 
         private async Task<bool> VerifyUserLoginIsWithinTheEmailInterval(string email)
         {
+            var userActiveCountryId = 1;
+            try
+            {
+                userActiveCountryId = await _userService.GetUserActiveCountryId();
+            }
+            catch (Exception ex) { }
+
             bool verifySendEmail = true;
 
             //1. check interval from global property
             var globalPropertyForEmailSendInterval = 1;
-            var globalPropertyForEmailSendIntervalObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.UserLoginEmailSendInterval);
+            var globalPropertyForEmailSendIntervalObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.UserLoginEmailSendInterval, userActiveCountryId);
             if (globalPropertyForEmailSendIntervalObj != null)
             {
                 int.TryParse(globalPropertyForEmailSendIntervalObj.Value, out globalPropertyForEmailSendInterval);

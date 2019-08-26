@@ -60,9 +60,10 @@ namespace GIGLS.Services.Implementation.Account
 
         public async Task<string> SendEmailForDueInvoices(int daystoduedate)
         {
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
 
             //1.Get start date for this feature
-            var globalpropertiesreminderdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.globalpropertiesreminderdate);
+            var globalpropertiesreminderdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.globalpropertiesreminderdate, userActiveCountryId);
             string globalpropertiesdateStr = globalpropertiesreminderdateObj?.Value;
 
             var globalpropertiesdate = DateTime.MinValue;
@@ -116,9 +117,10 @@ namespace GIGLS.Services.Implementation.Account
 
         public async Task<string> SendEmailForWalletBalanceCheck(decimal amountforreminder) 
         {
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
 
             //1.Get start date for this feature
-            var globalpropertiesreminderdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.globalpropertiesreminderdate);
+            var globalpropertiesreminderdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.globalpropertiesreminderdate, userActiveCountryId);
             string globalpropertiesdateStr = globalpropertiesreminderdateObj?.Value;
 
             var globalpropertiesdate = DateTime.MinValue;

@@ -32,7 +32,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Zone
                                      ZoneId = z.ZoneId,
                                      ZoneName = z.Zone.ZoneName,
                                      DateCreated = z.DateCreated,    
-                                     RegularEcommerceType = z.RegularEcommerceType
+                                     RegularEcommerceType = z.RegularEcommerceType,
+                                     CountryId = z.CountryId
                                      //user logged on
                                  };
                 return Task.FromResult(zoneDto.ToList());

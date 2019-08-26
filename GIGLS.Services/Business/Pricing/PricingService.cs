@@ -290,7 +290,8 @@ namespace GIGLS.Services.Business.Pricing
             }
 
             //Get Haulage Maximum Fixed Distance
-            var maximumFixedDistanceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HaulageMaximumFixedDistance);
+            var userActiveCountryId = await GetUserCountryId();
+            var maximumFixedDistanceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HaulageMaximumFixedDistance, userActiveCountryId);
             int maximumFixedDistance = int.Parse(maximumFixedDistanceObj.Value);
 
             //calculate price for the haulage
@@ -353,7 +354,7 @@ namespace GIGLS.Services.Business.Pricing
             }
 
             //Get Ecommerce limit weight from GlobalProperty
-            var ecommerceWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceWeightLimit);
+            var ecommerceWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceWeightLimit, pricingDto.CountryId);
 
             decimal weightLimit = decimal.Parse(ecommerceWeightLimitObj.Value);
 
@@ -427,7 +428,7 @@ namespace GIGLS.Services.Business.Pricing
             decimal deliveryOptionPrice = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
 
             //Get Ecommerce Return limit weight from GlobalProperty
-            var ecommerceWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceReturnWeightLimit);
+            var ecommerceWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceReturnWeightLimit, pricingDto.CountryId);
             decimal weightLimit = decimal.Parse(ecommerceWeightLimitObj.Value);
 
             //check for volumetric weight
@@ -472,7 +473,7 @@ namespace GIGLS.Services.Business.Pricing
             //decimal deliveryOptionPrice = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId);
 
             //Get International Weight Limit from GlobalProperty
-            var internationalWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalWeightLimit);
+            var internationalWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalWeightLimit, pricingDto.CountryId);
 
             decimal weightLimit = decimal.Parse(internationalWeightLimitObj.Value);
 
@@ -496,7 +497,7 @@ namespace GIGLS.Services.Business.Pricing
             }
 
             //Get Percentage Charge For International Shipment Service
-            var PercentageForInternationalShipment = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PercentageForInternationalShipment);
+            var PercentageForInternationalShipment = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PercentageForInternationalShipment, pricingDto.CountryId);
             decimal percentage = decimal.Parse(PercentageForInternationalShipment.Value);
 
             var percentagePrice = (percentage / 100) * PackagePrice;
@@ -514,9 +515,11 @@ namespace GIGLS.Services.Business.Pricing
         {
             decimal warSurcharge = 0;
 
-            var libyaObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.LIBYA);
-            var syriaObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SYRIA);
-            var yemenObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.YEMEN);
+            var userActiveCountryId = await GetUserCountryId();
+
+            var libyaObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.LIBYA, userActiveCountryId);
+            var syriaObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.SYRIA, userActiveCountryId);
+            var yemenObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.YEMEN, userActiveCountryId);
 
             var country = await _uow.Country.GetAsync(countryId);
             if (country != null)
@@ -542,9 +545,11 @@ namespace GIGLS.Services.Business.Pricing
 
         private async Task<decimal> GetInternationalPriceOverflow(decimal weight, decimal activeWeightLimit, int zoneId, int countryId)
         {
-            var InternationalWeightLimit30 = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalWeightLimit30);
-            var InternationalWeightLimit70 = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalWeightLimit70);
-            var InternationalWeightLimit100 = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalWeightLimit100);
+            var userActiveCountryId = await GetUserCountryId();
+
+            var InternationalWeightLimit30 = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalWeightLimit30, userActiveCountryId);
+            var InternationalWeightLimit70 = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalWeightLimit70, userActiveCountryId);
+            var InternationalWeightLimit100 = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.InternationalWeightLimit100, userActiveCountryId);
 
             decimal weightLimit30 = decimal.Parse(InternationalWeightLimit30.Value);
             decimal weightLimit70 = decimal.Parse(InternationalWeightLimit70.Value);
@@ -732,7 +737,7 @@ namespace GIGLS.Services.Business.Pricing
             }
 
             //Get Ecommerce limit weight from GlobalProperty
-            var ecommerceWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceWeightLimit);
+            var ecommerceWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceWeightLimit, pricingDto.CountryId);
 
             decimal weightLimit = decimal.Parse(ecommerceWeightLimitObj.Value);
 

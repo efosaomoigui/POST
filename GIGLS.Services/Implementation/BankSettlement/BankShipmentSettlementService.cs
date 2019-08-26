@@ -71,8 +71,10 @@ namespace GIGLS.Services.Implementation.Wallet
         //New bank processing order for shipment
         public async Task<Tuple<string, List<InvoiceViewDTO>, decimal>> GetBankProcessingOrderForShipment(DepositType type)
         {
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
+
             //Get Bank Deposit Module StartDate
-            var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate);
+            var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate, userActiveCountryId);
             string globalpropertiesdateStr = globalpropertiesdateObj?.Value;
 
             var globalpropertiesdate = DateTime.MinValue;
@@ -396,8 +398,10 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
 
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
+
             //Get Bank Deposit Module StartDate
-            var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate);
+            var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate, userActiveCountryId);
             string globalpropertiesdateStr = globalpropertiesdateObj?.Value;
 
             var globalpropertiesdate = DateTime.MinValue;
@@ -450,8 +454,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 bkoc.ServiceCenter = scs[0].ServiceCentreId;
                 bkoc.ScName = scs[0].Name;
 
+                var userActiveCountryId = await _userService.GetUserActiveCountryId();
+
                 //3. Get Bank Deposit Module StartDate
-                var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate);
+                var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate, userActiveCountryId);
                 string globalpropertiesdateStr = globalpropertiesdateObj?.Value;
 
                 var globalpropertiesdate = DateTime.MinValue;
@@ -549,8 +555,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 bkoc.ServiceCenter = scs[0].ServiceCentreId;
                 bkoc.ScName = scs[0].Name;
 
+                var userActiveCountryId = await _userService.GetUserActiveCountryId();
+
                 //3. Get Bank Deposit Module StartDate
-                var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate);
+                var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate, userActiveCountryId);
                 string globalpropertiesdateStr = globalpropertiesdateObj?.Value;
 
                 var globalpropertiesdate = DateTime.MinValue;
@@ -712,8 +720,10 @@ namespace GIGLS.Services.Implementation.Wallet
             //update BankProcessingOrderCodes
             bankorder.Status = DepositStatus.Deposited;
 
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
+
             //Get Bank Deposit Module StartDate
-            var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate);
+            var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate, userActiveCountryId);
             string globalpropertiesdateStr = globalpropertiesdateObj?.Value;
 
             var globalpropertiesdate = DateTime.MinValue;

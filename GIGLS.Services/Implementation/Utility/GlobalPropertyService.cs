@@ -8,6 +8,8 @@ using GIGLS.Infrastructure;
 using GIGLS.Core.Domain.Utility;
 using AutoMapper;
 using GIGLS.Core.Enums;
+using GIGLS.Core.DTO;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Utility
 {
@@ -34,6 +36,7 @@ namespace GIGLS.Services.Implementation.Utility
                     Key = globalProperty.Key,
                     Value = globalProperty.Value,
                     Description = globalProperty.Description,
+                    CountryId = globalProperty.CountryId,
                     IsActive = true
                 };
 
@@ -49,7 +52,18 @@ namespace GIGLS.Services.Implementation.Utility
 
         public Task<IEnumerable<GlobalPropertyDTO>> GetGlobalProperties()
         {
-            return Task.FromResult(Mapper.Map<IEnumerable<GlobalPropertyDTO>>(_uow.GlobalProperty.GetAll()));
+            var globalProperties = Mapper.Map<IEnumerable<GlobalPropertyDTO>>(_uow.GlobalProperty.GetAll());
+
+            var countries = _uow.Country.GetAll();
+            var countriesDTO = Mapper.Map<IEnumerable<CountryDTO>>(countries);
+
+            foreach (var globalProp in globalProperties)
+            {
+                var country = countriesDTO.FirstOrDefault(s => s.CountryId == globalProp.CountryId);
+                globalProp.Country = country;
+            }
+
+            return Task.FromResult(globalProperties);
         }
 
         public async Task<GlobalPropertyDTO> GetGlobalPropertyById(int globalPropertyId)
@@ -63,6 +77,12 @@ namespace GIGLS.Services.Implementation.Utility
                 }
 
                 var globalDTo = Mapper.Map<GlobalPropertyDTO>(global);
+
+                var country = await _uow.Country.GetAsync(globalDTo.CountryId);
+                var countryDTO = Mapper.Map<CountryDTO>(country);
+
+                globalDTo.Country = countryDTO;
+
                 return globalDTo;
             }
             catch (Exception)
@@ -103,6 +123,7 @@ namespace GIGLS.Services.Implementation.Utility
                 global.Value = globalProperty.Value;
                 global.Description = globalProperty.Description;
                 global.IsActive = global.IsActive;
+                global.CountryId = globalProperty.CountryId;
                 _uow.Complete();
 
             }
@@ -131,11 +152,12 @@ namespace GIGLS.Services.Implementation.Utility
             }
         }
 
-        public async Task<GlobalPropertyDTO> GetGlobalProperty(GlobalPropertyType globalPropertyType)
+        public async Task<GlobalPropertyDTO> GetGlobalProperty(GlobalPropertyType globalPropertyType, int countryId)
         {
             try
             {
-                var global = _uow.GlobalProperty.SingleOrDefault(s => s.Key == globalPropertyType.ToString());
+                var global = _uow.GlobalProperty.SingleOrDefault(s => s.Key == globalPropertyType.ToString()
+                    && s.CountryId == countryId);
                 var globalDTo = Mapper.Map<GlobalPropertyDTO>(global);
                 return await Task.FromResult(globalDTo);
             }

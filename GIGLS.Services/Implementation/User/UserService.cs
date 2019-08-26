@@ -1320,5 +1320,37 @@ namespace GIGLS.Services.Implementation.User
             }
             return userActiveCountry;
         }
+
+        public async Task<int> GetUserActiveCountryId()
+        {
+            int UserCountryId = 0;
+
+            //1. Get the user active country
+            var countries = await GetPriviledgeCountrys();
+            if (countries.Count == 1)
+            {
+                var userActiveCountry = countries[0];
+                UserCountryId = userActiveCountry.CountryId;
+            }
+            else
+            {
+                //Use default country
+                var currentUserId = await GetCurrentUserId();
+                var currentUser = await GetUserById(currentUserId);
+                var countryId = currentUser.UserActiveCountryId;
+
+                if (countryId > 0)
+                {
+                    UserCountryId = countryId;
+                }
+                else
+                {
+                    //throw exception
+                    throw new GenericException($"You have not been assigned an Active Country. Kindly inform the administrator.");
+                }
+            }
+
+            return UserCountryId;
+        }
     }
 }

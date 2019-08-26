@@ -75,6 +75,7 @@ namespace GIGLS.Core.IServices.User
         Task<IdentityResult> ForgotPassword(string email, string password);
 
         Task<CountryDTO> GetUserActiveCountry();
+        Task<int> GetUserActiveCountryId();
 
     }
 }

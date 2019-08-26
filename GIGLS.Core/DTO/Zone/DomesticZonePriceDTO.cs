@@ -24,5 +24,6 @@ namespace GIGLS.Core.DTO.Zone
         public List<UserDTO> UserDetail { get; set; }
 
         public int CountryId { get; set; }
+        public CountryDTO Country { get; set; }
     }
 }
