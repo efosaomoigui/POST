@@ -52,9 +52,9 @@ namespace GIGLS.Services.Implementation.Zone
             return Mapper.Map<WeightLimitPriceDTO>(weight);
         }
 
-        public async Task<WeightLimitPriceDTO> GetWeightLimitPriceByZoneId(int zoneId)
+        public async Task<WeightLimitPriceDTO> GetWeightLimitPriceByZoneId(int zoneId, int countryId)
         {
-            var weight = await _uow.WeightLimitPrice.GetAsync(x => x.ZoneId == zoneId);
+            var weight = await _uow.WeightLimitPrice.GetAsync(x => x.ZoneId == zoneId && x.CountryId == countryId);
             if (weight == null)
             {
                 throw new GenericException("Weight limit price does not exist");
@@ -63,9 +63,10 @@ namespace GIGLS.Services.Implementation.Zone
             return Mapper.Map<WeightLimitPriceDTO>(weight);
         }
 
-        public async Task<WeightLimitPriceDTO> GetWeightLimitPriceByZoneId(int zoneId, RegularEcommerceType regularEcommerceType)
+        public async Task<WeightLimitPriceDTO> GetWeightLimitPriceByZoneId(int zoneId, RegularEcommerceType regularEcommerceType, int countryId)
         {
-            var weight = await _uow.WeightLimitPrice.GetAsync(x => x.ZoneId == zoneId && x.RegularEcommerceType == regularEcommerceType);
+            var weight = await _uow.WeightLimitPrice.GetAsync(x => x.ZoneId == zoneId 
+                && x.RegularEcommerceType == regularEcommerceType && x.CountryId == countryId);
             if (weight == null)
             {
                 throw new GenericException("Weight limit price does not exist");

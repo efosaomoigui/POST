@@ -98,6 +98,7 @@ namespace GIGLS.Services.Implementation
                 country.CurrencyCode = countryDto.CurrencyCode;
                 country.CurrencyRatio = countryDto.CurrencyRatio;
                 country.IsActive = countryDto.IsActive;
+                country.PhoneNumberCode = countryDto.PhoneNumberCode;
                 _uow.Complete();
             }
             catch (Exception)

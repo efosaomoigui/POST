@@ -16,5 +16,7 @@ namespace GIGLS.Core.DTO.Zone
         public decimal Weight { get; set; }
 
         public RegularEcommerceType RegularEcommerceType { get; set; }
+
+        public int CountryId { get; set; }
     }
 }

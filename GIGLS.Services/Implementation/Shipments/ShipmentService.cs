@@ -587,7 +587,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return newShipment;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

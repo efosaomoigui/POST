@@ -43,11 +43,14 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Zone
             }
         }
 
-        public Task<DomesticZonePrice> GetDomesticZonePrice(int zoneId, decimal weight, RegularEcommerceType regularEcommerceType)
+        public Task<DomesticZonePrice> GetDomesticZonePrice(int zoneId, decimal weight, RegularEcommerceType regularEcommerceType, int countryId)
         {
             try
             {
-                var zones = Context.DomesticZonePrice.FirstOrDefault(d => d.ZoneId == zoneId && d.Weight >= weight && d.RegularEcommerceType == regularEcommerceType);
+                var zones = Context.DomesticZonePrice.FirstOrDefault(d => d.ZoneId == zoneId 
+                    && d.Weight >= weight 
+                    && d.RegularEcommerceType == regularEcommerceType
+                    && d.CountryId == countryId);
                 return Task.FromResult(zones);
             }
             catch (Exception)

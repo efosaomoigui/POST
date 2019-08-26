@@ -206,7 +206,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     DestinationStationId = preShipment.ReceiverStationId,
                     Weight = (decimal)preShipmentItem.Weight,
                     SpecialPackageId = (int)preShipmentItem.SpecialPackageId,
-                    ShipmentType = preShipmentItem.ShipmentType
+                    ShipmentType = preShipmentItem.ShipmentType,
+                    CountryId = 1   //Nigeria
                 };
                 if (preShipmentItem.ShipmentType == ShipmentType.Ecommerce)
                 {
