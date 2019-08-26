@@ -48,23 +48,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        public async Task UpdateMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest)
-        {
-            try
-            {
-                var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(s=>s.Waybill==PickUpRequest.Waybill);
-                if (MobilePickupRequests == null )
-                {
-                    throw new GenericException("Pickup Request Does Not Exist");
-                }
-                MobilePickupRequests.Status = PickUpRequest.Status;
-                await _uow.CompleteAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        
 
         public async Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequests()
         {
@@ -103,6 +87,25 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+        public async Task UpdateMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest)
+        {
+                try
+                { var userId = await _userservice.GetCurrentUserId();
+                    var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == PickUpRequest.Waybill && s.UserId == userId && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
+                    if (MobilePickupRequests == null)
+                    {
+                        throw new GenericException("Pickup Request Does Not Exist");
+                    }
+                    MobilePickupRequests.Status = PickUpRequest.Status;
+                    await _uow.CompleteAsync();
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            
         }
     }
 }
