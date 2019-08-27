@@ -29,15 +29,17 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly ICustomerService _customerService;
         private readonly IShipmentService _shipmentService;
         public readonly IDispatchService _dispatchService;
+        private readonly IPreShipmentMobileService _preShipmentMobileService;
 
         public ManifestWaybillMappingService(IUnitOfWork uow, IManifestService manifestService,
-            IUserService userService, ICustomerService customerService, IShipmentService shipmentService)
+            IUserService userService, ICustomerService customerService, IShipmentService shipmentService, IPreShipmentMobileService preShipmentMobileService)
         {
             _uow = uow;
             _manifestService = manifestService;
             _userService = userService;
             _customerService = customerService;
             _shipmentService = shipmentService;
+            _preShipmentMobileService = preShipmentMobileService;
             
             MapperConfig.Initialize();
         }
@@ -80,6 +82,24 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
 
+            return result.OrderByDescending(x => x.DateCreated).ToList();
+        }
+
+        //get pickup request manifest by date 
+        public async Task<List<PickupManifestWaybillMappingDTO>> GetAllPickupManifestWaybillMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            var resultSet = new HashSet<string>();
+            var result = new List<PickupManifestWaybillMappingDTO>();
+
+            var pickupManifestWaybillMapping = await _uow.PickupManifestWaybillMapping.GetPickupManifestWaybillMapping(dateFilterCriteria);
+
+            foreach (var item in pickupManifestWaybillMapping)
+            {
+                if (resultSet.Add(item.ManifestCode))
+                {
+                    result.Add(item);
+                }
+            }
             return result.OrderByDescending(x => x.DateCreated).ToList();
         }
 
@@ -332,6 +352,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var serviceIds = await _userService.GetPriviledgeServiceCenters();
+                
 
                 //1. check if any of the waybills has not been mapped to a manifest 
                 // and has not been process for return in case it was not delivered (i.e still active) that day
@@ -364,7 +385,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 foreach (var waybill in waybills)
                 {
                     //check if the waybill exist
-                    var shipment = await _uow.PreShipment.GetAsync(x => x.Waybill == waybill);
+                    var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
                     if (shipment == null)
                     {
                         throw new GenericException($"No Waybill exists for this number: {waybill}");
@@ -381,21 +402,20 @@ namespace GIGLS.Services.Implementation.Shipments
                     //}
 
                     //check if the shipment is at the final destination with a scan of ARF (WHEN SHIPMENT ARRIVED FINAL DESTINATION)
-                    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.Waybill == waybill);
-                    if (shipmentCollection == null)
-                    {
-                        throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
-                    }
-                    else
-                    {
-                        //WC -- SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO RECEIVER
-                        shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.WC;
-                    }
+                    //var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.Waybill == waybill);
+                    //if (shipmentCollection == null)
+                    //{
+                    //    throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
+                    //}
+                    //else
+                    //{
+                    //    //WC -- SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO RECEIVER
+                    //    shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.WC;
+                    //}
 
                     
                     //check if Waybill has not been added to this manifest 
                     var isWaybillMapped = await _uow.PickupManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
-
                     //if the waybill has not been added to this manifest, add it
                     if (!isWaybillMapped)
                     {
@@ -405,11 +425,12 @@ namespace GIGLS.Services.Implementation.Shipments
                             ManifestCode = manifest,
                             Waybill = waybill,
                             IsActive = true,
-                            ServiceCentreId = shipment.DestinationServiceCentreId
+                            ServiceCentreId = serviceIds[0]
                         };
                         _uow.PickupManifestWaybillMapping.Add(newMapping);
+                        shipment.shipmentstatus = "Assigned for Pickup";
                     }
-
+                    
                     //automatic scan all the way also
                 }
 
@@ -472,6 +493,48 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        //Get Waybills in Pickup Manifest
+        public async Task<List<PickupManifestWaybillMappingDTO>> GetWaybillsInPickupManifest(string manifestCode)
+        {
+            try
+            {
+                var pickupManifestDTO = await _manifestService.GetPickupManifestByCode(manifestCode);
+                var pickupManifestWaybillMappingList = await _uow.PickupManifestWaybillMapping.FindAsync(x => x.ManifestCode == pickupManifestDTO.ManifestCode);
+
+                var pickupManifestWaybillMappingDto = Mapper.Map<List<PickupManifestWaybillMappingDTO>>(pickupManifestWaybillMappingList.ToList());
+
+                foreach (var pickupManifestWaybill in pickupManifestWaybillMappingDto)
+                {
+                    pickupManifestWaybill.PickupManifestDetails = pickupManifestDTO;
+
+                    //get preshipment details
+                    pickupManifestWaybill.PreShipment = await _preShipmentMobileService.GetPreShipmentDetail(pickupManifestWaybill.Waybill);
+
+                    CustomerType customerType;
+                    if (pickupManifestWaybill.PreShipment.CustomerType == CustomerType.Company.ToString())
+                    {
+                        customerType = CustomerType.Company;
+                    }
+                    else
+                    {
+                        customerType = CustomerType.IndividualCustomer;
+                    }
+
+                    //Get customer detail
+                    //var currentCustomerObject = await _customerService.GetCustomer(pickupManifestWaybill.PreShipment., customerType);
+
+                }
+                return pickupManifestWaybillMappingDto;
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
         //Get Waybills In Manifest for Dispatch
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatchOld()
         {

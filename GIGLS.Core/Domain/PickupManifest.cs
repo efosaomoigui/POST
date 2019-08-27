@@ -16,7 +16,7 @@ namespace GIGL.GIGLS.Core.Domain
         public DateTime DateTime { get; set; }
 
         public int? ShipmentId { get; set; }
-        public Shipment Shipment { get; set; }
+        public PreShipmentMobile Shipment { get; set; }
 
         public string DispatchedById { get; set; }
 

@@ -22,5 +22,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ManifestWaybillMappingDTO>> GetManifestWaitingForSignOff();
         Task<List<ManifestWaybillMappingDTO>> GetManifestHistoryForWaybill(string waybill);
         Task MappingManifestToWaybillsPickup(string manifest, List<string> waybills);
+        Task<List<PickupManifestWaybillMappingDTO>> GetWaybillsInPickupManifest(string manifestCode);
+
+        Task<List<PickupManifestWaybillMappingDTO>> GetAllPickupManifestWaybillMappings(DateFilterCriteria dateFilterCriteria);
     }
 }

@@ -12,9 +12,9 @@ namespace GIGLS.Core.DTO.Shipments
         public PickupManifestDTO()
         {
             FleetTrip = new List<FleetTripDTO>();
-            Shipments = new List<ShipmentDTO>();
+            PreShipments = new List<PreShipmentMobileDTO>();
         }
-        public int ManifestId { get; set; }
+        public int PickupManifestId { get; set; }
         public string ManifestCode { get; set; }
         public DateTime DateTime { get; set; }
         public string MasterWaybill { get; set; }
@@ -23,7 +23,7 @@ namespace GIGLS.Core.DTO.Shipments
         public int? ShipmentId { get; set; }
         public int? FleetTripId { get; set; }
         public List<FleetTripDTO> FleetTrip { get; set; }
-        public List<ShipmentDTO> Shipments { get; set; }
+        public List<PreShipmentMobileDTO> PreShipments { get; set; }
         public bool IsDispatched { get; set; }
         public bool IsReceived { get; set; }
         public ManifestType ManifestType { get; set; }

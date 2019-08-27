@@ -10,6 +10,6 @@ namespace GIGLS.Core.IRepositories.Shipments
 {
     public interface IPickupManifestWaybillMappingRepository : IRepository<PickupManifestWaybillMapping>
     {
-        
+        Task<List<PickupManifestWaybillMappingDTO>> GetPickupManifestWaybillMapping(DateFilterCriteria dateFilterCriteria);
     }
 }

@@ -75,7 +75,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     //filter all the ways in the delivery manifest for scanning processing
                     var ret = await FilterWaybillsInDeliveryManifest(dispatchDTO, currentUserId, userServiceCentreId);
                 }
-                else
+                else if (dispatchDTO.ManifestType != ManifestType.Pickup && dispatchDTO.ManifestType != ManifestType.Delivery)
                 {
                     //Verify that all waybills are not cancelled and scan all the waybills in case none was cancelled
                     var ret2 = await VerifyWaybillsInGroupWaybillInManifest(dispatchDTO.ManifestNumber, currentUserId, userServiceCentreId);
@@ -89,6 +89,17 @@ namespace GIGLS.Services.Implementation.Fleets
 
                 // update manifest
                 var manifestObj = _uow.Manifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
+                if (manifestObj == null)
+                {
+                    var pickupManifestObj = _uow.PickupManifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
+                    if(pickupManifestObj != null)
+                    {
+                        var pickupManifestEntity = _uow.PickupManifest.Get(pickupManifestObj.PickupManifestId);
+                        pickupManifestEntity.DispatchedById = currentUserId;
+                        pickupManifestEntity.IsDispatched = true;
+                        pickupManifestEntity.ManifestType = dispatchDTO.ManifestType;
+                    }
+                }
                 if (manifestObj != null)
                 {
                     var manifestEntity = _uow.Manifest.Get(manifestObj.ManifestId);
@@ -297,8 +308,17 @@ namespace GIGLS.Services.Implementation.Fleets
 
                 //get the ManifestType
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
-                dispatchDTO.ManifestType = manifestObj.ManifestType;
+                if (manifestObj == null)
+                {
+                    var pickupManifestObject = await _uow.PickupManifest.GetAsync(x => x.ManifestCode.Equals(manifest));
+                    dispatchDTO.ManifestType = pickupManifestObject.ManifestType;
 
+                }
+                else
+                {
+                    dispatchDTO.ManifestType = manifestObj.ManifestType;
+                }
+                
                 return dispatchDTO;
             }
             catch (Exception)
