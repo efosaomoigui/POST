@@ -22,7 +22,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
             return Task.FromResult(Context.Station.Include("State").ToList());
         }
 
-        public Task<List<StationDTO>> GetLocalStations()
+        public Task<List<StationDTO>> GetLocalStations(int[] countryIds)
         {
             try
             {
@@ -30,7 +30,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                 var stationDto = from s in stations
                                  join st in Context.State on s.StateId equals st.StateId
                                  join c in Context.Country on st.CountryId equals c.CountryId
-                                 where c.CountryName == "Nigeria"
+                                 where countryIds.Contains(c.CountryId)
                                 select new StationDTO
                                 {
                                     StationId = s.StationId,
@@ -70,7 +70,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                 var stationDto = from s in stations
                                  join st in Context.State on s.StateId equals st.StateId
                                  join c in Context.Country on st.CountryId equals c.CountryId
-                                 where c.CountryName != "Nigeria"
+                                 //where c.CountryName != "Nigeria"
+                                 where c.CountryId == 1
                                  select new StationDTO
                                  {
                                      StationId = s.StationId,

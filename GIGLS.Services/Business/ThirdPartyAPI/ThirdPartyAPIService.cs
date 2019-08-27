@@ -300,15 +300,17 @@ namespace GIGLS.Services.Business.CustomerPortal
             return haulages;
         }
 
-        public async Task<IEnumerable<InsuranceDTO>> GetInsurances()
+        public async Task<InsuranceDTO> GetInsurances()
         {
-            var insurances = await _uow.Insurance.GetInsurancesAsync();
+            var countryIds = await _userService.GetPriviledgeCountryIds();
+            var insurances = await _uow.Insurance.GetInsuranceByCountry(countryIds[0]);
             return insurances;
         }
-
-        public async Task<IEnumerable<VATDTO>> GetVATs()
+        
+        public async Task<VATDTO> GetVATs()
         {
-            var vats = await _uow.VAT.GetVATsAsync();
+            var countryIds = await _userService.GetPriviledgeCountryIds();
+            var vats = await _uow.VAT.GetVATByCountry(countryIds[0]);
             return vats;
         }
 
@@ -344,7 +346,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<IEnumerable<StationDTO>> GetLocalStations()
         {
-            var localStations = await _uow.Station.GetLocalStations();
+            var countryIds = await _userService.GetPriviledgeCountryIds();
+            var localStations = await _uow.Station.GetLocalStations(countryIds);
             return localStations.OrderBy(x => x.StationName).ToList();
         }
 

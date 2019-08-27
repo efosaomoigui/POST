@@ -267,7 +267,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 var vat = await _thirdPartyAPIService.GetVATs();
                 return new ServiceResponse<VATDTO>
                 {
-                    Object = vat.FirstOrDefault()
+                    Object = vat
                 };
             });
         }
@@ -282,7 +282,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 var insurance = await _thirdPartyAPIService.GetInsurances();
                 return new ServiceResponse<InsuranceDTO>
                 {
-                    Object = insurance.FirstOrDefault()
+                    Object = insurance
                 };
             });
         }
