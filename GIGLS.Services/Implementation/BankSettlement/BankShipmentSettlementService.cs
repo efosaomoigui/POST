@@ -631,12 +631,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
-                    //1. get data from COD register account as queryable from CashOnDeliveryRegisterAccount table
-                    var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
-
-                    allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
-                    allCODs = allCODs.Where(s => s.CODStatusHistory == CODStatushistory.RecievedAtServiceCenter);
-
                     //--------------------------Validation Section -------------------------------------------//
 
                     //all shipments from payload JSON
@@ -654,9 +648,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
 
                     //--------------------------Validation Section -------------------------------------------//
-
-
-                    //var bankorderforshipmentandcod = Mapper.Map<List<BankProcessingOrderForShipmentAndCOD>>(allShipments);
+                    
                     var bankorderforshipmentandcod = allprocessingordeforshipment.Select(s => new BankProcessingOrderForShipmentAndCOD()
                     {
                         Waybill = s.Waybill,
@@ -667,6 +659,12 @@ namespace GIGLS.Services.Implementation.Wallet
                         ServiceCenter = bkoc.ScName,
                         Status = DepositStatus.Pending
                     });
+                    
+                    //1. get data from COD register account as queryable from CashOnDeliveryRegisterAccount table
+                    var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
+
+                    allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
+                    allCODs = allCODs.Where(s => s.CODStatusHistory == CODStatushistory.RecievedAtServiceCenter || s.CODStatusHistory == CODStatushistory.CollectedByDispatch);
 
                     //select a values from 
                     var nonDepsitedValueunprocessed = allCODs.Where(s => result.Contains(s.Waybill)).ToList();
@@ -679,7 +677,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
 
                     bkoc.TotalAmount = codTotal;
-                    bankordercodes = Mapper.Map<BankProcessingOrderCodes>(bkoc);
+                    bankordercodes = Mapper.Map<BankProcessingOrderCodes>(bkoc);                    
                     nonDepsitedValueunprocessed.ForEach(a => a.DepositStatus = DepositStatus.Pending);
                     nonDepsitedValueunprocessed.ForEach(a => a.RefCode = bkoc.Code);
 
