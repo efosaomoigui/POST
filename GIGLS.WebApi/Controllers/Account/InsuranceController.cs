@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
-using System.Linq;
 
 namespace GIGLS.WebApi.Controllers.Account
 {
@@ -23,16 +22,16 @@ namespace GIGLS.WebApi.Controllers.Account
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("")]
-        public async Task<IServiceResponse<InsuranceDTO>> GetInsurances()
+        public async Task<IServiceResponse<IEnumerable<InsuranceDTO>>> GetInsurances()
         {
             return await HandleApiOperationAsync(async () =>
             {
 
                 var insurance = await _insuranceService.GetInsurances();
 
-                return new ServiceResponse<InsuranceDTO>
+                return new ServiceResponse<IEnumerable<InsuranceDTO>>
                 {
-                    Object = insurance.FirstOrDefault()
+                    Object = insurance
                 };
             });
         }
@@ -101,5 +100,20 @@ namespace GIGLS.WebApi.Controllers.Account
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("country")]
+        public async Task<IServiceResponse<InsuranceDTO>> GetInsuranceByCountry()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var insurance = await _insuranceService.GetInsuranceByCountry();
+
+                return new ServiceResponse<InsuranceDTO>
+                {
+                    Object = insurance
+                };
+            });
+        }
     }
 }

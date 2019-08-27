@@ -3,6 +3,7 @@ using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.IServices.Account;
+using GIGLS.Core.IServices.User;
 using GIGLS.Infrastructure;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,10 +13,12 @@ namespace GIGLS.Services.Implementation.Account
     public class VATService : IVATService
     {
         private readonly IUnitOfWork _uow;
+        private readonly IUserService _userService;
 
-        public VATService(IUnitOfWork uow)
+        public VATService(IUnitOfWork uow, IUserService userService)
         {
             _uow = uow;
+            _userService = userService;
             MapperConfig.Initialize();
         }
 
@@ -27,16 +30,14 @@ namespace GIGLS.Services.Implementation.Account
 
         public async Task<VATDTO> GetVATById(int vatId)
         {
-            var vat = await _uow.VAT.GetAsync(vatId);
+            var vat = await _uow.VAT.GetVATById(vatId);
 
             if (vat == null)
             {
                 throw new GenericException("VAT does not exists");
             }
-
-            var vatDTO = Mapper.Map<VATDTO>(vat);
-
-            return vatDTO;
+            
+            return vat;
         }
 
         public async Task<object> AddVAT(VATDTO vatDto)
@@ -60,6 +61,7 @@ namespace GIGLS.Services.Implementation.Account
             vat.Name = vatDto.Name;
             vat.Value = vatDto.Value;
             vat.Type = vatDto.Type;
+            vat.CountryId = vatDto.CountryId;
 
             await _uow.CompleteAsync();
         }
@@ -74,6 +76,20 @@ namespace GIGLS.Services.Implementation.Account
             }
             _uow.VAT.Remove(vat);
             await _uow.CompleteAsync();
+        }
+
+        public async Task<VATDTO> GetVATByCountry()
+        {
+            var countryIds = await _userService.GetPriviledgeCountryIds();
+
+            VATDTO vat = new VATDTO();
+
+            if(countryIds.Length > 0)
+            {
+                vat = await _uow.VAT.GetVATByCountry(countryIds[0]);
+            }
+
+            return vat;
         }
     }
 }

@@ -11,5 +11,6 @@ namespace GIGLS.Core.IServices.Account
         Task<object> AddVAT(VATDTO vat);
         Task UpdateVAT(int vatId, VATDTO vat);
         Task RemoveVAT(int vatId);
+        Task<VATDTO> GetVATByCountry();
     }
 }
