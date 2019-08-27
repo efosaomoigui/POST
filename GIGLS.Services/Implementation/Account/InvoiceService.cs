@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Wallet;
@@ -352,6 +353,10 @@ namespace GIGLS.Services.Implementation.Account
                     };
                 }
             }
+
+            //get country details
+            var country = await _uow.Country.GetAsync(invoice.CountryId);
+            invoiceDTO.Country = Mapper.Map<CountryDTO>(country);
 
             return invoiceDTO;
         }

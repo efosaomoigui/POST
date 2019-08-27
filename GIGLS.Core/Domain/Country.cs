@@ -16,5 +16,11 @@ namespace GIGLS.Core.Domain
 
         [MaxLength(10)]
         public string PhoneNumberCode { get; set; }
+
+        [MaxLength(100)]
+        public string ContactNumber { get; set; }
+
+        [MaxLength(100)]
+        public string ContactEmail { get; set; }
     }
 }

@@ -20,5 +20,7 @@ namespace GIGLS.Core.DTO
         public decimal CurrencyRatio { get; set; }
         public bool IsActive { get; set; }
         public string PhoneNumberCode { get; set; }
+        public string ContactNumber { get; set; }
+        public string ContactEmail { get; set; }
     }
 }

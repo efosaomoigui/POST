@@ -61,7 +61,6 @@ namespace GIGLS.Services.Implementation
         {
             var countries = _uow.Country.GetAll();
             return Task.FromResult(Mapper.Map<IEnumerable<CountryDTO>>(countries));
-
         }
 
         public async Task<CountryDTO> GetCountryById(int countryId)
@@ -99,6 +98,8 @@ namespace GIGLS.Services.Implementation
                 country.CurrencyRatio = countryDto.CurrencyRatio;
                 country.IsActive = countryDto.IsActive;
                 country.PhoneNumberCode = countryDto.PhoneNumberCode;
+                country.ContactNumber = countryDto.ContactNumber;
+                country.ContactEmail = countryDto.ContactEmail;
                 _uow.Complete();
             }
             catch (Exception)
