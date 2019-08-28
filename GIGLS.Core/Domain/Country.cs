@@ -22,5 +22,11 @@ namespace GIGLS.Core.Domain
 
         [MaxLength(100)]
         public string ContactEmail { get; set; }
+        
+        [MaxLength(100)]
+        public string TermAndConditionAmount { get; set; }
+
+        [MaxLength(100)]
+        public string TermAndConditionCountry { get; set; }
     }
 }

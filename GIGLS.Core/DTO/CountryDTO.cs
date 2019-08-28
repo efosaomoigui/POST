@@ -22,5 +22,7 @@ namespace GIGLS.Core.DTO
         public string PhoneNumberCode { get; set; }
         public string ContactNumber { get; set; }
         public string ContactEmail { get; set; }
+        public string TermAndConditionAmount { get; set; }
+        public string TermAndConditionCountry { get; set; }
     }
 }

@@ -100,6 +100,8 @@ namespace GIGLS.Services.Implementation
                 country.PhoneNumberCode = countryDto.PhoneNumberCode;
                 country.ContactNumber = countryDto.ContactNumber;
                 country.ContactEmail = countryDto.ContactEmail;
+                country.TermAndConditionAmount = countryDto.TermAndConditionAmount;
+                country.TermAndConditionCountry = countryDto.TermAndConditionCountry;
                 _uow.Complete();
             }
             catch (Exception)
