@@ -151,7 +151,9 @@ namespace GIGLS.Services.Implementation.Messaging
                     "Shipment Creation Date",
                     "Shipment Creation Time",
                     "Shipment Fee",
-                    "Currency Symbol"
+                    "Currency Symbol",
+                    "Contact Email",
+                    "ContactNumber"
                 };
 
                 var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
@@ -205,6 +207,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[11] = invoice.DateCreated.ToShortTimeString();
                     strArray[12] = invoice.GrandTotal.ToString();
                     strArray[13] = country.CurrencySymbol;
+                    strArray[14] = country.ContactEmail;
+                    strArray[15] = country.ContactNumber;
                     
 
                     //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
