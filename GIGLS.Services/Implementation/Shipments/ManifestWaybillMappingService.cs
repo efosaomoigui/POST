@@ -803,6 +803,37 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //remove Waybill from Pickup Manifest
+        public async Task RemoveWaybillFromPickupManifest(string manifest, string waybill)
+        {
+            try
+            {
+
+                var pickupManifestDTO = await _manifestService.GetPickupManifestByCode(manifest);
+                var pickuupManifestWaybillMapping = await _uow.PickupManifestWaybillMapping.GetAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
+
+                if (pickuupManifestWaybillMapping == null)
+                {
+                    throw new GenericException($"Waybill {waybill} is not mapped to the manifest {manifest}");
+                }
+
+                //update shipmnt status
+                var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
+                if (shipment != null)
+                {
+                    shipment.shipmentstatus = "Shipment created";
+                }
+                _uow.PickupManifestWaybillMapping.Remove(pickuupManifestWaybillMapping);
+                
+               
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //update Waybill in manifest that is not delivered
         public async Task ReturnWaybillsInManifest(string manifest, List<string> waybills)
         {

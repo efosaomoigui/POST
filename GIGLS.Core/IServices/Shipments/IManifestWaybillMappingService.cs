@@ -25,5 +25,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<PickupManifestWaybillMappingDTO>> GetWaybillsInPickupManifest(string manifestCode);
 
         Task<List<PickupManifestWaybillMappingDTO>> GetAllPickupManifestWaybillMappings(DateFilterCriteria dateFilterCriteria);
+        Task RemoveWaybillFromPickupManifest(string manifest, string waybill);
     }
+
+
 }

@@ -213,6 +213,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+        
+        [GIGLSActivityAuthorize(Activity = "Delete")]
+        [HttpDelete]
+        [Route("removewaybillfrompickupmanifest/{manifest}/{waybill}")]
+        public async Task<IServiceResponse<bool>> RemoveWaybillFromPickupManifest(string manifest, string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.RemoveWaybillFromPickupManifest(manifest, waybill);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
 
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
