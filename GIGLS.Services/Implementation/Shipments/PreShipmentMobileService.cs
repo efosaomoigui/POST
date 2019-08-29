@@ -190,12 +190,13 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception ex) { }
 
-            var Pickuprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpPrice, userActiveCountryId);
+            //var Pickuprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpPrice, userActiveCountryId);
+            var Pickuprice = 500.0M;
             if (preShipment.PreShipmentItems.Count()==0)
             {
                 throw new GenericException("No Preshipitem was added");
             }
-            var PickupValue = Convert.ToDecimal(Pickuprice.Value);
+            var PickupValue = Convert.ToDecimal(Pickuprice);
             var ShipmentCount = preShipment.PreShipmentItems.Count();
             var IndividualPrice = PickupValue / ShipmentCount;
             var user = await _userService.GetUserById(preShipment.UserId);

@@ -1136,7 +1136,13 @@ namespace GIGLS.Services.Business.CustomerPortal
             var result = await SendOTPForRegisteredUser(registeredUser);
             return result;
         }
-        
+
+        public async Task<List<StationDTO>> GetLocalStations()
+        {
+            var countryIds = new int [1];   //NIGERIA
+            countryIds[0] = 1;
+            return await _uow.Station.GetLocalStations(countryIds);
+        }
 
     }
 }
