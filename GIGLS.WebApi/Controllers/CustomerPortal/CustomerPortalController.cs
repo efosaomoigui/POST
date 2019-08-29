@@ -830,7 +830,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var stations = await _stationService.GetLocalStations();
+                var stations = await _portalService.GetLocalStations();
                 return new ServiceResponse<IEnumerable<StationDTO>>
                 {
                     Object = stations,
