@@ -302,15 +302,15 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<InsuranceDTO> GetInsurances()
         {
-            var countryIds = await _userService.GetPriviledgeCountryIds();
-            var insurances = await _uow.Insurance.GetInsuranceByCountry(countryIds[0]);
+            var countryIds = await _userService.GetUserActiveCountryId();
+            var insurances = await _uow.Insurance.GetInsuranceByCountry(countryIds);
             return insurances;
         }
         
         public async Task<VATDTO> GetVATs()
         {
-            var countryIds = await _userService.GetPriviledgeCountryIds();
-            var vats = await _uow.VAT.GetVATByCountry(countryIds[0]);
+            var countryIds = await _userService.GetUserActiveCountryId();
+            var vats = await _uow.VAT.GetVATByCountry(countryIds);
             return vats;
         }
 

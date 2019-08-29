@@ -306,10 +306,18 @@ namespace GIGLS.Services.Implementation.Fleets
                     dispatchDTO.DriverDetail = user.FirstName + " " + user.LastName;
                 }
 
+                //get the country by service centre
+                if(dispatchDTO.ServiceCentreId > 0)
+                {
+                    int serviceCentre = (int)dispatchDTO.ServiceCentreId;
+                    var country = await _uow.Country.GetCountryByServiceCentreId(serviceCentre);
+                    dispatchDTO.Country = country;
+                }
+
                 //get the ManifestType
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
                 dispatchDTO.ManifestType = manifestObj.ManifestType;
-
+                                
                 return dispatchDTO;
             }
             catch (Exception)

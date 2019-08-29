@@ -80,15 +80,8 @@ namespace GIGLS.Services.Implementation.Account
 
         public async Task<VATDTO> GetVATByCountry()
         {
-            var countryIds = await _userService.GetPriviledgeCountryIds();
-
-            VATDTO vat = new VATDTO();
-
-            if(countryIds.Length > 0)
-            {
-                vat = await _uow.VAT.GetVATByCountry(countryIds[0]);
-            }
-
+            var countryIds = await _userService.GetUserActiveCountryId();
+            var vat = await _uow.VAT.GetVATByCountry(countryIds);
             return vat;
         }
     }
