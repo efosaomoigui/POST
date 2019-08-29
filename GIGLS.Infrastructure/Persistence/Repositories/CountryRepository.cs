@@ -34,7 +34,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                                      CurrencySymbol = country.CurrencySymbol,
                                      CurrencyCode = country.CurrencyCode,
                                      CurrencyRatio = country.CurrencyRatio,
-                                     IsActive = country.IsActive
+                                     IsActive = country.IsActive,
+                                     ContactEmail = country.ContactEmail,
+                                     ContactNumber = country.ContactNumber
                                  };
                 return Task.FromResult(countryDto.FirstOrDefault());
             }

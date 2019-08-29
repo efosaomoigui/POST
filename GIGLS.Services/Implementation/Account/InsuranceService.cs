@@ -81,15 +81,8 @@ namespace GIGLS.Services.Implementation.Account
 
         public async Task<InsuranceDTO> GetInsuranceByCountry()
         {
-            var countryIds = await _userService.GetPriviledgeCountryIds();
-
-            InsuranceDTO insurance = new InsuranceDTO();
-
-            if (countryIds.Length > 0)
-            {
-                insurance = await _uow.Insurance.GetInsuranceByCountry(countryIds[0]);
-            }
-
+            var countryIds = await _userService.GetUserActiveCountryId();
+            var insurance = await _uow.Insurance.GetInsuranceByCountry(countryIds);
             return insurance;
         }
     }
