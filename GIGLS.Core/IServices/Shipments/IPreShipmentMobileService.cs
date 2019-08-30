@@ -39,6 +39,8 @@ namespace GIGLS.Core.IServices.Shipments
 
         Task<bool> UpdateReceiverDetails(PreShipmentMobileDTO receiver);
 
+        Task<int> GetCountryId();
+
 
 
     }
