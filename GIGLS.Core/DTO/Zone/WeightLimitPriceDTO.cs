@@ -18,5 +18,6 @@ namespace GIGLS.Core.DTO.Zone
         public RegularEcommerceType RegularEcommerceType { get; set; }
 
         public int CountryId { get; set; }
+        public CountryDTO Country { get; set; }
     }
 }
