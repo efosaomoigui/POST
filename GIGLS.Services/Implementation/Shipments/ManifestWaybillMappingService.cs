@@ -704,7 +704,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
 
                     //3. check and return only delivered shipments in order to update cod
-                    var shipmentCollectionDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.IsCashOnDelivery == true && (x.ShipmentScanStatus == ShipmentScanStatus.OKT) || x.ShipmentScanStatus == ShipmentScanStatus.OKC);
+                    var shipmentCollectionDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.IsCashOnDelivery == true && (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC));
                     if (shipmentCollectionDelivered != null)
                     {
                         //Update CashOnDevliveryRegisterAccount As  Cash Recieved at Service Center
