@@ -38,8 +38,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<PartnerDTO> GetPartnerDetails(string EmailId);
 
         Task<bool> UpdateReceiverDetails(PreShipmentMobileDTO receiver);
-
-
+        
+        Task<string> LoadImage(ImageDTO images);
 
     }
 }

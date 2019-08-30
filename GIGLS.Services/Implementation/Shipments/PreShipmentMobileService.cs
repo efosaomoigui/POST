@@ -31,6 +31,9 @@ using GIGLS.Core.IMessageService;
 using GIGLS.Core.DTO.Customers;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Partnership;
+using System.IO;
+using System.Drawing;
+using System.Web;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -1199,6 +1202,15 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                //to get images information
+                var images = new ImageDTO();
+                
+                if(partner.VehicleLicenseImageDetails != null)
+                {
+                    images.FileType = ImageFileType.VehicleLicense;
+                    images.ImageString = partner.VehicleLicenseImageDetails;
+                    partner.VehicleLicenseImageDetails =  await LoadImage(images);
+                }
                 var Partner = await _uow.Partner.GetAsync(s => s.Email == partner.Email);
                 if(Partner != null)
                 {
@@ -1223,7 +1235,27 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     foreach(var vehicle in partner.VehicleTypeDetails)
                     {
-                       var VehicleDetails = await _uow.VehicleType.GetAsync(s => s.Vehicletype == vehicle.Vehicletype && s.Partnercode == partner.PartnerCode);
+                        if (vehicle.VehiceInsurancePolicyDetails != null)
+                        {
+                            images.FileType = ImageFileType.VehiceInsurancePolicy;
+                            images.ImageString = vehicle.VehiceInsurancePolicyDetails;
+                            vehicle.VehiceInsurancePolicyDetails = await LoadImage(images);
+                        }
+
+                        if (vehicle.VehiceRoadWorthinessDetails != null)
+                        {
+                            images.FileType = ImageFileType.VehiceRoadWorthiness;
+                            images.ImageString = vehicle.VehiceRoadWorthinessDetails;
+                            vehicle.VehiceRoadWorthinessDetails = await LoadImage(images);
+                        }
+
+                        if (vehicle.VehicleParticularsDetails != null)
+                        {
+                            images.FileType = ImageFileType.VehicleParticulars;
+                            images.ImageString = vehicle.VehicleParticularsDetails;
+                            vehicle.VehicleParticularsDetails = await LoadImage(images);
+                        }
+                        var VehicleDetails = await _uow.VehicleType.GetAsync(s => s.Vehicletype == vehicle.Vehicletype && s.Partnercode == partner.PartnerCode);
                        if(VehicleDetails!= null)
                         {
                            VehicleDetails.VehiceInsurancePolicyDetails = vehicle.VehiceInsurancePolicyDetails;
@@ -1303,6 +1335,35 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+        
+        //method for converting a base64 string to an image
+        public async Task<string> LoadImage(ImageDTO images)
+        {
+            try
+            {
+                byte[] bytes = Convert.FromBase64String(images.ImageString);
+                Image image;
 
+                using (MemoryStream ms = new MemoryStream(bytes))
+                {
+                    //Convert the base64 string to an Image
+                    image = Image.FromStream(ms);
+                }
+                string path = HttpContext.Current.Server.MapPath("~/Images/");
+                
+                string filename = path + images.FileType.ToString() + ".png";
+
+                //To save the image
+                image.Save(filename);
+                return await Task.FromResult(filename);
+               
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            
+        }
+                      
     }
 }

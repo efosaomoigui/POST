@@ -449,6 +449,7 @@
     <Folder Include="Controllers\Stores\" />
     <Folder Include="Controllers\Vendors\" />
     <Folder Include="Controllers\Workshops\" />
+    <Folder Include="Images\" />
     <Folder Include="ReportTemplate\download\" />
     <Folder Include="Views\InvoiceReminder\" />
     <Folder Include="Views\Reminder\" />
