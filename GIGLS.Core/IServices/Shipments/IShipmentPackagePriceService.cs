@@ -6,10 +6,11 @@ namespace GIGLS.Core.IServices.Shipments
 {
     public interface IShipmentPackagePriceService : IServiceDependencyMarker
     {
-        Task<IEnumerable<ShipmentPackagePriceDTO>> GetShipmentPackagePrices();
+        Task<List<ShipmentPackagePriceDTO>> GetShipmentPackagePrices();
         Task<ShipmentPackagePriceDTO> GetShipmentPackagePriceById(int shipmentPackagePriceId);
         Task<object> AddShipmentPackagePrice(ShipmentPackagePriceDTO shipmentPackagePriceDto);
         Task UpdateShipmentPackagePrice(int shipmentPackagePriceId, ShipmentPackagePriceDTO shipmentPackagePriceDto);
         Task DeleteShipmentPackagePrice(int shipmentPackagePriceId);
+        Task<List<ShipmentPackagePriceDTO>> GetShipmentPackagePriceByCountry();
     }
 }
