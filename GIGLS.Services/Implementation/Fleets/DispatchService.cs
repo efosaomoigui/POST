@@ -52,33 +52,16 @@ namespace GIGLS.Services.Implementation.Fleets
                 //check for the type of delivery manifest to know which type of process to do
                 if (dispatchDTO.ManifestType == ManifestType.Delivery)
                 {
-                    //first ensure that the dispatch user does not have any pending DeliveryManifest
-                    //get the dispatch for the user
-                    //var userDispatchs = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == dispatchDTO.DriverDetail && s.ReceivedBy == null).ToList();
-
-                    //get the active manifest for the dispatch user
-                    //if (userDispatchs.Count > 0)
-                    //{
-                    //    //error, the dispatch user cannot have an undelivered dispatch
-                    //    var manifestCodeArray = userDispatchs.Select(s => s.ManifestNumber).ToList();
-                    //    var manifestObjects = _uow.Manifest.GetAll().Where(s =>
-                    //    manifestCodeArray.Contains(s.ManifestCode) && s.ManifestType == ManifestType.Delivery).ToList();
-
-                    //    if (manifestObjects.Count > 0)
-                    //    {
-                    //        var deliveryManifestCodeArray = manifestObjects.Select(s => s.ManifestCode).ToList();
-                    //        throw new GenericException($"Error: Dispatch User cannot have an undelivered dispatch. " +
-                    //            $"Please finalise the following Delivery Manifests [{string.Join(", ", deliveryManifestCodeArray)}]");
-                    //    }
-                    //}
-
                     //filter all the ways in the delivery manifest for scanning processing
                     var ret = await FilterWaybillsInDeliveryManifest(dispatchDTO, currentUserId, userServiceCentreId);
                 }
-                else if (dispatchDTO.ManifestType != ManifestType.Pickup && dispatchDTO.ManifestType != ManifestType.Delivery)
+                else 
                 {
-                    //Verify that all waybills are not cancelled and scan all the waybills in case none was cancelled
-                    var ret2 = await VerifyWaybillsInGroupWaybillInManifest(dispatchDTO.ManifestNumber, currentUserId, userServiceCentreId);
+                    if (dispatchDTO.ManifestType != ManifestType.Pickup)
+                    {
+                        //Verify that all waybills are not cancelled and scan all the waybills in case none was cancelled
+                        var ret2 = await VerifyWaybillsInGroupWaybillInManifest(dispatchDTO.ManifestNumber, currentUserId, userServiceCentreId);
+                    }
                 }
 
                 // create dispatch
@@ -140,10 +123,6 @@ namespace GIGLS.Services.Implementation.Fleets
                 await _uow.CompleteAsync();
                 return new { Id = newDispatch.DispatchId };
             }
-            //catch (Exception)
-            //{
-            //    throw;
-            //}
         }
 
         /// <summary>
@@ -312,7 +291,6 @@ namespace GIGLS.Services.Implementation.Fleets
                 {
                     var pickupManifestObject = await _uow.PickupManifest.GetAsync(x => x.ManifestCode.Equals(manifest));
                     dispatchDTO.ManifestType = pickupManifestObject.ManifestType;
-
                 }
                 else
                 {

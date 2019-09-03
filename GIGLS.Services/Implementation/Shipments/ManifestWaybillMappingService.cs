@@ -351,8 +351,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var serviceIds = await _userService.GetPriviledgeServiceCenters();
-                
+                var serviceIds = await _userService.GetPriviledgeServiceCenters();                
 
                 //1. check if any of the waybills has not been mapped to a manifest 
                 // and has not been process for return in case it was not delivered (i.e still active) that day
@@ -366,7 +365,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException($"Error: Manifest cannot be created. " +
                                $"The following waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
                 }
-
 
                 var manifestObj = await _uow.PickupManifest.GetAsync(x => x.ManifestCode.Equals(manifest));
 
@@ -390,30 +388,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         throw new GenericException($"No Waybill exists for this number: {waybill}");
                     }
-
-                    //check if the user is at the final destination centre of the shipment
-                    //if (serviceIds.Length == 1 && serviceIds[0] == shipment.DestinationServiceCentreId)
-                    //{
-                        
-                    //}
-                    //else
-                    //{
-                    //    throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
-                    //}
-
-                    //check if the shipment is at the final destination with a scan of ARF (WHEN SHIPMENT ARRIVED FINAL DESTINATION)
-                    //var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.Waybill == waybill);
-                    //if (shipmentCollection == null)
-                    //{
-                    //    throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
-                    //}
-                    //else
-                    //{
-                    //    //WC -- SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO RECEIVER
-                    //    shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.WC;
-                    //}
-
-                    
+                                                           
                     //check if Waybill has not been added to this manifest 
                     var isWaybillMapped = await _uow.PickupManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
                     //if the waybill has not been added to this manifest, add it
@@ -430,16 +405,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         _uow.PickupManifestWaybillMapping.Add(newMapping);
                         shipment.shipmentstatus = "Assigned for Pickup";
                     }
-                    
-                    //automatic scan all the way also
                 }
-
                 _uow.Complete();
             }
-            catch (Exception)
-            {
-
-            }
+            catch (Exception) { }
         }
         //Get Waybills In Manifest
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifest(string manifestcode)
@@ -511,15 +480,15 @@ namespace GIGLS.Services.Implementation.Shipments
                     //get preshipment details
                     pickupManifestWaybill.PreShipment = await _preShipmentMobileService.GetPreShipmentDetail(pickupManifestWaybill.Waybill);
 
-                    CustomerType customerType;
-                    if (pickupManifestWaybill.PreShipment.CustomerType == CustomerType.Company.ToString())
-                    {
-                        customerType = CustomerType.Company;
-                    }
-                    else
-                    {
-                        customerType = CustomerType.IndividualCustomer;
-                    }
+                    //CustomerType customerType;
+                    //if (pickupManifestWaybill.PreShipment.CustomerType == CustomerType.Company.ToString())
+                    //{
+                    //    customerType = CustomerType.Company;
+                    //}
+                    //else
+                    //{
+                    //    customerType = CustomerType.IndividualCustomer;
+                    //}
 
                     //Get customer detail
                     //var currentCustomerObject = await _customerService.GetCustomer(pickupManifestWaybill.PreShipment., customerType);

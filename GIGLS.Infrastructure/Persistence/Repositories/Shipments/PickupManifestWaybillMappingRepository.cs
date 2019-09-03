@@ -1,10 +1,8 @@
 ﻿using GIGLS.Core.IRepositories.Shipments;
-using GIGLS.Core.IRepositories.Fleets;
 using GIGLS.Core.Domain;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using GIGLS.Core.DTO.Shipments;
-using GIGLS.Core.DTO.Fleets;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -62,6 +60,5 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                   };
             return await Task.FromResult(pickupmanifestWaybillMappingDTO.OrderByDescending(x => x.DateCreated).ToList());
         }
-
     }
 }

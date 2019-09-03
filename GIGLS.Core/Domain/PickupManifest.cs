@@ -18,8 +18,10 @@ namespace GIGL.GIGLS.Core.Domain
         public int? ShipmentId { get; set; }
         public PreShipmentMobile Shipment { get; set; }
 
+        [MaxLength(128)]
         public string DispatchedById { get; set; }
 
+        [MaxLength(128)]
         public string ReceiverById { get; set; }
 
         public int? FleetTripId { get; set; }
