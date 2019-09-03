@@ -40,6 +40,7 @@ using GIGLS.Core.IMessageService;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
+    [AllowAnonymous]
     [Authorize]
     [RoutePrefix("api/portal")]
     public class CustomerPortalController : BaseWebApiController
@@ -1191,6 +1192,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
+                
                 var response = await _preshipmentmobileService.LoadImage(images);
                 return new ServiceResponse<string>
                 {
