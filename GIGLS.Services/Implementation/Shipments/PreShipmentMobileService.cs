@@ -1341,7 +1341,10 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                byte[] bytes = Convert.FromBase64String(images.ImageString);
+                //To get only the base64 string
+                var baseString = images.ImageString.Split(',')[1];
+               
+                byte[] bytes = Convert.FromBase64String(baseString);
                 Image image;
 
                 using (MemoryStream ms = new MemoryStream(bytes))
