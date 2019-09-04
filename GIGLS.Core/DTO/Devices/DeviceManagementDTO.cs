@@ -10,6 +10,8 @@ namespace GIGLS.Core.DTO.Devices
         public UserDTO User { get; set; }
         public int DeviceId { get; set; }
         public DeviceDTO Device { get; set; }
+        public string Location { get; set; }
+        public string DataSimCardNumber { get; set; }
         public bool IsActive { get; set; }
     }
 }

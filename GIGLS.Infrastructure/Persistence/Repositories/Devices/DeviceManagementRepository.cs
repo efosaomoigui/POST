@@ -56,8 +56,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Devices
                                                PhoneNumber = x.PhoneNumber,
                                                Organisation = x.Organisation,
                                                PictureUrl = x.PictureUrl,
-                                               Gender = x.Gender
-                                           }).FirstOrDefault()
+                                               Gender = x.Gender,
+                                               SystemUserRole = x.SystemUserRole
+                                           }).FirstOrDefault(),
+                                           Location = s.Location,
+                                           DataSimCardNumber = s.DataSimCardNumber
                                        }).ToList();
 
             return Task.FromResult(managementDto);
@@ -105,7 +108,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Devices
                                                                Organisation = x.Organisation,
                                                                PictureUrl = x.PictureUrl,
                                                                Gender = x.Gender
-                                                           }).FirstOrDefault()
+                                                           }).FirstOrDefault(),
+                                                           Location = s.Location,
+                                                           DataSimCardNumber = s.DataSimCardNumber
                                                        }).ToList();
 
             return Task.FromResult(managementDto);
@@ -152,7 +157,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Devices
                                                          Organisation = x.Organisation,
                                                          PictureUrl = x.PictureUrl,
                                                          Gender = x.Gender
-                                                     }).FirstOrDefault()
+                                                     }).FirstOrDefault(),
+                                                     Location = s.Location,
+                                                     DataSimCardNumber = s.Location
                                                  }).FirstOrDefault();
 
             return Task.FromResult(managementDto);
