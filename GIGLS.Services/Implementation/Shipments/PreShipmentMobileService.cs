@@ -1367,6 +1367,44 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             
         }
-                      
+
+        ////this is main method of upload file to OneDrive 
+        //public async Task<string> UploadFileAsync(string filePath, string oneDrivePath)
+        //{
+        //    //get the upload session,we can use this session to upload file resume from break point 
+        //    string uploadUri = await GetUploadSession(oneDrivePath);
+
+        //    //when file upload is not finish, the result is upload progress, 
+        //    //When file upload is finish, the result is the file information. 
+        //    string result = string.Empty;
+        //    using (FileStream stream = File.OpenRead(filePath))
+        //    {
+        //        long position = 0;
+        //        long totalLength = stream.Length;
+        //        int length = 10 * 1024 * 1024;
+
+        //        //In one time, we just upload a part of file 
+        //        //When all file part is uploaded, break out in this loop 
+        //        while (true)
+        //        {
+        //            //Read a file part 
+        //            byte[] bytes = await ReadFileFragmentAsync(stream, position, length);
+
+        //            //check if arrive file end, when yes, break out with this loop 
+        //            if (position >= totalLength)
+        //            {
+        //                break;
+        //            }
+
+        //            //Upload the file part 
+        //            result = await UploadFileFragmentAsync(bytes, uploadUri, position, totalLength);
+
+        //            position += bytes.Length;
+        //        }
+        //    }
+
+        //    return result;
+        //}
+
     }
 }
