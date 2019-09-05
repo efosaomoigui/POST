@@ -127,19 +127,13 @@ namespace GIGLS.Services.Business.Scanning
                     await ProcessReturnWaybillFromDispatch(shipment.Waybill);
                     return true;
                 }
+                else if (scan.ShipmentScanStatus == ShipmentScanStatus.SMIM)
+                {
+                    //Missed shipment during transit manifest arrival
+                    await ProcessMissedWaybillFromTransitManifest(shipment.Waybill);
+                }
                 else
                 {
-                    ////if the scan status is AD and ARF is not yet scanned for the shipment, throw an error
-                    //if (scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD))
-                    //{
-                    //    var checkArrivalFinalDestiantionScan = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, ShipmentScanStatus.ARF.ToString());
-
-                    //    if (!checkArrivalFinalDestiantionScan)
-                    //    {
-                    //        throw new GenericException($"Error processing request. Shipment with waybill: {scan.WaybillNumber} is not at the final Destination");
-                    //    }
-                    //}
-
                     //check if the waybill has not been scan for the same status before
                     var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);
 
@@ -418,7 +412,7 @@ namespace GIGLS.Services.Business.Scanning
 
             return true;
         }
-
+        
         private async Task<bool> SendEmailOnAttemptedScanOfCancelledShipment(ScanDTO scan)
         {
             //send emails
@@ -538,8 +532,7 @@ namespace GIGLS.Services.Business.Scanning
 
             return true;
         }
-
-
+        
         private async Task CompleteTransitWaybillProcess(ScanDTO scan, HashSet<string> waybillsInGroupWaybill, HashSet<string> waybillsInManifest)
         {
             if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
@@ -573,6 +566,13 @@ namespace GIGLS.Services.Business.Scanning
                 transitWaybillNumber.IsTransitCompleted = true;
                 _uow.Complete();
             }
+        }
+        
+        private Task ProcessMissedWaybillFromTransitManifest(string waybill)
+        {
+            //1. Get the GroupWaybill and Transit Manifest
+            //var group = 
+            throw new NotImplementedException();
         }
 
         /// <summary>
