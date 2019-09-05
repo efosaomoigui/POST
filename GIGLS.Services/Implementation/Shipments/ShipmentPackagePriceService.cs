@@ -7,16 +7,19 @@ using GIGLS.Core;
 using AutoMapper;
 using GIGLS.Core.Domain;
 using GIGLS.Infrastructure;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
     public class ShipmentPackagePriceService : IShipmentPackagePriceService
     {
         private readonly IUnitOfWork _uow;
+        private readonly IUserService _userService;
 
-        public ShipmentPackagePriceService(IUnitOfWork uow)
+        public ShipmentPackagePriceService(IUnitOfWork uow, IUserService userService)
         {
             _uow = uow;
+            _userService = userService;
             MapperConfig.Initialize();
         }
 
@@ -57,14 +60,13 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var shipmentPackagePrice = await _uow.ShipmentPackagePrice.GetAsync(shipmentPackagePriceId);
+                var shipmentPackagePrice = await _uow.ShipmentPackagePrice.GetShipmentPackagePriceById(shipmentPackagePriceId);
                 if (shipmentPackagePrice == null)
                 {
                     throw new GenericException("shipment Package Price does not exist");
                 }
 
-                var shipmentPackagePriceDto = Mapper.Map<ShipmentPackagePriceDTO>(shipmentPackagePrice);
-                return shipmentPackagePriceDto;
+                return shipmentPackagePrice;
             }
             catch (Exception)
             {
@@ -72,10 +74,17 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public Task<IEnumerable<ShipmentPackagePriceDTO>> GetShipmentPackagePrices()
+        public async Task<List<ShipmentPackagePriceDTO>> GetShipmentPackagePrices()
         {
-            var shipmentPackagePrices = _uow.ShipmentPackagePrice.GetAll();
-            return Task.FromResult(Mapper.Map<IEnumerable<ShipmentPackagePriceDTO>>(shipmentPackagePrices));
+            var shipmentPackagePrices = await _uow.ShipmentPackagePrice.GetShipmentPackagePrices();
+            return shipmentPackagePrices;
+        }
+
+        public async Task<List<ShipmentPackagePriceDTO>> GetShipmentPackagePriceByCountry()
+        {
+            var countryIds = await _userService.GetUserActiveCountryId();
+            var shipmentPackagePrices = await _uow.ShipmentPackagePrice.GetShipmentPackagePriceByCountry(countryIds);
+            return shipmentPackagePrices;
         }
 
         public async Task UpdateShipmentPackagePrice(int shipmentPackagePriceId, ShipmentPackagePriceDTO shipmentPackagePriceDto)
@@ -90,6 +99,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 shipmentPackagePrice.Description = shipmentPackagePriceDto.Description;
                 shipmentPackagePrice.Price = shipmentPackagePriceDto.Price;
+                shipmentPackagePrice.CountryId = shipmentPackagePriceDto.CountryId;
                 _uow.Complete();
             }
             catch (Exception)

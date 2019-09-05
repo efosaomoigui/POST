@@ -6,6 +6,9 @@ using GIGLS.Core.IServices.Zone;
 using GIGLS.Core;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Infrastructure;
+using System.Linq;
+using GIGLS.Core.DTO;
+using AutoMapper;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -42,7 +45,8 @@ namespace GIGLS.Services.Implementation.Zone
                    SpecialDomesticPackageId  = newSpecialZonePrice.SpecialDomesticPackageId,
                    Weight = newSpecialZonePrice.Weight,
                    ZoneId = newSpecialZonePrice.ZoneId,
-                   //UserId = newSpecialZonePrice.UserId
+                   CountryId = newSpecialZonePrice.CountryId
+                    //UserId = newSpecialZonePrice.UserId
                 };
 
                 _uow.SpecialDomesticZonePrice.Add(newPrice);
@@ -83,6 +87,11 @@ namespace GIGLS.Services.Implementation.Zone
                     throw new GenericException("Not Exist");
                 }
 
+                var countries = _uow.Country.GetAll().ToList();
+                var countriesDTO = Mapper.Map<IEnumerable<CountryDTO>>(countries);
+
+                var country = countriesDTO.FirstOrDefault(s => s.CountryId == specialDomestic.CountryId);
+
                 return new SpecialDomesticZonePriceDTO
                 {
                     SpecialDomesticZonePriceId = specialDomestic.SpecialDomesticZonePriceId,
@@ -92,7 +101,9 @@ namespace GIGLS.Services.Implementation.Zone
                     ZoneId = specialDomestic.ZoneId,
                     ZoneName = specialDomestic.Zone.ZoneName,
                     SpecialDomesticPackageId = specialDomestic.SpecialDomesticPackageId,
-                    SpecialDomesticPackageName = specialDomestic.SpecialDomesticPackage.Name
+                    SpecialDomesticPackageName = specialDomestic.SpecialDomesticPackage.Name,
+                    CountryId = specialDomestic.CountryId,
+                    Country = country
                     //UserName    = specialDomestic.User.FirstName + " " + specialDomestic.User.LastName,
                     //UserId      = specialDomestic.UserId,
                 };
@@ -107,7 +118,18 @@ namespace GIGLS.Services.Implementation.Zone
         {
             try
             {
-                return await _uow.SpecialDomesticZonePrice.GetSpecialDomesticZonesPrice();
+                var specialZonePrices = await _uow.SpecialDomesticZonePrice.GetSpecialDomesticZonesPrice();
+
+                var countries = _uow.Country.GetAll().ToList();
+                var countriesDTO = Mapper.Map<IEnumerable<CountryDTO>>(countries);
+
+                foreach (var specialZonePrice in specialZonePrices)
+                {
+                    var country = countriesDTO.FirstOrDefault(s => s.CountryId == specialZonePrice.CountryId);
+                    specialZonePrice.Country = country;
+                }
+
+                return specialZonePrices;
             }
             catch (Exception)
             {
@@ -131,7 +153,8 @@ namespace GIGLS.Services.Implementation.Zone
                 zonePrice.Description = specialDomestic.Description;                
                 zonePrice.Price  = specialDomestic.Price;
                 zonePrice.Weight = specialDomestic.Weight;
-                zonePrice.ZoneId = specialDomestic.ZoneId;  
+                zonePrice.ZoneId = specialDomestic.ZoneId;
+                zonePrice.CountryId = specialDomestic.CountryId;
 
                 //zonePrice.UserId = specialDomestic.UserId;                              
                 _uow.Complete();
@@ -142,7 +165,7 @@ namespace GIGLS.Services.Implementation.Zone
             }
         }
 
-        public async Task<decimal> GetSpecialZonePrice(int package, int zone, decimal weight = 0)
+        public async Task<decimal> GetSpecialZonePrice(int package, int zone, int countryId, decimal weight = 0)
         {
             try
             {
@@ -150,7 +173,10 @@ namespace GIGLS.Services.Implementation.Zone
 
                 var specialPackage = await _packageService.GetSpecialDomesticPackageById(package);
 
-                var specialDomestic = await _uow.SpecialDomesticZonePrice.GetAsync(s => s.SpecialDomesticPackageId == package && s.ZoneId == zone);
+                var specialDomestic = await _uow.SpecialDomesticZonePrice.GetAsync(s => 
+                    s.SpecialDomesticPackageId == package && 
+                    s.ZoneId == zone &&
+                    s.CountryId == countryId);
                 if (specialDomestic == null)
                 {
                     throw new GenericException("Special Zone Price not yet set for selected parameters");

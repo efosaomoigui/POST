@@ -62,6 +62,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly IPasswordGenerator _codegenerator;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly IPreShipmentMobileService _preShipmentMobileService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
@@ -69,7 +70,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService, ICustomerService customerService,
             IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
-            IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService)
+            IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -89,6 +90,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _codegenerator = codegenerator;
             _globalPropertyService = globalPropertyService;
+            _preShipmentMobileService = preShipmentMobileService;
             MapperConfig.Initialize();
         }
 
@@ -566,7 +568,10 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<SignResponseDTO> SignUp(UserDTO user)
         {
-            var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus);
+            var CountryId = await _preShipmentMobileService.GetCountryId();
+            var userActiveCountryId = CountryId;    //Nigeria
+
+            var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, userActiveCountryId);
             var result = new SignResponseDTO();
                 if (user.UserChannelType == UserChannelType.Partner)
                 {
@@ -1134,7 +1139,14 @@ namespace GIGLS.Services.Business.CustomerPortal
             var result = await SendOTPForRegisteredUser(registeredUser);
             return result;
         }
-        
+
+        public async Task<List<StationDTO>> GetLocalStations()
+        {
+            var CountryId = await _preShipmentMobileService.GetCountryId();
+            var countryIds = new int [1];   //NIGERIA
+            countryIds[0] = CountryId;
+            return await _uow.Station.GetLocalStations(countryIds);
+        }
 
     }
 }

@@ -12,5 +12,7 @@ namespace GIGL.GIGLS.Core.Domain
         public virtual Zone Zone { get; set; }
         public decimal Price { get; set; }
         public RegularEcommerceType RegularEcommerceType { get; set; }
+
+        public int CountryId { get; set; }
     }
 }

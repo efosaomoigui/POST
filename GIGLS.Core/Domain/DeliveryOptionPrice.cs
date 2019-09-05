@@ -14,5 +14,7 @@ namespace GIGLS.Core.Domain
         public virtual DeliveryOption DeliveryOption { get; set; }
 
         public decimal Price { get; set; }
+
+        public int CountryId { get; set; }
     }
 }

@@ -13,5 +13,9 @@ namespace GIGLS.Core.DTO.Zone
         public string DeliveryOption { get; set; }
 
         public decimal Price { get; set; }
+
+        public int CountryId { get; set; }
+
+        public CountryDTO CountryDTO { get; set; }
     }
 }

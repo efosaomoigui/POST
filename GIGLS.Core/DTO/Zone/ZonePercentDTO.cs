@@ -12,5 +12,6 @@ namespace GIGLS.Core.DTO.Zone
         public ModificationType ModificationType { get; set; }
         public RateType RateType { get; set; }
         public List<ZoneDTO> Zones { get; set; }
+        public int CountryId { get; set; }
     }
 }

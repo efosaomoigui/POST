@@ -56,6 +56,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("pickupmanifestbydate")]
+        public async Task<IServiceResponse<List<PickupManifestWaybillMappingDTO>>> GetAllPickupManifestWaybillMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var pickupmanifestWayBillNumberMappings = await _service.GetAllPickupManifestWaybillMappings(dateFilterCriteria);
+
+                return new ServiceResponse<List<PickupManifestWaybillMappingDTO>>
+                {
+                    Object = pickupmanifestWayBillNumberMappings
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapmultiple")]
@@ -86,6 +102,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("mapmultiplepickup")]
+        public async Task<IServiceResponse<bool>> MappingManifestToWaybillsPickup(PickupManifestWaybillMappingDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.MappingManifestToWaybillsPickup(data.ManifestCode, data.Waybills);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("waybillsinmanifest/{manifest}")]
@@ -98,6 +129,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<List<ManifestWaybillMappingDTO>>
                 {
                     Object = groupWaybillNumbersInManifest
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("pickupwaybillsinmanifest/{manifest}")]
+        public async Task<IServiceResponse<List<PickupManifestWaybillMappingDTO>>> GetWaybillsInPickupManifest(string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var waybillNumbersIPickupManifest = await _service.GetWaybillsInPickupManifest(manifest);
+
+                return new ServiceResponse<List<PickupManifestWaybillMappingDTO>>
+                {
+                    Object = waybillNumbersIPickupManifest
                 };
             });
         }
@@ -160,6 +207,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 await _service.RemoveWaybillFromManifest(manifest, waybill);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+        
+        [GIGLSActivityAuthorize(Activity = "Delete")]
+        [HttpDelete]
+        [Route("removewaybillfrompickupmanifest/{manifest}/{waybill}")]
+        public async Task<IServiceResponse<bool>> RemoveWaybillFromPickupManifest(string manifest, string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.RemoveWaybillFromPickupManifest(manifest, waybill);
                 return new ServiceResponse<bool>
                 {
                     Object = true

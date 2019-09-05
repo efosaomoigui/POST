@@ -13,5 +13,7 @@ namespace GIGLS.Core.Domain
         public decimal Weight { get; set; }
         
         public RegularEcommerceType RegularEcommerceType { get; set; }
+
+        public int CountryId { get; set; }
     }
 }

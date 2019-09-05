@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Wallet;
@@ -60,9 +61,10 @@ namespace GIGLS.Services.Implementation.Account
 
         public async Task<string> SendEmailForDueInvoices(int daystoduedate)
         {
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
 
             //1.Get start date for this feature
-            var globalpropertiesreminderdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.globalpropertiesreminderdate);
+            var globalpropertiesreminderdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.globalpropertiesreminderdate, userActiveCountryId);
             string globalpropertiesdateStr = globalpropertiesreminderdateObj?.Value;
 
             var globalpropertiesdate = DateTime.MinValue;
@@ -116,9 +118,10 @@ namespace GIGLS.Services.Implementation.Account
 
         public async Task<string> SendEmailForWalletBalanceCheck(decimal amountforreminder) 
         {
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
 
             //1.Get start date for this feature
-            var globalpropertiesreminderdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.globalpropertiesreminderdate);
+            var globalpropertiesreminderdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.globalpropertiesreminderdate, userActiveCountryId);
             string globalpropertiesdateStr = globalpropertiesreminderdateObj?.Value;
 
             var globalpropertiesdate = DateTime.MinValue;
@@ -350,6 +353,10 @@ namespace GIGLS.Services.Implementation.Account
                     };
                 }
             }
+
+            //get country details
+            var country = await _uow.Country.GetAsync(invoice.CountryId);
+            invoiceDTO.Country = Mapper.Map<CountryDTO>(country);
 
             return invoiceDTO;
         }

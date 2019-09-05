@@ -4,6 +4,7 @@ using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
@@ -257,9 +258,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
 
+
+            var userActiveCountryId = 1;
+            try
+            {
+                userActiveCountryId = _userService.GetUserActiveCountryId().Result;
+            }
+            catch (Exception ex) { }
+
             //filter the data by using count which serve as the number of days to display
             DateTime backwardDatebyNumberofDays = DateTime.Today.AddDays(-30);
-            var hubManifestDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HUBManifestDaysToDisplay).Result;
+            var hubManifestDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HUBManifestDaysToDisplay, userActiveCountryId).Result;
             if (hubManifestDaysCountObj != null)
             {
                 int globalProp = 0;
@@ -437,11 +446,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 User = shipmentCollectionDto.UserId,
             }, shipmentCollectionDto.ShipmentScanStatus);
 
-            var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
-
+            //Get Destination Service centre details
+            var getServiceCentreDetail = await _uow.ServiceCentre.GetAsync(shipmentCollection.DestinationServiceCentreId);
+            
             //cash collected on Delivery
             if (shipmentCollectionDto.IsCashOnDelivery)
             {
+
                 CODStatushistory codStatushistory;
 
                 if (shipmentCollectionDto.IsComingFromDispatch)
@@ -473,7 +484,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (codRegisterCollectsForASingleWaybill != null)
                 {
                     codRegisterCollectsForASingleWaybill.CODStatusHistory = codStatushistory;
-                    codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCenterCode[0].ServiceCentreId;
+                    codRegisterCollectsForASingleWaybill.ServiceCenterId = getServiceCentreDetail.ServiceCentreId;
+                    codRegisterCollectsForASingleWaybill.ServiceCenterCode = getServiceCentreDetail.Code;
                     codRegisterCollectsForASingleWaybill.PaymentType = shipmentCollectionDto.PaymentType;
                     codRegisterCollectsForASingleWaybill.PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference;
                     codRegisterCollectsForASingleWaybill.DepositStatus = DepositStatus.Unprocessed;
@@ -486,11 +498,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         RefCode = null,
                         UserId = shipmentCollectionDto.UserId,
                         Amount = (decimal)shipmentCollectionDto.CashOnDeliveryAmount,
-                        ServiceCenterId = getServiceCenterCode[0].ServiceCentreId,
+                        ServiceCenterId = getServiceCentreDetail.ServiceCentreId, 
                         DepositStatus = DepositStatus.Unprocessed,
                         PaymentType = shipmentCollectionDto.PaymentType,
                         PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference,
-                        ServiceCenterCode = getServiceCenterCode[0].Code,
+                        ServiceCenterCode = getServiceCentreDetail.Code,
                         CODStatusHistory = codStatushistory
                     };
 
@@ -501,13 +513,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentCollectionDto.Demurrage?.Amount > 0)
             {
-                //var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-
                 ////--start--///Set the DepartureCountryId
                 int countryIdFromServiceCentreId = 0;
                 try
                 {
-                    var departureCountry = await _uow.Country.GetCountryByServiceCentreId(getServiceCenterCode[0].ServiceCentreId);
+                    var departureCountry = await _uow.Country.GetCountryByServiceCentreId(getServiceCentreDetail.ServiceCentreId);
                     countryIdFromServiceCentreId = departureCountry.CountryId;
                 }
                 catch (Exception) { }
@@ -517,7 +527,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var generalLedger = new GeneralLedger()
                 {
                     DateOfEntry = DateTime.Now,
-                    ServiceCentreId = getServiceCenterCode[0].ServiceCentreId, //serviceCenters[0],
+                    ServiceCentreId = getServiceCentreDetail.ServiceCentreId,
                     CountryId = countryIdFromServiceCentreId,
                     UserId = shipmentCollectionDto.UserId,
                     Amount = shipmentCollectionDto.Demurrage.AmountPaid,
@@ -537,12 +547,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     RefCode = null,
                     UserId = shipmentCollectionDto.UserId,
                     Amount = (decimal)shipmentCollectionDto.Demurrage.AmountPaid,
-                    ServiceCenterId = getServiceCenterCode[0].ServiceCentreId,
+                    ServiceCenterId = getServiceCentreDetail.ServiceCentreId,
                     DepositStatus = DepositStatus.Unprocessed,
                     PaymentType = shipmentCollectionDto.PaymentType,
                     PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference,
                     DEMStatusHistory = CODStatushistory.RecievedAtServiceCenter,
-                    ServiceCenterCode = getServiceCenterCode[0].Code
+                    ServiceCenterCode = getServiceCentreDetail.Code
                 };
 
                 //insert demurage into demurrage entity 
@@ -554,8 +564,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     AmountPaid = shipmentCollectionDto.Demurrage.AmountPaid,
                     ApprovedBy = shipmentCollectionDto.Demurrage.ApprovedBy,
                     UserId = shipmentCollection.UserId,
-                    ServiceCenterId = getServiceCenterCode[0].ServiceCentreId,
-                    ServiceCenterCode = getServiceCenterCode[0].Code
+                    ServiceCenterId = getServiceCentreDetail.ServiceCentreId,
+                    ServiceCenterCode = getServiceCentreDetail.Code
                 };
 
                 _uow.DemurrageRegisterAccount.Add(demurrageinformation);
@@ -651,12 +661,19 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
+                var userActiveCountryId = 1;
+                try
+                {
+                    userActiveCountryId = _userService.GetUserActiveCountryId().Result;
+                }
+                catch (Exception ex) { }
+
                 List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable()
                     .Where(s => s.IsCancelled == false && s.CompanyType != CompanyType.Ecommerce.ToString()
                     && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount).Result;
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount, userActiveCountryId).Result;
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count' has not been set. Kindly contact admin.");
@@ -740,10 +757,17 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
+                var userActiveCountryId = 1;
+                try
+                {
+                    userActiveCountryId = _userService.GetUserActiveCountryId().Result;
+                }
+                catch (Exception ex) { }
+
                 List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && s.CompanyType == CompanyType.Ecommerce.ToString() && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount).Result;
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId).Result;
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count for Ecommerce customer' has not been set. Kindly contact admin.");
@@ -812,10 +836,17 @@ namespace GIGLS.Services.Implementation.Shipments
         //---Added for global customer care and ecommerce
         public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetOverDueShipmentsGLOBAL(FilterOptionsDto filterOptionsDto)
         {
+            var userActiveCountryId = 1;
+            try
+            {
+                userActiveCountryId = _userService.GetUserActiveCountryId().Result;
+            }
+            catch (Exception ex) { }
+
             try
             {
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount).Result;
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount, userActiveCountryId).Result;
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count' has not been set. Kindly contact admin.");
@@ -882,10 +913,17 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<IEnumerable<ShipmentCollectionDTO>> GetOverDueShipmentsGLOBAL()
         {
+            var userActiveCountryId = 1;
+            try
+            {
+                userActiveCountryId = await _userService.GetUserActiveCountryId();
+            }
+            catch (Exception ex) { }
+
             try
             {
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount).Result;
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount, userActiveCountryId).Result;
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count' has not been set. Kindly contact admin.");
@@ -920,10 +958,17 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetEcommerceOverDueShipmentsGLOBAL(FilterOptionsDto filterOptionsDto)
         {
+            var userActiveCountryId = 1;
+            try
+            {
+                userActiveCountryId = _userService.GetUserActiveCountryId().Result;
+            }
+            catch (Exception ex) { }
+
             try
             {
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount).Result;
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId).Result;
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count for Ecommerce customer' has not been set. Kindly contact admin.");
@@ -990,10 +1035,17 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<IEnumerable<ShipmentCollectionDTO>> GetEcommerceOverDueShipmentsGLOBAL()
         {
+            var userActiveCountryId = 1;
+            try
+            {
+                userActiveCountryId = await _userService.GetUserActiveCountryId();
+            }
+            catch (Exception ex) { }
+
             try
             {
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount).Result;
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId).Result;
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count for Ecommerce customer' has not been set. Kindly contact admin.");
@@ -1042,10 +1094,17 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
+                var userActiveCountryId = 1;
+                try
+                {
+                    userActiveCountryId = await _userService.GetUserActiveCountryId();
+                }
+                catch (Exception ex) { }
+
                 List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && s.CompanyType == CompanyType.Ecommerce.ToString() && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount).Result;
+                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId).Result;
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count for Ecommerce customer' has not been set. Kindly contact admin.");

@@ -1,8 +1,6 @@
 ﻿using GIGLS.Core.DTO.Account;
-using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.BankSettlement;
-using GIGLS.Core.IServices.CashOnDeliveryBalance;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
 using System.Collections.Generic;

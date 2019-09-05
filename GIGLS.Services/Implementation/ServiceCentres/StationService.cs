@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.Implementation.ServiceCentres
 {
@@ -15,11 +16,13 @@ namespace GIGLS.Services.Implementation.ServiceCentres
     {
         private readonly IUnitOfWork _uow;
         private IStateService _stateService;
+        private readonly IUserService _userService;
 
-        public StationService(IUnitOfWork uow, IStateService stateService)
+        public StationService(IUnitOfWork uow, IStateService stateService, IUserService userService)
         {
             _uow = uow;
             _stateService = stateService;
+            _userService = userService;
             MapperConfig.Initialize();
         }
 
@@ -142,7 +145,8 @@ namespace GIGLS.Services.Implementation.ServiceCentres
         
         public async Task<List<StationDTO>> GetLocalStations()
         {
-            return await _uow.Station.GetLocalStations();
+            var countryIds = await _userService.GetPriviledgeCountryIds();
+            return await _uow.Station.GetLocalStations(countryIds);
         }
 
         public async Task<List<StationDTO>> GetInternationalStations()

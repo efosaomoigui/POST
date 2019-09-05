@@ -11,6 +11,7 @@ using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.MessagingLog;
+using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using System;
 using System.Linq;
@@ -25,16 +26,16 @@ namespace GIGLS.Services.Implementation.Messaging
         private readonly IEmailService _emailService;
         private readonly ISMSService _sMSService;
         private readonly IMessageService _messageService;
-        //private readonly IInvoiceService _invoiceService;
         private readonly ICustomerService _customerService;
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ISmsSendLogService _iSmsSendLogService;
         private readonly IEmailSendLogService _iEmailSendLogService;
+        private readonly IUserService _userService;
 
         public MessageSenderService(IUnitOfWork uow, IEmailService emailService, ISMSService sMSService,
             IMessageService messageService,
-            //IInvoiceService invoiceService, 
             ICustomerService customerService,
+            IUserService userService,
             ISmsSendLogService iSmsSendLogService, IEmailSendLogService iEmailSendLogService,
             IGlobalPropertyService globalPropertyService)
         {
@@ -47,6 +48,7 @@ namespace GIGLS.Services.Implementation.Messaging
             _globalPropertyService = globalPropertyService;
             _iSmsSendLogService = iSmsSendLogService;
             _iEmailSendLogService = iEmailSendLogService;
+            _userService = userService;
         }
 
         public async Task<bool> SendMessage(MessageType messageType, EmailSmsType emailSmsType, object obj)
@@ -149,7 +151,10 @@ namespace GIGLS.Services.Implementation.Messaging
                     "Shipment Creation Date",
                     "Shipment Creation Time",
                     "Shipment Fee",
-                    "Currency Symbol"
+                    "Currency Symbol",
+                    "Contact Email",
+                    "ContactNumber",
+                    "Currency Code",
                 };
 
                 var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
@@ -169,19 +174,25 @@ namespace GIGLS.Services.Implementation.Messaging
                     CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), invoice.CustomerType);
                     var customerObj = await _customerService.GetCustomer(invoice.CustomerId, customerType);
 
+                    var userActiveCountryId = 1;
+                    try
+                    {
+                        userActiveCountryId = await _userService.GetUserActiveCountryId();
+                    }
+                    catch (Exception ex) { }
+
                     //Get DemurrageDayCount from GlobalProperty
-                    var demurrageDayCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurrageDayCount);
+                    var demurrageDayCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurrageDayCount, userActiveCountryId);
                     var demurrageDayCount = demurrageDayCountObj.Value;
 
                     //Get DemurragePrice from GlobalProperty
-                    var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice);
+                    var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice, userActiveCountryId);
                     var demurragePrice = demurragePriceObj.Value;
 
                     //
                     var customerName = customerObj.CustomerName;
                     var demurrageAmount = demurragePrice;
-
-
+                    
                     //map the array
                     strArray[0] = customerName;
                     strArray[1] = invoice.Waybill;
@@ -197,7 +208,10 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[11] = invoice.DateCreated.ToShortTimeString();
                     strArray[12] = invoice.GrandTotal.ToString();
                     strArray[13] = country.CurrencySymbol;
-                    
+                    strArray[14] = country.ContactEmail;
+                    strArray[15] = country.ContactNumber;
+                    strArray[16] = country.CurrencyCode;
+
 
                     //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
                     if (messageDTO.MessageType == MessageType.ARF &&
@@ -278,6 +292,9 @@ namespace GIGLS.Services.Implementation.Messaging
                         messageDTO.To = invoice.ReceiverPhoneNumber;
                         messageDTO.ToEmail = invoice.ReceiverEmail;
                     }
+
+                    //prepare message format base on country code
+                    messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, country.PhoneNumberCode);
                 }
             }
 
@@ -312,30 +329,36 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 messageDTO.To = mobileMessageDTO.SenderPhoneNumber;
                 messageDTO.ToEmail = mobileMessageDTO.SenderEmail;
+
+                //Set default country as Nigeria for GIG Go APP
+                //prepare message format base on country code
+                messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
+
             }
 
-            //resolve phone numbers to +2347011111111
-            var toPhoneNumber = messageDTO.To;
-            //1
-            if (toPhoneNumber.Trim().StartsWith("0"))   //07011111111
-            {
-                toPhoneNumber = toPhoneNumber.Substring(1, toPhoneNumber.Length - 1);
-                toPhoneNumber = $"+234{toPhoneNumber}";
-            }
-            //2
-            if (!toPhoneNumber.Trim().StartsWith("+"))  //2347011111111
-            {
-                toPhoneNumber = $"+{toPhoneNumber}";
-            }
-            //3
-            if (!toPhoneNumber.Trim().StartsWith("2340"))  //23407011111111
-            {
-                toPhoneNumber = toPhoneNumber.Remove(0, 4);
-                toPhoneNumber = $"+234{toPhoneNumber}";
-            }
+            ////resolve phone numbers to +2347011111111
+            //var toPhoneNumber = messageDTO.To;
+            ////1
+            //if (toPhoneNumber.Trim().StartsWith("0"))   //07011111111
+            //{
+            //    toPhoneNumber = toPhoneNumber.Substring(1, toPhoneNumber.Length - 1);
+            //    toPhoneNumber = $"+234{toPhoneNumber}";
+            //}
+            ////2
+            //if (!toPhoneNumber.Trim().StartsWith("+"))  //2347011111111
+            //{
+            //    toPhoneNumber = $"+{toPhoneNumber}";
+            //}
+            ////3
+            //if (!toPhoneNumber.Trim().StartsWith("2340"))  //23407011111111
+            //{
+            //    toPhoneNumber = toPhoneNumber.Remove(0, 4);
+            //    toPhoneNumber = $"+234{toPhoneNumber}";
+            //}
 
-            //assign
-            messageDTO.To = toPhoneNumber;
+            //prepare phone number base on country code
+            //messageDTO.To = toPhoneNumber;
+            //messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To);
 
             return await Task.FromResult(true);
         }
@@ -600,11 +623,18 @@ namespace GIGLS.Services.Implementation.Messaging
 
         private async Task<bool> VerifyUserLoginIsWithinTheEmailInterval(string email)
         {
+            var userActiveCountryId = 1;
+            try
+            {
+                userActiveCountryId = await _userService.GetUserActiveCountryId();
+            }
+            catch (Exception ex) { }
+
             bool verifySendEmail = true;
 
             //1. check interval from global property
             var globalPropertyForEmailSendInterval = 1;
-            var globalPropertyForEmailSendIntervalObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.UserLoginEmailSendInterval);
+            var globalPropertyForEmailSendIntervalObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.UserLoginEmailSendInterval, userActiveCountryId);
             if (globalPropertyForEmailSendIntervalObj != null)
             {
                 int.TryParse(globalPropertyForEmailSendIntervalObj.Value, out globalPropertyForEmailSendInterval);
@@ -644,6 +674,41 @@ namespace GIGLS.Services.Implementation.Messaging
             await _uow.CompleteAsync();
 
             return await Task.FromResult(verifySendEmail);
+        }
+
+        private string ReturnPhoneNumberBaseOnCountry(string customerPhoneNumber, string countryPhoneCode)
+        {
+            string phone = customerPhoneNumber.Trim();
+            string defaultCodeWithoutPlusAndZero = countryPhoneCode + 0;
+
+            //1
+            if (phone.StartsWith("0")) //07011111111
+            {
+                phone = phone.Substring(1, phone.Length - 1);
+                phone = $"{countryPhoneCode}{phone}";
+            }
+
+            //2
+            if (!phone.StartsWith("+"))  //2347011111111
+            {
+                phone = $"+{phone}";
+            }
+
+            //3
+            if (phone.StartsWith(defaultCodeWithoutPlusAndZero))  //+23407011111111
+            {
+                phone = phone.Remove(0, 5);
+                phone = $"{countryPhoneCode}{phone}";
+            }
+
+            //4
+            if (!phone.StartsWith(countryPhoneCode))  //7011111111
+            {
+                phone = phone.Remove(0, 1);
+                phone = $"{countryPhoneCode}{phone}";
+            }
+
+            return phone;
         }
     }
 }

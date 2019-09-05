@@ -13,5 +13,6 @@ namespace GIGLS.Core.DTO.Zone
         public decimal WeightOne { get; set; }
         public decimal WeightTwo { get; set; }
         public decimal WeightThree { get; set; }
+        public int CountryId { get; set; }
     }
 }

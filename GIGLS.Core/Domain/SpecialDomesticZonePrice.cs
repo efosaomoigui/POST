@@ -18,8 +18,10 @@ namespace GIGL.GIGLS.Core.Domain
 
         public int SpecialDomesticPackageId { get; set; }
         public virtual SpecialDomesticPackage SpecialDomesticPackage { get; set; }
-       
+
         //public int UserId { get; set; }
         //public virtual User User { get; set; }
+
+        public int CountryId { get; set; }
     }
 }

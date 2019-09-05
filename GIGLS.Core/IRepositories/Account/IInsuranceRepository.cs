@@ -8,6 +8,8 @@ namespace GIGLS.Core.IRepositories.Account
 {
     public interface IInsuranceRepository : IRepository<Insurance>
     {
-        Task<IEnumerable<InsuranceDTO>> GetInsurancesAsync();
+        Task<List<InsuranceDTO>> GetInsurancesAsync();
+        Task<InsuranceDTO> GetInsuranceById(int insuranceId);
+        Task<InsuranceDTO> GetInsuranceByCountry(int countryId);
     }
 }
