@@ -85,12 +85,22 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         public async Task<bool> ProcessPaymentPartialTransaction(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO)
         {
             var result = false;
-
+            decimal cash = 0;
+            decimal pos = 0;
+            decimal transfer = 0;
+            string cashType = null;
+            string posType = null;
+            string transferType = null;
+             
+                
             if (paymentPartialTransactionProcessDTO == null)
                 throw new GenericException("Null Input");
 
             // get the current user info
             var currentUserId = await _userService.GetCurrentUserId();
+
+            
+               
 
             //get Ledger and Invoice
             var waybill = paymentPartialTransactionProcessDTO.Waybill;
@@ -164,6 +174,27 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             /////2.  When payment is complete and balance is 0
             if (balanceAmount == 0)
             {
+                //get the different breakdown of price
+                foreach (var item in paymentPartialTransactionProcessDTO.PaymentPartialTransactions)
+                {
+                    if (item.PaymentType == PaymentType.Cash)
+                    {
+                        cash += item.Amount;
+                        cashType = item.PaymentType.ToString();
+                    }
+                    else if (item.PaymentType == PaymentType.Pos)
+                    {
+                        pos += item.Amount;
+                        posType = item.PaymentType.ToString();
+                    }
+                    else if (item.PaymentType == PaymentType.Transfer)
+                    {
+                        transfer += item.Amount;
+                        transferType = item.PaymentType.ToString();
+                    }
+
+                }
+
                 // update GeneralLedger
                 generalLedgerEntity.IsDeferred = false;
                 generalLedgerEntity.PaymentType = PaymentType.Partial;
@@ -171,7 +202,9 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
                 //update invoice
                 invoiceEntity.PaymentDate = DateTime.Now;
-                invoiceEntity.PaymentMethod = PaymentType.Partial.ToString();
+                invoiceEntity.PaymentMethod = PaymentType.Partial.ToString() + " ( " + (cashType != null ? cashType + "[" + cash + "], " : "") +
+                                                                      (posType != null ? posType + "[" + pos + "], " : "")  +
+                                                                      (transferType != null ? transferType + "[" + transfer + "] " : "") + ")";
                 invoiceEntity.PaymentStatus = PaymentStatus.Paid;
             }
 
