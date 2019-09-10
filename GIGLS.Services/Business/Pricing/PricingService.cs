@@ -165,7 +165,7 @@ namespace GIGLS.Services.Business.Pricing
 
             decimal PackagePrice;
 
-            if (pricingDto.Weight > activeWeightLimit.Weight)
+            if (pricingDto.Weight > activeWeightLimit.Weight && zone.ZoneId != 15)  //ZoneId of 15 has limit till 100kg and has no overflow
             {
                 PackagePrice = await GetRegularPriceOverflow(pricingDto.Weight, activeWeightLimit.Weight, zone.ZoneId, pricingDto.CountryId);
             }
