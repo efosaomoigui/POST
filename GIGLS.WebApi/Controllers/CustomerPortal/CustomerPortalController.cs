@@ -40,7 +40,6 @@ using GIGLS.Core.IMessageService;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
-    [AllowAnonymous]
     [Authorize]
     [RoutePrefix("api/portal")]
     public class CustomerPortalController : BaseWebApiController
@@ -1184,8 +1183,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        //Testing the image Service
-        //Remove it later
         [HttpPost]
         [Route("saveimages")]
         public async Task<IServiceResponse<string>> LoadImage(ImageDTO images)
@@ -1201,9 +1198,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        //Testing the image Service
-        //Remove it later
-        [AllowAnonymous]
         [HttpGet]
         [Route("displayimages")]
         public async Task<IServiceResponse<List<Uri>>> DisplayImages(ImageDTO images)

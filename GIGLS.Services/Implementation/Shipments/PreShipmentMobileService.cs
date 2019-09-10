@@ -1376,7 +1376,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
 
         }

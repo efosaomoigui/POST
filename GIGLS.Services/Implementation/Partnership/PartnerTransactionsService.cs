@@ -7,12 +7,9 @@ using GIGLS.Core.IServices.Partnership;
 using GIGLS.Core.IServices.User;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Partnership
