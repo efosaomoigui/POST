@@ -5,6 +5,8 @@
         External,
         Transit,
         Delivery,
-        HUB
+        HUB,
+        Pickup
+
     }
 }

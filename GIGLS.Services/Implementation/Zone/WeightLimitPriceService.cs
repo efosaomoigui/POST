@@ -7,6 +7,8 @@ using GIGLS.Infrastructure;
 using AutoMapper;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
+using System.Linq;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -34,7 +36,8 @@ namespace GIGLS.Services.Implementation.Zone
                 Weight = weightLimitPrice.Weight,
                 ZoneId = weightLimitPrice.ZoneId,
                 Price = weightLimitPrice.Price,
-                RegularEcommerceType = weightLimitPrice.RegularEcommerceType
+                RegularEcommerceType = weightLimitPrice.RegularEcommerceType,
+                CountryId = weightLimitPrice.CountryId
             };
             _uow.WeightLimitPrice.Add(weight);
             await _uow.CompleteAsync();
@@ -77,7 +80,19 @@ namespace GIGLS.Services.Implementation.Zone
 
         public async Task<List<WeightLimitPriceDTO>> GetWeightLimitPrices()
         {
-            return await _uow.WeightLimitPrice.GetWeightLimitPrices();
+            var weightLimitPrices = await _uow.WeightLimitPrice.GetWeightLimitPrices();
+
+            var countries = _uow.Country.GetAll().ToList();
+            var countriesDTO = Mapper.Map<IEnumerable<CountryDTO>>(countries);
+
+            foreach (var weightLimitPrice in weightLimitPrices)
+            {
+                var country = countriesDTO.FirstOrDefault(s => s.CountryId == weightLimitPrice.CountryId);
+                weightLimitPrice.Country = country;
+            }
+
+
+            return weightLimitPrices;
         }
 
         public async Task RemoveWeightLimitPrice(int weightLimitId)
@@ -106,6 +121,7 @@ namespace GIGLS.Services.Implementation.Zone
             weight.Price = weightLimitPriceDto.Price;
             weight.ZoneId = weightLimitPriceDto.ZoneId;
             weight.RegularEcommerceType = weightLimitPriceDto.RegularEcommerceType;
+            weight.CountryId = weightLimitPriceDto.CountryId;
             await _uow.CompleteAsync();
         }
     }

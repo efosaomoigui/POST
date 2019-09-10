@@ -84,10 +84,6 @@ namespace GIGLS.Services.Implementation.Zone
             {
                 await _deliveryService.GetDeliveryOptionById(optionId);
                 await _zoneService.GetZoneById(zoneId);
-
-                //var option = await _uow.DeliveryOptionPrice.GetAsync(o => o.DeliveryOptionId == optionId 
-                //    && o.ZoneId == zoneId && o.CountryId == countryId, "Zone, DeliveryOption");
-
                 var option = await _uow.DeliveryOptionPrice.GetDeliveryOptionPrices(optionId, zoneId, countryId);
 
                 if (option == null)
@@ -108,7 +104,6 @@ namespace GIGLS.Services.Implementation.Zone
 
             try
             {
-               // var option = await _uow.DeliveryOptionPrice.GetAsync(o => o.DeliveryOptionPriceId == optionId, "Zone, DeliveryOption");
                 var option = await _uow.DeliveryOptionPrice.GetDeliveryOptionPrices(optionId);
 
                 if (option == null)
@@ -118,7 +113,7 @@ namespace GIGLS.Services.Implementation.Zone
 
                 return option;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

@@ -1,5 +1,4 @@
 ﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.IRepositories.ServiceCentres;
 using GIGLS.Core.IRepositories.Shipments;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure.Persistence;

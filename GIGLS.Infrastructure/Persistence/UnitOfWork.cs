@@ -422,9 +422,14 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IDeliveryNumberRepository DeliveryNumber { get; set; }
 
-
         [Inject]
         public IVehicleTypeRepository VehicleType { get; set; }
+
+        [Inject]
+        public IPickupManifestRepository PickupManifest { get; set; }
+
+        [Inject]
+        public IPickupManifestWaybillMappingRepository PickupManifestWaybillMapping { get; set; }
 
         public int Complete()
         {

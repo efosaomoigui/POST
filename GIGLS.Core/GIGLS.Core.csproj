@@ -186,6 +186,8 @@
     <Compile Include="Domain\OTP.cs" />
     <Compile Include="Domain\OverdueShipment.cs" />
     <Compile Include="Domain\Partnership\PartnerTransactions.cs" />
+    <Compile Include="Domain\PickupManifest.cs" />
+    <Compile Include="Domain\PickupManifestWaybillMapping.cs" />
     <Compile Include="Domain\PreShipmentItemMobile.cs" />
     <Compile Include="Domain\PreShipmentManifestMapping.cs" />
     <Compile Include="Domain\ManifestWaybillMapping.cs" />
@@ -375,6 +377,8 @@
     <Compile Include="DTO\Shipments\MobilePriceDTO.cs" />
     <Compile Include="DTO\Shipments\MobileShipmentTrackingHistoryDTO.cs" />
     <Compile Include="DTO\Shipments\OverdueShipmentDTO.cs" />
+    <Compile Include="DTO\Shipments\PickupManifestDTO.cs" />
+    <Compile Include="DTO\Shipments\PickupManifestWaybillMappingDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentItemMobileDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentMobileDTO.cs" />
     <Compile Include="DTO\Shipments\ThirdPartyPreShipmentItemDTO.cs" />
@@ -571,6 +575,8 @@
     <Compile Include="IRepositories\Shipments\IMobilePickUpRequestsRepository.cs" />
     <Compile Include="IRepositories\Shipments\IMobileShipmentTrackingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IOverdueShipmentRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IPickupManifestRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IPickupManifestWaybillMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IPreShipmentItemMobileRepository.cs" />
     <Compile Include="IRepositories\Shipments\IPreShipmentManifestMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IManifestWaybillMappingRepository.cs" />

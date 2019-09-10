@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.User;
+﻿using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.User;
 using GIGLS.CORE.DTO;
 
 namespace GIGLS.Core.DTO.Devices
@@ -10,6 +11,9 @@ namespace GIGLS.Core.DTO.Devices
         public UserDTO User { get; set; }
         public int DeviceId { get; set; }
         public DeviceDTO Device { get; set; }
+        public ServiceCentreDTO Location { get; set; }
+        public int LocationId { get; set; }
+        public string DataSimCardNumber { get; set; }
         public bool IsActive { get; set; }
     }
 }

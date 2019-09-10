@@ -100,5 +100,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("country")]
+        public async Task<IServiceResponse<IEnumerable<ShipmentPackagePriceDTO>>> GetShipmentPackagePriceByCountry()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentPackagePrices = await _packagePriceService.GetShipmentPackagePriceByCountry();
+
+                return new ServiceResponse<IEnumerable<ShipmentPackagePriceDTO>>
+                {
+                    Object = shipmentPackagePrices
+                };
+            });
+        }
+
     }
 }

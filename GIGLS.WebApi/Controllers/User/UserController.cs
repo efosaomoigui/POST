@@ -22,6 +22,7 @@ using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.Enums;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.WebApi.Controllers.User
 {
@@ -179,7 +180,7 @@ namespace GIGLS.WebApi.Controllers.User
                 var user = await _userService.GetUserById(userId);
 
                 //Use only for Employees
-                if (user.UserChannelType == Core.Enums.UserChannelType.Employee)
+                if (user.UserChannelType == UserChannelType.Employee)
                 {
                     var userClaims = await _userService.GetClaimsAsync(user.Id);
 
@@ -208,7 +209,7 @@ namespace GIGLS.WebApi.Controllers.User
                             //If countries is empty, use UserActiveCountry
                             if (countries.Count == 0)
                             {
-                                user.Country = new Core.DTO.CountryDTO[] { userActiveCountry }.ToList();
+                                user.Country = new CountryDTO[] { userActiveCountry }.ToList();
                                 user.CountryName = new String[] { userActiveCountry.CountryName }.ToList();
                             }
                         }

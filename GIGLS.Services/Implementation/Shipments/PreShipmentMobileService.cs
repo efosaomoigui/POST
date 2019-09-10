@@ -187,19 +187,21 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
-            var userActiveCountryId = 1;
+            var CountryId = await GetCountryId();
+            var userActiveCountryId = CountryId;
             try
             {
                 userActiveCountryId = await _userService.GetUserActiveCountryId();
             }
             catch (Exception ex) { }
 
-            var Pickuprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpPrice, userActiveCountryId);
-            if (preShipment.PreShipmentItems.Count() == 0)
+            //var Pickuprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpPrice, userActiveCountryId);
+            var Pickuprice = await GetPickUpPrice();
+            if (preShipment.PreShipmentItems.Count()==0)
             {
                 throw new GenericException("No Preshipitem was added");
             }
-            var PickupValue = Convert.ToDecimal(Pickuprice.Value);
+            var PickupValue = Convert.ToDecimal(Pickuprice);
             var ShipmentCount = preShipment.PreShipmentItems.Count();
             var IndividualPrice = PickupValue / ShipmentCount;
             var user = await _userService.GetUserById(preShipment.UserId);
@@ -908,7 +910,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<object> CancelShipment(string Waybill)
         {
-            var userActiveCountryId = 1;
+            var CountryId = await GetCountryId();
+            var userActiveCountryId = CountryId;
             try
             {
                 userActiveCountryId = await _userService.GetUserActiveCountryId();
@@ -1341,6 +1344,19 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+
+        public async Task<int> GetCountryId()
+        {
+            int userActiveCountryId = 1;
+            return userActiveCountryId;
+        }
+
+        public async Task<decimal> GetPickUpPrice()
+        {
+            decimal PickUpPrice = 500.0M;
+            return PickUpPrice;
         }
 
         //method for converting a base64 string to an image and saving to Azure

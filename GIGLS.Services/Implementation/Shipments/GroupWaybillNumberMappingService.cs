@@ -369,6 +369,12 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException($"No Shipment exists for this : {waybillNumber}");
                     }
 
+                    //if the groupwaybill service centre is not the same as the waybill destination
+                    if(shipmentDTO.DestinationServiceCentreId != serviceCentre.ServiceCentreId)
+                    {
+                        throw new GenericException($"Waybill {waybillNumber} cannot be added to the Groupwaybill {groupWaybillNumber}");
+                    }
+
                     //check if waybill has not been grouped 
                     var isWaybillGroup = await _uow.GroupWaybillNumberMapping.ExistAsync(x => x.GroupWaybillNumber == groupWaybillNumber && x.WaybillNumber == waybillNumber);
 
