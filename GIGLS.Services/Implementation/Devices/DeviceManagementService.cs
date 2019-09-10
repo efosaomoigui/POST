@@ -74,6 +74,7 @@ namespace GIGLS.Services.Implementation.Devices
                 {
                     throw new GenericException("Device information does not exist");
                 }
+                var stations = await _uow.ServiceCentre.GetAsync(deviceManagementDTO.StationId);
 
                 //check if the device has not been assign to someone 
                 var userActive = await _uow.DeviceManagement.GetAsync(x => x.IsActive == true && x.DeviceId == deviceManagementDTO.DeviceId);
@@ -83,14 +84,14 @@ namespace GIGLS.Services.Implementation.Devices
                     var assignedUser = await _uow.User.GetUserById(userActive.UserId);
                     throw new GenericException($"{device.Name} already been assigned to: {assignedUser.FirstName} {assignedUser.LastName}");
                 }
-
+                
                 //Add new device management
                 var newManagement = new DeviceManagement
                 {
                     DeviceId = device.DeviceId,
                     UserId = userDetail.Id,
                     IsActive = true,
-                    Location = deviceManagementDTO.Location,
+                    StationId = stations.ServiceCentreId,
                     DataSimCardNumber = deviceManagementDTO.DataSimCardNumber
                 };
                 _uow.DeviceManagement.Add(newManagement);

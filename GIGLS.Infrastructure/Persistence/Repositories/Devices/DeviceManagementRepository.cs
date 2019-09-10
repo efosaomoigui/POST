@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Domain.Devices;
 using GIGLS.Core.DTO.Devices;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.IRepositories.Devices;
 using GIGLS.Infrastructure.Persistence.Repository;
@@ -59,10 +60,19 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Devices
                                                Gender = x.Gender,
                                                SystemUserRole = x.SystemUserRole
                                            }).FirstOrDefault(),
-                                           Location = s.Location,
+                                           StationId = s.StationId,
+                                           Location = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.StationId).Select(x => new ServiceCentreDTO
+                                           {
+                                               Address = x.Address,
+                                               Name = x.Name,
+                                               Code = x.Code,
+                                               ServiceCentreId = x.ServiceCentreId
+                                               
+                                           }).FirstOrDefault(),
+                                           
                                            DataSimCardNumber = s.DataSimCardNumber
                                        }).ToList();
-
+           
             return Task.FromResult(managementDto);
         }
 
@@ -109,7 +119,16 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Devices
                                                                PictureUrl = x.PictureUrl,
                                                                Gender = x.Gender
                                                            }).FirstOrDefault(),
-                                                           Location = s.Location,
+                                                           StationId = s.StationId,
+                                                           Location = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.StationId).Select(x => new ServiceCentreDTO
+                                                           {
+                                                               Address = x.Address,
+                                                               Name = x.Name,
+                                                               Code = x.Code,
+                                                               ServiceCentreId = x.ServiceCentreId
+
+                                                           }).FirstOrDefault(),
+                                                           
                                                            DataSimCardNumber = s.DataSimCardNumber
                                                        }).ToList();
 
@@ -158,8 +177,16 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Devices
                                                          PictureUrl = x.PictureUrl,
                                                          Gender = x.Gender
                                                      }).FirstOrDefault(),
-                                                     Location = s.Location,
-                                                     DataSimCardNumber = s.Location
+                                                     StationId = s.StationId,
+                                                     Location = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.StationId).Select(x => new ServiceCentreDTO
+                                                     {
+                                                         Address = x.Address,
+                                                         Name = x.Name,
+                                                         Code = x.Code,
+                                                         ServiceCentreId = x.ServiceCentreId
+
+                                                     }).FirstOrDefault(),
+                                                     DataSimCardNumber = s.DataSimCardNumber
                                                  }).FirstOrDefault();
 
             return Task.FromResult(managementDto);
