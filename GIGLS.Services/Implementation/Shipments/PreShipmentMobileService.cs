@@ -1343,7 +1343,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        //method for converting a base64 string to an image
+        //method for converting a base64 string to an image and saving to Azure
         public async Task<string> LoadImage(ImageDTO images)
         {
             try
