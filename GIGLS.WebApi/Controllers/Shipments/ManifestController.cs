@@ -132,6 +132,20 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("changemanifesttype/{manifestCode}")]
+        public async Task<IServiceResponse<bool>> ChangeManifestType(string manifestCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.ChangeManifestType(manifestCode);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
 
     }
 }
