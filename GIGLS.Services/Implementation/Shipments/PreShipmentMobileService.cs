@@ -35,6 +35,7 @@ using System.IO;
 using System.Drawing;
 using System.Web;
 
+
 namespace GIGLS.Services.Implementation.Shipments
 {
     public class PreShipmentMobileService : IPreShipmentMobileService
@@ -67,7 +68,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
             IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice, IMobileShipmentTrackingService mobiletrackingservice,
             IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice,
-            IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMobileRatingService mobileratingService,IMessageSenderService messageSenderService)
+            IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMobileRatingService mobileratingService, IMessageSenderService messageSenderService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -194,7 +195,7 @@ namespace GIGLS.Services.Implementation.Shipments
             catch (Exception ex) { }
 
             var Pickuprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpPrice, userActiveCountryId);
-            if (preShipment.PreShipmentItems.Count()==0)
+            if (preShipment.PreShipmentItems.Count() == 0)
             {
                 throw new GenericException("No Preshipitem was added");
             }
@@ -380,7 +381,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               CompanyType = r.CompanyType,
                                                               CustomerCode = r.CustomerCode
                                                           }).ToList();
-                foreach(var Shipment in shipmentDto)
+                foreach (var Shipment in shipmentDto)
                 {
                     var PartnerId = _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == Shipment.Waybill).Result;
                     if (PartnerId != null)
@@ -390,8 +391,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         Shipment.PartnerLastName = partneruser.LastName;
                         Shipment.PartnerImageUrl = partneruser.PictureUrl;
                     }
-                    var rating  = _uow.MobileRating.GetAsync(j => j.Waybill == Shipment.Waybill).Result;
-                    if(rating != null)
+                    var rating = _uow.MobileRating.GetAsync(j => j.Waybill == Shipment.Waybill).Result;
+                    if (rating != null)
                     {
                         Shipment.IsRated = rating.IsRatedByCustomer;
                     }
@@ -489,7 +490,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var userId = await _userService.GetCurrentUserId();
                 pickuprequest.UserId = userId;
-                if(pickuprequest.Status== MobilePickUpRequestStatus.Rejected.ToString())
+                if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
                 {
                     pickuprequest.Status = MobilePickUpRequestStatus.Rejected.ToString();
                 }
@@ -511,7 +512,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
                     preshipmentmobile.shipmentstatus = "Assigned for Pickup";
-                    if(pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
+                    if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
                     {
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Rejected.ToString();
                     }
@@ -556,8 +557,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     var DepartureStation = await _uow.Station.GetAsync(s => s.StationId == preshipmentmobile.SenderStationId);
                     var DestinationStation = await _uow.Station.GetAsync(s => s.StationId == preshipmentmobile.ReceiverStationId);
                     var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                    
-                   
+
+
                     var MobileShipment = new ShipmentDTO
                     {
                         Waybill = preshipmentmobile.Waybill,
@@ -688,10 +689,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     //send Email to Sender's Email Address
                     var messageExtensionDTO = new MobileMessageDTO()
                     {
-                          SenderName = user.FirstName + " " + user.LastName,
-                          SenderEmail = user.Email,
-                          WaybillNumber= preshipmentmobile.Waybill,
-                          SenderPhoneNumber = preshipmentmobile.SenderPhoneNumber
+                        SenderName = user.FirstName + " " + user.LastName,
+                        SenderEmail = user.Email,
+                        WaybillNumber = preshipmentmobile.Waybill,
+                        SenderPhoneNumber = preshipmentmobile.SenderPhoneNumber
                     };
                     await _messageSenderService.SendGenericEmailMessage(MessageType.MATD, messageExtensionDTO);
                     //send SMS to Receiver's Phone Number
@@ -701,8 +702,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         WaybillNumber = preshipmentmobile.Waybill,
                         SenderPhoneNumber = preshipmentmobile.ReceiverPhoneNumber
                     };
-                    await _messageSenderService.SendMessage(MessageType.MATD,EmailSmsType.SMS, messageExtensionDTO);
-                   
+                    await _messageSenderService.SendMessage(MessageType.MATD, EmailSmsType.SMS, messageExtensionDTO);
+
                 }
                 return true;
 
@@ -816,7 +817,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     Select(s => s.Weight.ToString()).ToList();
 
                 //add to dictionary
-                if(!finalDictionary.ContainsKey(subcategory.SubCategoryName))
+                if (!finalDictionary.ContainsKey(subcategory.SubCategoryName))
                 {
                     finalDictionary.Add(subcategory.SubCategoryName, listOfWeights);
                 }
@@ -851,20 +852,20 @@ namespace GIGLS.Services.Implementation.Shipments
             return summary;
 
         }
-        
+
         public async Task<object> ResolveDisputeForMobile(PreShipmentMobileDTO preShipment)
         {
             try
             {
                 var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preShipment.CustomerCode);
                 var preshipmentmobilegrandtotal = _uow.PreShipmentMobile.GetAsync(s => s.PreShipmentMobileId == preShipment.PreShipmentMobileId).Result;
-                if(preshipmentmobilegrandtotal.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobilegrandtotal.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString())
+                if (preshipmentmobilegrandtotal.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobilegrandtotal.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString())
                 {
-                    throw new GenericException("This Shipment cannot be placed in Dispute, because it has been" + " " + preshipmentmobilegrandtotal.shipmentstatus) ;
+                    throw new GenericException("This Shipment cannot be placed in Dispute, because it has been" + " " + preshipmentmobilegrandtotal.shipmentstatus);
                 }
                 foreach (var id in preShipment.DeletedItems.ToList())
                 {
-                    var preshipmentitemmobile = _uow.PreShipmentItemMobile.GetAsync(s =>s.PreShipmentItemMobileId == id && s.PreShipmentMobileId == preShipment.PreShipmentMobileId).Result;
+                    var preshipmentitemmobile = _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentItemMobileId == id && s.PreShipmentMobileId == preShipment.PreShipmentMobileId).Result;
                     preshipmentitemmobile.IsCancelled = true;
                     _uow.PreShipmentItemMobile.Remove(preshipmentitemmobile);
                 }
@@ -885,10 +886,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 var PreshipmentPriceDTO = await GetPrice(preShipment);
                 preshipmentmobilegrandtotal.shipmentstatus = MobilePickUpRequestStatus.Resolved.ToString();
                 var difference = ((decimal)preshipmentmobilegrandtotal.CalculatedTotal - PreshipmentPriceDTO.GrandTotal);
-                if(difference < 0.00M)
+                if (difference < 0.00M)
                 {
                     var newdiff = Math.Abs((decimal)difference);
-                    if(newdiff > updatedwallet.Balance)
+                    if (newdiff > updatedwallet.Balance)
                     {
                         throw new GenericException("Insufficient Wallet Balance");
                     }
@@ -897,7 +898,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var pickuprequests = _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preShipment.Waybill).Result;
                 pickuprequests.Status = MobilePickUpRequestStatus.Resolved.ToString();
                 await _uow.CompleteAsync();
-                return new { IsResolved = true};
+                return new { IsResolved = true };
             }
             catch (Exception)
             {
@@ -916,8 +917,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
             try
             {
-                var preshipmentmobile = _uow.PreShipmentMobile.GetAsync(s => s.Waybill == Waybill,"PreShipmentItems").Result;
-                if(preshipmentmobile==null)
+                var preshipmentmobile = _uow.PreShipmentMobile.GetAsync(s => s.Waybill == Waybill, "PreShipmentItems").Result;
+                if (preshipmentmobile == null)
                 {
                     throw new GenericException("Shipment does not exist");
                 }
@@ -975,7 +976,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     if (rating.UserChannelType == UserChannelType.IndividualCustomer.ToString())
                     {
-                        if(existingrating.IsRatedByCustomer == true)
+                        if (existingrating.IsRatedByCustomer == true)
                         {
                             throw new GenericException("Customer has rated this Partner already!");
                         }
@@ -1023,7 +1024,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 return new { IsRated = true };
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw;
             }
@@ -1049,7 +1050,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var user = await _userService.GetUserByChannelCode(CustomerCode);
                 var customer = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == CustomerCode);
-                if(customer == null)
+                if (customer == null)
                 {
                     var customerDTO = new IndividualCustomerDTO
                     {
@@ -1153,7 +1154,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var user = await _userService.GetUserByEmail(detail);
-                if(user != null)
+                if (user != null)
                 {
                     var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == user.UserChannelCode);
                     if (wallet != null)
@@ -1175,7 +1176,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     _uow.IndividualCustomer.Remove(Customer);
                 }
-                
+
                 var partner = await _uow.Partner.GetAsync(s => s.Email == detail);
                 if (partner != null)
                 {
@@ -1205,14 +1206,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 //to get images information
                 var images = new ImageDTO();
                 
-                if(partner.VehicleLicenseImageDetails != null)
-                {
-                    images.FileType = ImageFileType.VehicleLicense;
-                    images.ImageString = partner.VehicleLicenseImageDetails;
-                    partner.VehicleLicenseImageDetails =  await LoadImage(images);
-                }
                 var Partner = await _uow.Partner.GetAsync(s => s.Email == partner.Email);
-                if(Partner != null)
+
+                if (Partner != null)
                 {
                     Partner.Address = partner.Address;
                     Partner.Email = partner.Email;
@@ -1227,13 +1223,23 @@ namespace GIGLS.Services.Implementation.Shipments
                     Partner.AccountNumber = partner.AccountNumber;
                     Partner.BankName = partner.BankName;
                     Partner.VehicleLicenseExpiryDate = partner.VehicleLicenseExpiryDate;
+
+                    images.PartnerFullName = partner.FirstName + partner.LastName;
+
+                    if (partner.VehicleLicenseImageDetails != null)
+                    {
+                        images.FileType = ImageFileType.VehicleLicense;
+                        images.ImageString = partner.VehicleLicenseImageDetails;
+                        partner.VehicleLicenseImageDetails = await LoadImage(images);
+                    }
+
                     Partner.VehicleLicenseImageDetails = partner.VehicleLicenseImageDetails;
                     Partner.VehicleLicenseNumber = partner.VehicleLicenseNumber;
-                    if(partner.VehicleTypeDetails.Count()== 0)
+                    if (partner.VehicleTypeDetails.Count() == 0)
                     {
                         throw new GenericException("Partner does not any Vehicle attached. Kindly review!!");
                     }
-                    foreach(var vehicle in partner.VehicleTypeDetails)
+                    foreach (var vehicle in partner.VehicleTypeDetails)
                     {
                         if (vehicle.VehiceInsurancePolicyDetails != null)
                         {
@@ -1256,18 +1262,19 @@ namespace GIGLS.Services.Implementation.Shipments
                             vehicle.VehicleParticularsDetails = await LoadImage(images);
                         }
                         var VehicleDetails = await _uow.VehicleType.GetAsync(s => s.Vehicletype == vehicle.Vehicletype && s.Partnercode == partner.PartnerCode);
-                       if(VehicleDetails!= null)
+                        if (VehicleDetails != null)
                         {
-                           VehicleDetails.VehiceInsurancePolicyDetails = vehicle.VehiceInsurancePolicyDetails;
-                           VehicleDetails.VehiceRoadWorthinessDetails = vehicle.VehiceRoadWorthinessDetails;
-                           VehicleDetails.VehicleParticularsDetails = vehicle.VehicleParticularsDetails;
-                           VehicleDetails.VehiclePlateNumber = vehicle.VehiclePlateNumber;
-                           VehicleDetails.Vehicletype = vehicle.Vehicletype;
-                          
+                            VehicleDetails.VehiceInsurancePolicyDetails = vehicle.VehiceInsurancePolicyDetails;
+                            VehicleDetails.VehiceRoadWorthinessDetails = vehicle.VehiceRoadWorthinessDetails;
+                            VehicleDetails.VehicleParticularsDetails = vehicle.VehicleParticularsDetails;
+                            VehicleDetails.VehiclePlateNumber = vehicle.VehiclePlateNumber;
+                            VehicleDetails.Vehicletype = vehicle.Vehicletype;
+
                         }
-                        else{
-                           var Vehicle = Mapper.Map<VehicleType>(vehicle);
-                           _uow.VehicleType.Add(Vehicle);
+                        else
+                        {
+                            var Vehicle = Mapper.Map<VehicleType>(vehicle);
+                            _uow.VehicleType.Add(Vehicle);
                         }
                     }
                     await _uow.CompleteAsync();
@@ -1293,12 +1300,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (Partner != null)
                 {
                     partnerdto = Mapper.Map<PartnerDTO>(Partner);
-                        var VehicleDetails = await _uow.VehicleType.FindAsync(s =>s.Partnercode == partnerdto.PartnerCode);
-                        if (VehicleDetails != null)
-                        {
-                          var vehicles = Mapper.Map<List<VehicleTypeDTO>>(VehicleDetails);
-                          partnerdto.VehicleTypeDetails = vehicles;
-                        }
+                    var VehicleDetails = await _uow.VehicleType.FindAsync(s => s.Partnercode == partnerdto.PartnerCode);
+                    if (VehicleDetails != null)
+                    {
+                        var vehicles = Mapper.Map<List<VehicleTypeDTO>>(VehicleDetails);
+                        partnerdto.VehicleTypeDetails = vehicles;
+                    }
                 }
                 else
                 {
@@ -1316,13 +1323,13 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var shipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill== receiver.Waybill);
+                var shipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == receiver.Waybill);
                 if (shipment != null)
                 {
                     shipment.ActualReceiverFirstName = receiver.ActualReceiverFirstName;
                     shipment.ActualReceiverLastName = receiver.ActualReceiverLastName;
                     shipment.ActualReceiverPhoneNumber = receiver.ActualReceiverPhoneNumber;
-    }
+                }
                 else
                 {
                     throw new GenericException("Shipment Information does not exist!");
@@ -1335,7 +1342,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        
+
         //method for converting a base64 string to an image
         public async Task<string> LoadImage(ImageDTO images)
         {
@@ -1343,68 +1350,44 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //To get only the base64 string
                 var baseString = images.ImageString.Split(',')[1];
-               
+
                 byte[] bytes = Convert.FromBase64String(baseString);
-                Image image;
 
-                using (MemoryStream ms = new MemoryStream(bytes))
-                {
-                    //Convert the base64 string to an Image
-                    image = Image.FromStream(ms);
-                }
-                string path = HttpContext.Current.Server.MapPath("~/Images/");
+                //Image image;
+
+                //using (MemoryStream ms = new MemoryStream(bytes))
+                //{
+                //    //Convert the base64 string to an Image
+                //    image = Image.FromStream(ms);
+                //}
+
+                //string path = HttpContext.Current.Server.MapPath("~/Images/");
                 
-                string filename = path + images.FileType.ToString() + ".png";
+                string filename = images.PartnerFullName + "_"  + images.FileType.ToString() + ".png";
+                
+               //To save the image locally
+               //image.Save(filename);
 
-                //To save the image
-                image.Save(filename);
-                return await Task.FromResult(filename);
-               
+               //Save to AzureBlobStorage
+               var blobname = await AzureBlobServiceUtil.UploadAsync(bytes, filename);
+
+                return await Task.FromResult(blobname);
+
             }
             catch (Exception ex)
             {
                 throw;
             }
-            
+
         }
 
-        ////this is main method of upload file to OneDrive 
-        //public async Task<string> UploadFileAsync(string filePath, string oneDrivePath)
-        //{
-        //    //get the upload session,we can use this session to upload file resume from break point 
-        //    string uploadUri = await GetUploadSession(oneDrivePath);
+        public async Task<List<Uri>> DisplayImages()
+        {
+            var result = await AzureBlobServiceUtil.DisplayAll();
 
-        //    //when file upload is not finish, the result is upload progress, 
-        //    //When file upload is finish, the result is the file information. 
-        //    string result = string.Empty;
-        //    using (FileStream stream = File.OpenRead(filePath))
-        //    {
-        //        long position = 0;
-        //        long totalLength = stream.Length;
-        //        int length = 10 * 1024 * 1024;
-
-        //        //In one time, we just upload a part of file 
-        //        //When all file part is uploaded, break out in this loop 
-        //        while (true)
-        //        {
-        //            //Read a file part 
-        //            byte[] bytes = await ReadFileFragmentAsync(stream, position, length);
-
-        //            //check if arrive file end, when yes, break out with this loop 
-        //            if (position >= totalLength)
-        //            {
-        //                break;
-        //            }
-
-        //            //Upload the file part 
-        //            result = await UploadFileFragmentAsync(bytes, uploadUri, position, totalLength);
-
-        //            position += bytes.Length;
-        //        }
-        //    }
-
-        //    return result;
-        //}
-
+            return result;
+        }
     }
+
+
 }

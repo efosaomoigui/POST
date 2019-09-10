@@ -8,6 +8,7 @@ namespace GIGLS.Core.DTO
         public int ImageId { get; set; }
         public ImageFileType FileType { get; set; }
         public string ImageString { get; set; }
+        public string PartnerFullName { get; set; }
        
     }
 }

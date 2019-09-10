@@ -3,6 +3,7 @@ using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.CORE.DTO.Report;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -40,6 +41,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> UpdateReceiverDetails(PreShipmentMobileDTO receiver);
         
         Task<string> LoadImage(ImageDTO images);
+
+        Task<List<Uri>> DisplayImages();
 
     }
 }

@@ -1201,6 +1201,24 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        //Testing the image Service
+        //Remove it later
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("displayimages")]
+        public async Task<IServiceResponse<List<Uri>>> DisplayImages(ImageDTO images)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                var response = await _preshipmentmobileService.DisplayImages();
+                return new ServiceResponse<List<Uri>>
+                {
+                    Object = response
+                };
+            });
+        }
+
         [HttpPost]
         [Route("getallpartnerdetails")]
         public async Task<IServiceResponse<PartnerDTO>> GetAllPartnerDetails(PartnerDTO partner)
