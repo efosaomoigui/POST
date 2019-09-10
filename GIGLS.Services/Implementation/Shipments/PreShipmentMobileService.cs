@@ -1352,22 +1352,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 var baseString = images.ImageString.Split(',')[1];
 
                 byte[] bytes = Convert.FromBase64String(baseString);
-
-                //Image image;
-
-                //using (MemoryStream ms = new MemoryStream(bytes))
-                //{
-                //    //Convert the base64 string to an Image
-                //    image = Image.FromStream(ms);
-                //}
-
-                //string path = HttpContext.Current.Server.MapPath("~/Images/");
-                
+                            
+              
                 string filename = images.PartnerFullName + "_"  + images.FileType.ToString() + ".png";
-                
-               //To save the image locally
-               //image.Save(filename);
-
+                            
                //Save to AzureBlobStorage
                var blobname = await AzureBlobServiceUtil.UploadAsync(bytes, filename);
 

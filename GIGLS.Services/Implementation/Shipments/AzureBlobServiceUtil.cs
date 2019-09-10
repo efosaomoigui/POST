@@ -97,9 +97,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (blob.GetType() == typeof(CloudBlockBlob))
                     {
                         allBlobs.Add(blob.Uri);
-
-                        //clear the entire system
-                        // await ((CloudBlockBlob)blob).DeleteIfExistsAsync();
+                                                
                     }
                 }
 
@@ -109,11 +107,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             catch (Exception ex)
             {
-
-                //ViewData["message"] = ex.Message;
-
-                //ViewData["trace"] = ex.StackTrace;
-
+                
                 throw ex;
             }
 
