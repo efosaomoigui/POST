@@ -12,7 +12,7 @@ namespace GIGLS.Core.DTO.Devices
         public int DeviceId { get; set; }
         public DeviceDTO Device { get; set; }
         public ServiceCentreDTO Location { get; set; }
-        public int StationId { get; set; }
+        public int LocationId { get; set; }
         public string DataSimCardNumber { get; set; }
         public bool IsActive { get; set; }
     }

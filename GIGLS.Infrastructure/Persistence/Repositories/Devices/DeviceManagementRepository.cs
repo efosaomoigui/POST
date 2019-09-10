@@ -60,8 +60,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Devices
                                                Gender = x.Gender,
                                                SystemUserRole = x.SystemUserRole
                                            }).FirstOrDefault(),
-                                           StationId = s.StationId,
-                                           Location = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.StationId).Select(x => new ServiceCentreDTO
+                                           LocationId = s.LocationId,
+                                           Location = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.LocationId).Select(x => new ServiceCentreDTO
                                            {
                                                Address = x.Address,
                                                Name = x.Name,
@@ -119,8 +119,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Devices
                                                                PictureUrl = x.PictureUrl,
                                                                Gender = x.Gender
                                                            }).FirstOrDefault(),
-                                                           StationId = s.StationId,
-                                                           Location = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.StationId).Select(x => new ServiceCentreDTO
+                                                            LocationId = s.LocationId,
+                                                           Location = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.LocationId).Select(x => new ServiceCentreDTO
                                                            {
                                                                Address = x.Address,
                                                                Name = x.Name,
@@ -177,8 +177,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Devices
                                                          PictureUrl = x.PictureUrl,
                                                          Gender = x.Gender
                                                      }).FirstOrDefault(),
-                                                     StationId = s.StationId,
-                                                     Location = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.StationId).Select(x => new ServiceCentreDTO
+                                                     LocationId = s.LocationId,
+                                                     Location = Context.ServiceCentre.Where(c => c.ServiceCentreId == s.LocationId).Select(x => new ServiceCentreDTO
                                                      {
                                                          Address = x.Address,
                                                          Name = x.Name,
