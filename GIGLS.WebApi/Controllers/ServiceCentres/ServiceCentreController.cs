@@ -11,7 +11,8 @@ using GIGLS.Core.IServices.User;
 
 namespace GIGLS.WebApi.Controllers.ServiceCentres  
 {
-    [Authorize(Roles = "Admin, ViewAdmin")]
+    [AllowAnonymous]
+    //[Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/servicecentre")]
     public class ServiceCentreController : BaseWebApiController
     {
@@ -143,6 +144,21 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             });
             
             
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("station/{stationId:int}")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetServiceCentreByStationId (int stationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var serviceCenters = await _service.GetServiceCentresByStationId(stationId);
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = serviceCenters
+                };
+            });
         }
 
         [GIGLSActivityAuthorize(Activity = "Delete")]
