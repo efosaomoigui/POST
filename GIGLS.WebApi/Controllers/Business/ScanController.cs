@@ -51,21 +51,5 @@ namespace GIGLS.WebApi.Controllers.Business
                 };
             });
         }
-
-        //[GIGLSActivityAuthorize(Activity = "Create")]
-        //[HttpPost]
-        //[Route("")]
-        //public async Task<IServiceResponse<bool>> ScanShipment(string waybillNumber, ShipmentScanStatus scanStatus)
-        //{
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-        //        var result = await _scan.ScanShipment(waybillNumber, scanStatus);
-
-        //        return new ServiceResponse<bool>
-        //        {
-        //            Object = result
-        //        };
-        //    });
-        //}
     }
 }
