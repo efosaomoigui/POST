@@ -130,7 +130,12 @@ namespace GIGLS.Services.Business.Scanning
                 else if (scan.ShipmentScanStatus == ShipmentScanStatus.SMIM)
                 {
                     //Missed shipment during transit manifest arrival
-                    await ProcessMissedWaybillFromTransitManifest(shipment.Waybill);
+                    await ProcessMissedWaybillFromTransitManifest(shipment.Waybill, scan.ShipmentScanStatus, currentCenter, serviceCenters[0].Name);
+                }
+                else if (scan.ShipmentScanStatus == ShipmentScanStatus.FMS)
+                {
+                    //Found Missed shipment
+                    await ProcessFoundMissedWaybill(shipment.Waybill, scan.ShipmentScanStatus, currentCenter, serviceCenters[0].Name);
                 }
                 else
                 {
@@ -568,47 +573,103 @@ namespace GIGLS.Services.Business.Scanning
             }
         }
         
-        private async Task ProcessMissedWaybillFromTransitManifest(string waybill)
+        private async Task ProcessMissedWaybillFromTransitManifest(string waybill, ShipmentScanStatus scanStatus, int currentServiceCentre, string currentServiceCentreName)
         {
             //1. Get the GroupWaybill, Transit & Manifest
-            //var group = await _uow.GroupWaybillNumberMapping.GetAsync(x => x.WaybillNumber == waybill);
-            //var groupWaybillNumberMapping = _uow.GroupWaybillNumberMapping.GetAllAsQueryable().Where(w => w.WaybillNumber == waybill).Select(x => x.GroupWaybillNumber).Distinct().ToList();
             var groupWaybillNumberMapping = _uow.GroupWaybillNumberMapping.GetAllAsQueryable().Where(w => w.WaybillNumber == waybill).LastOrDefault();
 
-            //2. Remove it from the group and transit table
-            //3. Remove it from the transit table
+            if (groupWaybillNumberMapping != null)
+            {
+                var manifestGroupwaybillMapping = await _uow.ManifestGroupWaybillNumberMapping.GetAsync(x => x.GroupWaybillNumber == groupWaybillNumberMapping.GroupWaybillNumber);
+                if (manifestGroupwaybillMapping != null)
+                {
+                    var shipmentDTO = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
 
-            //4. Make it available for the departure centre to regroup
+                    //2. Remove it from the group and transit table
+                    _uow.GroupWaybillNumberMapping.Remove(groupWaybillNumberMapping);
 
-            //7.add the manifest detail to tracking history
+                    //4. Make it available for grouping
+                    var transitWaybill = await _uow.TransitWaybillNumber.GetAsync(s => s.WaybillNumber == waybill);
+                    if (transitWaybill != null)
+                    {
+                        transitWaybill.IsGrouped = false;
+                    }
+                    else
+                    {
+                        shipmentDTO.IsGrouped = false;
+                    }
+                    
+                    var newShipmentTracking = new ShipmentTrackingDTO
+                    {
+                        DateTime = DateTime.Now,
+                        Status = scanStatus.ToString(),
+                        Waybill = waybill,
+                        DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId,
+                        DestinationServiceCentreId = shipmentDTO.DestinationServiceCentreId,
+                        Location = currentServiceCentreName,
+                        Manifest = manifestGroupwaybillMapping.ManifestCode,
+                        ServiceCentreId = currentServiceCentre,
+                        GroupWaybill = groupWaybillNumberMapping.GroupWaybillNumber 
+                    };
 
-            //8.Add it to missing(Incident) shipment table
-              
-            //9. Send email to both receiver and sender regional
+                    await _shipmentTrackingService.AddTrackingAndSendEmailForRemovingMissingShipmentsInManifest(newShipmentTracking, scanStatus, MessageType.SMIM);
+                                                         
+                }
+            }
+        }
+
+        //think on this process
+        private async Task ProcessFoundMissedWaybill(string waybill, ShipmentScanStatus scanStatus, int currentServiceCentre, string currentServiceCentreName)
+        {
+            var shipmentDTO = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+
+            var newShipmentTracking = new ShipmentTrackingDTO
+            {
+                DateTime = DateTime.Now,
+                Status = scanStatus.ToString(),
+                Waybill = waybill,
+                DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId,
+                DestinationServiceCentreId = shipmentDTO.DestinationServiceCentreId,
+                Location = currentServiceCentreName,
+                //Manifest = manifestGroupwaybillMapping.ManifestCode,
+                ServiceCentreId = currentServiceCentre
+            };
+
+            await _shipmentTrackingService.AddTrackingAndSendEmailForRemovingMissingShipmentsInManifest(newShipmentTracking, scanStatus, MessageType.FMS);
 
 
-            //var groupWaybillNumberMapping = _uow.GroupWaybillNumberMapping.GetAllAsQueryable();
-            //var groupWaybillResult = groupWaybillNumberMapping.Where(w => w.WaybillNumber == waybillNumber).Select(x => x.GroupWaybillNumber).Distinct().ToList();
+            //1. Get the GroupWaybill, Transit & Manifest
+            var groupWaybillNumberMapping = _uow.GroupWaybillNumberMapping.GetAllAsQueryable().Where(w => w.WaybillNumber == waybill).LastOrDefault();
 
-            //if (groupWaybillResult.Count() > 0)
-            //{
-            //    string groupWaybill = null;
-            //    foreach (string s in groupWaybillResult)
-            //    {
-            //        groupWaybill = s;
-            //    }
+            if (groupWaybillNumberMapping != null)
+            {
+                var manifestGroupwaybillMapping = await _uow.ManifestGroupWaybillNumberMapping.GetAsync(x => x.GroupWaybillNumber == groupWaybillNumberMapping.GroupWaybillNumber);
+                if (manifestGroupwaybillMapping != null)
+                {
+                    
 
-            //    //Get the manifest the group waybill
-            //    //var manifestGroupwaybillMapping = await _uow.ManifestGroupWaybillNumberMapping.Where(s => s.GroupWaybillNumber == groupWaybill).AsQueryable();
-            //    var manifestGroupwaybillMapping = await _uow.ManifestGroupWaybillNumberMapping.GetAsync(x => x.GroupWaybillNumber == groupWaybill);
-            //    if (manifestGroupwaybillMapping != null)
-            //    {
-            //        manifest = manifestGroupwaybillMapping.ManifestCode;
-            //        ManifestTypeValue = ManifestType.External.ToString();
-            //    }
-            //}
+                    //2. Remove it from the group and transit table
+                    _uow.GroupWaybillNumberMapping.Remove(groupWaybillNumberMapping);
 
-            throw new NotImplementedException();
+                    //4. Make it available for grouping
+                    var transitWaybill = await _uow.TransitWaybillNumber.GetAsync(s => s.WaybillNumber == waybill);
+                    if (transitWaybill != null)
+                    {
+                        transitWaybill.IsGrouped = false;
+                    }
+                    else
+                    {
+                        shipmentDTO.IsGrouped = false;
+                    }
+
+                    //8.Add it to missing(Incident) shipment table
+
+                    //7.add the manifest detail to tracking history and Send email to both receiver and sender regional
+
+                    
+
+                }
+            }
         }
 
         /// <summary>
