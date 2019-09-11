@@ -320,6 +320,12 @@ namespace GIGLS.Services.IServices.ServiceCentres
             {
                 throw;
             }
-        }        
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresByCountryId(int countryId)
+        {
+            int[] countryIds = new int[] { countryId };
+            return await _uow.ServiceCentre.GetLocalServiceCentres(countryIds);
+        }
     }
 }
