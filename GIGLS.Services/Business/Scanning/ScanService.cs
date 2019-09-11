@@ -127,19 +127,13 @@ namespace GIGLS.Services.Business.Scanning
                     await ProcessReturnWaybillFromDispatch(shipment.Waybill);
                     return true;
                 }
+                else if (scan.ShipmentScanStatus == ShipmentScanStatus.SMIM)
+                {
+                    //Missed shipment during transit manifest arrival
+                    await ProcessMissedWaybillFromTransitManifest(shipment.Waybill);
+                }
                 else
                 {
-                    ////if the scan status is AD and ARF is not yet scanned for the shipment, throw an error
-                    //if (scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD))
-                    //{
-                    //    var checkArrivalFinalDestiantionScan = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, ShipmentScanStatus.ARF.ToString());
-
-                    //    if (!checkArrivalFinalDestiantionScan)
-                    //    {
-                    //        throw new GenericException($"Error processing request. Shipment with waybill: {scan.WaybillNumber} is not at the final Destination");
-                    //    }
-                    //}
-
                     //check if the waybill has not been scan for the same status before
                     var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, scanStatus);
 
@@ -418,7 +412,7 @@ namespace GIGLS.Services.Business.Scanning
 
             return true;
         }
-
+        
         private async Task<bool> SendEmailOnAttemptedScanOfCancelledShipment(ScanDTO scan)
         {
             //send emails
@@ -538,8 +532,7 @@ namespace GIGLS.Services.Business.Scanning
 
             return true;
         }
-
-
+        
         private async Task CompleteTransitWaybillProcess(ScanDTO scan, HashSet<string> waybillsInGroupWaybill, HashSet<string> waybillsInManifest)
         {
             if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
@@ -573,6 +566,49 @@ namespace GIGLS.Services.Business.Scanning
                 transitWaybillNumber.IsTransitCompleted = true;
                 _uow.Complete();
             }
+        }
+        
+        private async Task ProcessMissedWaybillFromTransitManifest(string waybill)
+        {
+            //1. Get the GroupWaybill, Transit & Manifest
+            //var group = await _uow.GroupWaybillNumberMapping.GetAsync(x => x.WaybillNumber == waybill);
+            //var groupWaybillNumberMapping = _uow.GroupWaybillNumberMapping.GetAllAsQueryable().Where(w => w.WaybillNumber == waybill).Select(x => x.GroupWaybillNumber).Distinct().ToList();
+            var groupWaybillNumberMapping = _uow.GroupWaybillNumberMapping.GetAllAsQueryable().Where(w => w.WaybillNumber == waybill).LastOrDefault();
+
+            //2. Remove it from the group and transit table
+            //3. Remove it from the transit table
+
+            //4. Make it available for the departure centre to regroup
+
+            //7.add the manifest detail to tracking history
+
+            //8.Add it to missing(Incident) shipment table
+              
+            //9. Send email to both receiver and sender regional
+
+
+            //var groupWaybillNumberMapping = _uow.GroupWaybillNumberMapping.GetAllAsQueryable();
+            //var groupWaybillResult = groupWaybillNumberMapping.Where(w => w.WaybillNumber == waybillNumber).Select(x => x.GroupWaybillNumber).Distinct().ToList();
+
+            //if (groupWaybillResult.Count() > 0)
+            //{
+            //    string groupWaybill = null;
+            //    foreach (string s in groupWaybillResult)
+            //    {
+            //        groupWaybill = s;
+            //    }
+
+            //    //Get the manifest the group waybill
+            //    //var manifestGroupwaybillMapping = await _uow.ManifestGroupWaybillNumberMapping.Where(s => s.GroupWaybillNumber == groupWaybill).AsQueryable();
+            //    var manifestGroupwaybillMapping = await _uow.ManifestGroupWaybillNumberMapping.GetAsync(x => x.GroupWaybillNumber == groupWaybill);
+            //    if (manifestGroupwaybillMapping != null)
+            //    {
+            //        manifest = manifestGroupwaybillMapping.ManifestCode;
+            //        ManifestTypeValue = ManifestType.External.ToString();
+            //    }
+            //}
+
+            throw new NotImplementedException();
         }
 
         /// <summary>

@@ -7,6 +7,7 @@ using GIGLS.Infrastructure;
 using GIGLS.Core.Domain;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.DTO.Report;
+using System;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -37,25 +38,40 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException($"Shipment with waybill {waybill} does not exist");
             }
-
+            
+            //shipment should only be cancel by regional manager or admin
             var user = await _userService.GetCurrentUserId();
+            var region = await _userService.GetRegionServiceCenters(user);
 
-            var newCancel = new ShipmentCancel
+            if (region.Length > 0)
             {
-                Waybill = shipment.Waybill,
-                CreatedBy = shipment.UserId,
-                ShipmentCreatedDate = shipment.DateCreated,
-                CancelledBy = user,
-                CancelReason = shipmentCancelDTO.CancelReason
-            };
+                bool result = Array.Exists(region, s => s == shipment.DepartureServiceCentreId);
 
-            _uow.ShipmentCancel.Add(newCancel);
+                if (result)
+                {
+                    var newCancel = new ShipmentCancel
+                    {
+                        Waybill = shipment.Waybill,
+                        CreatedBy = shipment.UserId,
+                        ShipmentCreatedDate = shipment.DateCreated,
+                        CancelledBy = user,
+                        CancelReason = shipmentCancelDTO.CancelReason
+                    };
 
-            //cancel shipment from the shipment service
-            var boolResult = await _shipmentService.CancelShipment(waybill);
+                    _uow.ShipmentCancel.Add(newCancel);
 
-            await _uow.CompleteAsync();
-            return new { waybill = newCancel.Waybill };
+                    //cancel shipment from the shipment service
+                    var boolResult = await _shipmentService.CancelShipment(waybill);
+
+                    await _uow.CompleteAsync();
+                    return new { waybill = newCancel.Waybill };
+                }
+                else
+                {
+                    throw new GenericException($"Waybill {waybill} was not created at your region.");
+                }
+            }
+            return null;
         }
 
        

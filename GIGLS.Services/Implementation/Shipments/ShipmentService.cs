@@ -1065,18 +1065,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                //3. get all grouped waybills for that Service Centre
-                //once the waybills in group mapping for service centre grow to millions, the result will slow, need optimisation ???
-                //var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappingWaybills(serviceCenters);
-
-                //4. filter the two lists
-                //var groupedWaybillsAsStringList = groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber);
-                //var groupedWaybillsAsHashSet = new HashSet<string>(groupWayBillNumberMappings);
-                //var ungroupedWaybills = paidShipments.Where(s => !groupedWaybillsAsHashSet.Contains(s.Waybill)).ToList();
                 var ungroupedWaybills = paidShipments;
-
-
-                //5. Ensure the waybills are in this ServiceCentre from the TransitWaybill entity
 
                 //Get TransitWaybillNumber as a querable list
                 var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable().Where(x => x.IsTransitCompleted == false).ToList();
@@ -1141,15 +1130,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     sortorder = "0"
                 };
 
-                //var ungroupedWaybills = await GetUnGroupedWaybillsForServiceCentre(filterOptionsDto);
                 var ungroupedWaybills = await GetUnGroupedWaybillsForServiceCentreDropDown(filterOptionsDto);
 
                 var allServiceCenters = await _centreService.GetServiceCentres();
-
-                //var ungroupedServiceCentres = allServiceCenters.ToList().Where(
-                //    s => ungroupedWaybills.Select(
-                //        a => a.DestinationServiceCentreId).Contains(s.ServiceCentreId)).ToList();
-
+                
                 var grp = new List<int>();
 
                 foreach (var item in ungroupedWaybills)

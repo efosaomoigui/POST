@@ -217,5 +217,26 @@ namespace GIGLS.Services.Implementation.Shipments
             var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifestCode));
             return manifest;
         }
+
+        public async Task ChangeManifestType(string manifestCode)
+        {
+            var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestCode && x.ManifestType == ManifestType.External && x.IsDispatched == true);
+
+            if(manifest == null)
+            {
+                throw new GenericException("External Manifest information does not exist");
+            }
+
+            //check if the manifest has not be received
+            var dispatch = await _uow.Dispatch.GetAsync(d => d.ManifestNumber == manifestCode && d.ReceivedBy == null);
+
+            if(dispatch == null)
+            {
+                throw new GenericException("Manifest already received.");
+            }
+
+            manifest.ManifestType = ManifestType.Transit;
+            _uow.Complete();
+        }
     }
 }

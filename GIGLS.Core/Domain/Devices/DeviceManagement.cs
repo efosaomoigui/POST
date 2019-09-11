@@ -12,6 +12,11 @@ namespace GIGLS.Core.Domain.Devices
         public int DeviceId { get; set; }
         public virtual Device Device { get; set; }
 
+        public int LocationId { get; set; }
+
+        public virtual ServiceCentre Location { get; set; }
+                
+        public string DataSimCardNumber { get; set; }
         public bool IsActive { get; set; }
     }
 }

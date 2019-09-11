@@ -1352,5 +1352,50 @@ namespace GIGLS.Services.Implementation.User
 
             return UserCountryId;
         }
+
+        public async Task<int[]> GetRegionServiceCenters (string currentUserId)
+        {
+            int[] serviceCenterIds = { };
+            try
+            {
+                var currentUser = GetUserById(currentUserId).Result;
+                IList<Claim> userClaims = GetClaimsAsync(currentUserId).Result;
+                
+                string[] claimValue = null;
+                foreach (var claim in userClaims)
+                {
+                    if (claim.Type == "Privilege")
+                    {
+                        claimValue = claim.Value.Split(':');
+                    }
+                }
+
+                if (claimValue == null)
+                {
+                    throw new GenericException($"You have not been assigned a Regional access. Kindly inform the administrator.");
+                }
+
+                if (claimValue[0] == "Region")
+                {
+                    var regionId = int.Parse(claimValue[1]);
+                    var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
+                    serviceCenterIds = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentre.ServiceCentreId).ToArray();
+                }
+                else if (claimValue[0] == "Global")
+                {
+                    serviceCenterIds = _unitOfWork.ServiceCentre.GetAllAsQueryable().Select(x => x.ServiceCentreId).ToArray();
+                }
+                else
+                {
+                    throw new GenericException($"You have not been assigned a Regional access. Kindly inform the administrator.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return serviceCenterIds;
+        }
     }
 }
