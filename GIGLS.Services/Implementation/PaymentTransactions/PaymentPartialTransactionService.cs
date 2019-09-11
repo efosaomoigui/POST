@@ -34,13 +34,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             if (paymentPartialTransaction == null)
                 throw new GenericException("Null Input");
 
-           // var transactionExist = await _uow.PaymentPartialTransaction.ExistAsync(x => x.Waybill.Equals(paymentPartialTransaction.Waybill));
-          //  if (transactionExist == true)
-          //      throw new GenericException($"Payment Partial Transaction for {paymentPartialTransaction.Waybill} already exist");
-
             var payment = Mapper.Map<PaymentPartialTransaction>(paymentPartialTransaction);
             _uow.PaymentPartialTransaction.Add(payment);
-            //await _uow.CompleteAsync();
             return await Task.FromResult(new { Id = payment.PaymentPartialTransactionId });
         }
 
@@ -85,22 +80,12 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         public async Task<bool> ProcessPaymentPartialTransaction(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO)
         {
             var result = false;
-            decimal cash = 0;
-            decimal pos = 0;
-            decimal transfer = 0;
-            string cashType = null;
-            string posType = null;
-            string transferType = null;
-             
-                
+                             
             if (paymentPartialTransactionProcessDTO == null)
                 throw new GenericException("Null Input");
 
             // get the current user info
             var currentUserId = await _userService.GetCurrentUserId();
-
-            
-               
 
             //get Ledger and Invoice
             var waybill = paymentPartialTransactionProcessDTO.Waybill;
@@ -174,6 +159,13 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             /////2.  When payment is complete and balance is 0
             if (balanceAmount == 0)
             {
+                decimal cash = 0;
+                decimal pos = 0;
+                decimal transfer = 0;
+                string cashType = null;
+                string posType = null;
+                string transferType = null;
+
                 //get the different breakdown of price
                 foreach (var item in paymentPartialTransactionProcessDTO.PaymentPartialTransactions)
                 {
@@ -210,9 +202,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             await _uow.CompleteAsync();
             result = true;
-
             return result;
         }
-
     }
 }
