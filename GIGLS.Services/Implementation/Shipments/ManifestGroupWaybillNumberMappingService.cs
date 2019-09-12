@@ -284,14 +284,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 var groupWaybillNumberDTO = await _groupWaybillNumberService.GetGroupWayBillNumberById(groupWaybillNumber);
 
                 //validate the ids are in the system
-                if (manifestDTO == null)
-                {
-                    throw new GenericException($"No Manifest exists for this code: {manifest}");
-                }
-                if (groupWaybillNumberDTO == null)
-                {
-                    throw new GenericException($"No GroupWaybill exists for this number: {groupWaybillNumber}");
-                }
+                //if (manifestDTO == null)
+                //{
+                //    throw new GenericException($"No Manifest exists for this code: {manifest}");
+                //}
+                //if (groupWaybillNumberDTO == null)
+                //{
+                //    throw new GenericException($"No GroupWaybill exists for this number: {groupWaybillNumber}");
+                //}
 
                 var manifestGroupWaybillNumberMapping = _uow.ManifestGroupWaybillNumberMapping.SingleOrDefault(x => x.ManifestCode == manifest && x.GroupWaybillNumber == groupWaybillNumber);
                 if (manifestGroupWaybillNumberMapping != null)
