@@ -188,7 +188,8 @@ namespace GIGLS.Services.Business.Pricing
             }
             else
             {
-                PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
+                PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, 9, pricingDto.CountryId);
+                //PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
             }
 
 
