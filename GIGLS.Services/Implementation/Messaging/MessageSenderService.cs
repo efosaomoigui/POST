@@ -537,7 +537,9 @@ namespace GIGLS.Services.Implementation.Messaging
                     "Scan Status",
                     "Date Time of Scan",
                     "WaybillNumber",
-                    "CancelledOrCollected"
+                    "CancelledOrCollected",
+                    "Manifest",
+                    "GroupWaybill"
                  };
 
                 var messageExtensionDTO = (MessageExtensionDTO)obj;
@@ -549,7 +551,9 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[4] = $"{DateTime.Now.ToLongDateString()} : {DateTime.Now.ToLongTimeString()}";
                 strArray[5] = messageExtensionDTO.WaybillNumber;
                 strArray[6] = messageExtensionDTO.CancelledOrCollected;
-
+                strArray[7] = messageExtensionDTO.GroupWaybill;
+                strArray[8] = messageExtensionDTO.Manifest;
+                
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
 
@@ -561,8 +565,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 //populate the message template
                 messageDTO.FinalBody =
                     string.Format(messageDTO.Body, strArray);
-
-
+                
                 messageDTO.ToEmail = messageExtensionDTO.RegionalManagerEmail;
             }
 
