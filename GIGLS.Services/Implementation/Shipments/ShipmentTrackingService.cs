@@ -361,7 +361,16 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                var newTracking = Mapper.Map<ShipmentTracking>(tracking);
+                var newTracking = new ShipmentTracking
+                {
+                    Waybill = tracking.Waybill,
+                    Location = tracking.Location,
+                    UserId = tracking.User,
+                    DateTime = DateTime.Now,
+                    Status = tracking.Status,
+                    ServiceCentreId = tracking.ServiceCentreId
+                };
+                
                 _uow.ShipmentTracking.Add(newTracking);
                 await _uow.CompleteAsync();
 
@@ -423,7 +432,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //2. get all users that are regional managers
             var allEmployees = await _uow.User.GetUsers();
-            var regionalManagers = allEmployees.Where(s => s.Designation == "Regional Manager");
+            var regionalManagers = allEmployees.Where(s => s.SystemUserRole == "Regional Manager");
 
             //3. Loop thru each Regional Manager
             foreach (var regionalManager in regionalManagers)

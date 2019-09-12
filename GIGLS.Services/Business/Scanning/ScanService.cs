@@ -12,7 +12,6 @@ using System.Collections.Generic;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using System.Linq;
-using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
 
 namespace GIGLS.Services.Business.Scanning
@@ -91,15 +90,7 @@ namespace GIGLS.Services.Business.Scanning
             var serviceCenters = await _userService.GetCurrentServiceCenter();
             var currentCenter = serviceCenters[0].ServiceCentreId;
             var cashondeliveryinfo = new List<CashOnDeliveryRegisterAccount>();
-
-            //check if the waybill has not been scan for (AHK) shipment collecte or Delivered status before
-            //var checkShipmentCollectionTrack = await _shipmentTrackingService.CheckShipmentTracking(scan.WaybillNumber, ShipmentScanStatus.AHD.ToString());
-            //if (checkShipmentCollectionTrack.Equals(false))
-            //{   
-            //    throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already collected, no further scan is required!");
-
-            //}
-
+            
             //check if the waybill has not been scan for (AHK) shipment collecte or Delivered status before
             var shipmentCollected = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(scan.WaybillNumber) && (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC));
 
@@ -576,7 +567,7 @@ namespace GIGLS.Services.Business.Scanning
         private async Task ProcessMissedWaybillFromTransitManifest(string waybill, ShipmentScanStatus scanStatus, int currentServiceCentre, string currentServiceCentreName)
         {
             //1. Get the GroupWaybill, Transit & Manifest
-            var groupWaybillNumberMapping = _uow.GroupWaybillNumberMapping.GetAllAsQueryable().Where(w => w.WaybillNumber == waybill).LastOrDefault();
+            var groupWaybillNumberMapping = _uow.GroupWaybillNumberMapping.GetAllAsQueryable().Where(x => x.WaybillNumber == waybill).ToList().LastOrDefault();
 
             if (groupWaybillNumberMapping != null)
             {
@@ -600,8 +591,7 @@ namespace GIGLS.Services.Business.Scanning
                     }
                     
                     var newShipmentTracking = new ShipmentTrackingDTO
-                    {
-                        DateTime = DateTime.Now,
+                    {                        
                         Status = scanStatus.ToString(),
                         Waybill = waybill,
                         DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId,
@@ -609,11 +599,10 @@ namespace GIGLS.Services.Business.Scanning
                         Location = currentServiceCentreName,
                         Manifest = manifestGroupwaybillMapping.ManifestCode,
                         ServiceCentreId = currentServiceCentre,
-                        GroupWaybill = groupWaybillNumberMapping.GroupWaybillNumber 
+                        GroupWaybill = groupWaybillNumberMapping.GroupWaybillNumber
                     };
 
-                    await _shipmentTrackingService.AddTrackingAndSendEmailForRemovingMissingShipmentsInManifest(newShipmentTracking, scanStatus, MessageType.SMIM);
-                                                         
+                    await _shipmentTrackingService.AddTrackingAndSendEmailForRemovingMissingShipmentsInManifest(newShipmentTracking, scanStatus, MessageType.SMIM);                                                         
                 }
             }
         }
