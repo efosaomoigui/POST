@@ -215,9 +215,9 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
                 //update invoice
                 invoiceEntity.PaymentDate = DateTime.Now;
-                invoiceEntity.PaymentMethod = PaymentType.Partial.ToString() + " ( " + (cashType != null ? cashType + "[" + cash + "], " : "") +
-                                                                      (posType != null ? posType + "[" + pos + "], " : "")  +
-                                                                      (transferType != null ? transferType + "[" + transfer + "] " : "") + ")";
+                invoiceEntity.PaymentMethod = PaymentType.Partial.ToString() + " - " + (cashType != null ? cashType + "(" + cash + ") " : "") +
+                                                                      (posType != null ? posType + "(" + pos + ") " : "")  +
+                                                                      (transferType != null ? transferType + "(" + transfer + ") " : "");
                 invoiceEntity.PaymentStatus = PaymentStatus.Paid;
             }
 
