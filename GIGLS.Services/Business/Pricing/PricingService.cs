@@ -165,21 +165,50 @@ namespace GIGLS.Services.Business.Pricing
 
             decimal PackagePrice;
 
-            if (pricingDto.Weight > activeWeightLimit.Weight)  //ZoneId of 15 has limit till 100kg and has no overflow
+            //get country by service centre
+            var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DestinationServiceCentreId);
+            if(destinationCountry.CountryId == 1)
             {
-                if (zone.ZoneId == 9)
+                if (pricingDto.Weight > activeWeightLimit.Weight)  //ZoneId of 15 has limit till 100kg and has no overflow
                 {
-                    PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
+                    if (zone.ZoneId == 9)
+                    {
+                        PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
+                    }
+                    else
+                    {
+                        PackagePrice = await GetRegularPriceOverflow(pricingDto.Weight, activeWeightLimit.Weight, zone.ZoneId, pricingDto.CountryId);
+                    }
                 }
                 else
                 {
-                    PackagePrice = await GetRegularPriceOverflow(pricingDto.Weight, activeWeightLimit.Weight, zone.ZoneId, pricingDto.CountryId);
+                    PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
                 }
+
             }
             else
             {
                 PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
             }
+
+
+            //if (pricingDto.Weight > activeWeightLimit.Weight)  //ZoneId of 15 has limit till 100kg and has no overflow
+            //{
+            //    if (zone.ZoneId == 9)
+            //    {
+            //        PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
+            //    }
+            //    else
+            //    {
+            //        PackagePrice = await GetRegularPriceOverflow(pricingDto.Weight, activeWeightLimit.Weight, zone.ZoneId, pricingDto.CountryId);
+            //    }
+            //}
+            //else
+            //{
+            //    PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
+            //}
+
+
             return PackagePrice + deliveryOptionPrice;
         }
 
