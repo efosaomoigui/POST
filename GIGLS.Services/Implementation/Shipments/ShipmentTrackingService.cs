@@ -12,8 +12,8 @@ using System.Linq;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.DTO.User;
-using GIGLS.Core.IServices.ServiceCentres;
 using AutoMapper;
+using GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -113,7 +113,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipment.ShipmentScanStatus = scanStatus;
                     }
                 }
-
+                
                 await _uow.CompleteAsync();
                 return new { Id };
                 //return new { Id = newShipmentTracking.ShipmentTrackingId };
@@ -185,12 +185,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
-        //public async Task<IEnumerable<ShipmentTrackingDTO>> GetShipmentWaitingForCollection()
-        //{
-        //    return await _uow.ShipmentTracking.GetShipmentWaitingForCollection();
-        //}
-
+        
         public async Task<IEnumerable<ShipmentTrackingDTO>> GetShipmentTrackings(string waybill)
         {
             try
@@ -327,6 +322,100 @@ namespace GIGLS.Services.Implementation.Shipments
 
             return true;
         }
+                
+        public async Task<bool> AddTrackingAndSendEmailForRemovingMissingShipmentsInManifest(ShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus, MessageType messageType)
+        {
+            try
+            {
+                if (tracking.User == null)
+                {
+                    tracking.User = await _userService.GetCurrentUserId();
+                }
+
+                var scanMessage = await _uow.ScanStatus.GetAsync(x => x.Code == scanStatus.ToString());
+
+                //if missing, create incident report 
+                if (scanStatus.Equals(ShipmentScanStatus.SMIM))
+                {
+                    var incidentReport = new MissingShipment
+                    {
+                        Waybill = tracking.Waybill,
+                        Reason = "Missing",
+                        Comment = scanMessage.Incident,
+                        Status = "Pending",
+                        CreatedBy = tracking.User,
+                        ServiceCentreId = tracking.ServiceCentreId
+                    };
+                    _uow.MissingShipment.Add(incidentReport);
+                }
+
+                //if found, update incident report
+                if (scanStatus.Equals(ShipmentScanStatus.FMS))
+                {
+                    var incidentReport = await _uow.MissingShipment.GetAsync(x => x.Waybill == tracking.Waybill);
+                    if (incidentReport != null)
+                    {
+                        incidentReport.Status = "Resolved";
+                        incidentReport.Feedback = scanMessage.Incident;
+                        incidentReport.ResolvedBy = tracking.User;
+                    }
+                }
+
+                var newTracking = new ShipmentTracking
+                {
+                    Waybill = tracking.Waybill,
+                    Location = tracking.Location,
+                    UserId = tracking.User,
+                    DateTime = DateTime.Now,
+                    Status = tracking.Status,
+                    ServiceCentreId = tracking.ServiceCentreId
+                };
+                
+                _uow.ShipmentTracking.Add(newTracking);
+                await _uow.CompleteAsync();
+
+                //send sms and email Departure Regional Manager, Destination Regional Manager and Current Service Centre Regional Manager
+                List<UserDTO> allRegionalManagers = new List<UserDTO>();
+                
+                //1a. Get all the Regional Managers assigned to the ServiceCentre where Scan took place including the departure and destination
+                var departureRegionalManagers = await GetAllRegionalManagersForServiceCentre(tracking.DepartureServiceCentreId);
+                var destinationRegionalManagers = await GetAllRegionalManagersForServiceCentre(tracking.DestinationServiceCentreId);
+                var currentRegionalManagers = await GetAllRegionalManagersForServiceCentre(tracking.ServiceCentreId);
+
+                allRegionalManagers.AddRange(departureRegionalManagers);
+                allRegionalManagers.AddRange(destinationRegionalManagers);
+                allRegionalManagers.AddRange(currentRegionalManagers);
+                
+                var userDTO = await _userService.GetUserById(tracking.User);
+
+                //2. Use a loop to send to all Regional Managers
+                foreach (var regionalManager in allRegionalManagers)
+                {
+                    //2a. Create MessageExtensionDTO to hold custom message info
+                    var messageExtensionDTO = new MessageExtensionDTO()
+                    {
+                        ShipmentScanStatus = scanStatus,
+                        RegionalManagerName = regionalManager.FirstName + " " + regionalManager.LastName,
+                        RegionalManagerEmail = regionalManager.Email,
+                        ServiceCenterAgentName = userDTO.FirstName + " "+ userDTO.LastName,
+                        ServiceCenterName = tracking.Location,
+                        ScanStatus = scanMessage.Incident,
+                        WaybillNumber = tracking.Waybill,
+                        CancelledOrCollected = scanMessage.Reason,
+                        GroupWaybill = tracking.GroupWaybill,
+                        Manifest = tracking.Manifest
+                    };
+
+                    //2b. send message
+                    await _messageSenderService.SendGenericEmailMessage(messageType, messageExtensionDTO);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }         
+            return true;
+        }
 
         private async Task<List<UserDTO>> GetAllRegionalManagersForServiceCentre(int currentServiceCenterId)
         {
@@ -343,7 +432,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //2. get all users that are regional managers
             var allEmployees = await _uow.User.GetUsers();
-            var regionalManagers = allEmployees.Where(s => s.Designation == "Regional Manager");
+            var regionalManagers = allEmployees.Where(s => s.SystemUserRole == "Regional Manager");
 
             //3. Loop thru each Regional Manager
             foreach (var regionalManager in regionalManagers)

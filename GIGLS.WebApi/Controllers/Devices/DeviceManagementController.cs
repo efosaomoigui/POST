@@ -52,14 +52,30 @@ namespace GIGLS.WebApi.Controllers.Devices
             });
         }
 
+        //[GIGLSActivityAuthorize(Activity = "Create")]
+        //[HttpPost]
+        //[Route("{deviceId:int}/assign/{userId}")]
+        //public async Task<IServiceResponse<object>> AssignDeviceToUser(string userId, int deviceId)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        await _deviceService.AssignDeviceToUser(userId, deviceId);
+
+        //        return new ServiceResponse<object>
+        //        {
+        //            Object = true
+        //        };
+        //    });
+        //}
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
-        [Route("{deviceId:int}/assign/{userId}")]
-        public async Task<IServiceResponse<object>> AssignDeviceToUser(string userId, int deviceId)
+        [Route("assign")]
+        public async Task<IServiceResponse<object>> AssignDeviceToUser(DeviceManagementDTO deviceManagementDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _deviceService.AssignDeviceToUser(userId, deviceId);
+                await _deviceService.AssignDeviceToUser(deviceManagementDTO);
 
                 return new ServiceResponse<object>
                 {

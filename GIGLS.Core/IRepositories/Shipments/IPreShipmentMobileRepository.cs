@@ -13,5 +13,6 @@ namespace GIGLS.Core.IRepositories.Shipments
     public interface IPreShipmentMobileRepository : IRepository<PreShipmentMobile>
     {
        Task<List<PreShipmentMobileDTO>> GetPreShipmentsForMobile();
+       Task<PreShipmentMobileDTO> GetBasicPreShipmentMobileDetail(string waybill);
     }
 }

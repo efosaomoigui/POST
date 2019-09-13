@@ -30,7 +30,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Zone
                                   SpecialDomesticPackageId = s.SpecialDomesticPackageId,
                                   SpecialDomesticPackageName = s.SpecialDomesticPackage.Name,
                                   ZoneId = s.ZoneId,
-                                  ZoneName = s.Zone.ZoneName
+                                  ZoneName = s.Zone.ZoneName,
+                                  CountryId = s.CountryId
                                   //UserName = s.User.FirstName + " "+ s.User.LastName
                               };
                 return Task.FromResult(zoneDto.ToList());

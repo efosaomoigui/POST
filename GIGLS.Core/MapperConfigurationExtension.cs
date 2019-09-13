@@ -365,6 +365,12 @@ namespace GIGLS.Core
 
                 config.CreateMap<VehicleType,VehicleTypeDTO>();
                 config.CreateMap<VehicleTypeDTO, VehicleType>();
+
+                config.CreateMap<PickupManifest, PickupManifestDTO>();
+                config.CreateMap<PickupManifestDTO, PickupManifest>();
+
+                config.CreateMap<PickupManifestWaybillMapping, PickupManifestWaybillMappingDTO>();
+                config.CreateMap<PickupManifestWaybillMappingDTO, PickupManifestWaybillMapping>();
             });
 
             isInit = true;

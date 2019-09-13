@@ -102,6 +102,7 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.IdentityModel.Services" />
     <Reference Include="System.IdentityModel.Tokens.Jwt, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -185,6 +186,8 @@
     <Compile Include="Domain\OTP.cs" />
     <Compile Include="Domain\OverdueShipment.cs" />
     <Compile Include="Domain\Partnership\PartnerTransactions.cs" />
+    <Compile Include="Domain\PickupManifest.cs" />
+    <Compile Include="Domain\PickupManifestWaybillMapping.cs" />
     <Compile Include="Domain\PreShipmentItemMobile.cs" />
     <Compile Include="Domain\PreShipmentManifestMapping.cs" />
     <Compile Include="Domain\ManifestWaybillMapping.cs" />
@@ -305,6 +308,7 @@
     <Compile Include="DTO\Haulage\HaulageDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDistanceMappingPriceDTO.cs" />
     <Compile Include="DTO\Haulage\PackingListDTO.cs" />
+    <Compile Include="DTO\ImageDTO.cs" />
     <Compile Include="DTO\InternationalShipmentDetails\InternationalRequestReceiverDTO.cs" />
     <Compile Include="DTO\InternationalShipmentDetails\InternationalRequestReceiverItemDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardDTO.cs" />
@@ -373,6 +377,8 @@
     <Compile Include="DTO\Shipments\MobilePriceDTO.cs" />
     <Compile Include="DTO\Shipments\MobileShipmentTrackingHistoryDTO.cs" />
     <Compile Include="DTO\Shipments\OverdueShipmentDTO.cs" />
+    <Compile Include="DTO\Shipments\PickupManifestDTO.cs" />
+    <Compile Include="DTO\Shipments\PickupManifestWaybillMappingDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentItemMobileDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentMobileDTO.cs" />
     <Compile Include="DTO\Shipments\ThirdPartyPreShipmentItemDTO.cs" />
@@ -450,6 +456,7 @@
     <Compile Include="Enums\FleetType.cs" />
     <Compile Include="Enums\Gender.cs" />
     <Compile Include="Enums\GlobalPropertyType.cs" />
+    <Compile Include="Enums\ImageFileType.cs" />
     <Compile Include="Enums\IncrementType.cs" />
     <Compile Include="Enums\InventoryType.cs" />
     <Compile Include="Enums\JobCardMaintenanceStatus.cs" />
@@ -568,6 +575,8 @@
     <Compile Include="IRepositories\Shipments\IMobilePickUpRequestsRepository.cs" />
     <Compile Include="IRepositories\Shipments\IMobileShipmentTrackingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IOverdueShipmentRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IPickupManifestRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IPickupManifestWaybillMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IPreShipmentItemMobileRepository.cs" />
     <Compile Include="IRepositories\Shipments\IPreShipmentManifestMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IManifestWaybillMappingRepository.cs" />

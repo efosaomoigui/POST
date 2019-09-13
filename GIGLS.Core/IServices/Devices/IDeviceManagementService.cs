@@ -9,7 +9,9 @@ namespace GIGLS.Core.IServices.Devices
         Task<List<DeviceManagementDTO>> GetDeviceManagements();
         Task<List<DeviceManagementDTO>> GetActiveDeviceManagements();
         Task<DeviceManagementDTO> GetDeviceManagementById(int deviceManagementId);
-        Task AssignDeviceToUser(string userId, int deviceId);
+        //Task AssignDeviceToUser(string userId, int deviceId);
+
+        Task AssignDeviceToUser(DeviceManagementDTO deviceManagementDTO);
         Task UnAssignDeviceFromUser(int deviceManagementId);
     }
 }

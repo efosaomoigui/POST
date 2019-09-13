@@ -37,6 +37,7 @@ using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IMessageService;
 
+
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
     [Authorize]
@@ -398,7 +399,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return await HandleApiOperationAsync(async () =>
             {
                 var packages = await _portalService.GetSpecialDomesticPackages();
-                
+
                 return new ServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>
                 {
                     Object = packages
@@ -750,7 +751,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             {
                                 var response = await _preshipmentmobileService.CreatePartner(user.UserChannelCode);
                             }
-                            
+
                         }
                         //get access token from response body
                         var responseJson = await responseMessage.Content.ReadAsStringAsync();
@@ -801,12 +802,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-               var ItemTypes = _portalService.GetItemTypes();
-               return new ServiceResponse<List<string>>
-               {
-                Object = ItemTypes,
-               };
-            }); 
+                var ItemTypes = _portalService.GetItemTypes();
+                return new ServiceResponse<List<string>>
+                {
+                    Object = ItemTypes,
+                };
+            });
         }
 
         [HttpPost]
@@ -919,8 +920,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return await HandleApiOperationAsync(async () =>
             {
                 var packages = await _preshipmentmobileService.GetSpecialPackages();
-                
-             return new ServiceResponse<SpecialResultDTO>
+
+                return new ServiceResponse<SpecialResultDTO>
                 {
                     Object = packages
                 };
@@ -1176,6 +1177,36 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             {
                 var response = await _preshipmentmobileService.VerifyPartnerDetails(partner);
                 return new ServiceResponse<bool>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("saveimages")]
+        public async Task<IServiceResponse<string>> LoadImage(ImageDTO images)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                
+                var response = await _preshipmentmobileService.LoadImage(images);
+                return new ServiceResponse<string>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("displayimages")]
+        public async Task<IServiceResponse<List<Uri>>> DisplayImages(ImageDTO images)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                var response = await _preshipmentmobileService.DisplayImages();
+                return new ServiceResponse<List<Uri>>
                 {
                     Object = response
                 };
