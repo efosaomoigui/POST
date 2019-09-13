@@ -88,7 +88,7 @@ namespace GIGLS.Services.Implementation.Wallet
             allShipments = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate);
 
             //A. get partial payment values
-            var allShipmentsPartial = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate && s.PaymentMethod == "Partial");
+            var allShipmentsPartial = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate && s.PaymentMethod.Contains("Partial"));
 
             //added for GWA and GWARIMPA service centres
             {
@@ -122,7 +122,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
 
                 //2. partial
-                if (item.PaymentMethod == "Partial")
+                if (item.PaymentMethod.Contains("Partial"))
                 {
                     var partialPaymentCash = await returnPartialPaymentCashByWaybill(item.Waybill);
 
