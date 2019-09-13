@@ -39,6 +39,7 @@ using GIGLS.Core.Domain.Partnership;
 using GIGLS.Core.IServices.Utility;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.IMessageService;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -63,6 +64,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IPasswordGenerator _codegenerator;
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IPreShipmentMobileService _preShipmentMobileService;
+        private readonly IMessageSenderService _messageSenderService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
@@ -70,7 +72,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService, ICustomerService customerService,
             IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
-            IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService)
+            IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -91,6 +93,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _codegenerator = codegenerator;
             _globalPropertyService = globalPropertyService;
             _preShipmentMobileService = preShipmentMobileService;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
 
@@ -657,6 +660,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == user.Referrercode);
                             if(referrerCode != null)
                             {
+                                var userDTO = await _userService.GetUserByChannelCode(referrerCode.UserCode);
                                 var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrerCode.UserCode);
                                 wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
                                 var transaction = new WalletTransactionDTO
@@ -672,7 +676,13 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 };
                                 var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
                                 await _uow.CompleteAsync();
-
+                                var messageExtensionDTO = new MobileMessageDTO()
+                                {
+                                    SenderName = userDTO.FirstName + " " + userDTO.LastName,
+                                    SenderEmail = userDTO.Email
+                                    
+                                };
+                                await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
                             }
                         }
                         
@@ -791,6 +801,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == user.Referrercode);
                         if (referrerCode != null)
                         {
+                            var userDTO = await _userService.GetUserByChannelCode(referrerCode.UserCode);
                             var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrerCode.UserCode);
                             wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
                             var transaction = new WalletTransactionDTO
@@ -806,13 +817,19 @@ namespace GIGLS.Services.Business.CustomerPortal
                             };
                             var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
                             await _uow.CompleteAsync();
+                            var messageExtensionDTO = new MobileMessageDTO()
+                            {
+                                SenderName = userDTO.FirstName + " " + userDTO.LastName,
+                                SenderEmail = userDTO.Email
+                            };
+                            await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
 
                         }
                     }
                 }
                   
                 }
-                else if (user.UserChannelType == UserChannelType.IndividualCustomer)
+                else if (user.UserChannelType == UserChannelType.IndividualCustomer || user.UserChannelType == UserChannelType.Ecommerce)
                 {
                 var EmailUser = await _uow.User.GetUserByEmail(user.Email);
                 if (EmailUser != null)
@@ -872,6 +889,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == user.Referrercode);
                                 if (referrerCode != null)
                                 {
+                                    var userDTO = await _userService.GetUserByChannelCode(referrerCode.UserCode);
                                     var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrerCode.UserCode);
                                     wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
                                     var transaction = new WalletTransactionDTO
@@ -887,6 +905,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                                     };
                                     var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
                                     await _uow.CompleteAsync();
+                                    var messageExtensionDTO = new MobileMessageDTO()
+                                    {
+                                        SenderName = userDTO.FirstName + " " + userDTO.LastName,
+                                        SenderEmail = userDTO.Email
+                                    };
+                                    await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
 
                                 }
                             }
@@ -944,6 +968,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == user.Referrercode);
                                 if (referrerCode != null)
                                 {
+                                    var userDTO = await _userService.GetUserByChannelCode(referrerCode.UserCode);
                                     var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrerCode.UserCode);
                                     wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
                                     var transaction = new WalletTransactionDTO
@@ -959,6 +984,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                                     };
                                     var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
                                     await _uow.CompleteAsync();
+                                    var messageExtensionDTO = new MobileMessageDTO()
+                                    {
+                                        SenderName = userDTO.FirstName + " " + userDTO.LastName,
+                                        SenderEmail = userDTO.Email
+                                    };
+                                    await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
 
                                 }
                             }
@@ -1021,6 +1052,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == user.Referrercode);
                             if (referrerCode != null)
                             {
+                                var userDTO = await _userService.GetUserByChannelCode(referrerCode.UserCode);
                                 var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrerCode.UserCode);
                                 wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
                                 var transaction = new WalletTransactionDTO
@@ -1036,6 +1068,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 };
                                 var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
                                 await _uow.CompleteAsync();
+                                var messageExtensionDTO = new MobileMessageDTO()
+                                {
+                                    SenderName = userDTO.FirstName + " " + userDTO.LastName,
+                                    SenderEmail = userDTO.Email
+                                };
+                                await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
 
                             }
                         }
@@ -1081,6 +1119,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == user.Referrercode);
                         if (referrerCode != null)
                         {
+                            var userDTO = await _userService.GetUserByChannelCode(referrerCode.UserCode);
                             var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrerCode.UserCode);
                             wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
                             var transaction = new WalletTransactionDTO
@@ -1096,7 +1135,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                             };
                             var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
                             await _uow.CompleteAsync();
-
+                            var messageExtensionDTO = new MobileMessageDTO()
+                            {
+                                SenderName = userDTO.FirstName + " " + userDTO.LastName,
+                                SenderEmail = userDTO.Email
+                            };
+                            await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
                         }
                     }
                 }

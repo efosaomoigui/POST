@@ -555,8 +555,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     var DepartureStation = await _uow.Station.GetAsync(s => s.StationId == preshipmentmobile.SenderStationId);
                     var DestinationStation = await _uow.Station.GetAsync(s => s.StationId == preshipmentmobile.ReceiverStationId);
                     var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                    
-                   
                     var MobileShipment = new ShipmentDTO
                     {
                         Waybill = preshipmentmobile.Waybill,
@@ -602,8 +600,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.PickedUp.ToString();
                     preshipmentmobile.IsConfirmed = true;
                     await _uow.CompleteAsync();
-
-
                 }
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
                 {
@@ -704,7 +700,6 @@ namespace GIGLS.Services.Implementation.Shipments
                    
                 }
                 return true;
-
             }
             catch (Exception ex)
             {
@@ -747,7 +742,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     preshipment.Weight = preShipment.Weight;
                     preshipment.Width = preShipment.Width;
                     preshipment.Height = preShipment.Height;
-
                     await _uow.CompleteAsync();
                 }
                 return true;
@@ -757,7 +751,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
 
         public async Task<SpecialResultDTO> GetSpecialPackages()
         {
@@ -819,9 +812,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     finalDictionary.Add(subcategory.SubCategoryName, listOfWeights);
                 }
-
             }
-
             return finalDictionary;
         }
 
@@ -832,7 +823,6 @@ namespace GIGLS.Services.Implementation.Shipments
             var shipment = shipments.OrderByDescending(s => s.DateCreated);
             var newPreShipment = Mapper.Map<List<PreShipmentMobileDTO>>(shipment);
             return newPreShipment;
-
         }
         public async Task<SummaryTransactionsDTO> GetPartnerWalletTransactions()
         {
@@ -848,7 +838,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 Transactions = TotalTransactions
             };
             return summary;
-
         }
         
         public async Task<object> ResolveDisputeForMobile(PreShipmentMobileDTO preShipment)
@@ -962,7 +951,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
 
         public async Task<object> AddRatings(MobileRatingDTO rating)
         {
@@ -1096,7 +1084,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         UserId = user.Id,
                         IsActivated = false,
                     };
-                    var FinalPartner = Mapper.Map<Partner>(partnerDTO);
+                     var FinalPartner = Mapper.Map<Partner>(partnerDTO);
                     _uow.Partner.Add(FinalPartner);
                     await _uow.CompleteAsync();
                 }
@@ -1147,7 +1135,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
         public async Task<bool> deleterecord(string detail)
         {
             try
@@ -1264,12 +1251,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (Partner != null)
                 {
                     partnerdto = Mapper.Map<PartnerDTO>(Partner);
-                        var VehicleDetails = await _uow.VehicleType.FindAsync(s =>s.Partnercode == partnerdto.PartnerCode);
-                        if (VehicleDetails != null)
-                        {
+                    var VehicleDetails = await _uow.VehicleType.FindAsync(s =>s.Partnercode == partnerdto.PartnerCode);
+                    if (VehicleDetails != null)
+                    {
                           var vehicles = Mapper.Map<List<VehicleTypeDTO>>(VehicleDetails);
                           partnerdto.VehicleTypeDetails = vehicles;
-                        }
+                    }
                 }
                 else
                 {
@@ -1293,7 +1280,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipment.ActualReceiverFirstName = receiver.ActualReceiverFirstName;
                     shipment.ActualReceiverLastName = receiver.ActualReceiverLastName;
                     shipment.ActualReceiverPhoneNumber = receiver.ActualReceiverPhoneNumber;
-    }
+                }
                 else
                 {
                     throw new GenericException("Shipment Information does not exist!");
@@ -1306,7 +1293,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
 
         public async Task<int> GetCountryId()
         {
