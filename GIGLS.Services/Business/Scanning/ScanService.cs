@@ -201,6 +201,11 @@ namespace GIGLS.Services.Business.Scanning
 
             if (manifest != null)
             {
+                if (!manifest.IsDispatched)
+                {
+                    throw new GenericException($"Manifest: {manifest.ManifestCode} was not dispatched. Kindly inform your Regional Manager");
+                }
+
                 if(manifest.ManifestType == ManifestType.External || manifest.ManifestType == ManifestType.Transit)
                 {
                     var groupWaybillInManifestList = await _groupManifest.GetGroupWaybillNumbersInManifest(manifest.ManifestId);

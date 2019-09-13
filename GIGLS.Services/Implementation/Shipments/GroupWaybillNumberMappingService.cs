@@ -370,10 +370,21 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var ungroupedWaybills = await _shipmentService.GetUnGroupedWaybillsForServiceCentreDropDown(filterOptionsDto);
 
-                //check if the waybill that need to be grouped are in ungroupedWaybills above
-                var getWaybillNotAvailableForGrouping = waybillNumberList.Where(x => !ungroupedWaybills.Select(w => w.Waybill).Contains(x));
+                var ungroupedWaybillsList = new HashSet<string>();
 
-                if(getWaybillNotAvailableForGrouping.Count() > 0)
+                foreach(var item in ungroupedWaybills)
+                {
+                    if (item?.Waybill != null)
+                    {
+                        ungroupedWaybillsList.Add(item.Waybill);
+                    }
+                }
+               
+                //check if the waybill that need to be grouped are in ungroupedWaybills above
+                //var getWaybillNotAvailableForGrouping = waybillNumberList.Where(x => !ungroupedWaybills.Select(w => w.Waybill).Contains(x));
+                var getWaybillNotAvailableForGrouping = waybillNumberList.Where(x => !ungroupedWaybillsList.Contains(x)).ToList();
+
+                if (getWaybillNotAvailableForGrouping.Count() > 0)
                 {
                     throw new GenericException($"Error: The following waybills [{string.Join(", ", getWaybillNotAvailableForGrouping.ToList())}]" +
                         $" can not be added to this group because they are not available to you. Remove them from the list to proceed");
