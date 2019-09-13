@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
+﻿using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO.Shipments;
 using System;
@@ -31,6 +32,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> CreateShipmentFromPreShipment(string waybill);
         Task<List<StationDTO>> GetUnmappedManifestStations();
         Task<List<PreShipmentDTO>> GetUnmappedPreShipmentsInStation(int stationId);
+        Task<List<DeliveryNumberDTO>> GetDeliveryNumbers(FilterOptionsDto filterOptionsDto);
         
     }
 }

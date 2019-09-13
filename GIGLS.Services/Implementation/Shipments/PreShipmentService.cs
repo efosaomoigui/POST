@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
+using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
@@ -410,7 +411,6 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var query = _uow.PreShipment.PreShipmentsAsQueryable();
                 query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.New);
-
                 var preShipments = query.ToList();
                 var preShipmentList = Mapper.Map<List<PreShipmentDTO>>(preShipments);
 
@@ -418,15 +418,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 foreach(var preShipmentDto in preShipmentList)
                 {
                     var customerView = _uow.Invoice.GetAllFromCustomerView().FirstOrDefault(s => s.CustomerCode == preShipmentDto.CustomerCode);
-
                     if(customerView != null)
                     {
                         var customerDto = Mapper.Map<CustomerDTO>(customerView);
                         preShipmentDto.CustomerDetails = customerDto;
                     }
                 }
-
-
                 return await Task.FromResult(preShipmentList);
             }
             catch (Exception)
@@ -649,5 +646,21 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+
+        public async Task<List<DeliveryNumberDTO>> GetDeliveryNumbers(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                var query = _uow.DeliveryNumber.GetAll();
+                query = query.Where(s => s.IsUsed != true);
+                var deliverynumbers = query.ToList();
+                var deliverynumberDto = Mapper.Map<List<DeliveryNumberDTO>>(deliverynumbers);
+                return await Task.FromResult(deliverynumberDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

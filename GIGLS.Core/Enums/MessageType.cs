@@ -34,6 +34,7 @@
         SSC_Email,  //Message Type for use in sending email
         MATD,  //Message for Attempted Delivery
         PEmail, //Message Type for Forgot Password
+        MRB, //Mesage For Referral Bonus
         SMIM, //SHIPMENT MISSED DURING ARRIVAL TRANSIT MANIFEST
         FMS   //FOUND MISSING SHIPMENT
     } 
