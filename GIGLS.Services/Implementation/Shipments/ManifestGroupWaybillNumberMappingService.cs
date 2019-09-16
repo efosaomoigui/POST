@@ -314,7 +314,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters);
                 return manifestGroupWaybillMapings;
             }
@@ -328,7 +328,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters, dateFilterCriteria);
 
                 //group the result by manifest                
