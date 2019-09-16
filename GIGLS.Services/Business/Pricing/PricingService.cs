@@ -160,26 +160,46 @@ namespace GIGLS.Services.Business.Pricing
                 pricingDto.Weight = pricingDto.Weight > volume ? pricingDto.Weight : volume;
             }
 
+            //get country by service centre
+            var departureCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DepartureServiceCentreId);
+            var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DestinationServiceCentreId);
+
+
+
             //This is our limit weight.
             var activeWeightLimit = await _weightLimit.GetActiveWeightLimits();
+            decimal PackagePrice = 0;
 
-            decimal PackagePrice;
-
-            if (pricingDto.Weight > activeWeightLimit.Weight)  //ZoneId of 15 has limit till 100kg and has no overflow
+            ///--1. Price within a country
+            if (departureCountry.CountryId == destinationCountry.CountryId)
             {
-                if (zone.ZoneId == 9)
+                if (pricingDto.Weight > activeWeightLimit.Weight)
                 {
-                    PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
+                    PackagePrice = await GetRegularPriceOverflow(pricingDto.Weight, activeWeightLimit.Weight, zone.ZoneId, pricingDto.CountryId);
                 }
                 else
                 {
-                    PackagePrice = await GetRegularPriceOverflow(pricingDto.Weight, activeWeightLimit.Weight, zone.ZoneId, pricingDto.CountryId);
+                    PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
                 }
             }
             else
             {
-                PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
+                ///--2. Price between two countries
+                //Get the countryZoneMapping
+                var countryZoneMapping = await _uow.CountryRouteZoneMap.GetAsync(
+                    s => s.DepartureId == departureCountry.CountryId && s.DestinationId == destinationCountry.CountryId);
+
+                if (countryZoneMapping != null)
+                {
+                    PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, countryZoneMapping.ZoneId, destinationCountry.CountryId);
+                }
+                else
+                {
+                    throw new Exception("CountryRouteZoneMap has not been set.");
+                }
             }
+
+
             return PackagePrice + deliveryOptionPrice;
         }
 
