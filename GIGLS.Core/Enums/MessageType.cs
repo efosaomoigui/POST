@@ -36,6 +36,7 @@
         PEmail, //Message Type for Forgot Password
         MRB, //Mesage For Referral Bonus
         SMIM, //SHIPMENT MISSED DURING ARRIVAL TRANSIT MANIFEST
-        FMS   //FOUND MISSING SHIPMENT
+        FMS,  //FOUND MISSING SHIPMENT
+        OTP //Message for One Time Password
     } 
 }

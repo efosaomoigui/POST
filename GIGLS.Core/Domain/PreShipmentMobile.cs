@@ -111,6 +111,8 @@ namespace GIGLS.Core.Domain
         public string ActualReceiverLastName { get; set; }
         public string ActualReceiverPhoneNumber { get; set; }
 
+        public string CountryName { get; set; }
+
 
     }
 }

@@ -14,6 +14,8 @@ using GIGLS.Core.IServices.Utility;
 using System.Collections.Generic;
 using System.Linq;
 using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
 
 namespace GIGLS.Services.Implementation
 {
@@ -24,15 +26,17 @@ namespace GIGLS.Services.Implementation
         private readonly IEmailService _EmailService;
         private readonly IUserService _UserService;
         private readonly IPasswordGenerator _codegenerator;
+        private readonly IMessageSenderService _messageSenderService;
 
         public OTPService(IUnitOfWork uow, ISMSService MessageService, IEmailService EmailService, IUserService UserService,
-            IPasswordGenerator codegenerator)
+            IPasswordGenerator codegenerator, IMessageSenderService messageSenderService )
         {
             _uow = uow;
             _SmsService = MessageService;
             _EmailService = EmailService;
             _UserService = UserService;
             _codegenerator = codegenerator;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
         public async Task<UserDTO> IsOTPValid(int OTP)
@@ -74,25 +78,17 @@ namespace GIGLS.Services.Implementation
             Random rdm = new Random();
             return rdm.Next(min, max);
           }
-        public  async Task<string> SendOTP(OTPDTO user)
+        public  async Task<bool> SendOTP(OTPDTO user)
         {
-             
-            MessageDTO SMSmessage = new MessageDTO
+
+            var message = new MobileMessageDTO
             {
-                To = user.PhoneNumber,
-                FinalBody = $"Your OTP is {user.Otp}"
+                SenderEmail = user.EmailAddress,
+                SenderPhoneNumber = user.PhoneNumber,
+                OTP = user.Otp
             };
-            MessageDTO Emailmessage = new MessageDTO
-            {
-                CustomerName = "",
-                ReceiverName = "",
-                Subject = "OTP",
-                ToEmail = user.EmailAddress,
-                FinalBody = $"Thank you for registering .Your OTP is {user.Otp}"
-            };
-            var EmailResponse = await _EmailService.SendAsync(Emailmessage);
-            var Smsresponse = await _SmsService.SendAsync(SMSmessage);
-           return $"{EmailResponse},{Smsresponse}";
+            var response = await _messageSenderService.SendMessage(MessageType.OTP, EmailSmsType.All, message);
+            return response;
         }
         public async Task<UserDTO> CheckDetails(string user)
         {

@@ -12,6 +12,8 @@ namespace GIGLS.Core.DTO
         public string SenderEmail { get; set; }
         public string WaybillNumber { get; set; }
         public string SenderPhoneNumber { get; set; }
+
+        public int OTP { get; set; }
        
     }
 }

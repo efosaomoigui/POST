@@ -304,8 +304,8 @@ namespace GIGLS.Services.Implementation.Messaging
                  {
                      "Sender Name",
                      "Sender Email",
-                    "WaybillNumber"
-
+                     "WaybillNumber",
+                     "OTP"
                  };
 
                 var mobileMessageDTO = (MobileMessageDTO)obj;
@@ -313,6 +313,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[0] = mobileMessageDTO.SenderName;
                 strArray[1] = mobileMessageDTO.WaybillNumber;
                 strArray[2] = mobileMessageDTO.SenderName;
+                strArray[3] = Convert.ToString(mobileMessageDTO.OTP);
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);

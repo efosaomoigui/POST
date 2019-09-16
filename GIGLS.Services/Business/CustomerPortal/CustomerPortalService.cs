@@ -1187,16 +1187,13 @@ namespace GIGLS.Services.Business.CustomerPortal
             var Otp = await _otpService.GenerateOTP(user);
             var message = await _otpService.SendOTP(Otp);
 
-            string[] CombinedMessage = message.Split(',');
+            bool CombinedMessage = message;
 
-            var EmailResponse = CombinedMessage[0];
-            var PhoneResponse = CombinedMessage[1];
-
-            if (EmailResponse == "Accepted")
+            if (CombinedMessage == true)
             {
                 responseDto.EmailSent = true;
             }
-            if (PhoneResponse == "OK")
+            if (CombinedMessage == true)
             {
                 responseDto.PhoneSent = true;
             }
