@@ -43,7 +43,7 @@
           <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
           <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerPort>59632</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost/giglsresourceapi</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
