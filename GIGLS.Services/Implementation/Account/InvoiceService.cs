@@ -240,7 +240,6 @@ namespace GIGLS.Services.Implementation.Account
             if (invoiceDTO.IsShipmentCollected)
             {
                 var demurage = await _uow.Demurrage.GetAsync(s => s.WaybillNumber == invoiceDTO.Waybill);
-
                 if (demurage != null)
                 {
                     invoiceDTO.Shipment.Demurrage.AmountPaid = demurage.AmountPaid;

@@ -1081,7 +1081,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 //get all shipments by servicecentre
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
                 //added for GWA and GWARIMPA service centres
                 {

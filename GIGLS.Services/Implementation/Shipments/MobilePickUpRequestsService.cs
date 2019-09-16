@@ -37,7 +37,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         throw new GenericException($"Shipment with waybill number: {PickUpRequest.Waybill} exists already");
                     }
-                    
                 }
                 var newMobilePickUpRequest = Mapper.Map<MobilePickUpRequests>(PickUpRequest);
                 _uow.MobilePickUpRequests.Add(newMobilePickUpRequest);
@@ -105,7 +104,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw;
                 }
-            
         }
     }
 }
