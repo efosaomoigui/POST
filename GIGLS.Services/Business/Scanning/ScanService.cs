@@ -201,6 +201,11 @@ namespace GIGLS.Services.Business.Scanning
 
             if (manifest != null)
             {
+                if (!manifest.IsDispatched)
+                {
+                    throw new GenericException($"Manifest: {manifest.ManifestCode} was not dispatched. Kindly inform your Regional Manager");
+                }
+
                 if(manifest.ManifestType == ManifestType.External || manifest.ManifestType == ManifestType.Transit)
                 {
                     var groupWaybillInManifestList = await _groupManifest.GetGroupWaybillNumbersInManifest(manifest.ManifestId);
@@ -474,66 +479,69 @@ namespace GIGLS.Services.Business.Scanning
             //1. Only scan for manifest
             if (manifest != null)
             {
-                //2. Check for Scan related to Transit Manifest
-                if (scan.ShipmentScanStatus == ShipmentScanStatus.AST || scan.ShipmentScanStatus == ShipmentScanStatus.APT)
+                if(manifest.ManifestType == ManifestType.Transit)
                 {
-                    //3. Create new entries in TransitWaybills or update existing entries
-                    foreach (var waybill in waybillsInManifest)
+                    //2. Check for Scan related to Transit Manifest
+                    if (scan.ShipmentScanStatus == ShipmentScanStatus.AST || scan.ShipmentScanStatus == ShipmentScanStatus.APT)
                     {
-                        //3a. check if entry exist
-                        var transitWaybillNumber = await _uow.TransitWaybillNumber.GetAsync(s => s.WaybillNumber == waybill);
-
-                        if (transitWaybillNumber == null)
+                        //3. Create new entries in TransitWaybills or update existing entries
+                        foreach (var waybill in waybillsInManifest)
                         {
-                            //3b. create new entry
-                            await _transitWaybillNumberService.AddTransitWaybillNumber(
-                                new TransitWaybillNumberDTO
-                                {
-                                    WaybillNumber = waybill,
-                                    IsGrouped = false,
-                                    ServiceCentreId = currentUserSercentreId,
-                                    UserId = currentUserId
-                                }
-                            );
+                            //3a. check if entry exist
+                            var transitWaybillNumber = await _uow.TransitWaybillNumber.GetAsync(s => s.WaybillNumber == waybill);
+
+                            if (transitWaybillNumber == null)
+                            {
+                                //3b. create new entry
+                                await _transitWaybillNumberService.AddTransitWaybillNumber(
+                                    new TransitWaybillNumberDTO
+                                    {
+                                        WaybillNumber = waybill,
+                                        IsGrouped = false,
+                                        ServiceCentreId = currentUserSercentreId,
+                                        UserId = currentUserId
+                                    }
+                                );
+                            }
+                            else
+                            {
+                                //3c. update existing entry
+                                transitWaybillNumber.ServiceCentreId = currentUserSercentreId;
+                                transitWaybillNumber.UserId = currentUserId;
+                                transitWaybillNumber.IsGrouped = false;
+                                //_uow.Complete();
+                            }
+
+                            //4. Update entry in GroupWaybillMapping
+                            var groupWaybillNumberMapping = await _uow.GroupWaybillNumberMapping.GetAsync(s => s.WaybillNumber == waybill);
+                            //groupWaybillNumberMapping.DepartureServiceCentreId = currentUserSercentreId;
+                            _uow.GroupWaybillNumberMapping.Remove(groupWaybillNumberMapping); //remove waybill from mapping 12/09/2019
+                            _uow.Complete();
+
+                            //5. Get the GroupWaybill numbers in the manifest
+                            groupWaybillsInManifest.Add(groupWaybillNumberMapping.GroupWaybillNumber);
                         }
-                        else
+
+                        //6. Remove entry from ManifestGroupWaybillNumberMappingService
+                        //6.1 Find the groupWaybill attached to the Manifest
+                        foreach (var groupWaybill in groupWaybillsInManifest)
                         {
-                            //3c. update existing entry
-                            transitWaybillNumber.ServiceCentreId = currentUserSercentreId;
-                            transitWaybillNumber.UserId = currentUserId;
-                            transitWaybillNumber.IsGrouped = false;
-                            //_uow.Complete();
+                            //await _groupManifest.RemoveGroupWaybillNumberFromManifest(manifest.ManifestCode, groupWaybill);
+
+                            //Update the GroupWaybill for Transit
+                            //1. Update Departure Service Centre to New Service Centre and Set HasManifested to false
+                            //await _groupWaybill.ChangeDepartureServiceInGroupWaybill(currentUserSercentreId, groupWaybill);
+
+                            //New Update on 12 Sept 2019
+                            //Remove the group waybill from manifest
+                            var manifestGroupWaybillNumberMapping = _uow.ManifestGroupWaybillNumberMapping.SingleOrDefault(x => x.ManifestCode == manifest.ManifestCode && x.GroupWaybillNumber == groupWaybill);
+                            var groupwaybill = _uow.GroupWaybillNumber.SingleOrDefault(x => x.GroupWaybillCode == groupWaybill);
+
+                            _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupWaybillNumberMapping);
+                            _uow.GroupWaybillNumber.Remove(groupwaybill);
+                            _uow.Complete();
                         }
-
-                        //4. Update entry in GroupWaybillMapping
-                        var groupWaybillNumberMapping = await _uow.GroupWaybillNumberMapping.GetAsync(s => s.WaybillNumber == waybill);
-                        //groupWaybillNumberMapping.DepartureServiceCentreId = currentUserSercentreId;
-                        _uow.GroupWaybillNumberMapping.Remove(groupWaybillNumberMapping); //remove waybill from mapping 12/09/2019
-                        _uow.Complete();
-
-                        //5. Get the GroupWaybill numbers in the manifest
-                        groupWaybillsInManifest.Add(groupWaybillNumberMapping.GroupWaybillNumber);
                     }
-
-                    //6. Remove entry from ManifestGroupWaybillNumberMappingService
-                    //6.1 Find the groupWaybill attached to the Manifest
-                    foreach (var groupWaybill in groupWaybillsInManifest)
-                    {
-                        //await _groupManifest.RemoveGroupWaybillNumberFromManifest(manifest.ManifestCode, groupWaybill);
-
-                        //Update the GroupWaybill for Transit
-                        //1. Update Departure Service Centre to New Service Centre and Set HasManifested to false
-                        //await _groupWaybill.ChangeDepartureServiceInGroupWaybill(currentUserSercentreId, groupWaybill);
-
-                        //New Update on 12 Sept 2019
-                        //Remove the group waybill from manifest
-                        var manifestGroupWaybillNumberMapping = _uow.ManifestGroupWaybillNumberMapping.SingleOrDefault(x => x.ManifestCode == manifest.ManifestCode && x.GroupWaybillNumber == groupWaybill);
-                        var groupwaybill = _uow.GroupWaybillNumber.SingleOrDefault(x => x.GroupWaybillCode == groupWaybill);
-
-                        _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupWaybillNumberMapping);
-                        _uow.GroupWaybillNumber.Remove(groupwaybill);
-                        _uow.Complete();
-                    }                    
                 }
             }
 

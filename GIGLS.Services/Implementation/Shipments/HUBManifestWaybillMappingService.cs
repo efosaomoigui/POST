@@ -46,7 +46,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var resultSet = new HashSet<string>();
             var result = new List<HUBManifestWaybillMappingDTO>();
 
-            var serviceIds = _userService.GetPriviledgeServiceCenters().Result;
+            var serviceIds = await _userService.GetPriviledgeServiceCenters();
             var manifestWaybillMapings = await _uow.HUBManifestWaybillMapping.GetHUBManifestWaybillMappings(serviceIds);
 
             foreach (var item in manifestWaybillMapings)
@@ -65,7 +65,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var resultSet = new HashSet<string>();
             var result = new List<HUBManifestWaybillMappingDTO>();
 
-            var serviceIds = _userService.GetPriviledgeServiceCenters().Result;
+            var serviceIds = await _userService.GetPriviledgeServiceCenters();
             var manifestWaybillMapings = await _uow.HUBManifestWaybillMapping.GetHUBManifestWaybillMappings(serviceIds, dateFilterCriteria);
 
             foreach (var item in manifestWaybillMapings)
@@ -880,7 +880,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var resultSet = new HashSet<string>();
             var result = new List<HUBManifestWaybillMappingDTO>();
 
-            var serviceIds = _userService.GetPriviledgeServiceCenters().Result;
+            var serviceIds = await _userService.GetPriviledgeServiceCenters();
 
             //get delivery manifest that have been dispatched but not received
             var manifests = _uow.Manifest.GetAll().Where(x => x.ManifestType == ManifestType.Delivery && x.IsDispatched == true && x.IsReceived == false).Select(m => m.ManifestCode).Distinct().ToList();

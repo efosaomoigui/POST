@@ -259,8 +259,24 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (invoices != null)
             {
+                var finalResult = new List<ShipmentTrackingDTO>();
                 var result = await _iShipmentTrackService.TrackShipment(waybillNumber);
-                return result;
+
+                if (result.Count() > 0)
+                {
+                    string smim = ShipmentScanStatus.SMIM.ToString();
+                    string fms = ShipmentScanStatus.FMS.ToString();
+
+                    foreach (var tracking in result)
+                    {
+                        if (!(tracking.Status.Equals(smim) || tracking.Status.Equals(fms)))
+                        {
+                            finalResult.Add(tracking);
+                        }
+                    }
+                }
+
+                return finalResult;
             }
             else
             {
@@ -268,10 +284,26 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
-        public async Task<IEnumerable<ShipmentTrackingDTO>> PublicTrackShipment(string waybillNumber)
+        public async Task<List<ShipmentTrackingDTO>> PublicTrackShipment(string waybillNumber)
         {
-            var result = await _iShipmentTrackService.TrackShipment(waybillNumber);
-            return result;
+            var finalResult = new List<ShipmentTrackingDTO>();
+
+            var result = await _iShipmentTrackService.TrackShipment(waybillNumber);                      
+
+            if (result.Count() > 0)
+            {
+                string smim = ShipmentScanStatus.SMIM.ToString();
+                string fms = ShipmentScanStatus.FMS.ToString();
+
+                foreach (var tracking in result)
+                {
+                    if (!(tracking.Status.Equals(smim) || tracking.Status.Equals(fms)))
+                    {
+                        finalResult.Add(tracking);
+                    }
+                } 
+            }                      
+            return finalResult;
         }
 
         public async Task<CashOnDeliveryAccountSummaryDTO> GetCashOnDeliveryAccount()
