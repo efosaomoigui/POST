@@ -123,6 +123,8 @@ namespace GIGLS.Services.Business.Pricing
 
         private async Task<decimal> GetRegularPrice(PricingDTO pricingDto)
         {
+            decimal price;
+
             if (pricingDto.DepartureServiceCentreId <= 0)
             {
                 // use currentUser login servicecentre
@@ -134,6 +136,26 @@ namespace GIGLS.Services.Business.Pricing
                 pricingDto.DepartureServiceCentreId = serviceCenters[0];
             }
 
+            //get country by service centre
+            var departureCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DepartureServiceCentreId);
+            var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DestinationServiceCentreId);
+            
+            ///--1. Price within a country
+            if (departureCountry.CountryId == destinationCountry.CountryId)
+            {
+                price = await GetRegularPriceLocal(pricingDto);
+            }
+            else
+            {
+                price = await GetRegularPriceInternational(pricingDto);
+            }
+
+            return price;
+        }
+
+        private async Task<decimal> GetRegularPriceLocal(PricingDTO pricingDto)
+        {
+            
             var zone = await _routeZone.GetZone(pricingDto.DepartureServiceCentreId, pricingDto.DestinationServiceCentreId);
 
             //get the deliveryOptionPrice from an array
@@ -159,19 +181,17 @@ namespace GIGLS.Services.Business.Pricing
                 decimal volume = (pricingDto.Length * pricingDto.Height * pricingDto.Width) / 5000;
                 pricingDto.Weight = pricingDto.Weight > volume ? pricingDto.Weight : volume;
             }
-
-            //get country by service centre
-            var departureCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DepartureServiceCentreId);
-            var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DestinationServiceCentreId);
-
-
-
+                                   
             //This is our limit weight.
             var activeWeightLimit = await _weightLimit.GetActiveWeightLimits();
-            decimal PackagePrice = 0;
+            decimal PackagePrice;
 
             ///--1. Price within a country
-            if (departureCountry.CountryId == destinationCountry.CountryId)
+            if (zone.ZoneId == 9)
+            {
+                PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
+            }
+            else
             {
                 if (pricingDto.Weight > activeWeightLimit.Weight)
                 {
@@ -182,24 +202,60 @@ namespace GIGLS.Services.Business.Pricing
                     PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
                 }
             }
-            else
-            {
-                ///--2. Price between two countries
-                //Get the countryZoneMapping
-                var countryZoneMapping = await _uow.CountryRouteZoneMap.GetAsync(
+            
+            return PackagePrice + deliveryOptionPrice;
+        }
+
+        private async Task<decimal> GetRegularPriceInternational(PricingDTO pricingDto)
+        {
+            //get country by service centre
+            var departureCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DepartureServiceCentreId);
+            var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DestinationServiceCentreId);
+            
+            var zone = await _uow.CountryRouteZoneMap.GetAsync(
                     s => s.DepartureId == departureCountry.CountryId && s.DestinationId == destinationCountry.CountryId);
 
-                if (countryZoneMapping != null)
+            if (zone == null)
+            {
+                throw new Exception("Country Route Zone Mapping has not been set.");
+            }
+
+            //get the deliveryOptionPrice from an array
+            decimal deliveryOptionPriceTemp = 0;
+
+            if (pricingDto.DeliveryOptionIds.Count() == 0)
+            {
+                throw new GenericException("Delivery Option can not be empty");
+            }
+            else
+            {
+                foreach (var deliveryOptionId in pricingDto.DeliveryOptionIds)
                 {
-                    PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, countryZoneMapping.ZoneId, destinationCountry.CountryId);
-                }
-                else
-                {
-                    throw new Exception("CountryRouteZoneMap has not been set.");
+                    deliveryOptionPriceTemp += await _optionPrice.GetDeliveryOptionPrice(deliveryOptionId, zone.ZoneId, pricingDto.CountryId);
                 }
             }
 
+            decimal deliveryOptionPrice = deliveryOptionPriceTemp;
 
+            //check for volumetric weight
+            if (pricingDto.IsVolumetric)
+            {
+                decimal volume = (pricingDto.Length * pricingDto.Height * pricingDto.Width) / 5000;
+                pricingDto.Weight = pricingDto.Weight > volume ? pricingDto.Weight : volume;
+            }
+                       
+            decimal PackagePrice = 0;
+
+            //This is our limit weight.
+            if (pricingDto.Weight > 100)
+            {
+                throw new GenericException("WEIGHT EXIST INTERNATIONAL WEIGHT LIMIT");
+            }
+            else
+            {
+                PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, departureCountry.CountryId);
+            }
+            
             return PackagePrice + deliveryOptionPrice;
         }
 
@@ -894,9 +950,7 @@ namespace GIGLS.Services.Business.Pricing
 
             return UserCountryId;
         }
-
-
-
+               
         private async Task<ShipmentDTO> UpdateShipmentPriceBasedOnCountryCurrencyRatio(ShipmentDTO shipment)
         {
             var countryCurrencyRatio = await GetCountryCurrencyRatio();
