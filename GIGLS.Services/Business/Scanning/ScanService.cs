@@ -128,6 +128,11 @@ namespace GIGLS.Services.Business.Scanning
                     //Found Missed shipment
                     await ProcessFoundMissedWaybill(shipment.Waybill, scan.ShipmentScanStatus, currentCenter, serviceCenters[0].Name);
                 }
+                else if (shipment.ShipmentPickupPrice > 0 && (scan.ShipmentScanStatus == ShipmentScanStatus.AST || scan.ShipmentScanStatus == ShipmentScanStatus.APT))
+                {
+                    //2. Check for Scan related to Transit Manifest
+                    await ProcessPickUpShipment(shipment, scan, currentCenter, serviceCenters[0].Name);
+                }
                 else
                 {
                     //check if the waybill has not been scan for the same status before
@@ -678,6 +683,36 @@ namespace GIGLS.Services.Business.Scanning
 
                 }
             }
+        }
+
+        private async Task ProcessPickUpShipment(Shipment shipment, ScanDTO scan, int currentUserSercentreId, string serviceCentreName)
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+
+            //1. Set the waybill as grouped in the departure service centre
+            shipment.IsGrouped = true;
+
+            //2. Add it to transit table to be group by the centre
+            await _transitWaybillNumberService.AddTransitWaybillNumber(new TransitWaybillNumberDTO
+            {
+                WaybillNumber = shipment.Waybill,
+                IsGrouped = false,
+                ServiceCentreId = currentUserSercentreId,
+                UserId = currentUserId
+            });
+
+            string scanStatus = scan.ShipmentScanStatus.ToString();
+
+            //3. Create a scan status for it
+            await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
+            {
+                DateTime = DateTime.Now,
+                Status = scanStatus,
+                Waybill = scan.WaybillNumber,
+                User = currentUserId,
+                Location = serviceCentreName,
+                ServiceCentreId = currentUserSercentreId                
+            }, scan.ShipmentScanStatus);
         }
 
         /// <summary>
