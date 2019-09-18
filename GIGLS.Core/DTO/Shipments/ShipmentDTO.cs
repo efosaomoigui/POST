@@ -89,6 +89,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         public decimal ShipmentPackagePrice { get; set; }
 
+        public decimal ShipmentPickupPrice { get; set; }
         //wallet information
         public string WalletNumber { get; set; }
 

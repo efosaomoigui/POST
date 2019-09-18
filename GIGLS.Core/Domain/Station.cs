@@ -22,5 +22,7 @@ namespace GIGLS.Core.Domain
         public int SuperServiceCentreId { get; set; }
 
         public virtual ICollection<ServiceCentre> ServiceCentres { get; set; }
+
+        public decimal StationPickupPrice { get; set; }
     }
 }

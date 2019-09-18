@@ -91,6 +91,8 @@ namespace GIGL.GIGLS.Core.Domain
 
         public decimal ShipmentPackagePrice { get; set; }
 
+        public decimal ShipmentPickupPrice { get; set; }
+
         //from client
         public decimal? vatvalue_display { get; set; }
         public decimal? InvoiceDiscountValue_display { get; set; }
