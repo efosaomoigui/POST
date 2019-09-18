@@ -25,10 +25,10 @@ namespace GIGLS.Messaging.MessageService
             {
                 var smsURL = ConfigurationManager.AppSettings["smsURL"];
                 var smsApiKey = ConfigurationManager.AppSettings["smsApiKey"];
-                var smsFrom = ConfigurationManager.AppSettings["smsFrom"];
+                //var smsFrom = ConfigurationManager.AppSettings["smsFrom"];
 
                 //ogosms url format
-                var finalURL = $"{smsURL}&password={smsApiKey}&sender={smsFrom}&numbers={message.To}&message={message.FinalBody}&response=json&unicode=0";
+                var finalURL = $"{smsURL}&password={smsApiKey}&sender={message.From}&numbers={message.To}&message={message.FinalBody}&response=json&unicode=0";
                 var httpWebRequest = (HttpWebRequest)WebRequest.Create(finalURL);
 
                 using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
