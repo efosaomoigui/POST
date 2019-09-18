@@ -1003,7 +1003,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                UserName = u.FirstName + " " + u.LastName,
                                                CompanyType = s.CompanyType,
                                                PaymentTypeReference = i.PaymentTypeReference,
-                                               ApproximateItemsWeight = s.ApproximateItemsWeight
+                                               ApproximateItemsWeight = s.ApproximateItemsWeight,
+                                               Cash = i.Cash,
+                                               Transfer = i.Transfer,
+                                               Pos = i.Pos
                                            }).ToList();
             var resultDto = result.OrderByDescending(x => x.DateCreated).ToList();
             return Task.FromResult(resultDto);

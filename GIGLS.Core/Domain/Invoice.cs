@@ -30,5 +30,8 @@ namespace GIGLS.Core.Domain
         [MaxLength(100)]
         public string PaymentTypeReference { get; set; }
         public int CountryId { get; set; }
+        public decimal Cash { get; set; }
+        public decimal Transfer { get; set; }
+        public decimal Pos { get; set; }
     }
 }
