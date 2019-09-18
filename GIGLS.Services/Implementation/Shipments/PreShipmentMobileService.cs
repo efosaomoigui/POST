@@ -916,7 +916,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Shipment does not exist");
                 }
-                var pickuprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpPrice, userActiveCountryId);
+                var pickuprice = await GetPickUpPrice();
                 var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
                 foreach (var id in preshipmentmobile.PreShipmentItems.ToList())
                 {
@@ -924,13 +924,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     preshipmentitmmobile.IsCancelled = true;
                     _uow.PreShipmentItemMobile.Remove(preshipmentitmmobile);
                 }
-                var pickuprequests = _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill).Result;
+                var pickuprequests = _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString()).Result;
                 if (pickuprequests != null)
                 {
                     var user = await _userService.GetUserById(pickuprequests.UserId);
                     pickuprequests.Status = MobilePickUpRequestStatus.Cancelled.ToString();
-                    updatedwallet.Balance = ((updatedwallet.Balance + (decimal)preshipmentmobile.CalculatedTotal) - Convert.ToDecimal(pickuprice.Value));
-                    var Partnersprice = (0.4M * Convert.ToDecimal(pickuprice.Value));
+                    updatedwallet.Balance = ((updatedwallet.Balance + (decimal)preshipmentmobile.CalculatedTotal) - Convert.ToDecimal(pickuprice));
+                    var Partnersprice = (0.4M * Convert.ToDecimal(pickuprice));
                     var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == user.UserChannelCode);
                     wallet.Balance = wallet.Balance + Partnersprice;
                     var partnertransactions = new PartnerTransactionsDTO

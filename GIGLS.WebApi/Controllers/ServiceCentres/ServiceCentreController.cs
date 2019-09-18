@@ -12,8 +12,7 @@ using GIGLS.Core.DTO;
 
 namespace GIGLS.WebApi.Controllers.ServiceCentres  
 {
-    [AllowAnonymous]
-    //[Authorize(Roles = "Admin, ViewAdmin")]
+    [Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/servicecentre")]
     public class ServiceCentreController : BaseWebApiController
     {
