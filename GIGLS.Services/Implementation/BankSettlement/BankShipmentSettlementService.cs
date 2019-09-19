@@ -47,15 +47,15 @@ namespace GIGLS.Services.Implementation.Wallet
             allShipments = allShipments.Where(s => s.PaymentMethod == "Cash" && s.PaymentStatus == PaymentStatus.Paid);
 
             //added for GWA and GWARIMPA service centres
-            {
-                if (serviceCenters.Length == 1)
-                {
-                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                    {
-                        serviceCenters = new int[] { 4, 294 };
-                    }
-                }
-            }
+            //{
+            //    if (serviceCenters.Length == 1)
+            //    {
+            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+            //        {
+            //            serviceCenters = new int[] { 4, 294 };
+            //        }
+            //    }
+            //}
 
             var cashShipments = new List<InvoiceViewDTO>();
             if (serviceCenters.Length > 0)
@@ -89,18 +89,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //A. get partial payment values
             var allShipmentsPartial = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate && s.PaymentMethod.Contains("Partial"));
-
-            //added for GWA and GWARIMPA service centres
-            //{
-            //    if (serviceCenters.Length == 1)
-            //    {
-            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-            //        {
-            //            serviceCenters = new int[] { 4, 294 };
-            //        }
-            //    }
-            //}
-
+            
             //B. combine list for partial and cash shipment
             var cashShipments = new List<InvoiceViewDTO>();
             if (serviceCenters.Length > 0)
@@ -176,15 +165,15 @@ namespace GIGLS.Services.Implementation.Wallet
             allDemurrages = allDemurrages.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
 
             //added for GWA and GWARIMPA service centres
-            {
-                if (serviceCenters.Length == 1)
-                {
-                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                    {
-                        serviceCenters = new int[] { 4, 294 };
-                    }
-                }
-            }
+            //{
+            //    if (serviceCenters.Length == 1)
+            //    {
+            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+            //        {
+            //            serviceCenters = new int[] { 4, 294 };
+            //        }
+            //    }
+            //}
 
             var demurrageResults = new List<DemurrageRegisterAccount>();
             if (serviceCenters.Length > 0)
@@ -221,15 +210,15 @@ namespace GIGLS.Services.Implementation.Wallet
             allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
 
             //added for GWA and GWARIMPA service centres
-            {
-                if (serviceCenters.Length == 1)
-                {
-                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                    {
-                        serviceCenters = new int[] { 4, 294 };
-                    }
-                }
-            }
+            //{
+            //    if (serviceCenters.Length == 1)
+            //    {
+            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+            //        {
+            //            serviceCenters = new int[] { 4, 294 };
+            //        }
+            //    }
+            //}
 
             var codResults = new List<CashOnDeliveryRegisterAccount>();
             if (serviceCenters.Length > 0)
@@ -292,15 +281,15 @@ namespace GIGLS.Services.Implementation.Wallet
             var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == refcode);
 
             //added for GWA and GWARIMPA service centres
-            {
-                if (serviceCenters.Length == 1)
-                {
-                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                    {
-                        serviceCenters = new int[] { 4, 294 };
-                    }
-                }
-            }
+            //{
+            //    if (serviceCenters.Length == 1)
+            //    {
+            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+            //        {
+            //            serviceCenters = new int[] { 4, 294 };
+            //        }
+            //    }
+            //}
 
             var bankedShipments = new List<BankProcessingOrderForShipmentAndCODDTO>();
             if (serviceCenters.Length > 0)
@@ -412,15 +401,15 @@ namespace GIGLS.Services.Implementation.Wallet
             allShipments = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate);
 
             //added for GWA and GWARIMPA service centres
-            {
-                if (serviceCenters.Length == 1)
-                {
-                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                    {
-                        serviceCenters = new int[] { 4, 294 };
-                    }
-                }
-            }
+            //{
+            //    if (serviceCenters.Length == 1)
+            //    {
+            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+            //        {
+            //            serviceCenters = new int[] { 4, 294 };
+            //        }
+            //    }
+            //}
 
             var cashShipments = new List<InvoiceViewDTO>();
             if (serviceCenters.Length > 0)
@@ -967,7 +956,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 ScName = invoiceviewinfo.DepartureServiceCentreName,
                 IsCODPaidOut = true,
                 VerifiedBy = invoiceviewinfo.UserId
-
             };
 
             _uow.CodPayOutList.Add(payoutinfo); 
