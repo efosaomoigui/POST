@@ -91,15 +91,15 @@ namespace GIGLS.Services.Implementation.Wallet
             var allShipmentsPartial = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate && s.PaymentMethod.Contains("Partial"));
 
             //added for GWA and GWARIMPA service centres
-            {
-                if (serviceCenters.Length == 1)
-                {
-                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                    {
-                        serviceCenters = new int[] { 4, 294 };
-                    }
-                }
-            }
+            //{
+            //    if (serviceCenters.Length == 1)
+            //    {
+            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+            //        {
+            //            serviceCenters = new int[] { 4, 294 };
+            //        }
+            //    }
+            //}
 
             //B. combine list for partial and cash shipment
             var cashShipments = new List<InvoiceViewDTO>();
