@@ -453,19 +453,19 @@ namespace GIGLS.Services.Business.Scanning
                     else
                     {
                         //added for GWA and GWARIMPA service centres
-                        {
-                            if (serviceCenters.Length == 1)
-                            {
-                                if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                                {
-                                    if (serviceCenters[0] == destinationServiceCentreId)
-                                    {
-                                        serviceCenters = new int[] { 4, 294 };
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
+                        //{
+                        //    if (serviceCenters.Length == 1)
+                        //    {
+                        //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                        //        {
+                        //            if (serviceCenters[0] == destinationServiceCentreId)
+                        //            {
+                        //                serviceCenters = new int[] { 4, 294 };
+                        //                return true;
+                        //            }
+                        //        }
+                        //    }
+                        //}
 
                         throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
                     }
