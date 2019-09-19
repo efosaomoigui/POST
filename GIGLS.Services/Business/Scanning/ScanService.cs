@@ -686,20 +686,24 @@ namespace GIGLS.Services.Business.Scanning
         }
 
         private async Task ProcessPickUpShipment(Shipment shipment, ScanDTO scan, int currentUserSercentreId, string serviceCentreName)
-        {
+        {      
             var currentUserId = await _userService.GetCurrentUserId();
 
-            //1. Set the waybill as grouped in the departure service centre
-            shipment.IsGrouped = true;
-
-            //2. Add it to transit table to be group by the centre
-            await _transitWaybillNumberService.AddTransitWaybillNumber(new TransitWaybillNumberDTO
+            //Only allow if the shipment has not been grouped since it was created
+            if (!shipment.IsGrouped)
             {
-                WaybillNumber = shipment.Waybill,
-                IsGrouped = false,
-                ServiceCentreId = currentUserSercentreId,
-                UserId = currentUserId
-            });
+                //1. Set the waybill as grouped in the departure service centre
+                shipment.IsGrouped = true;
+
+                //2. Add it to transit table to be group by the centre
+                await _transitWaybillNumberService.AddTransitWaybillNumber(new TransitWaybillNumberDTO
+                {
+                    WaybillNumber = shipment.Waybill,
+                    IsGrouped = false,
+                    ServiceCentreId = currentUserSercentreId,
+                    UserId = currentUserId
+                });
+            }            
 
             string scanStatus = scan.ShipmentScanStatus.ToString();
 
