@@ -84,15 +84,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
                 //added for GWA and GWARIMPA service centres
-                {
-                    if (serviceCenters.Length == 1)
-                    {
-                        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                        {
-                            serviceCenters = new int[] { 4, 294 };
-                        }
-                    }
-                }
+                //{
+                //    if (serviceCenters.Length == 1)
+                //    {
+                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                //        {
+                //            serviceCenters = new int[] { 4, 294 };
+                //        }
+                //    }
+                //}
 
                 return _uow.Shipment.GetShipments(filterOptionsDto, serviceCenters);
             }
@@ -109,15 +109,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
                 //added for GWA and GWARIMPA service centres
-                {
-                    if (serviceCenters.Length == 1)
-                    {
-                        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                        {
-                            serviceCenters = new int[] { 4, 294 };
-                        }
-                    }
-                }
+                //{
+                //    if (serviceCenters.Length == 1)
+                //    {
+                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                //        {
+                //            serviceCenters = new int[] { 4, 294 };
+                //        }
+                //    }
+                //}
 
                 var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false);
                 var incomingShipments = new List<InvoiceViewDTO>();

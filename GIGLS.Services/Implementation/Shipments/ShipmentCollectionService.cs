@@ -112,15 +112,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
                 //added for GWA and GWARIMPA service centres
-                {
-                    if (serviceCenters.Length == 1)
-                    {
-                        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                        {
-                            serviceCenters = new int[] { 4, 294 };
-                        }
-                    }
-                }
+                //{
+                //    if (serviceCenters.Length == 1)
+                //    {
+                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                //        {
+                //            serviceCenters = new int[] { 4, 294 };
+                //        }
+                //    }
+                //}
 
                 //List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
@@ -184,15 +184,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
                 //added for GWA and GWARIMPA service centres
-                {
-                    if (serviceCenters.Length == 1)
-                    {
-                        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                        {
-                            serviceCenters = new int[] { 4, 294 };
-                        }
-                    }
-                }
+                //{
+                //    if (serviceCenters.Length == 1)
+                //    {
+                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                //        {
+                //            serviceCenters = new int[] { 4, 294 };
+                //        }
+                //    }
+                //}
 
                 //get startDate and endDate
                 var queryDate = collectionFilterCriteria.getStartDateAndEndDate();
@@ -224,15 +224,15 @@ namespace GIGLS.Services.Implementation.Shipments
             var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
             //added for GWA and GWARIMPA service centres
-            {
-                if (serviceCenters.Length == 1)
-                {
-                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                    {
-                        serviceCenters = new int[] { 4, 294 };
-                    }
-                }
-            }
+            //{
+            //    if (serviceCenters.Length == 1)
+            //    {
+            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+            //        {
+            //            serviceCenters = new int[] { 4, 294 };
+            //        }
+            //    }
+            //}
 
             var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
                 .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId)).ToList();
@@ -248,15 +248,15 @@ namespace GIGLS.Services.Implementation.Shipments
             var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
             //added for GWA and GWARIMPA service centres
-            {
-                if (serviceCenters.Length == 1)
-                {
-                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                    {
-                        serviceCenters = new int[] { 4, 294 };
-                    }
-                }
-            }
+            //{
+            //    if (serviceCenters.Length == 1)
+            //    {
+            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+            //        {
+            //            serviceCenters = new int[] { 4, 294 };
+            //        }
+            //    }
+            //}
 
 
             var userActiveCountryId = 1;
@@ -314,15 +314,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
                 //added for GWA and GWARIMPA service centres
-                {
-                    if (serviceCenters.Length == 1)
-                    {
-                        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                        {
-                            serviceCenters = new int[] { 4, 294 };
-                        }
-                    }
-                }
+                //{
+                //    if (serviceCenters.Length == 1)
+                //    {
+                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                //        {
+                //            serviceCenters = new int[] { 4, 294 };
+                //        }
+                //    }
+                //}
 
                 var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
                 .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId));
@@ -651,15 +651,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
                 //added for GWA and GWARIMPA service centres
-                {
-                    if (serviceCenters.Length == 1)
-                    {
-                        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                        {
-                            serviceCenters = new int[] { 4, 294 };
-                        }
-                    }
-                }
+                //{
+                //    if (serviceCenters.Length == 1)
+                //    {
+                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                //        {
+                //            serviceCenters = new int[] { 4, 294 };
+                //        }
+                //    }
+                //}
 
                 var userActiveCountryId = 1;
                 try
@@ -747,15 +747,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
                 //added for GWA and GWARIMPA service centres
-                {
-                    if (serviceCenters.Length == 1)
-                    {
-                        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                        {
-                            serviceCenters = new int[] { 4, 294 };
-                        }
-                    }
-                }
+                //{
+                //    if (serviceCenters.Length == 1)
+                //    {
+                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                //        {
+                //            serviceCenters = new int[] { 4, 294 };
+                //        }
+                //    }
+                //}
 
                 var userActiveCountryId = 1;
                 try
@@ -1084,15 +1084,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
                 //added for GWA and GWARIMPA service centres
-                {
-                    if (serviceCenters.Length == 1)
-                    {
-                        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                        {
-                            serviceCenters = new int[] { 4, 294 };
-                        }
-                    }
-                }
+                //{
+                //    if (serviceCenters.Length == 1)
+                //    {
+                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                //        {
+                //            serviceCenters = new int[] { 4, 294 };
+                //        }
+                //    }
+                //}
 
                 var userActiveCountryId = 1;
                 try
