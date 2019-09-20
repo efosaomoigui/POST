@@ -12,6 +12,7 @@ using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -904,6 +905,12 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCode(DepositType type)
         {
             var result = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCode(type);
+            return await Task.FromResult(result);
+        }         
+
+        public async Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, DateFilterCriteria dateFilterCriteria)
+        {
+            var result = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCodeByDate(type,dateFilterCriteria);
             return await Task.FromResult(result);
         }
 
