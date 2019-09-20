@@ -27,6 +27,7 @@ namespace GIGLS.Core.IRepositories.BankSettlement
         IQueryable<BankProcessingOrderCodesDTO> GetBankOrderProcessingCodeAsQueryable();
         Task<Shipment> GetShipmentByWaybill(string waybill);
         Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, DateFilterCriteria dateFilterCriteria);
+        Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeForDefaultDate(DepositType type);
     }
 
     public interface ICodPayOutListRepository : IRepository<CodPayOutList>

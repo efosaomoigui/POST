@@ -904,7 +904,7 @@ namespace GIGLS.Services.Implementation.Wallet
         //Helps to get bankprocessingcode properties from its table
         public async Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCode(DepositType type)
         {
-            var result = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCode(type);
+            var result = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCodeForDefaultDate(type);
             return await Task.FromResult(result);
         }         
 
