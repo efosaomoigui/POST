@@ -32,5 +32,8 @@ namespace GIGLS.Core.DTO.Account
         public string PaymentTypeReference { get; set; }
 
         public CountryDTO Country { get; set; }
+        public decimal Cash { get; set; }
+        public decimal Transfer { get; set; }
+        public decimal Pos { get; set; }
     }
 }

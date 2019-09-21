@@ -186,6 +186,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //update invoice
             invoiceEntity.PaymentDate = DateTime.Now;
             invoiceEntity.PaymentMethod = paymentTransaction.PaymentType.ToString();
+            await BreakdownPayments(invoiceEntity, paymentTransaction);
+            
             invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
             invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
 
@@ -194,7 +196,25 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             return result;
         }
+        private async Task<bool> BreakdownPayments(Invoice invoiceEntity, PaymentTransactionDTO paymentTransaction)
+        {
+            var result = false;
+            if (paymentTransaction.PaymentType == PaymentType.Cash)
+            {
+                invoiceEntity.Cash = invoiceEntity.Amount;
+            }
+            else if (paymentTransaction.PaymentType == PaymentType.Transfer)
+            {
+                invoiceEntity.Transfer = invoiceEntity.Amount;
+            }
+            else if (paymentTransaction.PaymentType == PaymentType.Pos)
+            {
+                invoiceEntity.Pos = invoiceEntity.Amount;
+            }
+            result = true;
+            return result;
 
+        }
         public async Task<bool> ProcessReturnPaymentTransaction(PaymentTransactionDTO paymentTransaction)
         {
             var result = false;
@@ -276,6 +296,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //update invoice
             invoiceEntity.PaymentDate = DateTime.Now;
             invoiceEntity.PaymentMethod = paymentTransaction.PaymentType.ToString();
+            await BreakdownPayments(invoiceEntity, paymentTransaction);
+
             invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
             invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
 

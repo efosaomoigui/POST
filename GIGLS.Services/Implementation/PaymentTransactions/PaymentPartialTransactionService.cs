@@ -109,7 +109,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     transfer += item.Amount;
                     transferType = item.PaymentType.ToString();
                 }
-
             }
 
             // get the current user info
@@ -193,12 +192,12 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                     if (item.PaymentType == PaymentType.Cash)
                     {
                         cash += item.Amount;
-                        cashType = item.PaymentType.ToString();
+                        cashType = item.PaymentType.ToString();                         
                     }
                     else if (item.PaymentType == PaymentType.Pos)
                     {
                         pos += item.Amount;
-                        posType = item.PaymentType.ToString();
+                        posType = item.PaymentType.ToString();                         
                     }
                     else if (item.PaymentType == PaymentType.Transfer)
                     {
@@ -215,9 +214,13 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
                 //update invoice
                 invoiceEntity.PaymentDate = DateTime.Now;
+                //invoiceEntity.PaymentMethod = PaymentType.Partial.ToString();
                 invoiceEntity.PaymentMethod = PaymentType.Partial.ToString() + " - " + (cashType != null ? cashType + "(" + cash + ") " : "") +
-                                                                      (posType != null ? posType + "(" + pos + ") " : "")  +
+                                                                      (posType != null ? posType + "(" + pos + ") " : "") +
                                                                       (transferType != null ? transferType + "(" + transfer + ") " : "");
+                invoiceEntity.Cash = cash;
+                invoiceEntity.Transfer = transfer;
+                invoiceEntity.Pos = pos;
                 invoiceEntity.PaymentStatus = PaymentStatus.Paid;
             }
 
