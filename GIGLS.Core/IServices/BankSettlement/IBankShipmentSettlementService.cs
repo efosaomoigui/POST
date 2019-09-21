@@ -3,6 +3,7 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.BankSettlement;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO.Report;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -42,5 +43,7 @@ namespace GIGLS.Core.IServices.BankSettlement
 
         Task<List<CodPayOutList>> GetPaidOutCODLists();
         Task<List<CodPayOutList>> GetPaidOutCODListsByCustomer(string customercode);
+
+        Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, DateFilterCriteria dateFilterCriteria);
     }
 }

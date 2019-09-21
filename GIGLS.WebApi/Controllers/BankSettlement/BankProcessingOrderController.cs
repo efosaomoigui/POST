@@ -5,6 +5,7 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Core.IServices.CashOnDeliveryBalance;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
 using System;
@@ -297,6 +298,22 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getbankOrderprocessingcodebyDate")]
+        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> GetBankOrderProcessingCodeByDate(DepositType type, DateFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var resValue = await _bankprocessingorder.GetBankOrderProcessingCodeByDate(type,dateFilterCriteria);
+                return new ServiceResponse<List<BankProcessingOrderCodesDTO>>
+                {
+                    Object = resValue
+                };
+            });
+        }
+
 
         //This one searches for all new Paid Out CODs
         [GIGLSActivityAuthorize(Activity = "View")]
