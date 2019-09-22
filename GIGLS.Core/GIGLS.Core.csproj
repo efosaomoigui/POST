@@ -277,6 +277,7 @@
     <Compile Include="DTO\Account\InvoiceViewDTO.cs" />
     <Compile Include="DTO\Account\ServiceCenreDTO.cs" />
     <Compile Include="DTO\Account\VATDTO.cs" />
+    <Compile Include="DTO\Admin\AdminReportDTO.cs" />
     <Compile Include="DTO\BankSettlement\BankProcessingOrderForShipmentAndCODDTO.cs" />
     <Compile Include="DTO\BankSettlement\CODSettlementSheetDTO.cs" />
     <Compile Include="DTO\BaseDomainDTO.cs" />
@@ -692,6 +693,7 @@
     <Compile Include="IServices\PaymentTransactions\IPaymentPartialTransactionService.cs" />
     <Compile Include="IServices\PaymentTransactions\IPaymentTransactionService.cs" />
     <Compile Include="IServices\Report\IAccountReportService.cs" />
+    <Compile Include="IServices\Report\IAdminReportService.cs" />
     <Compile Include="IServices\Report\IShipmentReportService.cs" />
     <Compile Include="IServices\ServiceCentres\IRegionService.cs" />
     <Compile Include="IServices\ServiceCentres\IRegionServiceCentreMappingService.cs" />
@@ -759,6 +761,7 @@
     <Compile Include="IServices\Zone\IZoneService.cs" />
     <Compile Include="MapperConfigurationExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="View\AdminReportView\AllTimeSalesByCountry.cs" />
     <Compile Include="View\CustomerView.cs" />
     <Compile Include="View\InvoiceView.cs" />
     <Compile Include="View\ShipmentTrackingView.cs" />

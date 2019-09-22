@@ -11,6 +11,7 @@ using GIGLS.CORE.DTO.Report;
 using System;
 using GIGLS.Core.View;
 using System.Data.SqlClient;
+using GIGLS.Core.View.AdminReportView;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 {
@@ -409,6 +410,36 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               PaymentStatus = i.PaymentStatus
                           });
             return result;
+        }
+
+        public IQueryable<Report_AllTimeSalesByCountry> GetAllTimeSalesByCountry()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IQueryable<Report_BusiestRoute> GetBusiestRoute()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IQueryable<Report_CustomerRevenue> GetCustomerRevenue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IQueryable<Report_MostShippedItemByWeight> GetMostShippedItemByWeight()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IQueryable<Report_RevenuePerServiceCentre> GetRevenuePerServiceCentre()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IQueryable<Report_TotalServiceCentreByState> GetTotalServiceCentreByState()
+        {
+            throw new NotImplementedException();
         }
     }
 }

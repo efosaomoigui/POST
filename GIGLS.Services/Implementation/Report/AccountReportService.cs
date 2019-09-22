@@ -5,8 +5,6 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core;
 using GIGLS.Core.IServices.User;
-using AutoMapper;
-using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.Enums;
 using System;
