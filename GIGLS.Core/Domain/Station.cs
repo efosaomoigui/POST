@@ -1,6 +1,6 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using System.Collections.Generic;
-using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace GIGLS.Core.Domain
 {
@@ -13,7 +13,10 @@ namespace GIGLS.Core.Domain
 
         public int StationId { get; set; }
 
+        [MaxLength(100)]
         public string StationName { get; set; }
+
+        [MaxLength(100)]
         public string StationCode { get; set; }
         
         public int StateId { get; set; }

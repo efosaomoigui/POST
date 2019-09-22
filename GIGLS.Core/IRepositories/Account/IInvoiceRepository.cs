@@ -32,5 +32,6 @@ namespace GIGLS.Core.IRepositories.Account
         IQueryable<Report_MostShippedItemByWeight> GetMostShippedItemByWeight();
         IQueryable<Report_RevenuePerServiceCentre> GetRevenuePerServiceCentre();
         IQueryable<Report_TotalServiceCentreByState> GetTotalServiceCentreByState();
+        IQueryable<Report_TotalOrdersDelivered> GetTotalOrdersDelivered();
     }
 }

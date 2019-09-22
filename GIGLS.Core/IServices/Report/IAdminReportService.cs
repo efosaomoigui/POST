@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.IServices.Report
 {
-    public interface IAdminReportService
+    public interface IAdminReportService : IServiceDependencyMarker
     {
         Task<AdminReportDTO> GetAdminReport();
     }

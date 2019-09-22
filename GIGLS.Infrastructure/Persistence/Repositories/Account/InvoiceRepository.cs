@@ -414,32 +414,44 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
         public IQueryable<Report_AllTimeSalesByCountry> GetAllTimeSalesByCountry()
         {
-            throw new NotImplementedException();
+            var result = _GIGLSContextForView.Report_AllTimeSalesByCountry.AsQueryable();
+            return result;
         }
 
         public IQueryable<Report_BusiestRoute> GetBusiestRoute()
         {
-            throw new NotImplementedException();
+            var result = _GIGLSContextForView.Report_BusiestRoute.AsQueryable();
+            return result;
         }
 
         public IQueryable<Report_CustomerRevenue> GetCustomerRevenue()
         {
-            throw new NotImplementedException();
+            var result = _GIGLSContextForView.Report_CustomerRevenue.AsQueryable();
+            return result;
         }
 
         public IQueryable<Report_MostShippedItemByWeight> GetMostShippedItemByWeight()
         {
-            throw new NotImplementedException();
+            var result = _GIGLSContextForView.Report_MostShippedItemByWeight.AsQueryable();
+            return result;
         }
 
         public IQueryable<Report_RevenuePerServiceCentre> GetRevenuePerServiceCentre()
         {
-            throw new NotImplementedException();
+            var result = _GIGLSContextForView.Report_RevenuePerServiceCentre.AsQueryable();
+            return result;
         }
 
         public IQueryable<Report_TotalServiceCentreByState> GetTotalServiceCentreByState()
         {
-            throw new NotImplementedException();
+            var result = _GIGLSContextForView.Report_TotalServiceCentreByState.AsQueryable();
+            return result;
+        }
+
+        public IQueryable<Report_TotalOrdersDelivered> GetTotalOrdersDelivered()
+        {
+            var result = _GIGLSContextForView.Report_TotalOrdersDelivered.AsQueryable();
+            return result;
         }
     }
 }

@@ -11,5 +11,6 @@ namespace GIGLS.Core.DTO.Admin
         public List<Report_MostShippedItemByWeight> MostShippedItemByWeight;
         public List<Report_RevenuePerServiceCentre> RevenuePerServiceCentre;
         public List<Report_TotalServiceCentreByState> TotalServiceCentreByState;
+        public Report_TotalOrdersDelivered TotalOrdersDelivered;
     }
 }
