@@ -700,27 +700,25 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("login")]
         public async Task<IServiceResponse<JObject>> Login(MobileLoginDTO logindetail)
         {
-
-            var user = await _otpService.CheckDetails(logindetail.UserDetail);
-            var vehicle = user.VehicleType;
-            if (user.Username != null)
+            return await HandleApiOperationAsync(async () =>
             {
-                user.Username = user.Username.Trim();
-            }
+                var user = await _otpService.CheckDetails(logindetail.UserDetail);
+                var vehicle = user.VehicleType;
+                if (user.Username != null)
+                {
+                    user.Username = user.Username.Trim();
+                }
 
-            if (logindetail.Password != null)
-            {
-                logindetail.Password = logindetail.Password.Trim();
-            }
-            if (user != null && user.IsActive == true)
-            {
-                string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
-                string getTokenResponse;
-
-                return await HandleApiOperationAsync(async () =>
+                if (logindetail.Password != null)
+                {
+                    logindetail.Password = logindetail.Password.Trim();
+                }
+                if (user != null && user.IsActive == true)
                 {
                     using (var client = new HttpClient())
                     {
+                        string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+                        string getTokenResponse;
                         //setup client
                         client.BaseAddress = new Uri(apiBaseUri);
                         client.DefaultRequestHeaders.Accept.Clear();
@@ -728,7 +726,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                         //setup login data
                         var formContent = new FormUrlEncodedContent(new[]
-                            {
+                        {
                          new KeyValuePair<string, string>("grant_type", "password"),
                          new KeyValuePair<string, string>("Username", user.Username),
                          new KeyValuePair<string, string>("Password", logindetail.Password),
@@ -768,17 +766,17 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                         };
                     }
-                });
-            }
-            else
-            {
-                var jObject = JObject.FromObject(user);
-                return new ServiceResponse<JObject>
+                }
+                else
                 {
-                    ShortDescription = "User has not been verified",
-                    Object = jObject
-                };
-            }
+                    var jObject = JObject.FromObject(user);
+                    return new ServiceResponse<JObject>
+                    {
+                        ShortDescription = "User has not been verified",
+                        Object = jObject
+                    };
+                }
+            });
         }
 
         [HttpPost]
@@ -1094,13 +1092,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("partnermonthlytransactions")]
-        public async Task<IServiceResponse<PartnerMonthlyTransactionsDTO>> PartnerMonthlyTransactions()
+        public async Task<IServiceResponse<Partnerdto>> PartnerMonthlyTransactions()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var transactions = await _preshipmentmobileService.GetMonthlyPartnerTransactions();
 
-                return new ServiceResponse<PartnerMonthlyTransactionsDTO>
+                return new ServiceResponse<Partnerdto>
                 {
                     Object = transactions
                 };
@@ -1237,6 +1235,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<bool>
                 {
                     Object = response
+                };
+            });
+        }
+        [HttpGet]
+        [Route("getpreshipmentmobiledetailsfromdeliverynumber/{deliverynumber}")]
+        public async Task<IServiceResponse<PreShipmentSummaryDTO>> GetPreshipmentmobiledetailsfromdeliverynumber(string deliverynumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _preshipmentmobileService.GetShipmentDetailsFromDeliveryNumber(deliverynumber);
+                return new ServiceResponse<PreShipmentSummaryDTO>
+                {
+                    Object = preshipment
                 };
             });
         }

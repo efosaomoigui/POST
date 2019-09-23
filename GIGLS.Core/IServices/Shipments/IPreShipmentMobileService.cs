@@ -28,7 +28,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<object> ResolveDisputeForMobile(PreShipmentMobileDTO preShipment);
         Task<object> CancelShipment(string Waybill);
         Task<object> AddRatings(MobileRatingDTO rating);
-        Task<PartnerMonthlyTransactionsDTO> GetMonthlyPartnerTransactions();
+        Task<Partnerdto> GetMonthlyPartnerTransactions();
         Task<bool> CreateCustomer(string CustomerCode);
 
         Task<bool> UpdateDeliveryNumber(MobileShipmentNumberDTO detail);
@@ -46,6 +46,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<string> LoadImage(ImageDTO images);
 
         Task<List<Uri>> DisplayImages();
+        Task<PreShipmentSummaryDTO> GetShipmentDetailsFromDeliveryNumber(string DeliveryNumber);
+        Task<bool> ApproveShipment(string waybillNumber);
 
     }
 }
