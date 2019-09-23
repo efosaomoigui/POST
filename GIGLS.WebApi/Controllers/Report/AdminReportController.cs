@@ -8,7 +8,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Report
 {
-    //[Authorize(Roles = "Report")]
+    [Authorize(Roles = "Report")]
     [RoutePrefix("api/specialreport")]
     public class AdminReportController : BaseWebApiController
     {
@@ -19,7 +19,7 @@ namespace GIGLS.WebApi.Controllers.Report
             _report = report;
         }
 
-        //[GIGLSActivityAuthorize(Activity = "View")]
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("report")]
         public async Task<IServiceResponse<AdminReportDTO>> GetAdminReport()
