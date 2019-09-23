@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.DTO.Admin;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Report;
 using GIGLS.Core.View.AdminReportView;
 using System;
@@ -30,7 +31,12 @@ namespace GIGLS.Services.Implementation.Report
             result.RevenuePerServiceCentre = await GetRevenuePerServiceCentres();
             result.TotalServiceCentreByState = await GetTotalServiceCentreByStates();
             result.TotalOrdersDelivered = await GetTotalOrdersDelivered();
-            
+
+            //Get customer count
+            result.NumberOfCustomer.Corporate = await GetCorporateCount();
+            result.NumberOfCustomer.Ecommerce = await GetEcommerceCount();
+            result.NumberOfCustomer.Individual = await GetIndividaulCount();
+
             return result;
         }
 
@@ -73,6 +79,24 @@ namespace GIGLS.Services.Implementation.Report
         private async Task<Report_TotalOrdersDelivered> GetTotalOrdersDelivered()
         {
             var result = _uow.Invoice.GetTotalOrdersDelivered().FirstOrDefault();
+            return await Task.FromResult(result);
+        }
+
+        private async Task<int> GetCorporateCount()
+        {
+            var result = _uow.Company.GetAllAsQueryable().Where(x => x.CompanyType == CompanyType.Corporate).Count();
+            return await Task.FromResult(result);
+        }
+        
+        private async Task<int> GetEcommerceCount()
+        {
+            var result = _uow.Company.GetAllAsQueryable().Where(x => x.CompanyType == CompanyType.Ecommerce).Count();
+            return await Task.FromResult(result);
+        }
+
+        private async Task<int> GetIndividaulCount()
+        {
+            var result = _uow.IndividualCustomer.GetAllAsQueryable().Select(x => x.PhoneNumber).Distinct().Count();
             return await Task.FromResult(result);
         }
     }

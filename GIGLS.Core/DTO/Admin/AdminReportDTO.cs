@@ -5,6 +5,10 @@ namespace GIGLS.Core.DTO.Admin
 {
     public class AdminReportDTO
     {
+        public AdminReportDTO()
+        {
+            NumberOfCustomer = new CustomersCount();
+        }
         public List<Report_AllTimeSalesByCountry> AllTimeSalesByCountry;
         public List<Report_BusiestRoute> BusiestRoute;
         public List<Report_CustomerRevenue> CustomerRevenue;
@@ -12,5 +16,13 @@ namespace GIGLS.Core.DTO.Admin
         public List<Report_RevenuePerServiceCentre> RevenuePerServiceCentre;
         public List<Report_TotalServiceCentreByState> TotalServiceCentreByState;
         public Report_TotalOrdersDelivered TotalOrdersDelivered;
+        public CustomersCount NumberOfCustomer;
+    }
+
+    public class CustomersCount
+    {
+        public int Ecommerce { get; set; }
+        public int Corporate { get; set; }
+        public int Individual { get; set; }
     }
 }
