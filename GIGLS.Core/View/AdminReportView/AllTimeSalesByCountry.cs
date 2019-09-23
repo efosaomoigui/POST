@@ -16,6 +16,7 @@ namespace GIGLS.Core.View.AdminReportView
     public class Report_BusiestRoute
     {
         [Key]
+        public long BusiestId { get; set; }
         public string DepartureStation { get; set; }
         public string DestinationStation { get; set; }
         public int TotalShipment { get; set; }
@@ -24,6 +25,7 @@ namespace GIGLS.Core.View.AdminReportView
     public class Report_CustomerRevenue
     {
         [Key]
+        public long CustomerRevenueId { get; set; }
         public string CompanyType { get; set; }
         public int Total { get; set; }
         public decimal Revenue { get; set; }
@@ -32,6 +34,7 @@ namespace GIGLS.Core.View.AdminReportView
     public class Report_MostShippedItemByWeight
     {
         [Key]
+        public long WeightId { get; set; }
         public double Weight { get; set; }
         public int Total { get; set; }
     }
