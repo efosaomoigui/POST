@@ -398,6 +398,38 @@ namespace GIGLS.Services.Business.Pricing
         //Ecommerce Price
         private async Task<decimal> GetEcommercePrice(PricingDTO pricingDto)
         {
+            decimal price;
+
+            if (pricingDto.DepartureServiceCentreId <= 0)
+            {
+                // use currentUser login servicecentre
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                if (serviceCenters.Length > 1)
+                {
+                    throw new GenericException("This user is assign to more than one(1) Service Centre  ");
+                }
+                pricingDto.DepartureServiceCentreId = serviceCenters[0];
+            }
+
+            //get country by service centre
+            var departureCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DepartureServiceCentreId);
+            var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DestinationServiceCentreId);
+
+            ///--1. Price within a country
+            if (departureCountry.CountryId == destinationCountry.CountryId)
+            {
+                price = await GetEcommercePriceLocal(pricingDto);
+            }
+            else
+            {
+                price = await GetEcommercePriceInternational(pricingDto);
+            }
+
+            return price;
+        }
+
+        private async Task<decimal> GetEcommercePriceLocal(PricingDTO pricingDto)
+        {
             if (pricingDto.DepartureServiceCentreId <= 0)
             {
                 // use currentUser login servicecentre
@@ -452,6 +484,59 @@ namespace GIGLS.Services.Business.Pricing
                 PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Ecommerce, pricingDto.CountryId);
             }
 
+            return PackagePrice + deliveryOptionPrice;
+        }
+
+        private async Task<decimal> GetEcommercePriceInternational(PricingDTO pricingDto)
+        {
+            //get country by service centre
+            var departureCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DepartureServiceCentreId);
+            var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(pricingDto.DestinationServiceCentreId);
+
+            var zone = await _uow.CountryRouteZoneMap.GetAsync(
+                    s => s.DepartureId == departureCountry.CountryId && s.DestinationId == destinationCountry.CountryId);
+
+            if (zone == null)
+            {
+                throw new Exception("Country Route Zone Mapping has not been set.");
+            }
+
+            //get the deliveryOptionPrice from an array
+            decimal deliveryOptionPriceTemp = 0;
+
+            if (pricingDto.DeliveryOptionIds.Count() == 0)
+            {
+                throw new GenericException("Delivery Option can not be empty");
+            }
+            else
+            {
+                foreach (var deliveryOptionId in pricingDto.DeliveryOptionIds)
+                {
+                    deliveryOptionPriceTemp += await _optionPrice.GetDeliveryOptionPrice(deliveryOptionId, zone.ZoneId, pricingDto.CountryId);
+                }
+            }
+
+            decimal deliveryOptionPrice = deliveryOptionPriceTemp;
+
+            //check for volumetric weight
+            if (pricingDto.IsVolumetric)
+            {
+                decimal volume = (pricingDto.Length * pricingDto.Height * pricingDto.Width) / 5000;
+                pricingDto.Weight = pricingDto.Weight > volume ? pricingDto.Weight : volume;
+            }
+
+            decimal PackagePrice;
+
+            //This is our limit weight.
+            if (pricingDto.Weight > 100)
+            {
+                throw new GenericException("WEIGHT EXIST INTERNATIONAL WEIGHT LIMIT");
+            }
+            else
+            {
+                PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Ecommerce, pricingDto.CountryId);
+            }
+            
             return PackagePrice + deliveryOptionPrice;
         }
 
