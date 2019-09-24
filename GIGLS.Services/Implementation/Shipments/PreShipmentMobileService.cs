@@ -124,6 +124,8 @@ namespace GIGLS.Services.Implementation.Shipments
             // get the current user info
             var currentUser = await _userService.GetCurrentUserId();
             preShipmentDTO.UserId = currentUser;
+            var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
+            preShipmentDTO.CountryName = Country.CountryName;
             var PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
             var wallet = await _walletService.GetWalletBalance();
             if (wallet.Balance >= Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal))
@@ -207,6 +209,8 @@ namespace GIGLS.Services.Implementation.Shipments
             var user = await _userService.GetUserById(preShipment.UserId);
             var Price = 0.0M;
             decimal DeclaredValue = 0.0M;
+            var Country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
+            preShipment.CountryId = Country.CountryId;
             foreach (var preShipmentItem in preShipment.PreShipmentItems)
             {
                 if (preShipmentItem.Quantity == 0)
@@ -220,7 +224,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     Weight = (decimal)preShipmentItem.Weight,
                     SpecialPackageId = (int)preShipmentItem.SpecialPackageId,
                     ShipmentType = preShipmentItem.ShipmentType,
-                    CountryId = 1   //Nigeria
+                    CountryId = preShipment.CountryId  //Nigeria
                 };
                 if (preShipmentItem.ShipmentType == ShipmentType.Ecommerce)
                 {
@@ -261,7 +265,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 MainCharge = preShipment.DeliveryPrice,
                 ServiceCharge = preShipment.Vat + preShipment.InsuranceValue,
                 GrandTotal = preShipment.Vat + preShipment.InsuranceValue + preShipment.DeliveryPrice,
-                PreshipmentMobile = preShipment
+                PreshipmentMobile = preShipment,
+                CurrencySymbol = Country.CurrencySymbol,
+                CurrencyCode = Country.CurrencyCode
             };
             return returnprice;
         }

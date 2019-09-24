@@ -45,5 +45,34 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                 throw;
             }
         }
+
+        public Task<CountryDTO> GetCountryByStationId(int stationId)
+        {
+            try
+            {
+                var countries = _context.Country;
+                var countryDto = from country in countries
+                                 join state in _context.State on country.CountryId equals state.CountryId
+                                 join station in _context.Station on state.StateId equals station.StateId
+                                 where station.StationId == stationId
+                                 select new CountryDTO
+                                 {
+                                     CountryId = country.CountryId,
+                                     CountryName = country.CountryName,
+                                     CountryCode = country.CountryCode,
+                                     CurrencySymbol = country.CurrencySymbol,
+                                     CurrencyCode = country.CurrencyCode,
+                                     CurrencyRatio = country.CurrencyRatio,
+                                     IsActive = country.IsActive,
+                                     ContactEmail = country.ContactEmail,
+                                     ContactNumber = country.ContactNumber
+                                 };
+                return Task.FromResult(countryDto.FirstOrDefault());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

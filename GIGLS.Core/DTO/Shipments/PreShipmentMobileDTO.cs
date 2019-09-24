@@ -119,6 +119,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ActualReceiverPhoneNumber { get; set; }
 
         public string CountryName { get; set; }
+        public int CountryId { get; set; }
 
     }
 }
