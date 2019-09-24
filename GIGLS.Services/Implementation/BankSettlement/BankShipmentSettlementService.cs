@@ -5,6 +5,7 @@ using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.BankSettlement;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Account;
@@ -900,15 +901,9 @@ namespace GIGLS.Services.Implementation.Wallet
             bankorder.Status = DepositStatus.Deposited;
             await _uow.CompleteAsync();
         }
+                      
 
-        //Helps to get bankprocessingcode properties from its table
-        public async Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCode(DepositType type)
-        {
-            var result = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCodeForDefaultDate(type);
-            return await Task.FromResult(result);
-        }         
-
-        public async Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, DateFilterCriteria dateFilterCriteria)
+        public async Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria)
         {
             var result = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCodeByDate(type,dateFilterCriteria);
             return await Task.FromResult(result);
