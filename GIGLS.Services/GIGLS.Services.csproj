@@ -267,7 +267,9 @@
     <Compile Include="Implementation\Stores\StoreService.cs" />
     <Compile Include="Implementation\SubCategoryService.cs" />
     <Compile Include="Implementation\User\UserService.cs" />
+    <Compile Include="Implementation\Utility\EnumExtensions.cs" />
     <Compile Include="Implementation\Utility\EnumHelper.cs" />
+    <Compile Include="Implementation\Utility\EnumValue.cs" />
     <Compile Include="Implementation\Utility\GlobalPropertyService.cs" />
     <Compile Include="Implementation\Utility\NumberGeneratorMonitorService.cs" />
     <Compile Include="Implementation\Utility\PasswordGenerator.cs" />
