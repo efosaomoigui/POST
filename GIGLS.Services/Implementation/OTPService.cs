@@ -90,7 +90,7 @@ namespace GIGLS.Services.Implementation
             var response = await _messageSenderService.SendMessage(MessageType.OTP, EmailSmsType.All, message);
             return response;
         }
-        public async Task<UserDTO> CheckDetails(string user)
+        public async Task<UserDTO> CheckDetails(string user, string userchanneltype)
         {
             UserDTO registerUser = new UserDTO();
             bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
@@ -143,7 +143,7 @@ namespace GIGLS.Services.Implementation
                     await _uow.CompleteAsync();
                     registerUser.Referrercode = referrercode.Referrercode;
                 }
-                var averageratings = await GetAverageRating(registerUser.UserChannelCode);
+                var averageratings = await GetAverageRating(registerUser.UserChannelCode, userchanneltype);
                 var IsVerified = await IsPartnerActivated(registerUser.UserChannelCode);
                 registerUser.IsVerified = IsVerified;
                 registerUser.AverageRatings = averageratings;
@@ -203,7 +203,7 @@ namespace GIGLS.Services.Implementation
                         await _uow.CompleteAsync();
                         registerUser.Referrercode = referrercode.Referrercode;
                     }
-                    var averageratings = await GetAverageRating(registerUser.UserChannelCode);
+                    var averageratings = await GetAverageRating(registerUser.UserChannelCode, userchanneltype);
                     var IsVerified = await IsPartnerActivated(registerUser.UserChannelCode);
                     registerUser.AverageRatings = averageratings;
                     registerUser.IsVerified = IsVerified;
@@ -217,18 +217,36 @@ namespace GIGLS.Services.Implementation
 
         }
 
-        public async Task<double> GetAverageRating(string CustomerCode)
+        public async Task<double> GetAverageRating(string CustomerCode,string usertype)
         {
-            var ratings = await _uow.MobileRating.FindAsync(s=>s.CustomerCode == CustomerCode || s.PartnerCode == CustomerCode);
-            var count = ratings.Count();
-            var averageratings = ratings.Sum(x=>x.CustomerRating);
-            averageratings = (averageratings / count);
-            if(averageratings.ToString() == "NaN")
+            if (usertype == UserChannelType.Partner.ToString())
             {
-                averageratings = 0.00;
+                var ratings = await _uow.MobileRating.FindAsync(s => s.PartnerCode == CustomerCode);
+                var count = ratings.Count();
+                var averageratings = ratings.Sum(x => x.CustomerRating);
+                averageratings = (averageratings / count);
+                if (averageratings.ToString() == "NaN")
+                {
+                    averageratings = 0.00;
+                }
+                var rating = (double)averageratings;
+                return rating;
             }
-            var rating = (double)averageratings;
-            return rating;
+            else
+            {
+                var ratings = await _uow.MobileRating.FindAsync(s =>s.CustomerCode == CustomerCode);
+                var count = ratings.Count();
+                var averageratings = ratings.Sum(x => x.PartnerRating);
+                averageratings = (averageratings / count);
+                if (averageratings.ToString() == "NaN")
+                {
+                    averageratings = 0.00;
+                }
+                var rating = (double)averageratings;
+                return rating;
+            }
+           
+           
         }
         public async Task<bool> IsPartnerActivated(string CustomerCode)
         {

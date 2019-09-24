@@ -40,6 +40,7 @@ using GIGLS.Core.IServices.Utility;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.IMessageService;
+using System.Text.RegularExpressions;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -1521,12 +1522,12 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<SignResponseDTO> ResendOTP(UserDTO user)
         {
-            var registeredUser = await _otpService.CheckDetails(user.Email);
-            if (registeredUser == null)
+            var registerUser = await CheckUser(user);
+            if (registerUser == null)
             {
                 throw new GenericException("User has not registered!");
             }
-            var result = await SendOTPForRegisteredUser(registeredUser);
+            var result = await SendOTPForRegisteredUser(registerUser);
             return result;
         }
 
@@ -1536,6 +1537,36 @@ namespace GIGLS.Services.Business.CustomerPortal
             var countryIds = new int [1];   //NIGERIA
             countryIds[0] = CountryId;
             return await _uow.Station.GetLocalStations(countryIds);
+        }
+
+        public async Task<UserDTO> CheckUser(UserDTO user)
+        {
+            var registerUser = new UserDTO();
+            bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            if (isEmail)
+            {
+                user.Email.Trim();
+                registerUser = await _userService.GetUserByEmail(user.Email);
+
+            }
+            else
+            {
+                bool IsPhone = Regex.IsMatch(user.PhoneNumber, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
+                if (IsPhone)
+                {
+                    if (!user.PhoneNumber.Contains("+234"))
+                    {
+                        user.PhoneNumber = "+234" + user.PhoneNumber.Remove(0, 1);
+                    };
+                    registerUser = await _userService.GetUserByPhone(user.PhoneNumber);
+
+                }
+                else
+                {
+                    throw new GenericException("Invalid Details");
+                }
+            }
+            return registerUser;
         }
 
     }

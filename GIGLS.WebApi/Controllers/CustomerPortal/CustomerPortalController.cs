@@ -702,7 +702,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var user = await _otpService.CheckDetails(logindetail.UserDetail);
+                var user = await _otpService.CheckDetails(logindetail.UserDetail,logindetail.UserChannelType);
                 var vehicle = user.VehicleType;
                 if (user.Username != null)
                 {
