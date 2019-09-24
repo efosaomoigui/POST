@@ -1251,5 +1251,18 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        [HttpPost]
+        [Route("approveshipment/{waybill}")]
+        public async Task<IServiceResponse<bool>> Approveshipment(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _preshipmentmobileService.ApproveShipment(waybill);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }
