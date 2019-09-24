@@ -3,6 +3,7 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.Shipments;
@@ -11,6 +12,7 @@ using GIGLS.CORE.DTO.Shipments;
 using GIGLS.CORE.IServices.Shipments;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
+using GIGLS.Services.Implementation.Utility;
 using GIGLS.WebApi.Filters;
 using Newtonsoft.Json.Linq;
 using System;
@@ -145,7 +147,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         //2. Submit the waybills with the status selected -->ScanTrackService  --> scan/multiple(POST)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
-        [Route("multiple")]
+        [Route("scanmultiple")]
         public async Task<IServiceResponse<bool>> ScanMultipleShipment(List<ScanDTO> scanList)
         {
             return await HandleApiOperationAsync(async () =>
@@ -197,7 +199,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         //3. Save --> ShipmentsService --> groupwaybillnumbermapping/mapmultiple(POST)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
-        [Route("mapmultiple")]
+        [Route("mapwaybillstogroup")]
         public async Task<IServiceResponse<bool>> MappingWaybillNumberToGroup(GroupWaybillNumberMappingDTO data)
         {
             return await HandleApiOperationAsync(async () =>
@@ -234,7 +236,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         //2. Generate Manifest --> ShipmentsService --> GenerateMaifestCode(manifest/generateMaifestCode)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
-        [Route("generateMaifestCode")]
+        [Route("generateManifestcode")]
         public async Task<IServiceResponse<string>> GenerateManifestCode()
         {
             return await HandleApiOperationAsync(async () =>
@@ -252,7 +254,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         //3. Save --> ShipmentsService --> manifestgroupwaybillnumbermapping(manifestgroupwaybillnumbermapping/mapmultiple)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
-        [Route("mapmultiple")]
+        [Route("mapgroupwaybilltomanifest")]
         public async Task<IServiceResponse<bool>> MappingManifestToGroupWaybillNumber(ManifestGroupWaybillNumberMappingDTO data)
         {
             return await HandleApiOperationAsync(async () =>
@@ -271,7 +273,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         //2.Save-- > ShipmentsService-- > ManifestForWaybillsMapping(manifestwaybillmapping / mapmultiplemobile)(POST)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
-        [Route("mapmultiplemobile")]
+        [Route("mapwaybillstomanifest")]
         public async Task<IServiceResponse<bool>> MappingManifestToWaybillsMobile(ManifestWaybillMappingDTO data)
         {
             return await HandleApiOperationAsync(async () =>
@@ -306,7 +308,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
-        [Route("mapmultipleForOverdue")]
+        [Route("mapwaybillstogroupforoverdue")]
         public async Task<IServiceResponse<bool>> MappingWaybillNumberToGroupForOverdue(GroupWaybillNumberMappingDTO data)
         {
             return await HandleApiOperationAsync(async () =>
@@ -344,7 +346,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         //1.Get State : StateService-- > get
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("")]
+        [Route("states")]
         public async Task<IServiceResponse<IEnumerable<StateDTO>>> GetStates(int pageSize = 10, int page = 1)
         {
             return await HandleApiOperationAsync(async () =>
@@ -377,6 +379,15 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
         //3.DemuragePaymentTypes-- > Enum
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("demuragepaymenttype")]
+        public IHttpActionResult DemuragePaymentTypes()
+        {
+            return Ok(EnumExtensions.GetValues<PaymentType>());
+        }
+
         //4.ReleasePaymentTypes-- > Enum
         //5.Signature pad
 
@@ -387,10 +398,10 @@ namespace GIGLS.WebApi.Controllers.Scanner
         [Route("collected")]
         public async Task<IServiceResponse<bool>> ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
         {
-            shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKT;
+            shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKT;
             if (shipmentCollection.IsComingFromDispatch)
             {
-                shipmentCollection.ShipmentScanStatus = Core.Enums.ShipmentScanStatus.OKC;
+                shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKC;
             }
 
             return await HandleApiOperationAsync(async () => {
@@ -409,7 +420,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         //2.Get LogVisitReason-- > ScanTrackService-- > logvisitreason(logvisitreason)(GET)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("")]
+        [Route("getlogvisit")]
         public async Task<IServiceResponse<List<LogVisitReasonDTO>>> GetLogVisitReasons()
         {
             return await HandleApiOperationAsync(async () =>
@@ -426,7 +437,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         //3.Save-- > ShipmentsService-- > manifestvisitmonitoring(manifestvisitmonitoring)(POST)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
-        [Route("")]
+        [Route("logwaybillvisit")]
         public async Task<IServiceResponse<object>> AddManifest(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO)
         {
             return await HandleApiOperationAsync(async () =>
