@@ -1408,7 +1408,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         var partnerinfo = Mapper.Map<PartnerDTO>(Partnerdetails);
                         ShipmentSummaryDetails.partnerdetails = partnerinfo;
-                        ShipmentSummaryDetails.PictureUrl = userdetails.PictureUrl;
+                        ShipmentSummaryDetails.partnerdetails.PictureUrl = userdetails.PictureUrl;
                     }
                 }
                 else

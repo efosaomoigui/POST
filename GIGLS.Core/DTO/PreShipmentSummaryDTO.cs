@@ -13,7 +13,5 @@ namespace GIGLS.Core.DTO
     {
         public PreShipmentMobileDTO shipmentdetails { get; set; }
         public PartnerDTO partnerdetails { get; set; }
-
-        public string PictureUrl { get; set; }
     }
 }
