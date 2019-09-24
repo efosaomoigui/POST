@@ -12,6 +12,8 @@ using System.Configuration;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace GIGLS.Services.Implementation.Partnership
 {
@@ -34,6 +36,7 @@ namespace GIGLS.Services.Implementation.Partnership
             {
                 var GoogleURL = ConfigurationManager.AppSettings["DistanceURL"];
                 var GoogleApiKey = ConfigurationManager.AppSettings["DistanceApiKey"];
+                GoogleApiKey = Decrypt(GoogleApiKey);
                 var finalURL = $"{GoogleURL}{GoogleApiKey}&units=metric&origins={location.OriginLatitude},{location.OriginLongitude}&destinations={location.DestinationLatitude},{location.DestinationLongitude}";
                 var httpWebRequest = (HttpWebRequest)WebRequest.Create(finalURL);
                 using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
@@ -64,6 +67,7 @@ namespace GIGLS.Services.Implementation.Partnership
             var TotalAmountBasedonTime = actualTimeinMinutes * 2;
             var TotalAmountBasedonShipment = partnerpay.ShipmentPrice * 0.05M;
             var TotalPrice = TotalAmountBasedonDistance + TotalAmountBasedonTime + TotalAmountBasedonShipment;
+             TotalPrice = Convert.ToDecimal(string.Format("{0:F2}", TotalPrice));
             return await Task.FromResult(TotalPrice);
         }
         public async Task<object> AddPartnerPaymentLog(PartnerTransactionsDTO walletPaymentLogDto)
@@ -80,5 +84,48 @@ namespace GIGLS.Services.Implementation.Partnership
             await _uow.CompleteAsync();
             return new { id = walletPaymentLog.PartnerTransactionsID };
         }
+        public string Encrypt(string clearText)
+            {
+                string EncryptionKey = "abc123";
+                byte[] clearBytes = Encoding.Unicode.GetBytes(clearText);
+                using (Aes encryptor = Aes.Create())
+                {
+                    Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                    encryptor.Key = pdb.GetBytes(32);
+                    encryptor.IV = pdb.GetBytes(16);
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateEncryptor(), CryptoStreamMode.Write))
+                        {
+                            cs.Write(clearBytes, 0, clearBytes.Length);
+                            cs.Close();
+                        }
+                        clearText = Convert.ToBase64String(ms.ToArray());
+                    }
+                }
+                return clearText;
+            }
+        public string Decrypt(string cipherText)
+            {
+                string EncryptionKey = "abc123";
+                cipherText = cipherText.Replace(" ", "+");
+                byte[] cipherBytes = Convert.FromBase64String(cipherText);
+                using (Aes encryptor = Aes.Create())
+                {
+                    Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                    encryptor.Key = pdb.GetBytes(32);
+                    encryptor.IV = pdb.GetBytes(16);
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateDecryptor(), CryptoStreamMode.Write))
+                        {
+                            cs.Write(cipherBytes, 0, cipherBytes.Length);
+                            cs.Close();
+                        }
+                        cipherText = Encoding.Unicode.GetString(ms.ToArray());
+                    }
+                }
+                return cipherText;
+            }
     }
 }
