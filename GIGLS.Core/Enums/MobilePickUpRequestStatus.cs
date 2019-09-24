@@ -20,6 +20,7 @@ namespace GIGLS.Core.Enums
         Visited,
         EnrouteToPickUp,
         Resolved,
-        PickedUp
+        PickedUp,
+        OnwardProcessing
     }
 }
