@@ -373,6 +373,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               SenderPhoneNumber = r.SenderPhoneNumber,
                                                               ReceiverCity = r.ReceiverCity,
                                                               ReceiverCountry = r.ReceiverCountry,
+                                                              SenderStationId = r.SenderStationId,
+                                                              ReceiverStationId = r.ReceiverStationId,
                                                               ReceiverEmail = r.ReceiverEmail,
                                                               ReceiverName = r.ReceiverName,
                                                               ReceiverPhoneNumber = r.ReceiverPhoneNumber,
@@ -391,7 +393,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                                           }).ToList();
                 foreach (var Shipment in shipmentDto)
                 {
-                    var PartnerId = _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == Shipment.Waybill).Result;
+                    var PartnerId = await _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == Shipment.Waybill && r.Status != MobilePickUpRequestStatus.Rejected.ToString());
                     if (PartnerId != null)
                     {
                         var partneruser = await _uow.User.GetUserById(PartnerId.UserId);
@@ -399,7 +401,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         Shipment.PartnerLastName = partneruser.LastName;
                         Shipment.PartnerImageUrl = partneruser.PictureUrl;
                     }
-                    var rating = _uow.MobileRating.GetAsync(j => j.Waybill == Shipment.Waybill).Result;
+                    var rating = await _uow.MobileRating.GetAsync(j => j.Waybill == Shipment.Waybill);
                     if (rating != null)
                     {
                         Shipment.IsRated = rating.IsRatedByCustomer;
@@ -408,6 +410,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         Shipment.IsRated = false;
                     }
+                    var country = await _uow.Country.GetCountryByStationId(Shipment.SenderStationId);
+                    Shipment.CurrencyCode = country.CurrencyCode;
+                    Shipment.CurrencySymbol = country.CurrencySymbol;
                 }
                 return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
             }

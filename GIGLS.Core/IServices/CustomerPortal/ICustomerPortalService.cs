@@ -68,5 +68,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         List<string> GetItemTypes();
 
         Task<List<StationDTO>> GetLocalStations();
+
+        Task<List<StationDTO>> GetAllStations();
     }
 }

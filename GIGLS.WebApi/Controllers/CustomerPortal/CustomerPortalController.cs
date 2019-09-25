@@ -58,11 +58,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         private readonly ISubCategoryService _subcategoryservice;
         private readonly IPasswordGenerator _passwordGenerator;
         private readonly IMessageSenderService _messageSenderService;
+        private readonly ICountryService _countryservice;
 
 
         public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IOTPService otpService,
             IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService, IWalletService walletService, IWalletTransactionService walletTransactionService, IServiceCentreService service,
-            ICategoryService categoryservice, ISubCategoryService subcategoryservice, IPasswordGenerator passwordGenerator, IMessageSenderService messageSenderService) : base(nameof(CustomerPortalController))
+            ICategoryService categoryservice, ISubCategoryService subcategoryservice, IPasswordGenerator passwordGenerator, IMessageSenderService messageSenderService, ICountryService countryservice) : base(nameof(CustomerPortalController))
         {
             // _uow = uow;
             _userService = userService;
@@ -78,6 +79,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             _subcategoryservice = subcategoryservice;
             _passwordGenerator = passwordGenerator;
             _messageSenderService = messageSenderService;
+            _countryservice = countryservice;
         }
 
 
@@ -1261,6 +1263,34 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<bool>
                 {
                     Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getcountries")]
+        public async Task<IServiceResponse<List<CountryDTO>>> getcountries()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var countries =await _countryservice.GetCountries();
+                return new ServiceResponse<List<CountryDTO>>
+                {
+                    Object = countries.ToList()
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getallstations")]
+        public async Task<IServiceResponse<List<StationDTO>>> getstations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stations = await _portalService.GetAllStations();
+                return new ServiceResponse<List<StationDTO>>
+                {
+                    Object = stations
                 };
             });
         }

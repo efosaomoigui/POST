@@ -102,5 +102,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                 throw;
             }
         }
+        public Task<List<Station>> GetAllStationsAsync()
+        {
+            return Task.FromResult(Context.Station.ToList());
+        }
     }
 }
