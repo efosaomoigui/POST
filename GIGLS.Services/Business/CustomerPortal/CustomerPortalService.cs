@@ -1569,5 +1569,14 @@ namespace GIGLS.Services.Business.CustomerPortal
             return registerUser;
         }
 
+
+        public async Task<List<StationDTO>> GetAllStations()
+        {
+           
+            var stations= await _uow.Station.GetAllStationsAsync();
+            var stationDTO = Mapper.Map<List<StationDTO>>(stations);
+            return stationDTO;
+        }
+
     }
 }
