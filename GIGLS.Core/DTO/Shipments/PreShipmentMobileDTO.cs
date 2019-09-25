@@ -118,5 +118,12 @@ namespace GIGLS.Core.DTO.Shipments
         public string ActualReceiverLastName { get; set; }
         public string ActualReceiverPhoneNumber { get; set; }
 
+        public string CountryName { get; set; }
+        public int CountryId { get; set; }
+
+        public string CurrencySymbol { get; set; }
+
+        public string CurrencyCode { get; set; }
+
     }
 }

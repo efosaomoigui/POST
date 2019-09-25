@@ -14,6 +14,8 @@ using GIGLS.Core.IServices.Utility;
 using System.Collections.Generic;
 using System.Linq;
 using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
 
 namespace GIGLS.Services.Implementation
 {
@@ -24,15 +26,17 @@ namespace GIGLS.Services.Implementation
         private readonly IEmailService _EmailService;
         private readonly IUserService _UserService;
         private readonly IPasswordGenerator _codegenerator;
+        private readonly IMessageSenderService _messageSenderService;
 
         public OTPService(IUnitOfWork uow, ISMSService MessageService, IEmailService EmailService, IUserService UserService,
-            IPasswordGenerator codegenerator)
+            IPasswordGenerator codegenerator, IMessageSenderService messageSenderService )
         {
             _uow = uow;
             _SmsService = MessageService;
             _EmailService = EmailService;
             _UserService = UserService;
             _codegenerator = codegenerator;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
         public async Task<UserDTO> IsOTPValid(int OTP)
@@ -74,27 +78,19 @@ namespace GIGLS.Services.Implementation
             Random rdm = new Random();
             return rdm.Next(min, max);
           }
-        public  async Task<string> SendOTP(OTPDTO user)
+        public  async Task<bool> SendOTP(OTPDTO user)
         {
-             
-            MessageDTO SMSmessage = new MessageDTO
+
+            var message = new MobileMessageDTO
             {
-                To = user.PhoneNumber,
-                FinalBody = $"Your OTP is {user.Otp}"
+                SenderEmail = user.EmailAddress,
+                SenderPhoneNumber = user.PhoneNumber,
+                OTP = user.Otp
             };
-            MessageDTO Emailmessage = new MessageDTO
-            {
-                CustomerName = "",
-                ReceiverName = "",
-                Subject = "OTP",
-                ToEmail = user.EmailAddress,
-                FinalBody = $"Thank you for registering .Your OTP is {user.Otp}"
-            };
-            var EmailResponse = await _EmailService.SendAsync(Emailmessage);
-            var Smsresponse = await _SmsService.SendAsync(SMSmessage);
-           return $"{EmailResponse},{Smsresponse}";
+            var response = await _messageSenderService.SendMessage(MessageType.OTP, EmailSmsType.All, message);
+            return response;
         }
-        public async Task<UserDTO> CheckDetails(string user)
+        public async Task<UserDTO> CheckDetails(string user, string userchanneltype)
         {
             UserDTO registerUser = new UserDTO();
             bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
@@ -102,7 +98,7 @@ namespace GIGLS.Services.Implementation
             {
                 user.Trim();
                 registerUser = await _UserService.GetUserByEmail(user);
-                var VehicleType = _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode).Result;
+                var VehicleType = await _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode);
                 if (VehicleType != null)
                 {
                     if (VehicleType.VehicleType != null)
@@ -121,13 +117,13 @@ namespace GIGLS.Services.Implementation
                 var vehicle = _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode).Result.ToList();
                 if(vehicle.Count() != 0)
                 {
+                    registerUser.VehicleType = new List<string>();
                     foreach (var item in vehicle)
                     {
-                        registerUser.VehicleType = new List<string>();
-                        registerUser.VehicleType.Add(item.Vehicletype);
+                       registerUser.VehicleType.Add(item.Vehicletype);
                     }
                 }
-                var referrerCode = _uow.ReferrerCode.GetAsync(s => s.UserCode == registerUser.UserChannelCode).Result;
+                var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.UserCode == registerUser.UserChannelCode);
                 if (referrerCode != null)
                 {
                     registerUser.Referrercode = referrerCode.Referrercode;
@@ -147,7 +143,7 @@ namespace GIGLS.Services.Implementation
                     await _uow.CompleteAsync();
                     registerUser.Referrercode = referrercode.Referrercode;
                 }
-                var averageratings = await GetAverageRating(registerUser.UserChannelCode);
+                var averageratings = await GetAverageRating(registerUser.UserChannelCode, userchanneltype);
                 var IsVerified = await IsPartnerActivated(registerUser.UserChannelCode);
                 registerUser.IsVerified = IsVerified;
                 registerUser.AverageRatings = averageratings;
@@ -162,7 +158,7 @@ namespace GIGLS.Services.Implementation
                         user = "+234" + user.Remove(0, 1);
                     };
                     registerUser = await _UserService.GetUserByPhone(user);
-                    var VehicleType = _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode).Result;
+                    var VehicleType = await _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode);
                     if (VehicleType != null)
                     {
                         if (VehicleType.VehicleType != null)
@@ -181,13 +177,13 @@ namespace GIGLS.Services.Implementation
                     var vehicle = _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode).Result.ToList();
                     if (vehicle.Count() != 0)
                     {
+                        registerUser.VehicleType = new List<string>();
                         foreach (var item in vehicle)
                         {
-                            registerUser.VehicleType = new List<string>();
                             registerUser.VehicleType.Add(item.Vehicletype);
                         }
                     }
-                    var referrerCode = _uow.ReferrerCode.GetAsync(s => s.UserCode == registerUser.UserChannelCode).Result;
+                    var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.UserCode == registerUser.UserChannelCode);
                     if (referrerCode != null)
                     {
                         registerUser.Referrercode = referrerCode.Referrercode;
@@ -207,7 +203,7 @@ namespace GIGLS.Services.Implementation
                         await _uow.CompleteAsync();
                         registerUser.Referrercode = referrercode.Referrercode;
                     }
-                    var averageratings = await GetAverageRating(registerUser.UserChannelCode);
+                    var averageratings = await GetAverageRating(registerUser.UserChannelCode, userchanneltype);
                     var IsVerified = await IsPartnerActivated(registerUser.UserChannelCode);
                     registerUser.AverageRatings = averageratings;
                     registerUser.IsVerified = IsVerified;
@@ -221,18 +217,36 @@ namespace GIGLS.Services.Implementation
 
         }
 
-        public async Task<double> GetAverageRating(string CustomerCode)
+        public async Task<double> GetAverageRating(string CustomerCode,string usertype)
         {
-            var ratings = await _uow.MobileRating.FindAsync(s=>s.CustomerCode == CustomerCode || s.PartnerCode == CustomerCode);
-            var count = ratings.Count();
-            var averageratings = ratings.Sum(x=>x.CustomerRating);
-            averageratings = (averageratings / count);
-            if(averageratings.ToString() == "NaN")
+            if (usertype == UserChannelType.Partner.ToString())
             {
-                averageratings = 0.00;
+                var ratings = await _uow.MobileRating.FindAsync(s => s.PartnerCode == CustomerCode);
+                var count = ratings.Count();
+                var averageratings = ratings.Sum(x => x.CustomerRating);
+                averageratings = (averageratings / count);
+                if (averageratings.ToString() == "NaN")
+                {
+                    averageratings = 0.00;
+                }
+                var rating = (double)averageratings;
+                return rating;
             }
-            var rating = (double)averageratings;
-            return rating;
+            else
+            {
+                var ratings = await _uow.MobileRating.FindAsync(s =>s.CustomerCode == CustomerCode);
+                var count = ratings.Count();
+                var averageratings = ratings.Sum(x => x.PartnerRating);
+                averageratings = (averageratings / count);
+                if (averageratings.ToString() == "NaN")
+                {
+                    averageratings = 0.00;
+                }
+                var rating = (double)averageratings;
+                return rating;
+            }
+           
+           
         }
         public async Task<bool> IsPartnerActivated(string CustomerCode)
         {

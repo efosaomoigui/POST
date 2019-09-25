@@ -37,7 +37,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         throw new GenericException($"Shipment with waybill number: {PickUpRequest.Waybill} exists already");
                     }
-                    
                 }
                 var newMobilePickUpRequest = Mapper.Map<MobilePickUpRequests>(PickUpRequest);
                 _uow.MobilePickUpRequests.Add(newMobilePickUpRequest);
@@ -65,7 +64,7 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
 
-        public async Task<PartnerMonthlyTransactionsDTO> GetMonthlyTransactions()
+        public async Task<Partnerdto> GetMonthlyTransactions()
         {
             try
             {
@@ -75,7 +74,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var TotalDelivery = Count;
                 var TotalEarnings =  await _uow.PartnerTransactions.FindAsync(s => s.UserId == userid && s.DateCreated.Month == DateTime.Now.Month && s.DateCreated.Year == DateTime.Now.Year);
                 var TotalEarning = TotalEarnings.Sum(x =>x.AmountReceived);
-                var totaltransactions = new PartnerMonthlyTransactionsDTO
+                var totaltransactions = new Partnerdto
                 {
                   MonthlyDelivery = mobilerequests,
                   TotalDelivery = TotalDelivery,
@@ -105,7 +104,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw;
                 }
-            
         }
     }
 }

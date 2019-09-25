@@ -11,6 +11,7 @@ using GIGLS.CORE.DTO.Report;
 using System;
 using GIGLS.Core.View;
 using System.Data.SqlClient;
+using GIGLS.Core.View.AdminReportView;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 {
@@ -408,6 +409,48 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               PaymentMethod = i.PaymentMethod,
                               PaymentStatus = i.PaymentStatus
                           });
+            return result;
+        }
+
+        public IQueryable<Report_AllTimeSalesByCountry> GetAllTimeSalesByCountry()
+        {
+            var result = _GIGLSContextForView.Report_AllTimeSalesByCountry.AsQueryable();
+            return result;
+        }
+
+        public IQueryable<Report_BusiestRoute> GetBusiestRoute()
+        {
+            var result = _GIGLSContextForView.Report_BusiestRoute.AsQueryable();
+            return result;
+        }
+
+        public IQueryable<Report_CustomerRevenue> GetCustomerRevenue()
+        {
+            var result = _GIGLSContextForView.Report_CustomerRevenue.AsQueryable();
+            return result;
+        }
+
+        public IQueryable<Report_MostShippedItemByWeight> GetMostShippedItemByWeight()
+        {
+            var result = _GIGLSContextForView.Report_MostShippedItemByWeight.AsQueryable();
+            return result;
+        }
+
+        public IQueryable<Report_RevenuePerServiceCentre> GetRevenuePerServiceCentre()
+        {
+            var result = _GIGLSContextForView.Report_RevenuePerServiceCentre.AsQueryable();
+            return result;
+        }
+
+        public IQueryable<Report_TotalServiceCentreByState> GetTotalServiceCentreByState()
+        {
+            var result = _GIGLSContextForView.Report_TotalServiceCentreByState.AsQueryable();
+            return result;
+        }
+
+        public IQueryable<Report_TotalOrdersDelivered> GetTotalOrdersDelivered()
+        {
+            var result = _GIGLSContextForView.Report_TotalOrdersDelivered.AsQueryable();
             return result;
         }
     }

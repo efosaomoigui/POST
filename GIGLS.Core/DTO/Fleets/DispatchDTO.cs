@@ -32,5 +32,7 @@ namespace GIGLS.Core.DTO.Fleets
         public ManifestType ManifestType { get; set; }
 
         public CountryDTO Country { get; set; }
+        public int DepartureServiceCenterId { get; set; }
+        public int DestinationServiceCenterId { get; set; }
     }
 }

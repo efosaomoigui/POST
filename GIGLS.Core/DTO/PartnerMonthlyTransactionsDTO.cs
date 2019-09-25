@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.DTO
 {
-    public  class PartnerMonthlyTransactionsDTO
+    public  class Partnerdto
     {
         public List<MobilePickUpRequestsDTO> MonthlyDelivery { get; set; }
 

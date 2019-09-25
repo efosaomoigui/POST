@@ -8,5 +8,7 @@ namespace GIGLS.Core.IRepositories
     public interface ICountryRepository : IRepository<Country>
     {
         Task<CountryDTO> GetCountryByServiceCentreId(int serviceCentreId);
+
+        Task<CountryDTO> GetCountryByStationId(int stationId);
     }
 }

@@ -27,7 +27,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<IEnumerable<InvoiceViewDTO>> GetInvoices();
         Task<InvoiceDTO> GetInvoiceByWaybill(string waybill);
         Task<IEnumerable<ShipmentTrackingDTO>> TrackShipment(string waybillNumber);
-        Task<IEnumerable<ShipmentTrackingDTO>> PublicTrackShipment(string waybillNumber);
+        Task<List<ShipmentTrackingDTO>> PublicTrackShipment(string waybillNumber);
         Task<CashOnDeliveryAccountSummaryDTO> GetCashOnDeliveryAccount();
         Task<IEnumerable<PaymentPartialTransactionDTO>> GetPartialPaymentTransaction(string waybill);
         Task<DashboardDTO> GetDashboard();
@@ -68,5 +68,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         List<string> GetItemTypes();
 
         Task<List<StationDTO>> GetLocalStations();
+
+        Task<List<StationDTO>> GetAllStations();
     }
 }

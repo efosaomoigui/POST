@@ -284,14 +284,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 var groupWaybillNumberDTO = await _groupWaybillNumberService.GetGroupWayBillNumberById(groupWaybillNumber);
 
                 //validate the ids are in the system
-                if (manifestDTO == null)
-                {
-                    throw new GenericException($"No Manifest exists for this code: {manifest}");
-                }
-                if (groupWaybillNumberDTO == null)
-                {
-                    throw new GenericException($"No GroupWaybill exists for this number: {groupWaybillNumber}");
-                }
+                //if (manifestDTO == null)
+                //{
+                //    throw new GenericException($"No Manifest exists for this code: {manifest}");
+                //}
+                //if (groupWaybillNumberDTO == null)
+                //{
+                //    throw new GenericException($"No GroupWaybill exists for this number: {groupWaybillNumber}");
+                //}
 
                 var manifestGroupWaybillNumberMapping = _uow.ManifestGroupWaybillNumberMapping.SingleOrDefault(x => x.ManifestCode == manifest && x.GroupWaybillNumber == groupWaybillNumber);
                 if (manifestGroupWaybillNumberMapping != null)
@@ -314,7 +314,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters);
                 return manifestGroupWaybillMapings;
             }
@@ -328,7 +328,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappings(serviceCenters, dateFilterCriteria);
 
                 //group the result by manifest                

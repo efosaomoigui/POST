@@ -36,7 +36,7 @@ namespace GIGLS.Services.Implementation.Report
 
         public async Task<List<ShipmentDTO>> GetShipments(ShipmentFilterCriteria filterCriteria)
         {
-            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
             var shipmentDto = await _uow.Shipment.GetShipments(filterCriteria, serviceCenters);
 
             foreach (var item in shipmentDto)
@@ -54,7 +54,7 @@ namespace GIGLS.Services.Implementation.Report
                 StartDate = System.DateTime.Today
             };
 
-            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
             return await _uow.Shipment.GetShipments(filterCriteria, serviceCenters);
         }
 

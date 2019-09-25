@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
+﻿using GIGLS.Core.Domain;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
@@ -344,6 +345,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             {
                 var preShipment = await _preShipmentMobileService.GetPreShipmentDetail(waybill);
                 return new ServiceResponse<PreShipmentMobileDTO>
+                {
+                    Object = preShipment
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("DeliveryNumber")]
+        public async Task<IServiceResponse<List<DeliveryNumberDTO>>> GetAllDeliveryNumbers(FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preShipment = await _service.GetDeliveryNumbers(filterOptionsDto);
+                return new ServiceResponse<List<DeliveryNumberDTO>>
                 {
                     Object = preShipment
                 };

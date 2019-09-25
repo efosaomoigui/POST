@@ -16,7 +16,7 @@
     <RootNamespace>GIGLS.WebApi</RootNamespace>
     <AssemblyName>GIGLS.WebApi</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <UseIISExpress>true</UseIISExpress>
+    <UseIISExpress>false</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
@@ -149,9 +149,8 @@
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Ninject, Version=3.2.0.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
       <HintPath>..\packages\Ninject.3.2.0.0\lib\net45-full\Ninject.dll</HintPath>
@@ -331,7 +330,9 @@
     <Compile Include="Controllers\PaymentTransactions\PaymentPartialTransactionController.cs" />
     <Compile Include="Controllers\PaymentTransactions\PaymentTransactionController.cs" />
     <Compile Include="Controllers\PickUp\PickUpController.cs" />
+    <Compile Include="Controllers\Report\AdminReportController.cs" />
     <Compile Include="Controllers\Report\ReportsController.cs" />
+    <Compile Include="Controllers\Scanner\MobileScannerController.cs" />
     <Compile Include="Controllers\ServiceCentres\RegionController.cs" />
     <Compile Include="Controllers\ServiceCentres\RegionServiceCentreMappingController.cs" />
     <Compile Include="Controllers\ServiceCentres\ServiceCentreController.cs" />
@@ -449,6 +450,7 @@
     <Folder Include="Controllers\Stores\" />
     <Folder Include="Controllers\Vendors\" />
     <Folder Include="Controllers\Workshops\" />
+    <Folder Include="Images\" />
     <Folder Include="ReportTemplate\download\" />
     <Folder Include="Views\InvoiceReminder\" />
     <Folder Include="Views\Reminder\" />
@@ -488,7 +490,18 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <SaveServerSettingsInUserFile>True</SaveServerSettingsInUserFile>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost/giglsresourceapi</IISUrl>
+          <OverrideIISAppRootUrl>True</OverrideIISAppRootUrl>
+          <IISAppRootUrl>http://localhost/giglsresourceapi</IISAppRootUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
     </VisualStudio>

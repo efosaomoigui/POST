@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GIGLS.Core.Enums
+﻿namespace GIGLS.Core.Enums
 {
     public enum MobilePickUpRequestStatus
     {
@@ -20,6 +14,7 @@ namespace GIGLS.Core.Enums
         Visited,
         EnrouteToPickUp,
         Resolved,
-        PickedUp
+        PickedUp,
+        OnwardProcessing
     }
 }

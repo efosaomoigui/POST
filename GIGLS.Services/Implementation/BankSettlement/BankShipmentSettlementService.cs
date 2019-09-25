@@ -12,6 +12,7 @@ using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -42,26 +43,26 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<IEnumerable<InvoiceViewDTO>> GetCashShipmentSettlement()
         {
-            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
             var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
             allShipments = allShipments.Where(s => s.PaymentMethod == "Cash" && s.PaymentStatus == PaymentStatus.Paid);
 
             //added for GWA and GWARIMPA service centres
-            {
-                if (serviceCenters.Length == 1)
-                {
-                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                    {
-                        serviceCenters = new int[] { 4, 294 };
-                    }
-                }
-            }
+            //{
+            //    if (serviceCenters.Length == 1)
+            //    {
+            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+            //        {
+            //            serviceCenters = new int[] { 4, 294 };
+            //        }
+            //    }
+            //}
 
-            var cashShipments = new List<GIGLS.Core.DTO.Account.InvoiceViewDTO>();
+            var cashShipments = new List<InvoiceViewDTO>();
             if (serviceCenters.Length > 0)
             {
                 var shipmentResult = allShipments.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId)).ToList();
-                cashShipments = Mapper.Map<List<GIGLS.Core.DTO.Account.InvoiceViewDTO>>(shipmentResult);
+                cashShipments = Mapper.Map<List<InvoiceViewDTO>>(shipmentResult);
             }
 
             return await Task.FromResult(cashShipments);
@@ -80,7 +81,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var globalpropertiesdate = DateTime.MinValue;
             bool success = DateTime.TryParse(globalpropertiesdateStr, out globalpropertiesdate);
             
-            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
             var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
 
@@ -88,19 +89,8 @@ namespace GIGLS.Services.Implementation.Wallet
             allShipments = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate);
 
             //A. get partial payment values
-            var allShipmentsPartial = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate && s.PaymentMethod == "Partial");
-
-            //added for GWA and GWARIMPA service centres
-            {
-                if (serviceCenters.Length == 1)
-                {
-                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                    {
-                        serviceCenters = new int[] { 4, 294 };
-                    }
-                }
-            }
-
+            var allShipmentsPartial = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate && s.PaymentMethod.Contains("Partial"));
+            
             //B. combine list for partial and cash shipment
             var cashShipments = new List<InvoiceViewDTO>();
             if (serviceCenters.Length > 0)
@@ -122,7 +112,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
 
                 //2. partial
-                if (item.PaymentMethod == "Partial")
+                if (item.PaymentMethod.Contains("Partial"))
                 {
                     var partialPaymentCash = await returnPartialPaymentCashByWaybill(item.Waybill);
 
@@ -170,21 +160,21 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             decimal total = 0;
 
-            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
             var allDemurrages = _uow.DemurrageRegisterAccount.GetDemurrageAsQueryable();
             allDemurrages = allDemurrages.Where(s => s.DEMStatusHistory == CODStatushistory.RecievedAtServiceCenter);
             allDemurrages = allDemurrages.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
 
             //added for GWA and GWARIMPA service centres
-            {
-                if (serviceCenters.Length == 1)
-                {
-                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                    {
-                        serviceCenters = new int[] { 4, 294 };
-                    }
-                }
-            }
+            //{
+            //    if (serviceCenters.Length == 1)
+            //    {
+            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+            //        {
+            //            serviceCenters = new int[] { 4, 294 };
+            //        }
+            //    }
+            //}
 
             var demurrageResults = new List<DemurrageRegisterAccount>();
             if (serviceCenters.Length > 0)
@@ -215,21 +205,21 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             decimal total = 0;
 
-            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
             var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
             allCODs = allCODs.Where(s => s.CODStatusHistory == CODStatushistory.RecievedAtServiceCenter || s.CODStatusHistory == CODStatushistory.CollectedByDispatch);
             allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
 
             //added for GWA and GWARIMPA service centres
-            {
-                if (serviceCenters.Length == 1)
-                {
-                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                    {
-                        serviceCenters = new int[] { 4, 294 };
-                    }
-                }
-            }
+            //{
+            //    if (serviceCenters.Length == 1)
+            //    {
+            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+            //        {
+            //            serviceCenters = new int[] { 4, 294 };
+            //        }
+            //    }
+            //}
 
             var codResults = new List<CashOnDeliveryRegisterAccount>();
             if (serviceCenters.Length > 0)
@@ -287,20 +277,20 @@ namespace GIGLS.Services.Implementation.Wallet
             var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
             decimal total = 0;
 
-            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
             var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrders(type);
             var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == refcode);
 
             //added for GWA and GWARIMPA service centres
-            {
-                if (serviceCenters.Length == 1)
-                {
-                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                    {
-                        serviceCenters = new int[] { 4, 294 };
-                    }
-                }
-            }
+            //{
+            //    if (serviceCenters.Length == 1)
+            //    {
+            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+            //        {
+            //            serviceCenters = new int[] { 4, 294 };
+            //        }
+            //    }
+            //}
 
             var bankedShipments = new List<BankProcessingOrderForShipmentAndCODDTO>();
             if (serviceCenters.Length > 0)
@@ -350,7 +340,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var getServiceCenterCode = await _userService.GetCurrentServiceCenter();
             decimal total = 0;
 
-            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
             var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrders(type);
 
             var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == refcode);
@@ -394,7 +384,7 @@ namespace GIGLS.Services.Implementation.Wallet
             //Generate the refcode
             decimal total = 0;
 
-            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
             var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
 
@@ -412,15 +402,15 @@ namespace GIGLS.Services.Implementation.Wallet
             allShipments = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate);
 
             //added for GWA and GWARIMPA service centres
-            {
-                if (serviceCenters.Length == 1)
-                {
-                    if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                    {
-                        serviceCenters = new int[] { 4, 294 };
-                    }
-                }
-            }
+            //{
+            //    if (serviceCenters.Length == 1)
+            //    {
+            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+            //        {
+            //            serviceCenters = new int[] { 4, 294 };
+            //        }
+            //    }
+            //}
 
             var cashShipments = new List<InvoiceViewDTO>();
             if (serviceCenters.Length > 0)
@@ -471,7 +461,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 //5. commence preparatiion to insert records in the BankProcessingOrderForShipmentAndCOD
                 var enddate = bkoc.DateAndTimeOfDeposit;
 
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
                 //1. get data from Demurrage register account as queryable from DemurrageRegisterAccount table
                 var allDemurrages = _uow.DemurrageRegisterAccount.GetDemurrageAsQueryable();
@@ -629,7 +619,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 else if (bkoc.DepositType == DepositType.COD)
                 {
-                    var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                    var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
                     //--------------------------Validation Section -------------------------------------------//
 
@@ -794,7 +784,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Bank Order Request Does not Exist!");
             }
 
-            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
             var allDemurrages = _uow.DemurrageRegisterAccount.GetDemurrageAsQueryable();
             allDemurrages = allDemurrages.Where(s => s.DepositStatus == DepositStatus.Pending);
             var codsforservicecenter = allDemurrages.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
@@ -825,7 +815,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Bank Order Request Does not Exist!");
             }
 
-            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
             var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
             allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Pending);
             var codsforservicecenter = allCODs.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
@@ -914,7 +904,13 @@ namespace GIGLS.Services.Implementation.Wallet
         //Helps to get bankprocessingcode properties from its table
         public async Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCode(DepositType type)
         {
-            var result = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCode(type);
+            var result = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCodeForDefaultDate(type);
+            return await Task.FromResult(result);
+        }         
+
+        public async Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, DateFilterCriteria dateFilterCriteria)
+        {
+            var result = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCodeByDate(type,dateFilterCriteria);
             return await Task.FromResult(result);
         }
 
@@ -967,7 +963,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 ScName = invoiceviewinfo.DepartureServiceCentreName,
                 IsCODPaidOut = true,
                 VerifiedBy = invoiceviewinfo.UserId
-
             };
 
             _uow.CodPayOutList.Add(payoutinfo); 

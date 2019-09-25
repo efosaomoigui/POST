@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.User;
@@ -22,16 +24,18 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IWalletService _walletService;
         private readonly ICustomerService _customerService;
         private readonly IServiceCentreService _centreService;
+        private readonly ICountryService _countryservice;
 
         public WalletTransactionService(IUnitOfWork uow, IUserService userService, 
             IWalletService walletService, ICustomerService customerService,
-            IServiceCentreService centreService)
+            IServiceCentreService centreService, ICountryService countryservice)
         {
             _uow = uow;
             _userService = userService;
             _walletService = walletService;
             _customerService = customerService;
             _centreService = centreService;
+            _countryservice = countryservice;
             MapperConfig.Initialize();
         }
 
@@ -149,18 +153,33 @@ namespace GIGLS.Services.Implementation.Wallet
         private async Task<WalletTransactionSummaryDTO> GetWalletTransactionByWalletIdForMobile(WalletDTO wallet)
         {
             //get the customer info
+            var country = new CountryDTO();
             var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
-
+            var userid = await _userService.GetUserByChannelCode(wallet.CustomerCode);
+            if (userid != null)
+            {
+                if (userid.UserActiveCountryId != 0)
+                {
+                    country = await _countryservice.GetCountryById(userid.UserActiveCountryId);
+                }
+                else
+                {
+                    country = await _countryservice.GetCountryById(1);
+                }
+            }
             var walletTransactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == wallet.WalletId);
             if (walletTransactions.Count() < 1)
             {
                 return new WalletTransactionSummaryDTO
                 {
                     WalletTransactions = new List<WalletTransactionDTO>(),
+                    CurrencyCode = country.CurrencyCode,
+                    CurrencySymbol = country.CurrencySymbol,
                     WalletNumber = wallet.WalletNumber,
                     WalletBalance = wallet.Balance,
                     WalletOwnerName = customerDTO.CustomerName,
                     WalletId = wallet.WalletId
+                   
                 };
             }
             var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(s => s.DateCreated));
@@ -168,10 +187,13 @@ namespace GIGLS.Services.Implementation.Wallet
             return new WalletTransactionSummaryDTO
             {
                 WalletTransactions = walletTransactionDTOList,
+                CurrencyCode = country.CurrencyCode,
+                CurrencySymbol = country.CurrencySymbol,
                 WalletNumber = wallet.WalletNumber,
                 WalletBalance = wallet.Balance,
                 WalletOwnerName = customerDTO.CustomerName,
                 WalletId = wallet.WalletId
+                
             };
         }
 

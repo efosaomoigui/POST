@@ -360,27 +360,47 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 List<GroupWaybillNumberMapping> groupWaybillNumberMapping = new List<GroupWaybillNumberMapping>();
 
-                foreach (var waybillNumber in waybillNumberList)
+                //Get All Waybills that need to be group by the service centre
+                var filterOptionsDto = new FilterOptionsDto
                 {
-                    var shipmentDTO = await _uow.Shipment.GetAsync(x => x.Waybill == waybillNumber);
+                    count = 1000000,
+                    page = 1,
+                    sortorder = "0"
+                };
 
-                    if (shipmentDTO == null)
+                var ungroupedWaybills = await _shipmentService.GetUnGroupedWaybillsForServiceCentreDropDown(filterOptionsDto);
+
+                var ungroupedWaybillsList = new HashSet<string>();
+
+                foreach(var item in ungroupedWaybills)
+                {
+                    if (item?.Waybill != null)
                     {
-                        throw new GenericException($"No Shipment exists for this : {waybillNumber}");
+                        ungroupedWaybillsList.Add(item.Waybill);
                     }
+                }
+               
+                //check if the waybill that need to be grouped are in ungroupedWaybills above
+                //var getWaybillNotAvailableForGrouping = waybillNumberList.Where(x => !ungroupedWaybills.Select(w => w.Waybill).Contains(x));
+                var getWaybillNotAvailableForGrouping = waybillNumberList.Where(x => !ungroupedWaybillsList.Contains(x)).ToList();
 
-                    //if the groupwaybill service centre is not the same as the waybill destination
-                    if(shipmentDTO.DestinationServiceCentreId != serviceCentre.ServiceCentreId)
+                if (getWaybillNotAvailableForGrouping.Count() > 0)
+                {
+                    throw new GenericException($"Error: The following waybills [{string.Join(", ", getWaybillNotAvailableForGrouping.ToList())}]" +
+                        $" can not be added to this group because they are not available to you. Remove them from the list to proceed");
+                }
+                else
+                {
+                    foreach (var waybillNumber in waybillNumberList)
                     {
-                        throw new GenericException($"Waybill {waybillNumber} cannot be added to the Groupwaybill {groupWaybillNumber}");
-                    }
+                        var shipmentDTO = await _uow.Shipment.GetAsync(x => x.Waybill == waybillNumber);
 
-                    //check if waybill has not been grouped 
-                    var isWaybillGroup = await _uow.GroupWaybillNumberMapping.ExistAsync(x => x.GroupWaybillNumber == groupWaybillNumber && x.WaybillNumber == waybillNumber);
+                        //if the groupwaybill service centre is not the same as the waybill destination
+                        if (shipmentDTO.DestinationServiceCentreId != serviceCentre.ServiceCentreId)
+                        {
+                            throw new GenericException($"Waybill {waybillNumber} cannot be added to the group {groupWaybillNumber}. Remove it from the list to proceed");
+                        }
 
-                    //if the waybill has not been grouped, group it
-                    if (!isWaybillGroup)
-                    {
                         //Add new Mapping
                         var newMapping = new GroupWaybillNumberMapping
                         {
@@ -393,7 +413,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             OriginalDepartureServiceCentreId = departureServiceCenterId,
                             UserId = currentUserId
                         };
-                        
+
                         groupWaybillNumberMapping.Add(newMapping);
 
                         //Mark the waybill that it has been Grouped

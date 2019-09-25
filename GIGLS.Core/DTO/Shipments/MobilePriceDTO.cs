@@ -19,5 +19,9 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal? MainCharge { get; set; }
 
         public decimal? ServiceCharge { get; set; }
+
+        public string CurrencySymbol { get; set; }
+
+        public string CurrencyCode { get; set; }
     }
 }

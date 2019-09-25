@@ -43,7 +43,8 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 StationName = station.StationName,
                 StationCode = station.StationCode,
                 StateId = station.StateId,
-                SuperServiceCentreId = station.SuperServiceCentreId
+                SuperServiceCentreId = station.SuperServiceCentreId,
+                StationPickupPrice = station.StationPickupPrice
             };
 
             _uow.Station.Add(newStation);
@@ -84,6 +85,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 DateModified = station.DateModified,
                 Country = station.State.CountryId.ToString(),
                 SuperServiceCentreId = station.SuperServiceCentreId,
+                StationPickupPrice = station.StationPickupPrice,
                 SuperServiceCentreDTO = new ServiceCentreDTO()
                 {
                     Code = serviceCentre?.Code,
@@ -107,6 +109,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             station.StationCode = stationDto.StationCode.Trim();
             station.StateId = stationDto.StateId;
             station.SuperServiceCentreId = stationDto.SuperServiceCentreId;
+            station.StationPickupPrice = stationDto.StationPickupPrice;
             await _uow.CompleteAsync();
         }
 
@@ -137,6 +140,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                     StateId = st.StateId,
                     StateName = st.State.StateName,
                     SuperServiceCentreId = st.SuperServiceCentreId,
+                    StationPickupPrice = st.StationPickupPrice,
                     SuperServiceCentreDTO = superServiceCentreDTO
                 });
             }

@@ -19,6 +19,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string Manifest { get; set; }
         public string ManifestType { get; set; }
         public ScanStatusDTO ScanStatus { get; set; }
+        public string GroupWaybill { get; set; }
 
         //
         public int DepartureServiceCentreId { get; set; }

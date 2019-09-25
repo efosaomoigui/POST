@@ -8,6 +8,7 @@ using System.Web.Http;
 using GIGLS.WebApi.Filters;
 using System.Linq;
 using GIGLS.Core.IServices.User;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.WebApi.Controllers.ServiceCentres  
 {
@@ -145,6 +146,21 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("station/{stationId:int}")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetServiceCentreByStationId (int stationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var serviceCenters = await _service.GetServiceCentresByStationId(stationId);
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = serviceCenters
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("{servicecentreId:int}")]
@@ -206,10 +222,23 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                 {
                     Object = servicecentre
                 };
-
             });
+        }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("ServiceCentresByCountryId")]
+        public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetServiceCentresByCountryId(CountryDTO countryDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var servicecentres = await _service.GetServiceCentresByCountryId(countryDTO.CountryId);
 
+                return new ServiceResponse<List<ServiceCentreDTO>>
+                {
+                    Object = servicecentres
+                };
+            });
         }
 
     }

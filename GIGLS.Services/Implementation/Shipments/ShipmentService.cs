@@ -84,15 +84,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
                 //added for GWA and GWARIMPA service centres
-                {
-                    if (serviceCenters.Length == 1)
-                    {
-                        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                        {
-                            serviceCenters = new int[] { 4, 294 };
-                        }
-                    }
-                }
+                //{
+                //    if (serviceCenters.Length == 1)
+                //    {
+                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                //        {
+                //            serviceCenters = new int[] { 4, 294 };
+                //        }
+                //    }
+                //}
 
                 return _uow.Shipment.GetShipments(filterOptionsDto, serviceCenters);
             }
@@ -106,18 +106,18 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
                 //added for GWA and GWARIMPA service centres
-                {
-                    if (serviceCenters.Length == 1)
-                    {
-                        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                        {
-                            serviceCenters = new int[] { 4, 294 };
-                        }
-                    }
-                }
+                //{
+                //    if (serviceCenters.Length == 1)
+                //    {
+                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
+                //        {
+                //            serviceCenters = new int[] { 4, 294 };
+                //        }
+                //    }
+                //}
 
                 var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false);
                 var incomingShipments = new List<InvoiceViewDTO>();
@@ -776,6 +776,7 @@ namespace GIGLS.Services.Implementation.Shipments
             newShipment.DepartureCountryId = departureCountry.CountryId;
             newShipment.DestinationCountryId = destinationCountry.CountryId;
             newShipment.CurrencyRatio = departureCountry.CurrencyRatio;
+            newShipment.ShipmentPickupPrice = shipmentDTO.ShipmentPickupPrice;
             ////--end--///Set the DepartureCountryId and DestinationCountryId
 
             _uow.Shipment.Add(newShipment);
@@ -932,51 +933,77 @@ namespace GIGLS.Services.Implementation.Shipments
                 //var groupedWaybillsAsHashSet = new HashSet<string>(groupWayBillNumberMappings);
                 //var ungroupedWaybills = paidShipments.Where(s => !groupedWaybillsAsHashSet.Contains(s.Waybill)).ToList();
                 var ungroupedWaybills = paidShipments;
-
-                //5. Ensure the waybills are in this ServiceCentre from the TransitWaybill entity
-                //Get TransitWaybillNumber as a querable list
-                var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable().Where(x => x.IsTransitCompleted == false).ToList();
-
-                // final ungroupedList
+                
+                //new solution
+                //1. Get Transit Waybill that is not completed, not group and service centre belong to login user
+                //2. Loop through output of 1 and get the shipment details, then add it to the ungrouped
                 var finalUngroupedList = new List<InvoiceView>();
+
                 foreach (var item in ungroupedWaybills)
                 {
-                    var tranWaybillObj = allTransitWaybillNumberList.LastOrDefault(s => s.WaybillNumber == item.Waybill);
-                    if (tranWaybillObj != null)
-                    {
-                        if (tranWaybillObj.ServiceCentreId == serviceCenters[0] && tranWaybillObj.IsGrouped == false)
-                        {
-                            finalUngroupedList.Add(item);
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        finalUngroupedList.Add(item);
-                    }
+                    finalUngroupedList.Add(item);
                 }
+                int currentServiceCentre = serviceCenters[0];
 
-                //6.added for Transitwaybills
-                var transitWaybillNumberList = allTransitWaybillNumberList.Where(s =>
-                    serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false && s.IsTransitCompleted == false).ToList();
+                var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable()
+                    .Where(x => x.ServiceCentreId == currentServiceCentre && x.IsGrouped == false && x.IsTransitCompleted == false).ToList();
 
-                foreach (var item in transitWaybillNumberList)
+                foreach (var item in allTransitWaybillNumberList)
                 {
-                    var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().FirstOrDefault(s => s.IsShipmentCollected == false && s.Waybill == item.WaybillNumber);
+                    var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments()
+                        .FirstOrDefault(s => s.IsShipmentCollected == false && s.Waybill == item.WaybillNumber && s.DestinationServiceCentreId == destinationSCId);
 
-                    if (filterByDestinationSC && shipmentsBySC.Count > 0)
-                    {
-                        var destinationSC = shipmentsBySC[0].DestinationServiceCentreId;
-                        if (shipment != null && shipment.DestinationServiceCentreId == destinationSC)
-                        {
-                            finalUngroupedList.Add(shipment);
-                        }
-                    }
-                    else
+                    if (shipment != null)
                     {
                         finalUngroupedList.Add(shipment);
                     }
                 }
+
+                //5. Ensure the waybills are in this ServiceCentre from the TransitWaybill entity
+                //Get TransitWaybillNumber as a querable list
+                //var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable().Where(x => x.IsTransitCompleted == false).ToList();
+
+                //// final ungroupedList
+                //var finalUngroupedList = new List<InvoiceView>();
+                //foreach (var item in ungroupedWaybills)
+                //{
+                //    var tranWaybillObj = allTransitWaybillNumberList.LastOrDefault(s => s.WaybillNumber == item.Waybill);
+                //    if (tranWaybillObj != null)
+                //    {
+                //        if (tranWaybillObj.ServiceCentreId == serviceCenters[0] && tranWaybillObj.IsGrouped == false)
+                //        {
+                //            finalUngroupedList.Add(item);
+                //            break;
+                //        }
+                //    }
+                //    else
+                //    {
+                //        finalUngroupedList.Add(item);
+                //    }
+                //}
+
+                //The problem might be from here
+                //6.added for Transitwaybills
+                //var transitWaybillNumberList = allTransitWaybillNumberList.Where(s =>
+                //    serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false && s.IsTransitCompleted == false).ToList();
+
+                //foreach (var item in transitWaybillNumberList)
+                //{
+                //    var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().FirstOrDefault(s => s.IsShipmentCollected == false && s.Waybill == item.WaybillNumber);
+
+                //    if (filterByDestinationSC && shipmentsBySC.Count > 0)
+                //    {
+                //        var destinationSC = shipmentsBySC[0].DestinationServiceCentreId;
+                //        if (shipment != null && shipment.DestinationServiceCentreId == destinationSC)
+                //        {
+                //            finalUngroupedList.Add(shipment);
+                //        }
+                //    }
+                //    //else
+                //    //{
+                //    //    finalUngroupedList.Add(shipment);
+                //    //}
+                //}
 
                 //7.
                 var finalList = new List<InvoiceViewDTO>();
@@ -1065,62 +1092,76 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                //3. get all grouped waybills for that Service Centre
-                //once the waybills in group mapping for service centre grow to millions, the result will slow, need optimisation ???
-                //var groupWayBillNumberMappings = await _uow.GroupWaybillNumberMapping.GetGroupWaybillMappingWaybills(serviceCenters);
-
-                //4. filter the two lists
-                //var groupedWaybillsAsStringList = groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber);
-                //var groupedWaybillsAsHashSet = new HashSet<string>(groupWayBillNumberMappings);
-                //var ungroupedWaybills = paidShipments.Where(s => !groupedWaybillsAsHashSet.Contains(s.Waybill)).ToList();
                 var ungroupedWaybills = paidShipments;
 
-
-                //5. Ensure the waybills are in this ServiceCentre from the TransitWaybill entity
-
-                //Get TransitWaybillNumber as a querable list
-                var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable().Where(x => x.IsTransitCompleted == false).ToList();
-
-                // final ungroupedList
+                //new solution
+                //1. Get Transit Waybill that is not completed, not group and service centre belong to login user
+                //2. Loop through output of 1 and get the shipment details, then add it to the ungrouped
                 var finalUngroupedList = new List<InvoiceView>();
+
                 foreach (var item in ungroupedWaybills)
                 {
-                    var tranWaybillObj = allTransitWaybillNumberList.LastOrDefault(s => s.WaybillNumber == item.Waybill);
-                    if (tranWaybillObj != null)
-                    {
-                        if (tranWaybillObj.ServiceCentreId == serviceCenters[0] && tranWaybillObj.IsGrouped == false)
-                        {
-                            finalUngroupedList.Add(item);
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        finalUngroupedList.Add(item);
-                    }
+                    finalUngroupedList.Add(item);
                 }
+                int currentServiceCentre = serviceCenters[0];
 
-                //6.added for Transitwaybills
-                var transitWaybillNumberList = allTransitWaybillNumberList.Where(s =>
-                    serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false && s.IsTransitCompleted == false).ToList();
+                var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable()
+                    .Where(x => x.ServiceCentreId == currentServiceCentre && x.IsGrouped == false && x.IsTransitCompleted == false).ToList();
 
-                foreach (var item in transitWaybillNumberList)
+                foreach (var item in allTransitWaybillNumberList)
                 {
                     var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().FirstOrDefault(s => s.IsShipmentCollected == false && s.Waybill == item.WaybillNumber);
 
-                    if (filterByDestinationSC && shipmentsBySC.Count > 0)
-                    {
-                        var destinationSC = shipmentsBySC[0].DestinationServiceCentreId;
-                        if (shipment != null && shipment.DestinationServiceCentreId == destinationSC)
-                        {
-                            finalUngroupedList.Add(shipment);
-                        }
-                    }
-                    else
+                    if (shipment != null)
                     {
                         finalUngroupedList.Add(shipment);
                     }
                 }
+
+                //old algorithm
+                ////Get TransitWaybillNumber as a querable list
+                //var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable().Where(x => x.IsTransitCompleted == false).ToList();
+
+                //// final ungroupedList
+                //var finalUngroupedList = new List<InvoiceView>();
+                //foreach (var item in ungroupedWaybills)
+                //{
+                //    var tranWaybillObj = allTransitWaybillNumberList.LastOrDefault(s => s.WaybillNumber == item.Waybill);
+                //    if (tranWaybillObj != null)
+                //    {
+                //        if (tranWaybillObj.ServiceCentreId == serviceCenters[0] && tranWaybillObj.IsGrouped == false)
+                //        {
+                //            finalUngroupedList.Add(item);
+                //            break;
+                //        }
+                //    }
+                //    else
+                //    {
+                //        finalUngroupedList.Add(item);
+                //    }
+                //}
+
+                ////6.added for Transitwaybills
+                //var transitWaybillNumberList = allTransitWaybillNumberList.Where(s =>
+                //    serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsTransitCompleted == false).ToList();
+
+                //foreach (var item in transitWaybillNumberList)
+                //{
+                //    var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().FirstOrDefault(s => s.IsShipmentCollected == false && s.Waybill == item.WaybillNumber);
+
+                //    if (filterByDestinationSC && shipmentsBySC.Count > 0)
+                //    {
+                //        var destinationSC = shipmentsBySC[0].DestinationServiceCentreId;
+                //        if (shipment != null && shipment.DestinationServiceCentreId == destinationSC)
+                //        {
+                //            finalUngroupedList.Add(shipment);
+                //        }
+                //    }
+                //    //else
+                //    //{
+                //    //    finalUngroupedList.Add(shipment);
+                //    //}
+                //}
 
                 return finalUngroupedList;
             }
@@ -1141,15 +1182,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     sortorder = "0"
                 };
 
-                //var ungroupedWaybills = await GetUnGroupedWaybillsForServiceCentre(filterOptionsDto);
                 var ungroupedWaybills = await GetUnGroupedWaybillsForServiceCentreDropDown(filterOptionsDto);
 
                 var allServiceCenters = await _centreService.GetServiceCentres();
-
-                //var ungroupedServiceCentres = allServiceCenters.ToList().Where(
-                //    s => ungroupedWaybills.Select(
-                //        a => a.DestinationServiceCentreId).Contains(s.ServiceCentreId)).ToList();
-
+                
                 var grp = new List<int>();
 
                 foreach (var item in ungroupedWaybills)
