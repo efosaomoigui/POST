@@ -614,6 +614,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                   var EmailUser = await _uow.User.GetUserByEmail(user.Email);
                   if (EmailUser != null)
                   {
+                    if(EmailUser.UserChannelType == UserChannelType.Employee)
+                    {
+                        throw new GenericException("You cannot use your Employee email to register.");
+                    }
                     var emailpartnerdetails = await _uow.Partner.GetAsync(s => s.Email == user.Email);
                     if (emailpartnerdetails != null)
                     {
@@ -745,7 +749,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         Email = user.Email,
                         FirstName = user.FirstName,
                         LastName = user.LastName,
-                        Organisation = CustomerType.IndividualCustomer.ToString(),
+                        Organisation = PartnerType.Individual.ToString(),
                         Password = user.Password,
                         PhoneNumber = user.PhoneNumber,
                         UserType = UserType.Regular,
@@ -795,9 +799,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                     await _walletService.AddWallet(new WalletDTO
                     {
                         CustomerId = FinalPartner.PartnerId,
-                        CustomerType = CustomerType.IndividualCustomer,
+                        CustomerType = CustomerType.Partner,
                         CustomerCode = FinalPartner.PartnerCode,
-                        CompanyType = CustomerType.IndividualCustomer.ToString()
+                        CompanyType = CustomerType.Partner.ToString()
                     });
                     result = await SendOTPForRegisteredUser(user);
                     if (user.Referrercode == null)
@@ -867,6 +871,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var EmailUser = await _uow.User.GetUserByEmail(user.Email);
                 if (EmailUser != null)
                 {
+                    if (EmailUser.UserChannelType == UserChannelType.Employee)
+                    {
+                        throw new GenericException("You cannot use your Employee email to register.");
+                    }
                     EmailUser.FirstName = user.FirstName;
                     EmailUser.LastName = user.LastName;
                     EmailUser.PhoneNumber = user.PhoneNumber;
@@ -1114,6 +1122,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else
                 {
+                    user.UserChannelType = UserChannelType.IndividualCustomer;
                     user.IsFromMobile = true;
                     var registeredUser = await Register(user);
                     result = await SendOTPForRegisteredUser(registeredUser);
@@ -1183,6 +1192,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var EmailUser = await _uow.User.GetUserByEmail(user.Email);
                 if (EmailUser != null)
                 {
+                    if (EmailUser.UserChannelType == UserChannelType.Employee)
+                    {
+                        throw new GenericException("You cannot use your Employee email to register.");
+                    }
                     EmailUser.FirstName = user.FirstName;
                     EmailUser.LastName = user.LastName;
                     EmailUser.PhoneNumber = user.PhoneNumber;
@@ -1434,6 +1447,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else
                 {
+                    user.UserChannelType = UserChannelType.Ecommerce;
                     user.IsFromMobile = true;
                     var registeredUser = await Register(user);
                     result = await SendOTPForRegisteredUser(registeredUser);
