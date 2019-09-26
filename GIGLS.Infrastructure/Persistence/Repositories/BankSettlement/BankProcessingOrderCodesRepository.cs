@@ -2,6 +2,7 @@
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.BankSettlement;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.BankSettlement;
 using GIGLS.CORE.DTO.Report;
@@ -42,38 +43,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
 
             return Task.FromResult(processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit).ToList());
         }
-        //gets the deposits for the month by default once the page loads
-        public Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeForDefaultDate(DepositType type)
-        {
-           
-            DateTime date = DateTime.Now;
-            var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
-            var currentDate = new DateTime(date.Year, date.Month, DateTime.Now.Day);
-                        
-            var processingorderCodes = Context.BankProcessingOrderCodes.Where(s => s.DateCreated >= firstDayOfMonth && s.DateCreated < currentDate).AsQueryable();                                    
-
-            processingorderCodes = processingorderCodes.Where(s => s.DepositType == type);
-            var processingcodes = from processingorderCode in processingorderCodes
-                                  select new BankProcessingOrderCodesDTO
-                                  {
-                                      CodeId = processingorderCode.CodeId,
-                                      Code = processingorderCode.Code,
-                                      DateAndTimeOfDeposit = processingorderCode.DateAndTimeOfDeposit,
-                                      DepositType = processingorderCode.DepositType,
-                                      TotalAmount = processingorderCode.TotalAmount,
-                                      UserId = processingorderCode.UserId,
-                                      Status = processingorderCode.Status,
-                                      ServiceCenter = processingorderCode.ServiceCenter,
-                                      ScName = processingorderCode.ScName,
-                                      FullName = processingorderCode.FullName,
-                                      VerifiedBy = processingorderCode.VerifiedBy
-                                  };
-
-            return Task.FromResult(processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit).ToList());
-        } 
+        
 
         //gets the deposits for the date range
-        public Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, DateFilterCriteria dateFilterCriteria)
+        public Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria)
         {
             //get startDate and endDate
             var queryDate = dateFilterCriteria.getStartDateAndEndDate();
@@ -82,7 +55,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
 
             var processingorderCodes = Context.BankProcessingOrderCodes.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.DepositType == type).AsQueryable();                       
 
-            //processingorderCodes = processingorderCodes.Where(s => s.DepositType == type);
+            
             var processingcodes = from processingorderCode in processingorderCodes
                                   select new BankProcessingOrderCodesDTO
                                   {

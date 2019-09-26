@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.BankSettlement;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
@@ -284,25 +285,11 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         }
 
         //Helps get all processing order by the type: COD or Shipment from 
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("getbankOrderprocessingcode")]
-        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> GetBankOrderProcessingCode(DepositType type) 
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var resValue = await _bankprocessingorder.GetBankOrderProcessingCode(type);
-                return new ServiceResponse<List<BankProcessingOrderCodesDTO>>
-                {
-                    Object = resValue
-                };
-            });
-        }
-
+        
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("getbankOrderprocessingcodebyDate")]
-        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> GetBankOrderProcessingCodeByDate(DepositType type, DateFilterCriteria dateFilterCriteria)
+        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> GetBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
