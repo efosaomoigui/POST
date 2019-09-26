@@ -183,6 +183,7 @@
     <Compile Include="Implementation\Customers\CustomerService.cs" />
     <Compile Include="Implementation\Customers\IndividualCustomerService.cs" />
     <Compile Include="Implementation\Dashboard\DashboardService.cs" />
+    <Compile Include="Implementation\DeliveryLocationService.cs" />
     <Compile Include="Implementation\DeliveryNumberService.cs" />
     <Compile Include="Implementation\Devices\DeviceManagementService.cs" />
     <Compile Include="Implementation\Devices\DeviceService.cs" />
@@ -224,6 +225,7 @@
     <Compile Include="Implementation\Report\AccountReportService.cs" />
     <Compile Include="Implementation\Report\AdminReportService.cs" />
     <Compile Include="Implementation\Report\ShipmentReportService.cs" />
+    <Compile Include="Implementation\RiderDeliveryService.cs" />
     <Compile Include="Implementation\ServiceCentres\RegionService.cs" />
     <Compile Include="Implementation\ServiceCentres\ServiceCentreService.cs" />
     <Compile Include="Implementation\ServiceCentres\StationService.cs" />

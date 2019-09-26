@@ -641,6 +641,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             await UpdateShipmentCollection(shipmentCollection);
+            await AddRiderToDeliveryTable(shipmentCollection);
         }
 
         public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetOverDueShipments(FilterOptionsDto filterOptionsDto)
@@ -1135,6 +1136,31 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        public async Task AddRiderToDeliveryTable(ShipmentCollectionDTO shipmentCollection)
+        {
+            shipmentCollection.Waybill = shipmentCollection.Waybill.Trim().ToLower();
+
+            if (await _uow.RiderDelivery.ExistAsync(v => v.Waybill.ToLower() == shipmentCollection.Waybill))
+            {
+                throw new GenericException($"Waybill {shipmentCollection.Waybill} already exist");
+            }
+            var location = await _uow.DeliveryLocation.GetAsync(v => v.Location == shipmentCollection.ReceiverArea);
+            var currentUserId = await _userService.GetCurrentUserId();
+
+            var updateRiderDelivery = new RiderDelivery
+            {
+                Waybill = shipmentCollection.Waybill,
+                DeliveryDate = DateTime.Now,
+                DriverId = currentUserId,
+                CostOfDelivery = location.Tariff,
+                Address = shipmentCollection.Address
+            };
+                        
+            _uow.RiderDelivery.Add(updateRiderDelivery);
+            await _uow.CompleteAsync();
+        }
+
 
 
     }
