@@ -10,6 +10,6 @@ namespace GIGLS.Core.IServices
 {
     public interface IRiderDeliveryService : IServiceDependencyMarker
     {
-        Task<List<RiderDeliveryDTO>> GetRiderDelivery(string riderId, ShipmentCollectionFilterCriteria dateFilterCriteria);
+        Task<RiderDeliveryViewDTO> GetRiderDelivery(string riderId, ShipmentCollectionFilterCriteria dateFilterCriteria);
     }
 }

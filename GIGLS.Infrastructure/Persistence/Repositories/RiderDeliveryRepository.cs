@@ -21,36 +21,35 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
             _context = context;
         }
 
-        public async Task<List<RiderDeliveryDTO>> GetRiderDelivery (string riderId, ShipmentCollectionFilterCriteria dateFilterCriteria)
+        public async Task<List<RiderDeliveryDTO>> GetRiderDelivery(string riderId, ShipmentCollectionFilterCriteria dateFilterCriteria)
         {
             //get startDate and endDate
             var queryDate = dateFilterCriteria.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var riderDelivery = Context.RiderDelivery.Where(s => s.DriverId == riderId && s.DateCreated >= startDate && s.DateCreated < endDate ).AsQueryable();
+            var riderDelivery = Context.RiderDelivery.Where(s => s.DriverId == riderId && s.DateCreated >= startDate && s.DateCreated < endDate).AsQueryable();
 
-            var riderDeliveryDTO = from s in riderDelivery
-                                   select new RiderDeliveryDTO
-                                   {
-                                       RiderDeliveryId = s.RiderDeliveryId,
-                                       Address = s.Address,
-                                       CostOfDelivery = s.CostOfDelivery,
-                                       DeliveryDate = s.DeliveryDate,
-                                       DriverId = s.DriverId,
-                                       Waybill = s.Waybill,
-                                      
-                                       //UserDetail = Context.Users.Where(x => x.Id == s.DriverId)
-                                       //.Select(p => new UserDTO
-                                       //{
-                                       //    FirstName = p.FirstName,
-                                       //    LastName = p.LastName
-                                       //}).FirstOrDefault()
-                                   };
+            List<RiderDeliveryDTO> riderDeliveryDTO = (from s in riderDelivery
+                                                       select new RiderDeliveryDTO
+                                                       {
+                                                           RiderDeliveryId = s.RiderDeliveryId,
+                                                           Address = s.Address,
+                                                           CostOfDelivery = s.CostOfDelivery,
+                                                           DeliveryDate = s.DeliveryDate,
+                                                           DriverId = s.DriverId,
+                                                           Waybill = s.Waybill,
+                                                           Area = s.Area,
+                                                           UserDetail = Context.Users.Where(x => x.Id == s.DriverId)
+                                                           .Select(p => new UserDTO
+                                                           {
+                                                               FirstName = p.FirstName,
+                                                               LastName = p.LastName
+                                                           }).FirstOrDefault()
+                                                       }).ToList();
 
-            return await Task.FromResult(riderDeliveryDTO.ToList());
-
-
+            var resultDto = riderDeliveryDTO.OrderByDescending(x => x.DeliveryDate).ToList();
+            return await Task.FromResult(resultDto);
         }
     }
 }

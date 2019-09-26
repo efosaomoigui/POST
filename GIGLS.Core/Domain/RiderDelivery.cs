@@ -16,5 +16,6 @@ namespace GIGLS.Core.Domain
         public decimal CostOfDelivery { get; set; }
         public string Address { get; set; }
         public DateTime DeliveryDate { get; set; }
+        public string Area { get; set; }
     }
 }

@@ -20,12 +20,8 @@ namespace GIGLS.Services.Implementation
             _uow = uow;
             MapperConfig.Initialize();
         }
-        //public Task<IEnumerable<RiderDeliveryDTO>> GetRiderDelivery(DateFilterCriteria dateFilterCriteria)
-        //{
-        //    var locations = _uow.DeliveryLocation.GetAll();
-        //    return Task.FromResult(Mapper.Map<IEnumerable<DeliveryLocationDTO>>(locations));
-        //}
-        public async Task<List<RiderDeliveryDTO>> GetRiderDelivery (string riderId, ShipmentCollectionFilterCriteria dateFilterCriteria)
+        
+        public async Task<RiderDeliveryViewDTO> GetRiderDelivery (string riderId, ShipmentCollectionFilterCriteria dateFilterCriteria)
         {
             var result = new List<RiderDeliveryDTO>();
 
@@ -34,7 +30,15 @@ namespace GIGLS.Services.Implementation
             {
                 result.Add(item);
             }
-            return result.OrderByDescending(x => x.DateCreated).ToList();
+            
+            var riderDeliveryViewDTO = new RiderDeliveryViewDTO()
+            {
+                RiderDelivery = result,
+                Total = result.Sum(s => s.CostOfDelivery)
+            };
+
+            return riderDeliveryViewDTO;
+            
 
         }
     }

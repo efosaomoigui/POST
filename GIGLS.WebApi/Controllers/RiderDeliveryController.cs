@@ -27,13 +27,13 @@ namespace GIGLS.WebApi.Controllers
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("riderdeliverybydate/{riderId}")]
-        public async Task<IServiceResponse<List<RiderDeliveryDTO>>> GetRiderDelivery(string riderId, ShipmentCollectionFilterCriteria dateFilterCriteria)
+        public async Task<IServiceResponse<RiderDeliveryViewDTO>> GetRiderDelivery(string riderId, ShipmentCollectionFilterCriteria dateFilterCriteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var riderDelivery = await _riderDeliveryService.GetRiderDelivery(riderId, dateFilterCriteria);
 
-                return new ServiceResponse<List<RiderDeliveryDTO>>
+                return new ServiceResponse<RiderDeliveryViewDTO>
                 {
                     Object = riderDelivery
                 };

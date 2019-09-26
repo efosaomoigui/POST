@@ -363,6 +363,7 @@
     <Compile Include="DTO\Report\ShipmentFilterCriteria.cs" />
     <Compile Include="DTO\Report\ShipmentProgressSummaryFilterCriteria.cs" />
     <Compile Include="DTO\RiderDeliveryDTO.cs" />
+    <Compile Include="DTO\RiderDeliveryViewDTO.cs" />
     <Compile Include="DTO\ServiceCentres\RegionDTO.cs" />
     <Compile Include="DTO\ServiceCentres\RegionServiceCentreMappingDTO.cs" />
     <Compile Include="DTO\ServiceCentres\ServiceCentreDTO.cs" />

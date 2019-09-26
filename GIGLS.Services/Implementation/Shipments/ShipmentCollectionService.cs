@@ -1154,14 +1154,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 DeliveryDate = DateTime.Now,
                 DriverId = currentUserId,
                 CostOfDelivery = location.Tariff,
-                Address = shipmentCollection.Address
+                Address = shipmentCollection.Address,
+                Area = shipmentCollection.ReceiverArea
             };
                         
             _uow.RiderDelivery.Add(updateRiderDelivery);
             await _uow.CompleteAsync();
         }
-
-
-
     }
 }
