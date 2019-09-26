@@ -1057,6 +1057,10 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var user = await _userService.GetUserByChannelCode(CustomerCode);
+                if(user.UserChannelType == UserChannelType.Ecommerce)
+                {
+                    return true;
+                }
                 var customer = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == CustomerCode);
                 if (customer == null)
                 {
@@ -1480,6 +1484,39 @@ namespace GIGLS.Services.Implementation.Shipments
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+
+
+        public async Task<bool> CreateCompany(string CustomerCode)
+        {
+            try
+            {
+                var user = await _userService.GetUserByChannelCode(CustomerCode);
+                var company = await _uow.Company.GetAsync(s => s.CustomerCode == CustomerCode);
+                if (company == null)
+                {
+                    var companydto = new CompanyDTO
+                    {
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Name = user.Organisation,
+                        CompanyType = CompanyType.Ecommerce,
+                        Password = user.Password,
+                        CustomerCode = user.UserChannelCode,
+                        IsRegisteredFromMobile = true,
+                    };
+                    var Company = Mapper.Map<Company>(companydto);
+                    _uow.Company.Add(Company);
+                    await _uow.CompleteAsync();
+                }
+                return true; ;
+            }
+            catch
+            {
+                throw;
             }
         }
     }

@@ -45,6 +45,12 @@ namespace GIGLS.Services.Implementation.Customers
                     throw new GenericException($"{company.Name} or phone number already exist");
                 }
 
+                //check if registration is from Giglgo
+                if(company.IsFromMobile==true)
+                {
+                    company.IsRegisteredFromMobile = true;
+                }
+
                 var newCompany = Mapper.Map<Company>(company);
                 newCompany.CompanyStatus = CompanyStatus.Pending;
 

@@ -751,6 +751,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             {
                                 var response = await _preshipmentmobileService.CreatePartner(user.UserChannelCode);
                             }
+                            if (logindetail.UserChannelType == UserChannelType.Ecommerce.ToString())
+                            {
+                                var response = await _preshipmentmobileService.CreateCompany(user.UserChannelCode);
+                            }
 
                         }
                         //get access token from response body

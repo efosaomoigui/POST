@@ -49,5 +49,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<PreShipmentSummaryDTO> GetShipmentDetailsFromDeliveryNumber(string DeliveryNumber);
         Task<bool> ApproveShipment(string waybillNumber);
 
+        Task<bool> CreateCompany(string CustomerCode);
+
     }
 }
