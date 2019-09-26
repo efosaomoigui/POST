@@ -1183,7 +1183,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     _uow.IndividualCustomer.Remove(Customer);
                 }
-
                 var partner = await _uow.Partner.GetAsync(s => s.Email == detail);
                 if (partner != null)
                 {
@@ -1212,9 +1211,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //to get images information
                 var images = new ImageDTO();
-                
                 var Partner = await _uow.Partner.GetAsync(s => s.Email == partner.Email);
-
                 if (Partner != null)
                 {
                     Partner.Address = partner.Address;
@@ -1230,16 +1227,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     Partner.AccountNumber = partner.AccountNumber;
                     Partner.BankName = partner.BankName;
                     Partner.VehicleLicenseExpiryDate = partner.VehicleLicenseExpiryDate;
-
                     images.PartnerFullName = partner.FirstName + partner.LastName;
-
                     if (partner.VehicleLicenseImageDetails != null)
                     {
                         images.FileType = ImageFileType.VehicleLicense;
                         images.ImageString = partner.VehicleLicenseImageDetails;
                         partner.VehicleLicenseImageDetails = await LoadImage(images);
                     }
-
                     Partner.VehicleLicenseImageDetails = partner.VehicleLicenseImageDetails;
                     Partner.VehicleLicenseNumber = partner.VehicleLicenseNumber;
                     if (partner.VehicleTypeDetails.Count() == 0)
@@ -1276,7 +1270,6 @@ namespace GIGLS.Services.Implementation.Shipments
                             VehicleDetails.VehicleParticularsDetails = vehicle.VehicleParticularsDetails;
                             VehicleDetails.VehiclePlateNumber = vehicle.VehiclePlateNumber;
                             VehicleDetails.Vehicletype = vehicle.Vehicletype;
-
                         }
                         else
                         {
@@ -1369,12 +1362,8 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //To get only the base64 string
                 var baseString = images.ImageString.Split(',')[1];
-
                 byte[] bytes = Convert.FromBase64String(baseString);
-                            
-              
                 string filename = images.PartnerFullName + "_"  + images.FileType.ToString() + ".png";
-                            
                //Save to AzureBlobStorage
                var blobname = await AzureBlobServiceUtil.UploadAsync(bytes, filename);
 
@@ -1492,7 +1481,6 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw ex;
             }
-
         }
     }
 
