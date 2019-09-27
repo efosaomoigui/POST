@@ -2,10 +2,7 @@
 using GIGLS.Core;
 using GIGLS.Core.DTO;
 using GIGLS.Core.IServices;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation
@@ -19,7 +16,8 @@ namespace GIGLS.Services.Implementation
             _uow = uow;
             MapperConfig.Initialize();
         }
-        public Task<IEnumerable<DeliveryLocationDTO>> GetLocations()
+
+        public Task<IEnumerable<DeliveryLocationDTO>> GetDeliveryLocations()
         {
             var locations = _uow.DeliveryLocation.GetAll();
             return Task.FromResult(Mapper.Map<IEnumerable<DeliveryLocationDTO>>(locations));

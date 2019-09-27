@@ -6,6 +6,6 @@ namespace GIGLS.Core.IServices
 {
     public interface IDeliveryLocationService : IServiceDependencyMarker
     {
-        Task<IEnumerable<DeliveryLocationDTO>> GetLocations();
+        Task<IEnumerable<DeliveryLocationDTO>> GetDeliveryLocations();
     }
 }

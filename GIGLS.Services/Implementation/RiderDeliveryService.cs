@@ -1,13 +1,8 @@
-﻿using AutoMapper;
-using GIGLS.Core;
+﻿using GIGLS.Core;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.IServices;
-using GIGLS.CORE.DTO.Report;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation
@@ -23,23 +18,17 @@ namespace GIGLS.Services.Implementation
         
         public async Task<RiderDeliveryViewDTO> GetRiderDelivery (string riderId, ShipmentCollectionFilterCriteria dateFilterCriteria)
         {
-            var result = new List<RiderDeliveryDTO>();
+            var result = new RiderDeliveryViewDTO();
 
             var riderDelivery = await _uow.RiderDelivery.GetRiderDelivery(riderId, dateFilterCriteria);
-            foreach (var item in riderDelivery)
+
+            if(riderDelivery.Count > 0)
             {
-                result.Add(item);
+                result.RiderDelivery = riderDelivery;
+                result.Total = riderDelivery.Sum(s => s.CostOfDelivery);
             }
             
-            var riderDeliveryViewDTO = new RiderDeliveryViewDTO()
-            {
-                RiderDelivery = result,
-                Total = result.Sum(s => s.CostOfDelivery)
-            };
-
-            return riderDeliveryViewDTO;
-            
-
+            return result;
         }
     }
 }

@@ -3,17 +3,12 @@ using GIGLS.Core.DTO.Report;
 using GIGLS.Core.IServices;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers
 {
-    //[Authorize(Roles = "Shipment, ViewAdmin")]
-    [AllowAnonymous]
+    [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/riderdelivery")]
     public class RiderDeliveryController : BaseWebApiController
     {

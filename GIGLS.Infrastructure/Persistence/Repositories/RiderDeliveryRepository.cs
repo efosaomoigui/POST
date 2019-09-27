@@ -3,12 +3,9 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.IRepositories;
-using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure.Persistence.Repository;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories
@@ -16,6 +13,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
     public class RiderDeliveryRepository : Repository<RiderDelivery, GIGLSContext>, IRiderDeliveryRepository
     {
         private GIGLSContext _context;
+
         public RiderDeliveryRepository(GIGLSContext context) : base(context)
         {
             _context = context;
@@ -28,7 +26,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var riderDelivery = Context.RiderDelivery.Where(s => s.DriverId == riderId && s.DateCreated >= startDate && s.DateCreated < endDate).AsQueryable();
+            var riderDelivery = _context.RiderDelivery.Where(s => s.DriverId == riderId && s.DateCreated >= startDate && s.DateCreated < endDate).AsQueryable();
 
             List<RiderDeliveryDTO> riderDeliveryDTO = (from s in riderDelivery
                                                        select new RiderDeliveryDTO
@@ -40,7 +38,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                                                            DriverId = s.DriverId,
                                                            Waybill = s.Waybill,
                                                            Area = s.Area,
-                                                           UserDetail = Context.Users.Where(x => x.Id == s.DriverId)
+                                                           UserDetail = _context.Users.Where(x => x.Id == s.DriverId)
                                                            .Select(p => new UserDTO
                                                            {
                                                                FirstName = p.FirstName,
