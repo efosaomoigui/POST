@@ -13,6 +13,7 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using System.Linq;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Business.Scanning
 {
@@ -628,6 +629,20 @@ namespace GIGLS.Services.Business.Scanning
 
                     await _shipmentTrackingService.AddTrackingAndSendEmailForRemovingMissingShipmentsInManifest(newShipmentTracking, scanStatus, MessageType.SMIM);                                                         
                 }
+
+                //delete the group if it the only waybill in the group and only group in the manifest
+                int groupWaybill = _uow.GroupWaybillNumberMapping.GetAllAsQueryable().Where(x => x.GroupWaybillNumber == groupWaybillNumberMapping.GroupWaybillNumber).Count();
+
+                if (groupWaybill == 0)
+                {
+                    var gw = await _uow.GroupWaybillNumber.GetAsync(x => x.GroupWaybillCode == groupWaybillNumberMapping.GroupWaybillNumber);
+                    _uow.GroupWaybillNumber.Remove(gw);
+
+                    //remove group from the manifest
+                    _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupwaybillMapping);
+
+                    await _uow.CompleteAsync();
+                }                                              
             }
         }
 
@@ -644,45 +659,37 @@ namespace GIGLS.Services.Business.Scanning
                 DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId,
                 DestinationServiceCentreId = shipmentDTO.DestinationServiceCentreId,
                 Location = currentServiceCentreName,
-                //Manifest = manifestGroupwaybillMapping.ManifestCode,
                 ServiceCentreId = currentServiceCentre
             };
 
-            await _shipmentTrackingService.AddTrackingAndSendEmailForRemovingMissingShipmentsInManifest(newShipmentTracking, scanStatus, MessageType.FMS);
-
-
-            //1. Get the GroupWaybill, Transit & Manifest
-            var groupWaybillNumberMapping = _uow.GroupWaybillNumberMapping.GetAllAsQueryable().Where(w => w.WaybillNumber == waybill).LastOrDefault();
-
-            if (groupWaybillNumberMapping != null)
+            //add/update the transit table
+            var transitWaybill = await _uow.TransitWaybillNumber.GetAsync(s => s.WaybillNumber == waybill);
+            if (transitWaybill != null)
             {
-                var manifestGroupwaybillMapping = await _uow.ManifestGroupWaybillNumberMapping.GetAsync(x => x.GroupWaybillNumber == groupWaybillNumberMapping.GroupWaybillNumber);
-                if (manifestGroupwaybillMapping != null)
-                {
-                    
-
-                    //2. Remove it from the group and transit table
-                    _uow.GroupWaybillNumberMapping.Remove(groupWaybillNumberMapping);
-
-                    //4. Make it available for grouping
-                    var transitWaybill = await _uow.TransitWaybillNumber.GetAsync(s => s.WaybillNumber == waybill);
-                    if (transitWaybill != null)
-                    {
-                        transitWaybill.IsGrouped = false;
-                    }
-                    else
-                    {
-                        shipmentDTO.IsGrouped = false;
-                    }
-
-                    //8.Add it to missing(Incident) shipment table
-
-                    //7.add the manifest detail to tracking history and Send email to both receiver and sender regional
-
-                    
-
-                }
+                transitWaybill.ServiceCentreId = currentServiceCentre;
+                transitWaybill.IsGrouped = false;
             }
+            else
+            {
+                string user = await _userService.GetCurrentUserId();
+
+                shipmentDTO.IsGrouped = false;
+
+                //create new transit waybill
+                var newTransit = new TransitWaybillNumber
+                {
+                    ServiceCentreId = currentServiceCentre,
+                    WaybillNumber = waybill,
+                    IsGrouped = false,
+                    IsTransitCompleted = false,
+                    UserId = user
+                };
+
+                _uow.TransitWaybillNumber.Add(newTransit);
+            }
+
+            //8.Add/Update missing(Incident), add tracking history and send message to regional manager
+            await _shipmentTrackingService.AddTrackingAndSendEmailForRemovingMissingShipmentsInManifest(newShipmentTracking, scanStatus, MessageType.FMS);   
         }
 
         private async Task ProcessPickUpShipment(Shipment shipment, ScanDTO scan, int currentUserSercentreId, string serviceCentreName)
