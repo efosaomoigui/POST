@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace GIGLS.Core.Domain
 {
@@ -11,6 +6,8 @@ namespace GIGLS.Core.Domain
     {
         [Key]
         public int DeliveryLocationId { get; set; }
+
+        [MaxLength(100)]
         public string Location { get; set; }         
         public decimal Tariff { get; set; }
     }
