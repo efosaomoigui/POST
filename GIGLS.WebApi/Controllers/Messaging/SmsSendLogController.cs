@@ -10,7 +10,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Messaging
 {
-    [Authorize(Roles = "Admin, Shipment")]
+    [Authorize(Roles = "Admin, Shipment, ViewAdmin")]
     [RoutePrefix("api/smssendlog")]
     public class SmsSendLogController : BaseWebApiController
     {
