@@ -640,7 +640,11 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             await UpdateShipmentCollection(shipmentCollection);
-            await AddRiderToDeliveryTable(shipmentCollection);
+            //If it is mobile
+            if (shipmentCollection.IsComingFromDispatch)
+            {
+                await AddRiderToDeliveryTable(shipmentCollection);
+            }
         }
 
         public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetOverDueShipments(FilterOptionsDto filterOptionsDto)
