@@ -1287,12 +1287,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("getallstations")]
-        public async Task<IServiceResponse<List<StationDTO>>> getstations()
+        public async Task<IServiceResponse<Dictionary<string, List<StationDTO>>>> getstations()
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var stations = await _portalService.GetAllStations();
-                return new ServiceResponse<List<StationDTO>>
+                return new ServiceResponse<Dictionary<string, List<StationDTO>>>
                 {
                     Object = stations
                 };
