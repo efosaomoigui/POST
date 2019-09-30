@@ -16,5 +16,7 @@
 
         public int ServiceCenterId { get; set; }
         public string ServiceCenterCode { get; set; }
+        public int CountryId { get; set; }
+        public CountryDTO Country { get; set; }
     }
 }

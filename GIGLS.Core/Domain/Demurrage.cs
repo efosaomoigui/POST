@@ -23,5 +23,7 @@ namespace GIGLS.Core.Domain
 
         [MaxLength(50)]
         public string ServiceCenterCode { get; set; }
+
+        public int CountryId { get; set; }
     }
 }

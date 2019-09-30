@@ -433,9 +433,7 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentCollection.IndentificationUrl = shipmentCollectionDto.IndentificationUrl;
             shipmentCollection.ShipmentScanStatus = shipmentCollectionDto.ShipmentScanStatus;
             shipmentCollection.UserId = shipmentCollectionDto.UserId;
-
-            // var collectionServiceCenter = shipmentCollectionDto.OriginalDestinationServiceCentre;
-
+            
             //Add Collected Scan to Scan History
             var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
             {
@@ -446,12 +444,11 @@ namespace GIGLS.Services.Implementation.Shipments
             }, shipmentCollectionDto.ShipmentScanStatus);
 
             //Get Destination Service centre details
-            var getServiceCentreDetail = await _uow.ServiceCentre.GetAsync(shipmentCollection.DestinationServiceCentreId);
-            
+            var getServiceCentreDetail = await _uow.ServiceCentre.GetServiceCentresByIdForInternational(shipmentCollection.DestinationServiceCentreId);
+
             //cash collected on Delivery
             if (shipmentCollectionDto.IsCashOnDelivery)
             {
-
                 CODStatushistory codStatushistory;
 
                 if (shipmentCollectionDto.IsComingFromDispatch)
@@ -474,7 +471,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     },
                     Description = shipmentCollectionDto.Description,
                     Waybill = shipmentCollectionDto.Waybill,
-                    CODStatus = CODStatus.Unprocessed
+                    CODStatus = CODStatus.Unprocessed,
+                    CountryId = getServiceCentreDetail.CountryId
                 });
 
                 //Update CashOnDevliveryRegisterAccount As  Cash Recieved at Service Center
@@ -488,6 +486,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     codRegisterCollectsForASingleWaybill.PaymentType = shipmentCollectionDto.PaymentType;
                     codRegisterCollectsForASingleWaybill.PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference;
                     codRegisterCollectsForASingleWaybill.DepositStatus = DepositStatus.Unprocessed;
+                    codRegisterCollectsForASingleWaybill.DestinationCountryId = getServiceCentreDetail.CountryId;
                 }
                 else
                 {
@@ -502,7 +501,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         PaymentType = shipmentCollectionDto.PaymentType,
                         PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference,
                         ServiceCenterCode = getServiceCentreDetail.Code,
-                        CODStatusHistory = codStatushistory
+                        CODStatusHistory = codStatushistory,
+                        DestinationCountryId = getServiceCentreDetail.CountryId
                     };
 
                     //Add the the selected cod information and set it in the codregister account
@@ -512,22 +512,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentCollectionDto.Demurrage?.Amount > 0)
             {
-                ////--start--///Set the DepartureCountryId
-                int countryIdFromServiceCentreId = 0;
-                try
-                {
-                    var departureCountry = await _uow.Country.GetCountryByServiceCentreId(getServiceCentreDetail.ServiceCentreId);
-                    countryIdFromServiceCentreId = departureCountry.CountryId;
-                }
-                catch (Exception) { }
-                ////--end--///Set the DepartureCountryId
-
                 //update general ledger for demurrage
                 var generalLedger = new GeneralLedger()
                 {
                     DateOfEntry = DateTime.Now,
                     ServiceCentreId = getServiceCentreDetail.ServiceCentreId,
-                    CountryId = countryIdFromServiceCentreId,
+                    CountryId = getServiceCentreDetail.CountryId,
                     UserId = shipmentCollectionDto.UserId,
                     Amount = shipmentCollectionDto.Demurrage.AmountPaid,
                     CreditDebitType = CreditDebitType.Credit,
@@ -551,7 +541,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     PaymentType = shipmentCollectionDto.PaymentType,
                     PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference,
                     DEMStatusHistory = CODStatushistory.RecievedAtServiceCenter,
-                    ServiceCenterCode = getServiceCentreDetail.Code
+                    ServiceCenterCode = getServiceCentreDetail.Code,
+                    CountryId = getServiceCentreDetail.CountryId
                 };
 
                 //insert demurage into demurrage entity 
@@ -564,7 +555,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     ApprovedBy = shipmentCollectionDto.Demurrage.ApprovedBy,
                     UserId = shipmentCollection.UserId,
                     ServiceCenterId = getServiceCentreDetail.ServiceCentreId,
-                    ServiceCenterCode = getServiceCentreDetail.Code
+                    ServiceCenterCode = getServiceCentreDetail.Code,
+                    CountryId = getServiceCentreDetail.CountryId
                 };
 
                 _uow.DemurrageRegisterAccount.Add(demurrageinformation);
@@ -611,9 +603,7 @@ namespace GIGLS.Services.Implementation.Shipments
         //        throw new GenericException($"Shipment with waybill: {waybill} is not available for Return Processing");
         //    }
         //}
-
-
-
+               
 
         public async Task ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
         {

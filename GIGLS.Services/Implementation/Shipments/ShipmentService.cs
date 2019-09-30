@@ -283,8 +283,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //only if the shipment is collected
                 //get ShipmentCollection if it exists
-                var shipmentCollection = _uow.ShipmentCollection.
-                    SingleOrDefault(s => s.Waybill == shipmentDto.Waybill);
+                var shipmentCollection = _uow.ShipmentCollection.SingleOrDefault(s => s.Waybill == shipmentDto.Waybill);
                 var shipmentCollectionDTO = Mapper.Map<ShipmentCollectionDTO>(shipmentCollection);
                 shipmentDto.ShipmentCollection = shipmentCollectionDTO;
 
@@ -354,17 +353,10 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             var price = 0;
             var demurrageDays = 0;
-
-            var userActiveCountryId = 1;
-            try
-            {
-                userActiveCountryId = await _userService.GetUserActiveCountryId();
-            }
-            catch (Exception ex) { }
-
+            
             //get GlobalProperty
-            var demurrageCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurrageDayCount, userActiveCountryId);
-            var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice, userActiveCountryId);
+            var demurrageCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurrageDayCount, shipmentDto.DestinationCountryId);
+            var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice, shipmentDto.DestinationCountryId);
 
             //validate
             if (demurrageCountObj == null || demurragePriceObj == null)
