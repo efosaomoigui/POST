@@ -30,5 +30,7 @@ namespace GIGLS.CORE.IServices.Shipments
 
         System.Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollectionForHub(FilterOptionsDto filterOptionsDto);
 
+        Task AddRiderToDeliveryTable(ShipmentCollectionDTO shipmentCollection);
+
     }
 }

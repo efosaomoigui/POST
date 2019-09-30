@@ -371,6 +371,12 @@ namespace GIGLS.Core
 
                 config.CreateMap<PickupManifestWaybillMapping, PickupManifestWaybillMappingDTO>();
                 config.CreateMap<PickupManifestWaybillMappingDTO, PickupManifestWaybillMapping>();
+
+                config.CreateMap<RiderDelivery, RiderDeliveryDTO>();
+                config.CreateMap<RiderDeliveryDTO, RiderDelivery>();
+
+                config.CreateMap<DeliveryLocation, DeliveryLocationDTO>();
+                config.CreateMap<DeliveryLocationDTO, DeliveryLocation>();
             });
 
             isInit = true;

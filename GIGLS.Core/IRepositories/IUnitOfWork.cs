@@ -169,6 +169,8 @@ namespace GIGLS.Core
         IVehicleTypeRepository VehicleType { get; set; }
         IPickupManifestRepository PickupManifest { get; set; }
         IPickupManifestWaybillMappingRepository PickupManifestWaybillMapping { get; set; }
+        IRiderDeliveryRepository RiderDelivery { get; set; }
+        IDeliveryLocationRepository DeliveryLocation { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

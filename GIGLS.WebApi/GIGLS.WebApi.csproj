@@ -303,6 +303,7 @@
     <Compile Include="Controllers\Customers\CustomerController.cs" />
     <Compile Include="Controllers\Customers\IndividualCustomerController.cs" />
     <Compile Include="Controllers\Dashboard\DashboardController.cs" />
+    <Compile Include="Controllers\DeliveryLocationController.cs" />
     <Compile Include="Controllers\Devices\DeviceController.cs" />
     <Compile Include="Controllers\Devices\DeviceManagementController.cs" />
     <Compile Include="Controllers\Fleets\DispatchActivityController.cs" />
@@ -332,6 +333,7 @@
     <Compile Include="Controllers\PickUp\PickUpController.cs" />
     <Compile Include="Controllers\Report\AdminReportController.cs" />
     <Compile Include="Controllers\Report\ReportsController.cs" />
+    <Compile Include="Controllers\RiderDeliveryController.cs" />
     <Compile Include="Controllers\Scanner\MobileScannerController.cs" />
     <Compile Include="Controllers\ServiceCentres\RegionController.cs" />
     <Compile Include="Controllers\ServiceCentres\RegionServiceCentreMappingController.cs" />
