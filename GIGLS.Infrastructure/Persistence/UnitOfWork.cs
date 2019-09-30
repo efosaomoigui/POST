@@ -431,6 +431,12 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IPickupManifestWaybillMappingRepository PickupManifestWaybillMapping { get; set; }
 
+        [Inject]
+        public IRiderDeliveryRepository RiderDelivery { get; set; }
+
+        [Inject]
+        public IDeliveryLocationRepository DeliveryLocation { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

@@ -4,7 +4,6 @@ using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
@@ -641,6 +640,11 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             await UpdateShipmentCollection(shipmentCollection);
+            //If it is mobile
+            if (shipmentCollection.IsComingFromDispatch)
+            {
+                await AddRiderToDeliveryTable(shipmentCollection);
+            }
         }
 
         public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetOverDueShipments(FilterOptionsDto filterOptionsDto)
@@ -649,18 +653,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //get all shipments by servicecentre
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-
-                //added for GWA and GWARIMPA service centres
-                //{
-                //    if (serviceCenters.Length == 1)
-                //    {
-                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                //        {
-                //            serviceCenters = new int[] { 4, 294 };
-                //        }
-                //    }
-                //}
-
+                
                 var userActiveCountryId = 1;
                 try
                 {
@@ -1136,6 +1129,35 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task AddRiderToDeliveryTable(ShipmentCollectionDTO shipmentCollection)
+        {
 
+            if (await _uow.RiderDelivery.ExistAsync(v => v.Waybill == shipmentCollection.Waybill))
+            {
+                throw new GenericException($"Waybill {shipmentCollection.Waybill} already exist");
+            }
+
+            var location = await _uow.DeliveryLocation.GetAsync(v => v.Location == shipmentCollection.ReceiverArea);
+
+            if(location == null)
+            {
+                throw new GenericException($"Receiver Area is not available, kinldy select the appropriate area");
+            }
+            
+            var currentUserId = await _userService.GetCurrentUserId();
+
+            var addRiderDelivery = new RiderDelivery
+            {
+                Waybill = shipmentCollection.Waybill,
+                DeliveryDate = DateTime.Now,
+                DriverId = currentUserId,
+                CostOfDelivery = location.Tariff,
+                Address = shipmentCollection.Address,
+                Area = shipmentCollection.ReceiverArea
+            };
+                        
+            _uow.RiderDelivery.Add(addRiderDelivery);
+            await _uow.CompleteAsync();
+        }
     }
 }
