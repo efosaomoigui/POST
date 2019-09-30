@@ -283,17 +283,6 @@ namespace GIGLS.Services.Implementation.Account
 
         public async Task<InvoiceDTO> GetInvoiceByWaybill(string waybl)
         {
-            //var invoices = await GetInvoices();
-            //var invoice = await _uow.Invoice.GetAsync(e => e.Waybill == waybl);
-
-            //if (invoice == null)
-            //{
-            //    throw new GenericException("Invoice does not exists");
-            //}
-
-            //return await GetInvoiceById(invoice.InvoiceId);
-
-
             var invoice = await _uow.Invoice.GetAsync(e => e.Waybill == waybl);
 
             if (invoice == null)

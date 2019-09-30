@@ -245,7 +245,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 // get ServiceCentre
                 var departureServiceCentre = await _centreService.GetServiceCentreById(shipment.DepartureServiceCentreId);
                 var destinationServiceCentre = await _centreService.GetServiceCentreById(shipment.DestinationServiceCentreId);
-
+                
                 //Change the Service Centre Code to country name if the shipment is International shipment
                 if (shipmentDto.IsInternational)
                 {
@@ -665,8 +665,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             return createdObject;
         }
-
-
+        
         private async Task<ShipmentDTO> CreateShipment(ShipmentDTO shipmentDTO)
         {
             await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
@@ -697,16 +696,12 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentDTO.DepartureServiceCentreId = serviceCenterIds[0];
             shipmentDTO.UserId = currentUserId;
 
-            //Generate Waybill Number(serviceCentreCode, userId, servicecentreId)
-            //var waybill = await _waybillService.GenerateWaybillNumber(loginUserServiceCentre.Code, shipmentDTO.UserId, loginUserServiceCentre.ServiceCentreId);
             var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
             var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
 
             shipmentDTO.Waybill = waybill;
-
-
+            
             var newShipment = Mapper.Map<Shipment>(shipmentDTO);
-            //shipmentDTO.ShipmentReroute.RerouteReason = newShipment.ShipmentReroute.RerouteReason;
 
             // set declared value of the shipment
             if (shipmentDTO.IsdeclaredVal)
@@ -751,6 +746,10 @@ namespace GIGLS.Services.Implementation.Shipments
             //save the display value of Insurance and Vat
             newShipment.Vat = shipmentDTO.vatvalue_display;
             newShipment.DiscountValue = shipmentDTO.InvoiceDiscountValue_display;
+            
+            ////--start--///Set the DepartureCountryId and DestinationCountryId
+            var departureCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DepartureServiceCentreId);
+            var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DestinationServiceCentreId);
 
             //check if the shipment contains cod
             if (newShipment.IsCashOnDelivery == true)
@@ -761,18 +760,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 cashondeliveryentity.CODStatusHistory = CODStatushistory.Created;
                 cashondeliveryentity.Description = "Cod From Sales";
                 //cashondeliveryentity.ServiceCenterCode = newShipment.DepartureServiceCentreId;
-                cashondeliveryentity.ServiceCenterId = 0; //newShipment.DepartureServiceCentreId; recieveddatcenter && unproccessed &&  cash && sc
+                cashondeliveryentity.ServiceCenterId = 0; 
                 cashondeliveryentity.Waybill = newShipment.Waybill;
                 cashondeliveryentity.UserId = newShipment.UserId;
                 cashondeliveryentity.DepartureServiceCenterId = newShipment.DepartureServiceCentreId;
+                cashondeliveryentity.DestinationCountryId = destinationCountry.CountryId;
 
                 _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
             }
-
-            ////--start--///Set the DepartureCountryId and DestinationCountryId
-            var departureCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DepartureServiceCentreId);
-            var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DestinationServiceCentreId);
-
+            
             newShipment.DepartureCountryId = departureCountry.CountryId;
             newShipment.DestinationCountryId = destinationCountry.CountryId;
             newShipment.CurrencyRatio = departureCountry.CurrencyRatio;
@@ -780,7 +776,6 @@ namespace GIGLS.Services.Implementation.Shipments
             ////--end--///Set the DepartureCountryId and DestinationCountryId
 
             _uow.Shipment.Add(newShipment);
-            //await _uow.CompleteAsync();
 
             //save into DeliveryOptionMapping table
             foreach (var deliveryOptionId in deliveryOptionIds)

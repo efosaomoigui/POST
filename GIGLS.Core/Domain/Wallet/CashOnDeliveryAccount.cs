@@ -41,7 +41,8 @@ namespace GIGLS.Core.Domain.Wallet
 
         [MaxLength(100)]
         public string RefCode { get; set; }
-        public int DepartureServiceCenterId { get; set; } 
+        public int DepartureServiceCenterId { get; set; }
+        public int DestinationCountryId { get; set; }
     }
 
     public class DemurrageRegisterAccount : BaseDomain, IAuditable 
@@ -69,5 +70,6 @@ namespace GIGLS.Core.Domain.Wallet
 
         [MaxLength(100)]
         public string RefCode { get; set; }
+        public int DestinationCountryId { get; set; }
     }
 }
