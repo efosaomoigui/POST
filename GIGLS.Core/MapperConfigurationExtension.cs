@@ -212,6 +212,9 @@ namespace GIGLS.Core
                 config.CreateMap<DemurrageRegisterAccount, DemurrageRegisterAccountDTO>();
                 config.CreateMap<DemurrageRegisterAccountDTO, DemurrageRegisterAccount>();
 
+                config.CreateMap<Demurrage, DemurrageDTO>();
+                config.CreateMap<DemurrageDTO, Demurrage>();
+
                 config.CreateMap<Dispatch, DispatchDTO>();
                 config.CreateMap<DispatchDTO, DispatchDTO>();
 
