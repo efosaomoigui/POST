@@ -1584,12 +1584,21 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
 
 
-        public async Task<List<StationDTO>> GetAllStations()
+        public async Task<Dictionary<string, List<StationDTO>>> GetAllStations()
         {
-           
-            var stations= await _uow.Station.GetAllStationsAsync();
-            var stationDTO = Mapper.Map<List<StationDTO>>(stations);
-            return stationDTO;
+            Dictionary<string, List<StationDTO>> StationDictionary = new Dictionary<string, List<StationDTO>>();
+            //1. getcountries
+            var countries = _uow.Country.GetAll().ToList();
+            //2. get the station attached to a country based on the contryId
+            foreach (var country in countries)
+            {
+                var countryIds = new int[1];   
+                countryIds[0] = country.CountryId;
+                var stationdtos = await _uow.Station.GetLocalStations(countryIds);
+                //3. add the country and its' stations 
+                StationDictionary.Add(country.CountryName, stationdtos);
+            }
+            return StationDictionary;
         }
 
     }

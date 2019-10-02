@@ -16,6 +16,7 @@ using GIGLS.CORE.DTO.Shipments;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GIGLS.Core.IServices.CustomerPortal
@@ -69,6 +70,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
 
         Task<List<StationDTO>> GetLocalStations();
 
-        Task<List<StationDTO>> GetAllStations();
+        Task<Dictionary<string, List<StationDTO>>> GetAllStations();
     }
 }
