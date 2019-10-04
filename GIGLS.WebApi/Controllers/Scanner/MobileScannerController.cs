@@ -27,7 +27,7 @@ using System.Web.Http;
 namespace GIGLS.WebApi.Controllers.Scanner
 {
     [Authorize(Roles = "Shipment, ViewAdmin")]
-    [RoutePrefix("api/Scanner")]
+    [RoutePrefix("api/scanner")]
     public class MobileScannerController : BaseWebApiController
     {
         private readonly IScanService _scanService;
