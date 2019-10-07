@@ -196,6 +196,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             return result;
         }
+
         private async Task<bool> BreakdownPayments(Invoice invoiceEntity, PaymentTransactionDTO paymentTransaction)
         {
             var result = false;
