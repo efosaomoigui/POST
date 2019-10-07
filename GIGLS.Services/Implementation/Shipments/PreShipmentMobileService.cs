@@ -1274,6 +1274,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             VehicleDetails.VehicleParticularsDetails = vehicle.VehicleParticularsDetails;
                             VehicleDetails.VehiclePlateNumber = vehicle.VehiclePlateNumber;
                             VehicleDetails.Vehicletype = vehicle.Vehicletype;
+                            VehicleDetails.IsVerified = vehicle.IsVerified;
                         }
                         else
                         {

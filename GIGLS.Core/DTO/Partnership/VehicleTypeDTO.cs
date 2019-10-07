@@ -17,5 +17,6 @@ namespace GIGLS.Core.DTO.Partnership
         public string VehiceInsurancePolicyDetails { get; set; }
         public string VehiceRoadWorthinessDetails { get; set; }
         public string VehicleParticularsDetails { get; set; }
+        public bool IsVerified { get; set; }
     }
 }

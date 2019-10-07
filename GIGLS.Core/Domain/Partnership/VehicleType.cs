@@ -21,5 +21,7 @@ namespace GIGLS.Core.Domain
 
         public string VehiceRoadWorthinessDetails { get; set; }
         public string VehicleParticularsDetails { get; set; }
+
+        public bool IsVerified { get; set; }
     }
 }
