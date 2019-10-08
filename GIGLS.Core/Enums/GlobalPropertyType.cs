@@ -29,6 +29,8 @@
         ReprintDays,  //the number of  days to allow for reprint
         HUBManifestDaysToDisplay,
         PickUpPrice,
-        ReferrerCodeBonus
+        ReferrerCodeBonus,
+        CustomerWeekDate,
+        CustomerWeekCount
     }
 }
