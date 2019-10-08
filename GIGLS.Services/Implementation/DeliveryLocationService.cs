@@ -27,7 +27,7 @@ namespace GIGLS.Services.Implementation
 
         public async Task<object> AddDeliveryLocationPrice(DeliveryLocationDTO deliveryLocationDTO)
         {
-            var deliveryExist = await _uow.DeliveryLocation.ExistAsync(x => x.Location.ToUpper() == deliveryLocationDTO.Location.ToUpper());
+            var deliveryExist = await _uow.DeliveryLocation.ExistAsync(x => x.Location.ToLower() == deliveryLocationDTO.Location.ToLower());
 
             if(deliveryExist == true)
             {
