@@ -306,6 +306,19 @@ namespace GIGLS.Services.Implementation.Fleets
                     dispatchDTO.Country = country;
                 }
 
+                //get Service Center Detail
+                var destService = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == dispatch.DestinationServiceCenterId);
+                if (destService != null)
+                {
+                    dispatchDTO.DestinationService = Mapper.Map<ServiceCentreDTO>(destService);
+                }
+
+                var deptService = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == dispatch.DepartureServiceCenterId);
+                if(deptService != null)
+                {
+                    dispatchDTO.DepartureService = Mapper.Map<ServiceCentreDTO>(deptService);
+                }
+
                 //get the ManifestType
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
                 if (manifestObj == null)
