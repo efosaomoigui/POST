@@ -706,7 +706,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             {
                 var user = await _otpService.CheckDetails(logindetail.UserDetail,logindetail.UserChannelType);
                 var vehicle = user.VehicleType;
-                var PartnerType = "";
+                var partnerType = "";
                 if (user.Username != null)
                 {
                     user.Username = user.Username.Trim();
@@ -751,8 +751,9 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             if (logindetail.UserChannelType == UserChannelType.Partner.ToString())
                             {
                                 var response = await _preshipmentmobileService.CreatePartner(user.UserChannelCode);
-                                
-                                PartnerType = response;
+                                partnerType = response;
+                                if (partnerType == PartnerType.InternalDeliveryPartner.ToString())
+                                    user.IsVerified = true;
                             }
                             if (logindetail.UserChannelType == UserChannelType.Ecommerce.ToString())
                             {
@@ -772,7 +773,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             ReferrerCode = user.Referrercode,
                             AverageRatings = user.AverageRatings,
                             IsVerified = user.IsVerified,
-                            PartnerType = PartnerType
+                            PartnerType = partnerType
 
                         };
                     }
