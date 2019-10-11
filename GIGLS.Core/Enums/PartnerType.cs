@@ -4,6 +4,8 @@
     {
         Corporate,
         Individual,
-        Ecommerce
+        Ecommerce,
+        DeliveryPartner,
+        InternalDeliveryPartner
     }
 }

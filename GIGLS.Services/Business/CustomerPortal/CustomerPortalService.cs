@@ -1588,7 +1588,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             Dictionary<string, List<StationDTO>> StationDictionary = new Dictionary<string, List<StationDTO>>();
             //1. getcountries
-            var countries = _uow.Country.GetAll().ToList();
+            var countries = _uow.Country.GetAll().ToList().Where(s=>s.IsActive ==true);
             //2. get the station attached to a country based on the contryId
             foreach (var country in countries)
             {
