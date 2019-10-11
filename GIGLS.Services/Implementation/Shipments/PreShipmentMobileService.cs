@@ -1108,8 +1108,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         partnerDTO.Email = user.Email;
                         partnerDTO.PhoneNumber = user.PhoneNumber;
                         partnerDTO.UserId = user.Id;
-                        partnerDTO.IsActivated = false;
+                        partnerDTO.IsActivated = true;
                         
+
                     }
                     else
                     {
@@ -1131,6 +1132,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (user.SystemUserRole == "Dispatch Rider")
                     {
                         partner.PartnerType = PartnerType.InternalDeliveryPartner;
+                        partner.IsActivated = true;
                     }
                     else
                     {
