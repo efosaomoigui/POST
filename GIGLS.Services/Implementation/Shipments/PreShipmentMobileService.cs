@@ -206,7 +206,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var PickupValue = Convert.ToDecimal(Pickuprice);
             var ShipmentCount = preShipment.PreShipmentItems.Count();
             var IndividualPrice = PickupValue / ShipmentCount;
-            var user = await _userService.GetUserById(preShipment.UserId);
+           // var user = await _userService.GetUserById(preShipment.UserId);
             var Price = 0.0M;
             decimal DeclaredValue = 0.0M;
             var Country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
