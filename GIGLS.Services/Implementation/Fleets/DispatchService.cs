@@ -305,18 +305,18 @@ namespace GIGLS.Services.Implementation.Fleets
                     var country = await _uow.Country.GetCountryByServiceCentreId(serviceCentre);
                     dispatchDTO.Country = country;
                 }
-                ////get Station Detail
-                //var destStation = await _uow.Station.GetAsync(x => x.StationId == dispatch.DestinationId);
-                //if (destStation != null)
-                //{
-                //    dispatchDTO.Destination = Mapper.Map<StationDTO>(destStation);
-                //}
+                //get Station Detail
+                var destStation = await _uow.Station.GetAsync(x => x.StationId == dispatch.DestinationId);
+                if (destStation != null)
+                {
+                    dispatchDTO.Destination = Mapper.Map<StationDTO>(destStation);
+                }
 
-                //var deptStation = await _uow.Station.GetAsync(x => x.StationId == dispatch.DepartureId);
-                //if (deptStation != null)
-                //{
-                //    dispatchDTO.Departure = Mapper.Map<StationDTO>(deptStation);
-                //}
+                var deptStation = await _uow.Station.GetAsync(x => x.StationId == dispatch.DepartureId);
+                if (deptStation != null)
+                {
+                    dispatchDTO.Departure = Mapper.Map<StationDTO>(deptStation);
+                }
                 //get Service Center Detail
                 var destService = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == dispatch.DestinationServiceCenterId);
                 if (destService != null)
