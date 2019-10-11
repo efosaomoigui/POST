@@ -206,7 +206,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var PickupValue = Convert.ToDecimal(Pickuprice);
             var ShipmentCount = preShipment.PreShipmentItems.Count();
             var IndividualPrice = PickupValue / ShipmentCount;
-            var user = await _userService.GetUserById(preShipment.UserId);
+           // var user = await _userService.GetUserById(preShipment.UserId);
             var Price = 0.0M;
             decimal DeclaredValue = 0.0M;
             var Country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
@@ -1089,31 +1089,60 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<bool> CreatePartner(string CustomerCode)
+        public async Task<string> CreatePartner(string CustomerCode)
         {
             try
             {
+                var partnerDTO = new PartnerDTO();
                 var user = await _userService.GetUserByChannelCode(CustomerCode);
                 var partner = await _uow.Partner.GetAsync(s => s.PartnerCode == CustomerCode);
                 if (partner == null)
                 {
-                    var partnerDTO = new PartnerDTO
+                    if (user.SystemUserRole == "Dispatch Rider")
                     {
-                        PartnerType = PartnerType.Individual,
-                        PartnerName = user.FirstName + "" + user.LastName,
-                        PartnerCode = user.UserChannelCode,
-                        FirstName = user.FirstName,
-                        LastName = user.LastName,
-                        Email = user.Email,
-                        PhoneNumber = user.PhoneNumber,
-                        UserId = user.Id,
-                        IsActivated = false,
-                    };
+                        partnerDTO.PartnerType = PartnerType.InternalDeliveryPartner;
+                        partnerDTO.PartnerName = user.FirstName + "" + user.LastName;
+                        partnerDTO.PartnerCode = user.UserChannelCode;
+                        partnerDTO.FirstName = user.FirstName;
+                        partnerDTO.LastName = user.LastName;
+                        partnerDTO.Email = user.Email;
+                        partnerDTO.PhoneNumber = user.PhoneNumber;
+                        partnerDTO.UserId = user.Id;
+                        partnerDTO.IsActivated = true;
+                        
+
+                    }
+                    else
+                    {
+                        partnerDTO.PartnerType = PartnerType.DeliveryPartner;
+                        partnerDTO.PartnerName = user.FirstName + "" + user.LastName;
+                        partnerDTO.PartnerCode = user.UserChannelCode;
+                        partnerDTO.FirstName = user.FirstName;
+                        partnerDTO.LastName = user.LastName;
+                        partnerDTO.Email = user.Email;
+                        partnerDTO.PhoneNumber = user.PhoneNumber;
+                        partnerDTO.UserId = user.Id;
+                        partnerDTO.IsActivated = false;
+                    }
                      var FinalPartner = Mapper.Map<Partner>(partnerDTO);
                     _uow.Partner.Add(FinalPartner);
-                    await _uow.CompleteAsync();
                 }
-                return true; ;
+                else
+                {
+                    if (user.SystemUserRole == "Dispatch Rider")
+                    {
+                        partner.PartnerType = PartnerType.InternalDeliveryPartner;
+                        partner.IsActivated = true;
+                    }
+                    else
+                    {
+                        partner.PartnerType = PartnerType.DeliveryPartner;
+                    }
+
+                }
+                await _uow.CompleteAsync();
+                var latestpartner = await _uow.Partner.GetAsync(s => s.PartnerCode == CustomerCode);
+                return latestpartner.PartnerType.ToString();
             }
             catch
             {
@@ -1246,18 +1275,18 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     foreach (var vehicle in partner.VehicleTypeDetails)
                     {
-                        if (vehicle.VehiceInsurancePolicyDetails != null)
+                        if (vehicle.VehicleInsurancePolicyDetails != null)
                         {
                             images.FileType = ImageFileType.VehiceInsurancePolicy;
-                            images.ImageString = vehicle.VehiceInsurancePolicyDetails;
-                            vehicle.VehiceInsurancePolicyDetails = await LoadImage(images);
+                            images.ImageString = vehicle.VehicleInsurancePolicyDetails;
+                            vehicle.VehicleInsurancePolicyDetails = await LoadImage(images);
                         }
 
-                        if (vehicle.VehiceRoadWorthinessDetails != null)
+                        if (vehicle.VehicleRoadWorthinessDetails != null)
                         {
                             images.FileType = ImageFileType.VehiceRoadWorthiness;
-                            images.ImageString = vehicle.VehiceRoadWorthinessDetails;
-                            vehicle.VehiceRoadWorthinessDetails = await LoadImage(images);
+                            images.ImageString = vehicle.VehicleRoadWorthinessDetails;
+                            vehicle.VehicleRoadWorthinessDetails = await LoadImage(images);
                         }
 
                         if (vehicle.VehicleParticularsDetails != null)
@@ -1269,8 +1298,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         var VehicleDetails = await _uow.VehicleType.GetAsync(s => s.VehicleTypeId == vehicle.VehicleTypeId && s.Partnercode == partner.PartnerCode);
                         if (VehicleDetails != null)
                         {
-                            VehicleDetails.VehiceInsurancePolicyDetails = vehicle.VehiceInsurancePolicyDetails;
-                            VehicleDetails.VehiceRoadWorthinessDetails = vehicle.VehiceRoadWorthinessDetails;
+                            VehicleDetails.VehiceInsurancePolicyDetails = vehicle.VehicleInsurancePolicyDetails;
+                            VehicleDetails.VehiceRoadWorthinessDetails = vehicle.VehicleRoadWorthinessDetails;
                             VehicleDetails.VehicleParticularsDetails = vehicle.VehicleParticularsDetails;
                             VehicleDetails.VehiclePlateNumber = vehicle.VehiclePlateNumber;
                             VehicleDetails.Vehicletype = vehicle.Vehicletype;
