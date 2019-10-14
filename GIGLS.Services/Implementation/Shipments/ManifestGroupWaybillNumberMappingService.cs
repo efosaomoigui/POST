@@ -453,6 +453,14 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 manifestGroupWaybills.ToList().ForEach(x => x.ManifestCode = newManifestCode);
 
+                //create new manifest
+                var newManifest = new Manifest
+                {
+                    ManifestCode = newManifestCode,
+                    DateTime = DateTime.Now
+                };
+                _uow.Manifest.Add(newManifest);                
+
                 //add tracking history
                 var arrWaybills = groupWaybillMapping.Select(x => x.WaybillNumber).ToList();
                 await ProcessScanning(arrWaybills, serviceCenters[0]);
