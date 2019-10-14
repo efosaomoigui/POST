@@ -216,5 +216,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
          });
         }
+
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("moveManifestToNewManifest/{manifestCode}")]
+        public async Task<IServiceResponse<string>> MoveManifestDetailToNewManifest(string manifestCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestSearch = await _service.MoveManifestDetailToNewManifest(manifestCode);
+                return new ServiceResponse<string>
+                {
+                    Object = manifestSearch
+                };
+            });
+        }
     }
 }
