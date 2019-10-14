@@ -457,14 +457,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var arrWaybills = groupWaybillMapping.Select(x => x.WaybillNumber).ToList();
                 await ProcessScanning(arrWaybills, serviceCenters[0]);
             }  
-
-
-            //Update Departure SC to new SC on groupwaybill          
-            //On GroupWaybillMapping,  Update Departure SC to new SC
-            // Create new Manifest 
-            // Update Manifest GW Mapping with the new Manifest code
-            //Add tracking to waybill
-
+            
             return newManifestCode;
         }
 
@@ -472,22 +465,25 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             var currentUserId = await _userService.GetCurrentUserId();
             var serviceCenterDetail = await _uow.ServiceCentre.GetAsync(serviceCentre);
-
-            var newShipmentTracking = new ShipmentTracking
-            {
-                Location = serviceCenterDetail.Name,
-                Status = ShipmentScanStatus.AST.ToString(),
-                DateTime = DateTime.Now,
-                UserId = currentUserId,
-                ServiceCentreId = serviceCentre
-            };
+            
+            List<ShipmentTracking> data = new List<ShipmentTracking>();
             
             foreach (var waybill in waybills)
             {
-                newShipmentTracking.Waybill = waybill;
-                _uow.ShipmentTracking.Add(newShipmentTracking);
+                var newShipmentTracking = new ShipmentTracking
+                {
+                    Waybill = waybill,
+                    Location = serviceCenterDetail.Name,
+                    Status = ShipmentScanStatus.AST.ToString(),
+                    DateTime = DateTime.Now,
+                    UserId = currentUserId,
+                    ServiceCentreId = serviceCentre
+                };
+
+                data.Add(newShipmentTracking);
             }
 
+            _uow.ShipmentTracking.AddRange(data);
             await _uow.CompleteAsync();
         }
     }
