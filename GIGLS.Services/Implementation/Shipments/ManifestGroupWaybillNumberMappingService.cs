@@ -466,6 +466,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 await ProcessScanning(arrWaybills, serviceCenters[0]);
             }  
             
+            if(newManifestCode == null)
+            {
+                throw new GenericException($"No Waybill was attached to the Manifest {manifestCode}");
+            }
+
             return newManifestCode;
         }
 
