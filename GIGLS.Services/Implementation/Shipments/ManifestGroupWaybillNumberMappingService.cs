@@ -4,6 +4,7 @@ using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.CORE.DTO.Report;
@@ -22,16 +23,18 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IGroupWaybillNumberService _groupWaybillNumberService;
         private readonly IUserService _userService;
         private readonly IManifestWaybillMappingService _manifestWaybillMappingService;
+        private readonly IShipmentTrackingService _trackingService;
 
         public ManifestGroupWaybillNumberMappingService(IUnitOfWork uow,
-            IManifestService manifestService, IGroupWaybillNumberService groupWaybillNumberService,
-            IUserService userService, IManifestWaybillMappingService manifestWaybillMappingService)
+            IManifestService manifestService, IGroupWaybillNumberService groupWaybillNumberService, IUserService userService,
+            IManifestWaybillMappingService manifestWaybillMappingService, IShipmentTrackingService trackingService)
         {
             _uow = uow;
             _manifestService = manifestService;
             _groupWaybillNumberService = groupWaybillNumberService;
             _userService = userService;
             _manifestWaybillMappingService = manifestWaybillMappingService;
+            _trackingService = trackingService;
             MapperConfig.Initialize();
         }
 
@@ -409,6 +412,92 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+        
+        public async Task<string> MoveManifestDetailToNewManifest(string manifestCode)
+        {
+            string newManifestCode = null;
+
+            //Get the manifest details
+            var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestCode && x.IsDispatched == true
+                && (x.ManifestType == ManifestType.External || x.ManifestType == ManifestType.Transit));
+
+            if (manifest == null)
+            {
+                throw new GenericException("Manifest can not be process for conversion");
+            }
+
+            //Get Login User Details
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+
+            //Get ManifestGroupWaybill Detail
+            var manifestGroupWaybills = await _uow.ManifestGroupWaybillNumberMapping.FindAsync(x => x.ManifestCode == manifestCode);
+
+            if(manifestGroupWaybills.Any())
+            {
+                var arrGrpWaybills = manifestGroupWaybills.Select(x => x.GroupWaybillNumber).ToArray();
+
+                //Update Departure SC to new SC on groupwaybill   
+                var group = _uow.GroupWaybillNumber.GetAllAsQueryable().Where(x => arrGrpWaybills.Contains(x.GroupWaybillCode)).ToList();
+                group.ForEach(x => x.DepartureServiceCentreId = serviceCenters[0]);
+
+                //On GroupWaybillMapping,  Update Departure SC to new SC
+                var groupWaybillMapping = _uow.GroupWaybillNumberMapping.GetAllAsQueryable().Where(x => arrGrpWaybills.Contains(x.GroupWaybillNumber)).ToList();
+                groupWaybillMapping.ForEach(x => x.DepartureServiceCentreId = serviceCenters[0]);
+
+                // Update Manifest GW Mapping with the new Manifest code
+                //Generate new Manifest 
+                ManifestDTO manifestDTO = new ManifestDTO();
+                newManifestCode = await _manifestService.GenerateManifestCode(manifestDTO);
+
+                manifestGroupWaybills.ToList().ForEach(x => x.ManifestCode = newManifestCode);
+
+                //create new manifest
+                var newManifest = new Manifest
+                {
+                    ManifestCode = newManifestCode,
+                    DateTime = DateTime.Now
+                };
+                _uow.Manifest.Add(newManifest);                
+
+                //add tracking history
+                var arrWaybills = groupWaybillMapping.Select(x => x.WaybillNumber).ToList();
+                await ProcessScanning(arrWaybills, serviceCenters[0]);
+            }  
+            
+            if(newManifestCode == null)
+            {
+                throw new GenericException($"No Waybill was attached to the Manifest {manifestCode}");
+            }
+
+            return newManifestCode;
+        }
+
+        private async Task ProcessScanning(List<string> waybills, int serviceCentre)
+        {
+            var currentUserId = await _userService.GetCurrentUserId();
+            var serviceCenterDetail = await _uow.ServiceCentre.GetAsync(serviceCentre);
+            
+            List<ShipmentTracking> data = new List<ShipmentTracking>();
+            
+            foreach (var waybill in waybills)
+            {
+                var newShipmentTracking = new ShipmentTracking
+                {
+                    Waybill = waybill,
+                    Location = serviceCenterDetail.Name,
+                    Status = ShipmentScanStatus.AST.ToString(),
+                    DateTime = DateTime.Now,
+                    UserId = currentUserId,
+                    ServiceCentreId = serviceCentre
+                };
+
+                data.Add(newShipmentTracking);
+            }
+
+            _uow.ShipmentTracking.AddRange(data);
+            await _uow.CompleteAsync();
         }
     }
 }
