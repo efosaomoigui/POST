@@ -124,6 +124,7 @@ namespace GIGLS.Services.Implementation.Shipments
             // get the current user info
             var currentUser = await _userService.GetCurrentUserId();
             preShipmentDTO.UserId = currentUser;
+            var user = await _userService.GetUserById(currentUser);
             var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
             preShipmentDTO.CountryName = Country.CountryName;
             var PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
@@ -147,6 +148,21 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 }
                 var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
+                if(user.UserChannelType == UserChannelType.IndividualCustomer)
+                {
+                    newPreShipment.CustomerType = "Individual";
+                    newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
+                }
+                if (user.UserChannelType == UserChannelType.Ecommerce)
+                {
+                    newPreShipment.CustomerType = CustomerType.Company.ToString();
+                    newPreShipment.CompanyType = CompanyType.Ecommerce.ToString();
+                }
+                if (user.UserChannelType == UserChannelType.Partner)
+                {
+                    newPreShipment.CustomerType = "Individual";
+                    newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
+                }
                 newPreShipment.IsConfirmed = false;
                 newPreShipment.IsDelivered = false;
                 newPreShipment.shipmentstatus = "Shipment created";
@@ -609,6 +625,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         ApproximateItemsWeight = 0.00,
                         ReprintCounterStatus = false,
                         CustomerType = preshipmentmobile.CustomerType,
+                        CompanyType = preshipmentmobile.CompanyType,
                         Value = preshipmentmobile.Value,
                         PaymentStatus = PaymentStatus.Paid,
                         IsFromMobile = true,
