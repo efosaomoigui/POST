@@ -5,6 +5,7 @@ using GIGLS.Core.DTO;
 using System.Net;
 using System;
 using System.IO;
+using System.Net.Http;
 
 namespace GIGLS.Messaging.MessageService
 {
@@ -23,9 +24,9 @@ namespace GIGLS.Messaging.MessageService
 
             try
             {
-                var smsURL = ConfigurationManager.AppSettings["smsURL"];
+                var smsURL = await returnValidUrl();
+
                 var smsApiKey = ConfigurationManager.AppSettings["smsApiKey"];
-                //var smsFrom = ConfigurationManager.AppSettings["smsFrom"];
 
                 //ogosms url format
                 var finalURL = $"{smsURL}&password={smsApiKey}&sender={message.From}&numbers={message.To}&message={message.FinalBody}&response=json&unicode=0";
@@ -43,7 +44,6 @@ namespace GIGLS.Messaging.MessageService
             }
             catch (Exception ex)
             {
-                // An exception occurred making the REST call
                 throw ex;
             }
 
@@ -59,6 +59,48 @@ namespace GIGLS.Messaging.MessageService
                 message = reponseMessage;
             }
             return message;
+        }
+
+        private async Task<string> returnValidUrl()
+        {
+            string smsURL = ConfigurationManager.AppSettings["smsURL"];
+            
+            bool result = await IsValidUri(smsURL);
+
+            if (!result)
+            {
+                smsURL = ConfigurationManager.AppSettings["smsURLNet"];
+            }
+            
+            return smsURL;
+        }
+
+        private async Task<bool> IsValidUri(string url)
+        {
+            try
+            {
+                Uri uri = new Uri(url);
+
+                using (HttpClient client = new HttpClient())
+                {
+                    HttpResponseMessage result = await client.GetAsync(uri);
+                    HttpStatusCode StatusCode = result.StatusCode;
+
+                    switch (StatusCode)
+                    {
+                        case HttpStatusCode.Accepted:
+                            return true;
+                        case HttpStatusCode.OK:
+                            return true;
+                        default:
+                            return false;
+                    }
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         // Use Scriptwall Sms
