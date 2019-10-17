@@ -1319,5 +1319,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("gethaulage")]
+        public async Task<IServiceResponse<IEnumerable<Haulagedto>>> Gethaulages()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var haulage = await _portalService.Gethaulages();
+
+                return new ServiceResponse<IEnumerable<Haulagedto>>
+                {
+                    Object = haulage
+                };
+            });
+        }
     }
 }
