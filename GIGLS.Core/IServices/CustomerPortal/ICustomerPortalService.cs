@@ -71,5 +71,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<StationDTO>> GetLocalStations();
 
         Task<Dictionary<string, List<StationDTO>>> GetAllStations();
+
+        Task<IEnumerable<Haulagedto>> Gethaulages();
     }
 }

@@ -8,5 +8,6 @@ namespace GIGLS.Core.IRepositories
     public interface IHaulageRepository : IRepository<Core.Domain.Haulage>
     {
         Task<IEnumerable<HaulageDTO>> GetHaulagesAsync();
+        Task<IEnumerable<Haulagedto>> GetHaulages();
     }
 }
