@@ -13,6 +13,7 @@ namespace GIGLS.Core.IServices
         Task UpdateStatusHaulageDistanceMapping(int haulageDistanceMappingId, bool status);
         Task DeleteHaulageDistanceMapping(int haulageDistanceMappingId);
         Task<HaulageDistanceMappingDTO> GetHaulageDistanceMapping(int departure, int destination);
+        Task<HaulageDistanceMappingDTO> GetHaulageDistanceMappingForMobile(int departure, int destination);
     }
 
 }

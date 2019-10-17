@@ -60,13 +60,16 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IMobileRatingService _mobileratingService;
         private readonly IMessageSenderService _messageSenderService;
+        private readonly IHaulageService _haulageService;
+        private readonly IHaulageDistanceMappingService _haulageDistanceMappingService;
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
             IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice, IMobileShipmentTrackingService mobiletrackingservice,
             IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice,
-            IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMobileRatingService mobileratingService, IMessageSenderService messageSenderService)
+            IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMobileRatingService mobileratingService, IMessageSenderService messageSenderService,
+            IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -88,6 +91,8 @@ namespace GIGLS.Services.Implementation.Shipments
             _globalPropertyService = globalPropertyService;
             _mobileratingService = mobileratingService;
             _messageSenderService = messageSenderService;
+            _haulageService = haulageService;
+            _haulageDistanceMappingService = haulageDistanceMappingService;
 
             MapperConfig.Initialize();
         }
@@ -1622,6 +1627,54 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException("An error occurred while trying to create company(L).M");
             }
+        }
+
+        public async Task<decimal> GetHaulagePrice(HaulagePricingMobileDTO haulagePricingDto)
+        {
+            decimal price = 0;
+
+            var departureStationId = haulagePricingDto.DepartureStationId;
+            var destinationStationId = haulagePricingDto.DestinationStationId;
+            var haulageid = haulagePricingDto.Haulageid;
+            var country = await _uow.Country.GetCountryByStationId(departureStationId);
+
+            //check haulage exists
+            var haulage = await _haulageService.GetHaulageById(haulageid);
+            if (haulage == null)
+            {
+                throw new GenericException("The Tonne specified has not been mapped");
+            }
+
+            //get the distance based on the stations
+            var haulageDistanceMapping = await _haulageDistanceMappingService.GetHaulageDistanceMappingForMobile(departureStationId, destinationStationId);
+            var distance = haulageDistanceMapping.Distance;
+
+            //set the default distance to 1
+            if (distance == 0)
+            {
+                distance = 1;
+            }
+            //Get Haulage Maximum Fixed Distance
+            var userActiveCountryId = country.CountryId;
+            var maximumFixedDistanceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HaulageMaximumFixedDistance, userActiveCountryId);
+            int maximumFixedDistance = int.Parse(maximumFixedDistanceObj.Value);
+
+            //calculate price for the haulage
+            if (distance <= maximumFixedDistance)
+            {
+                price = haulage.FixedRate;
+            }
+            else
+            {
+                //1. get the fixed rate and substract the maximum fixed distance from distance
+                decimal fixedRate = haulage.FixedRate;
+                distance = distance - maximumFixedDistance;
+
+                //2. multiply the remaining distance with the additional pate
+                price = fixedRate + distance * haulage.AdditionalRate;
+            }
+
+            return price;
         }
     }
 
