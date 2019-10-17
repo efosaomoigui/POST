@@ -61,8 +61,6 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IMobileRatingService _mobileratingService;
         private readonly IMessageSenderService _messageSenderService;
 
-
-
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPricingService pricingService, IWalletService walletService, IWalletTransactionService walletTransactionService,
@@ -115,177 +113,178 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw;
+                throw new GenericException("An error occurred while attempting to add preshipment.");
             }
         }
 
         private async Task<PreShipmentMobileDTO> CreatePreShipment(PreShipmentMobileDTO preShipmentDTO)
         {
-            // get the current user info
-            var currentUser = await _userService.GetCurrentUserId();
-            preShipmentDTO.UserId = currentUser;
-            var user = await _userService.GetUserById(currentUser);
-            var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
-            preShipmentDTO.CountryName = Country.CountryName;
-            var PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
-            var wallet = await _walletService.GetWalletBalance();
-            if (wallet.Balance >= Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal))
+            try
             {
-                var price = (wallet.Balance - Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal));
-                var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
-                preShipmentDTO.Waybill = waybill;
-                if (preShipmentDTO.PreShipmentItems.Count == 0)
+                // get the current user info
+                var currentUserId = await _userService.GetCurrentUserId();
+                preShipmentDTO.UserId = currentUserId;
+                var user = await _userService.GetUserById(currentUserId);
+                var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
+                preShipmentDTO.CountryId = Country.CountryId;
+                var PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
+                var wallet = await _walletService.GetWalletBalance();
+                if (wallet.Balance >= Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal))
                 {
-                    throw new GenericException("Shipment Items cannot be empty");
-                }
-                foreach (var item in preShipmentDTO.PreShipmentItems)
-                {
-                    if (!string.IsNullOrEmpty(item.Value))
+                    var price = (wallet.Balance - Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal));
+                    var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
+                    preShipmentDTO.Waybill = waybill;
+                    if (preShipmentDTO.PreShipmentItems.Count == 0)
                     {
-                        preShipmentDTO.Value += Convert.ToDecimal(item.Value);
-                        preShipmentDTO.IsdeclaredVal = true;
+                        throw new GenericException("Shipment Items cannot be empty");
                     }
+                    foreach (var item in preShipmentDTO.PreShipmentItems)
+                    {
+                        if (!string.IsNullOrEmpty(item.Value))
+                        {
+                            preShipmentDTO.Value += Convert.ToDecimal(item.Value);
+                            preShipmentDTO.IsdeclaredVal = true;
+                        }
 
-                }
-                var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
-                if(user.UserChannelType == UserChannelType.IndividualCustomer)
-                {
-                    newPreShipment.CustomerType = "Individual";
-                    newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
-                }
-                if (user.UserChannelType == UserChannelType.Ecommerce)
-                {
-                    newPreShipment.CustomerType = CustomerType.Company.ToString();
-                    newPreShipment.CompanyType = CompanyType.Ecommerce.ToString();
-                }
-                if (user.UserChannelType == UserChannelType.Partner)
-                {
-                    newPreShipment.CustomerType = "Individual";
-                    newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
-                }
-                newPreShipment.IsConfirmed = false;
-                newPreShipment.IsDelivered = false;
-                newPreShipment.shipmentstatus = "Shipment created";
-                newPreShipment.DateCreated = DateTime.Now;
-                newPreShipment.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
-                preShipmentDTO.IsBalanceSufficient = true;
-                _uow.PreShipmentMobile.Add(newPreShipment);
-                await _uow.CompleteAsync();
-                await ScanMobileShipment(new ScanDTO
-                {
-                    WaybillNumber = newPreShipment.Waybill,
-                    ShipmentScanStatus = ShipmentScanStatus.MCRT
-                });
-                var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
+                    }
+                    var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
 
-                var transaction = new WalletTransactionDTO
-                {
-                    WalletId = wallet.WalletId,
-                    CreditDebitType = CreditDebitType.Debit,
-                    Amount = (decimal)newPreShipment.CalculatedTotal,
-                    ServiceCentreId = defaultServiceCenter.ServiceCentreId,
-                    Waybill = waybill,
-                    Description = "Payment for Shipment",
-                    PaymentType = PaymentType.Online,
-                    UserId = newPreShipment.UserId
-                };
-                var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
+                    if (user.UserChannelType == UserChannelType.Ecommerce)
+                    {
+                        newPreShipment.CustomerType = CustomerType.Company.ToString();
+                        newPreShipment.CompanyType = CompanyType.Ecommerce.ToString();
+                    }
+                    else
+                    {
+                        newPreShipment.CustomerType = "Individual";
+                        newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
+                    }
+                    newPreShipment.IsConfirmed = false;
+                    newPreShipment.IsDelivered = false;
+                    newPreShipment.shipmentstatus = "Shipment created";
+                    newPreShipment.DateCreated = DateTime.Now;
+                    newPreShipment.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
+                    preShipmentDTO.IsBalanceSufficient = true;
+                    _uow.PreShipmentMobile.Add(newPreShipment);
+                    await _uow.CompleteAsync();
+                    await ScanMobileShipment(new ScanDTO
+                    {
+                        WaybillNumber = newPreShipment.Waybill,
+                        ShipmentScanStatus = ShipmentScanStatus.MCRT
+                    });
+                    var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
 
-                var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
-                updatedwallet.Balance = price;
-                await _uow.CompleteAsync();
-                return preShipmentDTO;
+                    var transaction = new WalletTransactionDTO
+                    {
+                        WalletId = wallet.WalletId,
+                        CreditDebitType = CreditDebitType.Debit,
+                        Amount = (decimal)newPreShipment.CalculatedTotal,
+                        ServiceCentreId = defaultServiceCenter.ServiceCentreId,
+                        Waybill = waybill,
+                        Description = "Payment for Shipment",
+                        PaymentType = PaymentType.Online,
+                        UserId = newPreShipment.UserId
+                    };
+                    var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
+                    var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
+                    updatedwallet.Balance = price;
+                    await _uow.CompleteAsync();
+                    return preShipmentDTO;
+                }
+                else
+                {
+                    preShipmentDTO.IsBalanceSufficient = false;
+                    return preShipmentDTO;
+                }
             }
-            else
+            catch
             {
-                preShipmentDTO.IsBalanceSufficient = false;
-                return preShipmentDTO;
+                throw new GenericException("An error occurred while attempting to create shipment.");
             }
         }
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
-            var CountryId = await GetCountryId();
-            var userActiveCountryId = CountryId;
             try
             {
-                userActiveCountryId = await _userService.GetUserActiveCountryId();
-            }
-            catch (Exception ex) { }
-
-            //var Pickuprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpPrice, userActiveCountryId);
-            var Pickuprice = await GetPickUpPrice();
-            if (preShipment.PreShipmentItems.Count()==0)
-            {
-                throw new GenericException("No Preshipitem was added");
-            }
-            var PickupValue = Convert.ToDecimal(Pickuprice);
-            var ShipmentCount = preShipment.PreShipmentItems.Count();
-            var IndividualPrice = PickupValue / ShipmentCount;
-           // var user = await _userService.GetUserById(preShipment.UserId);
-            var Price = 0.0M;
-            decimal DeclaredValue = 0.0M;
-            var Country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
-            preShipment.CountryId = Country.CountryId;
-            foreach (var preShipmentItem in preShipment.PreShipmentItems)
-            {
-                if (preShipmentItem.Quantity == 0)
+                var Pickuprice = await GetPickUpPrice();
+                if (preShipment.PreShipmentItems.Count() == 0)
                 {
-                    throw new GenericException("Quantity cannot be zero");
+                    throw new GenericException("No Preshipitem was added");
                 }
-                var PriceDTO = new PricingDTO
+                var PickupValue = Convert.ToDecimal(Pickuprice);
+                //var ShipmentCount = preShipment.PreShipmentItems.Count();
+                var Price = 0.0M;
+                decimal DeclaredValue = 0.0M;
+                var Country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
+                preShipment.CountryId = Country.CountryId;
+                foreach (var preShipmentItem in preShipment.PreShipmentItems)
                 {
-                    DepartureStationId = preShipment.SenderStationId,
-                    DestinationStationId = preShipment.ReceiverStationId,
-                    Weight = (decimal)preShipmentItem.Weight,
-                    SpecialPackageId = (int)preShipmentItem.SpecialPackageId,
-                    ShipmentType = preShipmentItem.ShipmentType,
-                    CountryId = preShipment.CountryId  //Nigeria
+                    if (preShipmentItem.Quantity == 0)
+                    {
+                        throw new GenericException("Quantity cannot be zero");
+                    }
+                    var PriceDTO = new PricingDTO
+                    {
+                        DepartureStationId = preShipment.SenderStationId,
+                        DestinationStationId = preShipment.ReceiverStationId,
+                        Weight = (decimal)preShipmentItem.Weight,
+                        SpecialPackageId = (int)preShipmentItem.SpecialPackageId,
+                        ShipmentType = preShipmentItem.ShipmentType,
+                        CountryId = preShipment.CountryId  //Nigeria
+                    };
+                    if (preShipmentItem.ShipmentType == ShipmentType.Ecommerce)
+                    {
+                        preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                        //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+                    }
+                    if (preShipmentItem.ShipmentType == ShipmentType.Special)
+                    {
+                        preShipmentItem.CalculatedPrice = await _pricingService.GetMobileSpecialPrice(PriceDTO);
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                        //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+                    }
+                    else if (preShipmentItem.ShipmentType == ShipmentType.Regular)
+                    {
+                        preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                        //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+                    }
+                    if (!string.IsNullOrEmpty(preShipmentItem.Value))
+                    {
+                        DeclaredValue += Convert.ToDecimal(preShipmentItem.Value);
+                        var DeclaredValueForPreShipment = Convert.ToDecimal(preShipmentItem.Value);
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M);
+                        preShipment.IsdeclaredVal = true;
+                    }
+                    Price += (decimal)preShipmentItem.CalculatedPrice;
                 };
-                if (preShipmentItem.ShipmentType == ShipmentType.Ecommerce)
+                decimal EstimatedDeclaredPrice = Convert.ToDecimal(DeclaredValue);
+                preShipment.DeliveryPrice = Price;
+                preShipment.Vat = (decimal)(preShipment.DeliveryPrice * 0.05M);
+                preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
+                preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice + preShipment.Vat + preShipment.InsuranceValue);
+                preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal / 100d, 0) * 100;
+                preShipment.Value = DeclaredValue;
+                var returnprice = new MobilePriceDTO()
                 {
-                    preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
-                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
-                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
-                }
-                if (preShipmentItem.ShipmentType == ShipmentType.Special)
-                {
-                    preShipmentItem.CalculatedPrice = await _pricingService.GetMobileSpecialPrice(PriceDTO);
-                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
-                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
-                }
-                else if (preShipmentItem.ShipmentType == ShipmentType.Regular)
-                {
-                    preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
-                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
-                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
-                }
-                if (!string.IsNullOrEmpty(preShipmentItem.Value))
-                {
-                    DeclaredValue += Convert.ToDecimal(preShipmentItem.Value);
-                    var DeclaredValueForPreShipment = Convert.ToDecimal(preShipmentItem.Value);
-                    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M);
-                    preShipment.IsdeclaredVal = true;
-                }
-                Price += (decimal)preShipmentItem.CalculatedPrice;
-            };
-            decimal EstimatedDeclaredPrice = Convert.ToDecimal(DeclaredValue);
-            preShipment.DeliveryPrice = Price;
-            preShipment.Vat = (decimal)(preShipment.DeliveryPrice * 0.05M);
-            preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
-            preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice + preShipment.Vat + preShipment.InsuranceValue);
-            preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal / 100d, 0) * 100;
-            preShipment.Value = DeclaredValue;
-            var returnprice = new MobilePriceDTO()
+                    MainCharge = preShipment.Vat + preShipment.InsuranceValue + preShipment.DeliveryPrice,
+                    PickUpCharge = PickupValue,
+                    Vat = preShipment.Vat,
+                    DeliveryPrice = preShipment.DeliveryPrice,
+                    InsuranceValue = preShipment.InsuranceValue,
+                    GrandTotal = preShipment.Vat + preShipment.InsuranceValue + preShipment.DeliveryPrice + PickupValue,
+                    PreshipmentMobile = preShipment,
+                    CurrencySymbol = Country.CurrencySymbol,
+                    CurrencyCode = Country.CurrencyCode
+                };
+                return returnprice;
+            }
+            catch(Exception ex)
             {
-                MainCharge = preShipment.DeliveryPrice,
-                ServiceCharge = preShipment.Vat + preShipment.InsuranceValue,
-                GrandTotal = preShipment.Vat + preShipment.InsuranceValue + preShipment.DeliveryPrice,
-                PreshipmentMobile = preShipment,
-                CurrencySymbol = Country.CurrencySymbol,
-                CurrencyCode = Country.CurrencyCode
-            };
-            return returnprice;
+                throw new GenericException($"Please an error occured while trying to calculate price/n {ex.ToString()}");
+            }
         }
 
         public async Task<List<PreShipmentMobileDTO>> GetShipments(BaseFilterCriteria filterOptionsDto)
@@ -361,7 +360,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw;
+                throw new GenericException("An error occurred while trying to get preshipment detail.");
             }
 
         }
@@ -434,75 +433,108 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw;
+                throw new GenericException("An error occurred while trying to get preshipment for a particular user.");
             }
         }
 
-
         public async Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages()
         {
-            var result = _uow.SpecialDomesticPackage.GetAll();
-            var packages = from s in result
-                           select new SpecialDomesticPackageDTO
-                           {
-                               SpecialDomesticPackageId = s.SpecialDomesticPackageId,
-                               SpecialDomesticPackageType = s.SpecialDomesticPackageType,
-                               Name = s.Name,
-                               Status = s.Status,
-                               SubCategory = new SubCategoryDTO
+            try
+            {
+                var result = _uow.SpecialDomesticPackage.GetAll();
+                var packages = from s in result
+                               select new SpecialDomesticPackageDTO
                                {
-                                   SubCategoryName = s.SubCategory.SubCategoryName,
-                                   Category = new CategoryDTO
+                                   SpecialDomesticPackageId = s.SpecialDomesticPackageId,
+                                   SpecialDomesticPackageType = s.SpecialDomesticPackageType,
+                                   Name = s.Name,
+                                   Status = s.Status,
+                                   SubCategory = new SubCategoryDTO
                                    {
-                                       CategoryId = s.SubCategory.Category.CategoryId,
-                                       CategoryName = s.SubCategory.Category.CategoryName
-                                   },
-                                   SubCategoryId = s.SubCategory.SubCategoryId,
-                                   CategoryId = s.SubCategory.CategoryId,
-                                   Weight = s.SubCategory.Weight
-                               }
+                                       SubCategoryName = s.SubCategory.SubCategoryName,
+                                       Category = new CategoryDTO
+                                       {
+                                           CategoryId = s.SubCategory.Category.CategoryId,
+                                           CategoryName = s.SubCategory.Category.CategoryName
+                                       },
+                                       SubCategoryId = s.SubCategory.SubCategoryId,
+                                       CategoryId = s.SubCategory.CategoryId,
+                                       Weight = s.SubCategory.Weight
+                                   }
 
 
-                           };
-            return packages;
+                               };
+                return packages;
+            }
+            catch(Exception)
+            {
+                throw new GenericException("Please an error occured while getting Special Packages");
+            }
         }
         public async Task<List<CategoryDTO>> GetCategories()
         {
-            var categories = await _categoryservice.GetCategories();
-            return categories;
+            try
+            {
+                var categories = await _categoryservice.GetCategories();
+                return categories;
+            }
+            catch(Exception)
+            {
+                throw new GenericException("Please an error occured while getting categories.Please try again");
+            }
         }
         public async Task<List<SubCategoryDTO>> GetSubCategories()
         {
-            var subcategories = await _subcategoryservice.GetSubCategories();
-            return subcategories;
+            try
+            {
+                var subcategories = await _subcategoryservice.GetSubCategories();
+                return subcategories;
+            }
+            catch(Exception)
+            {
+                throw new GenericException("Please an error occurred while getting sub-categories.Please try again");
+            }
         }
 
         public async Task ScanMobileShipment(ScanDTO scan)
         {
             // verify the waybill number exists in the system
-
-            var shipment = await GetMobileShipmentForScan(scan.WaybillNumber);
-            string scanStatus = scan.ShipmentScanStatus.ToString();
-            if (shipment != null)
+            try
             {
-                await _mobiletrackingservice.AddMobileShipmentTracking(new MobileShipmentTrackingDTO
+                var shipment = await GetMobileShipmentForScan(scan.WaybillNumber);
+                string scanStatus = scan.ShipmentScanStatus.ToString();
+                if (shipment != null)
                 {
-                    DateTime = DateTime.Now,
-                    Status = scanStatus,
-                    Waybill = scan.WaybillNumber,
-                }, scan.ShipmentScanStatus);
+                    await _mobiletrackingservice.AddMobileShipmentTracking(new MobileShipmentTrackingDTO
+                    {
+                        DateTime = DateTime.Now,
+                        Status = scanStatus,
+                        Waybill = scan.WaybillNumber,
+                    }, scan.ShipmentScanStatus);
+                }
+            }
+            catch(Exception)
+            {
+                throw new GenericException("Please an error occurred while trying to scan shipment.");
             }
 
 
         }
         public async Task<PreShipmentMobile> GetMobileShipmentForScan(string waybill)
         {
-            var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill.Equals(waybill));
-            if(shipment == null)
+            try
             {
-                throw new GenericException("Waybill does not exist");
+                var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill.Equals(waybill));
+                if (shipment == null)
+                {
+                    throw new GenericException("Waybill does not exist");
+                }
+                return shipment;
             }
-            return shipment;
+            catch (Exception)
+            {
+                throw new GenericException("Please an error occurred while trying to check if waybill number exists.");
+            }
         }
 
         public async Task<MobileShipmentTrackingHistoryDTO> TrackShipment(string waybillNumber)
@@ -650,6 +682,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
                 {
+                    var Pickuprice = await GetPickUpPrice();
                     var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "SenderLocation,ReceiverLocation");
                     if (preshipmentmobile.ZoneMapping == 1)
                     {
@@ -658,43 +691,40 @@ namespace GIGLS.Services.Implementation.Shipments
                             WaybillNumber = pickuprequest.Waybill,
                             ShipmentScanStatus = ShipmentScanStatus.MAHD
                         });
-                    }
-                    var Location = new LocationDTO
-                    {
-                        DestinationLatitude = (double)preshipmentmobile.ReceiverLocation.Latitude,
-                        DestinationLongitude = (double)preshipmentmobile.ReceiverLocation.Longitude,
-                        OriginLatitude = (double)preshipmentmobile.SenderLocation.Latitude,
-                        OriginLongitude = (double)preshipmentmobile.SenderLocation.Longitude
-                    };
+                        var Partnerpaymentfordelivery = new PartnerPayDTO
+                        {
+                            PickUprice = Pickuprice,
+                            ShipmentPrice = (decimal)preshipmentmobile.CalculatedTotal,
+                            ZoneMapping = (int)preshipmentmobile.ZoneMapping
+                        };
 
-                    RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
-                    var Partner = new PartnerPayDTO
+                        decimal price = await _partnertransactionservice.GetPriceForPartner(Partnerpaymentfordelivery);
+                        var partneruser = await _userService.GetUserById(userId);
+                        var wallet = _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode).Result;
+                        wallet.Balance = wallet.Balance + price;
+                        var partnertransactions = new PartnerTransactionsDTO
+                        {
+                            Destination = preshipmentmobile.ReceiverAddress,
+                            Departure = preshipmentmobile.SenderAddress,
+                            AmountReceived = price,
+                            Waybill = preshipmentmobile.Waybill
+                        };
+                        var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
+                        preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Delivered.ToString();
+                        await _uow.CompleteAsync();
+                        var messageextensionDTO = new MobileMessageDTO()
+                        {
+                            SenderName = preshipmentmobile.ReceiverName,
+                            WaybillNumber = preshipmentmobile.Waybill,
+                            SenderPhoneNumber = preshipmentmobile.ReceiverPhoneNumber
+                        };
+                        await _messageSenderService.SendMessage(MessageType.OKC, EmailSmsType.SMS, messageextensionDTO);
+                    }
+                    else
                     {
-                        Distance = details.rows[0].elements[0].distance.value.ToString(),
-                        Time = details.rows[0].elements[0].duration.value.ToString(),
-                        ShipmentPrice = (decimal)preshipmentmobile.CalculatedTotal
-                    };
-                    decimal price = await _partnertransactionservice.GetPriceForPartner(Partner);
-                    var partneruser = await _userService.GetUserById(userId);
-                    var wallet = _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode).Result;
-                    wallet.Balance = wallet.Balance + price;
-                    var partnertransactions = new PartnerTransactionsDTO
-                    {
-                        Destination = preshipmentmobile.ReceiverAddress,
-                        Departure = preshipmentmobile.SenderAddress,
-                        AmountReceived = price,
-                        Waybill = preshipmentmobile.Waybill
-                    };
-                    var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
-                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Delivered.ToString();
-                    await _uow.CompleteAsync();
-                    var messageextensionDTO = new MobileMessageDTO()
-                    {
-                        SenderName = preshipmentmobile.ReceiverName,
-                        WaybillNumber = preshipmentmobile.Waybill,
-                        SenderPhoneNumber = preshipmentmobile.ReceiverPhoneNumber
-                    };
-                    await _messageSenderService.SendMessage(MessageType.OKC, EmailSmsType.SMS, messageextensionDTO);
+                        throw new GenericException("This shipment is an interstate delivery, drop at the assigned service centre");
+                    }
+                    
                 }
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Cancelled.ToString())
                 {
@@ -810,72 +840,93 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception ex)
             {
-                throw;
+                throw new GenericException("Please an error occurred while trying to get all special packages.");
             }
         }
 
         private async Task<Dictionary<string, List<string>>> GetDictionaryCategories()
         {
-            //
-            Dictionary<string, List<string>> finalDictionary = new Dictionary<string, List<string>>();
-
-            //1. category
-            var Categories = await GetCategories();
-            finalDictionary.Add("CATEGORY", Categories.Select(s => s.CategoryName).OrderBy(s => s).ToList());
-
-
-            //2. subcategory
-            var Subcategories = await GetSubCategories();
-            foreach (var category in Categories)
+            try
             {
-                var listOfSubcategory = Subcategories.Where(s => s.Category.CategoryId == category.CategoryId).
-                    Select(s => s.SubCategoryName).Distinct().ToList();
+                //
+                Dictionary<string, List<string>> finalDictionary = new Dictionary<string, List<string>>();
 
-                //add to dictionary
-                finalDictionary.Add(category.CategoryName, listOfSubcategory);
+                //1. category
+                var Categories = await GetCategories();
+                finalDictionary.Add("CATEGORY", Categories.Select(s => s.CategoryName).OrderBy(s => s).ToList());
 
-            }
 
-
-            //3. subsubcategory
-            //var specialDomesticPackages = await GetSpecialDomesticPackages();
-            foreach (var subcategory in Subcategories)
-            {
-                var list = new List<decimal>();
-                var listOfWeights = Subcategories.Where(s => s.SubCategoryName == subcategory.SubCategoryName).
-                    Select(s => s.Weight.ToString()).ToList();
-
-                //add to dictionary
-                if (!finalDictionary.ContainsKey(subcategory.SubCategoryName))
+                //2. subcategory
+                var Subcategories = await GetSubCategories();
+                foreach (var category in Categories)
                 {
-                    finalDictionary.Add(subcategory.SubCategoryName, listOfWeights);
+                    var listOfSubcategory = Subcategories.Where(s => s.Category.CategoryId == category.CategoryId).
+                        Select(s => s.SubCategoryName).Distinct().ToList();
+
+                    //add to dictionary
+                    finalDictionary.Add(category.CategoryName, listOfSubcategory);
+
                 }
+
+
+                //3. subsubcategory
+                //var specialDomesticPackages = await GetSpecialDomesticPackages();
+                foreach (var subcategory in Subcategories)
+                {
+                    var list = new List<decimal>();
+                    var listOfWeights = Subcategories.Where(s => s.SubCategoryName == subcategory.SubCategoryName).
+                        Select(s => s.Weight.ToString()).ToList();
+
+                    //add to dictionary
+                    if (!finalDictionary.ContainsKey(subcategory.SubCategoryName))
+                    {
+                        finalDictionary.Add(subcategory.SubCategoryName, listOfWeights);
+                    }
+                }
+                return finalDictionary;
             }
-            return finalDictionary;
+            catch (Exception)
+            {
+                throw new GenericException("Please an error occurred while trying to get the categorization of special packages.");
+            }
         }
 
         public async Task<List<PreShipmentMobileDTO>> GetDisputePreShipment()
         {
-            var user = await _userService.GetCurrentUserId();
-            var shipments = _uow.PreShipmentMobile.FindAsync(s => s.UserId == user && s.shipmentstatus == MobilePickUpRequestStatus.Dispute.ToString(), "PreShipmentItems").Result;
-            var shipment = shipments.OrderByDescending(s => s.DateCreated);
-            var newPreShipment = Mapper.Map<List<PreShipmentMobileDTO>>(shipment);
-            return newPreShipment;
+            try
+            {
+                var user = await _userService.GetCurrentUserId();
+                var shipments = _uow.PreShipmentMobile.FindAsync(s => s.UserId == user && s.shipmentstatus == MobilePickUpRequestStatus.Dispute.ToString(), "PreShipmentItems").Result;
+                var shipment = shipments.OrderByDescending(s => s.DateCreated);
+                var newPreShipment = Mapper.Map<List<PreShipmentMobileDTO>>(shipment);
+                return newPreShipment;
+            }
+            catch(Exception)
+            {
+                throw new GenericException("Please an error occurred while trying to get shipments in dispute.");
+            }
         }
         public async Task<SummaryTransactionsDTO> GetPartnerWalletTransactions()
         {
-            var user = await _userService.GetCurrentUserId();
-            var transactions = _uow.PartnerTransactions.FindAsync(s => s.UserId == user).Result;
-            var partneruser = await _userService.GetUserById(user);
-            var wallet = _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode).Result;
-            transactions = transactions.OrderByDescending(s => s.DateCreated);
-            var TotalTransactions = Mapper.Map<List<PartnerTransactionsDTO>>(transactions);
-            var summary = new SummaryTransactionsDTO
+            try
             {
-                WalletBalance = wallet.Balance,
-                Transactions = TotalTransactions
-            };
-            return summary;
+                var user = await _userService.GetCurrentUserId();
+                var transactions = _uow.PartnerTransactions.FindAsync(s => s.UserId == user).Result;
+                var partneruser = await _userService.GetUserById(user);
+                var wallet = _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode).Result;
+                transactions = transactions.OrderByDescending(s => s.DateCreated);
+                var TotalTransactions = Mapper.Map<List<PartnerTransactionsDTO>>(transactions);
+                var summary = new SummaryTransactionsDTO
+                {
+                    WalletBalance = wallet.Balance,
+                    Transactions = TotalTransactions
+                };
+                return summary;
+            }
+            catch(Exception)
+            {
+                throw new GenericException("Please an error occurred while trying to get partne's transactions.");
+            }
         }
 
         public async Task<object> ResolveDisputeForMobile(PreShipmentMobileDTO preShipment)
@@ -927,7 +978,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw;
+                throw new GenericException("Please an error occurred while trying to resolve dispute.");
             }
         }
 
@@ -986,7 +1037,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw;
+                throw new GenericException("Please an error occurred while attempting to cancel the shipment.") ;
             }
         }
 
@@ -1051,7 +1102,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw;
+                throw new GenericException("Please an error occurred while trying to rate this shipment.");
             }
 
         }
@@ -1102,7 +1153,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw;
+                throw new GenericException("An error occurred while trying to create a customer record(L).");
             }
         }
 
@@ -1163,7 +1214,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw;
+                throw new GenericException("An error occurred while trying to create a Partner record(L)."); ;
             }
         }
 
@@ -1203,7 +1254,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw;
+                throw new GenericException("An error occurred while trying to update the delivery number.");
             }
         }
         public async Task<bool> deleterecord(string detail)
@@ -1251,7 +1302,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw;
+                throw new GenericException("An error occurred while attempting to delete record.");
             }
         }
 
@@ -1338,7 +1389,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw;
+                throw new GenericException("An error occurred while trying to verify partner details.") ;
             }
         }
 
@@ -1366,7 +1417,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw;
+                throw new GenericException("An error occurred while attemping to fetch partner's details.");
             }
         }
 
@@ -1390,7 +1441,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw;
+                throw new GenericException("An error occurred while attempting to update the details of the receiver.");
             }
         }
 
@@ -1478,16 +1529,16 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch(Exception ex)
             {
-                throw ex;
+                throw new GenericException("An error occurred while attempting to fetch details with delivery number.");
             }
             
         }
-
 
         public async Task<bool> ApproveShipment(string waybillNumber)
         {
             try
             {
+                var Pickupprice = await GetPickUpPrice();
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == waybillNumber, "SenderLocation,ReceiverLocation");
                 var Partnerid = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == waybillNumber && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
                 await ScanMobileShipment(new ScanDTO
@@ -1495,45 +1546,51 @@ namespace GIGLS.Services.Implementation.Shipments
                    WaybillNumber = waybillNumber,
                    ShipmentScanStatus = ShipmentScanStatus.MSVC
                 });
+                if (preshipmentmobile.ZoneMapping != 1)
+                {
+                    var Location = new LocationDTO
+                    {
+                        DestinationLatitude = (double)preshipmentmobile.ReceiverLocation.Latitude,
+                        DestinationLongitude = (double)preshipmentmobile.ReceiverLocation.Longitude,
+                        OriginLatitude = (double)preshipmentmobile.SenderLocation.Latitude,
+                        OriginLongitude = (double)preshipmentmobile.SenderLocation.Longitude
+                    };
 
-                var Location = new LocationDTO
+                    RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
+                    var Partner = new PartnerPayDTO
+                    {
+                        Distance = details.rows[0].elements[0].distance.value.ToString(),
+                        Time = details.rows[0].elements[0].duration.value.ToString(),
+                        ShipmentPrice = (decimal)preshipmentmobile.CalculatedTotal,
+                        PickUprice = Pickupprice
+                    };
+                    decimal price = await _partnertransactionservice.GetPriceForPartner(Partner);
+                    var partneruser = await _userService.GetUserById(Partnerid.UserId);
+                    var wallet = _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode).Result;
+                    wallet.Balance = wallet.Balance + price;
+                    var partnertransactions = new PartnerTransactionsDTO
+                    {
+                        Destination = preshipmentmobile.ReceiverAddress,
+                        Departure = preshipmentmobile.SenderAddress,
+                        AmountReceived = price,
+                        Waybill = preshipmentmobile.Waybill
+                    };
+                    var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
+                    await _uow.CompleteAsync();
+                }
+                else
                 {
-                    DestinationLatitude = (double)preshipmentmobile.ReceiverLocation.Latitude,
-                    DestinationLongitude = (double)preshipmentmobile.ReceiverLocation.Longitude,
-                    OriginLatitude = (double)preshipmentmobile.SenderLocation.Latitude,
-                    OriginLongitude = (double)preshipmentmobile.SenderLocation.Longitude
-                };
-
-                RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
-                var Partner = new PartnerPayDTO
-                {
-                    Distance = details.rows[0].elements[0].distance.value.ToString(),
-                    Time = details.rows[0].elements[0].duration.value.ToString(),
-                    ShipmentPrice = (decimal)preshipmentmobile.CalculatedTotal
-                };
-                decimal price = await _partnertransactionservice.GetPriceForPartner(Partner);
-                var partneruser = await _userService.GetUserById(Partnerid.UserId);
-                var wallet = _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode).Result;
-                wallet.Balance = wallet.Balance + price;
-                var partnertransactions = new PartnerTransactionsDTO
-                {
-                    Destination = preshipmentmobile.ReceiverAddress,
-                    Departure = preshipmentmobile.SenderAddress,
-                    AmountReceived = price,
-                    Waybill = preshipmentmobile.Waybill,
-                    IsFromServiceCentre = true
-                };
-                var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
-                preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
-                await _uow.CompleteAsync();
-                return true;
+                    throw new GenericException("This shipment is not an interstate delivery,take to the assigned receiver's location");
+                }
+               return true;
+                
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw new GenericException("An error occurred while approving shipment from dispatch rider.");
             }
         }
-
 
         public async Task<bool> CreateCompany(string CustomerCode)
         {
@@ -1563,7 +1620,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw;
+                throw new GenericException("An error occurred while trying to create company(L).M");
             }
         }
     }
