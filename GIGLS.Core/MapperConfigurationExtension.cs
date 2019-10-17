@@ -384,8 +384,7 @@ namespace GIGLS.Core
                 config.CreateMap<Country, NewCountryDTO>();
                 config.CreateMap<NewCountryDTO, Country>();
 
-                config.CreateMap<Haulage, Haulagedto>();
-                config.CreateMap<Haulagedto, Haulage>();
+               
             });
 
             isInit = true;

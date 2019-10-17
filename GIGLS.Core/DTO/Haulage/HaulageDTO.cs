@@ -11,10 +11,5 @@ namespace GIGLS.Core.DTO.Haulage
         public decimal FixedRate { get; set; }
         public decimal AdditionalRate { get; set; }
     }
-    public class Haulagedto 
-    {
-        public int HaulageId { get; set; }
-        public decimal Tonne { get; set; }
-       
-    }
+   
 }

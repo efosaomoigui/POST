@@ -383,11 +383,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var haulages = await _uow.Haulage.GetHaulagesAsync();
             return haulages;
         }
-        public async Task<IEnumerable<Haulagedto>> Gethaulages()
-        {
-            var haulages = await _uow.Haulage.GetHaulages();
-            return haulages;
-        }
+        
 
         public async Task<IEnumerable<InsuranceDTO>> GetInsurances()
         {
