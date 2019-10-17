@@ -340,6 +340,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                 dashboardDTO.WalletBalance = wallet.Balance;
             }
 
+            if(currentUser != null)
+            {
+                dashboardDTO.UserActiveCountry = await GetUserActiveCountry(currentUser);
+            }
+
             return await Task.FromResult(dashboardDTO);
         }
 
@@ -1605,5 +1610,31 @@ namespace GIGLS.Services.Business.CustomerPortal
             return StationDictionary;
         }
 
+        private async Task<CountryDTO> GetUserActiveCountry(UserDTO user)
+        {
+            CountryDTO userActiveCountry = new CountryDTO { };            
+
+            if (user != null)
+            {
+                int userActiveCountryId = user.UserActiveCountryId;
+
+                if (userActiveCountryId == 0)
+                {
+                    if (user.UserChannelType == UserChannelType.IndividualCustomer)
+                    {
+                        userActiveCountryId = _uow.IndividualCustomer.GetAllAsQueryable().Where(x => x.CustomerCode == user.UserChannelCode).Select(x => x.UserActiveCountryId).FirstOrDefault();                   
+                    }
+                    else if (user.UserChannelType == UserChannelType.Ecommerce || user.UserChannelType == UserChannelType.Corporate)
+                    {
+                        userActiveCountryId = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode == user.UserChannelCode).Select(x => x.UserActiveCountryId).FirstOrDefault();
+                    }
+                }
+
+                var country = await _uow.Country.GetAsync(userActiveCountryId);
+                userActiveCountry = Mapper.Map<CountryDTO>(country);
+            }
+
+            return userActiveCountry;
+        }
     }
 }
