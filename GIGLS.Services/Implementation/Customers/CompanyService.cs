@@ -190,46 +190,16 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
-                var company = await _uow.Company.GetAsync(companyId);
+                var company = await _uow.Company.GetCompanyById(companyId);
+                
                 if (company == null)
                 {
                     throw new GenericException("Company information does not exist");
                 }
 
                 CompanyDTO companyDto = Mapper.Map<CompanyDTO>(company);
-
-                if (companyDto.ReturnServiceCentre > 0)
-                {
-                    var serviceCentre = await _uow.ServiceCentre.GetAsync(company.ReturnServiceCentre);
-
-                    if (serviceCentre != null)
-                    {
-                        companyDto.ReturnServiceCentreName = serviceCentre.Name;
-                    }
-                }                
-
-                var contactPersons = _uow.CompanyContactPerson.Find(x => x.CompanyId == companyDto.CompanyId).ToList();
-
-                if (contactPersons.Any())
-                {
-                    companyDto.ContactPersons = contactPersons.Select(p => new CompanyContactPersonDTO
-                    {
-                        CompanyContactPersonId = p.CompanyContactPersonId,
-                        Designation = p.Designation,
-                        Email = p.Email,
-                        FirstName = p.FirstName,
-                        LastName = p.LastName,
-                        PhoneNumber = p.PhoneNumber,
-                        DateCreated = p.DateCreated,
-                        DateModified = p.DateModified,
-                        CompanyId = p.CompanyId
-                    }).ToList();
-                }
-
-                //get all countries and set the country name
-                var userCountry = await _uow.Country.GetAsync(companyDto.UserActiveCountryId);
-                companyDto.UserActiveCountryName = userCountry?.CountryName;
-
+                companyDto.UserActiveCountryName = companyDto.Country.CountryName;
+                
                 return companyDto;
             }
             catch (Exception)
@@ -409,31 +379,15 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
-                var company = await _uow.Company.GetAsync(x => x.CustomerCode.ToLower() == customerCode.ToLower());
+                var company = await _uow.Company.GetCompanyByCode(customerCode);
+
                 if (company == null)
                 {
                     return new CompanyDTO { };
                 }
 
                 CompanyDTO companyDto = Mapper.Map<CompanyDTO>(company);
-
-                var contactPersons = _uow.CompanyContactPerson.Find(x => x.CompanyId == companyDto.CompanyId).ToList();
-
-                if (contactPersons.Any())
-                {
-                    companyDto.ContactPersons = contactPersons.Select(p => new CompanyContactPersonDTO
-                    {
-                        CompanyContactPersonId = p.CompanyContactPersonId,
-                        Designation = p.Designation,
-                        Email = p.Email,
-                        FirstName = p.FirstName,
-                        LastName = p.LastName,
-                        PhoneNumber = p.PhoneNumber,
-                        DateCreated = p.DateCreated,
-                        DateModified = p.DateModified,
-                        CompanyId = p.CompanyId
-                    }).ToList();
-                }
+                companyDto.UserActiveCountryName = companyDto.Country.CountryName;
 
                 return companyDto;
             }
