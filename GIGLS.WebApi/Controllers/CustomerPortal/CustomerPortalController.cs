@@ -59,11 +59,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         private readonly IPasswordGenerator _passwordGenerator;
         private readonly IMessageSenderService _messageSenderService;
         private readonly ICountryService _countryservice;
+        private readonly IHaulageService _haulageservice;
 
 
         public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IOTPService otpService,
             IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService, IWalletService walletService, IWalletTransactionService walletTransactionService, IServiceCentreService service,
-            ICategoryService categoryservice, ISubCategoryService subcategoryservice, IPasswordGenerator passwordGenerator, IMessageSenderService messageSenderService, ICountryService countryservice) : base(nameof(CustomerPortalController))
+            ICategoryService categoryservice, ISubCategoryService subcategoryservice, IPasswordGenerator passwordGenerator, IMessageSenderService messageSenderService, ICountryService countryservice, IHaulageService haulageservice) : base(nameof(CustomerPortalController))
         {
             // _uow = uow;
             _userService = userService;
@@ -80,6 +81,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             _passwordGenerator = passwordGenerator;
             _messageSenderService = messageSenderService;
             _countryservice = countryservice;
+            _haulageservice = haulageservice;
         }
 
 
@@ -1278,12 +1280,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("getcountries")]
-        public async Task<IServiceResponse<List<CountryDTO>>> getcountries()
+        public async Task<IServiceResponse<List<NewCountryDTO>>> getcountries()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var countries =await _countryservice.GetCountries();
-                return new ServiceResponse<List<CountryDTO>>
+                var countries =await _countryservice.GetUpdatedCountries();
+                return new ServiceResponse<List<NewCountryDTO>>
                 {
                     Object = countries.ToList()
                 };
@@ -1300,6 +1302,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<Dictionary<string, List<StationDTO>>>
                 {
                     Object = stations
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("gethaulagepriceformobile")]
+        public async Task<IServiceResponse<decimal>> gethaulageprice(HaulagePricingMobileDTO haulage)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var haulagePrice = await _preshipmentmobileService.GetHaulagePrice(haulage);
+                return new ServiceResponse<decimal>
+                {
+                    Object = haulagePrice
                 };
             });
         }

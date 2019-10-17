@@ -63,6 +63,11 @@ namespace GIGLS.Services.Implementation
             var countries = _uow.Country.GetAll();
             return Task.FromResult(Mapper.Map<IEnumerable<CountryDTO>>(countries));
         }
+        public Task<IEnumerable<NewCountryDTO>> GetUpdatedCountries()
+        {
+            var countries = _uow.Country.GetAll();
+            return Task.FromResult(Mapper.Map<IEnumerable<NewCountryDTO>>(countries));
+        }
 
         public Task<IEnumerable<CountryDTO>> GetActiveCountries()
         {

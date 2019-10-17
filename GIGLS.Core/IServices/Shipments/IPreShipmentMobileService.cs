@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.CORE.DTO.Report;
@@ -50,6 +51,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> ApproveShipment(string waybillNumber);
 
         Task<bool> CreateCompany(string CustomerCode);
+        Task<decimal> GetHaulagePrice(HaulagePricingMobileDTO haulagePricingDto);
 
     }
 }

@@ -502,7 +502,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                     Password = user.Password,
                     CustomerCode = user.UserChannelCode,
                     PictureUrl = user.PictureUrl,
-                    IsFromMobile = user.IsFromMobile
+                    IsFromMobile = user.IsFromMobile,
+                    UserActiveCountryId = user.UserActiveCountryId
                     //added this to pass channelcode 
 
 
@@ -609,10 +610,13 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<SignResponseDTO> SignUp(UserDTO user)
         {
-            var CountryId = await _preShipmentMobileService.GetCountryId();
-            var userActiveCountryId = CountryId;    //Nigeria
+            if ((user.UserActiveCountryId).ToString() == null ||user.UserActiveCountryId == 0)
+            {
+                var CountryId = await _preShipmentMobileService.GetCountryId();
+                user.UserActiveCountryId = CountryId;    //Nigeria
+            }
 
-            var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, userActiveCountryId);
+            var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, user.UserActiveCountryId);
             var result = new SignResponseDTO();
                 if (user.UserChannelType == UserChannelType.Partner)
                 {
@@ -646,7 +650,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         EmailUser.Email = user.Email;
                         var partnerDTO = new PartnerDTO
                         {
-                             PartnerType = PartnerType.Individual,
+                             PartnerType = PartnerType.DeliveryPartner,
                              PartnerName = user.FirstName + "" + user.LastName,
                              PartnerCode = EmailUser.UserChannelCode,
                              FirstName  = user.FirstName,
@@ -765,7 +769,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                         PasswordExpireDate = DateTime.Now,
                         UserActiveCountryId = user.UserActiveCountryId,
                       
-                       
                     };
                     var FinalUser = Mapper.Map<User>(Partneruser);
                     FinalUser.Id = Guid.NewGuid().ToString();
@@ -781,7 +784,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     }
                     var partnerDTO = new PartnerDTO
                     {
-                        PartnerType = PartnerType.Individual,
+                        PartnerType = PartnerType.DeliveryPartner,
                         PartnerName = user.FirstName + " " + user.LastName,
                         PartnerCode = FinalUser.UserChannelCode,
                         FirstName = user.FirstName,
@@ -1379,7 +1382,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             CompanyStatus = CompanyStatus.Active,
                             SettlementPeriod = 1,
                             ReturnServiceCentre = 296,
-                            UserActiveCountryId = userActiveCountryId
+                            UserActiveCountryId = user.UserActiveCountryId
                             //added this to pass channelcode };
                         };
                         var company = Mapper.Map<Company>(customer);
