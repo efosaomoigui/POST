@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System;
 using AutoMapper;
 using GIGLS.Core.Enums;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
 {
@@ -26,6 +27,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 var companies = Context.Company;
                 var companiesDto = from c in companies
                                    join w in Context.Wallets on c.CustomerCode equals w.CustomerCode
+                                   join co in Context.Country on c.UserActiveCountryId equals co.CountryId
                                    select new CompanyDTO
                                    {
                                        CompanyId = c.CompanyId,
@@ -50,7 +52,16 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        DateCreated = c.DateCreated,
                                        DateModified = c.DateModified,
                                        WalletBalance = w.Balance,
-                                       UserActiveCountryId = c.UserActiveCountryId
+                                       UserActiveCountryId = c.UserActiveCountryId,
+                                       Country = new CountryDTO
+                                       {
+                                           CountryId = co.CountryId,
+                                           CountryName = co.CountryName,
+                                           CurrencySymbol = co.CurrencySymbol,
+                                           CurrencyCode = co.CurrencyCode,
+                                           PhoneNumberCode = co.PhoneNumberCode
+                                       },
+                                       UserActiveCountryName = co.CountryName
                                    };
                 return Task.FromResult(companiesDto.ToList());
             }

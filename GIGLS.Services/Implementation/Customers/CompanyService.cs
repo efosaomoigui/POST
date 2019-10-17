@@ -188,9 +188,6 @@ namespace GIGLS.Services.Implementation.Customers
 
         public async Task<CompanyDTO> GetCompanyById(int companyId)
         {
-            //Code to add existing companies to the user table
-            //await CodeToAddCorporateUsersToAspNetUsersTable();
-
             try
             {
                 var company = await _uow.Company.GetAsync(companyId);
