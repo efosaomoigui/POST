@@ -34,6 +34,22 @@ namespace GIGLS.WebApi.Controllers
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("active")]
+        public async Task<IServiceResponse<IEnumerable<CountryDTO>>> GetActiveCountries()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var country = await _countryService.GetActiveCountries();
+
+                return new ServiceResponse<IEnumerable<CountryDTO>>
+                {
+                    Object = country
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]

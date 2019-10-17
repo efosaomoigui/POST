@@ -7,6 +7,7 @@ using GIGLS.Core;
 using GIGLS.Infrastructure;
 using AutoMapper;
 using GIGLS.Core.Domain;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation
 {
@@ -60,6 +61,12 @@ namespace GIGLS.Services.Implementation
         public Task<IEnumerable<CountryDTO>> GetCountries()
         {
             var countries = _uow.Country.GetAll();
+            return Task.FromResult(Mapper.Map<IEnumerable<CountryDTO>>(countries));
+        }
+
+        public Task<IEnumerable<CountryDTO>> GetActiveCountries()
+        {
+            var countries = _uow.Country.GetAllAsQueryable().Where(x => x.IsActive == true);
             return Task.FromResult(Mapper.Map<IEnumerable<CountryDTO>>(countries));
         }
 
