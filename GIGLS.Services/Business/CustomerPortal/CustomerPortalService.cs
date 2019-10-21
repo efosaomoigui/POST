@@ -124,6 +124,18 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
 
             var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
+
+            if(invoicesDto != null)
+            {
+                var countries = _uow.Country.GetAllAsQueryable().Where(x => x.IsActive == true).ToList();
+                var countriesDto = Mapper.Map<List<CountryDTO>>(countries);
+
+                foreach(var c in invoicesDto)
+                {
+                    c.Country = countriesDto.Where(x => x.CountryId == c.DepartureCountryId).FirstOrDefault();
+                }
+            }
+
             return await Task.FromResult(invoicesDto);
         }
         //my own
