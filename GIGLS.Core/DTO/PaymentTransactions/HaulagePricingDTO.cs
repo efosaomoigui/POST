@@ -7,7 +7,7 @@
         public int Haulageid { get; set; }
         public int CountryId { get; set; }
     }
-    public class HaulagePricingMobileDTO
+    public class HaulagePriceDTO
     {
         public int DepartureStationId { get; set; }
         public int DestinationStationId { get; set; }

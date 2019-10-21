@@ -34,7 +34,8 @@ using GIGLS.Core.Domain.Partnership;
 using System.IO;
 using System.Drawing;
 using System.Web;
-
+using GIGLS.Core.DTO.User;
+using VehicleType = GIGLS.Core.Domain.VehicleType;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -212,17 +213,18 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var Pickuprice = await GetPickUpPrice();
+                
                 if (preShipment.PreShipmentItems.Count() == 0)
                 {
                     throw new GenericException("No Preshipitem was added");
                 }
-                var PickupValue = Convert.ToDecimal(Pickuprice);
                 //var ShipmentCount = preShipment.PreShipmentItems.Count();
                 var Price = 0.0M;
                 decimal DeclaredValue = 0.0M;
                 var Country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
                 preShipment.CountryId = Country.CountryId;
+                var Pickuprice = await GetPickUpPrice(preShipment.VehicleType,preShipment.CountryId);
+                var PickupValue = Convert.ToDecimal(Pickuprice);
                 foreach (var preShipmentItem in preShipment.PreShipmentItems)
                 {
                     if (preShipmentItem.Quantity == 0)
@@ -288,7 +290,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch(Exception ex)
             {
-                throw new GenericException($"Please an error occured while trying to calculate price/n {ex.ToString()}");
+                throw new GenericException($"Please an error occured while trying to calculate price.");
             }
         }
 
@@ -687,8 +689,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
                 {
-                    var Pickuprice = await GetPickUpPrice();
+                    
                     var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "SenderLocation,ReceiverLocation");
+                    var Pickuprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId);
                     if (preshipmentmobile.ZoneMapping == 1)
                     {
                         await ScanMobileShipment(new ScanDTO
@@ -1004,7 +1007,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Shipment does not exist");
                 }
-                var pickuprice = await GetPickUpPrice();
+                var pickuprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId);
                 var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
                 foreach (var id in preshipmentmobile.PreShipmentItems.ToList())
                 {
@@ -1456,10 +1459,37 @@ namespace GIGLS.Services.Implementation.Shipments
             return userActiveCountryId;
         }
 
-        public async Task<decimal> GetPickUpPrice()
+        public async Task<decimal> GetPickUpPrice(string vehicleType,int CountryId)
         {
-            decimal PickUpPrice = 500.0M;
-            return PickUpPrice;
+            try
+            {
+                var PickUpPrice = 0.0M;
+                if (vehicleType != null)
+                {
+                   
+                    if (vehicleType.ToLower() == Vehicletype.car.ToString())
+                    {
+                        var carPickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.CarPickupPrice, CountryId);
+                        PickUpPrice = (Convert.ToDecimal(carPickUprice.Value));
+                    }
+                    if (vehicleType.ToLower() == Vehicletype.bike.ToString())
+                    {
+                        var bikePickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BikePickUpPrice, CountryId);
+                        PickUpPrice = (Convert.ToDecimal(bikePickUprice.Value));
+                    }
+                    if (vehicleType.ToLower() == Vehicletype.van.ToString())
+                    {
+                        var vanPickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.VanPickupPrice, CountryId);
+                        PickUpPrice = (Convert.ToDecimal(vanPickUprice.Value));
+                    }
+                    
+                }
+                return PickUpPrice;
+            }
+            catch
+            {
+                throw new GenericException("Please an error occurred while getting PickupPrice!!");
+            }
         }
 
         //method for converting a base64 string to an image and saving to Azure
@@ -1543,8 +1573,9 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var Pickupprice = await GetPickUpPrice();
+              
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == waybillNumber, "SenderLocation,ReceiverLocation");
+                var Pickupprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId);
                 var Partnerid = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == waybillNumber && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
                 await ScanMobileShipment(new ScanDTO
                 {
@@ -1629,7 +1660,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<decimal> GetHaulagePrice(HaulagePricingMobileDTO haulagePricingDto)
+        public async Task<object> GetHaulagePrice(HaulagePriceDTO haulagePricingDto)
         {
             decimal price = 0;
 
@@ -1674,7 +1705,51 @@ namespace GIGLS.Services.Implementation.Shipments
                 price = fixedRate + distance * haulage.AdditionalRate;
             }
 
-            return price;
+            return new { Price = price, CurrencySymbol = country.CurrencySymbol, CurrencyCode = country.CurrencyCode};
+        }
+
+
+        public async Task<bool> EditProfile (UserDTO user)
+        {
+            try
+            {
+                var User = await _userService.GetUserByEmail(user.Email);
+                User.FirstName = user.FirstName;
+                User.LastName = user.LastName;
+                User.PhoneNumber = user.PhoneNumber;
+                User.Email = user.Email;
+                User.PictureUrl = user.PictureUrl;
+                await _userService.UpdateUser(User.Id, User);
+                if (user.UserChannelType.ToString() == UserChannelType.Partner.ToString())
+                {
+                    var partner = await _uow.Partner.GetAsync(s => s.PartnerCode == user.UserChannelCode);
+                    partner.FirstName = user.FirstName;
+                    partner.LastName = user.LastName;
+                    partner.Email = user.Email;
+                    partner.PictureUrl = user.PictureUrl;
+                }
+                if (user.UserChannelType.ToString() == UserChannelType.IndividualCustomer.ToString())
+                {
+                    var customer = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+                    customer.FirstName = user.FirstName;
+                    customer.LastName = user.LastName;
+                    customer.Email = user.Email;
+                    customer.PictureUrl = user.PictureUrl;
+                }
+                if (user.UserChannelType.ToString() == UserChannelType.Ecommerce.ToString())
+                {
+                    var company = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+                    company.FirstName = user.FirstName;
+                    company.LastName = user.LastName;
+                    company.Email = user.Email;
+                }
+                await _uow.CompleteAsync();
+                return true;
+            }
+            catch
+            {
+                throw new GenericException("Please an error occurred while updating profile.");
+            }
         }
     }
 

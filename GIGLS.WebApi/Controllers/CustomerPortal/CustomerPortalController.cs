@@ -798,11 +798,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var registerUser = await _portalService.Register(user);
+                var registerUser = await _preshipmentmobileService.EditProfile(user);
 
                 return new ServiceResponse<bool>
                 {
-                    Object = true
+                    Object = registerUser
                 };
             });
         }
@@ -1306,14 +1306,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("gethaulagepriceformobile")]
-        public async Task<IServiceResponse<decimal>> gethaulageprice(HaulagePricingMobileDTO haulage)
+        public async Task<IServiceResponse<object>> gethaulageprice(HaulagePriceDTO haulage)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var haulagePrice = await _preshipmentmobileService.GetHaulagePrice(haulage);
-                return new ServiceResponse<decimal>
+                return new ServiceResponse<object>
                 {
                     Object = haulagePrice
                 };
