@@ -1631,6 +1631,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
             try
             {
+                //check if shipment already exists
+                var shipmentexists = await _uow.Shipment.ExistAsync(s => s.Waybill == shipment.Waybill);
+                if(shipmentexists)
+                {
+                    throw new GenericException($"Shipment with waybill number: {shipment.Waybill} already exists.");
+                }
 
                 shipment.ApproximateItemsWeight = 0;
 

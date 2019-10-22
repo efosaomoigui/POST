@@ -12,5 +12,9 @@ namespace GIGLS.Core.DTO.Partnership
         public string Time { get; set; }
 
         public decimal ShipmentPrice { get; set; }
+
+        public decimal PickUprice { get; set; }
+
+        public int ZoneMapping { get; set; }
     }
 }

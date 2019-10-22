@@ -388,7 +388,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               Description = s.Description,
                               GrandTotal = i.Amount,
                               DepartureServiceCentreName = dept.Name,
-                              DestinationServiceCentreName = dest.Name
+                              DestinationServiceCentreName = dest.Name,
+                              DepartureCountryId = s.DepartureCountryId,
+                              DestinationCountryId = s.DestinationCountryId
                           });
             return result;
         }

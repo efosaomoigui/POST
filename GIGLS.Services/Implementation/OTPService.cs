@@ -49,7 +49,6 @@ namespace GIGLS.Services.Implementation
                 userdto.IsActive=true;
                 var user = await _UserService.UpdateUser(userdto.Id, userdto);
             }
-            
             return userdto;
         }
                

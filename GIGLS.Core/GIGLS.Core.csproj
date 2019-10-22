@@ -504,6 +504,7 @@
     <Compile Include="Enums\UserStatus.cs" />
     <Compile Include="Enums\UserType.cs" />
     <Compile Include="Enums\VATType.cs" />
+    <Compile Include="Enums\Vehicletype.cs" />
     <Compile Include="Enums\VendorType.cs" />
     <Compile Include="Enums\WalletType.cs" />
     <Compile Include="IAuditable.cs" />

@@ -124,6 +124,18 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
 
             var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
+
+            if(invoicesDto != null)
+            {
+                var countries = _uow.Country.GetAllAsQueryable().Where(x => x.IsActive == true).ToList();
+                var countriesDto = Mapper.Map<List<CountryDTO>>(countries);
+
+                foreach(var c in invoicesDto)
+                {
+                    c.Country = countriesDto.Where(x => x.CountryId == c.DepartureCountryId).FirstOrDefault();
+                }
+            }
+
             return await Task.FromResult(invoicesDto);
         }
         //my own
@@ -340,6 +352,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                 dashboardDTO.WalletBalance = wallet.Balance;
             }
 
+            if(currentUser != null)
+            {
+                dashboardDTO.UserActiveCountry = await GetUserActiveCountry(currentUser);
+            }
+
             return await Task.FromResult(dashboardDTO);
         }
 
@@ -383,6 +400,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var haulages = await _uow.Haulage.GetHaulagesAsync();
             return haulages;
         }
+        
 
         public async Task<IEnumerable<InsuranceDTO>> GetInsurances()
         {
@@ -497,7 +515,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                     Password = user.Password,
                     CustomerCode = user.UserChannelCode,
                     PictureUrl = user.PictureUrl,
-                    IsFromMobile = user.IsFromMobile
+                    IsFromMobile = user.IsFromMobile,
+                    UserActiveCountryId = user.UserActiveCountryId
                     //added this to pass channelcode 
 
 
@@ -604,10 +623,13 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<SignResponseDTO> SignUp(UserDTO user)
         {
-            var CountryId = await _preShipmentMobileService.GetCountryId();
-            var userActiveCountryId = CountryId;    //Nigeria
+            if ((user.UserActiveCountryId).ToString() == null ||user.UserActiveCountryId == 0)
+            {
+                var CountryId = await _preShipmentMobileService.GetCountryId();
+                user.UserActiveCountryId = CountryId;    //Nigeria
+            }
 
-            var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, userActiveCountryId);
+            var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, user.UserActiveCountryId);
             var result = new SignResponseDTO();
                 if (user.UserChannelType == UserChannelType.Partner)
                 {
@@ -641,7 +663,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         EmailUser.Email = user.Email;
                         var partnerDTO = new PartnerDTO
                         {
-                             PartnerType = PartnerType.Individual,
+                             PartnerType = PartnerType.DeliveryPartner,
                              PartnerName = user.FirstName + "" + user.LastName,
                              PartnerCode = EmailUser.UserChannelCode,
                              FirstName  = user.FirstName,
@@ -760,7 +782,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                         PasswordExpireDate = DateTime.Now,
                         UserActiveCountryId = user.UserActiveCountryId,
                       
-                       
                     };
                     var FinalUser = Mapper.Map<User>(Partneruser);
                     FinalUser.Id = Guid.NewGuid().ToString();
@@ -776,7 +797,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     }
                     var partnerDTO = new PartnerDTO
                     {
-                        PartnerType = PartnerType.Individual,
+                        PartnerType = PartnerType.DeliveryPartner,
                         PartnerName = user.FirstName + " " + user.LastName,
                         PartnerCode = FinalUser.UserChannelCode,
                         FirstName = user.FirstName,
@@ -1374,7 +1395,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             CompanyStatus = CompanyStatus.Active,
                             SettlementPeriod = 1,
                             ReturnServiceCentre = 296,
-                            UserActiveCountryId = userActiveCountryId
+                            UserActiveCountryId = user.UserActiveCountryId
                             //added this to pass channelcode };
                         };
                         var company = Mapper.Map<Company>(customer);
@@ -1601,5 +1622,31 @@ namespace GIGLS.Services.Business.CustomerPortal
             return StationDictionary;
         }
 
+        private async Task<CountryDTO> GetUserActiveCountry(UserDTO user)
+        {
+            CountryDTO userActiveCountry = new CountryDTO { };            
+
+            if (user != null)
+            {
+                int userActiveCountryId = user.UserActiveCountryId;
+
+                if (userActiveCountryId == 0)
+                {
+                    if (user.UserChannelType == UserChannelType.IndividualCustomer)
+                    {
+                        userActiveCountryId = _uow.IndividualCustomer.GetAllAsQueryable().Where(x => x.CustomerCode == user.UserChannelCode).Select(x => x.UserActiveCountryId).FirstOrDefault();                   
+                    }
+                    else if (user.UserChannelType == UserChannelType.Ecommerce || user.UserChannelType == UserChannelType.Corporate)
+                    {
+                        userActiveCountryId = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode == user.UserChannelCode).Select(x => x.UserActiveCountryId).FirstOrDefault();
+                    }
+                }
+
+                var country = await _uow.Country.GetAsync(userActiveCountryId);
+                userActiveCountry = Mapper.Map<CountryDTO>(country);
+            }
+
+            return userActiveCountry;
+        }
     }
 }

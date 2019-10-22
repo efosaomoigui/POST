@@ -89,18 +89,19 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //get the customer info
             var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
-
+            
             var walletTransactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == walletId);
             if (walletTransactions.Count() < 1)
             {
-                //throw new GenericException("Wallet Transaction information does not exist");
                 return new WalletTransactionSummaryDTO
                 {
                     WalletTransactions = new List<WalletTransactionDTO>(),
                     WalletNumber = wallet.WalletNumber,
                     WalletBalance = wallet.Balance,
                     WalletOwnerName = customerDTO.CustomerName,
-                    WalletId = walletId
+                    WalletId = walletId,
+                    CurrencyCode = customerDTO.Country.CurrencyCode,
+                    CurrencySymbol = customerDTO.Country.CurrencySymbol
                 };
             }
             var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(s => s.DateCreated));
@@ -118,7 +119,9 @@ namespace GIGLS.Services.Implementation.Wallet
                 WalletNumber = wallet.WalletNumber,
                 WalletBalance = wallet.Balance,
                 WalletOwnerName = customerDTO.CustomerName,
-                WalletId = walletId
+                WalletId = walletId,
+                CurrencyCode = customerDTO.Country.CurrencyCode,
+                CurrencySymbol = customerDTO.Country.CurrencySymbol
             };
         }
 
