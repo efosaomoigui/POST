@@ -364,7 +364,7 @@ namespace GIGLS.Services.Implementation.Messaging
             return await Task.FromResult(true);
         }
 
-        private async Task<bool> LogSMSMessage(MessageDTO messageDTO, string result, string exceptiomMessage = null)
+        private async Task<bool> LogSMSMessage(MessageDTO messageDTO, string result, string exceptionMessage = null)
         {
             try
             {
@@ -376,9 +376,9 @@ namespace GIGLS.Services.Implementation.Messaging
                     To = messageDTO.To,
                     Waybill = messageDTO.Waybill,
                     Message = messageDTO.FinalBody,
-                    Status = exceptiomMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
+                    Status = exceptionMessage == null ? MessagingLogStatus.Successful : MessagingLogStatus.Failed,
                     ResultStatus = result,
-                    ResultDescription = exceptiomMessage
+                    ResultDescription = exceptionMessage
                 });
             }
             catch (Exception ) { }
