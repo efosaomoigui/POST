@@ -409,7 +409,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               Amount = i.Amount,
                               InvoiceNo = i.InvoiceNo,
                               PaymentMethod = i.PaymentMethod,
-                              PaymentStatus = i.PaymentStatus
+                              PaymentStatus = i.PaymentStatus,
+                              DepartureCountryId = s.DepartureCountryId,
+                              DestinationCountryId = s.DestinationCountryId
                           });
             return result;
         }
