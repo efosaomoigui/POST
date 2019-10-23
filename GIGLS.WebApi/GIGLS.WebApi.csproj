@@ -335,6 +335,7 @@
     <Compile Include="Controllers\Report\ReportsController.cs" />
     <Compile Include="Controllers\RiderDeliveryController.cs" />
     <Compile Include="Controllers\Scanner\MobileScannerController.cs" />
+    <Compile Include="Controllers\ServiceCentres\LGAController.cs" />
     <Compile Include="Controllers\ServiceCentres\RegionController.cs" />
     <Compile Include="Controllers\ServiceCentres\RegionServiceCentreMappingController.cs" />
     <Compile Include="Controllers\ServiceCentres\ServiceCentreController.cs" />

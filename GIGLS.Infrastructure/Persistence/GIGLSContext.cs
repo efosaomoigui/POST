@@ -267,6 +267,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<PickupManifestWaybillMapping> PickupManifestWaybillMapping { get; set; }
         public DbSet<RiderDelivery> RiderDelivery { get; set; }
         public DbSet<DeliveryLocation> DeliveryLocation { get; set; }
+        public DbSet<LGA> LGA { get; set; }
 
         #endregion
 
