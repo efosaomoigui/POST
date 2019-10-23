@@ -125,5 +125,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         public string CurrencyCode { get; set; }
 
+        public int? Haulageid { get; set; }
+
     }
 }

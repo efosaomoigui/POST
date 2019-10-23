@@ -127,13 +127,26 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var PreshipmentPriceDTO = new MobilePriceDTO();
                 // get the current user info
                 var currentUserId = await _userService.GetCurrentUserId();
                 preShipmentDTO.UserId = currentUserId;
                 var user = await _userService.GetUserById(currentUserId);
                 var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
                 preShipmentDTO.CountryId = Country.CountryId;
-                var PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
+                if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.truck.ToString())
+                {
+                    PreshipmentPriceDTO = await GetHaulagePrice(new HaulagePriceDTO
+                    {
+                        Haulageid = (int)preShipmentDTO.Haulageid,
+                        DepartureStationId = preShipmentDTO.SenderStationId,
+                        DestinationStationId = preShipmentDTO.ReceiverStationId
+                    });
+                }
+                else
+                {
+                    PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
+                }
                 var wallet = await _walletService.GetWalletBalance();
                 if (wallet.Balance >= Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal))
                 {
@@ -583,7 +596,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     }
                     await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
-                    preshipmentmobile.shipmentstatus = "Assigned for Pickup";
                     if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
                     {
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Rejected.ToString();
@@ -1660,7 +1672,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<object> GetHaulagePrice(HaulagePriceDTO haulagePricingDto)
+        public async Task<MobilePriceDTO> GetHaulagePrice(HaulagePriceDTO haulagePricingDto)
         {
             decimal price = 0;
 
@@ -1705,7 +1717,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 price = fixedRate + distance * haulage.AdditionalRate;
             }
 
-            return new { Price = price, CurrencySymbol = country.CurrencySymbol, CurrencyCode = country.CurrencyCode};
+            return new MobilePriceDTO{ GrandTotal = price, CurrencySymbol = country.CurrencySymbol, CurrencyCode = country.CurrencyCode};
         }
 
 

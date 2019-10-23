@@ -10,6 +10,7 @@ namespace GIGLS.Core.Enums
     {
         car,
         bike,
-        van
+        van,
+        truck
     }
 }

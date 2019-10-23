@@ -52,7 +52,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> ApproveShipment(string waybillNumber);
 
         Task<bool> CreateCompany(string CustomerCode);
-        Task<object> GetHaulagePrice(HaulagePriceDTO haulagePricingDto);
+        Task<MobilePriceDTO> GetHaulagePrice(HaulagePriceDTO haulagePricingDto);
         Task<bool> EditProfile(UserDTO user);
 
     }

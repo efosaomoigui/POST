@@ -1308,12 +1308,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("gethaulagepriceformobile")]
-        public async Task<IServiceResponse<object>> gethaulageprice(HaulagePriceDTO haulage)
+        public async Task<IServiceResponse<MobilePriceDTO>> gethaulageprice(HaulagePriceDTO haulage)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var haulagePrice = await _preshipmentmobileService.GetHaulagePrice(haulage);
-                return new ServiceResponse<object>
+                return new ServiceResponse<MobilePriceDTO>
                 {
                     Object = haulagePrice
                 };
