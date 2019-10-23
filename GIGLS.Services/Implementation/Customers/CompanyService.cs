@@ -234,6 +234,7 @@ namespace GIGLS.Services.Implementation.Customers
                 company.ReturnAddress = companyDto.ReturnAddress;
                 company.RcNumber = companyDto.RcNumber;
                 company.UserActiveCountryId = companyDto.UserActiveCountryId;
+                company.isCodNeeded = companyDto.isCodNeeded;
 
                 if (companyDto.ContactPersons.Any())
                 {

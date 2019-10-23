@@ -48,5 +48,6 @@ namespace GIGLS.Core.DTO.Customers
         public bool IsRegisteredFromMobile { get; set; }
 
         public CountryDTO Country { get; set; }
+        public bool isCodNeeded { get; set; }
     }
 }

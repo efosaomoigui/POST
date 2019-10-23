@@ -39,6 +39,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        City = c.City,
                                        State = c.State,
                                        Address = c.Address,
+                                       isCodNeeded = c.isCodNeeded,
                                        PhoneNumber = c.PhoneNumber,
                                        Industry = c.Industry,
                                        CompanyType = c.CompanyType,
@@ -117,6 +118,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        ReturnAddress = c.ReturnAddress,
                                        DateCreated = c.DateCreated,
                                        DateModified = c.DateModified,
+                                       isCodNeeded = c.isCodNeeded,
                                        UserActiveCountryId = c.UserActiveCountryId,
                                        ContactPersons = _context.CompanyContactPerson.Where(x => x.CompanyId == c.CompanyId).Select(p => new CompanyContactPersonDTO
                                        {
@@ -167,6 +169,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        CompanyType = c.CompanyType,
                                        CompanyStatus = c.CompanyStatus,
                                        Discount = c.Discount,
+                                       isCodNeeded = c.isCodNeeded,
                                        SettlementPeriod = c.SettlementPeriod,
                                        CustomerCode = c.CustomerCode,
                                        CustomerCategory = c.CustomerCategory,

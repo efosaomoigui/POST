@@ -381,10 +381,8 @@ namespace GIGLS.Core
                 config.CreateMap<DeliveryLocation, DeliveryLocationDTO>();
                 config.CreateMap<DeliveryLocationDTO, DeliveryLocation>();
 
-                config.CreateMap<Country, NewCountryDTO>();
-                config.CreateMap<NewCountryDTO, Country>();
-
-               
+                config.CreateMap<LGA, LGADTO>();
+                config.CreateMap<LGADTO, LGA>();
             });
 
             isInit = true;
