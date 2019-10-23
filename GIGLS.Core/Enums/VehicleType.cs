@@ -8,9 +8,9 @@ namespace GIGLS.Core.Enums
 {
     public enum Vehicletype
     {
-        car,
-        bike,
-        van,
-        truck
+        Car,
+        Bike,
+        Van,
+        Truck
     }
 }
