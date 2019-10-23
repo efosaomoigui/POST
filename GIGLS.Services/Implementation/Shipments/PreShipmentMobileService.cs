@@ -134,7 +134,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var user = await _userService.GetUserById(currentUserId);
                 var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
                 preShipmentDTO.CountryId = Country.CountryId;
-                if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.truck.ToString())
+                if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
                 {
                     PreshipmentPriceDTO = await GetHaulagePrice(new HaulagePriceDTO
                     {
@@ -1480,17 +1480,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (vehicleType != null)
                 {
                    
-                    if (vehicleType.ToLower() == Vehicletype.car.ToString())
+                    if (vehicleType.ToLower() == Vehicletype.Car.ToString().ToLower())
                     {
                         var carPickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.CarPickupPrice, CountryId);
                         PickUpPrice = (Convert.ToDecimal(carPickUprice.Value));
                     }
-                    if (vehicleType.ToLower() == Vehicletype.bike.ToString())
+                    if (vehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower())
                     {
                         var bikePickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BikePickUpPrice, CountryId);
                         PickUpPrice = (Convert.ToDecimal(bikePickUprice.Value));
                     }
-                    if (vehicleType.ToLower() == Vehicletype.van.ToString())
+                    if (vehicleType.ToLower() == Vehicletype.Van.ToString().ToLower())
                     {
                         var vanPickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.VanPickupPrice, CountryId);
                         PickUpPrice = (Convert.ToDecimal(vanPickUprice.Value));
