@@ -85,8 +85,7 @@ namespace GIGLS.Messaging.MessageService
                     Waybill = message.Waybill,
                     Message = message.FinalBody,
                     Status = MessagingLogStatus.Failed,
-                    ResultStatus = smsURL,
-                    ResultDescription = "NOT REACHABLE"
+                    ResultDescription = $"NOT REACHABLE {smsURL}"
                 });
 
                 smsURL = ConfigurationManager.AppSettings["smsURLNet"];
