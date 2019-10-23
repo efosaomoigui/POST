@@ -6,11 +6,21 @@ using System.Net;
 using System;
 using System.IO;
 using System.Net.Http;
+using GIGLS.Core.IServices.MessagingLog;
+using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Messaging.MessageService
 {
     public class SMSService : ISMSService
     {
+        private readonly ISmsSendLogService _iSmsSendLogService;
+
+        public SMSService(ISmsSendLogService iSmsSendLogService)
+        {
+            _iSmsSendLogService = iSmsSendLogService;
+        }
+
         public async Task<string> SendAsync(MessageDTO message)
         {
             var result = await ConfigSendGridasync(message);
@@ -21,11 +31,10 @@ namespace GIGLS.Messaging.MessageService
         private async Task<string> ConfigSendGridasync(MessageDTO message)
         {
             string result = "";
-
+            
             try
             {
-                var smsURL = await returnValidUrl();
-
+                var smsURL = await ReturnValidUrl(message);
                 var smsApiKey = ConfigurationManager.AppSettings["smsApiKey"];
 
                 //ogosms url format
@@ -61,7 +70,7 @@ namespace GIGLS.Messaging.MessageService
             return message;
         }
 
-        private async Task<string> returnValidUrl()
+        private async Task<string> ReturnValidUrl(MessageDTO message)
         {
             string smsURL = ConfigurationManager.AppSettings["smsURL"];
             
@@ -69,6 +78,17 @@ namespace GIGLS.Messaging.MessageService
 
             if (!result)
             {
+                await _iSmsSendLogService.AddSmsSendLog(new SmsSendLogDTO()
+                {
+                    From = message.From,
+                    To = message.To,
+                    Waybill = message.Waybill,
+                    Message = message.FinalBody,
+                    Status = MessagingLogStatus.Failed,
+                    ResultStatus = smsURL,
+                    ResultDescription = "NOT REACHABLE"
+                });
+
                 smsURL = ConfigurationManager.AppSettings["smsURLNet"];
             }
             

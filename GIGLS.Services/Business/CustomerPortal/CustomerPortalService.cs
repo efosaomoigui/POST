@@ -248,16 +248,25 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
 
-            //Update to change the Corporate Paid status from 'Paid' to 'Credit'
-            foreach (var item in invoicesDto)
+            if(invoicesDto.Count() > 0)
             {
-                item.PaymentStatusDisplay = item.PaymentStatus.ToString();
-                if ((CompanyType.Corporate.ToString() == item.CompanyType)
-                    && (PaymentStatus.Paid == item.PaymentStatus))
+                var countries = _uow.Country.GetAllAsQueryable().Where(x => x.IsActive == true).ToList();
+                var countriesDto = Mapper.Map<List<CountryDTO>>(countries);
+                
+                //Update to change the Corporate Paid status from 'Paid' to 'Credit'
+                foreach (var item in invoicesDto)
                 {
-                    item.PaymentStatusDisplay = "Credit";
+                    item.PaymentStatusDisplay = item.PaymentStatus.ToString();
+                    if ((CompanyType.Corporate.ToString() == item.CompanyType)
+                        && (PaymentStatus.Paid == item.PaymentStatus))
+                    {
+                        item.PaymentStatusDisplay = "Credit";
+                    }
+
+                    item.Country = countriesDto.Where(x => x.CountryId == item.DepartureCountryId).FirstOrDefault();
                 }
-            }
+
+            }                     
 
             return invoicesDto;
         }
@@ -530,7 +539,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else
                 {
-
                     throw new GenericException("Customer could not be created");
                 }
             }
