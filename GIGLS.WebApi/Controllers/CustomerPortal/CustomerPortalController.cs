@@ -1321,6 +1321,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-       
+        [HttpGet]
+        [Route("getactivelgas")]
+        public async Task<IServiceResponse<IEnumerable<LGADTO>>> GetActiveLGAs()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var lga = await _portalService.GetActiveLGAs();
+                return new ServiceResponse<IEnumerable<LGADTO>>
+                {
+                    Object = lga
+
+                };
+            });
+        }
+
+
     }
 }

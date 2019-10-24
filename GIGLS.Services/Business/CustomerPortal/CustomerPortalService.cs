@@ -1825,5 +1825,17 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.UpdateVehicleProfile(user);
         }
+        public async Task<IEnumerable<LGADTO>> GetActiveLGAs()
+        {
+            try
+            {
+                return await _uow.LGA.GetActiveLGAs();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

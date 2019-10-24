@@ -113,8 +113,9 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<PreShipmentMobileDTO>> GetDisputePreShipment();
         Task<SummaryTransactionsDTO> GetPartnerWalletTransactions();
         Task<bool> UpdateVehicleProfile(UserDTO user);
+        Task<IEnumerable<LGADTO>> GetActiveLGAs();
 
 
-        
+
     }
 }
