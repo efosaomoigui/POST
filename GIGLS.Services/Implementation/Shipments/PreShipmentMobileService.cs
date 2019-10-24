@@ -134,20 +134,21 @@ namespace GIGLS.Services.Implementation.Shipments
                 var user = await _userService.GetUserById(currentUserId);
                 var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
                 preShipmentDTO.CountryId = Country.CountryId;
-                if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
-                {
-                    PreshipmentPriceDTO = await GetHaulagePrice(new HaulagePriceDTO
-                    {
-                        Haulageid = (int)preShipmentDTO.Haulageid,
-                        DepartureStationId = preShipmentDTO.SenderStationId,
-                        DestinationStationId = preShipmentDTO.ReceiverStationId
-                    });
-                    preShipmentDTO.CalculatedTotal = (double)PreshipmentPriceDTO.GrandTotal;
-                }
-                else
-                {
-                    PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
-                }
+                 if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
+                 {
+                        PreshipmentPriceDTO = await GetHaulagePrice(new HaulagePriceDTO
+                        {
+                            Haulageid = (int)preShipmentDTO.Haulageid,
+                            DepartureStationId = preShipmentDTO.SenderStationId,
+                            DestinationStationId = preShipmentDTO.ReceiverStationId
+                        });
+                        preShipmentDTO.CalculatedTotal = (double)PreshipmentPriceDTO.GrandTotal;
+                  }
+                  else
+                  {
+                        PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
+                  }
+               
                 var wallet = await _walletService.GetWalletBalance();
                 if (wallet.Balance >= Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal))
                 {
@@ -227,7 +228,6 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                
                 if (preShipment.PreShipmentItems.Count() == 0)
                 {
                     throw new GenericException("No Preshipitem was added");
@@ -302,9 +302,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
                 return returnprice;
             }
-            catch(Exception ex)
+            catch(Exception)
             {
-                throw new GenericException($"Please an error occured while trying to calculate price.");
+                throw;
             }
         }
 
@@ -381,7 +381,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw new GenericException("An error occurred while trying to get preshipment detail.");
+                throw;
             }
 
         }
@@ -554,7 +554,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw new GenericException("Please an error occurred while trying to check if waybill number exists.");
+                throw;
             }
         }
 
@@ -859,7 +859,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw new GenericException("Please an error occurred while trying to get all special packages.");
             }
@@ -977,7 +977,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     preshipmentitemmobile.ImageUrl = item.ImageUrl;
                     preshipmentitemmobile.ItemName = item.ItemName;
                     preshipmentitemmobile.Length = item.Length;
-                    await _uow.CompleteAsync();
                 }
 
                 var PreshipmentPriceDTO = await GetPrice(preShipment);
@@ -992,14 +991,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
                 updatedwallet.Balance = updatedwallet.Balance + (decimal)difference;
-                var pickuprequests = _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preShipment.Waybill).Result;
+                var pickuprequests = _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobilegrandtotal.Waybill).Result;
                 pickuprequests.Status = MobilePickUpRequestStatus.Resolved.ToString();
                 await _uow.CompleteAsync();
                 return new { IsResolved = true };
             }
             catch (Exception)
             {
-                throw new GenericException("Please an error occurred while trying to resolve dispute.");
+                throw ;
             }
         }
 
@@ -1058,7 +1057,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw new GenericException("Please an error occurred while attempting to cancel the shipment.") ;
+                throw;
             }
         }
 
@@ -1123,7 +1122,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw new GenericException("Please an error occurred while trying to rate this shipment.");
+                throw;
             }
 
         }
@@ -1271,11 +1270,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
                 }
-                return true; ;
+                return true; 
             }
             catch
             {
-                throw new GenericException("An error occurred while trying to update the delivery number.");
+                throw;
             }
         }
         public async Task<bool> deleterecord(string detail)
@@ -1410,7 +1409,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw new GenericException("An error occurred while trying to verify partner details.") ;
+                throw;
             }
         }
 
@@ -1438,7 +1437,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw new GenericException("An error occurred while attemping to fetch partner's details.");
+                throw;
             }
         }
 
@@ -1462,7 +1461,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw new GenericException("An error occurred while attempting to update the details of the receiver.");
+                throw;
             }
         }
 
@@ -1575,9 +1574,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Shipment with this delivery number cannot be found");
                 }
             }
-            catch(Exception ex)
+            catch(Exception)
             {
-                throw new GenericException("An error occurred while attempting to fetch details with delivery number.");
+                throw;
             }
             
         }
@@ -1637,7 +1636,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception ex)
             {
-                throw new GenericException("An error occurred while approving shipment from dispatch rider.");
+                throw;
             }
         }
 

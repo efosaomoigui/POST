@@ -164,7 +164,7 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             //get the customer info
             var country = new CountryDTO();
-            var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
+            //var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
             var userid = await _userService.GetUserByChannelCode(wallet.CustomerCode);
             if (userid != null)
             {
@@ -187,7 +187,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     CurrencySymbol = country.CurrencySymbol,
                     WalletNumber = wallet.WalletNumber,
                     WalletBalance = wallet.Balance,
-                    WalletOwnerName = customerDTO.CustomerName,
+                    WalletOwnerName = userid.FirstName + " " + userid.LastName,
                     WalletId = wallet.WalletId
                    
                 };
@@ -201,7 +201,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 CurrencySymbol = country.CurrencySymbol,
                 WalletNumber = wallet.WalletNumber,
                 WalletBalance = wallet.Balance,
-                WalletOwnerName = customerDTO.CustomerName,
+                WalletOwnerName = userid.FirstName + " " + userid.LastName,
                 WalletId = wallet.WalletId
                 
             };
