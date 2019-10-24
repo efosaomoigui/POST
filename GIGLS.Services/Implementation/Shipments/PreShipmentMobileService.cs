@@ -1810,46 +1810,7 @@ namespace GIGLS.Services.Implementation.Shipments
             return true;
         }
 
-        public async Task<bool> UpdateVehicleProfile(UserDTO user)
-        {
-            try
-            {
-                var partner = await _uow.Partner.GetAsync(s => s.PartnerCode == user.UserChannelCode);
-                if (partner == null)
-                {
-                    var partnerDTO = new PartnerDTO
-                    {
-                        PartnerType = PartnerType.InternalDeliveryPartner,
-                        PartnerName = user.FirstName + "" + user.LastName,
-                        PartnerCode = user.UserChannelCode,
-                        FirstName = user.FirstName,
-                        LastName = user.LastName,
-                        Email = user.Email,
-                        PhoneNumber = user.PhoneNumber,
-                        UserId = user.Id,
-                        IsActivated = false,
-                    };
-                    var FinalPartner = Mapper.Map<Partner>(partnerDTO);
-                    _uow.Partner.Add(FinalPartner);
-                }
-                foreach (var vehicle in user.VehicleType)
-                {
-                    var Vehicle = new VehicleTypeDTO
-                    {
-                        Vehicletype = vehicle.ToUpper(),
-                        Partnercode = user.UserChannelCode
-                    };
-                    var vehicletype = Mapper.Map<VehicleType>(Vehicle);
-                    _uow.VehicleType.Add(vehicletype);
-                }
-            }
-            catch
-            {
-                throw new GenericException("Please an error occurred while updating profile.");
-            }
-            await _uow.CompleteAsync();
-            return true;
-        }
+       
     }
 
 
