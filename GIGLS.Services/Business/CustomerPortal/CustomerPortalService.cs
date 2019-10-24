@@ -66,6 +66,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IPreShipmentMobileService _preShipmentMobileService;
         private readonly IMessageSenderService _messageSenderService;
+        private readonly ICountryService _countryService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
@@ -73,7 +74,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService, ICustomerService customerService,
             IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
-            IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService)
+            IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService, ICountryService countryService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -95,6 +96,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _globalPropertyService = globalPropertyService;
             _preShipmentMobileService = preShipmentMobileService;
             _messageSenderService = messageSenderService;
+            _countryService = countryService;
             MapperConfig.Initialize();
         }
 
