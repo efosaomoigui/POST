@@ -48,27 +48,16 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         private readonly ICustomerPortalService _portalService;
         private readonly IPaystackPaymentService _paymentService;
         private readonly IPreShipmentMobileService _preshipmentmobileService;
-        private readonly IStationService _stationService;
-        private readonly IWalletService _walletService;
-        private readonly IWalletTransactionService _walletTransactionService;
-        private readonly IServiceCentreService _service;
-        private readonly ICategoryService _categoryservice;
-        private readonly ISubCategoryService _subcategoryservice;
-        private readonly IPasswordGenerator _passwordGenerator;
-        private readonly IMessageSenderService _messageSenderService;
-        private readonly ICountryService _countryservice;
-        private readonly IHaulageService _haulageservice;
+        
 
 
-        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IOTPService otpService,
-            IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService, IWalletService walletService, IWalletTransactionService walletTransactionService, IServiceCentreService service,
-            ICategoryService categoryservice, ISubCategoryService subcategoryservice, IPasswordGenerator passwordGenerator, IMessageSenderService messageSenderService, ICountryService countryservice, IHaulageService haulageservice) : base(nameof(CustomerPortalController))
+        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IPreShipmentMobileService preshipmentmobileService
+            ) : base(nameof(CustomerPortalController))
         {
             // _uow = uow;
             _portalService = portalService;
             _paymentService = paymentService;
             _preshipmentmobileService = preshipmentmobileService;
-            
             
         }
 
