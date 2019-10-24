@@ -1703,7 +1703,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
         public Task<string> Generate(int length)
         {
-            return _codegenerator.Generate(5);
+            return _codegenerator.Generate(6);
         }
         public async Task<IdentityResult> ForgotPassword(string email, string password)
         {
