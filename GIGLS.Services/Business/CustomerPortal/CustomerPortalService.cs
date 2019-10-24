@@ -66,8 +66,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IPreShipmentMobileService _preShipmentMobileService;
         private readonly IMessageSenderService _messageSenderService;
-        private readonly ICountryService _countryservice;
-        private readonly IPasswordGenerator _passwordgenerator;
 
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
@@ -75,8 +73,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService, ICustomerService customerService,
             IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
-            IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService,
-            ICountryService countryservice, IPasswordGenerator passwordgenerator)
+            IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -98,8 +95,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             _globalPropertyService = globalPropertyService;
             _preShipmentMobileService = preShipmentMobileService;
             _messageSenderService = messageSenderService;
-            _countryservice = countryservice;
-            _passwordgenerator = passwordgenerator;
             MapperConfig.Initialize();
         }
 
@@ -1662,6 +1657,171 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
 
             return userActiveCountry;
+        }
+
+        public async Task<MobilePriceDTO> GetHaulagePrice(HaulagePriceDTO haulagePricingDto)
+        {
+            return await _preShipmentMobileService.GetHaulagePrice(haulagePricingDto);
+        }
+
+        public Task<IEnumerable<NewCountryDTO>> GetUpdatedCountries()
+        {
+            return _countryService.GetUpdatedCountries();
+        }
+        public async Task<bool> ApproveShipment(string waybillNumber)
+        {
+            return await _preShipmentMobileService.ApproveShipment(waybillNumber);
+        }
+
+        public Task<PreShipmentSummaryDTO> GetShipmentDetailsFromDeliveryNumber(string DeliveryNumber)
+        {
+            return _preShipmentMobileService.GetShipmentDetailsFromDeliveryNumber(DeliveryNumber);
+        }
+
+        public async Task<bool> UpdateReceiverDetails(PreShipmentMobileDTO receiver)
+        {
+            return await _preShipmentMobileService.UpdateReceiverDetails(receiver);
+        }
+
+        public async Task<PartnerDTO> GetPartnerDetails(string Email)
+        {
+            return await _preShipmentMobileService.GetPartnerDetails(Email);
+        }
+        public async Task<List<Uri>> DisplayImages()
+        {
+            return await _preShipmentMobileService.DisplayImages();
+        }
+        public async Task<string> LoadImage(ImageDTO images)
+        {
+            return await _preShipmentMobileService.LoadImage(images);
+        }
+        public async Task<bool> VerifyPartnerDetails(PartnerDTO partner)
+        {
+            return await _preShipmentMobileService.VerifyPartnerDetails(partner);
+        }
+        public Task<string> Generate(int length)
+        {
+            return _codegenerator.Generate(5);
+        }
+        public async Task<IdentityResult> ForgotPassword(string email, string password)
+        {
+            return await _userService.ForgotPassword(email, password);
+        }
+
+        public async Task SendGenericEmailMessage(MessageType messageType, object obj)
+        {
+            await _messageSenderService.SendGenericEmailMessage(messageType, obj);
+        }
+
+        public async Task<bool> deleterecord(string detail)
+        {
+            return await _preShipmentMobileService.deleterecord(detail);
+        }
+        public async Task<bool> UpdateDeliveryNumber(MobileShipmentNumberDTO detail)
+        {
+            return await _preShipmentMobileService.UpdateDeliveryNumber(detail);
+        }
+        public async Task<Partnerdto> GetMonthlyPartnerTransactions()
+        {
+            return await _preShipmentMobileService.GetMonthlyPartnerTransactions();
+        }
+        public async Task<object> AddRatings(MobileRatingDTO rating)
+        {
+            return await _preShipmentMobileService.AddRatings(rating);
+        }
+        public async Task<object> CancelShipment(string Waybill)
+        {
+            return await _preShipmentMobileService.CancelShipment(Waybill);
+        }
+
+        public async Task<UserDTO> IsOTPValid(int OTP)
+        {
+            return await _otpService.IsOTPValid(OTP);
+        }
+
+        public async Task<UserDTO> CheckDetails(string user, string userchanneltype)
+        {
+            return await _otpService.CheckDetails(user, userchanneltype);
+        }
+        public async Task<bool> CreateCustomer(string CustomerCode)
+        {
+            return await _preShipmentMobileService.CreateCustomer(CustomerCode);
+        }
+        public async Task<string> CreatePartner(string CustomerCode)
+        {
+            return await _preShipmentMobileService.CreatePartner(CustomerCode);
+        }
+        public async Task<bool> CreateCompany(string CustomerCode)
+        {
+            return await _preShipmentMobileService.CreateCompany(CustomerCode);
+        }
+        public async Task<bool> EditProfile(UserDTO user)
+        {
+            return await _preShipmentMobileService.EditProfile(user);
+        }
+        public async Task<object> AddPreShipmentMobile(PreShipmentMobileDTO preShipment)
+        {
+            return await _preShipmentMobileService.AddPreShipmentMobile(preShipment);
+        }
+        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser()
+        {
+            return await _preShipmentMobileService.GetPreShipmentForUser();
+        }
+        public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile()
+        {
+            return await _iWalletTransactionService.GetWalletTransactionsForMobile();
+        }
+        public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
+        {
+            return await _preShipmentMobileService.GetPrice(preShipment);
+        }
+        public async Task<WalletDTO> GetWalletBalance()
+        {
+            return await _walletService.GetWalletBalance();
+        }
+        public async Task<SpecialResultDTO> GetSpecialPackages()
+        {
+            return await _preShipmentMobileService.GetSpecialPackages();
+        }
+        public async Task<MobileShipmentTrackingHistoryDTO> trackShipment(string waybillNumber)
+        {
+            return await _preShipmentMobileService.TrackShipment(waybillNumber);
+        }
+        public async Task<PreShipmentMobileDTO> AddMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest)
+        {
+            return await _preShipmentMobileService.AddMobilePickupRequest(pickuprequest);
+        }
+        public async Task<List<MobilePickUpRequestsDTO>> GetMobilePickupRequest()
+        {
+            return await _preShipmentMobileService.GetMobilePickupRequest();
+        }
+        public async Task<bool> UpdateMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest)
+        {
+            return await _preShipmentMobileService.UpdateMobilePickupRequest(pickuprequest);
+        }
+        public async Task<object> ResolveDisputeForMobile(PreShipmentMobileDTO preShipment)
+        {
+            return await _preShipmentMobileService.ResolveDisputeForMobile(preShipment);
+        }
+        public async Task<PreShipmentMobileDTO> GetPreShipmentDetail(string waybill)
+        {
+            return await _preShipmentMobileService.GetPreShipmentDetail(waybill);
+        }
+        public async Task<bool> UpdatePreShipmentMobileDetails(List<PreShipmentItemMobileDTO> preshipmentmobile)
+        {
+            return await _preShipmentMobileService.UpdatePreShipmentMobileDetails(preshipmentmobile);
+        }
+        public async Task<List<PreShipmentMobileDTO>> GetDisputePreShipment()
+        {
+            return await _preShipmentMobileService.GetDisputePreShipment();
+        }
+        public async Task<SummaryTransactionsDTO> GetPartnerWalletTransactions()
+        {
+            return await _preShipmentMobileService.GetPartnerWalletTransactions();
+        }
+        public async Task<bool> UpdateVehicleProfile(UserDTO user)
+        {
+            return await _preShipmentMobileService.UpdateVehicleProfile(user);
         }
     }
 }
