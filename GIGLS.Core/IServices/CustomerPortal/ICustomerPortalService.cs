@@ -115,6 +115,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> UpdateVehicleProfile(UserDTO user);
 
 
-
+        
     }
 }
