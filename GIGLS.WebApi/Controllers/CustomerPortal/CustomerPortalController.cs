@@ -1309,7 +1309,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
         [HttpPost]
         [Route("updatevehicleprofile")]
-        public async Task<IServiceResponse<bool>> gethaulageprice(UserDTO user)
+        public async Task<IServiceResponse<bool>> updatevehicleprofile(UserDTO user)
         {
             return await HandleApiOperationAsync(async () =>
             {
