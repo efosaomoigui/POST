@@ -1132,7 +1132,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                string password = await _portalService.Generate(5);
+                string password = await _portalService.Generate(6);
                 var User = await _portalService.ForgotPassword(user.Email, password);
 
                 if (User.Succeeded)
