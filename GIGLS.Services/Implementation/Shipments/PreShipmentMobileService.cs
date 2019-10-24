@@ -272,30 +272,34 @@ namespace GIGLS.Services.Implementation.Shipments
                         preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                         //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     }
+                    var vatForPreshipment = (preShipmentItem.CalculatedPrice * 0.05M);
                     if (!string.IsNullOrEmpty(preShipmentItem.Value))
                     {
                         DeclaredValue += Convert.ToDecimal(preShipmentItem.Value);
                         var DeclaredValueForPreShipment = Convert.ToDecimal(preShipmentItem.Value);
-                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M);
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M) + vatForPreshipment;
+                       //preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice / 100, 0);
                         preShipment.IsdeclaredVal = true;
+                    }
+                    else
+                    {
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + vatForPreshipment;
+                       //preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice / 100, 0) * 100;
                     }
                     Price += (decimal)preShipmentItem.CalculatedPrice;
                 };
                 decimal EstimatedDeclaredPrice = Convert.ToDecimal(DeclaredValue);
                 preShipment.DeliveryPrice = Price;
-                preShipment.Vat = (decimal)(preShipment.DeliveryPrice * 0.05M);
                 preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
-                preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice + preShipment.Vat + preShipment.InsuranceValue);
-                preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal / 100d, 0) * 100;
+                preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice);
+                preShipment.CalculatedTotal = (double)preShipment.CalculatedTotal;
                 preShipment.Value = DeclaredValue;
                 var returnprice = new MobilePriceDTO()
                 {
-                    MainCharge = preShipment.Vat + preShipment.InsuranceValue + preShipment.DeliveryPrice,
+                    MainCharge = (decimal)preShipment.CalculatedTotal,
                     PickUpCharge = PickupValue,
-                    Vat = preShipment.Vat,
-                    DeliveryPrice = preShipment.DeliveryPrice,
                     InsuranceValue = preShipment.InsuranceValue,
-                    GrandTotal = preShipment.Vat + preShipment.InsuranceValue + preShipment.DeliveryPrice + PickupValue,
+                    GrandTotal = ((decimal)preShipment.CalculatedTotal + PickupValue),
                     PreshipmentMobile = preShipment,
                     CurrencySymbol = Country.CurrencySymbol,
                     CurrencyCode = Country.CurrencyCode
@@ -1739,6 +1743,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     partner.LastName = user.LastName;
                     partner.Email = user.Email;
                     partner.PictureUrl = user.PictureUrl;
+                    
                 }
                 if (user.UserChannelType.ToString() == UserChannelType.IndividualCustomer.ToString())
                 {
@@ -1762,6 +1767,47 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException("Please an error occurred while updating profile.");
             }
+        }
+
+        public async Task<bool> UpdateVehicleProfile(UserDTO user)
+        {
+            try
+            {
+                var partner = await _uow.Partner.GetAsync(s => s.PartnerCode == user.UserChannelCode);
+                if (partner == null)
+                {
+                    var partnerDTO = new PartnerDTO
+                    {
+                        PartnerType = PartnerType.InternalDeliveryPartner,
+                        PartnerName = user.FirstName + "" + user.LastName,
+                        PartnerCode = user.UserChannelCode,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber,
+                        UserId = user.Id,
+                        IsActivated = false,
+                    };
+                    var FinalPartner = Mapper.Map<Partner>(partnerDTO);
+                   _uow.Partner.Add(FinalPartner);
+                }
+                foreach (var vehicle in user.VehicleType)
+                {
+                    var Vehicle = new VehicleTypeDTO
+                    {
+                        Vehicletype = vehicle.ToUpper(),
+                        Partnercode = user.UserChannelCode
+                    };
+                    var vehicletype = Mapper.Map<VehicleType>(Vehicle);
+                    _uow.VehicleType.Add(vehicletype);
+                }
+            }
+            catch
+            {
+                throw new GenericException("Please an error occurred while updating profile.");
+            }
+            await _uow.CompleteAsync();
+            return true;
         }
     }
 

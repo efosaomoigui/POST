@@ -4,6 +4,7 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Haulage;
+using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
@@ -12,6 +13,7 @@ using GIGLS.Core.DTO.SLA;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
+using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO.Shipments;
 using Microsoft.AspNet.Identity;
 using System;
@@ -71,7 +73,48 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<StationDTO>> GetLocalStations();
 
         Task<Dictionary<string, List<StationDTO>>> GetAllStations();
+        Task<MobilePriceDTO> GetHaulagePrice(HaulagePriceDTO haulagePricingDto);
+        Task<IEnumerable<NewCountryDTO>> GetUpdatedCountries();
+        Task<bool> ApproveShipment(string waybillNumber);
+        Task<PreShipmentSummaryDTO> GetShipmentDetailsFromDeliveryNumber(string DeliveryNumber);
 
-        
+        Task<bool> UpdateReceiverDetails(PreShipmentMobileDTO receiver);
+        Task<PartnerDTO> GetPartnerDetails(string Email);
+        Task<List<Uri>> DisplayImages();
+        Task<string> LoadImage(ImageDTO images);
+        Task<bool> VerifyPartnerDetails(PartnerDTO partner);
+        Task<string> Generate(int length);
+        Task<IdentityResult> ForgotPassword(string email, string password);
+        Task SendGenericEmailMessage(MessageType messageType, object obj);
+        Task<bool> deleterecord(string detail);
+        Task<bool> UpdateDeliveryNumber(MobileShipmentNumberDTO detail);
+        Task<Partnerdto> GetMonthlyPartnerTransactions();
+        Task<object> AddRatings(MobileRatingDTO rating);
+        Task<object> CancelShipment(string Waybill);
+        Task<UserDTO> IsOTPValid(int OTP);
+        Task<UserDTO> CheckDetails(string user, string userchanneltype);
+        Task<bool> CreateCustomer(string CustomerCode);
+        Task<string> CreatePartner(string CustomerCode);
+        Task<bool> CreateCompany(string CustomerCode);
+        Task<bool> EditProfile(UserDTO user);
+        Task<object> AddPreShipmentMobile(PreShipmentMobileDTO preShipment);
+        Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser();
+        Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile();
+        Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment);
+        Task<WalletDTO> GetWalletBalance();
+        Task<SpecialResultDTO> GetSpecialPackages();
+        Task<MobileShipmentTrackingHistoryDTO> trackShipment(string waybillNumber);
+        Task<PreShipmentMobileDTO> AddMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest);
+        Task<List<MobilePickUpRequestsDTO>> GetMobilePickupRequest();
+        Task<bool> UpdateMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest);
+        Task<object> ResolveDisputeForMobile(PreShipmentMobileDTO preShipment);
+        Task<PreShipmentMobileDTO> GetPreShipmentDetail(string waybill);
+        Task<bool> UpdatePreShipmentMobileDetails(List<PreShipmentItemMobileDTO> preshipmentmobile);
+        Task<List<PreShipmentMobileDTO>> GetDisputePreShipment();
+        Task<SummaryTransactionsDTO> GetPartnerWalletTransactions();
+        Task<bool> UpdateVehicleProfile(UserDTO user);
+
+
+
     }
 }
