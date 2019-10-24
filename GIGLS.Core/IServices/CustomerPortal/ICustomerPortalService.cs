@@ -72,6 +72,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
 
         Task<Dictionary<string, List<StationDTO>>> GetAllStations();
 
-        
+        Task<IEnumerable<LGADTO>> GetActiveLGAs();
     }
 }

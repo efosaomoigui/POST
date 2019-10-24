@@ -1656,5 +1656,17 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return userActiveCountry;
         }
+
+        public async Task<IEnumerable<LGADTO>> GetActiveLGAs()
+        {
+            try
+            {
+                return await _uow.LGA.GetActiveLGAs();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

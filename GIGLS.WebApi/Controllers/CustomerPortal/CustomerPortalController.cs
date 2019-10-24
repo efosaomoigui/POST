@@ -60,12 +60,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         private readonly IMessageSenderService _messageSenderService;
         private readonly ICountryService _countryservice;
         private readonly IHaulageService _haulageservice;
-        private readonly ILGAService _lgaService;
-
+        
 
         public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IOTPService otpService,
             IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService, IWalletService walletService, IWalletTransactionService walletTransactionService, IServiceCentreService service,
-            ICategoryService categoryservice, ISubCategoryService subcategoryservice, IPasswordGenerator passwordGenerator, IMessageSenderService messageSenderService, ICountryService countryservice, IHaulageService haulageservice, ILGAService lgaService) : base(nameof(CustomerPortalController))
+            ICategoryService categoryservice, ISubCategoryService subcategoryservice, IPasswordGenerator passwordGenerator, IMessageSenderService messageSenderService, ICountryService countryservice, IHaulageService haulageservice) : base(nameof(CustomerPortalController))
         {
             // _uow = uow;
             _userService = userService;
@@ -83,7 +82,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             _messageSenderService = messageSenderService;
             _countryservice = countryservice;
             _haulageservice = haulageservice;
-            _lgaService = lgaService;
         }
 
 
@@ -1322,14 +1320,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        
+
         [HttpGet]
         [Route("getactivelgas")]
         public async Task<IServiceResponse<IEnumerable<LGADTO>>> GetActiveLGAs()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var lga = await _lgaService.GetActiveLGAs();
+                var lga = await _portalService.GetActiveLGAs();
                 return new ServiceResponse<IEnumerable<LGADTO>>
                 {
                     Object = lga
