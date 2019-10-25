@@ -1236,7 +1236,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         images.FileType = ImageFileType.VehicleLicense;
                         images.ImageString = partner.VehicleLicenseImageDetails;
-                        partner.VehicleLicenseImageDetails = await LoadImage(images);
+                        if (!images.ImageString.Contains("agilityblobstorage"))
+                        {
+                            partner.VehicleLicenseImageDetails = await LoadImage(images);
+                        }
+                        //partner.VehicleLicenseImageDetails = await LoadImage(images);
                     }
                     Partner.VehicleLicenseImageDetails = partner.VehicleLicenseImageDetails;
                     Partner.VehicleLicenseNumber = partner.VehicleLicenseNumber;
@@ -1246,31 +1250,40 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     foreach (var vehicle in partner.VehicleTypeDetails)
                     {
-                        if (vehicle.VehiceInsurancePolicyDetails != null)
+                        if (vehicle.VehicleInsurancePolicyDetails != null)
                         {
                             images.FileType = ImageFileType.VehiceInsurancePolicy;
-                            images.ImageString = vehicle.VehiceInsurancePolicyDetails;
-                            vehicle.VehiceInsurancePolicyDetails = await LoadImage(images);
+                            images.ImageString = vehicle.VehicleInsurancePolicyDetails;
+                            if (!images.ImageString.Contains("agilityblobstorage"))
+                            {
+                                vehicle.VehicleInsurancePolicyDetails = await LoadImage(images);
+                            }
                         }
 
-                        if (vehicle.VehiceRoadWorthinessDetails != null)
+                        if (vehicle.VehicleRoadWorthinessDetails != null)
                         {
                             images.FileType = ImageFileType.VehiceRoadWorthiness;
-                            images.ImageString = vehicle.VehiceRoadWorthinessDetails;
-                            vehicle.VehiceRoadWorthinessDetails = await LoadImage(images);
+                            images.ImageString = vehicle.VehicleRoadWorthinessDetails;
+                            if (!images.ImageString.Contains("agilityblobstorage"))
+                            {
+                                vehicle.VehicleRoadWorthinessDetails = await LoadImage(images);
+                            }
                         }
 
                         if (vehicle.VehicleParticularsDetails != null)
                         {
                             images.FileType = ImageFileType.VehicleParticulars;
                             images.ImageString = vehicle.VehicleParticularsDetails;
-                            vehicle.VehicleParticularsDetails = await LoadImage(images);
+                            if (!images.ImageString.Contains("agilityblobstorage"))
+                            {
+                                vehicle.VehicleParticularsDetails = await LoadImage(images);
+                            }
                         }
                         var VehicleDetails = await _uow.VehicleType.GetAsync(s => s.VehicleTypeId == vehicle.VehicleTypeId && s.Partnercode == partner.PartnerCode);
                         if (VehicleDetails != null)
                         {
-                            VehicleDetails.VehiceInsurancePolicyDetails = vehicle.VehiceInsurancePolicyDetails;
-                            VehicleDetails.VehiceRoadWorthinessDetails = vehicle.VehiceRoadWorthinessDetails;
+                            VehicleDetails.VehicleInsurancePolicyDetails = vehicle.VehicleInsurancePolicyDetails;
+                            VehicleDetails.VehicleRoadWorthinessDetails = vehicle.VehicleRoadWorthinessDetails;
                             VehicleDetails.VehicleParticularsDetails = vehicle.VehicleParticularsDetails;
                             VehicleDetails.VehiclePlateNumber = vehicle.VehiclePlateNumber;
                             VehicleDetails.Vehicletype = vehicle.Vehicletype;
@@ -1290,9 +1303,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 
@@ -1309,7 +1322,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         if (VehicleDetails != null)
                         {
                           var vehicles = Mapper.Map<List<VehicleTypeDTO>>(VehicleDetails);
-                          partnerdto.VehicleTypeDetails = vehicles;
+                          partnerdto.VehicleTypeDetails = vehicles.ToList();
                         }
                 }
                 else
