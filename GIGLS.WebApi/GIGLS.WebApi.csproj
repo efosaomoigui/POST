@@ -38,7 +38,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -303,6 +303,7 @@
     <Compile Include="Controllers\Customers\CustomerController.cs" />
     <Compile Include="Controllers\Customers\IndividualCustomerController.cs" />
     <Compile Include="Controllers\Dashboard\DashboardController.cs" />
+    <Compile Include="Controllers\DeliveryLocationController.cs" />
     <Compile Include="Controllers\Devices\DeviceController.cs" />
     <Compile Include="Controllers\Devices\DeviceManagementController.cs" />
     <Compile Include="Controllers\Fleets\DispatchActivityController.cs" />
@@ -332,7 +333,9 @@
     <Compile Include="Controllers\PickUp\PickUpController.cs" />
     <Compile Include="Controllers\Report\AdminReportController.cs" />
     <Compile Include="Controllers\Report\ReportsController.cs" />
+    <Compile Include="Controllers\RiderDeliveryController.cs" />
     <Compile Include="Controllers\Scanner\MobileScannerController.cs" />
+    <Compile Include="Controllers\ServiceCentres\LGAController.cs" />
     <Compile Include="Controllers\ServiceCentres\RegionController.cs" />
     <Compile Include="Controllers\ServiceCentres\RegionServiceCentreMappingController.cs" />
     <Compile Include="Controllers\ServiceCentres\ServiceCentreController.cs" />
@@ -492,7 +495,7 @@
         <WebProjectProperties>
           <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerPort>18591</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost/giglsresourceapi</IISUrl>
           <OverrideIISAppRootUrl>True</OverrideIISAppRootUrl>

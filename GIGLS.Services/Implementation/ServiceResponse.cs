@@ -37,5 +37,6 @@ namespace GIGLS.Services.Implementation
         public double AverageRatings { get; set; }
 
         public bool IsVerified { get; set; }
+        public string PartnerType { get; set; }
     }
 }

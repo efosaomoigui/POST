@@ -256,17 +256,21 @@ namespace GIGLS.Services.Implementation.Wallet
                         companyType = CompanyType.Ecommerce;
                     }
                     walletsQueryable = walletsQueryable.Where(x => x.CompanyType == companyType.ToString());
-                    walletsDto = Mapper.Map<List<WalletDTO>>(walletsQueryable.ToList());
+                    var walletsResult = walletsQueryable.ToList();
+                    walletsDto = Mapper.Map<List<WalletDTO>>(walletsResult);
                 }
 
                 ////set the customer name
                 foreach (var item in walletsDto)
                 {
                     // handle Company customers
-                    if (CustomerType.Company.Equals(item.CustomerType))
+                    if (CustomerType.Company == item.CustomerType)
                     {
                         var companyDTO = await _uow.Company.GetAsync(s => s.CompanyId == item.CustomerId);
-                        item.CustomerName = companyDTO.Name;
+                        if(companyDTO != null)
+                        {
+                            item.CustomerName = companyDTO.Name;
+                        }
                     }
                     else
                     {

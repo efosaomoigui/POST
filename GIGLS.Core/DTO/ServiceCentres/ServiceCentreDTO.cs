@@ -35,5 +35,6 @@ namespace GIGLS.Core.DTO.ServiceCentres
 
         public double? Longitude { get; set; }
         public bool IsHUB { get; set; }
+        public CountryDTO CountryDTO { get; set; }
     }
 }

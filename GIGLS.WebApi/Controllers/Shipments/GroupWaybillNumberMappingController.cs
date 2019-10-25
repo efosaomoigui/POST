@@ -80,23 +80,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
-
-        //[HttpGet]
-        //[Route("groupforwaybillnumber/id/{waybillNumberId}")]
-        //public async Task<IServiceResponse<GroupWaybillNumberDTO>> GetGroupForWaybillNumber(int waybillNumberId)
-        //{
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-
-        //        var groupWaybillNumberDTO = await _service.GetGroupForWaybillNumber(waybillNumberId);
-
-        //        return new ServiceResponse<GroupWaybillNumberDTO>
-        //        {
-        //            Object = groupWaybillNumberDTO
-        //        };
-        //    });
-        //}
-
+        
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("groupforwaybillnumber/code/{waybillNumber}")]

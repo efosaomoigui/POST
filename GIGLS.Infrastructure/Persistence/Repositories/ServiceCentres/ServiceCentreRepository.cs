@@ -7,6 +7,7 @@ using GIGLS.Core.IRepositories.ServiceCentres;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System.Linq;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
 {
@@ -269,7 +270,14 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     IsDefault = s.IsDefault,
                                     DateCreated = s.DateCreated,
                                     DateModified = s.DateModified,
-                                    IsHUB = s.IsHUB
+                                    IsHUB = s.IsHUB,
+                                    CountryDTO = new CountryDTO
+                                    {
+                                        CountryId = c.CountryId,
+                                        CountryCode = c.CountryCode,
+                                        CountryName = c.CountryName,
+                                        CurrencySymbol = c.CurrencySymbol                                        
+                                    }
                                 };
                 return Task.FromResult(centreDto.FirstOrDefault());
             }

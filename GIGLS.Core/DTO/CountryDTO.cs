@@ -25,4 +25,12 @@ namespace GIGLS.Core.DTO
         public string TermAndConditionAmount { get; set; }
         public string TermAndConditionCountry { get; set; }
     }
+    public class NewCountryDTO 
+    {
+        
+        public int CountryId { get; set; }
+        public string CountryName { get; set; }
+        public bool IsActive { get; set; }
+        
+    }
 }

@@ -212,6 +212,9 @@ namespace GIGLS.Core
                 config.CreateMap<DemurrageRegisterAccount, DemurrageRegisterAccountDTO>();
                 config.CreateMap<DemurrageRegisterAccountDTO, DemurrageRegisterAccount>();
 
+                config.CreateMap<Demurrage, DemurrageDTO>();
+                config.CreateMap<DemurrageDTO, Demurrage>();
+
                 config.CreateMap<Dispatch, DispatchDTO>();
                 config.CreateMap<DispatchDTO, DispatchDTO>();
 
@@ -371,6 +374,15 @@ namespace GIGLS.Core
 
                 config.CreateMap<PickupManifestWaybillMapping, PickupManifestWaybillMappingDTO>();
                 config.CreateMap<PickupManifestWaybillMappingDTO, PickupManifestWaybillMapping>();
+
+                config.CreateMap<RiderDelivery, RiderDeliveryDTO>();
+                config.CreateMap<RiderDeliveryDTO, RiderDelivery>();
+
+                config.CreateMap<DeliveryLocation, DeliveryLocationDTO>();
+                config.CreateMap<DeliveryLocationDTO, DeliveryLocation>();
+
+                config.CreateMap<LGA, LGADTO>();
+                config.CreateMap<LGADTO, LGA>();
             });
 
             isInit = true;

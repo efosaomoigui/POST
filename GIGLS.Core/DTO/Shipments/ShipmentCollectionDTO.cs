@@ -38,6 +38,8 @@ namespace GIGLS.CORE.DTO.Shipments
         public string PaymentTypeReference { get; set; }
 
         //boolean to check if release is coming from mobile
-        public bool IsComingFromDispatch { get; set; } 
+        public bool IsComingFromDispatch { get; set; }
+       
+        public string ReceiverArea { get; set; }
     }
 }

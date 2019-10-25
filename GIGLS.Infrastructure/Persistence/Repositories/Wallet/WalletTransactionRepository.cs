@@ -12,6 +12,7 @@ using System.Data.Entity;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.Enums;
 using GIGLS.Core.DTO.ServiceCentres;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 {
@@ -31,6 +32,25 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
             if (serviceCentreIds.Length > 0)
             {
                 walletTransactionContext = _context.WalletTransactions.Where(s => serviceCentreIds.Contains(s.ServiceCentreId));
+            }
+
+            var walletTransactions = walletTransactionContext.Include(s => s.ServiceCentre).ToList();
+            var walletTransactionDTO = Mapper.Map<IEnumerable<WalletTransactionDTO>>(walletTransactions);
+            return Task.FromResult(walletTransactionDTO.OrderByDescending(s => s.DateOfEntry).ToList());
+        }
+
+        public Task<List<WalletTransactionDTO>> GetWalletTransactionDateAsync (int[] serviceCentreIds, ShipmentCollectionFilterCriteria dateFilter)
+        {
+            //get startDate and endDate
+            var queryDate = dateFilter.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var walletTransactionContext = _context.WalletTransactions.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).AsQueryable();
+
+            if (serviceCentreIds.Length > 0)
+            {
+                walletTransactionContext = walletTransactionContext.Where(s => serviceCentreIds.Contains(s.ServiceCentreId));
             }
 
             var walletTransactions = walletTransactionContext.Include(s => s.ServiceCentre).ToList();
@@ -80,9 +100,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                                                                  }).FirstOrDefault()
                                                              }).OrderByDescending(s => s.DateOfEntry).ToList();
 
-            //var walletTransactions = walletTransactionContext.Include(s => s.ServiceCentre).Include(x => x.Wallet).ToList();
-            //var walletTransactionDTO = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions);
-                        
             return Task.FromResult(walletTransactionDTO.OrderByDescending(s => s.DateOfEntry).ToList());
         }
     }

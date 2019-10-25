@@ -3,6 +3,7 @@ using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.BankSettlement;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO.Report;
@@ -26,8 +27,8 @@ namespace GIGLS.Core.IRepositories.BankSettlement
         Task<List<BankProcessingOrderCodesDTO>> GetProcessingOrderCodebyRefCode(string refcode) ;
         IQueryable<BankProcessingOrderCodesDTO> GetBankOrderProcessingCodeAsQueryable();
         Task<Shipment> GetShipmentByWaybill(string waybill);
-        Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, DateFilterCriteria dateFilterCriteria);
-        Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeForDefaultDate(DepositType type);
+        Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria);
+        
     }
 
     public interface ICodPayOutListRepository : IRepository<CodPayOutList>

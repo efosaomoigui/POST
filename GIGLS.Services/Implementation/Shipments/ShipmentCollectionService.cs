@@ -4,7 +4,6 @@ using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
@@ -20,8 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -60,8 +57,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var updateShipmentTracking = new ShipmentTracking
             {
                 Waybill = shipmentCollection.Waybill,
-                //Location = tracking.Location,
-                Status = ShipmentScanStatus.OKT.ToString(), //EnumHelper.GetDescription(ShipmentScanStatus.DDSA),
+                Status = ShipmentScanStatus.OKT.ToString(), 
                 UserId = currentUserId,
                 DateTime = DateTime.Now
             };
@@ -110,25 +106,6 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //get all shipments by servicecentre
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-
-                //added for GWA and GWARIMPA service centres
-                //{
-                //    if (serviceCenters.Length == 1)
-                //    {
-                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                //        {
-                //            serviceCenters = new int[] { 4, 294 };
-                //        }
-                //    }
-                //}
-
-                //List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
-
-                //get collected shipment
-                //var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC).ToList();
-
-                //extras the current login staff shipment from the shipment collection
-                //shipmentCollection = shipmentCollection.Where(x => shipmentsWaybills.Contains(x.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
 
                 var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC) && serviceCenters.Contains(x.DestinationServiceCentreId)).ToList();
 
@@ -183,24 +160,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 //get all shipments by servicecentre
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
 
-                //added for GWA and GWARIMPA service centres
-                //{
-                //    if (serviceCenters.Length == 1)
-                //    {
-                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                //        {
-                //            serviceCenters = new int[] { 4, 294 };
-                //        }
-                //    }
-                //}
-
                 //get startDate and endDate
                 var queryDate = collectionFilterCriteria.getStartDateAndEndDate();
                 var startDate = queryDate.Item1;
                 var endDate = queryDate.Item2;
-
-                //var manifestGroupwaybillMapping = Context.ManifestGroupWaybillNumberMapping.Where(s => s.IsDeleted == false && s.DateCreated >= startDate && s.DateCreated < endDate).AsQueryable();
-
 
                 var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
                     .Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC)
@@ -222,18 +185,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             //get all shipments by servicecentre
             var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-
-            //added for GWA and GWARIMPA service centres
-            //{
-            //    if (serviceCenters.Length == 1)
-            //    {
-            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-            //        {
-            //            serviceCenters = new int[] { 4, 294 };
-            //        }
-            //    }
-            //}
-
+            
             var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
                 .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId)).ToList();
 
@@ -242,29 +194,12 @@ namespace GIGLS.Services.Implementation.Shipments
             return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateCreated));
         }
 
-        public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollectionForHub(FilterOptionsDto filterOptionsDto)
+        public async Task<Tuple<List<ShipmentCollectionDTO>, int>> GetShipmentWaitingForCollectionForHub(FilterOptionsDto filterOptionsDto)
         {
             //get all shipments by servicecentre
-            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-
-            //added for GWA and GWARIMPA service centres
-            //{
-            //    if (serviceCenters.Length == 1)
-            //    {
-            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-            //        {
-            //            serviceCenters = new int[] { 4, 294 };
-            //        }
-            //    }
-            //}
-
-
-            var userActiveCountryId = 1;
-            try
-            {
-                userActiveCountryId = _userService.GetUserActiveCountryId().Result;
-            }
-            catch (Exception ex) { }
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                       
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();           
 
             //filter the data by using count which serve as the number of days to display
             DateTime backwardDatebyNumberofDays = DateTime.Today.AddDays(-30);
@@ -280,9 +215,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
 
-            List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => 
-                s.IsCancelled == false && 
-                serviceCenters.Contains(s.DestinationServiceCentreId) &&
+            List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable()
+                .Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId) &&
                 s.DateCreated >= backwardDatebyNumberofDays).Select(x => x.Waybill).Distinct().ToList();
 
             var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().
@@ -303,7 +237,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var shipmentCollectionList = shipmentCollection.OrderByDescending(x => x.DateCreated).Skip((filterOptionsDto.PageIndex - 1) * filterOptionsDto.PageSize).Take(filterOptionsDto.PageSize).ToList();
 
             var shipmentCollectionListDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollectionList);
-            return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionListDto), shipmentCollectionTotalCount);
+            return new Tuple<List<ShipmentCollectionDTO>, int>(shipmentCollectionListDto, shipmentCollectionTotalCount);
         }
 
         public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollection(FilterOptionsDto filterOptionsDto)
@@ -312,18 +246,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //get all shipments by servicecentre
                 var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-
-                //added for GWA and GWARIMPA service centres
-                //{
-                //    if (serviceCenters.Length == 1)
-                //    {
-                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                //        {
-                //            serviceCenters = new int[] { 4, 294 };
-                //        }
-                //    }
-                //}
-
+                
                 var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
                 .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId));
 
@@ -339,65 +262,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), shipmentCollectionCount);
 
-                //List<ShipmentCollection> shipmentCollection = new List<ShipmentCollection>();
-                //List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();       
-                //if (filterOptionsDto.filterValue == "0" || filterOptionsDto.filterValue== null)
-                //{
-
-                //    shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().ToList().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.DateCreated.ToString("MM/dd/yyyy") == DateTime.Now.ToString("MM/dd/yyyy")).ToList();
-                //}
-                //else
-                //{
-                //    shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).ToList();
-                //}
-
-
-                //shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
-
-                //int count = shipmentCollection.Count();
-
-                //var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
-
-                //if (filterOptionsDto != null)
-                //{
-                //    //filter
-                //    var filter = filterOptionsDto.filter;
-                //    var filterValue = filterOptionsDto.filterValue;
-                //    if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
-                //    {
-                //        shipmentCollectionDto = shipmentCollectionDto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null
-                //            && (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
-                //    }
-
-                //    //sort
-                //    var sortorder = filterOptionsDto.sortorder;
-                //    var sortvalue = filterOptionsDto.sortvalue;
-
-                //    if (!string.IsNullOrEmpty(sortorder) && !string.IsNullOrEmpty(sortvalue))
-                //    {
-                //        System.Reflection.PropertyInfo prop = typeof(ShipmentCollection).GetProperty(sortvalue);
-
-                //        if (sortorder == "0")
-                //        {
-                //            shipmentCollectionDto = shipmentCollectionDto.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
-                //        }
-                //        else
-                //        {
-                //            shipmentCollectionDto = shipmentCollectionDto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
-                //        }
-                //    }
-
-                //    shipmentCollectionDto = shipmentCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
-                //}
-
-                //return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), count);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
-
 
         public async Task RemoveShipmentCollection(string waybill)
         {
@@ -434,9 +304,7 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentCollection.IndentificationUrl = shipmentCollectionDto.IndentificationUrl;
             shipmentCollection.ShipmentScanStatus = shipmentCollectionDto.ShipmentScanStatus;
             shipmentCollection.UserId = shipmentCollectionDto.UserId;
-
-            // var collectionServiceCenter = shipmentCollectionDto.OriginalDestinationServiceCentre;
-
+            
             //Add Collected Scan to Scan History
             var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
             {
@@ -447,12 +315,11 @@ namespace GIGLS.Services.Implementation.Shipments
             }, shipmentCollectionDto.ShipmentScanStatus);
 
             //Get Destination Service centre details
-            var getServiceCentreDetail = await _uow.ServiceCentre.GetAsync(shipmentCollection.DestinationServiceCentreId);
-            
+            var getServiceCentreDetail = await _uow.ServiceCentre.GetServiceCentresByIdForInternational(shipmentCollection.DestinationServiceCentreId);
+
             //cash collected on Delivery
             if (shipmentCollectionDto.IsCashOnDelivery)
             {
-
                 CODStatushistory codStatushistory;
 
                 if (shipmentCollectionDto.IsComingFromDispatch)
@@ -475,7 +342,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     },
                     Description = shipmentCollectionDto.Description,
                     Waybill = shipmentCollectionDto.Waybill,
-                    CODStatus = CODStatus.Unprocessed
+                    CODStatus = CODStatus.Unprocessed,
+                    CountryId = getServiceCentreDetail.CountryId
                 });
 
                 //Update CashOnDevliveryRegisterAccount As  Cash Recieved at Service Center
@@ -489,6 +357,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     codRegisterCollectsForASingleWaybill.PaymentType = shipmentCollectionDto.PaymentType;
                     codRegisterCollectsForASingleWaybill.PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference;
                     codRegisterCollectsForASingleWaybill.DepositStatus = DepositStatus.Unprocessed;
+                    codRegisterCollectsForASingleWaybill.DestinationCountryId = getServiceCentreDetail.CountryId;
                 }
                 else
                 {
@@ -503,7 +372,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         PaymentType = shipmentCollectionDto.PaymentType,
                         PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference,
                         ServiceCenterCode = getServiceCentreDetail.Code,
-                        CODStatusHistory = codStatushistory
+                        CODStatusHistory = codStatushistory,
+                        DestinationCountryId = getServiceCentreDetail.CountryId
                     };
 
                     //Add the the selected cod information and set it in the codregister account
@@ -513,22 +383,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (shipmentCollectionDto.Demurrage?.Amount > 0)
             {
-                ////--start--///Set the DepartureCountryId
-                int countryIdFromServiceCentreId = 0;
-                try
-                {
-                    var departureCountry = await _uow.Country.GetCountryByServiceCentreId(getServiceCentreDetail.ServiceCentreId);
-                    countryIdFromServiceCentreId = departureCountry.CountryId;
-                }
-                catch (Exception) { }
-                ////--end--///Set the DepartureCountryId
-
                 //update general ledger for demurrage
                 var generalLedger = new GeneralLedger()
                 {
                     DateOfEntry = DateTime.Now,
                     ServiceCentreId = getServiceCentreDetail.ServiceCentreId,
-                    CountryId = countryIdFromServiceCentreId,
+                    CountryId = getServiceCentreDetail.CountryId,
                     UserId = shipmentCollectionDto.UserId,
                     Amount = shipmentCollectionDto.Demurrage.AmountPaid,
                     CreditDebitType = CreditDebitType.Credit,
@@ -552,7 +412,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     PaymentType = shipmentCollectionDto.PaymentType,
                     PaymentTypeReference = shipmentCollectionDto.PaymentTypeReference,
                     DEMStatusHistory = CODStatushistory.RecievedAtServiceCenter,
-                    ServiceCenterCode = getServiceCentreDetail.Code
+                    ServiceCenterCode = getServiceCentreDetail.Code,
+                    CountryId = getServiceCentreDetail.CountryId
                 };
 
                 //insert demurage into demurrage entity 
@@ -565,7 +426,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     ApprovedBy = shipmentCollectionDto.Demurrage.ApprovedBy,
                     UserId = shipmentCollection.UserId,
                     ServiceCenterId = getServiceCentreDetail.ServiceCentreId,
-                    ServiceCenterCode = getServiceCentreDetail.Code
+                    ServiceCenterCode = getServiceCentreDetail.Code,
+                    CountryId = getServiceCentreDetail.CountryId
                 };
 
                 _uow.DemurrageRegisterAccount.Add(demurrageinformation);
@@ -594,27 +456,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
             }
-        }
-
-        //public async Task CheckShipmentCollection(string waybill)
-        //{
-        //    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(waybill) && (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC));
-
-        //    if (shipmentCollection != null)
-        //    {
-        //        throw new GenericException($"Shipment with waybill: {waybill} has been collected");
-        //    }
-
-        //    var shipmentDelivered = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(waybill) && (x.ShipmentScanStatus == ShipmentScanStatus.ARF));
-
-        //    if (shipmentDelivered == null)
-        //    {
-        //        throw new GenericException($"Shipment with waybill: {waybill} is not available for Return Processing");
-        //    }
-        //}
-
-
-
+        }                      
 
         public async Task ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
         {
@@ -641,39 +483,28 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             await UpdateShipmentCollection(shipmentCollection);
+            //If it is mobile
+            if (shipmentCollection.IsComingFromDispatch)
+            {
+                await AddRiderToDeliveryTable(shipmentCollection);
+            }
         }
 
-        public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetOverDueShipments(FilterOptionsDto filterOptionsDto)
+        public async Task<Tuple<List<ShipmentCollectionDTO>, int>> GetOverDueShipments(FilterOptionsDto filterOptionsDto)
         {
             try
             {
                 //get all shipments by servicecentre
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
-
-                //added for GWA and GWARIMPA service centres
-                //{
-                //    if (serviceCenters.Length == 1)
-                //    {
-                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                //        {
-                //            serviceCenters = new int[] { 4, 294 };
-                //        }
-                //    }
-                //}
-
-                var userActiveCountryId = 1;
-                try
-                {
-                    userActiveCountryId = _userService.GetUserActiveCountryId().Result;
-                }
-                catch (Exception ex) { }
-
-                List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable()
-                    .Where(s => s.IsCancelled == false && s.CompanyType != CompanyType.Ecommerce.ToString()
-                    && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                
+                var userActiveCountryId = await _userService.GetUserActiveCountryId();
+                
+                List<string> shipmentsWaybills = _uow.Invoice.GetAllFromInvoiceAndShipments()
+                    .Where(s => s.IsShipmentCollected == false && serviceCenters.Contains(s.DestinationServiceCentreId)  
+                    && s.CompanyType != CompanyType.Ecommerce.ToString()).Select(x => x.Waybill).Distinct().ToList();                
 
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount, userActiveCountryId).Result;
+                var overDueDaysCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount, userActiveCountryId);
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count' has not been set. Kindly contact admin.");
@@ -681,22 +512,23 @@ namespace GIGLS.Services.Implementation.Shipments
                 var overDueDaysCount = overDueDaysCountObj.Value;
                 int globalProp = int.Parse(overDueDaysCount);
                 var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
+
                 var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().
-                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate)).ToList();
-                shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
+                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId) 
+                    && (x.DateCreated <= overdueDate)).ToList();
+
+                shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).ToList();
 
                 //ensure that already grouped waybills don't appear with this list
                 var overdueShipment = _uow.OverdueShipment.GetAllAsQueryable().
                     Where(s => s.OverdueShipmentStatus == OverdueShipmentStatus.Grouped).ToList();
 
                 //filter the two lists
-                shipmentCollection =
-                    shipmentCollection.Where(s => !overdueShipment.Select(d => d.Waybill).Contains(s.Waybill)).ToList();
-
+                shipmentCollection = shipmentCollection.Where(s => !overdueShipment.Select(d => d.Waybill).Contains(s.Waybill)).ToList();
 
                 int count = shipmentCollection.Count();
 
-                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
+                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection.OrderByDescending(x => x.DateCreated).ToList());
 
                 if (filterOptionsDto != null)
                 {
@@ -730,7 +562,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentCollectionDto = shipmentCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
-                return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), count);
+                return new Tuple<List<ShipmentCollectionDTO>, int>(shipmentCollectionDto, count);
             }
             catch (Exception)
             {
@@ -739,35 +571,27 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
 
-        public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetEcommerceOverDueShipments(FilterOptionsDto filterOptionsDto)
+        public async Task<Tuple<List<ShipmentCollectionDTO>, int>> GetEcommerceOverDueShipments(FilterOptionsDto filterOptionsDto)
         {
             try
             {
                 //get all shipments by servicecentre
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                
+                var userActiveCountryId = await _userService.GetUserActiveCountryId();
+                
+                var invoiceShipments = _uow.Invoice.GetAllFromInvoiceAndShipments()
+                    .Where(s => s.IsShipmentCollected == false && s.DestinationCountryId == userActiveCountryId && s.CompanyType == CompanyType.Ecommerce.ToString());
 
-                //added for GWA and GWARIMPA service centres
-                //{
-                //    if (serviceCenters.Length == 1)
-                //    {
-                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                //        {
-                //            serviceCenters = new int[] { 4, 294 };
-                //        }
-                //    }
-                //}
-
-                var userActiveCountryId = 1;
-                try
+                if(serviceCenters.Length > 0)
                 {
-                    userActiveCountryId = _userService.GetUserActiveCountryId().Result;
+                    invoiceShipments = invoiceShipments.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId));
                 }
-                catch (Exception ex) { }
 
-                List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && s.CompanyType == CompanyType.Ecommerce.ToString() && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
-
+                List<string> shipmentsWaybills = invoiceShipments.Select(x => x.Waybill).Distinct().ToList();
+                
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId).Result;
+                var overDueDaysCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId);
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count for Ecommerce customer' has not been set. Kindly contact admin.");
@@ -775,9 +599,21 @@ namespace GIGLS.Services.Implementation.Shipments
                 var overDueDaysCount = overDueDaysCountObj.Value;
                 int globalProp = int.Parse(overDueDaysCount);
                 var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
-                var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().
-                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate)).ToList();
-                shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
+
+                //var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().
+                //    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate)).ToList();
+
+                var shipmentCollectionObj = _uow.ShipmentCollection.GetAllAsQueryable().
+                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate));
+
+                if (serviceCenters.Length > 0)
+                {
+                    shipmentCollectionObj = shipmentCollectionObj.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId));
+                }
+
+                var shipmentCollection = shipmentCollectionObj.ToList();
+
+                shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).ToList();
 
                 //ensure that already grouped waybills don't appear with this list
                 var overdueShipment = _uow.OverdueShipment.GetAllAsQueryable().
@@ -790,7 +626,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 int count = shipmentCollection.Count();
 
-                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
+                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection.OrderByDescending(x => x.DateCreated).ToList());
 
                 if (filterOptionsDto != null)
                 {
@@ -824,7 +660,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentCollectionDto = shipmentCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
-                return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), count);
+                return new Tuple<List<ShipmentCollectionDTO>, int>(shipmentCollectionDto, count);
             }
             catch (Exception)
             {
@@ -834,42 +670,46 @@ namespace GIGLS.Services.Implementation.Shipments
 
 
         //---Added for global customer care and ecommerce
-        public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetOverDueShipmentsGLOBAL(FilterOptionsDto filterOptionsDto)
+        public async Task<Tuple<List<ShipmentCollectionDTO>, int>> GetOverDueShipmentsGLOBAL(FilterOptionsDto filterOptionsDto)
         {
-            var userActiveCountryId = 1;
-            try
-            {
-                userActiveCountryId = _userService.GetUserActiveCountryId().Result;
-            }
-            catch (Exception ex) { }
+            //get all shipments by servicecentre
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();           
 
             try
             {
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount, userActiveCountryId).Result;
+                var overDueDaysCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.OverDueDaysCount, userActiveCountryId);
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count' has not been set. Kindly contact admin.");
                 }
+
                 var overDueDaysCount = overDueDaysCountObj.Value;
                 int globalProp = int.Parse(overDueDaysCount);
                 var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
-                var shipmentCollection = _uow.ShipmentCollection.ShipmentCollectionsForEcommerceAsQueryable(false).
-                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate)).ToList();
-                shipmentCollection = shipmentCollection.OrderByDescending(x => x.DateCreated).ToList();
+
+                var shipmentCollectionObj = _uow.ShipmentCollection.ShipmentCollectionsForEcommerceAsQueryable(false).
+                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate));
+
+                if(serviceCenters.Length > 0)
+                {
+                    shipmentCollectionObj = shipmentCollectionObj.Where(x => serviceCenters.Contains(x.DestinationServiceCentreId));
+                }
+
+                var shipmentCollection = shipmentCollectionObj.ToList();
 
                 //ensure that already grouped waybills don't appear with this list
                 var overdueShipment = _uow.OverdueShipment.GetAllAsQueryable().
                     Where(s => s.OverdueShipmentStatus == OverdueShipmentStatus.Grouped).ToList();
 
                 //filter the two lists
-                shipmentCollection =
-                    shipmentCollection.Where(s => !overdueShipment.Select(d => d.Waybill).Contains(s.Waybill)).ToList();
-
+                shipmentCollection = shipmentCollection.Where(s => !overdueShipment.Select(d => d.Waybill).Contains(s.Waybill)).ToList();
 
                 int count = shipmentCollection.Count();
 
-                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
+                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection.OrderByDescending(x => x.DateCreated).ToList());
 
                 if (filterOptionsDto != null)
                 {
@@ -903,7 +743,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentCollectionDto = shipmentCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
-                return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), count);
+                return new Tuple<List<ShipmentCollectionDTO>, int>(shipmentCollectionDto, count);
             }
             catch (Exception)
             {
@@ -954,21 +794,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
-
-        public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetEcommerceOverDueShipmentsGLOBAL(FilterOptionsDto filterOptionsDto)
+        
+        public async Task<Tuple<List<ShipmentCollectionDTO>, int>> GetEcommerceOverDueShipmentsGLOBAL(FilterOptionsDto filterOptionsDto)
         {
-            var userActiveCountryId = 1;
-            try
-            {
-                userActiveCountryId = _userService.GetUserActiveCountryId().Result;
-            }
-            catch (Exception ex) { }
 
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
+            
             try
             {
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId).Result;
+                var overDueDaysCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId);
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count for Ecommerce customer' has not been set. Kindly contact admin.");
@@ -976,9 +813,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 var overDueDaysCount = overDueDaysCountObj.Value;
                 int globalProp = int.Parse(overDueDaysCount);
                 var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
-                var shipmentCollection = _uow.ShipmentCollection.ShipmentCollectionsForEcommerceAsQueryable(true).
-                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate)).ToList();
-                shipmentCollection = shipmentCollection.OrderByDescending(x => x.DateCreated).ToList();
+
+                var shipmentCollectionObj = _uow.ShipmentCollection.ShipmentCollectionsForEcommerceAsQueryable(true).
+                   Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate));
+
+                if (serviceCenters.Length > 0)
+                {
+                    shipmentCollectionObj = shipmentCollectionObj.Where(x => serviceCenters.Contains(x.DestinationServiceCentreId));
+                }
+
+                var shipmentCollection = shipmentCollectionObj.ToList();
 
                 //ensure that already grouped waybills don't appear with this list
                 var overdueShipment = _uow.OverdueShipment.GetAllAsQueryable().
@@ -991,7 +835,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 int count = shipmentCollection.Count();
 
-                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
+                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection.OrderByDescending(x => x.DateCreated).ToList());
 
                 if (filterOptionsDto != null)
                 {
@@ -1025,7 +869,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentCollectionDto = shipmentCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
-                return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), count);
+                return new Tuple<List<ShipmentCollectionDTO>, int>(shipmentCollectionDto, count);
             }
             catch (Exception)
             {
@@ -1035,17 +879,14 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<IEnumerable<ShipmentCollectionDTO>> GetEcommerceOverDueShipmentsGLOBAL()
         {
-            var userActiveCountryId = 1;
-            try
-            {
-                userActiveCountryId = await _userService.GetUserActiveCountryId();
-            }
-            catch (Exception ex) { }
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
+            
             try
             {
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId).Result;
+                var overDueDaysCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId);
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count for Ecommerce customer' has not been set. Kindly contact admin.");
@@ -1053,18 +894,26 @@ namespace GIGLS.Services.Implementation.Shipments
                 var overDueDaysCount = overDueDaysCountObj.Value;
                 int globalProp = int.Parse(overDueDaysCount);
                 var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
-                var shipmentCollection = _uow.ShipmentCollection.ShipmentCollectionsForEcommerceAsQueryable(true).
-                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate)).ToList();
-                shipmentCollection = shipmentCollection.OrderByDescending(x => x.DateCreated).ToList();
+                
+                var shipmentCollectionObj = _uow.ShipmentCollection.ShipmentCollectionsForEcommerceAsQueryable(true).
+                   Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate));
+
+                if (serviceCenters.Length > 0)
+                {
+                    shipmentCollectionObj = shipmentCollectionObj.Where(x => serviceCenters.Contains(x.DestinationServiceCentreId));
+                }
+
+                var shipmentCollection = shipmentCollectionObj.ToList();
 
                 //ensure that already grouped waybills don't appear with this list
                 var overdueShipment = _uow.OverdueShipment.GetAllAsQueryable().
                     Where(s => s.OverdueShipmentStatus == OverdueShipmentStatus.Grouped).ToList();
 
                 //filter the two lists
-                shipmentCollection =
-                    shipmentCollection.Where(s => !overdueShipment.Select(d => d.Waybill).Contains(s.Waybill)).ToList();
+                shipmentCollection = shipmentCollection.Where(s => !overdueShipment.Select(d => d.Waybill).Contains(s.Waybill)).ToList();
+
                 int count = shipmentCollection.Count();
+
                 var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
 
                 return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateModified));
@@ -1082,18 +931,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //get all shipments by servicecentre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-
-                //added for GWA and GWARIMPA service centres
-                //{
-                //    if (serviceCenters.Length == 1)
-                //    {
-                //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-                //        {
-                //            serviceCenters = new int[] { 4, 294 };
-                //        }
-                //    }
-                //}
-
+                
                 var userActiveCountryId = 1;
                 try
                 {
@@ -1136,6 +974,35 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task AddRiderToDeliveryTable(ShipmentCollectionDTO shipmentCollection)
+        {
 
+            if (await _uow.RiderDelivery.ExistAsync(v => v.Waybill == shipmentCollection.Waybill))
+            {
+                throw new GenericException($"Waybill {shipmentCollection.Waybill} already exist");
+            }
+
+            var location = await _uow.DeliveryLocation.GetAsync(v => v.Location == shipmentCollection.ReceiverArea);
+
+            if(location == null)
+            {
+                throw new GenericException($"Receiver Area is not available, kinldy select the appropriate area");
+            }
+            
+            var currentUserId = await _userService.GetCurrentUserId();
+
+            var addRiderDelivery = new RiderDelivery
+            {
+                Waybill = shipmentCollection.Waybill,
+                DeliveryDate = DateTime.Now,
+                DriverId = currentUserId,
+                CostOfDelivery = location.Tariff,
+                Address = shipmentCollection.Address,
+                Area = shipmentCollection.ReceiverArea
+            };
+                        
+            _uow.RiderDelivery.Add(addRiderDelivery);
+            await _uow.CompleteAsync();
+        }
     }
 }

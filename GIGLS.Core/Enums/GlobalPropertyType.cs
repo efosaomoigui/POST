@@ -28,7 +28,12 @@
         ReprintFeatureStartDate,  //the date to start using this service
         ReprintDays,  //the number of  days to allow for reprint
         HUBManifestDaysToDisplay,
-        PickUpPrice,
-        ReferrerCodeBonus
+        BikePickUpPrice,
+        ReferrerCodeBonus,
+        CustomerWeekDate,
+        CustomerWeekCount,
+        CarPickupPrice,
+        VanPickupPrice
+
     }
 }
