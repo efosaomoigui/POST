@@ -36,6 +36,7 @@ using System.Drawing;
 using System.Web;
 using GIGLS.Core.DTO.User;
 using VehicleType = GIGLS.Core.Domain.VehicleType;
+using Hangfire;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -704,6 +705,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.PickedUp.ToString();
                     preshipmentmobile.IsConfirmed = true;
+                    BackgroundJob.Schedule(() => Console.WriteLine("Hello, world"),TimeSpan.FromMinutes(1));
                     await _uow.CompleteAsync();
                 }
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
@@ -1832,10 +1834,29 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             return IsWithinTime;
 
+        }
+        private async Task<int> CalculateTimeBasedonLocation(PreShipmentMobileDTO item)
+        {
+            var Location = new LocationDTO
+            {
+                DestinationLatitude = (double)item.ReceiverLocation.Latitude,
+                DestinationLongitude = (double)item.ReceiverLocation.Longitude,
+                OriginLatitude = (double)item.SenderLocation.Latitude,
+                OriginLongitude = (double)item.SenderLocation.Longitude
+            };
+            RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
+            var time = (details.rows[0].elements[0].duration.value / 60);
+            return time;
+
+        }
+        private async Task<int> CheckDeliveryTimeAndSendMail(int DeliveryTime,string waybill)
+        {
+            var 
 
         }
 
-       
+
+
     }
 
 

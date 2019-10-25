@@ -7,6 +7,9 @@ using System.Web.Http;
 using System.Net.Http.Formatting;
 using Newtonsoft.Json.Serialization;
 using GIGLS.WebApi.Providers;
+using Hangfire;
+using GlobalConfiguration = Hangfire.GlobalConfiguration;
+using Hangfire.SqlServer;
 
 [assembly: OwinStartup(typeof(GIGLS.WebApi.Startup))]
 
@@ -32,6 +35,9 @@ namespace GIGLS.WebApi
             app.UseCors(Microsoft.Owin.Cors.CorsOptions.AllowAll);
 
             app.UseWebApi(config);
+            GlobalConfiguration.Configuration.UseSqlServerStorage("GIGLSContextDB");
+            app.UseHangfireDashboard();
+            app.UseHangfireServer();
         }
 
 
@@ -42,5 +48,6 @@ namespace GIGLS.WebApi
             var jsonFormatter = config.Formatters.OfType<JsonMediaTypeFormatter>().First();
             jsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
         }
+       
     }
 }
