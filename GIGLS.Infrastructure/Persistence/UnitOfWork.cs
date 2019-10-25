@@ -441,7 +441,7 @@ namespace GIGLS.Infrastructure.Persistence
         public ILGARepository LGA { get; set; }
 
         [Inject]
-        IWaybillPaymentLogRepository WaybillPaymentLog { get; set; }
+        public IWaybillPaymentLogRepository WaybillPaymentLog { get; set; }
 
         public int Complete()
         {

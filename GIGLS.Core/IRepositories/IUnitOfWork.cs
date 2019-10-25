@@ -172,7 +172,7 @@ namespace GIGLS.Core
         IRiderDeliveryRepository RiderDelivery { get; set; }
         IDeliveryLocationRepository DeliveryLocation { get; set; }
         ILGARepository LGA { get; set; }
-        IWaybillPaymentLogRepository IWaybillPaymentLogRepository {get; set;}
+        IWaybillPaymentLogRepository WaybillPaymentLog {get; set;}
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

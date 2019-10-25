@@ -23,5 +23,6 @@ namespace GIGLS.Core.DTO.Wallet
         public UserDTO User { get; set; }
 
         public bool IsWaybillSettled { get; set; }
+        public bool IsPaymentSuccessful { get; set; }
     }
 }

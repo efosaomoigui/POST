@@ -26,5 +26,6 @@ namespace GIGLS.Core.Domain.Wallet
         public string UserId { get; set; }
 
         public bool IsWaybillSettled { get; set; }
+        public bool IsPaymentSuccessful { get; set; }
     }
 }

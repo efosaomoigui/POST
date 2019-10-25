@@ -337,6 +337,7 @@
     <Compile Include="DTO\Nav\SubSubNavDTO.cs" />
     <Compile Include="DTO\NotificationDTO.cs" />
     <Compile Include="DTO\OnlinePayment\PaystackWebhookDTO.cs" />
+    <Compile Include="DTO\OnlinePayment\TheTellerNetDTO.cs" />
     <Compile Include="DTO\OTPDTO.cs" />
     <Compile Include="DTO\PartnerMonthlyTransactionsDTO.cs" />
     <Compile Include="DTO\Partnership\RootObject.cs" />
