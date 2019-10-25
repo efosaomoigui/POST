@@ -1355,7 +1355,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     Partner.BankName = partner.BankName;
                     Partner.VehicleLicenseExpiryDate = partner.VehicleLicenseExpiryDate;
                     images.PartnerFullName = partner.FirstName + partner.LastName;
-                    if (partner.VehicleLicenseImageDetails != null)
+                    if (partner.VehicleLicenseImageDetails != null && !partner.VehicleLicenseImageDetails.Contains("agilityblob"))
                     {
                         images.FileType = ImageFileType.VehicleLicense;
                         images.ImageString = partner.VehicleLicenseImageDetails;
@@ -1369,21 +1369,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     foreach (var vehicle in partner.VehicleTypeDetails)
                     {
-                        if (vehicle.VehicleInsurancePolicyDetails != null)
+                        if (vehicle.VehicleInsurancePolicyDetails != null && !vehicle.VehicleInsurancePolicyDetails.Contains("agilityblob"))
                         {
                             images.FileType = ImageFileType.VehiceInsurancePolicy;
                             images.ImageString = vehicle.VehicleInsurancePolicyDetails;
                             vehicle.VehicleInsurancePolicyDetails = await LoadImage(images);
                         }
 
-                        if (vehicle.VehicleRoadWorthinessDetails != null)
+                        if (vehicle.VehicleRoadWorthinessDetails != null && !vehicle.VehicleRoadWorthinessDetails.Contains("agilityblob"))
                         {
                             images.FileType = ImageFileType.VehiceRoadWorthiness;
                             images.ImageString = vehicle.VehicleRoadWorthinessDetails;
                             vehicle.VehicleRoadWorthinessDetails = await LoadImage(images);
                         }
 
-                        if (vehicle.VehicleParticularsDetails != null)
+                        if (vehicle.VehicleParticularsDetails != null && !vehicle.VehicleParticularsDetails.Contains("agilityblob"))
                         {
                             images.FileType = ImageFileType.VehicleParticulars;
                             images.ImageString = vehicle.VehicleParticularsDetails;
