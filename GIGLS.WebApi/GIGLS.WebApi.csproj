@@ -290,6 +290,7 @@
     <Compile Include="Controllers\BankSettlement\CODProcessingOrderController.cs" />
     <Compile Include="Controllers\BankSettlement\CODSettlementSheetController.cs" />
     <Compile Include="Controllers\BaseWebApiController.cs" />
+    <Compile Include="Controllers\Business\OnlineWaybillPaymentController.cs" />
     <Compile Include="Controllers\Business\PaymentController.cs" />
     <Compile Include="Controllers\Business\PricingController.cs" />
     <Compile Include="Controllers\Business\ScanController.cs" />

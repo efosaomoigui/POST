@@ -440,6 +440,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public ILGARepository LGA { get; set; }
 
+        [Inject]
+        IWaybillPaymentLogRepository WaybillPaymentLog { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();
