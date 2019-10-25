@@ -1254,7 +1254,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
+        [AllowAnonymous]
         [HttpGet]
         [Route("getcountries")]
         public async Task<IServiceResponse<List<NewCountryDTO>>> getcountries()

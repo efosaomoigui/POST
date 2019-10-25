@@ -239,6 +239,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 preShipment.CountryId = Country.CountryId;
                 var Pickuprice = await GetPickUpPrice(preShipment.VehicleType,preShipment.CountryId);
                 var PickupValue = Convert.ToDecimal(Pickuprice);
+                var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
                 foreach (var preShipmentItem in preShipment.PreShipmentItems)
                 {
                     if (preShipmentItem.Quantity == 0)
@@ -302,7 +303,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     GrandTotal = ((decimal)preShipment.CalculatedTotal + PickupValue),
                     PreshipmentMobile = preShipment,
                     CurrencySymbol = Country.CurrencySymbol,
-                    CurrencyCode = Country.CurrencyCode
+                    CurrencyCode = Country.CurrencyCode,
+                    IsWithinProcessingTime = IsWithinProcessingTime
                 };
                 return returnprice;
             }
@@ -1390,8 +1392,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         var VehicleDetails = await _uow.VehicleType.GetAsync(s => s.VehicleTypeId == vehicle.VehicleTypeId && s.Partnercode == partner.PartnerCode);
                         if (VehicleDetails != null)
                         {
-                            VehicleDetails.VehiceInsurancePolicyDetails = vehicle.VehicleInsurancePolicyDetails;
-                            VehicleDetails.VehiceRoadWorthinessDetails = vehicle.VehicleRoadWorthinessDetails;
+                            VehicleDetails.VehicleInsurancePolicyDetails = vehicle.VehicleInsurancePolicyDetails;
+                            VehicleDetails.VehicleRoadWorthinessDetails = vehicle.VehicleRoadWorthinessDetails;
                             VehicleDetails.VehicleParticularsDetails = vehicle.VehicleParticularsDetails;
                             VehicleDetails.VehiclePlateNumber = vehicle.VehiclePlateNumber;
                             VehicleDetails.Vehicletype = vehicle.Vehicletype;
@@ -1684,6 +1686,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var destinationStationId = haulagePricingDto.DestinationStationId;
             var haulageid = haulagePricingDto.Haulageid;
             var country = await _uow.Country.GetCountryByStationId(departureStationId);
+            var IsWithinProcessingTime = await WithinProcessingTime(country.CountryId);
 
             //check haulage exists
             var haulage = await _haulageService.GetHaulageById(haulageid);
@@ -1721,7 +1724,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 price = fixedRate + distance * haulage.AdditionalRate;
             }
 
-            return new MobilePriceDTO{ GrandTotal = price, CurrencySymbol = country.CurrencySymbol, CurrencyCode = country.CurrencyCode};
+            return new MobilePriceDTO{ GrandTotal = price,
+                CurrencySymbol = country.CurrencySymbol,
+                CurrencyCode = country.CurrencyCode,
+                IsWithinProcessingTime = IsWithinProcessingTime
+            };
         }
 
 
@@ -1808,6 +1815,24 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             await _uow.CompleteAsync();
             return true;
+        }
+
+        private async Task<bool> WithinProcessingTime (int CountryId)
+        {
+            bool IsWithinTime = false;
+            var Startime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpStartTime, CountryId); 
+            var Endtime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpEndTime, CountryId); ;
+            TimeSpan start = new TimeSpan(Convert.ToInt32(Startime.Value), 0, 0);
+            TimeSpan end = new TimeSpan(Convert.ToInt32(Endtime.Value), 0, 0);
+            //TimeSpan now = new TimeSpan(19, 0, 0);
+            TimeSpan now = DateTime.Now.TimeOfDay;
+            if (now > start && now < end)
+            {
+               IsWithinTime = true;
+            }
+            return IsWithinTime;
+
+
         }
 
        

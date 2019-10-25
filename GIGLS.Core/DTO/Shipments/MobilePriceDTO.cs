@@ -22,5 +22,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string CurrencySymbol { get; set; }
 
         public string CurrencyCode { get; set; }
+        public bool? IsWithinProcessingTime { get; set; }
     }
 }
