@@ -177,6 +177,7 @@
     <Compile Include="Domain\HUBManifestWaybillMapping.cs" />
     <Compile Include="Domain\InternationalRequestReceiver.cs" />
     <Compile Include="Domain\InternationalRequestReceiverItem.cs" />
+    <Compile Include="Domain\LGA.cs" />
     <Compile Include="Domain\Location.cs" />
     <Compile Include="Domain\LogVisitReason.cs" />
     <Compile Include="Domain\ManifestVisitMonitoring.cs" />
@@ -364,6 +365,7 @@
     <Compile Include="DTO\Report\ShipmentProgressSummaryFilterCriteria.cs" />
     <Compile Include="DTO\RiderDeliveryDTO.cs" />
     <Compile Include="DTO\RiderDeliveryViewDTO.cs" />
+    <Compile Include="DTO\ServiceCentres\LGADTO.cs" />
     <Compile Include="DTO\ServiceCentres\RegionDTO.cs" />
     <Compile Include="DTO\ServiceCentres\RegionServiceCentreMappingDTO.cs" />
     <Compile Include="DTO\ServiceCentres\ServiceCentreDTO.cs" />
@@ -502,6 +504,7 @@
     <Compile Include="Enums\UserStatus.cs" />
     <Compile Include="Enums\UserType.cs" />
     <Compile Include="Enums\VATType.cs" />
+    <Compile Include="Enums\Vehicletype.cs" />
     <Compile Include="Enums\VendorType.cs" />
     <Compile Include="Enums\WalletType.cs" />
     <Compile Include="IAuditable.cs" />
@@ -569,6 +572,7 @@
     <Compile Include="IRepositories\Partnership\IVehicleTypeRepository.cs" />
     <Compile Include="IRepositories\PaymentTransactions\IPaymentPartialTransactionRepository.cs" />
     <Compile Include="IRepositories\PaymentTransactions\IPaymentTransactionRepository.cs" />
+    <Compile Include="IRepositories\ServiceCentres\ILGARepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IRegionRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IRegionServiceCentreMappingRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IServiceCentreRepository.cs" />
@@ -705,6 +709,7 @@
     <Compile Include="IServices\Report\IAccountReportService.cs" />
     <Compile Include="IServices\Report\IAdminReportService.cs" />
     <Compile Include="IServices\Report\IShipmentReportService.cs" />
+    <Compile Include="IServices\ServiceCentres\ILGAService.cs" />
     <Compile Include="IServices\ServiceCentres\IRegionService.cs" />
     <Compile Include="IServices\ServiceCentres\IRegionServiceCentreMappingService.cs" />
     <Compile Include="IServices\ServiceCentres\IServiceCentreService.cs" />

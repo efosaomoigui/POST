@@ -587,10 +587,17 @@ namespace GIGLS.Services.Implementation.Shipments
                             Waybill = newShipment.Waybill
                         });
                     }
-
                 }
 
+                //implement customer week function here
+                var result = await ProcessPaymentForCustomerWeek(newShipment);
 
+                if (result)
+                {
+                    newShipment.GrandTotal = 0;
+                    newShipment.SealNumber = "";
+                }
+                
                 return newShipment;
             }
             catch (Exception)
@@ -1430,8 +1437,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             return dailySales;
         }
-
-
+        
         ///////////
         public async Task<bool> ScanShipment(ScanDTO scan)
         {
@@ -1459,8 +1465,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             return await _customerService.GetCustomer(customerId, customerType);
         }
-
-
+        
         /// <summary>
         /// This method is responsible for cancelling a shipment.
         /// It ensures that accounting entries are reversed accordingly or rolls back if an error occurs.
@@ -1626,6 +1631,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
             try
             {
+                //check if shipment already exists
+                var shipmentexists = await _uow.Shipment.ExistAsync(s => s.Waybill == shipment.Waybill);
+                if(shipmentexists)
+                {
+                    throw new GenericException($"Shipment with waybill number: {shipment.Waybill} already exists.");
+                }
 
                 shipment.ApproximateItemsWeight = 0;
 
@@ -1663,5 +1674,68 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw ex;
             }
         }
+
+        //Process Payment for Customer Week
+        public async Task<bool> ProcessPaymentForCustomerWeek(ShipmentDTO shipment)
+        {
+            var processPayment = false;
+
+            var customerWeek = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.CustomerWeekDate, shipment.DepartureCountryId);
+
+            if (customerWeek == null)
+                return processPayment;
+
+            var customerWeekDate = Convert.ToDateTime(customerWeek.Value);
+            var startDate = DateTime.Now.Date;
+
+            //if today is customer week
+            if(startDate.ToLongDateString() == customerWeekDate.ToLongDateString())
+            {
+                var endDate = startDate.AddDays(1);
+                
+                //1. Get all Individual customer waybills for the service centre for 08/10/2019 sort by date created
+                string individual = CustomerType.IndividualCustomer.ToString();                
+
+                var data = _uow.Shipment.GetAllAsQueryable()
+                    .Where(x => x.DateCreated >= startDate && x.DateCreated < endDate && x.DepartureServiceCentreId == shipment.DepartureServiceCentreId 
+                    && x.CompanyType == individual).OrderBy(x => x.DateCreated).Select(x => x.Waybill).ToList();
+                
+                //2. Get the Index of the waybill -- eg. if findIndex = 1, then index = 2 or findIndex = -1(Nothing find), then index = 0 
+                int waybillIndex = data.FindIndex(x => x == shipment.Waybill) + 1;
+
+                //3. If the waybill fall Shipment between 1st, 5th, 10, 15, 20
+                var shipmentCount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.CustomerWeekCount, shipment.DepartureCountryId);
+
+                if (shipmentCount == null)
+                    return processPayment;
+
+                int[] freeShippingItem = shipmentCount.Value.Split(',').Select(x => int.Parse(x.Trim())).ToArray();
+
+                //4. Process payment for the customer else don't     
+                processPayment = freeShippingItem.Contains(waybillIndex);
+                
+                if (processPayment)
+                {
+                    var generalLedgerEntity = await _uow.GeneralLedger.GetAsync(s => s.Waybill == shipment.Waybill);
+                    var invoiceEntity = await _uow.Invoice.GetAsync(s => s.Waybill == shipment.Waybill);
+                    var oldShipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == shipment.Waybill);
+
+                    generalLedgerEntity.Amount = 0;
+                    invoiceEntity.Amount = 0;
+                    oldShipment.GrandTotal = 0;
+
+                    await _uow.CompleteAsync();
+
+                    PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
+                    {
+                        Waybill = shipment.Waybill,
+                        PaymentType = PaymentType.Cash
+                    };
+
+                    var result = await _paymentService.ProcessPayment(paymentTransaction);
+                }
+            }
+            return processPayment;            
+        }        
     }
 }

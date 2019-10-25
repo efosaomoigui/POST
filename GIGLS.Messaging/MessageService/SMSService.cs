@@ -5,11 +5,22 @@ using GIGLS.Core.DTO;
 using System.Net;
 using System;
 using System.IO;
+using System.Net.Http;
+using GIGLS.Core.IServices.MessagingLog;
+using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Messaging.MessageService
 {
     public class SMSService : ISMSService
     {
+        private readonly ISmsSendLogService _iSmsSendLogService;
+
+        public SMSService(ISmsSendLogService iSmsSendLogService)
+        {
+            _iSmsSendLogService = iSmsSendLogService;
+        }
+
         public async Task<string> SendAsync(MessageDTO message)
         {
             var result = await ConfigSendGridasync(message);
@@ -20,12 +31,11 @@ namespace GIGLS.Messaging.MessageService
         private async Task<string> ConfigSendGridasync(MessageDTO message)
         {
             string result = "";
-
+            
             try
             {
-                var smsURL = ConfigurationManager.AppSettings["smsURL"];
+                var smsURL = await ReturnValidUrl(message);
                 var smsApiKey = ConfigurationManager.AppSettings["smsApiKey"];
-                //var smsFrom = ConfigurationManager.AppSettings["smsFrom"];
 
                 //ogosms url format
                 var finalURL = $"{smsURL}&password={smsApiKey}&sender={message.From}&numbers={message.To}&message={message.FinalBody}&response=json&unicode=0";
@@ -43,7 +53,6 @@ namespace GIGLS.Messaging.MessageService
             }
             catch (Exception ex)
             {
-                // An exception occurred making the REST call
                 throw ex;
             }
 
@@ -59,6 +68,58 @@ namespace GIGLS.Messaging.MessageService
                 message = reponseMessage;
             }
             return message;
+        }
+
+        private async Task<string> ReturnValidUrl(MessageDTO message)
+        {
+            string smsURL = ConfigurationManager.AppSettings["smsURL"];
+            
+            bool result = await IsValidUri(smsURL);
+
+            if (!result)
+            {
+                await _iSmsSendLogService.AddSmsSendLog(new SmsSendLogDTO()
+                {
+                    From = message.From,
+                    To = message.To,
+                    Waybill = message.Waybill,
+                    Message = message.FinalBody,
+                    Status = MessagingLogStatus.Failed,
+                    ResultDescription = $"NOT REACHABLE {smsURL}"
+                });
+
+                smsURL = ConfigurationManager.AppSettings["smsURLNet"];
+            }
+            
+            return smsURL;
+        }
+
+        private async Task<bool> IsValidUri(string url)
+        {
+            try
+            {
+                Uri uri = new Uri(url);
+
+                using (HttpClient client = new HttpClient())
+                {
+                    HttpResponseMessage result = await client.GetAsync(uri);
+                    HttpStatusCode StatusCode = result.StatusCode;
+
+                    switch (StatusCode)
+                    {
+                        case HttpStatusCode.Accepted:
+                            return true;
+                        case HttpStatusCode.OK:
+                            return true;
+                        default:
+                            return false;
+                    }
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         // Use Scriptwall Sms

@@ -11,4 +11,5 @@ namespace GIGLS.Core.DTO.Haulage
         public decimal FixedRate { get; set; }
         public decimal AdditionalRate { get; set; }
     }
+   
 }

@@ -136,5 +136,20 @@ namespace GIGLS.Services.Implementation
             zoneMap.Status = status;
             await _unitOfWork.CompleteAsync();
         }
+        public async Task<HaulageDistanceMappingDTO> GetHaulageDistanceMappingForMobile(int departure, int destination)
+        {
+           
+            // use Stations
+            var haulageDistanceMappingList = await _unitOfWork.HaulageDistanceMapping.FindAsync(r =>
+                r.DepartureId == departure &&
+                r.DestinationId == destination, "Destination,Departure");
+
+            var haulageDistanceMapping = haulageDistanceMappingList.FirstOrDefault();
+
+            if (haulageDistanceMapping == null)
+                throw new GenericException("The Mapping of Route does not exist");
+
+            return Mapper.Map<HaulageDistanceMappingDTO>(haulageDistanceMapping);
+        }
     }
 }

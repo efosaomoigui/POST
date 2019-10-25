@@ -181,13 +181,13 @@ namespace GIGLS.WebApi.Controllers.Scanner
 
         //2. Generate GroupWaybill --> ShipmentsService --> groupwaybill/generategroupwaybillnumber(GET)
         [GIGLSActivityAuthorize(Activity = "Create")]
-        [HttpPost]
-        [Route("generategroupwaybillnumber")]
-        public async Task<IServiceResponse<string>> GenerateGroupWaybillNumber(GroupWaybillNumberDTO groupWaybillNumberDTO)
+        [HttpGet]
+        [Route("generategroupwaybillnumber/{serviceCentreCode}")]
+        public async Task<IServiceResponse<string>> GenerateGroupWaybillNumber(string serviceCentreCode)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var groupwaybills = await _groupService.GenerateGroupWaybillNumber(groupWaybillNumberDTO);
+                var groupwaybills = await _groupService.GenerateGroupWaybillNumber(serviceCentreCode);
 
                 return new ServiceResponse<string>
                 {
@@ -211,9 +211,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 };
             });
         }
-
-
-
+               
         //Manifest Scan
         //---------------------
         //1. Get Service centre --> ShipmentsService --> byservicecentre(shipment/unmappedmanifestservicecentre (GET)
@@ -235,7 +233,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
 
         //2. Generate Manifest --> ShipmentsService --> GenerateMaifestCode(manifest/generateMaifestCode)
         [GIGLSActivityAuthorize(Activity = "Create")]
-        [HttpPost]
+        [HttpGet]
         [Route("generateManifestcode")]
         public async Task<IServiceResponse<string>> GenerateManifestCode()
         {

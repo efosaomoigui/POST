@@ -101,6 +101,7 @@ namespace GIGLS.WebApi.Controllers
                 apiResponse.ReferrerCode = methodResponse.ReferrerCode;
                 apiResponse.AverageRatings = methodResponse.AverageRatings;
                 apiResponse.IsVerified = methodResponse.IsVerified;
+                apiResponse.PartnerType = methodResponse.PartnerType;
                 apiResponse.ShortDescription = string.IsNullOrEmpty(methodResponse.ShortDescription)
                     ? apiResponse.ShortDescription
                     : methodResponse.ShortDescription;

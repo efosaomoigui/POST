@@ -518,12 +518,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 //1. check if the waybill are over due shipment
                 await ValidateOverDueShipments(waybillNumberList);
 
+                var currentUserId = await _userService.GetCurrentUserId();
+
                 //2. call existing api that handle grouping
-                await MappingWaybillNumberToGroup(groupWaybillNumber, waybillNumberList);
+                //await MappingWaybillNumberToGroup(groupWaybillNumber, waybillNumberList);
+                await MappingOverDueWaybillNumberToGroup(groupWaybillNumber, waybillNumberList, currentUserId);
 
                 //3. Save into OverdueShipment as grouped status
-                //update shipment collection as GroupedForWarehouse and remove overshipment 
-                var currentUserId = await _userService.GetCurrentUserId();
+                //update shipment collection as GroupedForWarehouse and remove overshipment                 
                 foreach (var waybill in waybillNumberList)
                 {
                     var overdueShipment = _uow.OverdueShipment.FindAsync(s => s.Waybill == waybill).Result.FirstOrDefault();
@@ -558,11 +560,15 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 //get all shipments by servicecentre
-                var serviceCenters = await _userService.GetPriviledgeServiceCenters();                
-                List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable().Where(s => s.IsCancelled == false && s.CompanyType != CompanyType.Ecommerce.ToString() && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var userActiveCountry = await _userService.GetUserActiveCountryId();
+
+                List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable()
+                    .Where(s => s.IsCancelled == false && s.CompanyType != CompanyType.Ecommerce.ToString()
+                    && serviceCenters.Contains(s.DestinationServiceCentreId)).Select(x => x.Waybill).Distinct().ToList();
 
                 // filter by global property for OverDueShipments
-                var overDueDaysCountObj = _uow.GlobalProperty.SingleOrDefault(s => s.Key == GlobalPropertyType.OverDueDaysCount.ToString());
+                var overDueDaysCountObj = _uow.GlobalProperty.SingleOrDefault(s => s.Key == GlobalPropertyType.OverDueDaysCount.ToString() && s.CountryId == userActiveCountry);
                 if (overDueDaysCountObj == null)
                 {
                     throw new GenericException($"The Global property 'Over Due Days Count' has not been set. Kindly contact admin.");
@@ -570,19 +576,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 var overDueDaysCount = overDueDaysCountObj.Value;
                 int globalProp = int.Parse(overDueDaysCount);
                 var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
-
+                
                 var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().
-                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated <= overdueDate)).ToList();
+                    Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF &&  serviceCenters.Contains(x.DestinationServiceCentreId) && (x.DateCreated <= overdueDate)).ToList();
 
-                shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
+                //shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).OrderByDescending(x => x.DateCreated).ToList();
+                shipmentCollection = shipmentCollection.Where(s => shipmentsWaybills.Contains(s.Waybill)).ToList();
 
                 //ensure that already grouped waybills don't appear with this list
                 var overdueShipment = _uow.OverdueShipment.GetAllAsQueryable().
                     Where(s => s.OverdueShipmentStatus == OverdueShipmentStatus.Grouped).ToList();
 
                 //filter the two lists
-                shipmentCollection =
-                    shipmentCollection.Where(s => !overdueShipment.Select(d => d.Waybill).Contains(s.Waybill)).ToList();
+                shipmentCollection = shipmentCollection.Where(s => !overdueShipment.Select(d => d.Waybill).Contains(s.Waybill)).ToList();
 
                 var overdueShipmentList = shipmentCollection.Select(x => x.Waybill).Distinct().ToList();
                 
@@ -600,6 +606,67 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        
+
+        private async Task MappingOverDueWaybillNumberToGroup(string groupWaybillNumber, List<string> waybillNumberList, string currentUserId)
+        {
+            try
+            {
+                //validate the ids are in the system
+                var serviceCenterId = int.Parse(groupWaybillNumber.Substring(1, 3));
+                var serviceCentre = await _centreService.GetServiceCentreById(serviceCenterId);
+
+                // get the service centres of login user
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                if (serviceCenters.Length == 0)
+                {
+                    throw new GenericException("Error processing request. The login user is not assign to any service centre nor has the right privilege");
+                }
+
+                int departureServiceCenterId = serviceCenters[0];
+
+                //Get GroupWaybill Details
+                var groupwaybillObj = await _uow.GroupWaybillNumber.GetAsync(x => x.GroupWaybillCode.Equals(groupWaybillNumber));
+
+                if (groupwaybillObj == null)
+                {
+                    var newGroupWaybill = new GroupWaybillNumber
+                    {
+                        GroupWaybillCode = groupWaybillNumber,
+                        UserId = currentUserId,
+                        ServiceCentreId = serviceCentre.ServiceCentreId,
+                        IsActive = true,
+                        DepartureServiceCentreId = departureServiceCenterId
+                    };
+                    _uow.GroupWaybillNumber.Add(newGroupWaybill);
+                }
+
+                List<GroupWaybillNumberMapping> groupWaybillNumberMapping = new List<GroupWaybillNumberMapping>();
+
+                foreach (var waybillNumber in waybillNumberList)
+                {
+                    //Add new Mapping
+                    var newMapping = new GroupWaybillNumberMapping
+                    {
+                        GroupWaybillNumber = groupWaybillNumber,
+                        WaybillNumber = waybillNumber,
+                        IsActive = true,
+                        DateMapped = DateTime.Now,
+                        DepartureServiceCentreId = departureServiceCenterId,
+                        DestinationServiceCentreId = serviceCenterId,
+                        OriginalDepartureServiceCentreId = departureServiceCenterId,
+                        UserId = currentUserId
+                    };
+
+                    groupWaybillNumberMapping.Add(newMapping);
+                }
+
+                _uow.GroupWaybillNumberMapping.AddRange(groupWaybillNumberMapping);
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Wallet;
+﻿using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.DTO.Report;
@@ -28,6 +29,21 @@ namespace GIGLS.WebApi.Controllers.Wallet
             return await HandleApiOperationAsync(async () =>
             {
                 var walletTransactions = await _walletTransactionService.GetWalletTransactions();
+                return new ServiceResponse<IEnumerable<WalletTransactionDTO>>
+                {
+                    Object = walletTransactions
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("walletbydate")]
+        public async Task<IServiceResponse<IEnumerable<WalletTransactionDTO>>> GetWalletTransactionsByDate(ShipmentCollectionFilterCriteria dateFilter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var walletTransactions = await _walletTransactionService.GetWalletTransactionsByDate(dateFilter);
                 return new ServiceResponse<IEnumerable<WalletTransactionDTO>>
                 {
                     Object = walletTransactions

@@ -45,5 +45,6 @@ namespace GIGL.GIGLS.Core.Domain
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public bool IsRegisteredFromMobile { get; set; }
+        public bool isCodNeeded { get; set; }
     }
 }

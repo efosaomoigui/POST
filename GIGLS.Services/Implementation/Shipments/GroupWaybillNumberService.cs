@@ -68,6 +68,16 @@ namespace GIGLS.Services.Implementation.Shipments
             return groupwaybill;
         }
 
+        public async Task<string> GenerateGroupWaybillNumber(string serviceCentreCode)
+        {
+            GroupWaybillNumberDTO groupWaybillNumberDTO = new GroupWaybillNumberDTO
+            {
+                ServiceCentreCode = serviceCentreCode
+            };
+
+            return await GenerateGroupWaybillNumber(groupWaybillNumberDTO);
+        }
+
         public async Task<IEnumerable<GroupWaybillNumberDTO>> GetAllGroupWayBillNumbers()
         {
             try
@@ -305,5 +315,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        
     }
 }

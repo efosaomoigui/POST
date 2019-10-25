@@ -13,6 +13,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<GroupWaybillNumberDTO> GetGroupWayBillNumberById(int groupwaybillId);
         Task<GroupWaybillNumberDTO> GetGroupWayBillNumberById(string groupwaybillNumber);
         Task<string> GenerateGroupWaybillNumber(GroupWaybillNumberDTO groupWaybillNumberDTO);
+        Task<string> GenerateGroupWaybillNumber(string serviceCentreCode);
         Task UpdateGroupWaybillNumber(int groupwaybillId);
         Task UpdateGroupWaybillNumber(string groupwaybillNumber);
         Task RemoveGroupWaybillNumber(int groupwaybillId);
