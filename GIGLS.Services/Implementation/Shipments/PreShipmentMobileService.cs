@@ -278,13 +278,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         DeclaredValue += Convert.ToDecimal(preShipmentItem.Value);
                         var DeclaredValueForPreShipment = Convert.ToDecimal(preShipmentItem.Value);
                         preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M) + vatForPreshipment;
-                       //preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice / 100, 0);
+                       preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice);
                         preShipment.IsdeclaredVal = true;
                     }
                     else
                     {
                         preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + vatForPreshipment;
-                       //preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice / 100, 0) * 100;
+                        preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice);
                     }
                     Price += (decimal)preShipmentItem.CalculatedPrice;
                 };
@@ -292,7 +292,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 preShipment.DeliveryPrice = Price;
                 preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
                 preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice);
-                preShipment.CalculatedTotal = (double)preShipment.CalculatedTotal;
+                preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal);
                 preShipment.Value = DeclaredValue;
                 var returnprice = new MobilePriceDTO()
                 {
