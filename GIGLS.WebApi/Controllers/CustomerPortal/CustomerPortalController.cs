@@ -36,7 +36,7 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IMessageService;
-
+using GIGLS.Core.DTO.Admin;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -1324,6 +1324,23 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("websiteData")]
+        public async Task<IServiceResponse<AdminReportDTO>> GetWebsiteData()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var data = await _portalService.WebsiteData();
+                return new ServiceResponse<AdminReportDTO>
+                {
+                    Object = data
+
+                };
+            });
+        }
+
 
 
     }

@@ -41,6 +41,8 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.IMessageService;
 using System.Text.RegularExpressions;
+using GIGLS.Core.DTO.Admin;
+using GIGLS.Core.IServices.Report;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -67,6 +69,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IPreShipmentMobileService _preShipmentMobileService;
         private readonly IMessageSenderService _messageSenderService;
         private readonly ICountryService _countryService;
+        private readonly IAdminReportService _adminReportService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
@@ -74,7 +77,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService, ICustomerService customerService,
             IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
-            IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService, ICountryService countryService)
+            IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService, 
+            ICountryService countryService, IAdminReportService adminReportService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -97,6 +101,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _preShipmentMobileService = preShipmentMobileService;
             _messageSenderService = messageSenderService;
             _countryService = countryService;
+            _adminReportService = adminReportService;
             MapperConfig.Initialize();
         }
 
@@ -1835,6 +1840,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw;
             }
+        }
+
+        public async Task<AdminReportDTO> WebsiteData()
+        {
+            return await _adminReportService.DisplayWebsiteData();
         }
 
     }
