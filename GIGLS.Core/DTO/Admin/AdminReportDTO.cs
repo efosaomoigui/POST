@@ -17,6 +17,7 @@ namespace GIGLS.Core.DTO.Admin
         public List<Report_TotalServiceCentreByState> TotalServiceCentreByState;
         public Report_TotalOrdersDelivered TotalOrdersDelivered;
         public CustomersCount NumberOfCustomer;
+        public int TotalCustomers;
     }
 
     public class CustomersCount

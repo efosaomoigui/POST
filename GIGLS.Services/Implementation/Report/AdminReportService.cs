@@ -39,6 +39,20 @@ namespace GIGLS.Services.Implementation.Report
 
             return result;
         }
+        //To display data for the website
+        public async Task<AdminReportDTO> DisplayWebsiteData()
+        {
+            var result = new AdminReportDTO();
+
+            
+            result.NumberOfCustomer.Ecommerce = await GetEcommerceCount();
+            result.NumberOfCustomer.Individual = await GetIndividaulCount();
+            result.NumberOfCustomer.Corporate = await GetCorporateCount();
+            result.TotalCustomers = result.NumberOfCustomer.Ecommerce + result.NumberOfCustomer.Individual + result.NumberOfCustomer.Corporate;
+
+            result.TotalOrdersDelivered = await GetTotalOrdersDelivered();
+            return result;
+        }
 
         private async Task<List<Report_AllTimeSalesByCountry>> GetAllTimeSalesByCountries()
         {
