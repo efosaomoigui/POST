@@ -10,6 +10,7 @@ using GIGLS.WebApi.Providers;
 using Hangfire;
 using GlobalConfiguration = Hangfire.GlobalConfiguration;
 using Hangfire.SqlServer;
+using Ninject;
 
 [assembly: OwinStartup(typeof(GIGLS.WebApi.Startup))]
 
@@ -29,15 +30,23 @@ namespace GIGLS.WebApi
 
             ConfigureAuth(app);
             ConfigureOAuthTokenConsumption(app);
-
             //ConfigureWebApi(config);
             app.Use<CustomAuthenticationMiddleware>();
             app.UseCors(Microsoft.Owin.Cors.CorsOptions.AllowAll);
 
             app.UseWebApi(config);
-            GlobalConfiguration.Configuration.UseSqlServerStorage("GIGLSContextDB");
-            app.UseHangfireDashboard();
+            GlobalConfiguration.Configuration.UseSqlServerStorage("GIGLSContextDB", new SqlServerStorageOptions
+            {
+                CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                QueuePollInterval = TimeSpan.Zero,
+                UseRecommendedIsolationLevel = true,
+                UsePageLocksOnDequeue = true,
+                DisableGlobalLocks = true
+            });
             app.UseHangfireServer();
+            app.UseHangfireDashboard();
+           
         }
 
 
