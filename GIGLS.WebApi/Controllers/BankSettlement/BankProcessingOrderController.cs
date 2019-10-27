@@ -1,10 +1,12 @@
 ﻿using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.BankSettlement;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Core.IServices.CashOnDeliveryBalance;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
 using System;
@@ -283,20 +285,94 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         }
 
         //Helps get all processing order by the type: COD or Shipment from 
+        
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("getbankOrderprocessingcode")]
-        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> GetBankOrderProcessingCode(DepositType type) 
+        [HttpPost]
+        [Route("getbankOrderprocessingcodebyDate")]
+        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> GetBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var resValue = await _bankprocessingorder.GetBankOrderProcessingCode(type);
+                var resValue = await _bankprocessingorder.GetBankOrderProcessingCodeByDate(type,dateFilterCriteria);
                 return new ServiceResponse<List<BankProcessingOrderCodesDTO>>
                 {
                     Object = resValue
                 };
             });
         }
+
+
+        //This one searches for all new Paid Out CODs
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("RequestCODCustomerWhoNeedPayOut")]
+        public async Task<IServiceResponse<object>> RequestCODCustomerWhoNeedPayOut()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //All cash CODs from sales
+                var bankshipmentprocessingorders = await _bankprocessingorder.GetCODCustomersWhoNeedPayOut();
+                return new ServiceResponse<object>
+                {
+                    Object = bankshipmentprocessingorders
+                };
+            });
+        }
+
+        //This one searches for all new Paid Out CODs
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("PaidOutCODLists")]
+        public async Task<IServiceResponse<object>> PaidOutCODLists() 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //All cash CODs from sales
+                var bankshipmentprocessingorders = await _bankprocessingorder.GetPaidOutCODLists();
+                return new ServiceResponse<object>
+                {
+                    Object = bankshipmentprocessingorders
+                };
+            });
+        }
+
+        //This one searches for all new Paid Out CODs
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("UpdateCODCustomerWhoNeedPayOut")]
+        public async Task<IServiceResponse<object>> UpdateCODCustomerWhoNeedPayOut(NewInvoiceViewDTO invoiceinfo)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //All cash CODs from sales
+                await _bankprocessingorder.UpdateCODCustomersWhoNeedPayOut(invoiceinfo);
+
+                return new ServiceResponse<object>
+                {
+                };
+            });
+        }
+
+        //This one searches for all new Paid Out CODs
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("ViewCustomersPaidOutCODs")]
+        //public async Task<IServiceResponse<object>> ViewCustomersPaidOutCODs()
+        //{
+
+        //    return null;
+        //    //return await HandleApiOperationAsync(async () =>
+        //    //{
+        //    //    //All cash CODs from sales
+        //    //    var bankshipmentprocessingorders = await _bankprocessingorder.GetBankProcessingOrderForDemurrage(type);
+        //    //    return new ServiceResponse<object>
+        //    //    {
+        //    //        Object = bankshipmentprocessingorders.Item2,
+        //    //        Total = bankshipmentprocessingorders.Item3,
+        //    //        RefCode = bankshipmentprocessingorders.Item1
+        //    //    };
+        //    //});
+        //}
 
 
     }

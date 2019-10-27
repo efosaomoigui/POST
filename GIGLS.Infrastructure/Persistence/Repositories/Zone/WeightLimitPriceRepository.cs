@@ -29,7 +29,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Zone
                                     Price = r.Price,
                                     ZoneId = r.ZoneId,
                                     ZoneName = r.Zone.ZoneName,
-                                    RegularEcommerceType = r.RegularEcommerceType
+                                    RegularEcommerceType = r.RegularEcommerceType,
+                                    CountryId = r.CountryId
                                 };
                 return Task.FromResult(optionDto.ToList());
             }

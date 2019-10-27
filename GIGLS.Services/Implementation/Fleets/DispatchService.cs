@@ -52,43 +52,39 @@ namespace GIGLS.Services.Implementation.Fleets
                 //check for the type of delivery manifest to know which type of process to do
                 if (dispatchDTO.ManifestType == ManifestType.Delivery)
                 {
-                    //first ensure that the dispatch user does not have any pending DeliveryManifest
-                    //get the dispatch for the user
-                    //var userDispatchs = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == dispatchDTO.DriverDetail && s.ReceivedBy == null).ToList();
-
-                    //get the active manifest for the dispatch user
-                    //if (userDispatchs.Count > 0)
-                    //{
-                    //    //error, the dispatch user cannot have an undelivered dispatch
-                    //    var manifestCodeArray = userDispatchs.Select(s => s.ManifestNumber).ToList();
-                    //    var manifestObjects = _uow.Manifest.GetAll().Where(s =>
-                    //    manifestCodeArray.Contains(s.ManifestCode) && s.ManifestType == ManifestType.Delivery).ToList();
-
-                    //    if (manifestObjects.Count > 0)
-                    //    {
-                    //        var deliveryManifestCodeArray = manifestObjects.Select(s => s.ManifestCode).ToList();
-                    //        throw new GenericException($"Error: Dispatch User cannot have an undelivered dispatch. " +
-                    //            $"Please finalise the following Delivery Manifests [{string.Join(", ", deliveryManifestCodeArray)}]");
-                    //    }
-                    //}
-
                     //filter all the ways in the delivery manifest for scanning processing
                     var ret = await FilterWaybillsInDeliveryManifest(dispatchDTO, currentUserId, userServiceCentreId);
                 }
-                else
+                else 
                 {
-                    //Verify that all waybills are not cancelled and scan all the waybills in case none was cancelled
-                    var ret2 = await VerifyWaybillsInGroupWaybillInManifest(dispatchDTO.ManifestNumber, currentUserId, userServiceCentreId);
+                    if (dispatchDTO.ManifestType != ManifestType.Pickup)
+                    {
+                        //Verify that all waybills are not cancelled and scan all the waybills in case none was cancelled
+                        var ret2 = await VerifyWaybillsInGroupWaybillInManifest(dispatchDTO.ManifestNumber, currentUserId, userServiceCentreId);
+                    }
                 }
 
                 // create dispatch
                 var newDispatch = Mapper.Map<Dispatch>(dispatchDTO);
                 newDispatch.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
                 newDispatch.ServiceCentreId = userServiceCentreId;
+                newDispatch.DepartureServiceCenterId = dispatchDTO.DepartureServiceCenterId;
+                newDispatch.DestinationServiceCenterId = dispatchDTO.DestinationServiceCenterId;
                 _uow.Dispatch.Add(newDispatch);
 
                 // update manifest
                 var manifestObj = _uow.Manifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
+                if (manifestObj == null)
+                {
+                    var pickupManifestObj = _uow.PickupManifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
+                    if(pickupManifestObj != null)
+                    {
+                        var pickupManifestEntity = _uow.PickupManifest.Get(pickupManifestObj.PickupManifestId);
+                        pickupManifestEntity.DispatchedById = currentUserId;
+                        pickupManifestEntity.IsDispatched = true;
+                        pickupManifestEntity.ManifestType = dispatchDTO.ManifestType;
+                    }
+                }
                 if (manifestObj != null)
                 {
                     var manifestEntity = _uow.Manifest.Get(manifestObj.ManifestId);
@@ -97,11 +93,23 @@ namespace GIGLS.Services.Implementation.Fleets
                     manifestEntity.ManifestType = dispatchDTO.ManifestType;
                 }
 
+                ////--start--///Set the DepartureCountryId
+                int countryIdFromServiceCentreId = 0;
+                try
+                {
+                    var departureCountry = await _uow.Country.GetCountryByServiceCentreId(userServiceCentreId);
+                    countryIdFromServiceCentreId = departureCountry.CountryId;
+                }
+                catch (Exception) { }
+                ////--end--///Set the DepartureCountryId
+
+
                 //update General Ledger
                 var generalLedger = new GeneralLedger()
                 {
                     DateOfEntry = DateTime.Now,
                     ServiceCentreId = userServiceCentreId,
+                    CountryId = countryIdFromServiceCentreId,
                     UserId = currentUserId,
                     Amount = dispatchDTO.Amount,
                     CreditDebitType = CreditDebitType.Debit,
@@ -129,10 +137,6 @@ namespace GIGLS.Services.Implementation.Fleets
                 await _uow.CompleteAsync();
                 return new { Id = newDispatch.DispatchId };
             }
-            //catch (Exception)
-            //{
-            //    throw;
-            //}
         }
 
         /// <summary>
@@ -149,8 +153,8 @@ namespace GIGLS.Services.Implementation.Fleets
             if (listOfWaybills.Count > 0)
             {
                 //Scan all waybills attached to this manifestNumber
-                string status = ShipmentScanStatus.WC.ToString();
-                await ScanWaybillsInManifest(listOfWaybills, currentUserId, userServiceCentreId, status);
+                //ShipmentScanStatus status = ShipmentScanStatus.WC;
+                await ScanWaybillsInManifest(listOfWaybills, currentUserId, userServiceCentreId, ShipmentScanStatus.WC);
             }
 
             return 0;
@@ -184,8 +188,8 @@ namespace GIGLS.Services.Implementation.Fleets
             else
             {
                 //Scan all waybills attached to this manifestNumber
-                string status = ShipmentScanStatus.DSC.ToString();
-                await ScanWaybillsInManifest(listOfWaybills.ToList(), currentUserId, userServiceCentreId, status);
+                //string status = ShipmentScanStatus.DSC.ToString();
+                await ScanWaybillsInManifest(listOfWaybills.ToList(), currentUserId, userServiceCentreId, ShipmentScanStatus.DSC);
             }
             return 0;
         }
@@ -195,7 +199,7 @@ namespace GIGLS.Services.Implementation.Fleets
         /// are scan.
         /// </summary>
 
-        private async Task ScanWaybillsInManifest(List<string> waybills, string currentUserId, int userServiceCentreId, string scanStatus)
+        private async Task ScanWaybillsInManifest(List<string> waybills, string currentUserId, int userServiceCentreId, ShipmentScanStatus scanStatus)
         {
             var serviceCenter = await _uow.ServiceCentre.GetAsync(userServiceCentreId);
 
@@ -205,12 +209,27 @@ namespace GIGLS.Services.Implementation.Fleets
                 {
                     Waybill = item,
                     Location = serviceCenter.Name,
-                    Status = scanStatus,
+                    Status = scanStatus.ToString(),
                     DateTime = DateTime.Now,
                     UserId = currentUserId,
                     ServiceCentreId = serviceCenter.ServiceCentreId
                 };
+
                 _uow.ShipmentTracking.Add(newShipmentTracking);
+
+                //use to optimise shipment progress for shipment that has depart service centre
+                //update shipment table if the scan status contain any of the following : TRO, DSC, DTR
+                if (scanStatus.Equals(ShipmentScanStatus.DSC) || scanStatus.Equals(ShipmentScanStatus.TRO) || scanStatus.Equals(ShipmentScanStatus.DTR))
+                {
+                    //Get shipment Details
+                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(item));
+
+                    //update shipment if the user belong to original departure service centre
+                    if (shipment.DepartureServiceCentreId == serviceCenter.ServiceCentreId && shipment.ShipmentScanStatus != scanStatus)
+                    {
+                        shipment.ShipmentScanStatus = scanStatus; 
+                    }
+                }
             }
         }
 
@@ -265,7 +284,6 @@ namespace GIGLS.Services.Implementation.Fleets
                 var dispatch = dispatchResult.FirstOrDefault();
                 if (dispatch == null)
                 {
-                    //throw new GenericException("Information does not Exist");
                     return null;
                 }
 
@@ -280,9 +298,69 @@ namespace GIGLS.Services.Implementation.Fleets
                     dispatchDTO.DriverDetail = user.FirstName + " " + user.LastName;
                 }
 
+                //get the country by service centre
+                if(dispatchDTO.ServiceCentreId > 0)
+                {
+                    int serviceCentre = (int)dispatchDTO.ServiceCentreId;
+                    var country = await _uow.Country.GetCountryByServiceCentreId(serviceCentre);
+                    dispatchDTO.Country = country;
+                }
+                //get Station Detail
+                var destStation = await _uow.Station.GetAsync(x => x.StationId == dispatch.DestinationId);
+                if (destStation != null)
+                {
+                    dispatchDTO.Destination = Mapper.Map<StationDTO>(destStation);
+                }
+
+                var deptStation = await _uow.Station.GetAsync(x => x.StationId == dispatch.DepartureId);
+                if (deptStation != null)
+                {
+                    dispatchDTO.Departure = Mapper.Map<StationDTO>(deptStation);
+                }
+                //get Service Center Detail
+                var destService = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == dispatch.DestinationServiceCenterId);
+                if (destService != null)
+                {
+                    dispatchDTO.DestinationService = Mapper.Map<ServiceCentreDTO>(destService);
+                }
+
+                var deptService = await _uow.ServiceCentre.GetAsync(x => x.ServiceCentreId == dispatch.DepartureServiceCenterId);
+                if(deptService != null)
+                {
+                    dispatchDTO.DepartureService = Mapper.Map<ServiceCentreDTO>(deptService);
+                }
+
                 //get the ManifestType
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
-                dispatchDTO.ManifestType = manifestObj.ManifestType;
+                if (manifestObj == null)
+                {
+                    var pickupManifestObject = await _uow.PickupManifest.GetAsync(x => x.ManifestCode.Equals(manifest));
+                    dispatchDTO.ManifestType = pickupManifestObject.ManifestType;
+                }
+                else
+                {
+                    dispatchDTO.ManifestType = manifestObj.ManifestType;
+                }
+                
+                return dispatchDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<DispatchDTO>> GetDispatchCaptainByName(string captain)
+        {
+            try
+            {
+                var dispatchResult = await _uow.Dispatch.FindAsync(x => x.DriverDetail.Equals(captain));
+               
+                if (dispatchResult.Count() == 0)
+                {
+                    return null;
+                }
+                var dispatchDTO = Mapper.Map<List<DispatchDTO>>(dispatchResult);
 
                 return dispatchDTO;
             }

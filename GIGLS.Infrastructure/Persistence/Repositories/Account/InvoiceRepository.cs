@@ -10,8 +10,8 @@ using AutoMapper;
 using GIGLS.CORE.DTO.Report;
 using System;
 using GIGLS.Core.View;
-using GIGLS.Core.Domain.Wallet;
 using System.Data.SqlClient;
+using GIGLS.Core.View.AdminReportView;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 {
@@ -135,7 +135,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             var invoices = _GIGLSContextForView.InvoiceView.AsQueryable();
 
             //filter by paymentstatus of non paid
-            invoices = invoices.Where(s=>s.CompanyType == "Ecommerce");
+            invoices = invoices.Where(s => s.CompanyType == "Ecommerce");
 
             return invoices;
 
@@ -151,22 +151,56 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             var queryDate = accountFilterCriteria.getStartDateAndEndDate();
 
             //declare parameters for the stored procedure
-            SqlParameter iscancelled = new SqlParameter("@IsCancelled", (object)accountFilterCriteria.IsCancelled?? DBNull.Value);
+            SqlParameter iscancelled = new SqlParameter("@IsCancelled", (object)accountFilterCriteria.IsCancelled ?? DBNull.Value);
             SqlParameter startDate = new SqlParameter("@StartDate", queryDate.Item1);
             SqlParameter endDate = new SqlParameter("@EndDate", queryDate.Item2);
-            
+
             SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", Convert.ToInt32(accountFilterCriteria.PaymentStatus));//accountFilterCriteria.PaymentStatus
 
-            var sc = (serviceCentreIds.Length > 0) ? serviceCentreIds[0] : 0; 
+            var sc = (serviceCentreIds.Length > 0) ? serviceCentreIds[0] : 0;
             //SqlParameter paymentMethod = new SqlParameter("@paymentMethod", accountFilterCriteria.p);
             SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
 
             SqlParameter stationId = new SqlParameter("@StationId", accountFilterCriteria.StationId);
-            SqlParameter CompanyType = new SqlParameter("@CompanyType", (object)accountFilterCriteria.CompanyType?? DBNull.Value);
-            SqlParameter isCod = new SqlParameter("@IsCashOnDelivery", (object)accountFilterCriteria.IsCashOnDelivery??DBNull.Value);
+            SqlParameter CompanyType = new SqlParameter("@CompanyType", (object)accountFilterCriteria.CompanyType ?? DBNull.Value);
+            SqlParameter isCod = new SqlParameter("@IsCashOnDelivery", (object)accountFilterCriteria.IsCashOnDelivery ?? DBNull.Value);
+            SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
 
-            var invoices = 
-           await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTO>("NewInvoiceViewSP @IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CompanyType, @IsCashOnDelivery",  
+            var invoices =
+           await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTO>("NewInvoiceViewSP @IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CompanyType, @IsCashOnDelivery, @CountryId",
+                iscancelled, startDate, endDate, paymentStatus, departureServiceCentreId, stationId, CompanyType, isCod, CountryId).ToListAsync();
+
+            var result = invoices.ToList();
+            var invoicesResult = Mapper.Map<IEnumerable<InvoiceViewDTO>>(result);
+
+            return await Task.FromResult(invoicesResult.ToList()); // Task.FromResult(invoicesResult.OrderByDescending(x => x.DateCreated).ToList());
+        }
+
+        public async Task<List<InvoiceViewDTO>> GetInvoicesFromViewWithDeliveryTimeAsyncFromSP(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
+        {
+            DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
+            DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
+
+            var queryDate = accountFilterCriteria.getStartDateAndEndDate();
+
+
+            //declare parameters for the stored procedure
+            SqlParameter iscancelled = new SqlParameter("@IsCancelled", (object)accountFilterCriteria.IsCancelled ?? DBNull.Value);
+            SqlParameter startDate = new SqlParameter("@StartDate", queryDate.Item1);
+            SqlParameter endDate = new SqlParameter("@EndDate", queryDate.Item2);
+
+            SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", Convert.ToInt32(accountFilterCriteria.PaymentStatus));//accountFilterCriteria.PaymentStatus
+
+            var sc = (serviceCentreIds.Length > 0) ? serviceCentreIds[0] : 0;
+            //SqlParameter paymentMethod = new SqlParameter("@paymentMethod", accountFilterCriteria.p);
+            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
+
+            SqlParameter stationId = new SqlParameter("@StationId", accountFilterCriteria.StationId);
+            SqlParameter CompanyType = new SqlParameter("@CompanyType", (object)accountFilterCriteria.CompanyType ?? DBNull.Value);
+            SqlParameter isCod = new SqlParameter("@IsCashOnDelivery", (object)accountFilterCriteria.IsCashOnDelivery ?? DBNull.Value);
+
+            var invoices =
+           await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTO>("NewInvoiceViewSPWithDeliveryTime @IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CompanyType, @IsCashOnDelivery",
                 iscancelled, startDate, endDate, paymentStatus, departureServiceCentreId, stationId, CompanyType, isCod).ToListAsync();
 
             var result = invoices.ToList();
@@ -233,7 +267,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             return Task.FromResult(invoicesResult.OrderByDescending(x => x.DateCreated).ToList());
         }
 
-
         public IQueryable<InvoiceView> GetAllFromInvoiceView()
         {
             var invoices = _GIGLSContextForView.InvoiceView.AsQueryable();
@@ -274,7 +307,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               DepositStatus = s.DepositStatus,
                               PaymentMethod = i.PaymentMethod,
                               CashOnDeliveryAmount = s.CashOnDeliveryAmount,
-                              ReprintCounterStatus = s.ReprintCounterStatus
+                              ReprintCounterStatus = s.ReprintCounterStatus,
+                              ShipmentScanStatus = s.ShipmentScanStatus,
+                              IsGrouped = s.IsGrouped,
+                              DepartureCountryId = s.DepartureCountryId,
+                              DestinationCountryId = s.DestinationCountryId
                           });
             return result;
         }
@@ -325,11 +362,100 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               DepositStatus = s.DepositStatus,
                               PaymentMethod = i.PaymentMethod,
                               PickupOptions = s.PickupOptions,
-                              IsCancelled = s.IsCancelled
+                              IsCancelled = s.IsCancelled,
+                              DepartureCountryId = s.DepartureCountryId,
+                              DestinationCountryId = s.DestinationCountryId
                           });
             return result;
         }
 
+        public IQueryable<InvoiceView> GetCustomerTransactions()
+        {
+            var shipments = Context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false);
 
+            var result = (from s in shipments
+                          join i in Context.Invoice on s.Waybill equals i.Waybill
+                          join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
+                          join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                          select new InvoiceView
+                          {
+                              Waybill = s.Waybill,
+                              CustomerCode = s.CustomerCode,
+                              DateCreated = s.DateCreated,
+                              ReceiverEmail = s.ReceiverEmail,
+                              ReceiverName = s.ReceiverName,
+                              PickupOptions = s.PickupOptions,
+                              Description = s.Description,
+                              GrandTotal = i.Amount,
+                              DepartureServiceCentreName = dept.Name,
+                              DestinationServiceCentreName = dest.Name,
+                              DepartureCountryId = s.DepartureCountryId,
+                              DestinationCountryId = s.DestinationCountryId
+                          });
+            return result;
+        }
+
+        public IQueryable<InvoiceView> GetCustomerInvoices()
+        {
+            var shipments = Context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false);
+
+            var result = (from s in shipments
+                          join i in Context.Invoice on s.Waybill equals i.Waybill
+                          select new InvoiceView
+                          {
+                              Waybill = s.Waybill,
+                              CustomerCode = s.CustomerCode,
+                              DateCreated = s.DateCreated,
+                              Amount = i.Amount,
+                              InvoiceNo = i.InvoiceNo,
+                              PaymentMethod = i.PaymentMethod,
+                              PaymentStatus = i.PaymentStatus,
+                              DepartureCountryId = s.DepartureCountryId,
+                              DestinationCountryId = s.DestinationCountryId
+                          });
+            return result;
+        }
+
+        public IQueryable<Report_AllTimeSalesByCountry> GetAllTimeSalesByCountry()
+        {
+            var result = _GIGLSContextForView.Report_AllTimeSalesByCountry.AsQueryable();
+            return result;
+        }
+
+        public IQueryable<Report_BusiestRoute> GetBusiestRoute()
+        {
+            var result = _GIGLSContextForView.Report_BusiestRoute.AsQueryable();
+            return result;
+        }
+
+        public IQueryable<Report_CustomerRevenue> GetCustomerRevenue()
+        {
+            var result = _GIGLSContextForView.Report_CustomerRevenue.AsQueryable();
+            return result;
+        }
+
+        public IQueryable<Report_MostShippedItemByWeight> GetMostShippedItemByWeight()
+        {
+            var result = _GIGLSContextForView.Report_MostShippedItemByWeight.AsQueryable();
+            return result;
+        }
+
+        public IQueryable<Report_RevenuePerServiceCentre> GetRevenuePerServiceCentre()
+        {
+            var result = _GIGLSContextForView.Report_RevenuePerServiceCentre.AsQueryable();
+            return result;
+        }
+
+        public IQueryable<Report_TotalServiceCentreByState> GetTotalServiceCentreByState()
+        {
+            var result = _GIGLSContextForView.Report_TotalServiceCentreByState.AsQueryable();
+            return result;
+        }
+
+        public IQueryable<Report_TotalOrdersDelivered> GetTotalOrdersDelivered()
+        {
+            var result = _GIGLSContextForView.Report_TotalOrdersDelivered.AsQueryable();
+            return result;
+        }
     }
 }

@@ -3,6 +3,9 @@
     public enum PartnerType
     {
         Corporate,
-        Individual
+        Individual,
+        Ecommerce,
+        DeliveryPartner,
+        InternalDeliveryPartner
     }
 }

@@ -8,5 +8,6 @@
         public bool Status { get; set; }
         public decimal FixedRate { get; set; }
         public decimal AdditionalRate { get; set; }
+        public int CountryId { get; set; }
     }
 }

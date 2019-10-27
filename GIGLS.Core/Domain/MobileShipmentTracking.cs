@@ -1,18 +1,19 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace GIGLS.Core.Domain
 {
     public class MobileShipmentTracking : BaseDomain
     {
         public int MobileShipmentTrackingId { get; set; }
+
+        [MaxLength(100)]
         public string Waybill { get; set; }
         public string Location { get; set; }
+
+        [MaxLength(100)]
         public string Status { get; set; }
         public DateTime DateTime { get; set; }
         public TrackingType TrackingType { get; set; }

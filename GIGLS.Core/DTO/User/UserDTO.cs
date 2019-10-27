@@ -60,5 +60,20 @@ namespace GIGLS.Core.DTO.User
         public DateTime PasswordExpireDate { get; set; }
 
         public string CustomerId { get; set; }
+
+        //user priviledge countries
+        public List<CountryDTO> Country { get; set; }
+        public List<string> CountryName { get; set; }
+
+        public int UserActiveCountryId { get; set; }
+        public CountryDTO UserActiveCountry { get; set; }
+        public List<string> VehicleType { get; set; }
+        public bool IsFromMobile { get; set; }
+
+        public string Referrercode { get; set; }
+
+        public double AverageRatings { get; set; }
+
+        public bool IsVerified { get; set; }
     }
 }

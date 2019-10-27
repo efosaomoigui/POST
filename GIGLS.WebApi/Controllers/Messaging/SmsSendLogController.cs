@@ -10,7 +10,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Messaging
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin, Shipment, ViewAdmin")]
     [RoutePrefix("api/smssendlog")]
     public class SmsSendLogController : BaseWebApiController
     {
@@ -69,6 +69,38 @@ namespace GIGLS.WebApi.Controllers.Messaging
                 };
             });
         }
-        
+
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("phonenumber")]
+        public async Task<IServiceResponse<List<SmsSendLogDTO>>> GetSmsSendLog([FromUri]string phoneNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var messages = await _messageService.GetSmsSendLog(phoneNumber);
+
+                return new ServiceResponse<List<SmsSendLogDTO>>
+                {
+                    Object = messages
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("waybill")]
+        public async Task<IServiceResponse<List<SmsSendLogDTO>>> GetSmsSendLogs([FromUri]string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var messages = await _messageService.GetSmsSendLogs(waybill);
+
+                return new ServiceResponse<List<SmsSendLogDTO>>
+                {
+                    Object = messages
+                };
+            });
+        }
     }
 }

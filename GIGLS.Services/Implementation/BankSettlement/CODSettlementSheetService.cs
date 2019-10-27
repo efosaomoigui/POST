@@ -66,7 +66,7 @@ namespace GIGLS.Services.Implementation.BankSettlement
 
         public async Task<IEnumerable<CODSettlementSheetDTO>> GetCODSettlementSheets()
         {
-            var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
             var codSettlementSheets = await _uow.CODSettlementSheet.GetCODSettlementSheetsAsync(serviceCenters);
             return codSettlementSheets;

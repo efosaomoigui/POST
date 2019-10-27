@@ -49,7 +49,7 @@ namespace GIGLS.Services.Implementation.Shipments
             await _uow.CompleteAsync();
         }
 
-        public async Task AddShipmentReturn(string waybill)
+        public async Task<string> AddShipmentReturn(string waybill)
         {
             try
             {
@@ -68,19 +68,27 @@ namespace GIGLS.Services.Implementation.Shipments
                 int departure = shipment.DepartureServiceCentreId;
                 shipment.DepartureServiceCentreId = shipment.DestinationServiceCentreId;
                 shipment.DestinationServiceCentreId = departure;
+                shipment.PickupOptions = PickupOptions.SERVICECENTER;
 
                 //change ecommerce customer destination address to their return address
                 if (shipment.CustomerDetails.CompanyType == CompanyType.Ecommerce)
                 {
-                    if (shipment.CustomerDetails.ReturnOption != null)
+                    if(shipment.CustomerDetails.ReturnOption == null || shipment.CustomerDetails.ReturnServiceCentre < 1)
                     {
-                        shipment.PickupOptions = (PickupOptions)Enum.Parse(typeof(PickupOptions), shipment.CustomerDetails.ReturnOption);
+                        throw new GenericException($"Return can not be initiated for {shipment.CustomerDetails.CustomerName} at this time, as he has not specified a return address. Merchant should contact the e-commerce team and provide a valid return address.");
                     }
+                    else
+                    {
+                        if (shipment.CustomerDetails.ReturnOption != null)
+                        {
+                            shipment.PickupOptions = (PickupOptions)Enum.Parse(typeof(PickupOptions), shipment.CustomerDetails.ReturnOption);
+                        }
 
-                    if (shipment.CustomerDetails.ReturnServiceCentre > 0)
-                    {
-                        shipment.DestinationServiceCentreId = shipment.CustomerDetails.ReturnServiceCentre;
-                    }
+                        if (shipment.CustomerDetails.ReturnServiceCentre > 0)
+                        {
+                            shipment.DestinationServiceCentreId = shipment.CustomerDetails.ReturnServiceCentre;
+                        }
+                    }                    
                 }
 
                 //Check if the user is a staff at final destination
@@ -99,15 +107,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //update the Receiver Details for returned shipments
                 await UpdateReceiverDetailsReturnedShipment(shipment);
-
-                //update shipment collection status to Returnstatus
-                var shipmentCollection = await _collectionService.GetShipmentCollectionById(waybill);
-                shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.SSR;
-                await _collectionService.UpdateShipmentCollection(shipmentCollection);
-
+                
                 //Create new shipment
                 var newShipment = await _shipmentService.AddShipment(shipment);
-
+                
                 //create new shipment return
                 var newShipmentReturn = new ShipmentReturn
                 {
@@ -118,9 +121,16 @@ namespace GIGLS.Services.Implementation.Shipments
                     //Discount =                
                 };
                 _uow.ShipmentReturn.Add(newShipmentReturn);
+                
+                //update shipment collection status to Returnstatus
+                var shipmentCollection = await _collectionService.GetShipmentCollectionById(waybill);
+                shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.SSR;
+                await _collectionService.UpdateShipmentCollection(shipmentCollection);
 
                 //complete transaction
                 await _uow.CompleteAsync();
+
+                return newShipment.Waybill;
             }
             catch (Exception)
             {
@@ -173,7 +183,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         IsVolumetric = item.IsVolumetric,
                         Width = decimal.Parse(item.Width.ToString()),
                         Length = decimal.Parse(item.Length.ToString()),
-                        Height = decimal.Parse(item.Height.ToString())
+                        Height = decimal.Parse(item.Height.ToString()),
+                        CountryId = shipment.DepartureCountryId
                     });
 
                     item.Price = itemPrice;

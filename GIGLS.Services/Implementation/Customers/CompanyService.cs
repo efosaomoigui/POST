@@ -45,6 +45,12 @@ namespace GIGLS.Services.Implementation.Customers
                     throw new GenericException($"{company.Name} or phone number already exist");
                 }
 
+                //check if registration is from Giglgo
+                if(company.IsFromMobile==true)
+                {
+                    company.IsRegisteredFromMobile = true;
+                }
+
                 var newCompany = Mapper.Map<Company>(company);
                 newCompany.CompanyStatus = CompanyStatus.Pending;
 
@@ -118,7 +124,8 @@ namespace GIGLS.Services.Implementation.Customers
                     UserChannelCode = newCompany.CustomerCode,
                     UserChannelPassword = password,
                     UserChannelType = userChannelType,
-                    PasswordExpireDate = DateTime.Now
+                    PasswordExpireDate = DateTime.Now,
+                    UserActiveCountryId = newCompany.UserActiveCountryId
                 });
 
                 //complete
@@ -181,42 +188,18 @@ namespace GIGLS.Services.Implementation.Customers
 
         public async Task<CompanyDTO> GetCompanyById(int companyId)
         {
-            //Code to add existing companies to the user table
-            //await CodeToAddCorporateUsersToAspNetUsersTable();
-
             try
             {
-                var company = await _uow.Company.GetAsync(companyId);
+                var company = await _uow.Company.GetCompanyById(companyId);
+                
                 if (company == null)
                 {
                     throw new GenericException("Company information does not exist");
                 }
 
                 CompanyDTO companyDto = Mapper.Map<CompanyDTO>(company);
-                var serviceCentre = await _uow.ServiceCentre.GetAsync(company.ReturnServiceCentre);
-                if(serviceCentre != null)
-                {
-                    companyDto.ReturnServiceCentreName = serviceCentre.Name;
-                }
-
-                var contactPersons = _uow.CompanyContactPerson.Find(x => x.CompanyId == companyDto.CompanyId).ToList();
-
-                if (contactPersons.Any())
-                {
-                    companyDto.ContactPersons = contactPersons.Select(p => new CompanyContactPersonDTO
-                    {
-                        CompanyContactPersonId = p.CompanyContactPersonId,
-                        Designation = p.Designation,
-                        Email = p.Email,
-                        FirstName = p.FirstName,
-                        LastName = p.LastName,
-                        PhoneNumber = p.PhoneNumber,
-                        DateCreated = p.DateCreated,
-                        DateModified = p.DateModified,
-                        CompanyId = p.CompanyId
-                    }).ToList();
-                }
-
+                companyDto.UserActiveCountryName = companyDto.Country.CountryName;
+                
                 return companyDto;
             }
             catch (Exception)
@@ -249,6 +232,9 @@ namespace GIGLS.Services.Implementation.Customers
                 company.ReturnOption = companyDto.ReturnOption;
                 company.ReturnServiceCentre = companyDto.ReturnServiceCentre;
                 company.ReturnAddress = companyDto.ReturnAddress;
+                company.RcNumber = companyDto.RcNumber;
+                company.UserActiveCountryId = companyDto.UserActiveCountryId;
+                company.isCodNeeded = companyDto.isCodNeeded;
 
                 if (companyDto.ContactPersons.Any())
                 {
@@ -270,6 +256,7 @@ namespace GIGLS.Services.Implementation.Customers
                 user.LastName = companyDto.Name;
                 user.FirstName = companyDto.Name;
                 user.Email = companyDto.Email;
+                user.UserActiveCountryId = companyDto.UserActiveCountryId;
 
                 await _userService.UpdateUser(user.Id, user);
 
@@ -369,7 +356,8 @@ namespace GIGLS.Services.Implementation.Customers
                             Username = newCompany.CustomerCode,
                             UserChannelCode = newCompany.CustomerCode,
                             UserChannelPassword = password,
-                            UserChannelType = userChannelType
+                            UserChannelType = userChannelType,
+                            UserActiveCountryId = newCompany.UserActiveCountryId
                         });
                     }
                     catch (Exception)
@@ -392,31 +380,15 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
-                var company = await _uow.Company.GetAsync(x => x.CustomerCode.ToLower() == customerCode.ToLower());
+                var company = await _uow.Company.GetCompanyByCode(customerCode);
+
                 if (company == null)
                 {
                     return new CompanyDTO { };
                 }
 
                 CompanyDTO companyDto = Mapper.Map<CompanyDTO>(company);
-
-                var contactPersons = _uow.CompanyContactPerson.Find(x => x.CompanyId == companyDto.CompanyId).ToList();
-
-                if (contactPersons.Any())
-                {
-                    companyDto.ContactPersons = contactPersons.Select(p => new CompanyContactPersonDTO
-                    {
-                        CompanyContactPersonId = p.CompanyContactPersonId,
-                        Designation = p.Designation,
-                        Email = p.Email,
-                        FirstName = p.FirstName,
-                        LastName = p.LastName,
-                        PhoneNumber = p.PhoneNumber,
-                        DateCreated = p.DateCreated,
-                        DateModified = p.DateModified,
-                        CompanyId = p.CompanyId
-                    }).ToList();
-                }
+                companyDto.UserActiveCountryName = companyDto.Country.CountryName;
 
                 return companyDto;
             }

@@ -9,9 +9,14 @@ namespace GIGLS.Core.Domain
         [Key]
         [MaxLength(100), MinLength(5)]
         [Index(IsUnique = true)]
-        public string Waybill { get; set; }        
+        public string Waybill { get; set;}
+
+        [MaxLength(128)]
         public string CreatedBy { get; set; }
         public DateTime ShipmentCreatedDate { get; set; }
+
+        [MaxLength(128)]
         public string CancelledBy { get; set; }
+        public string CancelReason { get; set; } 
     }
 }

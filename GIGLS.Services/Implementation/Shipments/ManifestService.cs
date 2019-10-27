@@ -122,6 +122,29 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //Get ManifestCode of Pickup Manifest
+        public async Task<PickupManifestDTO> GetPickupManifestByCode(string manifest)
+        {
+            try
+            {
+                var pickupManifestObj = await _uow.PickupManifest.GetAsync(x => x.ManifestCode.Equals(manifest));
+                
+                if (pickupManifestObj == null)
+                {
+                    throw new GenericException($"No Manifest exists for this code: {manifest}");
+                }
+
+                var pickupManifestDTO = Mapper.Map<PickupManifestDTO>(pickupManifestObj);
+                pickupManifestDTO.DispatchedBy = pickupManifestObj.DispatchedById;
+                pickupManifestDTO.ReceiverBy = pickupManifestObj.ReceiverById;
+                return pickupManifestDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<string> GenerateManifestCode(ManifestDTO manifestDTO)
         {
             try
@@ -193,6 +216,27 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifestCode));
             return manifest;
+        }
+
+        public async Task ChangeManifestType(string manifestCode)
+        {
+            var manifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifestCode && x.ManifestType == ManifestType.External && x.IsDispatched == true);
+
+            if(manifest == null)
+            {
+                throw new GenericException("External Manifest information does not exist");
+            }
+
+            //check if the manifest has not be received
+            var dispatch = await _uow.Dispatch.GetAsync(d => d.ManifestNumber == manifestCode && d.ReceivedBy == null);
+
+            if(dispatch == null)
+            {
+                throw new GenericException("Manifest already received.");
+            }
+
+            manifest.ManifestType = ManifestType.Transit;
+            _uow.Complete();
         }
     }
 }

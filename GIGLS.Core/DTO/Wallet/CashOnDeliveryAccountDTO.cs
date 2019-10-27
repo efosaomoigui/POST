@@ -14,6 +14,8 @@ namespace GIGLS.Core.DTO.Wallet
         public string UserId { get; set; }
         public string Waybill { get; set; }
         public CODStatus CODStatus { get; set; }
+        public int CountryId { get; set; }
+        public CountryDTO Country { get; set; }
     }
 
     public class CashOnDeliveryRegisterAccountDTO : BaseDomainDTO  
@@ -30,6 +32,8 @@ namespace GIGLS.Core.DTO.Wallet
         public DepositStatus DepositStatus { get; set; }
         public string RefCode { get; set; }
         public int DepartureServiceCenterId { get; set; }
+        public int DestinationCountryId { get; set; }
+        public CountryDTO Country { get; set; }
     }
 
     public class DemurrageRegisterAccountDTO : BaseDomainDTO 
@@ -46,5 +50,7 @@ namespace GIGLS.Core.DTO.Wallet
         public string PaymentTypeReference { get; set; }
         public DepositStatus DepositStatus { get; set; }
         public string RefCode { get; set; }
+        public int CountryId { get; set; }
+        public CountryDTO Country { get; set; }
     }
 }

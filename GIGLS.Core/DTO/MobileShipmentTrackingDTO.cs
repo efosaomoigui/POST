@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace GIGLS.Core.DTO
         public string Location { get; set; }
         public string Status { get; set; }
         public DateTime DateTime { get; set; }
-        public string TrackingType { get; set; }
+        public TrackingType TrackingType { get; set; }
         public MobileScanStatusDTO ScanStatus { get; set; }
 
         public string User { get; set; }

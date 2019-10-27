@@ -8,6 +8,8 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.WebApi.Filters;
 using System.Linq;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.Fleets;
+using System;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -134,6 +136,41 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("waybillsinmanifest")]
+        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetWaybillsInListOfManifest([FromUri]string captainId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var WaybillNumbersInMannifest = await _service.GetWaybillsInListOfManifest(captainId);
+
+                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                {
+                    Object = WaybillNumbersInMannifest
+                };
+            });
+        }
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("waybillsinmanifestbydate")]
+        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetAllWaybillsInListOfManifest([FromUri]string captainId, DateTime StartDate, DateTime EndDate)
+        {
+            DateFilterCriteria dateFilterCriteria = new DateFilterCriteria();
+            dateFilterCriteria.StartDate = StartDate;
+            dateFilterCriteria.EndDate = EndDate;
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                var WaybillsInManifest = await _service.GetAllWaybillsinListOfManifest(captainId, dateFilterCriteria);
+                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                {
+                    Object = WaybillsInManifest
+                };
+            });
+        }
+
+
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("RemoveGroupWaybillNumberFromManifest/{manifest}/{groupWaybillNumber}")]
@@ -178,6 +215,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
                     Object = manifestSearch
                 };
          });
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("moveManifestToNewManifest/{manifestCode}")]
+        public async Task<IServiceResponse<string>> MoveManifestDetailToNewManifest(string manifestCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestSearch = await _service.MoveManifestDetailToNewManifest(manifestCode);
+                return new ServiceResponse<string>
+                {
+                    Object = manifestSearch
+                };
+            });
         }
     }
 }

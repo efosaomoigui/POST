@@ -159,11 +159,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
 
-            var invoices =
-                _uow.Invoice.GetAllFromInvoiceView().Where(s =>
-                s.CustomerCode == currentUser.UserChannelCode && s.Waybill == waybillNumber).ToList();
+            var invoices = _uow.Shipment.GetAllAsQueryable().Where(s => s.CustomerCode == currentUser.UserChannelCode && s.Waybill == waybillNumber).FirstOrDefault();
 
-            if (invoices.Count > 0)
+            if (invoices != null)
             {
                 var result = await _iShipmentTrackService.TrackShipment(waybillNumber);
                 return result;
@@ -259,11 +257,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (wallet != null)
             {
-                var invoices = _uow.Invoice.GetAllFromInvoiceView().Where(s => s.CustomerCode == currentUser.UserChannelCode).ToList();
-                var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
-
-                // 
-                dashboardDTO.TotalShipmentOrdered = invoices.Count();
+                int invoices = _uow.Shipment.GetAllAsQueryable().Where(s => s.CustomerCode == currentUser.UserChannelCode && s.IsCancelled == false).Count();
+                dashboardDTO.TotalShipmentOrdered = invoices;
                 dashboardDTO.WalletBalance = wallet.Balance;
             }
 
@@ -285,7 +280,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<List<ServiceCentreDTO>> GetLocalServiceCentres()
         {
-            return await _uow.ServiceCentre.GetLocalServiceCentres();
+            var countryIds = await _userService.GetPriviledgeCountryIds();
+            return await _uow.ServiceCentre.GetLocalServiceCentres(countryIds);
         }
 
         public async Task<IEnumerable<DeliveryOptionDTO>> GetDeliveryOptions()
@@ -304,15 +300,17 @@ namespace GIGLS.Services.Business.CustomerPortal
             return haulages;
         }
 
-        public async Task<IEnumerable<InsuranceDTO>> GetInsurances()
+        public async Task<InsuranceDTO> GetInsurances()
         {
-            var insurances = await _uow.Insurance.GetInsurancesAsync();
+            var countryIds = await _userService.GetUserActiveCountryId();
+            var insurances = await _uow.Insurance.GetInsuranceByCountry(countryIds);
             return insurances;
         }
-
-        public async Task<IEnumerable<VATDTO>> GetVATs()
+        
+        public async Task<VATDTO> GetVATs()
         {
-            var vats = await _uow.VAT.GetVATsAsync();
+            var countryIds = await _userService.GetUserActiveCountryId();
+            var vats = await _uow.VAT.GetVATByCountry(countryIds);
             return vats;
         }
 
@@ -348,7 +346,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<IEnumerable<StationDTO>> GetLocalStations()
         {
-            var localStations = await _uow.Station.GetLocalStations();
+            var countryIds = await _userService.GetPriviledgeCountryIds();
+            var localStations = await _uow.Station.GetLocalStations(countryIds);
             return localStations.OrderBy(x => x.StationName).ToList();
         }
 

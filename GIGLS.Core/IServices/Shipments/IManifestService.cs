@@ -15,5 +15,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task DeleteManifest(int manifestId);
         Task<string> GenerateManifestCode(ManifestDTO manifestDTO);
         Task<Manifest> GetManifestCodeForScan(string manifestCode);
+
+        Task<PickupManifestDTO> GetPickupManifestByCode(string manifest);
+        Task ChangeManifestType(string manifestCode);
     }
 }

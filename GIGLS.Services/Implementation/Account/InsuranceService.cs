@@ -3,6 +3,7 @@ using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.IServices.Account;
+using GIGLS.Core.IServices.User;
 using GIGLS.Infrastructure;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,10 +13,12 @@ namespace GIGLS.Services.Implementation.Account
     public class InsuranceService : IInsuranceService
     {
         private readonly IUnitOfWork _uow;
+        private readonly IUserService _userService;
 
-        public InsuranceService(IUnitOfWork uow)
+        public InsuranceService(IUnitOfWork uow, IUserService userService)
         {
             _uow = uow;
+            _userService = userService;
             MapperConfig.Initialize();
         }
 
@@ -27,16 +30,14 @@ namespace GIGLS.Services.Implementation.Account
 
         public async Task<InsuranceDTO> GetInsuranceById(int insuranceId)
         {
-            var insurance = await _uow.Insurance.GetAsync(insuranceId);
+            var insurance = await _uow.Insurance.GetInsuranceById(insuranceId);
 
             if (insurance == null)
             {
                 throw new GenericException("Insurance does not exists");
             }
 
-            var insuranceDTO = Mapper.Map<InsuranceDTO>(insurance);
-
-            return insuranceDTO;
+            return insurance;
         }
 
         public async Task<object> AddInsurance(InsuranceDTO insuranceDto)
@@ -61,6 +62,7 @@ namespace GIGLS.Services.Implementation.Account
             insurance.Name = insuranceDto.Name;
             insurance.Name = insuranceDto.Name;
             insurance.Value = insuranceDto.Value;
+            insurance.CountryId = insuranceDto.CountryId;
 
             await _uow.CompleteAsync();
         }
@@ -75,6 +77,13 @@ namespace GIGLS.Services.Implementation.Account
             }
             _uow.Insurance.Remove(insurance);
             await _uow.CompleteAsync();
+        }
+
+        public async Task<InsuranceDTO> GetInsuranceByCountry()
+        {
+            var countryIds = await _userService.GetUserActiveCountryId();
+            var insurance = await _uow.Insurance.GetInsuranceByCountry(countryIds);
+            return insurance;
         }
     }
 }

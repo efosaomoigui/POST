@@ -1,5 +1,4 @@
 ﻿using GIGL.GIGLS.Core.Domain;
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -14,6 +13,7 @@ namespace GIGLS.Core.Domain
         public string WaybillCode { get; set; }
         public bool IsActive  { get; set; }
         
+        [MaxLength(128)]
         public string UserId { get; set; }
 
         public int ServiceCentreId { get; set; }

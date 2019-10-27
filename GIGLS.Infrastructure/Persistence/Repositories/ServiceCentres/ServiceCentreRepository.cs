@@ -7,6 +7,7 @@ using GIGLS.Core.IRepositories.ServiceCentres;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System.Linq;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
 {
@@ -41,7 +42,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     StationId = s.StationId,
                                     StationName = sc.StationName,
                                     StationCode = sc.StationCode,
-                                    IsDefault = s.IsDefault
+                                    IsDefault = s.IsDefault,
+                                    IsHUB = s.IsHUB
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
@@ -77,7 +79,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     StationCode = sc.StationCode,
                                     CountryId = c.CountryId,
                                     Country = c.CountryName,
-                                    IsDefault = s.IsDefault
+                                    IsDefault = s.IsDefault,
+                                    IsHUB = s.IsHUB
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
@@ -126,6 +129,80 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
             }
         }
 
+        public Task<List<ServiceCentreDTO>> GetLocalServiceCentres(int[] countryIds)
+        {
+            try
+            {
+                var centres = _context.ServiceCentre;
+
+                //1. countryIds not empty
+                if(countryIds.Length > 0)
+                {
+                    var centreDto = from s in centres
+                                    join sc in _context.Station on s.StationId equals sc.StationId
+                                    join st in _context.State on sc.StateId equals st.StateId
+                                    join c in _context.Country on st.CountryId equals c.CountryId
+                                    where countryIds.Contains(c.CountryId)
+                                    select new ServiceCentreDTO
+                                    {
+                                        Name = s.Name,
+                                        Address = s.Address,
+                                        City = s.City,
+                                        Email = s.Email,
+                                        PhoneNumber = s.PhoneNumber,
+                                        ServiceCentreId = s.ServiceCentreId,
+                                        Code = s.Code,
+                                        IsActive = s.IsActive,
+                                        TargetAmount = s.TargetAmount,
+                                        TargetOrder = s.TargetOrder,
+                                        StationId = s.StationId,
+                                        StationName = sc.StationName,
+                                        StationCode = sc.StationCode,
+                                        CountryId = c.CountryId,
+                                        Country = c.CountryName,
+                                        IsDefault = s.IsDefault,
+                                        Longitude = s.Longitude,
+                                        Latitude = s.Latitude
+                                    };
+                    return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
+                }
+                else
+                {
+                    var centreDto = from s in centres
+                                    join sc in _context.Station on s.StationId equals sc.StationId
+                                    join st in _context.State on sc.StateId equals st.StateId
+                                    join c in _context.Country on st.CountryId equals c.CountryId
+                                    select new ServiceCentreDTO
+                                    {
+                                        Name = s.Name,
+                                        Address = s.Address,
+                                        City = s.City,
+                                        Email = s.Email,
+                                        PhoneNumber = s.PhoneNumber,
+                                        ServiceCentreId = s.ServiceCentreId,
+                                        Code = s.Code,
+                                        IsActive = s.IsActive,
+                                        TargetAmount = s.TargetAmount,
+                                        TargetOrder = s.TargetOrder,
+                                        StationId = s.StationId,
+                                        StationName = sc.StationName,
+                                        StationCode = sc.StationCode,
+                                        CountryId = c.CountryId,
+                                        Country = c.CountryName,
+                                        IsDefault = s.IsDefault,
+                                        IsHUB = s.IsHUB,
+                                        Longitude = s.Longitude,
+                                        Latitude = s.Latitude
+                                    };
+                    return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public Task<List<ServiceCentreDTO>> GetInternationalServiceCentres()
         {
             try
@@ -153,7 +230,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     StationCode = sc.StationCode,
                                     CountryId = c.CountryId,
                                     Country = c.CountryName,
-                                    IsDefault = s.IsDefault
+                                    IsDefault = s.IsDefault,
+                                    IsHUB = s.IsHUB
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
@@ -191,7 +269,15 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     Country = c.CountryName,
                                     IsDefault = s.IsDefault,
                                     DateCreated = s.DateCreated,
-                                    DateModified = s.DateModified
+                                    DateModified = s.DateModified,
+                                    IsHUB = s.IsHUB,
+                                    CountryDTO = new CountryDTO
+                                    {
+                                        CountryId = c.CountryId,
+                                        CountryCode = c.CountryCode,
+                                        CountryName = c.CountryName,
+                                        CurrencySymbol = c.CurrencySymbol                                        
+                                    }
                                 };
                 return Task.FromResult(centreDto.FirstOrDefault());
             }
@@ -223,7 +309,42 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     StationId = s.StationId,
                                     StationName = sc.StationName,
                                     StationCode = sc.StationCode,
-                                    IsDefault = s.IsDefault
+                                    IsDefault = s.IsDefault,
+                                    IsHUB = s.IsHUB
+                                };
+                return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<ServiceCentreDTO>> GetServiceCentreByCode(string[] code)
+        {
+            try
+            {
+                var centres = _context.ServiceCentre.Where(x => code.Contains(x.Code));
+
+                var centreDto = from s in centres
+                                join sc in _context.Station on s.StationId equals sc.StationId
+                                select new ServiceCentreDTO
+                                {
+                                    Name = s.Name,
+                                    Address = s.Address,
+                                    City = s.City,
+                                    Email = s.Email,
+                                    PhoneNumber = s.PhoneNumber,
+                                    ServiceCentreId = s.ServiceCentreId,
+                                    Code = s.Code,
+                                    IsActive = s.IsActive,
+                                    TargetAmount = s.TargetAmount,
+                                    TargetOrder = s.TargetOrder,
+                                    StationId = s.StationId,
+                                    StationName = sc.StationName,
+                                    StationCode = sc.StationCode,
+                                    IsDefault = s.IsDefault,
+                                    IsHUB = s.IsHUB
                                 };
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }

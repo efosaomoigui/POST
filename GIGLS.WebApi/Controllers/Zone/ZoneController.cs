@@ -125,5 +125,37 @@ namespace GIGLS.WebApi.Controllers.Zone
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("zonepriceupdate")]
+        public async Task<IServiceResponse<object>> UpdateAllZonePrice(ZonePercentDTO zonePercent)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _zoneService.UpdateAllPriceByZone(zonePercent);
+                return new ServiceResponse<object>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("weightpriceupdate")]
+        public async Task<IServiceResponse<object>> UpdateAllWeightPrice(WeightPercentDTO  weightPercentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _zoneService.UpdateAllPriceByWeight(weightPercentDTO);
+                return new ServiceResponse<object>
+                {
+                    Object = true
+                };
+            });
+        }
+
     }
+
+
 }

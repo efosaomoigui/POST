@@ -10,7 +10,7 @@ namespace GIGLS.Core.DTO.Shipments
     public class PreShipmentMobileDTO : BaseDomainDTO
     {
         public int PreShipmentMobileId { get; set; }
-        
+        public new DateTime? DateCreated { get; set; }
         public string Waybill { get; set; }
 
         //Senders' Information
@@ -102,6 +102,30 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsDelivered { get; set; }
         public int TrackingId { get; set; }
 
+        public string VehicleType { get; set; }
+
+        public int? ZoneMapping { get; set; }
+        public List<int> DeletedItems { get; set; }
+
+        public bool IsRated { get; set; }
+
+        public string PartnerFirstName { get; set; }
+
+        public string PartnerLastName { get; set; }
+
+        public string PartnerImageUrl { get; set; }
+        public string ActualReceiverFirstName { get; set; }
+        public string ActualReceiverLastName { get; set; }
+        public string ActualReceiverPhoneNumber { get; set; }
+
+        public string CountryName { get; set; }
+        public int CountryId { get; set; }
+
+        public string CurrencySymbol { get; set; }
+
+        public string CurrencyCode { get; set; }
+
+        public int? Haulageid { get; set; }
 
     }
 }

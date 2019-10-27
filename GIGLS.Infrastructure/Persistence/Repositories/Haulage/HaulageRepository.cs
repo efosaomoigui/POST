@@ -22,5 +22,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories
             var haulageDto = Mapper.Map<IEnumerable<HaulageDTO>>(haulages);
             return Task.FromResult(haulageDto);
         }
+        
     }
 }

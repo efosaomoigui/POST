@@ -10,6 +10,6 @@ namespace GIGLS.Core.IRepositories.Zone
     public interface IDomesticZonePriceRepository : IRepository<DomesticZonePrice>
     {
         Task<List<DomesticZonePriceDTO>> GetDomesticZones();
-        Task<DomesticZonePrice> GetDomesticZonePrice(int zoneId, decimal weight, RegularEcommerceType regularEcommerceType);
+        Task<DomesticZonePrice> GetDomesticZonePrice(int zoneId, decimal weight, RegularEcommerceType regularEcommerceType, int countryId);
     }
 }

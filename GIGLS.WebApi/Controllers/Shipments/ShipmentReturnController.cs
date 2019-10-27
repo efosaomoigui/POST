@@ -101,15 +101,15 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("{waybill}")]
-        public async Task<IServiceResponse<bool>> AddShipmentReturn(string waybill)
+        public async Task<IServiceResponse<string>> AddShipmentReturn(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _service.AddShipmentReturn(waybill);
+                string newWaybill = await _service.AddShipmentReturn(waybill);
 
-                return new ServiceResponse<bool>
+                return new ServiceResponse<string>
                 {
-                    Object = true
+                    Object = newWaybill
                 };
             });
         }

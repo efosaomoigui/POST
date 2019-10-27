@@ -9,5 +9,7 @@ namespace GIGLS.Core.DTO.Utility
         public string Value { get; set; }
         public string Description { get; set; }
         public bool IsActive { get; set; }
+        public int CountryId { get; set; }
+        public CountryDTO Country { get; set; }
     }
 }

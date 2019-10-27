@@ -6,6 +6,7 @@ using GIGLS.Core.DTO.Zone;
 using GIGLS.Core;
 using GIGLS.Infrastructure;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -36,8 +37,8 @@ namespace GIGLS.Services.Implementation.Zone
                     throw new GenericException("Zone Not Exist");
                 }
 
-                if(await _uow.DeliveryOptionPrice.ExistAsync(
-                        c => c.ZoneId == option.ZoneId && c.DeliveryOptionId == option.DeliveryOptionId))
+                if(await _uow.DeliveryOptionPrice.ExistAsync(c => c.ZoneId == option.ZoneId 
+                    && c.DeliveryOptionId == option.DeliveryOptionId && c.CountryId == option.CountryId))
                 {
                     throw new GenericException("Price has already been set for this Delivery Option");
                 }
@@ -46,7 +47,8 @@ namespace GIGLS.Services.Implementation.Zone
                 {
                       ZoneId = option.ZoneId,
                       DeliveryOptionId = option.DeliveryOptionId,
-                      Price = option.Price                                     
+                      Price = option.Price,
+                      CountryId = option.CountryId
                 };
                 _uow.DeliveryOptionPrice.Add(newOption);
                 await _uow.CompleteAsync();
@@ -76,14 +78,14 @@ namespace GIGLS.Services.Implementation.Zone
             }
         }
 
-        public async Task<decimal> GetDeliveryOptionPrice(int optionId, int zoneId)
+        public async Task<decimal> GetDeliveryOptionPrice(int optionId, int zoneId, int countryId)
         {
             try
             {
                 await _deliveryService.GetDeliveryOptionById(optionId);
                 await _zoneService.GetZoneById(zoneId);
+                var option = await _uow.DeliveryOptionPrice.GetDeliveryOptionPrices(optionId, zoneId, countryId);
 
-                var option = await _uow.DeliveryOptionPrice.GetAsync(o => o.DeliveryOptionId == optionId && o.ZoneId == zoneId, "Zone, DeliveryOption");
                 if (option == null)
                 {
                     throw new GenericException("Delivery Option Price Not Exist");
@@ -102,20 +104,14 @@ namespace GIGLS.Services.Implementation.Zone
 
             try
             {
-                var option = await _uow.DeliveryOptionPrice.GetAsync(o => o.DeliveryOptionPriceId == optionId, "Zone, DeliveryOption");
+                var option = await _uow.DeliveryOptionPrice.GetDeliveryOptionPrices(optionId);
+
                 if (option == null)
                 {
                     throw new GenericException("Delivery Option Price Not Exist");
                 }
-                return new DeliveryOptionPriceDTO
-                {
-                    DeliveryOptionPriceId = option.DeliveryOptionPriceId,
-                    Price = option.Price,
-                    DeliveryOptionId = option.DeliveryOptionId,
-                    ZoneId = option.ZoneId,
-                    DeliveryOption = option.DeliveryOption.Description,
-                    ZoneName = option.Zone.ZoneName
-                };
+
+                return option;
             }
             catch (Exception)
             {
@@ -149,14 +145,21 @@ namespace GIGLS.Services.Implementation.Zone
                     throw new GenericException("Zone Not Exist");
                 }
 
+                if (!await _uow.Country.ExistAsync(c => c.CountryId == optionDto.CountryId))
+                {
+                    throw new GenericException("Country Not Exist");
+                }
+
                 var option = await _uow.DeliveryOptionPrice.GetAsync(optionId);
                 if (option == null || optionDto.DeliveryOptionPriceId != optionId)
                 {
                     throw new GenericException("Delivery Option Price Not Exist");
                 }
+
                 option.Price = optionDto.Price;
                 option.ZoneId = optionDto.ZoneId;
                 option.DeliveryOptionId = optionDto.DeliveryOptionId;
+                option.CountryId = optionDto.CountryId;
                 _uow.Complete();
             }
             catch (Exception)

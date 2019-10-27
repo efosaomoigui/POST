@@ -9,8 +9,8 @@ namespace GIGLS.Core.IServices.Zone
     {
         Task<List<WeightLimitPriceDTO>> GetWeightLimitPrices();
         Task<WeightLimitPriceDTO> GetWeightLimitPriceById(int weightLimitId);
-        Task<WeightLimitPriceDTO> GetWeightLimitPriceByZoneId(int zoneId);
-        Task<WeightLimitPriceDTO> GetWeightLimitPriceByZoneId(int zoneId, RegularEcommerceType regularEcommerceType);
+        Task<WeightLimitPriceDTO> GetWeightLimitPriceByZoneId(int zoneId, int countryId);
+        Task<WeightLimitPriceDTO> GetWeightLimitPriceByZoneId(int zoneId, RegularEcommerceType regularEcommerceType, int countryId);
         Task<object> AddWeightLimitPrice(WeightLimitPriceDTO weightLimit);
         Task UpdateWeightLimitPrice(int weightLimitId, WeightLimitPriceDTO weightLimit);
         Task RemoveWeightLimitPrice(int weightLimitId);

@@ -358,7 +358,10 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IBankProcessingOrderCodesRepository BankProcessingOrderCodes { get; set; }
 
-        //IBankProcessingOrderForShipmentAndCODRepository
+        [Inject]
+        public ICodPayOutListRepository CodPayOutList { get; set; }
+
+        //IBankProcessingOrderForShipmentAndCODRepository CodPayOutList
 
         [Inject]
         public IOTPRepository OTP { get; set; }
@@ -389,10 +392,54 @@ namespace GIGLS.Infrastructure.Persistence
         public IRegionServiceCentreMappingRepository RegionServiceCentreMapping
         { get; set; }
 
+        [Inject]
+        public IDemurrageRepository Demurrage
+        { get; set; }
+
+        [Inject]
+        public IHUBManifestWaybillMappingRepository HUBManifestWaybillMapping
+        { get; set; }
+
+        [Inject]
+        public ICategoryRepository Category { get; set; }
+
+        [Inject]
+        public ISubCategoryRepository SubCategory { get; set; }
+
 
         [Inject]
         public IMobileScanStatusRepository MobileScanStatus { get; set; }
-       
+
+        [Inject]
+        public IPartnerTransactionsRepository PartnerTransactions { get; set; }
+
+        [Inject]
+        public IMobileRatingRepository MobileRating { get; set; }
+
+        [Inject]
+        public IReferrerCodeRepository ReferrerCode { get; set; }
+
+        [Inject]
+        public IDeliveryNumberRepository DeliveryNumber { get; set; }
+
+        [Inject]
+        public IVehicleTypeRepository VehicleType { get; set; }
+
+        [Inject]
+        public IPickupManifestRepository PickupManifest { get; set; }
+
+        [Inject]
+        public IPickupManifestWaybillMappingRepository PickupManifestWaybillMapping { get; set; }
+
+        [Inject]
+        public IRiderDeliveryRepository RiderDelivery { get; set; }
+
+        [Inject]
+        public IDeliveryLocationRepository DeliveryLocation { get; set; }
+
+        [Inject]
+        public ILGARepository LGA { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

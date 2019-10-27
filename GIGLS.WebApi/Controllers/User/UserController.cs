@@ -18,6 +18,11 @@ using GIGLS.WebApi.Filters;
 using GIGLS.CORE.DTO.User;
 using GIGLS.Core.IServices.Utility;
 using System.Linq;
+using GIGLS.Core.IServices.ServiceCentres;
+using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.Enums;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.WebApi.Controllers.User
 {
@@ -27,11 +32,18 @@ namespace GIGLS.WebApi.Controllers.User
     {
         private readonly IUserService _userService;
         private readonly IPasswordGenerator _passwordGenerator;
+        private IServiceCentreService _serviceCentreService;
+        private ICountryService _countryService;
+        private readonly IMessageSenderService _messageSenderService;
 
-        public UserController(IUserService userService, IPasswordGenerator passwordGenerator) : base(nameof(UserController))
+        public UserController(IUserService userService, IPasswordGenerator passwordGenerator,
+            IServiceCentreService serviceCentreService, ICountryService countryService, IMessageSenderService messageSenderService) : base(nameof(UserController))
         {
             _userService = userService;
             _passwordGenerator = passwordGenerator;
+            _serviceCentreService = serviceCentreService;
+            _countryService = countryService;
+            _messageSenderService = messageSenderService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -114,6 +126,20 @@ namespace GIGLS.WebApi.Controllers.User
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("api/user/dispatchriders")]
+        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetDispatchRiders()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var users = await _userService.GetDispatchRiders();
+                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                {
+                    Object = users
+                };
+            });
+        }
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
@@ -150,13 +176,59 @@ namespace GIGLS.WebApi.Controllers.User
         public async Task<IServiceResponse<UserDTO>> GetUser(string userId)
         {
             return await HandleApiOperationAsync(async () =>
-           {
-               var user = await _userService.GetUserById(userId);
-               return new ServiceResponse<UserDTO>
-               {
-                   Object = user
-               };
-           });
+            {
+                var user = await _userService.GetUserById(userId);
+
+                //Use only for Employees
+                if (user.UserChannelType == UserChannelType.Employee)
+                {
+                    var userClaims = await _userService.GetClaimsAsync(user.Id);
+
+                    if (userClaims.Count() > 0)
+                    {
+                        //set service centre
+                        int[] serviceCenterIds = await _userService.GetPriviledgeServiceCenters(userId);
+                        if (serviceCenterIds.Length == 1)
+                        {
+                            var serviceCentre = await _serviceCentreService.GetServiceCentreById(serviceCenterIds[0]);
+                            user.UserActiveServiceCentre = serviceCentre.Name;
+                        }
+
+                        //set country from PriviledgeCountrys
+                        var countries = await _userService.GetPriviledgeCountrys(userId);
+                        user.Country = countries;
+                        user.CountryName = countries.Select(x => x.CountryName).ToList();
+
+                        //If UserActive Country is already set in the UserEntity, use that value
+                        if (user.UserActiveCountryId > 0)
+                        {
+                            var userActiveCountry = await _countryService.GetCountryById(user.UserActiveCountryId);
+                            user.UserActiveCountry = userActiveCountry;
+                            user.UserActiveCountryId = userActiveCountry.CountryId;
+
+                            //If countries is empty, use UserActiveCountry
+                            if (countries.Count == 0)
+                            {
+                                user.Country = new CountryDTO[] { userActiveCountry }.ToList();
+                                user.CountryName = new String[] { userActiveCountry.CountryName }.ToList();
+                            }
+                        }
+                        else
+                        {
+                            //set user active country
+                            if (countries.Count == 1)
+                            {
+                                user.UserActiveCountry = countries[0];
+                            }
+                        }
+                    }
+                }
+
+                return new ServiceResponse<UserDTO>
+                {
+                    Object = user
+                };
+            });
         }
 
         [GIGLSActivityAuthorize(Activity = "Delete")]
@@ -165,20 +237,20 @@ namespace GIGLS.WebApi.Controllers.User
         public async Task<IServiceResponse<bool>> Deleteuser(string userId)
         {
             return await HandleApiOperationAsync(async () =>
-           {
-               var result = await _userService.RemoveUser(userId);
-               if (!result.Succeeded)
-               {
-                   throw new GenericException("Operation could not complete delete successfully: ", $"{GetErrorResult(result)}");
-               }
+            {
+                var result = await _userService.RemoveUser(userId);
+                if (!result.Succeeded)
+                {
+                    throw new GenericException("Operation could not complete delete successfully: ", $"{GetErrorResult(result)}");
+                }
 
 
-               return new ServiceResponse<bool>
-               {
-                   Object = true
-               };
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
 
-           });
+            });
         }
 
         [GIGLSActivityAuthorize(Activity = "Update")]
@@ -402,7 +474,7 @@ namespace GIGLS.WebApi.Controllers.User
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var vals = (claim.SystemRole !=null) ? "." + claim.SystemRole : ""; 
+                var vals = (claim.SystemRole != null) ? "." + claim.SystemRole : "";
                 var val = claim.claimValue + vals;
                 Claim cl = new Claim(claim.claimType, val);
                 var result = await _userService.AddClaimAsync(claim.userId, cl);
@@ -427,7 +499,7 @@ namespace GIGLS.WebApi.Controllers.User
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var val = claim.claimValue+"."+claim.SystemRole;
+                var val = claim.claimValue + "." + claim.SystemRole;
                 Claim cl = new Claim(claim.claimType, val);
                 var result = await _userService.RemoveClaimAsync(claim.userId, cl);
 
@@ -525,7 +597,7 @@ namespace GIGLS.WebApi.Controllers.User
                 }
             });
         }
-                
+
         [AllowAnonymous]
         [HttpPost]
         [Route("api/user/login")]
@@ -547,7 +619,7 @@ namespace GIGLS.WebApi.Controllers.User
 
             return await HandleApiOperationAsync(async () =>
             {
-                
+
                 using (var client = new HttpClient())
                 {
                     //setup client
@@ -573,7 +645,7 @@ namespace GIGLS.WebApi.Controllers.User
 
                     //get access token from response body
                     var responseJson = await responseMessage.Content.ReadAsStringAsync();
-                    var jObject = JObject.Parse(responseJson);                                      
+                    var jObject = JObject.Parse(responseJson);
 
                     getTokenResponse = jObject.GetValue("access_token").ToString();
 
@@ -596,7 +668,7 @@ namespace GIGLS.WebApi.Controllers.User
 
                 if (!result)
                 {
-                    throw new GenericException("Operation could not complete update successfully");    
+                    throw new GenericException("Operation could not complete update successfully");
                 }
 
                 return new ServiceResponse<bool>
@@ -606,6 +678,30 @@ namespace GIGLS.WebApi.Controllers.User
             });
 
         }
+
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpGet]
+        [Route("api/user/countrySettings/{userid}/{countryId}")]
+        public async Task<IServiceResponse<bool>> UserActiveCountrySettings(string userid, int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _userService.UserActiveCountrySettings(userid, countryId);
+
+                if (!result)
+                {
+                    throw new GenericException("Operation could not complete update successfully");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+
+        }
+
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
@@ -649,7 +745,7 @@ namespace GIGLS.WebApi.Controllers.User
                 };
             });
         }
-        
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPut]
         [Route("api/user/changepassword/{userid}/{currentPassword}/{newPassword}")]
@@ -692,10 +788,37 @@ namespace GIGLS.WebApi.Controllers.User
                 };
             });
         }
+
+        [AllowAnonymous]
+        [HttpPut]
+        [Route("api/user/forgotpassword/{email}")]
+        public async Task<IServiceResponse<bool>> ForgotPassword(string email)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                string password = await _passwordGenerator.Generate();
+                var user = await _userService.ForgotPassword(email,password);
+
+                if (user.Succeeded)
+                {
+                    var passwordMessage = new PasswordMessageDTO()
+                    {
+                        Password = password,
+                        UserEmail = email
+                    };
+
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
+                }
+                else
+                {
+                    throw new GenericException("Operation could not be completed, Kindly provide valid email address");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }       
     }
-
 }
-
-
-
-

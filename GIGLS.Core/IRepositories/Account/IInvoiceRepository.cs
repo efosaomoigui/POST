@@ -2,11 +2,12 @@
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.View;
+using GIGLS.Core.View.AdminReportView;
 using GIGLS.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+ 
 namespace GIGLS.Core.IRepositories.Account
 {
     public interface IInvoiceRepository : IRepository<Invoice>
@@ -19,6 +20,18 @@ namespace GIGLS.Core.IRepositories.Account
         IQueryable<CustomerView> GetAllFromCustomerView();
         IQueryable<InvoiceView> GetInvoicesForReminderAsync();
         IQueryable<InvoiceView> GetAllFromInvoiceAndShipments();
-        IQueryable<InvoiceView> GetAllInvoiceShipments(); //GetInvoicesFromViewAsyncFromSP
+        IQueryable<InvoiceView> GetAllInvoiceShipments();
+        IQueryable<InvoiceView> GetCustomerTransactions();
+        IQueryable<InvoiceView> GetCustomerInvoices();
+        Task<List<InvoiceViewDTO>> GetInvoicesFromViewWithDeliveryTimeAsyncFromSP(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
+
+        //Admin Report 
+        IQueryable<Report_AllTimeSalesByCountry> GetAllTimeSalesByCountry();
+        IQueryable<Report_BusiestRoute> GetBusiestRoute();
+        IQueryable<Report_CustomerRevenue> GetCustomerRevenue();
+        IQueryable<Report_MostShippedItemByWeight> GetMostShippedItemByWeight();
+        IQueryable<Report_RevenuePerServiceCentre> GetRevenuePerServiceCentre();
+        IQueryable<Report_TotalServiceCentreByState> GetTotalServiceCentreByState();
+        IQueryable<Report_TotalOrdersDelivered> GetTotalOrdersDelivered();
     }
 }

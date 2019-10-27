@@ -16,7 +16,6 @@ using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
-using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
@@ -27,12 +26,17 @@ using System.Configuration;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core;
 using GIGLS.Core.IServices.ServiceCentres;
-using GIGLS.Core.IServices.Business;
+using GIGLS.Core.Domain.BankSettlement;
+using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.DTO.Report;
+using GIGLS.Core.Enums;
+using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.IServices.Utility;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.DTO.Admin;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -43,34 +47,24 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         //private readonly IUnitOfWork _uow;
         private readonly ICustomerPortalService _portalService;
         private readonly IPaystackPaymentService _paymentService;
-        private readonly IOTPService _otpService;
-        private readonly IUserService _userService;
         private readonly IPreShipmentMobileService _preshipmentmobileService;
-        private readonly IStationService _stationService;
-        private readonly IWalletService _walletService;
-        private readonly IWalletTransactionService _walletTransactionService;
-        private readonly IServiceCentreService _service;
+        
 
 
-        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IOTPService otpService,
-            IUserService userService, IPreShipmentMobileService preshipmentmobileService, IStationService stationService, IWalletService walletService, IWalletTransactionService walletTransactionService, IServiceCentreService service) : base(nameof(CustomerPortalController))
+        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IPreShipmentMobileService preshipmentmobileService
+            ) : base(nameof(CustomerPortalController))
         {
             // _uow = uow;
-            _userService = userService;
-            _otpService = otpService;
             _portalService = portalService;
             _paymentService = paymentService;
             _preshipmentmobileService = preshipmentmobileService;
-            _stationService = stationService;
-            _walletService = walletService;
-            _walletTransactionService = walletTransactionService;
-            _service = service;
+            
         }
 
 
         [HttpPost]
         [Route("transaction")]
-        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentCollectionFilterCriteria f_Criteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -232,6 +226,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 var invoice = await _portalService.GetInvoiceByWaybill(waybill);
 
                 return new ServiceResponse<InvoiceDTO>
+                {
+                    Object = invoice
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("GetPaidCODByCustomer")]
+        public async Task<IServiceResponse<List<CodPayOutList>>> GetPaidCODByCustomer()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var invoice = await _portalService.GetPaidCODByCustomer();
+
+                return new ServiceResponse<List<CodPayOutList>>
                 {
                     Object = invoice
                 };
@@ -500,7 +509,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
         [AllowAnonymous]
         [HttpPost]
         [Route("register")]
@@ -596,7 +604,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("validateotp/{OTP}")]
         public async Task<IServiceResponse<JObject>> IsOTPValid(int OTP)
         {
-            var Otp = await _otpService.IsOTPValid(OTP);
+            var Otp = await _portalService.IsOTPValid(OTP);
             if (Otp != null && Otp.IsActive == true)
             {
                 string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
@@ -670,29 +678,29 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("login/{UserDetail}/{Password}")]
-        public async Task<IServiceResponse<JObject>> Login(string UserDetail, string Password)
+        [Route("login")]
+        public async Task<IServiceResponse<JObject>> Login(MobileLoginDTO logindetail)
         {
-
-            var user = await _otpService.CheckDetails(UserDetail);
-            if (user.Username != null)
+            return await HandleApiOperationAsync(async () =>
             {
-                user.Username = user.Username.Trim();
-            }
+                var user = await _portalService.CheckDetails(logindetail.UserDetail,logindetail.UserChannelType);
+                var vehicle = user.VehicleType;
+                var partnerType = "";
+                if (user.Username != null)
+                {
+                    user.Username = user.Username.Trim();
+                }
 
-            if (Password != null)
-            {
-                Password = Password.Trim();
-            }
-            if (user != null && user.IsActive == true)
-            {
-                string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
-                string getTokenResponse;
-
-                return await HandleApiOperationAsync(async () =>
+                if (logindetail.Password != null)
+                {
+                    logindetail.Password = logindetail.Password.Trim();
+                }
+                if (user != null && user.IsActive == true)
                 {
                     using (var client = new HttpClient())
                     {
+                        string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+                        string getTokenResponse;
                         //setup client
                         client.BaseAddress = new Uri(apiBaseUri);
                         client.DefaultRequestHeaders.Accept.Clear();
@@ -700,10 +708,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                         //setup login data
                         var formContent = new FormUrlEncodedContent(new[]
-                            {
+                        {
                          new KeyValuePair<string, string>("grant_type", "password"),
                          new KeyValuePair<string, string>("Username", user.Username),
-                         new KeyValuePair<string, string>("Password", Password),
+                         new KeyValuePair<string, string>("Password", logindetail.Password),
                          });
 
                         //setup login data
@@ -711,31 +719,54 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                         if (!responseMessage.IsSuccessStatusCode)
                         {
-                            throw new GenericException("Operation could not complete login successfully:");
+                            throw new GenericException("Incorrect Login Details");
                         }
+                        else
+                        {
+                            if (logindetail.UserChannelType == UserChannelType.IndividualCustomer.ToString())
+                            {
+                                var response = await _portalService.CreateCustomer(user.UserChannelCode);
+                            }
+                            if (logindetail.UserChannelType == UserChannelType.Partner.ToString())
+                            {
+                                var response = await _portalService.CreatePartner(user.UserChannelCode);
+                                partnerType = response;
+                                if (partnerType == PartnerType.InternalDeliveryPartner.ToString())
+                                    user.IsVerified = true;
+                            }
+                            if (logindetail.UserChannelType == UserChannelType.Ecommerce.ToString())
+                            {
+                                var response = await _portalService.CreateCompany(user.UserChannelCode);
+                            }
 
+                        }
                         //get access token from response body
                         var responseJson = await responseMessage.Content.ReadAsStringAsync();
                         var jObject = JObject.Parse(responseJson);
 
                         getTokenResponse = jObject.GetValue("access_token").ToString();
-
                         return new ServiceResponse<JObject>
                         {
-                            Object = jObject
+                            VehicleType = vehicle,
+                            Object = jObject,
+                            ReferrerCode = user.Referrercode,
+                            AverageRatings = user.AverageRatings,
+                            IsVerified = user.IsVerified,
+                            PartnerType = partnerType
+
                         };
                     }
-                });
-            }
-            else
-            {
-                var jObject = JObject.FromObject(user);
-                return new ServiceResponse<JObject>
+                }
+                else
                 {
-                    ShortDescription = "User has not been verified",
-                    Object = jObject
-                };
-            }
+                    var jObject = JObject.FromObject(user);
+                    return new ServiceResponse<JObject>
+                    {
+                        ShortDescription = "User has not been verified",
+                        Object = jObject
+                    };
+                }
+            });
         }
 
         [HttpPost]
@@ -744,11 +775,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var registerUser = await _portalService.Register(user);
+                var registerUser = await _portalService.EditProfile(user);
 
                 return new ServiceResponse<bool>
                 {
-                    Object = true
+                    Object = registerUser
                 };
             });
         }
@@ -757,11 +788,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("itemTypes")]
         public async Task<IServiceResponse<List<string>>> GetItemTypes()
         {
-            var ItemTypes = _portalService.GetItemTypes();
-            return new ServiceResponse<List<string>>
+            return await HandleApiOperationAsync(async () =>
             {
-                Object = ItemTypes,
-            };
+                var ItemTypes = _portalService.GetItemTypes();
+                return new ServiceResponse<List<string>>
+                {
+                    Object = ItemTypes,
+                };
+            });
         }
 
         [HttpPost]
@@ -770,7 +804,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var PreshipMentMobile = await _preshipmentmobileService.AddPreShipmentMobile(PreshipmentMobile);
+                var PreshipMentMobile = await _portalService.AddPreShipmentMobile(PreshipmentMobile);
 
                 return new ServiceResponse<object>
                 {
@@ -785,7 +819,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var stations = await _stationService.GetLocalStations();
+                var stations = await _portalService.GetLocalStations();
                 return new ServiceResponse<IEnumerable<StationDTO>>
                 {
                     Object = stations,
@@ -799,8 +833,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var Transactionhistory = await _walletTransactionService.GetWalletTransactionsForMobile();
-                var preshipments = await _preshipmentmobileService.GetPreShipmentForUser();
+                var Transactionhistory = await _portalService.GetWalletTransactionsForMobile();
+                var preshipments = await _portalService.GetPreShipmentForUser();
                 Transactionhistory.Shipments = preshipments;
                 return new ServiceResponse<WalletTransactionSummaryDTO>
                 {
@@ -815,7 +849,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var Price = await _preshipmentmobileService.GetPrice(PreshipmentMobile);
+                var Price = await _portalService.GetPrice(PreshipmentMobile);
 
                 return new ServiceResponse<MobilePriceDTO>
                 {
@@ -830,7 +864,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var PreshipMentMobile = await _preshipmentmobileService.GetPreShipmentForUser();
+                var PreshipMentMobile = await _portalService.GetPreShipmentForUser();
                 return new ServiceResponse<List<PreShipmentMobileDTO>>
                 {
                     Object = PreshipMentMobile,
@@ -860,7 +894,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var wallet = await _walletService.GetWalletBalance();
+                var wallet = await _portalService.GetWalletBalance();
                 return new ServiceResponse<decimal>
                 {
                     Object = wallet.Balance
@@ -869,14 +903,15 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
         [HttpGet]
         [Route("getspecialpackages")]
-        public async Task<IServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>> GetSpecialPackages()
+        public async Task<IServiceResponse<SpecialResultDTO>> GetSpecialPackages()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var specialpackages = await _preshipmentmobileService.GetSpecialDomesticPackages();
-                 return new ServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>
+                var packages = await _portalService.GetSpecialPackages();
+
+                return new ServiceResponse<SpecialResultDTO>
                 {
-                    Object = specialpackages
+                    Object = packages
                 };
             });
         }
@@ -887,7 +922,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _preshipmentmobileService.TrackShipment(waybillNumber);
+                var result = await _portalService.trackShipment(waybillNumber);
 
                 return new ServiceResponse<MobileShipmentTrackingHistoryDTO>
                 {
@@ -902,7 +937,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipmentItem = await _preshipmentmobileService.AddMobilePickupRequest(PickupRequest);
+                var shipmentItem = await _portalService.AddMobilePickupRequest(PickupRequest);
 
                 return new ServiceResponse<PreShipmentMobileDTO>
                 {
@@ -917,7 +952,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var PickUpRequests = await _preshipmentmobileService.GetMobilePickupRequest();
+                var PickUpRequests = await _portalService.GetMobilePickupRequest();
 
                 return new ServiceResponse<List<MobilePickUpRequestsDTO>>
                 {
@@ -932,7 +967,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var flag = await _preshipmentmobileService.UpdateMobilePickupRequest(PickupRequest);
+                var flag = await _portalService.UpdateMobilePickupRequest(PickupRequest);
 
                 return new ServiceResponse<object>
                 {
@@ -947,7 +982,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var details = await _preshipmentmobileService.GetPreShipmentDetail(waybillNumber);
+                var details = await _portalService.GetPreShipmentDetail(waybillNumber);
 
                 return new ServiceResponse<PreShipmentMobileDTO>
                 {
@@ -955,6 +990,358 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
+
+        [HttpPost]
+        [Route("updatepreshipmentmobile")]
+        public async Task<IServiceResponse<bool>> UpdatePreshipmentMobile(List<PreShipmentItemMobileDTO> preshipment)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _portalService.UpdatePreShipmentMobileDetails(preshipment);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = flag
+                };
+            });
+        }
+
+
+        [HttpGet]
+        [Route("getpreshipmentindispute")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetPreshipmentInDispute()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = await _portalService.GetDisputePreShipment();
+
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = shipments
+                };
+            });
+        }
+        [HttpGet]
+        [Route("getpartnerwallettransactions")]
+        public async Task<IServiceResponse<SummaryTransactionsDTO>> GetPartnerwalletTransactions()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var totalTransactions = await _portalService.GetPartnerWalletTransactions();
+
+                return new ServiceResponse<SummaryTransactionsDTO>
+                {
+                    Object = totalTransactions
+                };
+            });
+        }
+        [HttpPost]
+        [Route("resolvedispute")]
+        public async Task<object> ResolveDispute(PreShipmentMobileDTO shipment)
+
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _portalService.ResolveDisputeForMobile(shipment);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+        [HttpPost]
+        [Route("cancelshipment/{waybillNumber}")]
+        public async Task<object> CancelShipment(string waybillNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _portalService.CancelShipment(waybillNumber);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+        [HttpPost]
+        [Route("addratings")]
+        public async Task<object> Addratings(MobileRatingDTO rating)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _portalService.AddRatings(rating);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("partnermonthlytransactions")]
+        public async Task<IServiceResponse<Partnerdto>> PartnerMonthlyTransactions()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var transactions = await _portalService.GetMonthlyPartnerTransactions();
+
+                return new ServiceResponse<Partnerdto>
+                {
+                    Object = transactions
+                };
+            });
+        }
+
+
+        [HttpPost]
+        [Route("adddeliverynumber")]
+        public async Task<IServiceResponse<bool>> UpdateDeliveryNumber(MobileShipmentNumberDTO detail)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _portalService.UpdateDeliveryNumber(detail);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("deleterecord")]
+        public async Task<IServiceResponse<bool>> DeleteRecord(UserDTO user)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _portalService.deleterecord(user.Email);
+                return new ServiceResponse<bool>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("forgotpassword")]
+        public async Task<IServiceResponse<bool>> ForgotPassword(UserDTO user)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                string password = await _portalService.Generate(6);
+                var User = await _portalService.ForgotPassword(user.Email, password);
+
+                if (User.Succeeded)
+                {
+                    var passwordMessage = new PasswordMessageDTO()
+                    {
+                        Password = password,
+                        UserEmail = user.Email
+                    };
+
+                    await _portalService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
+                }
+                else
+                {
+                    throw new GenericException("Operation could not be completed");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("verifypartnerdetails")]
+        public async Task<IServiceResponse<bool>> VerifyPartnerDetails(PartnerDTO partner)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _portalService.VerifyPartnerDetails(partner);
+                return new ServiceResponse<bool>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("saveimages")]
+        public async Task<IServiceResponse<string>> LoadImage(ImageDTO images)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                
+                var response = await _portalService.LoadImage(images);
+                return new ServiceResponse<string>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("displayimages")]
+        public async Task<IServiceResponse<List<Uri>>> DisplayImages(ImageDTO images)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                var response = await _portalService.DisplayImages();
+                return new ServiceResponse<List<Uri>>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getallpartnerdetails")]
+        public async Task<IServiceResponse<PartnerDTO>> GetAllPartnerDetails(PartnerDTO partner)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _portalService.GetPartnerDetails(partner.Email);
+                return new ServiceResponse<PartnerDTO>
+                {
+                    Object = response
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("updatereceiverdetails")]
+        public async Task<IServiceResponse<bool>> UpdateReceiverDetails(PreShipmentMobileDTO receiver)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = await _portalService.UpdateReceiverDetails(receiver);
+                return new ServiceResponse<bool>
+                {
+                    Object = response
+                };
+            });
+        }
+        [HttpGet]
+        [Route("getpreshipmentmobiledetailsfromdeliverynumber/{deliverynumber}")]
+        public async Task<IServiceResponse<PreShipmentSummaryDTO>> GetPreshipmentmobiledetailsfromdeliverynumber(string deliverynumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _portalService.GetShipmentDetailsFromDeliveryNumber(deliverynumber);
+                return new ServiceResponse<PreShipmentSummaryDTO>
+                {
+                    Object = preshipment
+                };
+            });
+        }
+        [HttpPost]
+        [Route("approveshipment/{waybill}")]
+        public async Task<IServiceResponse<bool>> Approveshipment(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ApproveShipment(waybill);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("getcountries")]
+        public async Task<IServiceResponse<List<NewCountryDTO>>> getcountries()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var countries = await _portalService.GetUpdatedCountries();
+                return new ServiceResponse<List<NewCountryDTO>>
+                {
+                    Object = countries.ToList()
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getallstations")]
+        public async Task<IServiceResponse<Dictionary<string, List<StationDTO>>>> getstations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stations = await _portalService.GetAllStations();
+                return new ServiceResponse<Dictionary<string, List<StationDTO>>>
+                {
+                    Object = stations
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("gethaulagepriceformobile")]
+        public async Task<IServiceResponse<MobilePriceDTO>> gethaulageprice(HaulagePriceDTO haulage)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var haulagePrice = await _portalService.GetHaulagePrice(haulage);
+                return new ServiceResponse<MobilePriceDTO>
+                {
+                    Object = haulagePrice
+                };
+            });
+        }
+        [HttpPost]
+        [Route("updatevehicleprofile")]
+        public async Task<IServiceResponse<bool>> updatevehicleprofile(UserDTO user)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.UpdateVehicleProfile(user);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getactivelgas")]
+        public async Task<IServiceResponse<IEnumerable<LGADTO>>> GetActiveLGAs()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var lga = await _portalService.GetActiveLGAs();
+                return new ServiceResponse<IEnumerable<LGADTO>>
+                {
+                    Object = lga
+
+                };
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("websiteData")]
+        public async Task<IServiceResponse<AdminReportDTO>> GetWebsiteData()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var data = await _portalService.WebsiteData();
+                return new ServiceResponse<AdminReportDTO>
+                {
+                    Object = data
+
+                };
+            });
+        }
+
+
+
     }
 }

@@ -6,5 +6,6 @@ namespace GIGLS.Core.DTO.Shipments
     {
         public string WaybillNumber { get; set; }
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
+        public string CancelledOrCollected { get; set; }
     }
 }

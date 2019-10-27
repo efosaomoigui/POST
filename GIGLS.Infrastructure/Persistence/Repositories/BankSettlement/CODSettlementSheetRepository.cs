@@ -1,12 +1,9 @@
 ﻿using GIGLS.Core.Domain.BankSettlement;
-using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.BankSettlement;
 using GIGLS.Core.IRepositories.BankSettlement;
-using GIGLS.Core.IRepositories.Wallet;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 

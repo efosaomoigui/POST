@@ -29,7 +29,7 @@ namespace GIGLS.Core.DTO.Account
         public decimal Insurance { get; set; }
         public decimal Vat { get; set; }
         public decimal Total { get; set; }
-        public decimal CashOnDeliveryAmount { get; set; }
+        public decimal? CashOnDeliveryAmount { get; set; }
         public bool IsCancelled { get; set; }
         public decimal ShipmentPackagePrice { get; set; }
         public bool IsInternational { get; set; }
@@ -102,5 +102,19 @@ namespace GIGLS.Core.DTO.Account
         public string InvoiceDueDays { get; set; }
 
         public string PaymentStatusDisplay { get; set; }
+
+        public bool IsCODPaidOut { get; set; }
+
+        //Country info
+        public int DepartureCountryId { get; set; }
+        public int DestinationCountryId { get; set; }
+        public int CountryId { get; set; }
+        public CountryDTO Country { get; set; }
+
+        public DateTime DeliveryTime { get; set; }  
+        public decimal Cash { get; set; }
+        public decimal Transfer { get; set; }
+        public decimal Pos { get; set; }
     }
+
 }

@@ -1,13 +1,19 @@
 ﻿using AutoMapper;
+using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
+using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.CORE.Domain;
 using GIGLS.Infrastructure;
+using GIGLS.Services.Implementation.Utility;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
@@ -24,15 +30,17 @@ namespace GIGLS.Services.Implementation.User
         private IServiceCentreService _serviceCentreService;
         private IRegionServiceCentreMappingService _regionServiceCentreMappingService;
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
+        private ICountryService _countryService;
 
         public UserService(IUnitOfWork uow, IServiceCentreService serviceCentreService,
             IRegionServiceCentreMappingService regionServiceCentreMappingService,
-            INumberGeneratorMonitorService numberGeneratorMonitorService)
+            INumberGeneratorMonitorService numberGeneratorMonitorService,ICountryService countryService)
         {
             _unitOfWork = uow;
             _serviceCentreService = serviceCentreService;
             _regionServiceCentreMappingService = regionServiceCentreMappingService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
+            _countryService = countryService;
             MapperConfig.Initialize();
         }
 
@@ -104,32 +112,24 @@ namespace GIGLS.Services.Implementation.User
             return _unitOfWork.User.GetDispatchCaptains();
         }
 
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchRiders()
+        {
+            return _unitOfWork.User.GetDispatchRiders();
+        }
+
         //Get a user by Id using Guid from identity implement of EF
         public async Task<UserDTO> GetUserById(string Id)
         {
-            string userActiveServiceCentre = null;
-
             var user = _unitOfWork.User.GetUserById(Id).Result;
 
-            if (user != null)
-            {
-                var activeCentre = _unitOfWork.UserServiceCentreMapping.GetAsync(x => x.IsActive == true && x.User.Id.Equals(Id)).Result;
-                if (activeCentre != null)
-                {
-                    var serviceCentre = _unitOfWork.ServiceCentre.GetAsync(x => x.ServiceCentreId == activeCentre.ServiceCentreId).Result;
-                    userActiveServiceCentre = serviceCentre.Name;
-                }
-            }
-            else
+            if (user == null)
             {
                 throw new GenericException("User does not exist!");
             }
 
             var userDto = Mapper.Map<UserDTO>(user);
 
-            userDto.UserActiveServiceCentre = userActiveServiceCentre;
-
-            return userDto;
+            return await Task.FromResult(userDto);
         }
 
         public async Task<UserDTO> GetUserByEmail(string email)
@@ -142,7 +142,6 @@ namespace GIGLS.Services.Implementation.User
             }
 
             return Mapper.Map<UserDTO>(user);
-
         }
 
         //Get a user by Id using int custom UserId added to users table
@@ -156,7 +155,19 @@ namespace GIGLS.Services.Implementation.User
             }
 
             return Mapper.Map<UserDTO>(user);
+        }
 
+        public async Task<string> GetUserChannelCode()
+        {
+            var currentUserId = await GetCurrentUserId();
+            var user = await GetUserById(currentUserId);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!");
+            }
+
+            return user.UserChannelCode;
         }
 
         public async Task<UserDTO> GetUserByChannelCode(string channelCode)
@@ -169,7 +180,6 @@ namespace GIGLS.Services.Implementation.User
             }
 
             return Mapper.Map<UserDTO>(user);
-
         }
 
 
@@ -661,6 +671,69 @@ namespace GIGLS.Services.Implementation.User
             return sc;
         }
 
+        public async Task<int[]> GetPriviledgeServiceCenters(string currentUserId)
+        {
+            int[] serviceCenterIds = { };   //empty array
+            // get current user
+            try
+            {
+                var currentUser = GetUserById(currentUserId).Result;
+                var userClaims = GetClaimsAsync(currentUserId).Result;
+
+                //currentUser.ServiceCentres
+
+                string[] claimValue = null;
+                foreach (var claim in userClaims)
+                {
+                    if (claim.Type == "Privilege")
+                    {
+                        claimValue = claim.Value.Split(':');   // format stringName:stringValue
+                    }
+                }
+                if (claimValue == null)
+                {
+                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                }
+
+                if (claimValue[0] == "Global")
+                {
+                    serviceCenterIds = new int[] { };
+                }
+                else if (claimValue[0] == "Region")
+                {
+                    var regionId = int.Parse(claimValue[1]);
+                    var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
+                    serviceCenterIds = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentre.ServiceCentreId).ToArray();
+                }
+                else if (claimValue[0] == "Station")
+                {
+                    var stationId = int.Parse(claimValue[1]);
+                    var serviceCentres = await _serviceCentreService.GetServiceCentres();
+                    serviceCenterIds = serviceCentres.Where(s => s.StationId == stationId).Select(s => s.ServiceCentreId).ToArray();
+                }
+                else if (claimValue[0] == "ServiceCentre")
+                {
+                    int serviceCenterId = int.Parse(claimValue[1]);
+                    serviceCenterIds = new int[] { serviceCenterId };
+                }
+                else if (claimValue[0] == "Public")
+                {
+                    serviceCenterIds = new int[] { };
+                }
+                else
+                {
+                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return serviceCenterIds;
+        }
+
+
         public async Task<int[]> GetPriviledgeServiceCenters()
         {
             int[] serviceCenterIds = { };   //empty array
@@ -783,7 +856,20 @@ namespace GIGLS.Services.Implementation.User
             await _unitOfWork.CompleteAsync();
             return result;
         }
+        public async Task<IdentityResult> ForgotPassword(string email, string password)
+        {
+            var result = new IdentityResult();
 
+            var user = await _unitOfWork.User.GetUserByEmail(email);            
+
+            if (user != null)
+            {
+                result = await ResetPassword(user.Id, password);
+                await _unitOfWork.CompleteAsync();                
+            }
+            return result;
+        }
+                
         /// <summary>
         /// Code for first migration
         /// 1. Reset the users password
@@ -1073,6 +1159,243 @@ namespace GIGLS.Services.Implementation.User
                 throw new GenericException("Phone number does not exist!");
             }
             return Mapper.Map<UserDTO>(user);
+        }
+
+        public async Task<int[]> GetPriviledgeCountryIds(string currentUserId)
+        {
+            //1. get service centres
+            int[] serviceCenterIds = await GetPriviledgeServiceCenters(currentUserId);
+
+            //2. get the countries based on the service centre
+            var serviceCentres =
+                _unitOfWork.ServiceCentre.GetAll("Station, Station.State").Where(s => serviceCenterIds.Contains(s.ServiceCentreId)).ToList();
+
+            //3.
+            var countryIds = new HashSet<int>();
+            foreach (var serviceCentre in serviceCentres)
+            {
+                var countryId = serviceCentre.Station.State.CountryId;
+                countryIds.Add(countryId);
+            }
+
+            return countryIds.ToArray();
+        }
+
+        public async Task<int[]> GetPriviledgeCountryIds()
+        {
+            //1. get service centres
+            int[] serviceCenterIds = await GetPriviledgeServiceCenters();
+
+            //2. get the countries based on the service centre
+            var serviceCentres =
+                _unitOfWork.ServiceCentre.GetAll("Station, Station.State").Where(s => serviceCenterIds.Contains(s.ServiceCentreId)).ToList();
+
+            //3.
+            var countryIds = new HashSet<int>();
+            foreach (var serviceCentre in serviceCentres)
+            {
+                var countryId = serviceCentre.Station.State.CountryId;
+                countryIds.Add(countryId);
+            }
+
+            return countryIds.ToArray();
+        }
+
+        public async Task<List<CountryDTO>> GetPriviledgeCountrys(string currentUserId)
+        {
+            //1. get countries
+            int[] countryIds = await GetPriviledgeCountryIds(currentUserId);
+
+            //2. get the countries based on the service centre
+            var countries = _unitOfWork.Country.GetAllAsQueryable().Where(s => countryIds.Contains(s.CountryId)).ToList();
+
+            //3.
+            var uniqueCountryIds = new HashSet<int>();
+            var priviledgeCountrys = new List<CountryDTO>();
+            foreach (var country in countries)
+            {
+                if (uniqueCountryIds.Add(country.CountryId))
+                {
+                    var countryDTO = new CountryDTO()
+                    {
+                        CountryId = country.CountryId,
+                        CountryCode = country.CountryCode,
+                        CountryName = country.CountryName,
+                        CurrencyRatio = country.CurrencyRatio,
+                        CurrencyCode = country.CurrencyCode,
+                        CurrencySymbol = country.CurrencySymbol
+                    };
+                    priviledgeCountrys.Add(countryDTO);
+                }
+            }
+
+            return priviledgeCountrys;
+        }
+
+        public async Task<List<CountryDTO>> GetPriviledgeCountrys()
+        {
+            //1. get countries
+            int[] countryIds = await GetPriviledgeCountryIds();
+
+            //2. get the countries based on the service centre
+            var countries = _unitOfWork.Country.GetAllAsQueryable().Where(s => countryIds.Contains(s.CountryId)).ToList();
+
+            //3.
+            var uniqueCountryIds = new HashSet<int>();
+            var priviledgeCountrys = new List<CountryDTO>();
+            foreach (var country in countries)
+            {
+                if (uniqueCountryIds.Add(country.CountryId))
+                {
+                    var countryDTO = new CountryDTO()
+                    {
+                        CountryId = country.CountryId,
+                        CountryCode = country.CountryCode,
+                        CountryName = country.CountryName,
+                        CurrencyRatio = country.CurrencyRatio,
+                        CurrencyCode = country.CurrencyCode,
+                        CurrencySymbol = country.CurrencySymbol
+                    };
+                    priviledgeCountrys.Add(countryDTO);
+                }
+            }
+
+            return priviledgeCountrys;
+        }
+
+        public async Task<bool> UserActiveCountrySettings(string userid, int countryId)
+        {
+            var result = false;
+            try
+            {
+                //validate userId
+                var user = await _unitOfWork.User.GetUserById(userid);
+                if (user == null)
+                {
+                    throw new GenericException("User does not exist!");
+                }
+
+                //validate countryId
+                var country = await _unitOfWork.Country.GetAsync(countryId);
+                if (country == null)
+                {
+                    throw new GenericException("Country does not exist!");
+                }
+
+                //set countryId
+                user.UserActiveCountryId = country.CountryId;
+                await _unitOfWork.CompleteAsync();
+                result = true;
+            }
+            catch (Exception ex)
+            {
+                result = false;
+                throw ex;
+            }
+            return result;
+        }
+
+        public async Task<CountryDTO> GetUserActiveCountry()
+        {
+            CountryDTO userActiveCountry = null;
+            //set user active country from PriviledgeCountrys
+            var countries = await GetPriviledgeCountrys();
+            if (countries.Count == 1)
+            {
+                userActiveCountry = countries[0];
+            }
+            else
+            {
+                //If UserActive Country is already set in the UserEntity, use that value
+                string currentUserId = await GetCurrentUserId();
+                var currentUser = await GetUserById(currentUserId);
+                if (currentUser.UserActiveCountryId > 0)
+                {
+                    var userActiveCountryFromEntity = await _countryService.GetCountryById(currentUser.UserActiveCountryId);
+                    if (userActiveCountryFromEntity.CurrencySymbol != null)
+                    {
+                        userActiveCountry = userActiveCountryFromEntity;
+                    }
+                }
+            }
+            return userActiveCountry;
+        }
+
+        public async Task<int> GetUserActiveCountryId()
+        {
+            int UserCountryId = 0;
+
+            //1. Get the user active country
+            var countries = await GetPriviledgeCountrys();
+            if (countries.Count == 1)
+            {
+                var userActiveCountry = countries[0];
+                UserCountryId = userActiveCountry.CountryId;
+            }
+            else
+            {
+                //Use default country
+                var currentUserId = await GetCurrentUserId();
+                var currentUser = await GetUserById(currentUserId);
+                var countryId = currentUser.UserActiveCountryId;
+
+                if (countryId > 0)
+                {
+                    UserCountryId = countryId;
+                }
+                else
+                {
+                    //throw exception
+                    throw new GenericException($"You have not been assigned an Active Country. Kindly inform the administrator.");
+                }
+            }
+
+            return UserCountryId;
+        }
+
+        public async Task<int[]> GetRegionServiceCenters (string currentUserId)
+        {
+            int[] serviceCenterIds = { };
+            try
+            {
+                var currentUser = GetUserById(currentUserId).Result;
+                IList<Claim> userClaims = GetClaimsAsync(currentUserId).Result;
+                
+                string[] claimValue = null;
+                foreach (var claim in userClaims)
+                {
+                    if (claim.Type == "Privilege")
+                    {
+                        claimValue = claim.Value.Split(':');
+                    }
+                }
+
+                if (claimValue == null)
+                {
+                    throw new GenericException($"You have not been assigned a Regional access. Kindly inform the administrator.");
+                }
+
+                if (claimValue[0] == "Region")
+                {
+                    var regionId = int.Parse(claimValue[1]);
+                    var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
+                    serviceCenterIds = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentre.ServiceCentreId).ToArray();
+                }
+                else if (claimValue[0] == "Global")
+                {
+                    serviceCenterIds = _unitOfWork.ServiceCentre.GetAllAsQueryable().Select(x => x.ServiceCentreId).ToArray();
+                }
+                else
+                {
+                    throw new GenericException($"You have not been assigned a Regional access. Kindly inform the administrator.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return serviceCenterIds;
         }
     }
 }

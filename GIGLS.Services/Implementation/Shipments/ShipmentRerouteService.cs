@@ -75,13 +75,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
                 }
-
-
-                ////4. update shipment collection status to RerouteStatus
-                var shipmentCollection = await _collectionService.GetShipmentCollectionById(shipmentDTO.Waybill);
-                shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.SRR;
-                await _collectionService.UpdateShipmentCollection(shipmentCollection);
-
+                               
                 ////5. Create new shipment
                 //5.1 Get Existing Shipment information and update rerouting information
                 originalShipment.DepartureServiceCentreId = shipmentDTO.DepartureServiceCentreId;
@@ -105,20 +99,27 @@ namespace GIGLS.Services.Implementation.Shipments
                 //5.5 Create new shipment
                 var newShipment = await _shipmentService.AddShipment(originalShipment);
 
-
                 ////6. create new shipment reroute
                 var user = await _userService.GetCurrentUserId();
                 ShipmentRerouteInitiator initiator = shipmentDTO.GrandTotal > 0 ? ShipmentRerouteInitiator.Customer : ShipmentRerouteInitiator.Staff;
+                string rerouteReason = shipmentDTO.ShipmentReroute == null ? null : shipmentDTO.ShipmentReroute.RerouteReason;
 
                 var newShipmentReroute = new ShipmentReroute
                 {
                     WaybillNew = newShipment.Waybill,
                     WaybillOld = shipmentDTO.Waybill,
                     RerouteBy = user,
-                    ShipmentRerouteInitiator = initiator
+                    RerouteReason = rerouteReason,
+                    ShipmentRerouteInitiator = initiator                
                 };
                 _uow.ShipmentReroute.Add(newShipmentReroute);
-                 //complete transaction
+                
+                ////4. update shipment collection status to RerouteStatus
+                var shipmentCollection = await _collectionService.GetShipmentCollectionById(shipmentDTO.Waybill);
+                shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.SRR;
+                await _collectionService.UpdateShipmentCollection(shipmentCollection);
+
+                //complete transaction
                 await _uow.CompleteAsync();
 
                 ////7. return new shipment 

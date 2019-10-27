@@ -212,6 +212,9 @@ namespace GIGLS.Core
                 config.CreateMap<DemurrageRegisterAccount, DemurrageRegisterAccountDTO>();
                 config.CreateMap<DemurrageRegisterAccountDTO, DemurrageRegisterAccount>();
 
+                config.CreateMap<Demurrage, DemurrageDTO>();
+                config.CreateMap<DemurrageDTO, Demurrage>();
+
                 config.CreateMap<Dispatch, DispatchDTO>();
                 config.CreateMap<DispatchDTO, DispatchDTO>();
 
@@ -338,6 +341,48 @@ namespace GIGLS.Core
 
                 config.CreateMap<MobileScanStatus, MobileScanStatusDTO>();
                 config.CreateMap<MobileScanStatusDTO, MobileScanStatus>();
+
+                config.CreateMap<HUBManifestWaybillMapping, HUBManifestWaybillMappingDTO>();
+                config.CreateMap<HUBManifestWaybillMappingDTO, HUBManifestWaybillMapping>();
+
+                config.CreateMap<CodPayOutList, NewInvoiceViewDTO>();
+                config.CreateMap<NewInvoiceViewDTO, CodPayOutList>();
+
+                config.CreateMap<Category, CategoryDTO>();
+                config.CreateMap<CategoryDTO, Category>();
+
+                config.CreateMap<SubCategory, SubCategoryDTO>();
+                config.CreateMap<SubCategoryDTO, SubCategory>();
+
+                config.CreateMap<PartnerTransactions, PartnerTransactionsDTO>();
+                config.CreateMap<PartnerTransactionsDTO, PartnerTransactions>();
+
+                config.CreateMap<MobileRating, MobileRatingDTO>();
+                config.CreateMap<MobileRatingDTO, MobileRating>();
+
+                config.CreateMap<ReferrerCode, ReferrerCodeDTO>();
+                config.CreateMap<ReferrerCodeDTO, ReferrerCode>();
+
+                config.CreateMap<DeliveryNumber, DeliveryNumberDTO>();
+                config.CreateMap<DeliveryNumberDTO, DeliveryNumber>();
+
+                config.CreateMap<VehicleType,VehicleTypeDTO>();
+                config.CreateMap<VehicleTypeDTO, VehicleType>();
+
+                config.CreateMap<PickupManifest, PickupManifestDTO>();
+                config.CreateMap<PickupManifestDTO, PickupManifest>();
+
+                config.CreateMap<PickupManifestWaybillMapping, PickupManifestWaybillMappingDTO>();
+                config.CreateMap<PickupManifestWaybillMappingDTO, PickupManifestWaybillMapping>();
+
+                config.CreateMap<RiderDelivery, RiderDeliveryDTO>();
+                config.CreateMap<RiderDeliveryDTO, RiderDelivery>();
+
+                config.CreateMap<DeliveryLocation, DeliveryLocationDTO>();
+                config.CreateMap<DeliveryLocationDTO, DeliveryLocation>();
+
+                config.CreateMap<LGA, LGADTO>();
+                config.CreateMap<LGADTO, LGA>();
             });
 
             isInit = true;

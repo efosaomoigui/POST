@@ -50,5 +50,10 @@ namespace GIGLS.Core.DTO.Customers
         public string CustomerCode { get; set; }
 
         public string Password { get; set; }
+
+        //User Active CountryId
+        public int UserActiveCountryId { get; set; }
+        public bool IsFromMobile { get; set; }
+        public CountryDTO Country { get; set; }
     }
 }

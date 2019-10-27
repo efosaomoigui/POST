@@ -30,5 +30,11 @@ namespace GIGLS.Core.DTO.Fleets
 
         //Added for TransitManifest
         public ManifestType ManifestType { get; set; }
+
+        public CountryDTO Country { get; set; }
+        public int DepartureServiceCenterId { get; set; }
+        public ServiceCentreDTO DepartureService { get; set; }
+        public int DestinationServiceCenterId { get; set; }
+        public ServiceCentreDTO DestinationService { get; set; }
     }
 }

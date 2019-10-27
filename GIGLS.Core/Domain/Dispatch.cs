@@ -35,5 +35,8 @@ namespace GIGLS.Core.Domain
         [ForeignKey("DestinationId")]
         public virtual Station Destination { get; set; }
 
+        public int DepartureServiceCenterId { get; set; }
+        public int DestinationServiceCenterId { get; set; }
+
     }
 }

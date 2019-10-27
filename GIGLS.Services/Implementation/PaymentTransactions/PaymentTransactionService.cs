@@ -186,6 +186,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //update invoice
             invoiceEntity.PaymentDate = DateTime.Now;
             invoiceEntity.PaymentMethod = paymentTransaction.PaymentType.ToString();
+            await BreakdownPayments(invoiceEntity, paymentTransaction);
+            
             invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
             invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
 
@@ -195,6 +197,25 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             return result;
         }
 
+        private async Task<bool> BreakdownPayments(Invoice invoiceEntity, PaymentTransactionDTO paymentTransaction)
+        {
+            var result = false;
+            if (paymentTransaction.PaymentType == PaymentType.Cash)
+            {
+                invoiceEntity.Cash = invoiceEntity.Amount;
+            }
+            else if (paymentTransaction.PaymentType == PaymentType.Transfer)
+            {
+                invoiceEntity.Transfer = invoiceEntity.Amount;
+            }
+            else if (paymentTransaction.PaymentType == PaymentType.Pos)
+            {
+                invoiceEntity.Pos = invoiceEntity.Amount;
+            }
+            result = true;
+            return result;
+
+        }
         public async Task<bool> ProcessReturnPaymentTransaction(PaymentTransactionDTO paymentTransaction)
         {
             var result = false;
@@ -276,6 +297,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //update invoice
             invoiceEntity.PaymentDate = DateTime.Now;
             invoiceEntity.PaymentMethod = paymentTransaction.PaymentType.ToString();
+            await BreakdownPayments(invoiceEntity, paymentTransaction);
+
             invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
             invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
 
@@ -293,26 +316,33 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var companyObj = await _uow.Company.GetAsync(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower());
             var customerWalletLimitCategory = companyObj.CustomerCategory;
 
+            var userActiveCountryId = 1;
+            try
+            {
+                userActiveCountryId = await _userService.GetUserActiveCountryId();
+            }
+            catch (Exception ex) { }
+
             switch (customerWalletLimitCategory)
             {
                 case CustomerCategory.Gold:
                     {
                         //get max negati ve wallet limit from GlobalProperty
-                        var ecommerceNegativeWalletLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceGoldNegativeWalletLimit);
+                        var ecommerceNegativeWalletLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceGoldNegativeWalletLimit, userActiveCountryId);
                         ecommerceNegativeWalletLimit = decimal.Parse(ecommerceNegativeWalletLimitObj.Value);
                         break;
                     }
                 case CustomerCategory.Premium:
                     {
                         //get max negati ve wallet limit from GlobalProperty
-                        var ecommerceNegativeWalletLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommercePremiumNegativeWalletLimit);
+                        var ecommerceNegativeWalletLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommercePremiumNegativeWalletLimit, userActiveCountryId);
                         ecommerceNegativeWalletLimit = decimal.Parse(ecommerceNegativeWalletLimitObj.Value);
                         break;
                     }
                 case CustomerCategory.Normal:
                     {
                         //get max negati ve wallet limit from GlobalProperty
-                        var ecommerceNegativeWalletLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceNegativeWalletLimit);
+                        var ecommerceNegativeWalletLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceNegativeWalletLimit, userActiveCountryId);
                         ecommerceNegativeWalletLimit = decimal.Parse(ecommerceNegativeWalletLimitObj.Value);
                         break;
                     }

@@ -97,6 +97,11 @@ namespace GIGLS.WebApi.Controllers
                 apiResponse.Total = methodResponse.Total;
                 apiResponse.RefCode = methodResponse.RefCode;
                 apiResponse.Shipmentcodref = methodResponse.Shipmentcodref;
+                apiResponse.VehicleType = methodResponse.VehicleType;
+                apiResponse.ReferrerCode = methodResponse.ReferrerCode;
+                apiResponse.AverageRatings = methodResponse.AverageRatings;
+                apiResponse.IsVerified = methodResponse.IsVerified;
+                apiResponse.PartnerType = methodResponse.PartnerType;
                 apiResponse.ShortDescription = string.IsNullOrEmpty(methodResponse.ShortDescription)
                     ? apiResponse.ShortDescription
                     : methodResponse.ShortDescription;

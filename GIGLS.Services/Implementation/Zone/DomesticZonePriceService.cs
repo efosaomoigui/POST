@@ -7,6 +7,9 @@ using GIGL.GIGLS.Core.Domain;
 using System.Collections.Generic;
 using GIGLS.Infrastructure;
 using GIGLS.Core.Enums;
+using AutoMapper;
+using System.Linq;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -37,7 +40,8 @@ namespace GIGLS.Services.Implementation.Zone
                     Weight = domesticZonePrice.Weight,
                     Price = domesticZonePrice.Price,
                     ZoneId = domesticZonePrice.ZoneId,
-                    RegularEcommerceType = domesticZonePrice.RegularEcommerceType
+                    RegularEcommerceType = domesticZonePrice.RegularEcommerceType,
+                    CountryId = domesticZonePrice.CountryId
                 };
 
                 _uow.DomesticZonePrice.Add(newPrice);
@@ -69,11 +73,11 @@ namespace GIGLS.Services.Implementation.Zone
             }
         }
 
-        public async Task<decimal> GetDomesticZonePrice(int zoneId, decimal weight, RegularEcommerceType regularEcommerceType)
+        public async Task<decimal> GetDomesticZonePrice(int zoneId, decimal weight, RegularEcommerceType regularEcommerceType, int countryId)
         {
             try
             {
-                var zone = await _uow.DomesticZonePrice.GetDomesticZonePrice(zoneId, weight, regularEcommerceType);
+                var zone = await _uow.DomesticZonePrice.GetDomesticZonePrice(zoneId, weight, regularEcommerceType, countryId);
 
                 if (zone == null)
                 {
@@ -98,6 +102,11 @@ namespace GIGLS.Services.Implementation.Zone
                     throw new Exception("Price for this Zone and Weight does not exist");
                 }
 
+                var countries = _uow.Country.GetAll().ToList();
+                var countriesDTO = Mapper.Map<IEnumerable<CountryDTO>>(countries);
+
+                var country = countriesDTO.FirstOrDefault(s => s.CountryId == zone.CountryId);
+
                 return new DomesticZonePriceDTO
                 {
                     DomesticZonePriceId = zone.DomesticZonePriceId,
@@ -105,6 +114,8 @@ namespace GIGLS.Services.Implementation.Zone
                     Price = zone.Price,
                     ZoneId = zone.ZoneId,
                     ZoneName = zone.Zone.ZoneName,
+                    CountryId = zone.CountryId,
+                    Country = country,
                     RegularEcommerceType = zone.RegularEcommerceType
                 };
             }
@@ -118,7 +129,19 @@ namespace GIGLS.Services.Implementation.Zone
         {
             try
             {
-                return await _uow.DomesticZonePrice.GetDomesticZones();
+                var domesticZones = await _uow.DomesticZonePrice.GetDomesticZones();
+
+                var countries = _uow.Country.GetAll().ToList();
+                var countriesDTO = Mapper.Map<IEnumerable<CountryDTO>>(countries);
+
+                foreach (var domesticZone in domesticZones)
+                {
+                    var country = countriesDTO.FirstOrDefault(s => s.CountryId == domesticZone.CountryId);
+                    domesticZone.Country = country;
+                }
+
+
+                return domesticZones;
             }
             catch (Exception)
             {
@@ -141,6 +164,7 @@ namespace GIGLS.Services.Implementation.Zone
                 zone.Price = domesticZoneDto.Price;
                 zone.ZoneId = domesticZoneDto.ZoneId;
                 zone.RegularEcommerceType = domesticZoneDto.RegularEcommerceType;
+                zone.CountryId = domesticZoneDto.CountryId;
                 _uow.Complete();
             }
             catch (Exception)
@@ -148,5 +172,6 @@ namespace GIGLS.Services.Implementation.Zone
                 throw;
             }
         }
+
     }
 }

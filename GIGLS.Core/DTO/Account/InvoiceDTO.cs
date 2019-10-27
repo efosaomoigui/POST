@@ -20,6 +20,7 @@ namespace GIGLS.Core.DTO.Account
         public bool IsInternational { get; set; }
         public int ServiceCentreId { get; set; }
         public bool IsShipmentCollected { get; set; }
+        public int CountryId { get; set; }
 
         public ServiceCenreDTO ServiceCentre { get; set; }
 
@@ -29,5 +30,10 @@ namespace GIGLS.Core.DTO.Account
 
         public PaymentPartialTransactionProcessDTO PaymentPartialTransaction { get; set; }
         public string PaymentTypeReference { get; set; }
+
+        public CountryDTO Country { get; set; }
+        public decimal Cash { get; set; }
+        public decimal Transfer { get; set; }
+        public decimal Pos { get; set; }
     }
 }

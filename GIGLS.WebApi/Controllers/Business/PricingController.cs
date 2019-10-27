@@ -27,6 +27,8 @@ namespace GIGLS.WebApi.Controllers.Business
         {
             return await HandleApiOperationAsync(async () =>
             {
+                var userCountryId = await _pricing.GetUserCountryId();
+                pricingDto.CountryId = userCountryId;
                 var price = await _pricing.GetPrice(pricingDto);
 
                 return new ServiceResponse<decimal>
@@ -43,6 +45,9 @@ namespace GIGLS.WebApi.Controllers.Business
         {
             return await HandleApiOperationAsync(async () =>
             {
+                var userCountryId = await _pricing.GetUserCountryId();
+                haulagePricingDto.CountryId = userCountryId;
+
                 var price = await _pricing.GetHaulagePrice(haulagePricingDto);
 
                 return new ServiceResponse<decimal>
@@ -59,6 +64,9 @@ namespace GIGLS.WebApi.Controllers.Business
         {
             return await HandleApiOperationAsync(async () =>
             {
+                var userCountryId = await _pricing.GetUserCountryId();
+                pricingDto.CountryId = userCountryId;
+
                 var price = await _pricing.GetInternationalPrice(pricingDto);
 
                 return new ServiceResponse<decimal>
@@ -75,6 +83,9 @@ namespace GIGLS.WebApi.Controllers.Business
         {
             return await HandleApiOperationAsync(async () =>
             {
+                var userCountryId = await _pricing.GetUserCountryId();
+                pricingDto.CountryId = userCountryId;
+
                 var price = await _pricing.GetReroutePrice(pricingDto);
 
                 return new ServiceResponse<ShipmentDTO>

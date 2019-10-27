@@ -20,8 +20,12 @@ namespace GIGLS.CORE.Domain
         public string State { get; set; }     
         public string IndentificationUrl { get; set; }
         public ShipmentScanStatus ShipmentScanStatus { get; set; }
+        public int DepartureServiceCentreId { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+        public bool IsCashOnDelivery { get; set; }
 
         //Who processed the collection
+        [MaxLength(128)]
         public string UserId { get; set; }
     }
 }

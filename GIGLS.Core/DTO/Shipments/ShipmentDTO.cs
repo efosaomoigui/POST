@@ -89,6 +89,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         public decimal ShipmentPackagePrice { get; set; }
 
+        public decimal ShipmentPickupPrice { get; set; }
         //wallet information
         public string WalletNumber { get; set; }
 
@@ -121,5 +122,18 @@ namespace GIGLS.Core.DTO.Shipments
         //Sender's Address - added for the special case of corporate customers
         public string SenderAddress { get; set; }
         public string SenderState { get; set; }
+
+        //Cancelled Reason
+        public ShipmentCancelDTO ShipmentCancel { get; set; }
+
+        //Reroute Reason
+        public ShipmentRerouteDTO ShipmentReroute { get; set; }
+
+        public bool IsFromMobile { get; set; }
+
+        //Country info
+        public int DepartureCountryId { get; set; }
+        public int DestinationCountryId { get; set; }
+        public decimal CurrencyRatio { get; set; }
     }
 }

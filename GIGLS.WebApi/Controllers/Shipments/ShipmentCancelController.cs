@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Services.Implementation;
@@ -37,6 +38,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("search")]
+        public async Task<IServiceResponse<List<ShipmentCancelDTO>>> GetAllShipmentCancel(ShipmentCollectionFilterCriteria collectionFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentcancelled = await _service.GetShipmentCancels(collectionFilterCriteria);
+
+                return new ServiceResponse<List<ShipmentCancelDTO>>
+                {
+                    Object = shipmentcancelled
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{waybill}")]
         public async Task<IServiceResponse<ShipmentCancelDTO>> GetShipmentCancelByWaybill(string waybill)
@@ -52,14 +69,30 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        //[GIGLSActivityAuthorize(Activity = "Create")]
+        //[HttpPost]
+        //[Route("{waybill}")]
+        //public async Task<IServiceResponse<bool>> AddShipmentCancel(string waybill)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        await _service.AddShipmentCancel(waybill);
+
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Object = true
+        //        };
+        //    });
+        //}
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("{waybill}")]
-        public async Task<IServiceResponse<bool>> AddShipmentCancel(string waybill)
+        public async Task<IServiceResponse<bool>> AddShipmentCancel(string waybill, ShipmentCancelDTO shipmentCancelDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _service.AddShipmentCancel(waybill);
+                await _service.AddShipmentCancel(waybill,shipmentCancelDTO);
 
                 return new ServiceResponse<bool>
                 {
@@ -67,7 +100,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
-
 
     }
 }

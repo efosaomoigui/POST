@@ -32,6 +32,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                     int difference = Convert.ToInt32(span.TotalMinutes);
                     if (difference < 5)
                         message.IsValid = true;
+                    else
+                    {
+                        throw new GenericException("OTP has expired!!!");
+                    }
                     return await Task.FromResult(message);
                 }
 

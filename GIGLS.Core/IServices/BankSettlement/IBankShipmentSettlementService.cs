@@ -1,7 +1,10 @@
-﻿using GIGLS.Core.DTO.Account;
+﻿using GIGLS.Core.Domain.BankSettlement;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.BankSettlement;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO.Report;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -25,8 +28,7 @@ namespace GIGLS.Core.IServices.BankSettlement
         Task UpdateBankOrderProcessingCode_cod(BankProcessingOrderCodesDTO refcode);
         Task UpdateBankOrderProcessingCode_demurrage(BankProcessingOrderCodesDTO bankrefcode);
         Task UpdateBankProcessingOrderForShipmentAndCOD(BankProcessingOrderForShipmentAndCODDTO refcodeobj);
-
-        Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCode(DepositType type);
+                
         Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetBankProcessingOrderForShipmentAndCOD(DepositType type);
 
         Task<Tuple<string, List<CashOnDeliveryRegisterAccountDTO>, decimal>> GetBankProcessingOrderForCOD(DepositType type);
@@ -35,5 +37,13 @@ namespace GIGLS.Core.IServices.BankSettlement
         Task MarkAsVerified(BankProcessingOrderCodesDTO refcode);
         Task MarkAsVerified_cod(BankProcessingOrderCodesDTO refcode);
         Task MarkAsVerified_demurrage(BankProcessingOrderCodesDTO bankrefcode);
+
+        Task<List<NewInvoiceViewDTO>> GetCODCustomersWhoNeedPayOut();
+        Task UpdateCODCustomersWhoNeedPayOut(NewInvoiceViewDTO invoiceviewinfo);
+
+        Task<List<CodPayOutList>> GetPaidOutCODLists();
+        Task<List<CodPayOutList>> GetPaidOutCODListsByCustomer(string customercode);
+
+        Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria);
     }
 }

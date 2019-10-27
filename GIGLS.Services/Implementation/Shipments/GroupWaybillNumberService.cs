@@ -68,6 +68,16 @@ namespace GIGLS.Services.Implementation.Shipments
             return groupwaybill;
         }
 
+        public async Task<string> GenerateGroupWaybillNumber(string serviceCentreCode)
+        {
+            GroupWaybillNumberDTO groupWaybillNumberDTO = new GroupWaybillNumberDTO
+            {
+                ServiceCentreCode = serviceCentreCode
+            };
+
+            return await GenerateGroupWaybillNumber(groupWaybillNumberDTO);
+        }
+
         public async Task<IEnumerable<GroupWaybillNumberDTO>> GetAllGroupWayBillNumbers()
         {
             try
@@ -143,12 +153,17 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Add waybill here
                 List<string> waybills = new List<string>();
+
+                List<Object> waybillsWithDate = new List<object>();
+
                 foreach (var item in groupWaybillNumberMappingList)
                 {
                     waybills.Add(item.WaybillNumber);
+                    waybillsWithDate.Add(new { item.WaybillNumber, item.DateMapped });
                 }
 
                 groupwaybillDto.WaybillNumbers = waybills;
+                groupwaybillDto.WaybillsWithDate = waybillsWithDate;
 
                 var groupWaybillNumberMapping = groupWaybillNumberMappingList.FirstOrDefault();
 
@@ -300,5 +315,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        
     }
 }

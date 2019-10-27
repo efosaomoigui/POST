@@ -30,6 +30,14 @@
         ISE, //SHIPMENT CREATION SCAN FOR INTERNAIONAL SHIPMENT - EMAIL
         USER_LOGIN, //USER LOGIN
         IEMAIL, //FOR DUE INVOICES FOR CORPORATE CLIENTS
-        WEMAIL //WALLET BALANCES AT 10K AND 5K FOR CORPORATE CLIENTS
+        WEMAIL, //WALLET BALANCES AT 10K AND 5K FOR CORPORATE CLIENTS
+        SSC_Email,  //Message Type for use in sending email
+        MATD,  //Message for Attempted Delivery
+        PEmail, //Message Type for Forgot Password
+        MRB, //Mesage For Referral Bonus
+        SMIM, //SHIPMENT MISSED DURING ARRIVAL TRANSIT MANIFEST
+        FMS,  //FOUND MISSING SHIPMENT
+        OTP, //Message for One Time Password
+        UDM //Message for shipment that has exceeded delivery time
     } 
 }

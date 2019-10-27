@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using GIGLS.Core.DTO.Fleets;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -20,5 +21,12 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ShipmentDTO>> GetUnMappedWaybillsForDeliveryManifestByServiceCentre();
         Task<List<ManifestWaybillMappingDTO>> GetManifestWaitingForSignOff();
         Task<List<ManifestWaybillMappingDTO>> GetManifestHistoryForWaybill(string waybill);
+        Task MappingManifestToWaybillsPickup(string manifest, List<string> waybills);
+        Task<List<PickupManifestWaybillMappingDTO>> GetWaybillsInPickupManifest(string manifestCode);
+
+        Task<List<PickupManifestWaybillMappingDTO>> GetAllPickupManifestWaybillMappings(DateFilterCriteria dateFilterCriteria);
+        Task RemoveWaybillFromPickupManifest(string manifest, string waybill);
     }
+
+
 }

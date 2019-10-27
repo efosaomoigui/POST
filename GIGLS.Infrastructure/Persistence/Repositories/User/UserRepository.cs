@@ -10,7 +10,6 @@ using Microsoft.AspNet.Identity;
 using GIGLS.CORE.Domain;
 using System.Security.Claims;
 using GIGLS.Core.Enums;
-using GIGL.GIGLS.Core.Domain;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
 {
@@ -22,8 +21,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
         }
 
         public Task<GIGL.GIGLS.Core.Domain.User> GetUserByEmail(string email)
-        {
-            
+        {            
             var user = _userManager.Users.Where(x => x.Email.Equals(email)).FirstOrDefault();
             return Task.FromResult(user);
         }
@@ -97,6 +95,14 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType != UserType.System
                         && x.UserChannelType == UserChannelType.Employee
                         && (x.SystemUserRole == "Dispatch Rider" || x.SystemUserRole == "Captain")).AsEnumerable();
+            return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
+        }
+
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchRiders()
+        {
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.UserType != UserType.System
+                        && x.UserChannelType == UserChannelType.Employee
+                        && (x.SystemUserRole == "Dispatch Rider")).AsEnumerable();
             return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
         }
 

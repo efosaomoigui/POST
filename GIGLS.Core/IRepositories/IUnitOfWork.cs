@@ -133,9 +133,11 @@ namespace GIGLS.Core
         IExpenseTypeRepository ExpenseType { get; set; }
         IExpenditureRepository Expenditure { get; set; }
         IBankProcessingOrderForShipmentAndCODRepository BankProcessingOrderForShipmentAndCOD { get; set; }
-        IBankProcessingOrderCodesRepository BankProcessingOrderCodes { get; set; } 
+        IBankProcessingOrderCodesRepository BankProcessingOrderCodes { get; set; }
+        ICodPayOutListRepository CodPayOutList { get; set; }
 
-        IOTPRepository  OTP { get; set; }
+
+        IOTPRepository OTP { get; set; }
         IPreShipmentMobileRepository PreShipmentMobile { get; set; }
 
         IPreShipmentItemMobileRepository PreShipmentItemMobile { get; set; }
@@ -148,6 +150,28 @@ namespace GIGLS.Core
 
         IRegionRepository Region { get; set; }
         IRegionServiceCentreMappingRepository RegionServiceCentreMapping { get; set; }
+        IDemurrageRepository Demurrage { get; set; }
+
+        IHUBManifestWaybillMappingRepository HUBManifestWaybillMapping { get; set; }
+
+        ICategoryRepository Category { get; set; }
+
+        ISubCategoryRepository SubCategory { get; set; }
+
+        IPartnerTransactionsRepository PartnerTransactions { get; set; }
+
+        IMobileRatingRepository MobileRating { get; set; }
+
+        IReferrerCodeRepository ReferrerCode { get; set; }
+
+        IDeliveryNumberRepository DeliveryNumber { get; set; }
+
+        IVehicleTypeRepository VehicleType { get; set; }
+        IPickupManifestRepository PickupManifest { get; set; }
+        IPickupManifestWaybillMappingRepository PickupManifestWaybillMapping { get; set; }
+        IRiderDeliveryRepository RiderDelivery { get; set; }
+        IDeliveryLocationRepository DeliveryLocation { get; set; }
+        ILGARepository LGA { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

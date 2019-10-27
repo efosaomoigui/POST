@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Wallet;
@@ -60,9 +61,10 @@ namespace GIGLS.Services.Implementation.Account
 
         public async Task<string> SendEmailForDueInvoices(int daystoduedate)
         {
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
 
             //1.Get start date for this feature
-            var globalpropertiesreminderdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.globalpropertiesreminderdate);
+            var globalpropertiesreminderdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.globalpropertiesreminderdate, userActiveCountryId);
             string globalpropertiesdateStr = globalpropertiesreminderdateObj?.Value;
 
             var globalpropertiesdate = DateTime.MinValue;
@@ -116,9 +118,10 @@ namespace GIGLS.Services.Implementation.Account
 
         public async Task<string> SendEmailForWalletBalanceCheck(decimal amountforreminder) 
         {
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
 
             //1.Get start date for this feature
-            var globalpropertiesreminderdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.globalpropertiesreminderdate);
+            var globalpropertiesreminderdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.globalpropertiesreminderdate, userActiveCountryId);
             string globalpropertiesdateStr = globalpropertiesreminderdateObj?.Value;
 
             var globalpropertiesdate = DateTime.MinValue;
@@ -232,6 +235,18 @@ namespace GIGLS.Services.Implementation.Account
             // get Customer
             invoiceDTO.Customer = invoiceDTO.Shipment.CustomerDetails;
 
+            //To get amount paid for demurrage
+
+            if (invoiceDTO.IsShipmentCollected)
+            {
+                var demurage = await _uow.Demurrage.GetAsync(s => s.WaybillNumber == invoiceDTO.Waybill);
+                if (demurage != null)
+                {
+                    invoiceDTO.Shipment.Demurrage.AmountPaid = demurage.AmountPaid;
+                    invoiceDTO.Shipment.Demurrage.ApprovedBy = demurage.ApprovedBy;
+                }
+            }         
+           
             //get wallet number
             if (invoiceDTO.Customer.CustomerType == CustomerType.Company)
             {
@@ -268,7 +283,6 @@ namespace GIGLS.Services.Implementation.Account
 
         public async Task<InvoiceDTO> GetInvoiceByWaybill(string waybl)
         {
-            //var invoices = await GetInvoices();
             var invoice = await _uow.Invoice.GetAsync(e => e.Waybill == waybl);
 
             if (invoice == null)
@@ -276,7 +290,63 @@ namespace GIGLS.Services.Implementation.Account
                 throw new GenericException("Invoice does not exists");
             }
 
-            return await GetInvoiceById(invoice.InvoiceId);
+            var invoiceDTO = Mapper.Map<InvoiceDTO>(invoice);
+
+            // get Shipment
+            var waybill = invoiceDTO.Waybill;
+            invoiceDTO.Shipment = await _shipmentService.GetShipment(waybill);
+
+            // get Customer
+            invoiceDTO.Customer = invoiceDTO.Shipment.CustomerDetails;
+
+            //To get amount paid for demurrage
+            if (invoiceDTO.IsShipmentCollected)
+            {
+                var demurage = await _uow.Demurrage.GetAsync(s => s.WaybillNumber == invoiceDTO.Waybill);
+
+                if (demurage != null)
+                {
+                    invoiceDTO.Shipment.Demurrage.AmountPaid = demurage.AmountPaid;
+                    invoiceDTO.Shipment.Demurrage.ApprovedBy = demurage.ApprovedBy;
+                }
+            }         
+           
+            //get wallet number
+            if (invoiceDTO.Customer.CustomerType == CustomerType.Company)
+            {
+                var wallet = await _uow.Wallet.GetAsync(
+                    s => s.CustomerId == invoiceDTO.Customer.CompanyId &&
+                    s.CustomerType == CustomerType.Company);
+                invoiceDTO.Customer.WalletNumber = wallet?.WalletNumber;
+            }
+            else
+            {
+                var wallet = await _uow.Wallet.GetAsync(
+                    s => s.CustomerId == invoiceDTO.Customer.IndividualCustomerId &&
+                    s.CustomerType == CustomerType.IndividualCustomer);
+                invoiceDTO.Customer.WalletNumber = wallet?.WalletNumber;
+            }
+
+            ///// Partial Payments, if invoice status is pending
+            if (invoiceDTO.PaymentStatus == PaymentStatus.Pending)
+            {
+                var partialTransactionsForWaybill = await _uow.PaymentPartialTransaction.FindAsync(x => x.Waybill.Equals(waybill));
+
+                if (partialTransactionsForWaybill.Count() > 0)
+                {
+                    invoiceDTO.PaymentPartialTransaction = new PaymentPartialTransactionProcessDTO()
+                    {
+                        Waybill = waybill,
+                        PaymentPartialTransactions = Mapper.Map<List<PaymentPartialTransactionDTO>>(partialTransactionsForWaybill)
+                    };
+                }
+            }
+
+            //get country details
+            var country = await _uow.Country.GetAsync(invoice.CountryId);
+            invoiceDTO.Country = Mapper.Map<CountryDTO>(country);
+
+            return invoiceDTO;
         }
 
         public async Task<object> AddInvoice(InvoiceDTO invoiceDto)

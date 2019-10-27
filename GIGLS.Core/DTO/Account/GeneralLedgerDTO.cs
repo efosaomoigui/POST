@@ -28,5 +28,6 @@ namespace GIGLS.Core.DTO.Account
         public PaymentServiceType PaymentServiceType { get; set; }
         public string PaymentTypeReference { get; set; }
         public bool IsInternational { get; set; }
+        public int CountryId { get; set; }
     }
 }

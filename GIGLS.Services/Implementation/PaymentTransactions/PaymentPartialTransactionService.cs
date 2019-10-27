@@ -34,13 +34,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             if (paymentPartialTransaction == null)
                 throw new GenericException("Null Input");
 
-           // var transactionExist = await _uow.PaymentPartialTransaction.ExistAsync(x => x.Waybill.Equals(paymentPartialTransaction.Waybill));
-          //  if (transactionExist == true)
-          //      throw new GenericException($"Payment Partial Transaction for {paymentPartialTransaction.Waybill} already exist");
-
             var payment = Mapper.Map<PaymentPartialTransaction>(paymentPartialTransaction);
             _uow.PaymentPartialTransaction.Add(payment);
-            //await _uow.CompleteAsync();
             return await Task.FromResult(new { Id = payment.PaymentPartialTransactionId });
         }
 
@@ -84,10 +79,37 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
         public async Task<bool> ProcessPaymentPartialTransaction(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO)
         {
-            var result = false;
 
+            var result = false;
+                             
             if (paymentPartialTransactionProcessDTO == null)
                 throw new GenericException("Null Input");
+
+            decimal cash = 0;
+            decimal pos = 0;
+            decimal transfer = 0;
+            string cashType = null;
+            string posType = null;
+            string transferType = null;
+
+            foreach (var item in paymentPartialTransactionProcessDTO.PaymentPartialTransactions)
+            {
+                if (item.PaymentType == PaymentType.Cash)
+                {
+                    cash += item.Amount;
+                    cashType = item.PaymentType.ToString();
+                }
+                else if (item.PaymentType == PaymentType.Pos)
+                {
+                    pos += item.Amount;
+                    posType = item.PaymentType.ToString();
+                }
+                else if (item.PaymentType == PaymentType.Transfer)
+                {
+                    transfer += item.Amount;
+                    transferType = item.PaymentType.ToString();
+                }
+            }
 
             // get the current user info
             var currentUserId = await _userService.GetCurrentUserId();
@@ -107,7 +129,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             {
                 totalAmountAlreadyPaid += item.Amount;
             }
-
+                        
             //get total amount customer is paying
             decimal totalAmountPaid = 0;
             foreach (var paymentPartialTransaction in paymentPartialTransactionProcessDTO.PaymentPartialTransactions)
@@ -150,6 +172,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 paymentPartialTransaction.PaymentStatus = PaymentStatus.Paid;
                 var paymentTransactionId = await AddPaymentPartialTransaction(paymentPartialTransaction);
                 
+                
                 totalAmountPaid += paymentPartialTransaction.Amount;
             }
             // get the balance
@@ -163,7 +186,27 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             /////2.  When payment is complete and balance is 0
             if (balanceAmount == 0)
-            {
+            {                
+                foreach (var item in partialTransactionsForWaybill)
+                {
+                    if (item.PaymentType == PaymentType.Cash)
+                    {
+                        cash += item.Amount;
+                        cashType = item.PaymentType.ToString();                         
+                    }
+                    else if (item.PaymentType == PaymentType.Pos)
+                    {
+                        pos += item.Amount;
+                        posType = item.PaymentType.ToString();                         
+                    }
+                    else if (item.PaymentType == PaymentType.Transfer)
+                    {
+                        transfer += item.Amount;
+                        transferType = item.PaymentType.ToString();
+                    }
+
+                }
+                                
                 // update GeneralLedger
                 generalLedgerEntity.IsDeferred = false;
                 generalLedgerEntity.PaymentType = PaymentType.Partial;
@@ -171,15 +214,19 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
                 //update invoice
                 invoiceEntity.PaymentDate = DateTime.Now;
-                invoiceEntity.PaymentMethod = PaymentType.Partial.ToString();
+                //invoiceEntity.PaymentMethod = PaymentType.Partial.ToString();
+                invoiceEntity.PaymentMethod = PaymentType.Partial.ToString() + " - " + (cashType != null ? cashType + "(" + cash + ") " : "") +
+                                                                      (posType != null ? posType + "(" + pos + ") " : "") +
+                                                                      (transferType != null ? transferType + "(" + transfer + ") " : "");
+                invoiceEntity.Cash = cash;
+                invoiceEntity.Transfer = transfer;
+                invoiceEntity.Pos = pos;
                 invoiceEntity.PaymentStatus = PaymentStatus.Paid;
             }
 
             await _uow.CompleteAsync();
             result = true;
-
             return result;
         }
-
     }
 }

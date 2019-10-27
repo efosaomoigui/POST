@@ -9,6 +9,7 @@ using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.Services.IServices.ServiceCentres
 {
@@ -95,6 +96,11 @@ namespace GIGLS.Services.IServices.ServiceCentres
             {
                 throw;
             }
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetServiceCentreByCode(string[] code)
+        {
+            return await _uow.ServiceCentre.GetServiceCentreByCode(code);
         }
 
         public async Task<ServiceCentreDTO> GetServiceCentreById(int serviceCentreId)
@@ -189,6 +195,18 @@ namespace GIGLS.Services.IServices.ServiceCentres
             }
         }
 
+        public async Task<List<ServiceCentreDTO>> GetLocalServiceCentres(int[] countryIds)
+        {
+            try
+            {
+                return await _uow.ServiceCentre.GetLocalServiceCentres(countryIds);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<ServiceCentreDTO>> GetInternationalServiceCentres()
         {
             try
@@ -253,6 +271,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 centre.Code = service.Code;
                 centre.TargetAmount = service.TargetAmount;
                 centre.TargetOrder = service.TargetOrder;
+                centre.IsHUB = service.IsHUB;
                 _uow.Complete();
             }
             catch (Exception ex)
@@ -301,6 +320,12 @@ namespace GIGLS.Services.IServices.ServiceCentres
             {
                 throw;
             }
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresByCountryId(int countryId)
+        {
+            int[] countryIds = new int[] { countryId };
+            return await _uow.ServiceCentre.GetLocalServiceCentres(countryIds);
         }
     }
 }

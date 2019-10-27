@@ -15,10 +15,12 @@ namespace GIGLS.WebApi.Controllers.Customers
     public class CompanyController : BaseWebApiController
     {
         private readonly ICompanyService _service;
+        private ICountryService _countryService;
 
-        public CompanyController(ICompanyService service) : base(nameof(CompanyController))
+        public CompanyController(ICompanyService service, ICountryService countryService) : base(nameof(CompanyController))
         {
             _service = service;
+            _countryService = countryService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -27,7 +29,7 @@ namespace GIGLS.WebApi.Controllers.Customers
         public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompanies()
         {
             return await HandleApiOperationAsync(async () => {
-                var companies = await _service.GetCompanies();
+                var companies = await _service.GetCompanies();                
                 return new ServiceResponse<IEnumerable<CompanyDTO>>
                 {
                     Object = companies

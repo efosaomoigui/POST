@@ -112,6 +112,18 @@ namespace GIGLS.Services.Implementation.Messaging
             return Mapper.Map<SmsSendLogDTO>(message);
         }
 
+        public async Task<List<SmsSendLogDTO>> GetSmsSendLog(string phoneNumber)
+        {
+            var message = await _uow.SmsSendLog.FindAsync(x => x.To == phoneNumber);
+            return Mapper.Map<List<SmsSendLogDTO>>(message.OrderByDescending(x => x.DateCreated));
+        }
+
+        public async Task<List<SmsSendLogDTO>> GetSmsSendLogs(string waybill)
+        {
+            var message = await _uow.SmsSendLog.FindAsync(x => x.Waybill == waybill);
+            return Mapper.Map<List<SmsSendLogDTO>>(message.OrderByDescending(x => x.DateCreated));
+        }
+
         public async Task RemoveSmsSendLog(int messageId)
         {
             var message = await _uow.SmsSendLog.GetAsync(messageId);

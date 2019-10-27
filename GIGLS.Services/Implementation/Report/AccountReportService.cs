@@ -5,8 +5,6 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core;
 using GIGLS.Core.IServices.User;
-using AutoMapper;
-using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.Enums;
 using System;
@@ -29,6 +27,10 @@ namespace GIGLS.Services.Implementation.Report
 
         public async Task<List<GeneralLedgerDTO>> GetExpenditureReports(AccountFilterCriteria accountFilterCriteria)
         {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
+
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             accountFilterCriteria.creditDebitType = CreditDebitType.Debit;
             var generalLedgerDTO = await _uow.GeneralLedger.GetGeneralLedgersAsync(accountFilterCriteria, serviceCenterIds);
@@ -43,6 +45,10 @@ namespace GIGLS.Services.Implementation.Report
 
         public async Task<List<GeneralLedgerDTO>> GetIncomeReports(AccountFilterCriteria accountFilterCriteria)
         {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
+
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             accountFilterCriteria.creditDebitType = CreditDebitType.Credit;
             var generalLedgerDTO = await _uow.GeneralLedger.GetGeneralLedgersAsync(accountFilterCriteria, serviceCenterIds);
@@ -57,6 +63,10 @@ namespace GIGLS.Services.Implementation.Report
 
         public async Task<List<GeneralLedgerDTO>> GetDemurageReports(AccountFilterCriteria accountFilterCriteria)
         {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
+
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             accountFilterCriteria.PaymentServiceType = PaymentServiceType.Demurage;
             var generalLedgerDTO = await _uow.GeneralLedger.GetGeneralLedgersAsync(accountFilterCriteria, serviceCenterIds);
@@ -87,6 +97,11 @@ namespace GIGLS.Services.Implementation.Report
 
         public async Task<List<InvoiceViewDTO>> GetInvoiceReportsFromView(AccountFilterCriteria accountFilterCriteria)
         {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
+
+
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var invoices = await _uow.Invoice.GetInvoicesFromViewAsyncFromSP(accountFilterCriteria, serviceCenterIds);
 
@@ -126,6 +141,48 @@ namespace GIGLS.Services.Implementation.Report
 
             return invoices;
         }
-        
+
+        public async Task<List<InvoiceViewDTO>> GetInvoiceReportsFromViewPlusDeliveryTime(AccountFilterCriteria accountFilterCriteria) 
+        {
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var invoices = await _uow.Invoice.GetInvoicesFromViewWithDeliveryTimeAsyncFromSP(accountFilterCriteria, serviceCenterIds);
+
+            foreach (var item in invoices)
+            {
+                //get CustomerDetails
+                if (item.CustomerType.Contains("Individual"))
+                {
+                    item.CustomerType = CustomerType.IndividualCustomer.ToString();
+                }
+
+                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), item.CustomerType);
+                //var customerDetails = await _shipmentService.GetCustomer(item.CustomerId, customerType);
+                var customerDetails = new CustomerDTO()
+                {
+                    CustomerType = customerType,
+                    CustomerCode = item.CustomerCode,
+                    Email = item.Email,
+                    PhoneNumber = item.PhoneNumber,
+                    CompanyId = item.CompanyId.GetValueOrDefault(),
+                    Name = item.Name,
+                    IndividualCustomerId = item.IndividualCustomerId.GetValueOrDefault(),
+                    FirstName = item.FirstName,
+                    LastName = item.LastName
+                };
+
+                item.CustomerDetails = customerDetails;
+
+                //Update to change the Corporate Paid status from 'Paid' to 'Credit'
+                item.PaymentStatusDisplay = item.PaymentStatus.ToString();
+                if ((CompanyType.Corporate.ToString() == item.CompanyType)
+                    && (PaymentStatus.Paid == item.PaymentStatus))
+                {
+                    item.PaymentStatusDisplay = "Credit";
+                }
+            }
+
+            return invoices;
+        }
+
     }
 }

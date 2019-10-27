@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 {
@@ -15,7 +16,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
         {
             _context = context;
         }
-
 
         public Task<List<ShipmentCancelDTO>> GetShipmentCancels()
         {
@@ -28,8 +28,50 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                        CreatedBy = Context.Users.Where(x => x.Id == r.CreatedBy).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
                                                        ShipmentCreatedDate = r.ShipmentCreatedDate,
                                                        CancelledBy = Context.Users.Where(x => x.Id == r.CancelledBy).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
-                                                       DateCreated = r.DateCreated
+                                                       DateCreated = r.DateCreated,
+                                                       CancelReason= r.CancelReason
                                                    }).OrderByDescending(x => x.DateCreated).ToList();
+
+            return Task.FromResult(shipmentDto);
+        }
+
+        public Task<List<ShipmentCancelDTO>> GetShipmentCancels(ShipmentCollectionFilterCriteria collectionFilterCriteria)
+        {
+            //get startDate and endDate
+            var queryDate = collectionFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var shipments = _context.ShipmentCancel.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).AsQueryable();
+
+            List<ShipmentCancelDTO> shipmentDto = (from r in shipments
+                                                   select new ShipmentCancelDTO()
+                                                   {
+                                                       Waybill = r.Waybill,
+                                                       CreatedBy = Context.Users.Where(x => x.Id == r.CreatedBy).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
+                                                       ShipmentCreatedDate = r.ShipmentCreatedDate,
+                                                       CancelledBy = Context.Users.Where(x => x.Id == r.CancelledBy).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
+                                                       DateCreated = r.DateCreated,
+                                                       CancelReason = r.CancelReason
+                                                   }).OrderByDescending(x => x.DateCreated).ToList();
+
+            return Task.FromResult(shipmentDto);
+        }
+
+        public Task<ShipmentCancelDTO> GetShipmentCancels(string waybill)
+        {
+            var shipments = _context.ShipmentCancel.Where(x => x.Waybill == waybill).AsQueryable();
+
+            ShipmentCancelDTO shipmentDto = (from r in shipments
+                                             select new ShipmentCancelDTO()
+                                             {
+                                                 Waybill = r.Waybill,
+                                                 CreatedBy = Context.Users.Where(x => x.Id == r.CreatedBy).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
+                                                 ShipmentCreatedDate = r.ShipmentCreatedDate,
+                                                 CancelledBy = Context.Users.Where(x => x.Id == r.CancelledBy).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
+                                                 DateCreated = r.DateCreated,
+                                                 CancelReason = r.CancelReason
+                                             }).FirstOrDefault();
 
             return Task.FromResult(shipmentDto);
         }

@@ -24,5 +24,7 @@ namespace GIGLS.Core.DTO.PaymentTransactions
         //Added for ThirdParty API
         public int DepartureStationId { get; set; }
         public int DestinationStationId { get; set; }
+
+        public int CountryId { get; set; }
     }
 }

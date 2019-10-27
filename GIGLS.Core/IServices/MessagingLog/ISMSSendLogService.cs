@@ -13,5 +13,7 @@ namespace GIGLS.Core.IServices.MessagingLog
         Task<object> AddSmsSendLog(SmsSendLogDTO messageDto);
         Task UpdateSmsSendLog(int messageId, SmsSendLogDTO messageDto);
         Task RemoveSmsSendLog(int messageId);
+        Task<List<SmsSendLogDTO>> GetSmsSendLog(string phoneNumber);
+        Task<List<SmsSendLogDTO>> GetSmsSendLogs(string waybill);
     }
 }

@@ -51,8 +51,8 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
         Task<IEnumerable<DeliveryOptionDTO>> GetDeliveryOptions();
         Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
         Task<IEnumerable<HaulageDTO>> GetHaulages();
-        Task<IEnumerable<InsuranceDTO>> GetInsurances();
-        Task<IEnumerable<VATDTO>> GetVATs();
+        Task<InsuranceDTO> GetInsurances();
+        Task<VATDTO> GetVATs();
         Task<DomesticRouteZoneMapDTO> GetZone(int departure, int destination);
 
         Task<CustomerDTO> GetCustomer(string userId);

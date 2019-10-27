@@ -28,6 +28,9 @@ namespace GIGLS.Core.DTO.Zone
         public string UserName { get; set; }
 
         public List<UserDTO> UserDetail { get; set; }
+
+        public int CountryId { get; set; }
+        public CountryDTO Country { get; set; }
     }
 
 }

@@ -21,12 +21,17 @@ namespace GIGL.GIGLS.Core.Domain
         public string State { get; set; }
         public string Address { get; set; }
 
+        //User Active CountryId
+        public int UserActiveCountryId { get; set; }
+
         [MaxLength(20), MinLength(3)]
         [Index(IsUnique = true)]
         public string PhoneNumber { get; set; }
         public string Industry { get; set; }
         public CompanyType CompanyType { get; set; }
         public CompanyStatus CompanyStatus { get; set; }
+
+        [MaxLength(100)]
         public string CustomerCode { get; set; }
         public decimal Discount { get; set; }
         public int SettlementPeriod { get; set; }
@@ -39,5 +44,7 @@ namespace GIGL.GIGLS.Core.Domain
         public string Password { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public bool IsRegisteredFromMobile { get; set; }
+        public bool isCodNeeded { get; set; }
     }
 }

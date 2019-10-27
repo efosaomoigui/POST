@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.CORE.IServices.Report;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.User;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -22,11 +23,14 @@ namespace GIGLS.WebApi.Controllers.Shipments
     {
         private readonly IShipmentService _service;
         private readonly IShipmentReportService _reportService;
+        private readonly IUserService _userService;
 
-        public ShipmentController(IShipmentService service, IShipmentReportService reportService) : base(nameof(ShipmentController))
+        public ShipmentController(IShipmentService service, IShipmentReportService reportService,
+            IUserService userService) : base(nameof(ShipmentController))
         {
             _service = service;
             _reportService = reportService;
+            _userService = userService;
         }
 
 
@@ -57,6 +61,11 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [Route("")]
         public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> GetShipments([FromUri]FilterOptionsDto filterOptionsDto)
         {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            filterOptionsDto.CountryId = userActiveCountry?.CountryId;
+
+
             return await HandleApiOperationAsync(async () =>
             {
                 var shipments = _service.GetShipments(filterOptionsDto);

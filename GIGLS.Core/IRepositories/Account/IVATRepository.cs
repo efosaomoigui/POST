@@ -8,6 +8,8 @@ namespace GIGLS.Core.IRepositories.Account
 {
     public interface IVATRepository : IRepository<VAT>
     {
-        Task<IEnumerable<VATDTO>> GetVATsAsync();
+        Task<List<VATDTO>> GetVATsAsync();
+        Task<VATDTO> GetVATById(int vatId);
+        Task<VATDTO> GetVATByCountry(int countryId);
     }
 }

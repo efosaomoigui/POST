@@ -5,6 +5,7 @@ using System.Data.Entity.ModelConfiguration.Conventions;
 using GIGLS.Core.Domain.Wallet;
 using System.Configuration;
 using System;
+using GIGLS.Core.View.AdminReportView;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -15,7 +16,7 @@ namespace GIGLS.Infrastructure.Persistence
             : base("GIGLSContextDB")
         {
             Database.SetInitializer<GIGLSContextForView>(null);
-            Database.Log = s => System.Diagnostics.Debug.WriteLine(s);
+            //Database.Log = s => System.Diagnostics.Debug.WriteLine(s);
 
             //Get Bank Deposit Module StartDate
             var isTimeOutCheck = ConfigurationManager.AppSettings["isTimeOut"];
@@ -36,6 +37,14 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<CustomerView> CustomerView { get; set; }
         public DbSet<ShipmentTrackingView> ScanTrackingView { get; set; }
         public DbSet<WalletPaymentLogView> WalletPaymentLogView { get; set; }
+        public DbSet<Report_AllTimeSalesByCountry> Report_AllTimeSalesByCountry { get; set; }
+        public DbSet<Report_BusiestRoute> Report_BusiestRoute { get; set; }
+        public DbSet<Report_CustomerRevenue> Report_CustomerRevenue { get; set; }
+        public DbSet<Report_MostShippedItemByWeight> Report_MostShippedItemByWeight { get; set; }
+        public DbSet<Report_RevenuePerServiceCentre> Report_RevenuePerServiceCentre { get; set; }
+        public DbSet<Report_TotalServiceCentreByState> Report_TotalServiceCentreByState { get; set; }
+        public DbSet<Report_TotalOrdersDelivered> Report_TotalOrdersDelivered { get; set; }
+
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

@@ -24,9 +24,15 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal Value { get; set; }
         public DateTime? DeliveryTime { get; set; }
         public PaymentStatus PaymentStatus { get; set; }
+
+        [MaxLength(100)]
         public string CustomerType { get; set; }
         public int CustomerId { get; set; }
+
+        [MaxLength(100)]
         public string CompanyType { get; set; }
+
+        [MaxLength(100)]
         public string CustomerCode { get; set; }
 
         //Receivers Information
@@ -69,6 +75,7 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal? ActualAmountCollected { get; set; }
 
         //General Details comes with role user
+        [MaxLength(128)]
         public string UserId { get; set; }
 
         public bool IsdeclaredVal { get; set; }
@@ -83,6 +90,8 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal? Total { get; set; }
 
         public decimal ShipmentPackagePrice { get; set; }
+
+        public decimal ShipmentPickupPrice { get; set; }
 
         //from client
         public decimal? vatvalue_display { get; set; }
@@ -105,5 +114,22 @@ namespace GIGL.GIGLS.Core.Domain
         //Sender's Address - added for the special case of corporate customers
         public string SenderAddress { get; set; }
         public string SenderState { get; set; }
+        //Shipment reroute
+        public ShipmentReroute ShipmentReroute { get; set; }
+        public bool IsCODPaidOut { get; set; }
+
+        //use to optimise shipment progress for shipment that has depart service centre
+        public ShipmentScanStatus ShipmentScanStatus { get; set; }
+
+        public bool IsGrouped { get; set; }
+
+        //Country info
+        public int DepartureCountryId { get; set; }
+        public int DestinationCountryId { get; set; }
+        public decimal CurrencyRatio { get; set; }
+
+        //new property for mobile
+        public string DeliveryNumber { get; set; }
+
     }
 }

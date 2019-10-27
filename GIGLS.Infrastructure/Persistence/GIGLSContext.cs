@@ -98,6 +98,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         public DbSet<ShipmentDeliveryOptionMapping> ShipmentDeliveryOptionMapping { get; set; }
 
+        public DbSet<Demurrage> Demurrage { get; set; }
         //customer
         public DbSet<Company> Company { get; set; }
         public DbSet<CompanyContactPerson> CompanyContactPerson { get; set; }
@@ -228,6 +229,8 @@ namespace GIGLS.Infrastructure.Persistence
         //Bank Settlement Order
         public DbSet<BankProcessingOrderForShipmentAndCOD> BankProcessingOrderForShipmentAndCOD { get; set; }
         public DbSet<BankProcessingOrderCodes> BankProcessingOrderCodes { get; set; }
+        public DbSet<CodPayOutList> CodPayOutList { get; set; }
+
         public DbSet<PreShipmentItemMobile> PresShipmentItemMobile { get; set; }
 
         public DbSet<PreShipmentMobile> PresShipmentMobile { get; set; }
@@ -243,7 +246,28 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<RegionServiceCentreMapping> RegionServiceCentreMappings { get; set; }
         public DbSet<MobileScanStatus> MobileScanStatus { get; set; }
 
+        public DbSet<HUBManifestWaybillMapping> HUBManifestWaybillMapping { get; set; }
 
+        public DbSet<Category> Category { get; set; }
+
+        public DbSet<SubCategory> SubCategory { get; set; }
+
+        public DbSet<PartnerTransactions> PartnerTransactions { get; set; }
+
+        public DbSet<MobileRating> MobileRating { get; set; }
+
+        public DbSet<ReferrerCode> ReferrerCode { get; set; }
+
+        public DbSet<DeliveryNumber> DeliveryNumber { get; set; }
+
+        public DbSet<VehicleType> VehicleType { get; set; }
+
+        public DbSet<PickupManifest> PickupManifest { get; set; }
+        
+        public DbSet<PickupManifestWaybillMapping> PickupManifestWaybillMapping { get; set; }
+        public DbSet<RiderDelivery> RiderDelivery { get; set; }
+        public DbSet<DeliveryLocation> DeliveryLocation { get; set; }
+        public DbSet<LGA> LGA { get; set; }
 
         #endregion
 

@@ -15,13 +15,23 @@ namespace GIGLS.Core.Domain
 
         public decimal Amount { get; set; }
         public PaymentStatus PaymentStatus { get; set; }
+
+        [MaxLength(100)]
         public string PaymentMethod { get; set; }
         public DateTime PaymentDate { get; set; }
+
+        [MaxLength(100), MinLength(5)]
         public string Waybill { get; set; }
         public DateTime DueDate { get; set; }
         public int ServiceCentreId { get; set; }
         public bool IsInternational { get; set; }
         public bool IsShipmentCollected { get; set; }
+
+        [MaxLength(100)]
         public string PaymentTypeReference { get; set; }
+        public int CountryId { get; set; }
+        public decimal Cash { get; set; }
+        public decimal Transfer { get; set; }
+        public decimal Pos { get; set; }
     }
 }

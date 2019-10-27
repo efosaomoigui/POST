@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.User;
 using GIGLS.CORE.Domain;
 using Microsoft.AspNet.Identity;
@@ -16,7 +17,8 @@ namespace GIGLS.Core.IServices.User
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCorporateCustomerUsers();
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetPartnerUsers();
         Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetSystemUsers();
-        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchCaptains();        
+        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchCaptains();
+        Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetDispatchRiders();
         Task<UserDTO> GetUserById(string userId);
         Task<UserDTO> GetUserByEmail(string email);
         Task<UserDTO> GetUserById(int userId);
@@ -60,5 +62,20 @@ namespace GIGLS.Core.IServices.User
         Task<UserDTO> GetUserByPhone(string PhoneNumber);
 
         IQueryable<GIGL.GIGLS.Core.Domain.User> GetCorporateCustomerUsersAsQueryable();
+
+        Task<int[]> GetPriviledgeCountryIds();
+        Task<List<CountryDTO>> GetPriviledgeCountrys();
+        Task<string> GetUserChannelCode();
+
+        Task<bool> UserActiveCountrySettings(string userid, int countryId);
+
+        Task<int[]> GetPriviledgeServiceCenters(string currentUserId);
+        Task<int[]> GetPriviledgeCountryIds(string currentUserId);
+        Task<List<CountryDTO>> GetPriviledgeCountrys(string currentUserId);
+        Task<IdentityResult> ForgotPassword(string email, string password);
+
+        Task<CountryDTO> GetUserActiveCountry();
+        Task<int> GetUserActiveCountryId();
+        Task<int[]> GetRegionServiceCenters(string currentUserId);
     }
 }
