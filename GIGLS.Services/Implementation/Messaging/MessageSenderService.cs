@@ -578,14 +578,16 @@ namespace GIGLS.Services.Implementation.Messaging
                  {
                      "Sender Name",
                      "Sender Email",
-                    "WaybillNumber"
-                    
+                    "WaybillNumber",
+                    "ExpectedTimeofDelivery"
+
                  };
 
                 var mobileMessageDTO = (MobileMessageDTO)obj;
                 //map the array
                 strArray[0] = mobileMessageDTO.SenderName;
                 strArray[1] = mobileMessageDTO.WaybillNumber;
+                strArray[3] = mobileMessageDTO.ExpectedTimeofDelivery;
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);

@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Admin;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Haulage;
@@ -114,7 +115,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<SummaryTransactionsDTO> GetPartnerWalletTransactions();
         Task<bool> UpdateVehicleProfile(UserDTO user);
         Task<IEnumerable<LGADTO>> GetActiveLGAs();
-
+        Task<AdminReportDTO> WebsiteData();
 
 
 

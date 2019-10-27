@@ -33,7 +33,11 @@
         CustomerWeekDate,
         CustomerWeekCount,
         CarPickupPrice,
-        VanPickupPrice
+        VanPickupPrice,
+        PickUpStartTime,
+        PickUpEndTime,
+        AddedMinutesForDeliveryTime,
+        EmailForDeliveryTime
 
     }
 }

@@ -36,6 +36,7 @@ using System.Drawing;
 using System.Web;
 using GIGLS.Core.DTO.User;
 using VehicleType = GIGLS.Core.Domain.VehicleType;
+using Hangfire;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -239,6 +240,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 preShipment.CountryId = Country.CountryId;
                 var Pickuprice = await GetPickUpPrice(preShipment.VehicleType,preShipment.CountryId);
                 var PickupValue = Convert.ToDecimal(Pickuprice);
+                var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
                 foreach (var preShipmentItem in preShipment.PreShipmentItems)
                 {
                     if (preShipmentItem.Quantity == 0)
@@ -278,13 +280,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         DeclaredValue += Convert.ToDecimal(preShipmentItem.Value);
                         var DeclaredValueForPreShipment = Convert.ToDecimal(preShipmentItem.Value);
                         preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M) + vatForPreshipment;
-                       //preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice / 100, 0);
+                        preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice);
                         preShipment.IsdeclaredVal = true;
                     }
                     else
                     {
                         preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + vatForPreshipment;
-                       //preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice / 100, 0) * 100;
+                        preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice);
                     }
                     Price += (decimal)preShipmentItem.CalculatedPrice;
                 };
@@ -292,7 +294,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 preShipment.DeliveryPrice = Price;
                 preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
                 preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice);
-                preShipment.CalculatedTotal = (double)preShipment.CalculatedTotal;
+                preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal);
                 preShipment.Value = DeclaredValue;
                 var returnprice = new MobilePriceDTO()
                 {
@@ -302,7 +304,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     GrandTotal = ((decimal)preShipment.CalculatedTotal + PickupValue),
                     PreshipmentMobile = preShipment,
                     CurrencySymbol = Country.CurrencySymbol,
-                    CurrencyCode = Country.CurrencyCode
+                    CurrencyCode = Country.CurrencyCode,
+                    IsWithinProcessingTime = IsWithinProcessingTime
                 };
                 return returnprice;
             }
@@ -582,11 +585,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 pickuprequest.UserId = userId;
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
                 {
-                    pickuprequest.Status = MobilePickUpRequestStatus.Rejected.ToString();
+                    var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.Status == MobilePickUpRequestStatus.Rejected.ToString());
+                    if (request == null)
+                    {
+                        await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
+                    }
+                    else
+                    {
+                        request.Status = pickuprequest.Status.ToString();
+                    }
                 }
-                else
+                else if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString()) 
                 {
-                    pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
+                    await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
                 }
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
                 if (preshipmentmobile != null)
@@ -600,16 +611,15 @@ namespace GIGLS.Services.Implementation.Shipments
                         preshipmentmobile.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude;
 
                     }
-                    await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
                     if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
-                    {
-                        preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Rejected.ToString();
-                    }
-                    else
                     {
                         preshipmentmobile.shipmentstatus = "Assigned for Pickup";
                     }
-                    await _uow.CompleteAsync();
+                    else
+                    {
+                        preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
+                    }
+                    
                     var newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
 
                     await ScanMobileShipment(new ScanDTO
@@ -617,12 +627,14 @@ namespace GIGLS.Services.Implementation.Shipments
                         WaybillNumber = pickuprequest.Waybill,
                         ShipmentScanStatus = ShipmentScanStatus.MAPT
                     });
+                    await _uow.CompleteAsync();
                     return newPreShipment;
                 }
                 else
                 {
                     throw new GenericException("Waybill Does Not Exist");
                 }
+                
             }
             catch
             {
@@ -643,7 +655,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         WaybillNumber = pickuprequest.Waybill,
                         ShipmentScanStatus = ShipmentScanStatus.MSHC
                     });
-                    var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems");
+                    var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
                     var DepartureStation = await _uow.Station.GetAsync(s => s.StationId == preshipmentmobile.SenderStationId);
                     var DestinationStation = await _uow.Station.GetAsync(s => s.StationId == preshipmentmobile.ReceiverStationId);
                     var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
@@ -702,6 +714,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.PickedUp.ToString();
                     preshipmentmobile.IsConfirmed = true;
+                    var item = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
+                    await CheckDeliveryTimeAndSendMail(item);
                     await _uow.CompleteAsync();
                 }
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
@@ -924,6 +938,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipments = _uow.PreShipmentMobile.FindAsync(s => s.UserId == user && s.shipmentstatus == MobilePickUpRequestStatus.Dispute.ToString(), "PreShipmentItems").Result;
                 var shipment = shipments.OrderByDescending(s => s.DateCreated);
                 var newPreShipment = Mapper.Map<List<PreShipmentMobileDTO>>(shipment);
+                foreach(var Shipment in newPreShipment)
+                {
+                    var country = await _uow.Country.GetCountryByStationId(Shipment.SenderStationId);
+                    Shipment.CurrencyCode = country.CurrencyCode;
+                    Shipment.CurrencySymbol = country.CurrencySymbol;
+                }
                 return newPreShipment;
             }
             catch(Exception)
@@ -1353,7 +1373,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     Partner.BankName = partner.BankName;
                     Partner.VehicleLicenseExpiryDate = partner.VehicleLicenseExpiryDate;
                     images.PartnerFullName = partner.FirstName + partner.LastName;
-                    if (partner.VehicleLicenseImageDetails != null)
+                    if (partner.VehicleLicenseImageDetails != null && !partner.VehicleLicenseImageDetails.Contains("agilityblob"))
                     {
                         images.FileType = ImageFileType.VehicleLicense;
                         images.ImageString = partner.VehicleLicenseImageDetails;
@@ -1367,21 +1387,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     foreach (var vehicle in partner.VehicleTypeDetails)
                     {
-                        if (vehicle.VehicleInsurancePolicyDetails != null)
+                        if (vehicle.VehicleInsurancePolicyDetails != null && !vehicle.VehicleInsurancePolicyDetails.Contains("agilityblob"))
                         {
                             images.FileType = ImageFileType.VehiceInsurancePolicy;
                             images.ImageString = vehicle.VehicleInsurancePolicyDetails;
                             vehicle.VehicleInsurancePolicyDetails = await LoadImage(images);
                         }
 
-                        if (vehicle.VehicleRoadWorthinessDetails != null)
+                        if (vehicle.VehicleRoadWorthinessDetails != null && !vehicle.VehicleRoadWorthinessDetails.Contains("agilityblob"))
                         {
                             images.FileType = ImageFileType.VehiceRoadWorthiness;
                             images.ImageString = vehicle.VehicleRoadWorthinessDetails;
                             vehicle.VehicleRoadWorthinessDetails = await LoadImage(images);
                         }
 
-                        if (vehicle.VehicleParticularsDetails != null)
+                        if (vehicle.VehicleParticularsDetails != null && !vehicle.VehicleParticularsDetails.Contains("agilityblob"))
                         {
                             images.FileType = ImageFileType.VehicleParticulars;
                             images.ImageString = vehicle.VehicleParticularsDetails;
@@ -1390,8 +1410,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         var VehicleDetails = await _uow.VehicleType.GetAsync(s => s.VehicleTypeId == vehicle.VehicleTypeId && s.Partnercode == partner.PartnerCode);
                         if (VehicleDetails != null)
                         {
-                            VehicleDetails.VehiceInsurancePolicyDetails = vehicle.VehicleInsurancePolicyDetails;
-                            VehicleDetails.VehiceRoadWorthinessDetails = vehicle.VehicleRoadWorthinessDetails;
+                            VehicleDetails.VehicleInsurancePolicyDetails = vehicle.VehicleInsurancePolicyDetails;
+                            VehicleDetails.VehicleRoadWorthinessDetails = vehicle.VehicleRoadWorthinessDetails;
                             VehicleDetails.VehicleParticularsDetails = vehicle.VehicleParticularsDetails;
                             VehicleDetails.VehiclePlateNumber = vehicle.VehiclePlateNumber;
                             VehicleDetails.Vehicletype = vehicle.Vehicletype;
@@ -1684,6 +1704,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var destinationStationId = haulagePricingDto.DestinationStationId;
             var haulageid = haulagePricingDto.Haulageid;
             var country = await _uow.Country.GetCountryByStationId(departureStationId);
+            var IsWithinProcessingTime = await WithinProcessingTime(country.CountryId);
 
             //check haulage exists
             var haulage = await _haulageService.GetHaulageById(haulageid);
@@ -1721,7 +1742,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 price = fixedRate + distance * haulage.AdditionalRate;
             }
 
-            return new MobilePriceDTO{ GrandTotal = price, CurrencySymbol = country.CurrencySymbol, CurrencyCode = country.CurrencyCode};
+            return new MobilePriceDTO{ GrandTotal = price,
+                CurrencySymbol = country.CurrencySymbol,
+                CurrencyCode = country.CurrencyCode,
+                IsWithinProcessingTime = IsWithinProcessingTime
+            };
         }
 
 
@@ -1810,7 +1835,70 @@ namespace GIGLS.Services.Implementation.Shipments
             return true;
         }
 
-       
+        private async Task<bool> WithinProcessingTime (int CountryId)
+        {
+            bool IsWithinTime = false;
+            var Startime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpStartTime, CountryId); 
+            var Endtime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpEndTime, CountryId); ;
+            TimeSpan start = new TimeSpan(Convert.ToInt32(Startime.Value), 0, 0);
+            TimeSpan end = new TimeSpan(Convert.ToInt32(Endtime.Value), 0, 0);
+            //TimeSpan now = new TimeSpan(19, 0, 0);
+            TimeSpan now = DateTime.Now.TimeOfDay;
+            if (now > start && now < end)
+            {
+               IsWithinTime = true;
+            }
+            return IsWithinTime;
+
+        }
+        private async Task<int> CalculateTimeBasedonLocation(PreShipmentMobileDTO item)
+        {
+            var Location = new LocationDTO
+            {
+                DestinationLatitude = (double)item.ReceiverLocation.Latitude,
+                DestinationLongitude = (double)item.ReceiverLocation.Longitude,
+                OriginLatitude = (double)item.SenderLocation.Latitude,
+                OriginLongitude = (double)item.SenderLocation.Longitude
+            };
+            RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
+            var time = (details.rows[0].elements[0].duration.value / 60);
+            return time;
+
+        }
+        public async Task DetermineShipmentstatus(string waybill, int countryid,DateTime ExpectedTimeOfDelivery)
+        {
+            var status = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
+            if(status!=null)
+            {
+                if(status.Status == MobilePickUpRequestStatus.Confirmed.ToString())
+                {
+                    var time = string.Format("{0:f}", ExpectedTimeOfDelivery);
+                    var Email = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EmailForDeliveryTime, countryid);
+                    var message = new MobileMessageDTO
+                    {
+                        SenderEmail = Email.Value,
+                        WaybillNumber = waybill,
+                        ExpectedTimeofDelivery = time
+                    };
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.UDM, message);
+                }
+            }
+
+        }
+        private async Task CheckDeliveryTimeAndSendMail(PreShipmentMobileDTO item)
+        {
+            var time = await CalculateTimeBasedonLocation(item);
+            var country =await _uow.Country.GetCountryByStationId(item.SenderStationId);
+            var additionaltime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.AddedMinutesForDeliveryTime, country.CountryId);
+            var addedtime = int.Parse(additionaltime.Value);
+            var totaltime = time + addedtime;
+            var NewTime = DateTime.Now.AddMinutes(totaltime);
+            BackgroundJob.Schedule(() => DetermineShipmentstatus(item.Waybill, country.CountryId, NewTime), TimeSpan.FromMinutes(totaltime));
+
+        }
+
+
+
     }
 
 
