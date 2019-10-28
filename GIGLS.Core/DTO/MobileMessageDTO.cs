@@ -14,6 +14,7 @@ namespace GIGLS.Core.DTO
         public string SenderPhoneNumber { get; set; }
 
         public int OTP { get; set; }
+        public string ExpectedTimeofDelivery { get; set; }
        
     }
 }

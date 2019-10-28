@@ -35,7 +35,9 @@
         CarPickupPrice,
         VanPickupPrice,
         PickUpStartTime,
-        PickUpEndTime
+        PickUpEndTime,
+        AddedMinutesForDeliveryTime,
+        EmailForDeliveryTime
 
     }
 }
