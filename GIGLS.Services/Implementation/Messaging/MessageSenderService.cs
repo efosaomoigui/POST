@@ -174,12 +174,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), invoice.CustomerType);
                     var customerObj = await _customerService.GetCustomer(invoice.CustomerId, customerType);
 
-                    var userActiveCountryId = 1;
-                    try
-                    {
-                        userActiveCountryId = await _userService.GetUserActiveCountryId();
-                    }
-                    catch (Exception ex) { }
+                    
+                   var userActiveCountryId = await _userService.GetUserActiveCountryId();
 
                     //Get DemurrageDayCount from GlobalProperty
                     var demurrageDayCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurrageDayCount, userActiveCountryId);
