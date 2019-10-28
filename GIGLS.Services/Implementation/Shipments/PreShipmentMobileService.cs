@@ -459,9 +459,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new GenericException("An error occurred while trying to get preshipment for a particular user.");
+                throw ex;
             }
         }
 
