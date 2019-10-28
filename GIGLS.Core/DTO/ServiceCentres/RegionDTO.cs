@@ -1,6 +1,4 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.CORE.DTO;
-using System.Collections.Generic;
+﻿using GIGLS.CORE.DTO;
 
 namespace GIGLS.Core.DTO.ServiceCentres
 {

@@ -382,6 +382,7 @@
     <Compile Include="Controllers\Wallet\WalletController.cs" />
     <Compile Include="Controllers\Wallet\WalletPaymentLogController.cs" />
     <Compile Include="Controllers\Wallet\WalletTransactionController.cs" />
+    <Compile Include="Controllers\Wallet\WaybillPaymentLogController.cs" />
     <Compile Include="Controllers\Zone\CountryRouteZoneMapController.cs" />
     <Compile Include="Controllers\Zone\DeliveryOptionController.cs" />
     <Compile Include="Controllers\Zone\DeliveryOptionPriceController.cs" />
