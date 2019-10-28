@@ -586,18 +586,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 pickuprequest.UserId = userId;
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
                 {
-                    var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.Status == MobilePickUpRequestStatus.Rejected.ToString());
+                    var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.UserId == userId && s.Status == MobilePickUpRequestStatus.Rejected.ToString());
                     if (request == null)
                     {
                         await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
                     }
                     else
                     {
-                        request.Status = pickuprequest.Status.ToString();
+                        throw new GenericException($"Shipment with waybill number: {pickuprequest.Waybill} exists already");
                     }
                 }
-                else if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString()) 
+                else
                 {
+                    pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
                     await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
                 }
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
@@ -612,7 +613,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         preshipmentmobile.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude;
 
                     }
-                    if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
+                    if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString())
                     {
                         preshipmentmobile.shipmentstatus = "Assigned for Pickup";
                     }
