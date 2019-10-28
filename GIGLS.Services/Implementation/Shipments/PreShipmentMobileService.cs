@@ -406,7 +406,6 @@ namespace GIGLS.Services.Implementation.Shipments
                                                           {
                                                               PreShipmentMobileId = r.PreShipmentMobileId,
                                                               Waybill = r.Waybill,
-                                                              CustomerType = r.CustomerType,
                                                               ActualDateOfArrival = r.ActualDateOfArrival,
                                                               DateCreated = r.DateCreated,
                                                               DateModified = r.DateModified,
@@ -414,7 +413,6 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               ReceiverAddress = r.ReceiverAddress,
                                                               SenderAddress = r.SenderAddress,
                                                               SenderPhoneNumber = r.SenderPhoneNumber,
-                                                              ReceiverCity = r.ReceiverCity,
                                                               ReceiverCountry = r.ReceiverCountry,
                                                               SenderStationId = r.SenderStationId,
                                                               ReceiverStationId = r.ReceiverStationId,
@@ -429,9 +427,6 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               GrandTotal = r.GrandTotal,
                                                               DeliveryPrice = r.DeliveryPrice,
                                                               CalculatedTotal = r.CalculatedTotal,
-                                                              InsuranceValue = r.InsuranceValue,
-                                                              DiscountValue = r.DiscountValue,
-                                                              CompanyType = r.CompanyType,
                                                               CustomerCode = r.CustomerCode
                                                           }).ToList();
                 foreach (var Shipment in shipmentDto)
@@ -440,9 +435,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (PartnerId != null)
                     {
                         var partneruser = await _uow.User.GetUserById(PartnerId.UserId);
-                        Shipment.PartnerFirstName = partneruser.FirstName;
-                        Shipment.PartnerLastName = partneruser.LastName;
-                        Shipment.PartnerImageUrl = partneruser.PictureUrl;
+                        if (partneruser != null)
+                        {
+                            Shipment.PartnerFirstName = partneruser.FirstName;
+                            Shipment.PartnerLastName = partneruser.LastName;
+                            Shipment.PartnerImageUrl = partneruser.PictureUrl;
+                        }
                     }
                     var rating = await _uow.MobileRating.GetAsync(j => j.Waybill == Shipment.Waybill);
                     if (rating != null)
@@ -454,14 +452,17 @@ namespace GIGLS.Services.Implementation.Shipments
                         Shipment.IsRated = false;
                     }
                     var country = await _uow.Country.GetCountryByStationId(Shipment.SenderStationId);
-                    Shipment.CurrencyCode = country.CurrencyCode;
-                    Shipment.CurrencySymbol = country.CurrencySymbol;
+                    if (country != null)
+                    {
+                        Shipment.CurrencyCode = country.CurrencyCode;
+                        Shipment.CurrencySymbol = country.CurrencySymbol;
+                    }
                 }
                 return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new GenericException("An error occurred while trying to get preshipment for a particular user.");
+                throw ex;
             }
         }
 
@@ -585,18 +586,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 pickuprequest.UserId = userId;
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
                 {
-                    var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.Status == MobilePickUpRequestStatus.Rejected.ToString());
+                    var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.UserId == userId && s.Status == MobilePickUpRequestStatus.Rejected.ToString());
                     if (request == null)
                     {
                         await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
                     }
                     else
                     {
-                        request.Status = pickuprequest.Status.ToString();
+                        throw new GenericException($"Shipment with waybill number: {pickuprequest.Waybill} exists already");
                     }
                 }
-                else if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString()) 
+                else
                 {
+                    pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
                     await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
                 }
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
@@ -611,7 +613,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         preshipmentmobile.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude;
 
                     }
-                    if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
+                    if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString())
                     {
                         preshipmentmobile.shipmentstatus = "Assigned for Pickup";
                     }

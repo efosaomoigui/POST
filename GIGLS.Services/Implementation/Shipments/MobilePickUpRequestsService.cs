@@ -30,13 +30,12 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == PickUpRequest.Waybill);
+                var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == PickUpRequest.Waybill && s.UserId == PickUpRequest.UserId);
                 if (MobilePickupRequests != null)
                 {
-                    if (MobilePickupRequests.Status != MobilePickUpRequestStatus.Rejected.ToString())
-                    {
-                        throw new GenericException($"Shipment with waybill number: {PickUpRequest.Waybill} exists already");
-                    }
+                   
+                   throw new GenericException($"Shipment with waybill number: {PickUpRequest.Waybill} exists already");
+                    
                 }
                 var newMobilePickUpRequest = Mapper.Map<MobilePickUpRequests>(PickUpRequest);
                 _uow.MobilePickUpRequests.Add(newMobilePickUpRequest);
@@ -91,7 +90,8 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task UpdateMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest)
         {
                 try
-                { var userId = await _userservice.GetCurrentUserId();
+                {
+                var userId = await _userservice.GetCurrentUserId();
                     var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == PickUpRequest.Waybill && s.UserId == userId && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
                     if (MobilePickupRequests == null)
                     {
