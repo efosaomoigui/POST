@@ -79,11 +79,10 @@ namespace GIGLS.Services.Implementation.Partnership
                 Totalprice = Convert.ToDecimal(string.Format("{0:F2}", Totalprice));
                 var Sumofpickupandgooglapicalc =  0.8M * (Totalprice + partnerpay.ShipmentPrice);
                 TotalPrice = Convert.ToDecimal(string.Format("{0:F2}", Sumofpickupandgooglapicalc));
-
-
             }
             return await Task.FromResult(TotalPrice);
         }
+
         public async Task<object> AddPartnerPaymentLog(PartnerTransactionsDTO walletPaymentLogDto)
         {
             
