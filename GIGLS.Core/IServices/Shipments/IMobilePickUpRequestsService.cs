@@ -10,7 +10,7 @@ namespace GIGLS.Core.IServices.Shipments
     public interface IMobilePickUpRequestsService : IServiceDependencyMarker
     {
         Task AddMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest);
-        Task UpdateMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest);
+        Task UpdateMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest, string userId);
         Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequests();
 
         Task<Partnerdto> GetMonthlyTransactions();

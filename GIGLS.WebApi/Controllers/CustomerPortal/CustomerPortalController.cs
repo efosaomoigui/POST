@@ -695,6 +695,15 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 {
                     logindetail.Password = logindetail.Password.Trim();
                 }
+                if (user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
+                {
+                    var jObject = JObject.FromObject(user);
+                    return new ServiceResponse<JObject>
+                    {
+                        ShortDescription = "You are not authorized to login on this platform.",
+                        Object = jObject
+                    };
+                }
                 if (user != null && user.IsActive == true)
                 {
                     using (var client = new HttpClient())
