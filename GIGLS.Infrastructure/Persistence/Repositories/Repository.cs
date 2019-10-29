@@ -58,15 +58,11 @@ namespace GIGLS.Infrastructure.Persistence.Repository
             return Context.Set<TEntity>().AsQueryable();
         }
 
-        //public IEnumerable<TEntity> GetAll()
-        //{
-        //    return Context.Set<TEntity>().ToList();
-        //}
         public IEnumerable<TEntity> GetAll(string includeProperties)
         {
             IQueryable<TEntity> query = Context.Set<TEntity>();
             query = _IncludeProperties(query, includeProperties);
-            return query.ToList();  // Context.Set<TEntity>().ToList();
+            return query.ToList();  
         }
         public IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
         {

@@ -264,6 +264,7 @@
     <Compile Include="Domain\Wallet\WalletNumber.cs" />
     <Compile Include="Domain\Wallet\WalletPaymentLog.cs" />
     <Compile Include="Domain\Wallet\WalletTransaction.cs" />
+    <Compile Include="Domain\Wallet\WaybillPaymentLog.cs" />
     <Compile Include="Domain\WaybillNumber.cs" />
     <Compile Include="Domain\WeightLimit.cs" />
     <Compile Include="Domain\WeightLimitPrice.cs" />
@@ -336,6 +337,7 @@
     <Compile Include="DTO\Nav\SubSubNavDTO.cs" />
     <Compile Include="DTO\NotificationDTO.cs" />
     <Compile Include="DTO\OnlinePayment\PaystackWebhookDTO.cs" />
+    <Compile Include="DTO\OnlinePayment\TheTellerNetDTO.cs" />
     <Compile Include="DTO\OTPDTO.cs" />
     <Compile Include="DTO\PartnerMonthlyTransactionsDTO.cs" />
     <Compile Include="DTO\Partnership\RootObject.cs" />
@@ -437,6 +439,7 @@
     <Compile Include="DTO\Wallet\WalletSearchOption.cs" />
     <Compile Include="DTO\Wallet\WalletTransactionDto.cs" />
     <Compile Include="DTO\Wallet\WalletTransactionSummaryDTO.cs" />
+    <Compile Include="DTO\Wallet\WaybillPaymentLogDTO.cs" />
     <Compile Include="DTO\Workshops\WorkshopDTO.cs" />
     <Compile Include="DTO\Zone\DeliveryOptionDTO.cs" />
     <Compile Include="DTO\Zone\DeliveryOptionPriceDTO.cs" />
@@ -629,6 +632,7 @@
     <Compile Include="IRepositories\Wallet\IWalletPaymentLogRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletTransactionRepository.cs" />
+    <Compile Include="IRepositories\Wallet\IWaybillPaymentLogRepository.cs" />
     <Compile Include="IRepositories\Workshops\IWorkshopRepository.cs" />
     <Compile Include="IRepositories\Zone\IDeliveryOptionPriceRepository.cs" />
     <Compile Include="IRepositories\Zone\IDeliveryOptionRepository.cs" />
@@ -762,6 +766,7 @@
     <Compile Include="IServices\Wallet\IWalletPaymentLogService.cs" />
     <Compile Include="IServices\Wallet\IWalletService.cs" />
     <Compile Include="IServices\Wallet\IWalletTransactionService.cs" />
+    <Compile Include="IServices\Wallet\IWaybillPaymentLogService.cs" />
     <Compile Include="IServices\Workshops\IWorkshopService.cs" />
     <Compile Include="IServices\Zone\IDeliveryOptionPriceService.cs" />
     <Compile Include="IServices\Zone\IDeliveryOptionService.cs" />
