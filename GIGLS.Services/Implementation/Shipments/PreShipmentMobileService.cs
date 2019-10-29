@@ -1929,7 +1929,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var status = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
             if(status!=null)
             {
-                if(status.Status == MobilePickUpRequestStatus.Confirmed.ToString())
+                if(status.Status != MobilePickUpRequestStatus.Delivered.ToString())
                 {
                     var time = string.Format("{0:f}", ExpectedTimeOfDelivery);
                     var Email = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EmailForDeliveryTime, countryid);
