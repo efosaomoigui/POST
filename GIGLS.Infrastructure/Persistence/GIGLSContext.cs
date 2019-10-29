@@ -269,6 +269,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<RiderDelivery> RiderDelivery { get; set; }
         public DbSet<DeliveryLocation> DeliveryLocation { get; set; }
         public DbSet<LGA> LGA { get; set; }
+        public DbSet<Bank> Bank { get; set; }
 
         #endregion
 

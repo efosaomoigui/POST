@@ -121,6 +121,7 @@
     <Compile Include="Persistence\Repositories\Account\InvoiceRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\InvoiceShipmentRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\VATRepository.cs" />
+    <Compile Include="Persistence\Repositories\BankSettlement\BankRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\CodPayOutListRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\BankProcessingOrderCodesRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\BankProcessingOrderForShipmentAndCODRepository.cs" />

@@ -386,6 +386,9 @@ namespace GIGLS.Core
 
                 config.CreateMap<WaybillPaymentLog, WaybillPaymentLogDTO>();
                 config.CreateMap<WaybillPaymentLogDTO, WaybillPaymentLog>();
+
+                config.CreateMap<Bank, BankDTO>();
+                config.CreateMap<BankDTO, Bank>();
             });
 
             isInit = true;
