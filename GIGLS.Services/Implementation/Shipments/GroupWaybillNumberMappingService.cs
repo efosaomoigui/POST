@@ -391,7 +391,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    foreach (var waybillNumber in waybillNumberList)
+                    //convert the list to HashSet to remove duplicate
+                    var newWaybillNumberList = new HashSet<string>(waybillNumberList);
+
+                    foreach (var waybillNumber in newWaybillNumberList)
                     {
                         var shipmentDTO = await _uow.Shipment.GetAsync(x => x.Waybill == waybillNumber);
 
