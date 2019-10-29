@@ -98,7 +98,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException("Pickup Request Does Not Exist");
                     }
                     MobilePickupRequests.Status = PickUpRequest.Status;
-                    //await _uow.CompleteAsync();
+                    await _uow.CompleteAsync();
                 }
                 catch (Exception)
                 {
