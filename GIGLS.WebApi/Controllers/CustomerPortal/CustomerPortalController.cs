@@ -697,12 +697,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 }
                 if (user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
                 {
-                    var jObject = JObject.FromObject(user);
-                    return new ServiceResponse<JObject>
-                    {
-                        ShortDescription = "You are not authorized to login on this platform.",
-                        Object = jObject
-                    };
+                    throw new GenericException("You are not authorized to login on this platform.");
                 }
                 if (user != null && user.IsActive == true)
                 {
@@ -768,7 +763,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 }
                 else
                 {
-                    var jObject = JObject.FromObject(user);
+                    
+                    var data = new { IsActive = false };
+
+                    var jObject = JObject.FromObject(data);
+
                     return new ServiceResponse<JObject>
                     {
                         ShortDescription = "User has not been verified",
