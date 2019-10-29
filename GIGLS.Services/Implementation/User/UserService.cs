@@ -1,19 +1,15 @@
 ﻿using AutoMapper;
-using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
-using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.CORE.Domain;
 using GIGLS.Infrastructure;
-using GIGLS.Services.Implementation.Utility;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
@@ -1396,6 +1392,11 @@ namespace GIGLS.Services.Implementation.User
             }
 
             return serviceCenterIds;
+        }
+
+        public async Task<bool> IsUserHasAdminRole(string userId)
+        {
+            return await _unitOfWork.User.IsUserHasAdminRole(userId);
         }
     }
 }

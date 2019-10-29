@@ -239,7 +239,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.Manifest.Add(newManifest);
                 }
 
-                foreach (var groupWaybillNumber in groupWaybillNumberList)
+
+                //convert the list to HashSet to remove duplicate
+                var newGroupWaybillNumberList = new HashSet<string>(groupWaybillNumberList);
+
+                foreach (var groupWaybillNumber in newGroupWaybillNumberList)
                 {
                     var groupWaybillNumberDTO = await _groupWaybillNumberService.GetGroupWayBillNumberById(groupWaybillNumber);
 
