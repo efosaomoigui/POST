@@ -7,7 +7,6 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.BankSettlement
@@ -27,6 +26,7 @@ namespace GIGLS.Services.Implementation.BankSettlement
             var banks = _uow.Bank.GetAll().OrderBy(x => x.BankName);
             return Task.FromResult(Mapper.Map<IEnumerable<BankDTO>>(banks));
         }
+
         public async Task<BankDTO> GetBankById(int bankId)
         {
             try
@@ -44,6 +44,7 @@ namespace GIGLS.Services.Implementation.BankSettlement
                 throw;
             }
         }
+
         public async Task<object> AddBank(BankDTO bankDTO)
         {
             try
@@ -63,33 +64,38 @@ namespace GIGLS.Services.Implementation.BankSettlement
             {
                 throw;
             }
-            
-            
         }
+        
         public async Task UpdateBank (int bankId, BankDTO bankDTO)
         {
             try
             {
-                var bank = await _uow.Bank.GetAsync(bankId);
-                //to check if the update already esists
+                //To check if the update already esists
                 var banks = await _uow.Bank.ExistAsync(c => c.BankName.ToLower() == bankDTO.BankName.ToLower());
 
-                if(bank == null || bankDTO.BankId != bankId)
-                {
-                    throw new GenericException("Bank information does not exist");
-                }
-                else if (banks == true)
+                if (banks)
                 {
                     throw new GenericException("Bank information already exists");
                 }
-                bank.BankName = bankDTO.BankName;
-                _uow.Complete();
+                else
+                {
+                    var bank = await _uow.Bank.GetAsync(bankId);
+
+                    if (bank == null || bankDTO.BankId != bankId)
+                    {
+                        throw new GenericException("Bank information does not exist");
+                    }
+
+                    bank.BankName = bankDTO.BankName;
+                    _uow.Complete();
+                }                
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
         public async Task DeleteBank (int bankId)
         {
             try

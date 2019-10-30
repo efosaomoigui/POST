@@ -1,5 +1,4 @@
 ﻿using GIGLS.Core.Domain;
-using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.Enums;
 using System;
 using System.Collections.Generic;
@@ -7,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace GIGLS.Core.DTO.BankSettlement
 {
- 
+
     public class BankProcessingOrderForShipmentAndCODDTO : BaseDomain, IAuditable
     {
         [Key]
@@ -46,15 +45,8 @@ namespace GIGLS.Core.DTO.BankSettlement
         public DepositStatus Status { get; set; }
         public string VerifiedBy { get; set; }
         public string BankName { get; set; }
-        //Shipment Items
+                
         public List<BankProcessingOrderForShipmentAndCODDTO> ShipmentAndCOD { get; set; }
-
-        ////COD Items
-        //public List<CashOnDeliveryRegisterAccount> CODRegister { get; set; }
-
-        ////Demurrage Items
-        //public List<DemurrageRegisterAccount> DemurrageRegister { get; set; }
-
     }
 
     public class CodPayOutListDTO : BaseDomain, IAuditable 
@@ -75,7 +67,6 @@ namespace GIGLS.Core.DTO.BankSettlement
 
     public class CombiineBankOrDerDTO : BaseDomain, IAuditable  
     {
-        //public BankProcessingOrderForShipmentAndCODDTO f =  new BankProcessingOrderForShipmentAndCODDTO();
         public BankProcessingOrderCodesDTO orderval = new BankProcessingOrderCodesDTO();
         public decimal CODAmount { get; set; } 
     }

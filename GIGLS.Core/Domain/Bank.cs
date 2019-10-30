@@ -5,10 +5,6 @@ namespace GIGLS.Core.Domain
 {
     public class Bank : BaseDomain, IAuditable
     {
-        public Bank()
-        {
-        }
-
         public int BankId { get; set; }
 
         [MaxLength(100), MinLength(2)]

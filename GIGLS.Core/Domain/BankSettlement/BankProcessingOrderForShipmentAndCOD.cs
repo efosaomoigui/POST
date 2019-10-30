@@ -1,10 +1,9 @@
 ﻿using GIGLS.Core.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGLS.Core.Domain.BankSettlement
-{ 
+{
 
     public class BankProcessingOrderForShipmentAndCOD : BaseDomain, IAuditable  
     {
