@@ -1666,7 +1666,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 CreateGeneralLedger(shipment);
                 var newShipment = Mapper.Map<Shipment>(shipment);
                 _uow.Shipment.Add(newShipment);
-                await _uow.CompleteAsync();
+                //await _uow.CompleteAsync();
                 return true;
             }
             catch (Exception ex)

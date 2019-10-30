@@ -695,6 +695,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 {
                     logindetail.Password = logindetail.Password.Trim();
                 }
+                if (user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
+                {
+                    throw new GenericException("You are not authorized to login on this platform.");
+                }
                 if (user != null && user.IsActive == true)
                 {
                     using (var client = new HttpClient())
@@ -759,7 +763,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 }
                 else
                 {
-                    var jObject = JObject.FromObject(user);
+                    
+                    var data = new { IsActive = false };
+
+                    var jObject = JObject.FromObject(data);
+
                     return new ServiceResponse<JObject>
                     {
                         ShortDescription = "User has not been verified",

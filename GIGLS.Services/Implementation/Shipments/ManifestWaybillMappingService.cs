@@ -346,6 +346,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+        
         //map waybill to Manifest (Pickup)
         public async Task MappingManifestToWaybillsPickup(string manifest, List<string> waybills)
         {
@@ -380,7 +381,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.PickupManifest.Add(newManifest);
                 }
 
-                foreach (var waybill in waybills)
+                var newWaybillList = new HashSet<string>(waybills);
+
+                var newMappingList = new List<PickupManifestWaybillMapping>();
+
+                foreach (var waybill in newWaybillList)
                 {
                     //check if the waybill exist
                     var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
@@ -402,10 +407,15 @@ namespace GIGLS.Services.Implementation.Shipments
                             IsActive = true,
                             ServiceCentreId = serviceIds[0]
                         };
-                        _uow.PickupManifestWaybillMapping.Add(newMapping);
+
+                        newMappingList.Add(newMapping);
+
+                        //_uow.PickupManifestWaybillMapping.Add(newMapping);
+
                         shipment.shipmentstatus = "Assigned for Pickup";
                     }
                 }
+                _uow.PickupManifestWaybillMapping.AddRange(newMappingList);
                 _uow.Complete();
             }
             catch (Exception) { }

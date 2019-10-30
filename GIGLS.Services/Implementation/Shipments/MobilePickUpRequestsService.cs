@@ -87,11 +87,11 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task UpdateMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest)
+        public async Task UpdateMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest, string userId)
         {
                 try
                 {
-                var userId = await _userservice.GetCurrentUserId();
+                    //var userId = await _userservice.GetCurrentUserId();
                     var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == PickUpRequest.Waybill && s.UserId == userId && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
                     if (MobilePickupRequests == null)
                     {

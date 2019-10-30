@@ -276,5 +276,21 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             var user = _userManager.Users.Where(x => x.PhoneNumber.Contains(PhoneNumber)).FirstOrDefault();
             return Task.FromResult(user);
         }
+
+        public Task<bool> IsUserHasAdminRole(string userId)
+        {
+            bool hasAdminRole = false;
+
+            var user = _userManager.Users
+                .Where(x => x.IsDeleted == false && x.Id == userId 
+                && (x.SystemUserRole == "Chairman" || x.SystemUserRole == "Administrator" || x.SystemUserRole == "Director")).FirstOrDefault();
+
+            if(user != null)
+            {
+                hasAdminRole = true;
+            }
+
+            return Task.FromResult(hasAdminRole);
+        }
     }
 }
