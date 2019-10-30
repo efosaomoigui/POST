@@ -34,7 +34,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> CreateCustomer(string CustomerCode);
 
         Task<bool> UpdateDeliveryNumber(MobileShipmentNumberDTO detail);
-        Task<string> CreatePartner(string CustomerCode);
+        Task<PartnerDTO> CreatePartner(string CustomerCode);
         Task<bool> deleterecord(string detail);
         Task<bool> VerifyPartnerDetails(PartnerDTO partner);
 

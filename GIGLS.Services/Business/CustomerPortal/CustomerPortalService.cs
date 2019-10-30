@@ -1754,7 +1754,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.CreateCustomer(CustomerCode);
         }
-        public async Task<string> CreatePartner(string CustomerCode)
+        public async Task<PartnerDTO> CreatePartner(string CustomerCode)
         {
             return await _preShipmentMobileService.CreatePartner(CustomerCode);
         }
@@ -1845,6 +1845,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<AdminReportDTO> WebsiteData()
         {
             return await _adminReportService.DisplayWebsiteData();
+        }
+        public async Task AddWallet(WalletDTO wallet)
+        {
+            await _walletService.AddWallet(wallet);
         }
 
     }

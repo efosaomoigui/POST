@@ -47,17 +47,15 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         //private readonly IUnitOfWork _uow;
         private readonly ICustomerPortalService _portalService;
         private readonly IPaystackPaymentService _paymentService;
-        private readonly IPreShipmentMobileService _preshipmentmobileService;
         
 
 
-        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IPreShipmentMobileService preshipmentmobileService
-            ) : base(nameof(CustomerPortalController))
+        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService) : base(nameof(CustomerPortalController))
         {
             // _uow = uow;
             _portalService = portalService;
             _paymentService = paymentService;
-            _preshipmentmobileService = preshipmentmobileService;
+           
             
         }
 
@@ -683,22 +681,22 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var user = await _portalService.CheckDetails(logindetail.UserDetail,logindetail.UserChannelType);
-                var vehicle = user.VehicleType;
-                var partnerType = "";
-                if (user.Username != null)
-                {
-                    user.Username = user.Username.Trim();
-                }
+            var user = await _portalService.CheckDetails(logindetail.UserDetail, logindetail.UserChannelType);
+            var vehicle = user.VehicleType;
+            var partnerType = "";
+            if (user.Username != null)
+            {
+                user.Username = user.Username.Trim();
+            }
 
-                if (logindetail.Password != null)
-                {
-                    logindetail.Password = logindetail.Password.Trim();
-                }
-                if (user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
-                {
-                    throw new GenericException("You are not authorized to login on this platform.");
-                }
+            if (logindetail.Password != null)
+            {
+                logindetail.Password = logindetail.Password.Trim();
+            }
+            if (user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
+            {
+                throw new GenericException("You are not authorized to login on this platform.");
+            }
                 if (user != null && user.IsActive == true)
                 {
                     using (var client = new HttpClient())
@@ -713,10 +711,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                         //setup login data
                         var formContent = new FormUrlEncodedContent(new[]
                         {
-                         new KeyValuePair<string, string>("grant_type", "password"),
-                         new KeyValuePair<string, string>("Username", user.Username),
-                         new KeyValuePair<string, string>("Password", logindetail.Password),
-                         });
+                        new KeyValuePair<string, string>("grant_type", "password"),
+                        new KeyValuePair<string, string>("Username", user.Username),
+                        new KeyValuePair<string, string>("Password", logindetail.Password),
+                        });
 
                         //setup login data
                         HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
@@ -733,37 +731,47 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             }
                             if (logindetail.UserChannelType == UserChannelType.Partner.ToString())
                             {
-                                var response = await _portalService.CreatePartner(user.UserChannelCode);
-                                partnerType = response;
+                                var partner = await _portalService.CreatePartner(user.UserChannelCode);
+                                partnerType = partner.PartnerType.ToString();
                                 if (partnerType == PartnerType.InternalDeliveryPartner.ToString())
+                                {
                                     user.IsVerified = true;
+                                    await _portalService.AddWallet(new WalletDTO
+                                    {
+                                        CustomerId = partner.PartnerId,
+                                        CustomerType = CustomerType.Partner,
+                                        CustomerCode = user.UserChannelCode,
+                                        CompanyType = CustomerType.Partner.ToString()
+                                    });
+
+                                }
+                                if (logindetail.UserChannelType == UserChannelType.Ecommerce.ToString())
+                                {
+                                    var response = await _portalService.CreateCompany(user.UserChannelCode);
+                                }
+
                             }
-                            if (logindetail.UserChannelType == UserChannelType.Ecommerce.ToString())
+                            //get access token from response body
+                            var responseJson = await responseMessage.Content.ReadAsStringAsync();
+                            var jObject = JObject.Parse(responseJson);
+
+                            getTokenResponse = jObject.GetValue("access_token").ToString();
+                            return new ServiceResponse<JObject>
                             {
-                                var response = await _portalService.CreateCompany(user.UserChannelCode);
-                            }
+                                VehicleType = vehicle,
+                                Object = jObject,
+                                ReferrerCode = user.Referrercode,
+                                AverageRatings = user.AverageRatings,
+                                IsVerified = user.IsVerified,
+                                PartnerType = partnerType
 
+                            };
                         }
-                        //get access token from response body
-                        var responseJson = await responseMessage.Content.ReadAsStringAsync();
-                        var jObject = JObject.Parse(responseJson);
-
-                        getTokenResponse = jObject.GetValue("access_token").ToString();
-                        return new ServiceResponse<JObject>
-                        {
-                            VehicleType = vehicle,
-                            Object = jObject,
-                            ReferrerCode = user.Referrercode,
-                            AverageRatings = user.AverageRatings,
-                            IsVerified = user.IsVerified,
-                            PartnerType = partnerType
-
-                        };
                     }
                 }
                 else
                 {
-                    
+
                     var data = new { IsActive = false };
 
                     var jObject = JObject.FromObject(data);
