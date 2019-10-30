@@ -38,7 +38,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                       ServiceCenter = processingorderCode.ServiceCenter,
                                       ScName = processingorderCode.ScName,
                                       FullName = processingorderCode.FullName,
-                                      VerifiedBy = processingorderCode.VerifiedBy
+                                      VerifiedBy = processingorderCode.VerifiedBy,
+                                      BankName = processingorderCode.BankName
+
                                   };
 
             return Task.FromResult(processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit).ToList());
@@ -69,7 +71,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                       ServiceCenter = processingorderCode.ServiceCenter,
                                       ScName = processingorderCode.ScName,
                                       FullName = processingorderCode.FullName,
-                                      VerifiedBy = processingorderCode.VerifiedBy
+                                      VerifiedBy = processingorderCode.VerifiedBy,
+                                      BankName = processingorderCode.BankName
                                   };
 
             return Task.FromResult(processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit).ToList());
@@ -89,6 +92,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                       UserId = processingorderCode.UserId,
                                       Status = processingorderCode.Status,
                                       ServiceCenter = processingorderCode.ServiceCenter,
+                                      BankName = processingorderCode.BankName
                                   };
             return processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit);
         }
@@ -109,6 +113,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                UserId = processingorderCode.UserId,
                                Status = processingorderCode.Status,
                                ServiceCenter = processingorderCode.ServiceCenter,
+                               BankName = processingorderCode.BankName
                            };
             return Task.FromResult(codorder.ToList());
         }

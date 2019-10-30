@@ -733,6 +733,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //update Shipment
             nonDepsitedValue.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
+            bankorder.BankName = bankrefcode.BankName;
+
             await _uow.CompleteAsync();
         }
 
@@ -798,7 +800,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             codsforservicecenter.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
             bankorder.Status = bankrefcode.Status;
-
+            bankorder.BankName = bankrefcode.BankName;
             await _uow.CompleteAsync();
         }
 
@@ -829,6 +831,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             codsforservicecenter.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
             bankorder.Status = bankrefcode.Status;
+            bankorder.BankName = bankrefcode.BankName;
 
             await _uow.CompleteAsync();
         }

@@ -294,6 +294,7 @@
     <Compile Include="Controllers\Account\InvoiceReminderController.cs" />
     <Compile Include="Controllers\Account\InvoiceShipmentController.cs" />
     <Compile Include="Controllers\Account\VATController.cs" />
+    <Compile Include="Controllers\BankSettlement\BankController.cs" />
     <Compile Include="Controllers\BankSettlement\BankProcessingOrderController.cs" />
     <Compile Include="Controllers\BankSettlement\BankShipmentSettlementController.cs" />
     <Compile Include="Controllers\BankSettlement\CODProcessingOrderController.cs" />
