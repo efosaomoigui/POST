@@ -160,15 +160,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         throw new GenericException("Shipment Items cannot be empty");
                     }
-                    foreach (var item in preShipmentDTO.PreShipmentItems)
-                    {
-                        if (!string.IsNullOrEmpty(item.Value))
-                        {
-                            preShipmentDTO.Value += Convert.ToDecimal(item.Value);
-                            preShipmentDTO.IsdeclaredVal = true;
-                        }
-
-                    }
+                    
                     var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
 
                     if (user.UserChannelType == UserChannelType.Ecommerce)
@@ -1260,7 +1252,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<string> CreatePartner(string CustomerCode)
+        public async Task<PartnerDTO> CreatePartner(string CustomerCode)
         {
             try
             {
@@ -1313,7 +1305,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 await _uow.CompleteAsync();
                 var latestpartner = await _uow.Partner.GetAsync(s => s.PartnerCode == CustomerCode);
-                return latestpartner.PartnerType.ToString();
+                var finalPartner = Mapper.Map<PartnerDTO>(latestpartner);
+                return finalPartner;
             }
             catch
             {
@@ -1326,7 +1319,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var userId = await _userService.GetCurrentUserId();
-                var number = await _uow.DeliveryNumber.GetAsync(s => s.Number == detail.DeliveryNumber);
+                var number = await _uow.DeliveryNumber.GetAsync(s => s.Number.ToLower() == detail.DeliveryNumber.ToLower());
                 if (number == null)
                 {
                     throw new GenericException("Delivery Number does not exist");
@@ -1955,7 +1948,6 @@ namespace GIGLS.Services.Implementation.Shipments
             BackgroundJob.Schedule(() => DetermineShipmentstatus(item.Waybill, country.CountryId, NewTime), TimeSpan.FromMinutes(totaltime));
 
         }
-
 
 
     }

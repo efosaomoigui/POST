@@ -95,7 +95,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<UserDTO> IsOTPValid(int OTP);
         Task<UserDTO> CheckDetails(string user, string userchanneltype);
         Task<bool> CreateCustomer(string CustomerCode);
-        Task<string> CreatePartner(string CustomerCode);
+        Task<PartnerDTO> CreatePartner(string CustomerCode);
         Task<bool> CreateCompany(string CustomerCode);
         Task<bool> EditProfile(UserDTO user);
         Task<object> AddPreShipmentMobile(PreShipmentMobileDTO preShipment);
@@ -116,6 +116,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> UpdateVehicleProfile(UserDTO user);
         Task<IEnumerable<LGADTO>> GetActiveLGAs();
         Task<AdminReportDTO> WebsiteData();
+        Task AddWallet(WalletDTO wallet);
 
 
 
