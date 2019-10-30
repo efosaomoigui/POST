@@ -3,16 +3,13 @@ using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.BankSettlement
 {
-    [AllowAnonymous]
+    [Authorize(Roles = "Admin")]
     [RoutePrefix("api/bank")]
     public class BankController : BaseWebApiController
     {
