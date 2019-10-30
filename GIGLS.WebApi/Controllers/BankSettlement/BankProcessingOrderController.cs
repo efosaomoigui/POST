@@ -349,6 +349,21 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getBanks")]
+        public async Task<IServiceResponse<IEnumerable<BankDTO>>> GetBanks()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var banks = await _bankprocessingorder.GetBanks();
+                return new ServiceResponse<IEnumerable<BankDTO>>
+                {
+                    Object = banks
+                };
+            });
+        }
+
         //This one searches for all new Paid Out CODs
         //[GIGLSActivityAuthorize(Activity = "View")]
         //[HttpGet]
