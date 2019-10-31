@@ -1689,7 +1689,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                     decimal price = await _partnertransactionservice.GetPriceForPartner(Partner);
                     var partneruser = await _userService.GetUserById(Partnerid.UserId);
-                    var wallet = _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode).Result;
+                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode);
                     wallet.Balance = wallet.Balance + price;
                     var partnertransactions = new PartnerTransactionsDTO
                     {
