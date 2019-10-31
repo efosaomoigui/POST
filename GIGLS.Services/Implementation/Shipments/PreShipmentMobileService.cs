@@ -143,7 +143,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             DepartureStationId = preShipmentDTO.SenderStationId,
                             DestinationStationId = preShipmentDTO.ReceiverStationId
                         });
-                        preShipmentDTO.CalculatedTotal = (double)PreshipmentPriceDTO.GrandTotal;
+                        preShipmentDTO.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
                   }
                   else
                   {
@@ -1037,7 +1037,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 foreach (var id in preShipment.DeletedItems.ToList())
                 {
-                    var preshipmentitemmobile = _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentItemMobileId == id && s.PreShipmentMobileId == preShipment.PreShipmentMobileId).Result;
+                    var preshipmentitemmobile = await _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentItemMobileId == id && s.PreShipmentMobileId == preShipment.PreShipmentMobileId);
                     preshipmentitemmobile.IsCancelled = true;
                     _uow.PreShipmentItemMobile.Remove(preshipmentitemmobile);
                 }
@@ -1107,7 +1107,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var user = await _userService.GetUserById(pickuprequests.UserId);
                     pickuprequests.Status = MobilePickUpRequestStatus.Cancelled.ToString();
-                    updatedwallet.Balance = ((updatedwallet.Balance + (decimal)preshipmentmobile.CalculatedTotal) - Convert.ToDecimal(pickuprice));
+                    updatedwallet.Balance = ((updatedwallet.Balance + preshipmentmobile.GrandTotal) - Convert.ToDecimal(pickuprice));
                     var Partnersprice = (0.4M * Convert.ToDecimal(pickuprice));
                     var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == user.UserChannelCode);
                     wallet.Balance = wallet.Balance + Partnersprice;
@@ -1120,14 +1120,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                     var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
-                    await _uow.CompleteAsync();
                 }
                 else
                 {
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
-                    updatedwallet.Balance = ((updatedwallet.Balance + (decimal)preshipmentmobile.CalculatedTotal));
-                    await _uow.CompleteAsync();
+                    updatedwallet.Balance = ((updatedwallet.Balance + preshipmentmobile.GrandTotal));
                 }
+                await _uow.CompleteAsync();
                 return new { IsCancelled = true };
             }
             catch (Exception)
@@ -1169,7 +1168,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         existingrating.IsRatedByPartner = true;
                         existingrating.DatePartnerRated = DateTime.Now;
                     }
-                    await _uow.CompleteAsync();
+                   
                 }
                 else
                 {
@@ -1191,8 +1190,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     var ratings = Mapper.Map<MobileRating>(rating);
                     _uow.MobileRating.Add(ratings);
-                    await _uow.CompleteAsync();
                 }
+                await _uow.CompleteAsync();
                 return new { IsRated = true };
             }
             catch (Exception)
