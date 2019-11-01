@@ -623,21 +623,22 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString())
                     {
                         preshipmentmobile.shipmentstatus = "Assigned for Pickup";
+                        var newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
+
+                        await ScanMobileShipment(new ScanDTO
+                        {
+                            WaybillNumber = pickuprequest.Waybill,
+                            ShipmentScanStatus = ShipmentScanStatus.MAPT
+                        });
+                        await _uow.CompleteAsync();
+                        return newPreShipment;
                     }
                     else
                     {
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
                     }
                     
-                    var newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
-
-                    await ScanMobileShipment(new ScanDTO
-                    {
-                        WaybillNumber = pickuprequest.Waybill,
-                        ShipmentScanStatus = ShipmentScanStatus.MAPT
-                    });
-                    await _uow.CompleteAsync();
-                    return newPreShipment;
+                    
                 }
                 else
                 {
