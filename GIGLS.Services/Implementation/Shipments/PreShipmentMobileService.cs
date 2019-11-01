@@ -574,6 +574,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var newPreShipment = new PreShipmentMobileDTO();
                 if (pickuprequest.UserId == null)
                 {
                     pickuprequest.UserId = await _userService.GetCurrentUserId();
@@ -623,15 +624,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString())
                     {
                         preshipmentmobile.shipmentstatus = "Assigned for Pickup";
-                        var newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
+                        
 
                         await ScanMobileShipment(new ScanDTO
                         {
                             WaybillNumber = pickuprequest.Waybill,
                             ShipmentScanStatus = ShipmentScanStatus.MAPT
                         });
-                        await _uow.CompleteAsync();
-                        return newPreShipment;
+                       
                     }
                     if (pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString())
                     {
@@ -641,14 +641,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
                     }
-                    
-                    
+                   newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
+                   await _uow.CompleteAsync();
                 }
                 else
                 {
                     throw new GenericException("Waybill Does Not Exist");
                 }
-                
+                return newPreShipment;
             }
             catch
             {
