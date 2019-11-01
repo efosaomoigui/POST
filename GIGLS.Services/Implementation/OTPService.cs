@@ -213,18 +213,7 @@ namespace GIGLS.Services.Implementation
                 }
                 else
                 {
-                    var code = await _codegenerator.Generate(5);
-                    var referrerCodeDTO = new ReferrerCodeDTO
-                    {
-                        Referrercode = code,
-                        UserId = registerUser.Id,
-                        UserCode = registerUser.UserChannelCode
-
-                    };
-                    var referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
-                    _uow.ReferrerCode.Add(referrercode);
-                    await _uow.CompleteAsync();
-                    registerUser.Referrercode = referrercode.Referrercode;
+                    registerUser = await GenerateReferrerCode(registerUser);
                 }
                 var averageratings = await GetAverageRating(registerUser.UserChannelCode, userchanneltype);
                 var IsVerified = await IsPartnerActivated(registerUser.UserChannelCode);
@@ -236,6 +225,23 @@ namespace GIGLS.Services.Implementation
             {
                 throw;
             }
+        }
+
+        public async Task<UserDTO> GenerateReferrerCode(UserDTO user)
+        {
+            var code = await _codegenerator.Generate(5);
+            var referrerCodeDTO = new ReferrerCodeDTO
+            {
+                Referrercode = code,
+                UserId = user.Id,
+                UserCode = user.UserChannelCode
+
+            };
+            var referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
+            _uow.ReferrerCode.Add(referrercode);
+            await _uow.CompleteAsync();
+            user.Referrercode = referrercode.Referrercode;
+            return user;
         }
 
     }

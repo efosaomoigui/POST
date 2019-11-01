@@ -10,6 +10,7 @@ namespace GIGLS.Core.IServices
         Task<OTPDTO> GenerateOTP(UserDTO user);
         Task<bool> SendOTP(OTPDTO user);
         Task<UserDTO> CheckDetails(string user,string userchanneltype);
+        Task<UserDTO> GenerateReferrerCode(UserDTO user);
 
     }
 }

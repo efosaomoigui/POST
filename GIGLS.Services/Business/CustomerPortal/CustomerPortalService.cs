@@ -1345,31 +1345,13 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 //Generate referrercode for user that is signing up and didnt 
                 //supply a referrecode
-                var code = await _codegenerator.Generate(5);
-                var referrerCodeDTO = new ReferrerCodeDTO
-                {
-                    Referrercode = code,
-                    UserId = User.Id,
-                    UserCode = User.UserChannelCode
-                };
-                var Referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
-                _uow.ReferrerCode.Add(Referrercode);
+                User = await GenerateReferrerCode(User);
             }
             else
             {
                 var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, Countryid);
                 //Generate referrercode for user that is signing up and supplies a referrerCode
-                var code = await _codegenerator.Generate(5);
-                var referrerCodeDTO = new ReferrerCodeDTO
-                {
-                    Referrercode = code,
-                    UserId = User.Id,
-                    UserCode = User.UserChannelCode
-
-                };
-                var Referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
-                _uow.ReferrerCode.Add(Referrercode);
-                await _uow.CompleteAsync();
+                User = await GenerateReferrerCode(User);
 
                 //based on the referrercode supplied, use it to get the wallet and update the balance 
                 var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == referrercode);
@@ -1508,6 +1490,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw;
             }
+        }
+
+        public async Task<UserDTO> GenerateReferrerCode(UserDTO user)
+        {
+            return await _otpService.GenerateReferrerCode(user);
         }
 
     }

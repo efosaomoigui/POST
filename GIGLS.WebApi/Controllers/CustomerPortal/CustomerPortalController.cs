@@ -632,6 +632,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                         {
                             throw new GenericException("Operation could not complete login successfully:");
                         }
+                        else
+                        {
+                            Otp = await _portalService.GenerateReferrerCode(Otp);
+                        }
 
                         //get access token from response body
                         var responseJson = await responseMessage.Content.ReadAsStringAsync();
@@ -641,21 +645,24 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                         return new ServiceResponse<JObject>
                         {
-                            Object = jObject
+                            Object = jObject,
+                            ReferrerCode = Otp.Referrercode
                         };
                     }
                 
                  }
                  else
-                {
-                    var jObject = JObject.FromObject(Otp);
+                 {
+                    var data = new { IsActive = false };
+
+                    var jObject = JObject.FromObject(data);
+
                     return new ServiceResponse<JObject>
                     {
                         ShortDescription = "User has not been verified",
                         Object = jObject
-
                     };
-                    }
+                 }
             });
         }
 
