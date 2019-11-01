@@ -633,6 +633,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         await _uow.CompleteAsync();
                         return newPreShipment;
                     }
+                    if (pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString())
+                    {
+                        preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
+                    }
                     else
                     {
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
