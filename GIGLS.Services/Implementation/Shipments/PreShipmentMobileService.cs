@@ -574,11 +574,13 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var userId = await _userService.GetCurrentUserId();
-                pickuprequest.UserId = userId;
+                if (pickuprequest.UserId == null)
+                {
+                    pickuprequest.UserId = await _userService.GetCurrentUserId();
+                }
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
                 {
-                    var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.UserId == userId && s.Status == MobilePickUpRequestStatus.Rejected.ToString());
+                    var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.UserId == pickuprequest.UserId && s.Status == MobilePickUpRequestStatus.Rejected.ToString());
                     if (request == null)
                     {
                         await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
@@ -588,6 +590,19 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException($"Shipment with waybill number: {pickuprequest.Waybill} exists already");
                     }
                 }
+                if (pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString())
+                {
+                    var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.UserId == pickuprequest.UserId && s.Status == MobilePickUpRequestStatus.TimedOut.ToString());
+                    if (request == null)
+                    {
+                        await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
+                    }
+                    else
+                    {
+                        throw new GenericException($"Shipment with waybill number: {pickuprequest.Waybill} exists already");
+                    }
+                }
+
                 else
                 {
                     pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();

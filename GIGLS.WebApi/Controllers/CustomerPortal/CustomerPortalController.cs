@@ -47,7 +47,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         //private readonly IUnitOfWork _uow;
         private readonly ICustomerPortalService _portalService;
         private readonly IPaystackPaymentService _paymentService;
-        
+
 
 
         public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService) : base(nameof(CustomerPortalController))
@@ -55,8 +55,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             // _uow = uow;
             _portalService = portalService;
             _paymentService = paymentService;
-           
-            
+
+
         }
 
 
@@ -605,10 +605,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return await HandleApiOperationAsync(async () =>
             {
                 var Otp = await _portalService.IsOTPValid(OTP);
-                 if (Otp != null && Otp.IsActive == true)
-                 {
-                   string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
-                   string getTokenResponse;
+                if (Otp != null && Otp.IsActive == true)
+                {
+                    string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+                    string getTokenResponse;
 
                     using (var client = new HttpClient())
                     {
@@ -649,10 +649,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             ReferrerCode = Otp.Referrercode
                         };
                     }
-                
-                 }
-                 else
-                 {
+
+                }
+                else
+                {
                     var data = new { IsActive = false };
 
                     var jObject = JObject.FromObject(data);
@@ -662,7 +662,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                         ShortDescription = "User has not been verified",
                         Object = jObject
                     };
-                 }
+                }
             });
         }
 
@@ -689,22 +689,22 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-            var user = await _portalService.CheckDetails(logindetail.UserDetail, logindetail.UserChannelType);
-            var vehicle = user.VehicleType;
-            var partnerType = "";
-            if (user.Username != null)
-            {
-                user.Username = user.Username.Trim();
-            }
+                var user = await _portalService.CheckDetails(logindetail.UserDetail, logindetail.UserChannelType);
+                var vehicle = user.VehicleType;
+                var partnerType = "";
+                if (user.Username != null)
+                {
+                    user.Username = user.Username.Trim();
+                }
 
-            if (logindetail.Password != null)
-            {
-                logindetail.Password = logindetail.Password.Trim();
-            }
-            if (user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
-            {
-                throw new GenericException("You are not authorized to login on this platform.");
-            }
+                if (logindetail.Password != null)
+                {
+                    logindetail.Password = logindetail.Password.Trim();
+                }
+                if (user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
+                {
+                    throw new GenericException("You are not authorized to login on this platform.");
+                }
                 if (user != null && user.IsActive == true)
                 {
                     using (var client = new HttpClient())
@@ -1201,7 +1201,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                
+
                 var response = await _portalService.LoadImage(images);
                 return new ServiceResponse<string>
                 {
@@ -1362,6 +1362,32 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                     Object = data
 
                 };
+            });
+        }
+
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("addmobilepickuprequestfortimedoutrequests")]
+        public async Task<IServiceResponse<bool>> AddPickupRequestForTimedOutRequest([FromBody] MobilePickUpRequestsDTO PickupRequest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<bool>();
+                var request = Request;
+                var headers = request.Headers;
+                //headers.Add("Content-Type", "application/json");
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _portalService.Decrypt();
+                    string token = headers.GetValues("api_key").FirstOrDefault();
+                    if (token == key)
+                    {
+                        var shipmentItem = await _portalService.AddMobilePickupRequest(PickupRequest);
+                        response.Object = true;
+                    }
+                }
+                return response;
             });
         }
 

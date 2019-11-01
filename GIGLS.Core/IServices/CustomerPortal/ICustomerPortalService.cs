@@ -118,7 +118,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<AdminReportDTO> WebsiteData();
         Task AddWallet(WalletDTO wallet);
         Task<UserDTO> GenerateReferrerCode(UserDTO user);
-
+        Task<string> Decrypt();
 
 
     }

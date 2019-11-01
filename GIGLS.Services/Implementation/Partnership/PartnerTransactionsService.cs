@@ -36,7 +36,7 @@ namespace GIGLS.Services.Implementation.Partnership
             {
                 var GoogleURL = ConfigurationManager.AppSettings["DistanceURL"];
                 var GoogleApiKey = ConfigurationManager.AppSettings["DistanceApiKey"];
-                GoogleApiKey = Decrypt(GoogleApiKey);
+                GoogleApiKey = await Decrypt(GoogleApiKey);
                 var finalURL = $"{GoogleURL}{GoogleApiKey}&units=metric&origins={location.OriginLatitude},{location.OriginLongitude}&destinations={location.DestinationLatitude},{location.DestinationLongitude}";
                 var httpWebRequest = (HttpWebRequest)WebRequest.Create(finalURL);
                 using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
@@ -119,7 +119,7 @@ namespace GIGLS.Services.Implementation.Partnership
                 }
                 return clearText;
             }
-        public string Decrypt(string cipherText)
+        public async Task<string> Decrypt(string cipherText)
             {
                 string EncryptionKey = "abc123";
                 cipherText = cipherText.Replace(" ", "+");

@@ -43,6 +43,8 @@ using GIGLS.Core.IMessageService;
 using System.Text.RegularExpressions;
 using GIGLS.Core.DTO.Admin;
 using GIGLS.Core.IServices.Report;
+using GIGLS.Core.IServices.Partnership;
+using System.Configuration;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -71,6 +73,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly ICountryService _countryService;
         private readonly IAdminReportService _adminReportService;
         public readonly IIndividualCustomerService _individualCustomerService;
+        public readonly IPartnerTransactionsService _partnertransactionservice;
 
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
@@ -79,7 +82,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService, 
-            ICountryService countryService, IAdminReportService adminReportService, IIndividualCustomerService individualCustomerService)
+            ICountryService countryService, IAdminReportService adminReportService, IIndividualCustomerService individualCustomerService, IPartnerTransactionsService partnertransactionservice)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -104,6 +107,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _countryService = countryService;
             _adminReportService = adminReportService;
             _individualCustomerService = individualCustomerService;
+            _partnertransactionservice = partnertransactionservice;
             MapperConfig.Initialize();
         }
 
@@ -1495,6 +1499,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<UserDTO> GenerateReferrerCode(UserDTO user)
         {
             return await _otpService.GenerateReferrerCode(user);
+        }
+        public async Task<string> Decrypt()
+        {
+            var GoogleApiKey = ConfigurationManager.AppSettings["DistanceApiKey"];
+            return await _partnertransactionservice.Decrypt(GoogleApiKey);
         }
 
     }

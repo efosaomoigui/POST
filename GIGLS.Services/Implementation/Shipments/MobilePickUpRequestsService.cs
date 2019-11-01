@@ -30,7 +30,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == PickUpRequest.Waybill && s.UserId == PickUpRequest.UserId);
+                var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == PickUpRequest.Waybill && s.UserId == PickUpRequest.UserId && s.Status == PickUpRequest.Status.ToString());
                 if (MobilePickupRequests != null)
                 {
                    

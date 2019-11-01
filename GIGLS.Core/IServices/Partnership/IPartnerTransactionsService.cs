@@ -13,5 +13,6 @@ namespace GIGLS.Core.IServices.Partnership
         Task<RootObject> GetGeoDetails(LocationDTO location);
         Task<decimal> GetPriceForPartner(PartnerPayDTO partnerpay);
         Task<object> AddPartnerPaymentLog(PartnerTransactionsDTO walletPaymentLogDto);
+        Task<string> Decrypt(string cipherText);
     }
 }
