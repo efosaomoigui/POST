@@ -46,8 +46,10 @@ namespace GIGLS.Services.Implementation
             var userdto = await _UserService.GetUserByEmail(result.EmailAddress);
             if(result.IsValid ==true)
             {
-                userdto.IsActive=true;
-                var user = await _UserService.UpdateUser(userdto.Id, userdto);
+                userdto.IsActive = true;
+                await _UserService.UpdateUser(userdto.Id, userdto);
+                _uow.OTP.Remove(otpbody);
+                await _uow.CompleteAsync();
             }
             return userdto;
         }
@@ -111,7 +113,7 @@ namespace GIGLS.Services.Implementation
                     var registerUser = await _UserService.GetUserByPhone(user);
                     RegisterUser = await CheckVehicleInformation(registerUser, userchanneltype);
                 }
-                else
+                if(!isEmail && !IsPhone)
                 {
                     var registerUser = await _UserService.GetUserByChannelCode(user);
                     RegisterUser = await CheckVehicleInformation(registerUser, userchanneltype);

@@ -721,34 +721,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                     }
                     var PartnerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
                     NumberGeneratorType.Partner);
-                    var Partneruser = new UserDTO()
-                    {
-                        ConfirmPassword = user.Password,
-                        Department = PartnerType.Individual.ToString(),
-                        DateCreated = DateTime.Now,
-                        Designation = PartnerType.Individual.ToString(),
-                        Email = user.Email,
-                        FirstName = user.FirstName,
-                        LastName = user.LastName,
-                        Organisation = PartnerType.Individual.ToString(),
-                        Password = user.Password,
-                        PhoneNumber = user.PhoneNumber,
-                        UserType = UserType.Regular,
-                        Username = PartnerCode,
-                        UserChannelCode = PartnerCode,
-                        UserChannelPassword = user.Password,
-                        UserChannelType = UserChannelType.Partner,
-                        PasswordExpireDate = DateTime.Now,
-                        UserActiveCountryId = user.UserActiveCountryId,
-
-                    };
-                    var FinalUser = Mapper.Map<User>(Partneruser);
-                    FinalUser.Id = Guid.NewGuid().ToString();
-                    FinalUser.DateCreated = DateTime.Now.Date;
-                    FinalUser.DateModified = DateTime.Now.Date;
-                    FinalUser.PasswordExpireDate = DateTime.Now;
-                    FinalUser.UserName = (user.UserChannelType == UserChannelType.Partner) ? user.Email : user.UserChannelCode;
-                    var u = await _uow.User.RegisterUser(FinalUser, user.Password);
+                    user.UserChannelCode = PartnerCode;
+                    var FinalUser = await CreateNewuser(user);
                     var Vehicle = "";
                     foreach (var vehicle in user.VehicleType)
                     {
@@ -816,6 +790,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                             emailcustomerdetails.Password = user.Password;
                             EmailUser.UserChannelPassword = user.Password;
                             emailcustomerdetails.PhoneNumber = user.PhoneNumber;
+                            emailcustomerdetails.FirstName = user.FirstName;
+                            emailcustomerdetails.LastName = user.LastName;
                             await _uow.CompleteAsync();
                             var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
                             result = await SendOTPForRegisteredUser(user);
@@ -838,6 +814,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                             phonecustomerdetails.Email = user.Email;
                             phonecustomerdetails.Password = user.Password;
                             phonecustomerdetails.PhoneNumber = user.PhoneNumber;
+                            emailcustomerdetails.FirstName = user.FirstName;
+                            emailcustomerdetails.LastName = user.LastName;
                             EmailUser.UserChannelPassword = user.Password;
                             await _uow.CompleteAsync();
                             var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
@@ -1352,6 +1330,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     User = await CreateNewuser(user);
                     //return user;
                 }
+
                 return User;
             }
             catch(Exception)
@@ -1360,7 +1339,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
-        private async Task CalculateReferralBonus (string referrercode, UserDTO EmailUser, int Countryid)
+        private async Task CalculateReferralBonus (string referrercode, UserDTO User, int Countryid)
         {
             if (referrercode == null)
             {
@@ -1370,8 +1349,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var referrerCodeDTO = new ReferrerCodeDTO
                 {
                     Referrercode = code,
-                    UserId = EmailUser.Id,
-                    UserCode = EmailUser.UserChannelCode
+                    UserId = User.Id,
+                    UserCode = User.UserChannelCode
                 };
                 var Referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
                 _uow.ReferrerCode.Add(Referrercode);
@@ -1384,8 +1363,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var referrerCodeDTO = new ReferrerCodeDTO
                 {
                     Referrercode = code,
-                    UserId = EmailUser.Id,
-                    UserCode = EmailUser.UserChannelCode
+                    UserId = User.Id,
+                    UserCode = User.UserChannelCode
 
                 };
                 var Referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
@@ -1427,35 +1406,102 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             try
             {
-                if (user.UserChannelType)
-                var result = new UserDTO
+                
+                if (user.UserChannelType == UserChannelType.IndividualCustomer)
                 {
-                    ConfirmPassword = user.Password,
-                    Department = CustomerType.IndividualCustomer.ToString(),
-                    DateCreated = DateTime.Now,
-                    Designation = CustomerType.IndividualCustomer.ToString(),
-                    Email = user.Email,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Organisation = CustomerType.IndividualCustomer.ToString(),
-                    Password = user.Password,
-                    PhoneNumber = user.PhoneNumber,
-                    UserType = UserType.Regular,
-                    Username = user.UserChannelCode,
-                    UserChannelCode = user.UserChannelCode,
-                    UserChannelPassword = user.Password,
-                    UserChannelType = UserChannelType.IndividualCustomer,
-                    PasswordExpireDate = DateTime.Now,
-                    UserActiveCountryId = user.UserActiveCountryId
-                };
-                var FinalUser = Mapper.Map<User>(result);
-                FinalUser.Id = Guid.NewGuid().ToString();
-                FinalUser.DateCreated = DateTime.Now.Date;
-                FinalUser.DateModified = DateTime.Now.Date;
-                FinalUser.PasswordExpireDate = DateTime.Now;
-                FinalUser.UserName = (user.UserChannelType == UserChannelType.Partner) ? user.Email : user.UserChannelCode;
-                var u = await _uow.User.RegisterUser(FinalUser, user.Password);
-                user.Id = FinalUser.Id;
+                    var result = new UserDTO
+                    {
+                        ConfirmPassword = user.Password,
+                        Department = CustomerType.IndividualCustomer.ToString(),
+                        DateCreated = DateTime.Now,
+                        Designation = CustomerType.IndividualCustomer.ToString(),
+                        Email = user.Email,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Organisation = CustomerType.IndividualCustomer.ToString(),
+                        Password = user.Password,
+                        PhoneNumber = user.PhoneNumber,
+                        UserType = UserType.Regular,
+                        Username = user.UserChannelCode,
+                        UserChannelCode = user.UserChannelCode,
+                        UserChannelPassword = user.Password,
+                        UserChannelType = UserChannelType.IndividualCustomer,
+                        PasswordExpireDate = DateTime.Now,
+                        UserActiveCountryId = user.UserActiveCountryId
+                    };
+                    var FinalUser = Mapper.Map<User>(result);
+                    FinalUser.Id = Guid.NewGuid().ToString();
+                    FinalUser.DateCreated = DateTime.Now.Date;
+                    FinalUser.DateModified = DateTime.Now.Date;
+                    FinalUser.PasswordExpireDate = DateTime.Now;
+                    FinalUser.UserName = (user.UserChannelType == UserChannelType.IndividualCustomer) ? user.Email : user.UserChannelCode;
+                    var u = await _uow.User.RegisterUser(FinalUser, user.Password);
+                    user.Id = FinalUser.Id;
+                    
+                }
+                if (user.UserChannelType == UserChannelType.Ecommerce)
+                {
+                    var result = new UserDTO
+                    {
+                        ConfirmPassword = user.Password,
+                        Department = CustomerType.Company.ToString(),
+                        DateCreated = DateTime.Now,
+                        Designation = CustomerType.Company.ToString(),
+                        Email = user.Email,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Organisation = CustomerType.Company.ToString(),
+                        Password = user.Password,
+                        PhoneNumber = user.PhoneNumber,
+                        UserType = UserType.Regular,
+                        Username = user.UserChannelCode,
+                        UserChannelCode = user.UserChannelCode,
+                        UserChannelPassword = user.Password,
+                        UserChannelType = UserChannelType.Ecommerce,
+                        PasswordExpireDate = DateTime.Now,
+                        UserActiveCountryId = user.UserActiveCountryId
+                    };
+                    var FinalUser = Mapper.Map<User>(result);
+                    FinalUser.Id = Guid.NewGuid().ToString();
+                    FinalUser.DateCreated = DateTime.Now.Date;
+                    FinalUser.DateModified = DateTime.Now.Date;
+                    FinalUser.PasswordExpireDate = DateTime.Now;
+                    FinalUser.UserName = (user.UserChannelType == UserChannelType.Ecommerce) ? user.Email : user.UserChannelCode;
+                    var u = await _uow.User.RegisterUser(FinalUser, user.Password);
+                    user.Id = FinalUser.Id;
+                    
+                }
+                if (user.UserChannelType == UserChannelType.Partner)
+                {
+                    var result = new UserDTO
+                    {
+                        ConfirmPassword = user.Password,
+                        Department = CustomerType.Partner.ToString(),
+                        DateCreated = DateTime.Now,
+                        Designation = CustomerType.Company.ToString(),
+                        Email = user.Email,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Organisation = CustomerType.Partner.ToString(),
+                        Password = user.Password,
+                        PhoneNumber = user.PhoneNumber,
+                        UserType = UserType.Regular,
+                        Username = user.UserChannelCode,
+                        UserChannelCode = user.UserChannelCode,
+                        UserChannelPassword = user.Password,
+                        UserChannelType = UserChannelType.Partner,
+                        PasswordExpireDate = DateTime.Now,
+                        UserActiveCountryId = user.UserActiveCountryId
+                    };
+                    var FinalUser = Mapper.Map<User>(result);
+                    FinalUser.Id = Guid.NewGuid().ToString();
+                    FinalUser.DateCreated = DateTime.Now.Date;
+                    FinalUser.DateModified = DateTime.Now.Date;
+                    FinalUser.PasswordExpireDate = DateTime.Now;
+                    FinalUser.UserName = (user.UserChannelType == UserChannelType.Partner) ? user.Email : user.UserChannelCode;
+                    var u = await _uow.User.RegisterUser(FinalUser, user.Password);
+                    user.Id = FinalUser.Id;
+                }
                 return user;
             }
             catch(Exception)

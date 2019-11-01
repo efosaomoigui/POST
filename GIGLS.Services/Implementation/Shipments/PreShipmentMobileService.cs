@@ -243,7 +243,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         DepartureStationId = preShipment.SenderStationId,
                         DestinationStationId = preShipment.ReceiverStationId,
-                        Weight = (decimal)preShipmentItem.Weight,
+                        Weight = preShipmentItem.Weight,
                         SpecialPackageId = (int)preShipmentItem.SpecialPackageId,
                         ShipmentType = preShipmentItem.ShipmentType,
                         CountryId = preShipment.CountryId  //Nigeria
@@ -769,6 +769,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "SenderLocation,ReceiverLocation");
                 preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Delivered.ToString();
+                preshipmentmobile.IsDelivered = true;
 
                 var Pickuprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId);
                 if (preshipmentmobile.ZoneMapping == 1)
@@ -896,7 +897,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         preshipment.ItemType = preShipment.ItemType;
                         preshipment.Length = preShipment.Length;
                         preshipment.Quantity = preShipment.Quantity;
-                        preshipment.Weight = preShipment.Weight;
+                        preshipment.Weight = (double)preShipment.Weight;
                         preshipment.Width = preShipment.Width;
                         preshipment.Height = preShipment.Height;
                     }                    
@@ -1046,7 +1047,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var preshipmentitemmobile = _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentItemMobileId == item.PreShipmentItemMobileId && s.PreShipmentMobileId == preShipment.PreShipmentMobileId).Result;
                     preshipmentitemmobile.Quantity = item.Quantity;
                     preshipmentitemmobile.Value = item.Value;
-                    preshipmentitemmobile.Weight = item.Weight;
+                    preshipmentitemmobile.Weight = (double)item.Weight;
                     preshipmentitemmobile.Description = item.Description;
                     preshipmentitemmobile.Height = item.Height;
                     preshipmentitemmobile.ImageUrl = item.ImageUrl;

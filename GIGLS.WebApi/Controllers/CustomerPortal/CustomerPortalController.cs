@@ -602,14 +602,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("validateotp/{OTP}")]
         public async Task<IServiceResponse<JObject>> IsOTPValid(int OTP)
         {
-            var Otp = await _portalService.IsOTPValid(OTP);
-            if (Otp != null && Otp.IsActive == true)
+            return await HandleApiOperationAsync(async () =>
             {
-                string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
-                string getTokenResponse;
+                var Otp = await _portalService.IsOTPValid(OTP);
+                 if (Otp != null && Otp.IsActive == true)
+                 {
+                   string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+                   string getTokenResponse;
 
-                return await HandleApiOperationAsync(async () =>
-                {
                     using (var client = new HttpClient())
                     {
                         //setup client
@@ -644,18 +644,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             Object = jObject
                         };
                     }
-                });
-            }
-            else
-            {
-                var jObject = JObject.FromObject(Otp);
-                return new ServiceResponse<JObject>
+                
+                 }
+                 else
                 {
-                    ShortDescription = "User has not been verified",
-                    Object = jObject
+                    var jObject = JObject.FromObject(Otp);
+                    return new ServiceResponse<JObject>
+                    {
+                        ShortDescription = "User has not been verified",
+                        Object = jObject
 
-                };
-            }
+                    };
+                    }
+            });
         }
 
         [AllowAnonymous]
