@@ -987,7 +987,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var user = await _userService.GetCurrentUserId();
-                var shipments = _uow.PreShipmentMobile.FindAsync(s => s.UserId == user && s.shipmentstatus == MobilePickUpRequestStatus.Dispute.ToString(), "PreShipmentItems").Result;
+                var shipments = await _uow.PreShipmentMobile.FindAsync(s => s.UserId == user && s.shipmentstatus == MobilePickUpRequestStatus.Dispute.ToString(), "PreShipmentItems");
                 var shipment = shipments.OrderByDescending(s => s.DateCreated);
                 var newPreShipment = Mapper.Map<List<PreShipmentMobileDTO>>(shipment);
                 foreach(var Shipment in newPreShipment)
@@ -1057,7 +1057,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var PreshipmentPriceDTO = await GetPrice(preShipment);
                 preshipmentmobilegrandtotal.shipmentstatus = MobilePickUpRequestStatus.Resolved.ToString();
-                var difference = ((decimal)preshipmentmobilegrandtotal.CalculatedTotal - PreshipmentPriceDTO.GrandTotal);
+                var difference = (preshipmentmobilegrandtotal.GrandTotal - PreshipmentPriceDTO.GrandTotal);
                 if (difference < 0.00M)
                 {
                     var newdiff = Math.Abs((decimal)difference);
@@ -1067,7 +1067,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
                 updatedwallet.Balance = updatedwallet.Balance + (decimal)difference;
-                var pickuprequests = _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobilegrandtotal.Waybill).Result;
+                var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobilegrandtotal.Waybill);
                 pickuprequests.Status = MobilePickUpRequestStatus.Resolved.ToString();
                 await _uow.CompleteAsync();
                 return new { IsResolved = true };
@@ -1090,7 +1090,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             try
             {
-                var preshipmentmobile = _uow.PreShipmentMobile.GetAsync(s => s.Waybill == Waybill, "PreShipmentItems").Result;
+                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == Waybill, "PreShipmentItems");
                 if (preshipmentmobile == null)
                 {
                     throw new GenericException("Shipment does not exist");
@@ -1099,11 +1099,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
                 foreach (var id in preshipmentmobile.PreShipmentItems.ToList())
                 {
-                    var preshipmentitmmobile = _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == preshipmentmobile.PreShipmentMobileId && s.PreShipmentItemMobileId == id.PreShipmentItemMobileId).Result;
+                    var preshipmentitmmobile = await _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == preshipmentmobile.PreShipmentMobileId && s.PreShipmentItemMobileId == id.PreShipmentItemMobileId);
                     preshipmentitmmobile.IsCancelled = true;
+                    //we need to modify this to only change the IsCancelled instead of deleting the items.
                     _uow.PreShipmentItemMobile.Remove(preshipmentitmmobile);
                 }
-                var pickuprequests = _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString()).Result;
+                var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
                 if (pickuprequests != null)
                 {
                     var user = await _userService.GetUserById(pickuprequests.UserId);
@@ -1672,19 +1673,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 });
                 if (preshipmentmobile.ZoneMapping != 1)
                 {
-                    var Location = new LocationDTO
-                    {
-                        DestinationLatitude = (double)preshipmentmobile.ReceiverLocation.Latitude,
-                        DestinationLongitude = (double)preshipmentmobile.ReceiverLocation.Longitude,
-                        OriginLatitude = (double)preshipmentmobile.SenderLocation.Latitude,
-                        OriginLongitude = (double)preshipmentmobile.SenderLocation.Longitude
-                    };
+                    //var Location = new LocationDTO
+                    //{
+                    //    DestinationLatitude = (double)preshipmentmobile.ReceiverLocation.Latitude,
+                    //    DestinationLongitude = (double)preshipmentmobile.ReceiverLocation.Longitude,
+                    //    OriginLatitude = (double)preshipmentmobile.SenderLocation.Latitude,
+                    //    OriginLongitude = (double)preshipmentmobile.SenderLocation.Longitude
+                    //};
 
-                    RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
+                    //RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
                     var Partner = new PartnerPayDTO
                     {
-                        Distance = details.rows[0].elements[0].distance.value.ToString(),
-                        Time = details.rows[0].elements[0].duration.value.ToString(),
+                        //Distance = details.rows[0].elements[0].distance.value.ToString(),
+                        //Time = details.rows[0].elements[0].duration.value.ToString(),
                         ShipmentPrice = (decimal)preshipmentmobile.CalculatedTotal,
                         PickUprice = Pickupprice
                     };

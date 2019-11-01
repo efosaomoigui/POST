@@ -640,7 +640,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return items;
         }
 
-        public async Task<SignResponseDTO> SignUp(UserDTO user)
+        public async Task<SignResponseDTO> SignUp(UserDTO user) 
         {
             if ((user.UserActiveCountryId).ToString() == null || user.UserActiveCountryId == 0)
             {
