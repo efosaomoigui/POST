@@ -9,6 +9,10 @@ using System.Net.Http;
 using GIGLS.Core.IServices.MessagingLog;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.Enums;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Types;
+using Twilio.Exceptions;
 
 namespace GIGLS.Messaging.MessageService
 {
@@ -23,15 +27,30 @@ namespace GIGLS.Messaging.MessageService
 
         public async Task<string> SendAsync(MessageDTO message)
         {
-            var result = await ConfigSendGridasync(message);
+            var result = "";
+
+            switch (message.SMSSenderPlatform)
+            {
+                case SMSSenderPlatform.OGOSMS:
+                    result = await SendSMSUsingOGOSMSAsync(message);
+                    break;
+
+                case SMSSenderPlatform.TWILIO:
+                    result = await SendSMSUsingTwilioAsync(message);
+                    break;
+
+                default:
+                    break;
+            }
+            
             return result;
         }
 
         // Use OGO Sms
-        private async Task<string> ConfigSendGridasync(MessageDTO message)
+        private async Task<string> SendSMSUsingOGOSMSAsync(MessageDTO message)
         {
             string result = "";
-            
+
             try
             {
                 var smsURL = await ReturnValidUrl(message);
@@ -73,7 +92,7 @@ namespace GIGLS.Messaging.MessageService
         private async Task<string> ReturnValidUrl(MessageDTO message)
         {
             string smsURL = ConfigurationManager.AppSettings["smsURL"];
-            
+
             bool result = await IsValidUri(smsURL);
 
             if (!result)
@@ -90,7 +109,7 @@ namespace GIGLS.Messaging.MessageService
 
                 smsURL = ConfigurationManager.AppSettings["smsURLNet"];
             }
-            
+
             return smsURL;
         }
 
@@ -150,39 +169,36 @@ namespace GIGLS.Messaging.MessageService
 
             return await Task.FromResult(result);
         }
-        
-        //// Use NuGet to install Twilio 
-        //private async Task<bool> ConfigSendGridasync(MessageDTO message)
-        //{
-        //    bool result = false;
 
-        //    // Use your account SID and authentication token instead
-        //    // of the placeholders shown here.
-        //    string accountSID = ConfigurationManager.AppSettings["smsService:accountSID"];
-        //    string authToken = ConfigurationManager.AppSettings["smsService:authToken"];
+        //// Use Twilio SMS
+        private async Task<string> SendSMSUsingTwilioAsync(MessageDTO message)
+        {
+            string accountSID = ConfigurationManager.AppSettings["smsService:accountSID"];
+            string authToken = ConfigurationManager.AppSettings["smsService:authToken"];
+            string fromNumber = ConfigurationManager.AppSettings["smsFrom"];
 
-        //    var fromNumber = ConfigurationManager.AppSettings["smsService:FromNumber"];
+            // Initialize the TwilioClient.
+            TwilioClient.Init(accountSID, authToken);
 
-        //    // Initialize the TwilioClient.
-        //    TwilioClient.Init(accountSID, authToken);
+            string result;
+            try
+            {
+                // Send an SMS message.
+                var msg = MessageResource.Create(
+                    to: new PhoneNumber(message.To),
+                    from: new PhoneNumber(fromNumber),
+                    body: message.Body
+                );
 
-        //    try
-        //    {
-        //        // Send an SMS message.
-        //        var msg = MessageResource.Create(
-        //            to: new PhoneNumber(message.To),
-        //            from: new PhoneNumber(fromNumber),
-        //            body: message.Body);
+                result = msg.Status.ToString();
+            }
+            catch (TwilioException ex)
+            {
+                // An exception occurred making the REST call
+                throw ex;
+            }
 
-        //        result = true;
-        //    }
-        //    catch (TwilioException ex)
-        //    {
-        //        // An exception occurred making the REST call
-        //        throw ex;
-        //    }
-
-        //    return await Task.FromResult(result);
-        //}
+            return await Task.FromResult(result);
+        }
     }
 }

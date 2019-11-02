@@ -500,6 +500,7 @@
     <Compile Include="Enums\ShipmentScanStatus.cs" />
     <Compile Include="Enums\ShipmentType.cs" />
     <Compile Include="Enums\SLAType.cs" />
+    <Compile Include="Enums\SMSSenderPlatform.cs" />
     <Compile Include="Enums\SpecialDomesticPackageType.cs" />
     <Compile Include="Enums\StockRequestDestinationType.cs" />
     <Compile Include="Enums\StockRequestSourceType.cs" />

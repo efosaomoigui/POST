@@ -331,31 +331,9 @@ namespace GIGLS.Services.Implementation.Messaging
                 //prepare message format base on country code
                 messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
 
+                //use to determine sms sender service to use
+                messageDTO.SMSSenderPlatform = mobileMessageDTO.SMSSenderPlatform;
             }
-
-            ////resolve phone numbers to +2347011111111
-            //var toPhoneNumber = messageDTO.To;
-            ////1
-            //if (toPhoneNumber.Trim().StartsWith("0"))   //07011111111
-            //{
-            //    toPhoneNumber = toPhoneNumber.Substring(1, toPhoneNumber.Length - 1);
-            //    toPhoneNumber = $"+234{toPhoneNumber}";
-            //}
-            ////2
-            //if (!toPhoneNumber.Trim().StartsWith("+"))  //2347011111111
-            //{
-            //    toPhoneNumber = $"+{toPhoneNumber}";
-            //}
-            ////3
-            //if (!toPhoneNumber.Trim().StartsWith("2340"))  //23407011111111
-            //{
-            //    toPhoneNumber = toPhoneNumber.Remove(0, 4);
-            //    toPhoneNumber = $"+234{toPhoneNumber}";
-            //}
-
-            //prepare phone number base on country code
-            //messageDTO.To = toPhoneNumber;
-            //messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To);
 
             return await Task.FromResult(true);
         }

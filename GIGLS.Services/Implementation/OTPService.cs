@@ -9,7 +9,6 @@ using GIGLS.Core.IMessage;
 using AutoMapper;
 using GIGLS.Core.IServices.User;
 using System.Text.RegularExpressions;
-using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.Utility;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +28,7 @@ namespace GIGLS.Services.Implementation
         private readonly IMessageSenderService _messageSenderService;
 
         public OTPService(IUnitOfWork uow, ISMSService MessageService, IEmailService EmailService, IUserService UserService,
-            IPasswordGenerator codegenerator, IMessageSenderService messageSenderService )
+            IPasswordGenerator codegenerator, IMessageSenderService messageSenderService)
         {
             _uow = uow;
             _SmsService = MessageService;
@@ -44,7 +43,7 @@ namespace GIGLS.Services.Implementation
             var otpbody = await _uow.OTP.IsOTPValid(OTP);
             var result = Mapper.Map<OTPDTO>(otpbody);
             var userdto = await _UserService.GetUserByEmail(result.EmailAddress);
-            if(result.IsValid ==true)
+            if (result.IsValid == true)
             {
                 userdto.IsActive = true;
                 await _UserService.UpdateUser(userdto.Id, userdto);
@@ -53,44 +52,47 @@ namespace GIGLS.Services.Implementation
             }
             return userdto;
         }
-               
-        public  async Task<OTPDTO> GenerateOTP(UserDTO user)
-        {
-               int id = GeneratePassword();
-                var otp = new OTPDTO
-                {
-                    EmailAddress = user.Email,
-                    PhoneNumber = user.PhoneNumber,
-                    CustomerId = user.UserChannelCode,
-                    Otp = id
-                };
 
-                var result = Mapper.Map<OTP>(otp);
-                _uow.OTP.Add(result);
-                await _uow.CompleteAsync();
-                return otp;
-            
- }
+        public async Task<OTPDTO> GenerateOTP(UserDTO user)
+        {
+            int id = GeneratePassword();
+            var otp = new OTPDTO
+            {
+                EmailAddress = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                CustomerId = user.UserChannelCode,
+                Otp = id
+            };
+
+            var result = Mapper.Map<OTP>(otp);
+            _uow.OTP.Add(result);
+            await _uow.CompleteAsync();
+            return otp;
+
+        }
 
         private static int GeneratePassword()
-         {
+        {
             int min = 1000;
             int max = 9999;
             Random rdm = new Random();
             return rdm.Next(min, max);
-          }
-        public  async Task<bool> SendOTP(OTPDTO user)
-        {
+        }
 
+        public async Task<bool> SendOTP(OTPDTO user)
+        {
             var message = new MobileMessageDTO
             {
                 SenderEmail = user.EmailAddress,
                 SenderPhoneNumber = user.PhoneNumber,
-                OTP = user.Otp
+                OTP = user.Otp,
+                SMSSenderPlatform = SMSSenderPlatform.TWILIO
             };
+
             var response = await _messageSenderService.SendMessage(MessageType.OTP, EmailSmsType.All, message);
             return response;
         }
+
         public async Task<UserDTO> CheckDetails(string user, string userchanneltype)
         {
             try
@@ -113,7 +115,7 @@ namespace GIGLS.Services.Implementation
                     var registerUser = await _UserService.GetUserByPhone(user);
                     RegisterUser = await CheckVehicleInformation(registerUser, userchanneltype);
                 }
-                if(!isEmail && !IsPhone)
+                if (!isEmail && !IsPhone)
                 {
                     var registerUser = await _UserService.GetUserByChannelCode(user);
                     RegisterUser = await CheckVehicleInformation(registerUser, userchanneltype);
@@ -121,14 +123,14 @@ namespace GIGLS.Services.Implementation
 
                 return RegisterUser;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw;
             }
 
         }
 
-        public async Task<double> GetAverageRating(string CustomerCode,string usertype)
+        public async Task<double> GetAverageRating(string CustomerCode, string usertype)
         {
             if (usertype == UserChannelType.Partner.ToString())
             {
@@ -145,7 +147,7 @@ namespace GIGLS.Services.Implementation
             }
             else
             {
-                var ratings = await _uow.MobileRating.FindAsync(s =>s.CustomerCode == CustomerCode);
+                var ratings = await _uow.MobileRating.FindAsync(s => s.CustomerCode == CustomerCode);
                 var count = ratings.Count();
                 var averageratings = ratings.Sum(x => x.PartnerRating);
                 averageratings = (averageratings / count);
@@ -156,8 +158,8 @@ namespace GIGLS.Services.Implementation
                 var rating = (double)averageratings;
                 return rating;
             }
-           
-           
+
+
         }
         public async Task<bool> IsPartnerActivated(string CustomerCode)
         {
@@ -221,7 +223,7 @@ namespace GIGLS.Services.Implementation
                 registerUser.IsVerified = IsVerified;
                 return registerUser;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw;
             }
