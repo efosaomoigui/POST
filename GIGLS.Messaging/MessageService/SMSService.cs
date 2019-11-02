@@ -173,6 +173,8 @@ namespace GIGLS.Messaging.MessageService
         //// Use Twilio SMS
         private async Task<string> SendSMSUsingTwilioAsync(MessageDTO message)
         {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
             string accountSID = ConfigurationManager.AppSettings["smsService:accountSID"];
             string authToken = ConfigurationManager.AppSettings["smsService:authToken"];
             string fromNumber = ConfigurationManager.AppSettings["smsFrom"];
@@ -187,7 +189,7 @@ namespace GIGLS.Messaging.MessageService
                 var msg = MessageResource.Create(
                     to: new PhoneNumber(message.To),
                     from: new PhoneNumber(fromNumber),
-                    body: message.Body
+                    body: message.FinalBody
                 );
 
                 result = msg.Status.ToString();
