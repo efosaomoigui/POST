@@ -651,11 +651,17 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var CountryId = await _preShipmentMobileService.GetCountryId();
                 user.UserActiveCountryId = CountryId;    //Nigeria
             }
+            else
+            {
+                var countryid = await _uow.Country.GetAsync(s => s.CountryName.Equals(user.CountryName));
+                user.UserActiveCountryId = countryid.CountryId;
+            }
             var result = new SignResponseDTO();
             if (user.UserChannelType == UserChannelType.Partner)
             {
-                var EmailUser = await _uow.User.GetUserByEmail(user.Email);
-                if (EmailUser != null)
+                var PhoneNumber = user.PhoneNumber.Remove(0, 4);
+                var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
+                if (EmailUser != null )
                 {
                     if (EmailUser.UserChannelType == UserChannelType.Employee)
                     {
@@ -666,7 +672,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         throw new GenericException("Email already Exists as a Partner!");
                     }
-                    var phonepartnerdetails = await _uow.Partner.GetAsync(s => s.PhoneNumber == user.PhoneNumber);
+                    var phonepartnerdetails = await _uow.Partner.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber));
                     if (phonepartnerdetails != null)
                     {
                         throw new GenericException("Phone number already Exists as a Partner!");
@@ -711,14 +717,15 @@ namespace GIGLS.Services.Business.CustomerPortal
                         await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
                     }
                 }
-                if (EmailUser == null)
+              
+                if (EmailUser == null )
                 {
                     var emailpartnerdetails = await _uow.Partner.GetAsync(s => s.Email == user.Email);
                     if (emailpartnerdetails != null)
                     {
                         throw new GenericException("Email already Exists on Partners!");
                     }
-                    var phonepartnerdetails = await _uow.Partner.GetAsync(s => s.PhoneNumber == user.PhoneNumber);
+                    var phonepartnerdetails = await _uow.Partner.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber));
                     if (phonepartnerdetails != null)
                     {
                         throw new GenericException("Phone number already Exists on Partners!");
@@ -768,7 +775,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             if (user.UserChannelType == UserChannelType.IndividualCustomer)
             {
-                var EmailUser = await _uow.User.GetUserByEmail(user.Email);
+                var PhoneNumber = user.PhoneNumber.Remove(0, 4);
+                var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
                 if (EmailUser != null)
                 {
                     if (EmailUser.UserChannelType == UserChannelType.Employee)
@@ -805,7 +813,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         }
 
                     }
-                    var phonecustomerdetails = await _uow.IndividualCustomer.GetAsync(s => s.PhoneNumber == user.PhoneNumber);
+                    var phonecustomerdetails = await _uow.IndividualCustomer.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber));
                     if (phonecustomerdetails != null)
                     {
                         if (phonecustomerdetails.IsRegisteredFromMobile == true)
@@ -854,7 +862,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
                     }
                 }
-                else
+                else if(EmailUser ==null)
                 {
                     user.UserChannelType = UserChannelType.IndividualCustomer;
                     user.IsFromMobile = true;
@@ -866,7 +874,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             else if (user.UserChannelType == UserChannelType.Ecommerce)
             {
-                var EmailUser = await _uow.User.GetUserByEmail(user.Email);
+                var PhoneNumber = user.PhoneNumber.Remove(0, 4);
+                var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
                 if (EmailUser != null)
                 {
                     if (EmailUser.UserChannelType == UserChannelType.Employee)
@@ -901,7 +910,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         }
 
                     }
-                    var phonecompanydetails = await _uow.Company.GetAsync(s => s.PhoneNumber == user.PhoneNumber);
+                    var phonecompanydetails = await _uow.Company.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber));
                     if (phonecompanydetails != null)
                     {
                         if (phonecompanydetails.IsRegisteredFromMobile == true)
@@ -952,7 +961,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
                     }
                 }
-                else
+                else if(EmailUser ==null)
                 {
                     user.UserChannelType = UserChannelType.Ecommerce;
                     user.IsFromMobile = true;

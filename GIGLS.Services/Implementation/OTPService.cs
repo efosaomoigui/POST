@@ -108,10 +108,7 @@ namespace GIGLS.Services.Implementation
                 bool IsPhone = Regex.IsMatch(user, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
                 if (IsPhone)
                 {
-                    if (!user.Contains("+234"))
-                    {
-                        user = "+234" + user.Remove(0, 1);
-                    };
+                    user = user.Remove(0, 1);
                     var registerUser = await _UserService.GetUserByPhone(user);
                     RegisterUser = await CheckVehicleInformation(registerUser, userchanneltype);
                 }
@@ -231,18 +228,27 @@ namespace GIGLS.Services.Implementation
 
         public async Task<UserDTO> GenerateReferrerCode(UserDTO user)
         {
+            
             var code = await _codegenerator.Generate(5);
-            var referrerCodeDTO = new ReferrerCodeDTO
+            var ReferrerCodeExists = await _uow.ReferrerCode.GetAsync(s => s.UserCode == user.UserChannelCode);
+            if (ReferrerCodeExists == null)
             {
-                Referrercode = code,
-                UserId = user.Id,
-                UserCode = user.UserChannelCode
+                var referrerCodeDTO = new ReferrerCodeDTO
+                {
+                    Referrercode = code,
+                    UserId = user.Id,
+                    UserCode = user.UserChannelCode
 
-            };
-            var referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
-            _uow.ReferrerCode.Add(referrercode);
-            await _uow.CompleteAsync();
-            user.Referrercode = referrercode.Referrercode;
+                };
+                var referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
+                _uow.ReferrerCode.Add(referrercode);
+                await _uow.CompleteAsync();
+                user.Referrercode = referrercode.Referrercode;
+            }
+            else
+            {
+                user.Referrercode = ReferrerCodeExists.Referrercode;
+            }
             return user;
         }
 

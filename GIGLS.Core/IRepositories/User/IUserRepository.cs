@@ -48,5 +48,6 @@ namespace GIGLS.Core.IRepositories.User
         IQueryable<GIGL.GIGLS.Core.Domain.User> GetCorporateCustomerUsersAsQueryable();
 
         Task<bool> IsUserHasAdminRole(string userId);
+        Task<GIGL.GIGLS.Core.Domain.User> GetUserByEmailorPhoneNumber(string email, string PhoneNumber);
     }
 }
