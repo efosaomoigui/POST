@@ -446,6 +446,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IBankRepository Bank { get; set; }
 
+        [Inject]
+        public IActivationCampaignEmailRepository ActivationCampaignEmail { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

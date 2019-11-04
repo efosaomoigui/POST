@@ -37,7 +37,10 @@
         PickUpStartTime,
         PickUpEndTime,
         AddedMinutesForDeliveryTime,
-        EmailForDeliveryTime
+        EmailForDeliveryTime,
+        ActivationCampaignStartDate,
+        ActivationCampaignEndDate,
+        ReferralBonusForActivationCampaign
 
     }
 }

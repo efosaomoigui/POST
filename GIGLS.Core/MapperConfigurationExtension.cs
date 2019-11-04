@@ -389,6 +389,10 @@ namespace GIGLS.Core
 
                 config.CreateMap<Bank, BankDTO>();
                 config.CreateMap<BankDTO, Bank>();
+
+
+                config.CreateMap<ActivationCampaignEmail, ActivationCampaignEmailDTO>();
+                config.CreateMap<ActivationCampaignEmailDTO, ActivationCampaignEmail>();
             });
 
             isInit = true;

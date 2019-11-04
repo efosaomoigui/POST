@@ -135,6 +135,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Domain\ActivationCampaignEmail.cs" />
     <Compile Include="Domain\AppRole.cs" />
     <Compile Include="Domain\Audit\AuditTrailEvent.cs" />
     <Compile Include="Domain\Bank.cs" />
@@ -282,6 +283,7 @@
     <Compile Include="DTO\Account\InvoiceViewDTO.cs" />
     <Compile Include="DTO\Account\ServiceCenreDTO.cs" />
     <Compile Include="DTO\Account\VATDTO.cs" />
+    <Compile Include="DTO\ActivationCampaignEmailDTO.cs" />
     <Compile Include="DTO\Admin\AdminReportDTO.cs" />
     <Compile Include="DTO\BankSettlement\BankDTO.cs" />
     <Compile Include="DTO\BankSettlement\BankProcessingOrderForShipmentAndCODDTO.cs" />
@@ -548,6 +550,7 @@
     <Compile Include="IRepositories\Haulage\IHaulageDistanceMappingPriceRepository.cs" />
     <Compile Include="IRepositories\Haulage\IPackingListRepository.cs" />
     <Compile Include="IRepositories\Haulage\IHaulageRepository.cs" />
+    <Compile Include="IRepositories\IActivationCampaignEmailRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
     <Compile Include="IRepositories\ICategoryRepository.cs" />
     <Compile Include="IRepositories\ICountryRepository.cs" />
@@ -685,6 +688,7 @@
     <Compile Include="IServices\Haulage\IHaulageDistanceMappingPriceService.cs" />
     <Compile Include="IServices\Haulage\IHaulageService.cs" />
     <Compile Include="IServices\Haulage\IPackingListService.cs" />
+    <Compile Include="IServices\IActivationCampaignEmailService.cs" />
     <Compile Include="IServices\ICategoryService.cs" />
     <Compile Include="IServices\ICountryService.cs" />
     <Compile Include="IServices\IDeliveryLocationService.cs" />

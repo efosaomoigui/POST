@@ -270,6 +270,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<DeliveryLocation> DeliveryLocation { get; set; }
         public DbSet<LGA> LGA { get; set; }
         public DbSet<Bank> Bank { get; set; }
+        public DbSet<ActivationCampaignEmail> ActivationCampaignEmail { get; set; }
 
         #endregion
 

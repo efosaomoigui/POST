@@ -175,6 +175,8 @@ namespace GIGLS.Core
         IWaybillPaymentLogRepository WaybillPaymentLog {get; set;}
         IBankRepository Bank { get; set; }
 
+        IActivationCampaignEmailRepository ActivationCampaignEmail { get; set; }
+
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
     }
