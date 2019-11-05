@@ -75,5 +75,7 @@ namespace GIGLS.Core.DTO.User
         public double AverageRatings { get; set; }
 
         public bool IsVerified { get; set; }
+
+        public string MobileCountryName { get; set; }
     }
 }

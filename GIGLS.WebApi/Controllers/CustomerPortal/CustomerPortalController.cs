@@ -692,6 +692,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 var user = await _portalService.CheckDetails(logindetail.UserDetail, logindetail.UserChannelType);
                 var vehicle = user.VehicleType;
                 var partnerType = "";
+
                 if (user.Username != null)
                 {
                     user.Username = user.Username.Trim();
@@ -701,10 +702,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 {
                     logindetail.Password = logindetail.Password.Trim();
                 }
+
                 if (user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
                 {
                     throw new GenericException("You are not authorized to login on this platform.");
                 }
+
                 if (user != null && user.IsActive == true)
                 {
                     using (var client = new HttpClient())

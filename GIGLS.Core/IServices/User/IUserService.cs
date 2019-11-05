@@ -79,5 +79,6 @@ namespace GIGLS.Core.IServices.User
         Task<int[]> GetRegionServiceCenters(string currentUserId);
 
         Task<bool> IsUserHasAdminRole(string userId);
+        Task<UserDTO> GetUserUsingCustomer(string emailPhoneCode);
     }
 }

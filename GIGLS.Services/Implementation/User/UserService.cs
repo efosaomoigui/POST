@@ -1398,5 +1398,19 @@ namespace GIGLS.Services.Implementation.User
         {
             return await _unitOfWork.User.IsUserHasAdminRole(userId);
         }
+
+
+        //use for mobile request
+        public async Task<UserDTO> GetUserUsingCustomer(string emailPhoneCode)
+        {
+            var user = await _unitOfWork.User.GetUserUsingCustomer(emailPhoneCode);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!");
+            }
+
+            return Mapper.Map<UserDTO>(user);
+        }
     }
 }
