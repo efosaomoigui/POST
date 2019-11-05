@@ -101,29 +101,7 @@ namespace GIGLS.Services.Implementation
                 
                 UserDTO registerUserDTo = new UserDTO();
                 registerUserDTo = await CheckVehicleInformation(registerUser, userchanneltype);
-
-                //bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
-                //if (isEmail)
-                //{
-                //    user.Trim();
-                //    var registerUser = await _UserService.GetUserByEmail(user);
-                //    RegisterUser = await CheckVehicleInformation(registerUser, userchanneltype);
-                //}
-
-                //bool IsPhone = Regex.IsMatch(user, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
-                //if (IsPhone)
-                //{
-                //    user = user.Remove(0, 1);
-                //    var registerUser = await _UserService.GetUserByPhone(user);
-                //    RegisterUser = await CheckVehicleInformation(registerUser, userchanneltype);
-                //}
-
-                //if (!isEmail && !IsPhone)
-                //{
-                //    var registerUser = await _UserService.GetUserByChannelCode(user);
-                //    RegisterUser = await CheckVehicleInformation(registerUser, userchanneltype);
-                //}
-
+                
                 return registerUserDTo;
             }
             catch (Exception)
