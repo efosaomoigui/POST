@@ -1140,25 +1140,21 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 user.Email.Trim();
                 registerUser = await _userService.GetUserByEmail(user.Email);
-
             }
             else
             {
                 bool IsPhone = Regex.IsMatch(user.PhoneNumber, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
                 if (IsPhone)
                 {
-                    if (!user.PhoneNumber.Contains("+234"))
-                    {
-                        user.PhoneNumber = "+234" + user.PhoneNumber.Remove(0, 1);
-                    };
+                    user.PhoneNumber = user.PhoneNumber.Remove(0, 1);
                     registerUser = await _userService.GetUserByPhone(user.PhoneNumber);
-
                 }
                 else
                 {
                     throw new GenericException("Invalid Details");
                 }
             }
+
             return registerUser;
         }
 
