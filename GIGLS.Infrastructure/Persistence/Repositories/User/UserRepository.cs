@@ -301,7 +301,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
 
         public Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomer(string emailPhoneCode)
         {
-            var user = _userManager.Users.Where(x => (x.Email.Equals(emailPhoneCode) || x.UserChannelCode.Equals(emailPhoneCode) || x.PhoneNumber.Contains(emailPhoneCode)) && x.IsRegisteredFromMobile == true).FirstOrDefault();
+            var user = _userManager.Users.Where(x => (x.Email.Equals(emailPhoneCode) 
+            || x.UserChannelCode.Equals(emailPhoneCode) || x.PhoneNumber.Contains(emailPhoneCode)) 
+            && (x.IsRegisteredFromMobile == true || x.SystemUserRole == "Dispatch Rider" || x.SystemUserRole == "Captain" )).FirstOrDefault();
             return Task.FromResult(user);
         }
     }
