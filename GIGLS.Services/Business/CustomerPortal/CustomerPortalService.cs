@@ -882,7 +882,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                             emailcustomerdetails.IsRegisteredFromMobile = true;
                             emailcustomerdetails.Email = user.Email;
                             emailcustomerdetails.Password = user.Password;
-                            EmailUser.UserChannelPassword = user.Password;
                             emailcustomerdetails.PhoneNumber = user.PhoneNumber;
                             emailcustomerdetails.FirstName = user.FirstName;
                             emailcustomerdetails.LastName = user.LastName;
@@ -910,7 +909,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                             phonecustomerdetails.PhoneNumber = user.PhoneNumber;
                             phonecustomerdetails.FirstName = user.FirstName;
                             phonecustomerdetails.LastName = user.LastName;
-                            EmailUser.UserChannelPassword = user.Password;
                             var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
                             await _uow.CompleteAsync();
 
@@ -923,7 +921,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         if (EmailUser.UserChannelType == UserChannelType.Employee)
                         {
-
                             if (EmailUser.Email != user.Email)
                             {
                                 user.UserChannelType = UserChannelType.IndividualCustomer;
@@ -1007,7 +1004,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                             emailcompanydetails.IsRegisteredFromMobile = true;
                             emailcompanydetails.Email = user.Email;
                             emailcompanydetails.Password = user.Password;
-                            EmailUser.UserChannelPassword = user.Password;
                             emailcompanydetails.PhoneNumber = user.PhoneNumber;
                             await _uow.CompleteAsync();
                             var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
@@ -1029,7 +1025,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                             phonecompanydetails.Email = user.Email;
                             phonecompanydetails.Password = user.Password;
                             phonecompanydetails.PhoneNumber = user.PhoneNumber;
-                            EmailUser.UserChannelPassword = user.Password;
                             await _uow.CompleteAsync();
                             var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
                             result = await SendOTPForRegisteredUser(user);
@@ -1041,7 +1036,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         if (EmailUser.UserChannelType == UserChannelType.Employee)
                         {
-
                             if (EmailUser.Email != user.Email)
                             {
                                 user.UserChannelType = UserChannelType.IndividualCustomer;
@@ -1587,7 +1581,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                         UserChannelType = UserChannelType.IndividualCustomer,
                         PasswordExpireDate = DateTime.Now,
                         UserActiveCountryId = user.UserActiveCountryId,
-                        IsFromMobile = true
+                        IsFromMobile = true,
+                        IsRegisteredFromMobile = true
                     };
 
                     var FinalUser = Mapper.Map<User>(result);
@@ -1621,7 +1616,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                         UserChannelType = UserChannelType.Ecommerce,
                         PasswordExpireDate = DateTime.Now,
                         UserActiveCountryId = user.UserActiveCountryId,
-                        IsFromMobile = true
+                        IsFromMobile = true,
+                        IsRegisteredFromMobile = true
                     };
 
                     var FinalUser = Mapper.Map<User>(result);
@@ -1655,7 +1651,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                         UserChannelType = UserChannelType.Partner,
                         PasswordExpireDate = DateTime.Now,
                         UserActiveCountryId = user.UserActiveCountryId,
-                        IsFromMobile = true
+                        IsFromMobile = true,
+                        IsRegisteredFromMobile = true
                     };
 
                     var FinalUser = Mapper.Map<User>(result);

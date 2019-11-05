@@ -77,5 +77,6 @@ namespace GIGLS.Core.DTO.User
         public bool IsVerified { get; set; }
 
         public string MobileCountryName { get; set; }
+        public bool IsRegisteredFromMobile { get; set; }
     }
 }
