@@ -292,9 +292,16 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
 
             return Task.FromResult(hasAdminRole);
         }
+
         public Task<GIGL.GIGLS.Core.Domain.User> GetUserByEmailorPhoneNumber(string email, string PhoneNumber)
         {
             var user = _userManager.Users.Where(x => x.Email.Equals(email) || x.PhoneNumber.Contains(PhoneNumber)).FirstOrDefault();
+            return Task.FromResult(user);
+        }
+
+        public Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomer(string emailPhoneCode)
+        {
+            var user = _userManager.Users.Where(x => (x.Email.Equals(emailPhoneCode) || x.UserChannelCode.Equals(emailPhoneCode) || x.PhoneNumber.Contains(emailPhoneCode)) && x.IsRegisteredFromMobile == true).FirstOrDefault();
             return Task.FromResult(user);
         }
     }
