@@ -48,8 +48,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         private readonly ICustomerPortalService _portalService;
         private readonly IPaystackPaymentService _paymentService;
 
-
-
         public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService) : base(nameof(CustomerPortalController))
         {
             // _uow = uow;
@@ -58,8 +56,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
 
         }
-
-
+        
         [HttpPost]
         [Route("transaction")]
         public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentCollectionFilterCriteria f_Criteria)
@@ -690,6 +687,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return await HandleApiOperationAsync(async () =>
             {
                 var user = await _portalService.CheckDetails(logindetail.UserDetail, logindetail.UserChannelType);
+
                 var vehicle = user.VehicleType;
                 var partnerType = "";
 

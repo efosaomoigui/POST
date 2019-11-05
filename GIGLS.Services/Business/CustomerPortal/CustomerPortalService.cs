@@ -1286,7 +1286,24 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<UserDTO> CheckDetails(string user, string userchanneltype)
         {
-            return await _otpService.CheckDetails(user, userchanneltype);
+            string emailPhone = "";
+
+            bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            if (isEmail)
+            {
+                emailPhone = user;
+            }
+            else
+            {
+                bool IsPhone = Regex.IsMatch(user, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
+                if (IsPhone)
+                {
+                    user = user.Remove(0, 1);
+                    emailPhone = user;
+                }
+            }
+
+            return await _otpService.CheckDetails(emailPhone, userchanneltype);
         }
         public async Task<bool> CreateCustomer(string CustomerCode)
         {
