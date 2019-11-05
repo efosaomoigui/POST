@@ -744,6 +744,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             EmailUser.PhoneNumber = user.PhoneNumber;
                             EmailUser.Email = user.Email;
                             EmailUser.IsRegisteredFromMobile = true;
+                            EmailUser.UserActiveCountryId = user.UserActiveCountryId;
 
                             var partnerDTO = new PartnerDTO
                             {
@@ -866,6 +867,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         EmailUser.PhoneNumber = user.PhoneNumber;
                         EmailUser.Email = user.Email;
                         EmailUser.IsRegisteredFromMobile = true;
+                        EmailUser.UserActiveCountryId = user.UserActiveCountryId;
                     }
                     
                     var emailcustomerdetails = await _uow.IndividualCustomer.GetAsync(s => s.Email == user.Email);
@@ -906,8 +908,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                             phonecustomerdetails.Email = user.Email;
                             phonecustomerdetails.Password = user.Password;
                             phonecustomerdetails.PhoneNumber = user.PhoneNumber;
-                            emailcustomerdetails.FirstName = user.FirstName;
-                            emailcustomerdetails.LastName = user.LastName;
+                            phonecustomerdetails.FirstName = user.FirstName;
+                            phonecustomerdetails.LastName = user.LastName;
                             EmailUser.UserChannelPassword = user.Password;
                             var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
                             await _uow.CompleteAsync();
@@ -945,6 +947,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 userId = EmailUser.Id,
                                 IsRegisteredFromMobile = true
                             };
+
                             var individualCustomer = Mapper.Map<IndividualCustomer>(customer);
                             EmailUser.UserChannelPassword = user.Password;
                             var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
@@ -989,8 +992,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                         EmailUser.PhoneNumber = user.PhoneNumber;
                         EmailUser.Email = user.Email;
                         EmailUser.IsRegisteredFromMobile = true;
+                        EmailUser.UserActiveCountryId = user.UserActiveCountryId;
                     }
-
 
                     var emailcompanydetails = await _uow.Company.GetAsync(s => s.Email == user.Email);
                     if (emailcompanydetails != null)
@@ -1430,6 +1433,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     var individualCustomerDTO = Mapper.Map<IndividualCustomer>(customer);
                     _uow.IndividualCustomer.Add(individualCustomerDTO);
                     await _uow.CompleteAsync();
+
                     // add customer to a wallet
                     await _walletService.AddWallet(new WalletDTO
                     {
@@ -1438,6 +1442,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         CustomerCode = individualCustomerDTO.CustomerCode,
                         CompanyType = CustomerType.IndividualCustomer.ToString()
                     });
+
                     // add customer to user's table.
                     User = await CreateNewuser(user);
                     //return user;
