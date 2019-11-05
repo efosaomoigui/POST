@@ -651,9 +651,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var CountryId = await _preShipmentMobileService.GetCountryId();
                 user.UserActiveCountryId = CountryId;    //Nigeria
             }
-            else
+            else if (user.MobileCountryName != null)
             {
-                var countryid = await _uow.Country.GetAsync(s => s.CountryName.Equals(user.CountryName));
+                var countryid = await _uow.Country.GetAsync(s => s.CountryName.Equals(user.MobileCountryName));
                 user.UserActiveCountryId = countryid.CountryId;
             }
             var result = new SignResponseDTO();
