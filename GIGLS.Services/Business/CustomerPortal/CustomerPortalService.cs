@@ -891,9 +891,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                             result = await SendOTPForRegisteredUser(user);
                             var User = Mapper.Map<UserDTO>(EmailUser);
                             await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
+                            return result;
                         }
-                    }
 
+                    }
+                    
                     var phonecustomerdetails = await _uow.IndividualCustomer.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber));
                     if (phonecustomerdetails != null)
                     {
@@ -915,6 +917,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             result = await SendOTPForRegisteredUser(user);
                             var User = Mapper.Map<UserDTO>(EmailUser);
                             await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
+                            return result;
                         }
                     }
                     else
@@ -928,6 +931,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 var registeredUser = await CreateUserBasedOnCustomerType(user);
                                 result = await SendOTPForRegisteredUser(registeredUser);
                                 await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
+                                return result;
                             }
                         }
                         else
@@ -952,9 +956,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                             await _uow.CompleteAsync();
 
                             result = await SendOTPForRegisteredUser(user);
-
                             var User = Mapper.Map<UserDTO>(EmailUser);
                             await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
+                            return result;
+
                         }
 
                     }
@@ -1010,6 +1015,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             result = await SendOTPForRegisteredUser(user);
                             var User = Mapper.Map<UserDTO>(EmailUser);
                             await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
+                            return result;
                         }
                     }
                     var phonecompanydetails = await _uow.Company.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber));
@@ -1030,6 +1036,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             result = await SendOTPForRegisteredUser(user);
                             var User = Mapper.Map<UserDTO>(EmailUser);
                             await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
+                            return result;
                         }
                     }
                     else
@@ -1043,6 +1050,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 var registeredUser = await CreateUserBasedOnCustomerType(user);
                                 result = await SendOTPForRegisteredUser(registeredUser);
                                 await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
+                                return result;
                             }
                         }
                         else
