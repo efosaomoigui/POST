@@ -91,42 +91,44 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     newCustomer.Email = newCustomer.CustomerCode;
                 }
-                try
-                {
-                    var password = "";
-                    if (newCustomer.Password == null)
-                    {
-                        password = await _passwordGenerator.Generate();
-                    }
-                    else
-                    {
-                        password = newCustomer.Password;
-                    }
-                    var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
-                    {
-                        ConfirmPassword = password,
-                        Department = CustomerType.IndividualCustomer.ToString(),
-                        DateCreated = DateTime.Now,
-                        Designation = CustomerType.IndividualCustomer.ToString(),
-                        Email=newCustomer.Email,
-                        FirstName = newCustomer.FirstName,
-                        LastName = newCustomer.LastName,
-                        Organisation = CustomerType.IndividualCustomer.ToString(),
-                        Password = password,
-                        PhoneNumber = newCustomer.PhoneNumber,
-                        UserType = UserType.Regular,
-                        Username = newCustomer.CustomerCode,
-                        UserChannelCode = newCustomer.CustomerCode,
-                        UserChannelPassword = password,
-                        UserChannelType = UserChannelType.IndividualCustomer,
-                        PasswordExpireDate = DateTime.Now,
-                        UserActiveCountryId = newCustomer.UserActiveCountryId
-                    });
-                }
-                catch (Exception)
-                {
-                    // do nothing
-                }
+
+                //create login for the user
+                //try
+                //{
+                //    var password = "";
+                //    if (newCustomer.Password == null)
+                //    {
+                //        password = await _passwordGenerator.Generate();
+                //    }
+                //    else
+                //    {
+                //        password = newCustomer.Password;
+                //    }
+                //    var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
+                //    {
+                //        ConfirmPassword = password,
+                //        Department = CustomerType.IndividualCustomer.ToString(),
+                //        DateCreated = DateTime.Now,
+                //        Designation = CustomerType.IndividualCustomer.ToString(),
+                //        Email=newCustomer.Email,
+                //        FirstName = newCustomer.FirstName,
+                //        LastName = newCustomer.LastName,
+                //        Organisation = CustomerType.IndividualCustomer.ToString(),
+                //        Password = password,
+                //        PhoneNumber = newCustomer.PhoneNumber,
+                //        UserType = UserType.Regular,
+                //        Username = newCustomer.CustomerCode,
+                //        UserChannelCode = newCustomer.CustomerCode,
+                //        UserChannelPassword = password,
+                //        UserChannelType = UserChannelType.IndividualCustomer,
+                //        PasswordExpireDate = DateTime.Now,
+                //        UserActiveCountryId = newCustomer.UserActiveCountryId
+                //    });
+                //}
+                //catch (Exception)
+                //{
+                //    // do nothing
+                //}
                 
                 return Mapper.Map<IndividualCustomerDTO>(newCustomer);
             }
