@@ -67,7 +67,17 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var CurrencyCode = "";
+                var CurrencySymbol = "";
                 var userid = await _userservice.GetCurrentUserId();
+                var user = await _userservice.GetUserById(userid);
+                var Country = await _uow.Country.GetAsync(s => s.CountryId == user.UserActiveCountryId);
+                if(Country !=null)
+                {
+                    CurrencyCode = Country.CurrencyCode;
+                    CurrencySymbol = Country.CurrencySymbol;
+                }
+                
                 var mobilerequests = await _uow.MobilePickUpRequests.GetMobilePickUpRequestsAsyncMonthly(userid);
                 var Count = await _uow.MobilePickUpRequests.FindAsync(x => x.UserId == userid && x.DateCreated.Month == DateTime.Now.Month && x.DateCreated.Year == DateTime.Now.Year && x.Status =="Delivered");
                 var TotalDelivery = Count.Count();
@@ -75,6 +85,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 var TotalEarning = TotalEarnings.Sum(x =>x.AmountReceived);
                 var totaltransactions = new Partnerdto
                 {
+                  CurrencyCode = CurrencyCode,
+                  CurrencySymbol = CurrencySymbol,
                   MonthlyDelivery = mobilerequests,
                   TotalDelivery = TotalDelivery,
                   MonthlyTransactions = TotalEarning

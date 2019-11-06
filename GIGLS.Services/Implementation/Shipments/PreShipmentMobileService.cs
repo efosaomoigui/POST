@@ -612,6 +612,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
                 if (preshipmentmobile != null)
                 {
+                    var Country = await _uow.Country.GetCountryByStationId(preshipmentmobile.SenderStationId);
+                    
                     if (pickuprequest.ServiceCentreId != null)
                     {
 
@@ -642,6 +644,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
                     }
                    newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
+                   if(Country !=null)
+                    {
+                        newPreShipment.CurrencyCode = Country.CurrencyCode;
+                        newPreShipment.CurrencySymbol = Country.CurrencySymbol;
+                    }
                    await _uow.CompleteAsync();
                 }
                 else
@@ -1027,14 +1034,24 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var CurrencyCode = "";
+                var CurrencySymbol = "";
                 var user = await _userService.GetCurrentUserId();
-                var transactions = _uow.PartnerTransactions.FindAsync(s => s.UserId == user).Result;
+                var transactions = await _uow.PartnerTransactions.FindAsync(s => s.UserId == user);
                 var partneruser = await _userService.GetUserById(user);
-                var wallet = _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode).Result;
+                var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode);
                 transactions = transactions.OrderByDescending(s => s.DateCreated);
                 var TotalTransactions = Mapper.Map<List<PartnerTransactionsDTO>>(transactions);
+                var Country = await _uow.Country.GetAsync(s => s.CountryId == partneruser.UserActiveCountryId);
+                if (Country != null)
+                {
+                    CurrencyCode = Country.CurrencyCode;
+                    CurrencySymbol = Country.CurrencySymbol;
+                }
                 var summary = new SummaryTransactionsDTO
                 {
+                    CurrencySymbol = CurrencySymbol,
+                    CurrencyCode = CurrencyCode,
                     WalletBalance = wallet.Balance,
                     Transactions = TotalTransactions
                 };
