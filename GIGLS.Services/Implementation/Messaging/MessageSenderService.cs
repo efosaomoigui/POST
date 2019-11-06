@@ -158,13 +158,24 @@ namespace GIGLS.Services.Implementation.Messaging
                 };
 
                 var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
-                
+
                 var invoice = _uow.Invoice.GetAllInvoiceShipments().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).FirstOrDefault();
 
                 if (invoice != null)
                 {
-                    //Get Country Currency Symbol
-                    var country = _uow.Country.Find(s => s.CountryId == invoice.DepartureCountryId).FirstOrDefault();
+                    var country = new Country();
+
+                    //C. PICK THE RIGHT DESTINATION COUNTRY PHONE NUMBER
+                    if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.AD || messageDTO.MessageType == MessageType.OKT || messageDTO.MessageType == MessageType.AHD)
+                    {
+                        //use the destination country details 
+                        country = _uow.Country.Find(s => s.CountryId == invoice.DestinationCountryId).FirstOrDefault();
+                    }
+                    else
+                    {
+                        //Get Country Currency Symbol
+                        country = _uow.Country.Find(s => s.CountryId == invoice.DepartureCountryId).FirstOrDefault();
+                    }
 
                     //get CustomerDetails
                     if (invoice.CustomerType.Contains("Individual"))
@@ -174,8 +185,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), invoice.CustomerType);
                     var customerObj = await _customerService.GetCustomer(invoice.CustomerId, customerType);
 
-                    
-                   var userActiveCountryId = await _userService.GetUserActiveCountryId();
+                    var userActiveCountryId = await _userService.GetUserActiveCountryId();
 
                     //Get DemurrageDayCount from GlobalProperty
                     var demurrageDayCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurrageDayCount, userActiveCountryId);
@@ -188,7 +198,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     //
                     var customerName = customerObj.CustomerName;
                     var demurrageAmount = demurragePrice;
-                    
+
                     //map the array
                     strArray[0] = customerName;
                     strArray[1] = invoice.Waybill;
@@ -210,8 +220,7 @@ namespace GIGLS.Services.Implementation.Messaging
 
 
                     //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
-                    if (messageDTO.MessageType == MessageType.ARF &&
-                        invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
+                    if (messageDTO.MessageType == MessageType.ARF &&  invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
                     {
                         MessageDTO homeDeliveryMessageDTO = null;
                         if (messageDTO.EmailSmsType == EmailSmsType.SMS)
@@ -234,8 +243,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     }
 
                     //B. added for HomeDelivery email, when scan is created at Service Centre
-                    if (messageDTO.MessageType == MessageType.CRT &&
-                        invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
+                    if (messageDTO.MessageType == MessageType.CRT && invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
                     {
                         MessageDTO homeDeliveryMessageDTO = null;
                         if (messageDTO.EmailSmsType == EmailSmsType.SMS)
@@ -255,22 +263,22 @@ namespace GIGLS.Services.Implementation.Messaging
                         {
                             messageDTO.Body = homeDeliveryMessageDTO.Body;
                         }
-                    }
-
+                    }                 
+                    
                     //B. decode url parameter
                     messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
 
                     //C. populate the message subject
                     messageDTO.Subject =
                         string.Format(messageDTO.Subject, strArray);
-                    
+
                     //populate the message template
                     messageDTO.FinalBody =
                         string.Format(messageDTO.Body, strArray);
 
                     //populate the waybill
                     messageDTO.Waybill = invoice.Waybill;
-                    
+
                     if ("CUSTOMER" == messageDTO.To.Trim())
                     {
                         messageDTO.To = customerObj.PhoneNumber;
@@ -355,7 +363,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     ResultDescription = exceptionMessage
                 });
             }
-            catch (Exception ) { }
+            catch (Exception) { }
 
             return true;
         }
@@ -376,7 +384,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     ResultDescription = exceptiomMessage
                 });
             }
-            catch (Exception){   }
+            catch (Exception) { }
 
             return true;
         }
@@ -528,7 +536,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[6] = messageExtensionDTO.CancelledOrCollected;
                 strArray[7] = messageExtensionDTO.GroupWaybill;
                 strArray[8] = messageExtensionDTO.Manifest;
-                
+
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
 
@@ -540,7 +548,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 //populate the message template
                 messageDTO.FinalBody =
                     string.Format(messageDTO.Body, strArray);
-                
+
                 messageDTO.ToEmail = messageExtensionDTO.RegionalManagerEmail;
             }
 
@@ -597,7 +605,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.ToEmail = passwordMessageDTO.UserEmail;
             }
 
-            
+
             return await Task.FromResult(verifySendEmail);
         }
 
