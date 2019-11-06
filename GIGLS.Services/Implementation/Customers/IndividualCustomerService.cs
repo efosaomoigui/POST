@@ -63,9 +63,9 @@ namespace GIGLS.Services.Implementation.Customers
                 }
 
                 //generate customer code
-                var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
-                    NumberGeneratorType.CustomerCodeIndividual);
+                var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeIndividual);
                 newCustomer.CustomerCode = customerCode;
+
                 //added this line of code for mobile registration
                 if(customer.IsFromMobile ==true)
                 {
@@ -270,16 +270,16 @@ namespace GIGLS.Services.Implementation.Customers
             customer.Password = customerDto.Password;
             customer.UserActiveCountryId = customerDto.UserActiveCountryId;
             
-            var user = await _userService.GetUserByChannelCode(customer.CustomerCode);
-            user.FirstName = customerDto.FirstName;
-            user.LastName = customerDto.LastName;
-            user.PhoneNumber = customerDto.PhoneNumber;
-            user.Email = customerDto.Email;
-            user.PictureUrl = customerDto.PictureUrl;
-            user.UserActiveCountryId = customerDto.UserActiveCountryId;
-            await _userService.UpdateUser(user.Id, user);
-            await _uow.CompleteAsync();
-           
+            //var user = await _userService.GetUserByChannelCode(customer.CustomerCode);
+            //user.FirstName = customerDto.FirstName;
+            //user.LastName = customerDto.LastName;
+            //user.PhoneNumber = customerDto.PhoneNumber;
+            //user.Email = customerDto.Email;
+            //user.PictureUrl = customerDto.PictureUrl;
+            //user.UserActiveCountryId = customerDto.UserActiveCountryId;
+            //await _userService.UpdateUser(user.Id, user);
+
+            await _uow.CompleteAsync();           
         }
 
         public async Task<List<IndividualCustomerDTO>> GetIndividualCustomers(string searchData)
