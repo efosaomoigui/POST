@@ -30,13 +30,12 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == PickUpRequest.Waybill);
+                var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == PickUpRequest.Waybill && s.UserId == PickUpRequest.UserId && s.Status == PickUpRequest.Status.ToString());
                 if (MobilePickupRequests != null)
                 {
-                    if (MobilePickupRequests.Status != MobilePickUpRequestStatus.Rejected.ToString())
-                    {
-                        throw new GenericException($"Shipment with waybill number: {PickUpRequest.Waybill} exists already");
-                    }
+                   
+                   throw new GenericException($"Shipment with waybill number: {PickUpRequest.Waybill} exists already");
+                    
                 }
                 var newMobilePickUpRequest = Mapper.Map<MobilePickUpRequests>(PickUpRequest);
                 _uow.MobilePickUpRequests.Add(newMobilePickUpRequest);
@@ -68,7 +67,17 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var CurrencyCode = "";
+                var CurrencySymbol = "";
                 var userid = await _userservice.GetCurrentUserId();
+                var user = await _userservice.GetUserById(userid);
+                var Country = await _uow.Country.GetAsync(s => s.CountryId == user.UserActiveCountryId);
+                if(Country !=null)
+                {
+                    CurrencyCode = Country.CurrencyCode;
+                    CurrencySymbol = Country.CurrencySymbol;
+                }
+                
                 var mobilerequests = await _uow.MobilePickUpRequests.GetMobilePickUpRequestsAsyncMonthly(userid);
                 var Count = await _uow.MobilePickUpRequests.FindAsync(x => x.UserId == userid && x.DateCreated.Month == DateTime.Now.Month && x.DateCreated.Year == DateTime.Now.Year && x.Status =="Delivered");
                 var TotalDelivery = Count.Count();
@@ -76,6 +85,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 var TotalEarning = TotalEarnings.Sum(x =>x.AmountReceived);
                 var totaltransactions = new Partnerdto
                 {
+                  CurrencyCode = CurrencyCode,
+                  CurrencySymbol = CurrencySymbol,
                   MonthlyDelivery = mobilerequests,
                   TotalDelivery = TotalDelivery,
                   MonthlyTransactions = TotalEarning
@@ -88,10 +99,11 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task UpdateMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest)
+        public async Task UpdateMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest, string userId)
         {
                 try
-                { var userId = await _userservice.GetCurrentUserId();
+                {
+                    //var userId = await _userservice.GetCurrentUserId();
                     var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == PickUpRequest.Waybill && s.UserId == userId && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
                     if (MobilePickupRequests == null)
                     {

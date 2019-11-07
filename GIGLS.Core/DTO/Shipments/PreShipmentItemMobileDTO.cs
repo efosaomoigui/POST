@@ -12,7 +12,7 @@ namespace GIGLS.Core.DTO.Shipments
     {
         public int PreShipmentItemMobileId { get; set; }
         public string Description { get; set; }
-        public double Weight { get; set; }
+        public decimal Weight { get; set; }
         public string ItemType { get; set; }
         public ShipmentType ShipmentType { get; set; }
 

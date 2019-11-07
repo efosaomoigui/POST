@@ -33,6 +33,8 @@ namespace GIGLS.Core.DTO.Fleets
 
         public CountryDTO Country { get; set; }
         public int DepartureServiceCenterId { get; set; }
+        public ServiceCentreDTO DepartureService { get; set; }
         public int DestinationServiceCenterId { get; set; }
+        public ServiceCentreDTO DestinationService { get; set; }
     }
 }

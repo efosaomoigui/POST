@@ -1801,6 +1801,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
             try
             {
+                //check if shipment already exists
+                var shipmentexists = await _uow.Shipment.ExistAsync(s => s.Waybill == shipment.Waybill);
+                if(shipmentexists)
+                {
+                    throw new GenericException($"Shipment with waybill number: {shipment.Waybill} already exists.");
+                }
 
                 shipment.ApproximateItemsWeight = 0;
 
@@ -1830,7 +1836,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 CreateGeneralLedger(shipment);
                 var newShipment = Mapper.Map<Shipment>(shipment);
                 _uow.Shipment.Add(newShipment);
-                await _uow.CompleteAsync();
+                //await _uow.CompleteAsync();
                 return true;
             }
             catch (Exception ex)
@@ -1844,8 +1850,12 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             var processPayment = false;
 
-            var customerWeek = System.Configuration.ConfigurationManager.AppSettings["CustomerWeekDate"];
-            var customerWeekDate = Convert.ToDateTime(customerWeek);
+            var customerWeek = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.CustomerWeekDate, shipment.DepartureCountryId);
+
+            if (customerWeek == null)
+                return processPayment;
+
+            var customerWeekDate = Convert.ToDateTime(customerWeek.Value);
             var startDate = DateTime.Now.Date;
 
             //if today is customer week
@@ -1864,8 +1874,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 int waybillIndex = data.FindIndex(x => x == shipment.Waybill) + 1;
 
                 //3. If the waybill fall Shipment between 1st, 5th, 10, 15, 20
-                var shipmentCount = System.Configuration.ConfigurationManager.AppSettings["CustomerWeekCount"];
-                int[] freeShippingItem = shipmentCount.Split(',').Select(x => int.Parse(x.Trim())).ToArray();
+                var shipmentCount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.CustomerWeekCount, shipment.DepartureCountryId);
+
+                if (shipmentCount == null)
+                    return processPayment;
+
+                int[] freeShippingItem = shipmentCount.Value.Split(',').Select(x => int.Parse(x.Trim())).ToArray();
 
                 //4. Process payment for the customer else don't     
                 processPayment = freeShippingItem.Contains(waybillIndex);
@@ -1891,10 +1905,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var result = await _paymentService.ProcessPayment(paymentTransaction);
                 }
             }
-
-            return processPayment;
-        }
-
-
+            return processPayment;            
+        }        
     }
 }

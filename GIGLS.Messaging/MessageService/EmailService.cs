@@ -19,12 +19,12 @@ namespace GIGLS.Messaging.MessageService
         private async Task<string> ConfigSendGridasync(MessageDTO message)
         {
             var myMessage = new SendGridMessage();
-            myMessage.TemplateId = ConfigurationManager.AppSettings["emailService:SendGridTemplateId"]; ;
+            myMessage.TemplateId = ConfigurationManager.AppSettings["emailService:SendGridTemplateId"];
             var fromEmail = ConfigurationManager.AppSettings["emailService:FromEmail"];
             var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
 
             myMessage.AddTo(message.ToEmail);
-            myMessage.From = new SendGrid.Helpers.Mail.EmailAddress(fromEmail, fromName);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
             myMessage.Subject = message.Subject;
             myMessage.PlainTextContent = message.FinalBody;
             myMessage.HtmlContent = message.FinalBody;

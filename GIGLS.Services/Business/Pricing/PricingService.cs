@@ -835,15 +835,18 @@ namespace GIGLS.Services.Business.Pricing
         public async Task<decimal> GetMobileRegularPrice(PricingDTO pricingDto)
         {
 
-            if (pricingDto.DepartureStationId == pricingDto.DestinationStationId)
-            {
-                pricingDto.DeliveryOptionId = 3;
-            }
-            else
-            {
-                pricingDto.DeliveryOptionId = 2;
-            }
             var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
+            if (zone != null)
+            {
+                if (zone.ZoneId == 1)
+                {
+                    pricingDto.DeliveryOptionId = 7;
+                }
+                else
+                {
+                    pricingDto.DeliveryOptionId = 2;
+                }
+            }
 
             //get the deliveryOptionPrice from an array
 

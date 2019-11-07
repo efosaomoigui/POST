@@ -135,8 +135,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Domain\ActivationCampaignEmail.cs" />
     <Compile Include="Domain\AppRole.cs" />
     <Compile Include="Domain\Audit\AuditTrailEvent.cs" />
+    <Compile Include="Domain\Bank.cs" />
     <Compile Include="Domain\BankSettlement\BankProcessingOrderForShipmentAndCOD.cs" />
     <Compile Include="Domain\BankSettlement\CODSettlementSheet.cs" />
     <Compile Include="Domain\BaseDomain.cs" />
@@ -177,6 +179,7 @@
     <Compile Include="Domain\HUBManifestWaybillMapping.cs" />
     <Compile Include="Domain\InternationalRequestReceiver.cs" />
     <Compile Include="Domain\InternationalRequestReceiverItem.cs" />
+    <Compile Include="Domain\LGA.cs" />
     <Compile Include="Domain\Location.cs" />
     <Compile Include="Domain\LogVisitReason.cs" />
     <Compile Include="Domain\ManifestVisitMonitoring.cs" />
@@ -263,6 +266,7 @@
     <Compile Include="Domain\Wallet\WalletNumber.cs" />
     <Compile Include="Domain\Wallet\WalletPaymentLog.cs" />
     <Compile Include="Domain\Wallet\WalletTransaction.cs" />
+    <Compile Include="Domain\Wallet\WaybillPaymentLog.cs" />
     <Compile Include="Domain\WaybillNumber.cs" />
     <Compile Include="Domain\WeightLimit.cs" />
     <Compile Include="Domain\WeightLimitPrice.cs" />
@@ -279,7 +283,9 @@
     <Compile Include="DTO\Account\InvoiceViewDTO.cs" />
     <Compile Include="DTO\Account\ServiceCenreDTO.cs" />
     <Compile Include="DTO\Account\VATDTO.cs" />
+    <Compile Include="DTO\ActivationCampaignEmailDTO.cs" />
     <Compile Include="DTO\Admin\AdminReportDTO.cs" />
+    <Compile Include="DTO\BankSettlement\BankDTO.cs" />
     <Compile Include="DTO\BankSettlement\BankProcessingOrderForShipmentAndCODDTO.cs" />
     <Compile Include="DTO\BankSettlement\CODSettlementSheetDTO.cs" />
     <Compile Include="DTO\BaseDomainDTO.cs" />
@@ -335,6 +341,7 @@
     <Compile Include="DTO\Nav\SubSubNavDTO.cs" />
     <Compile Include="DTO\NotificationDTO.cs" />
     <Compile Include="DTO\OnlinePayment\PaystackWebhookDTO.cs" />
+    <Compile Include="DTO\OnlinePayment\TheTellerNetDTO.cs" />
     <Compile Include="DTO\OTPDTO.cs" />
     <Compile Include="DTO\PartnerMonthlyTransactionsDTO.cs" />
     <Compile Include="DTO\Partnership\RootObject.cs" />
@@ -364,6 +371,7 @@
     <Compile Include="DTO\Report\ShipmentProgressSummaryFilterCriteria.cs" />
     <Compile Include="DTO\RiderDeliveryDTO.cs" />
     <Compile Include="DTO\RiderDeliveryViewDTO.cs" />
+    <Compile Include="DTO\ServiceCentres\LGADTO.cs" />
     <Compile Include="DTO\ServiceCentres\RegionDTO.cs" />
     <Compile Include="DTO\ServiceCentres\RegionServiceCentreMappingDTO.cs" />
     <Compile Include="DTO\ServiceCentres\ServiceCentreDTO.cs" />
@@ -435,6 +443,7 @@
     <Compile Include="DTO\Wallet\WalletSearchOption.cs" />
     <Compile Include="DTO\Wallet\WalletTransactionDto.cs" />
     <Compile Include="DTO\Wallet\WalletTransactionSummaryDTO.cs" />
+    <Compile Include="DTO\Wallet\WaybillPaymentLogDTO.cs" />
     <Compile Include="DTO\Workshops\WorkshopDTO.cs" />
     <Compile Include="DTO\Zone\DeliveryOptionDTO.cs" />
     <Compile Include="DTO\Zone\DeliveryOptionPriceDTO.cs" />
@@ -493,6 +502,7 @@
     <Compile Include="Enums\ShipmentScanStatus.cs" />
     <Compile Include="Enums\ShipmentType.cs" />
     <Compile Include="Enums\SLAType.cs" />
+    <Compile Include="Enums\SMSSenderPlatform.cs" />
     <Compile Include="Enums\SpecialDomesticPackageType.cs" />
     <Compile Include="Enums\StockRequestDestinationType.cs" />
     <Compile Include="Enums\StockRequestSourceType.cs" />
@@ -502,6 +512,7 @@
     <Compile Include="Enums\UserStatus.cs" />
     <Compile Include="Enums\UserType.cs" />
     <Compile Include="Enums\VATType.cs" />
+    <Compile Include="Enums\Vehicletype.cs" />
     <Compile Include="Enums\VendorType.cs" />
     <Compile Include="Enums\WalletType.cs" />
     <Compile Include="IAuditable.cs" />
@@ -517,6 +528,7 @@
     <Compile Include="IRepositories\Account\IInvoiceShipmentRepository.cs" />
     <Compile Include="IRepositories\Account\IVATRepository.cs" />
     <Compile Include="IRepositories\BankSettlement\IBankProcessingOrderForShipmentAndCOD.cs" />
+    <Compile Include="IRepositories\BankSettlement\IBankRepository.cs" />
     <Compile Include="IRepositories\BankSettlement\ICODSettlementSheetRepository.cs" />
     <Compile Include="IRepositories\Client\IClientNodeRepository.cs" />
     <Compile Include="IRepositories\Customers\ICompanyContactPersonRepository.cs" />
@@ -538,6 +550,7 @@
     <Compile Include="IRepositories\Haulage\IHaulageDistanceMappingPriceRepository.cs" />
     <Compile Include="IRepositories\Haulage\IPackingListRepository.cs" />
     <Compile Include="IRepositories\Haulage\IHaulageRepository.cs" />
+    <Compile Include="IRepositories\IActivationCampaignEmailRepository.cs" />
     <Compile Include="IRepositories\IAuthRepository.cs" />
     <Compile Include="IRepositories\ICategoryRepository.cs" />
     <Compile Include="IRepositories\ICountryRepository.cs" />
@@ -569,6 +582,7 @@
     <Compile Include="IRepositories\Partnership\IVehicleTypeRepository.cs" />
     <Compile Include="IRepositories\PaymentTransactions\IPaymentPartialTransactionRepository.cs" />
     <Compile Include="IRepositories\PaymentTransactions\IPaymentTransactionRepository.cs" />
+    <Compile Include="IRepositories\ServiceCentres\ILGARepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IRegionRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IRegionServiceCentreMappingRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IServiceCentreRepository.cs" />
@@ -625,6 +639,7 @@
     <Compile Include="IRepositories\Wallet\IWalletPaymentLogRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletRepository.cs" />
     <Compile Include="IRepositories\Wallet\IWalletTransactionRepository.cs" />
+    <Compile Include="IRepositories\Wallet\IWaybillPaymentLogRepository.cs" />
     <Compile Include="IRepositories\Workshops\IWorkshopRepository.cs" />
     <Compile Include="IRepositories\Zone\IDeliveryOptionPriceRepository.cs" />
     <Compile Include="IRepositories\Zone\IDeliveryOptionRepository.cs" />
@@ -644,6 +659,7 @@
     <Compile Include="IServices\Account\IInvoiceService.cs" />
     <Compile Include="IServices\Account\IInvoiceShipmentService.cs" />
     <Compile Include="IServices\Account\IVATService.cs" />
+    <Compile Include="IServices\BankSettlement\IBankService.cs" />
     <Compile Include="IServices\BankSettlement\ICODSettlementSheetService.cs" />
     <Compile Include="IServices\Business\IPaymentService.cs" />
     <Compile Include="IServices\Business\IPricingService.cs" />
@@ -672,6 +688,7 @@
     <Compile Include="IServices\Haulage\IHaulageDistanceMappingPriceService.cs" />
     <Compile Include="IServices\Haulage\IHaulageService.cs" />
     <Compile Include="IServices\Haulage\IPackingListService.cs" />
+    <Compile Include="IServices\IActivationCampaignEmailService.cs" />
     <Compile Include="IServices\ICategoryService.cs" />
     <Compile Include="IServices\ICountryService.cs" />
     <Compile Include="IServices\IDeliveryLocationService.cs" />
@@ -705,6 +722,7 @@
     <Compile Include="IServices\Report\IAccountReportService.cs" />
     <Compile Include="IServices\Report\IAdminReportService.cs" />
     <Compile Include="IServices\Report\IShipmentReportService.cs" />
+    <Compile Include="IServices\ServiceCentres\ILGAService.cs" />
     <Compile Include="IServices\ServiceCentres\IRegionService.cs" />
     <Compile Include="IServices\ServiceCentres\IRegionServiceCentreMappingService.cs" />
     <Compile Include="IServices\ServiceCentres\IServiceCentreService.cs" />
@@ -757,6 +775,7 @@
     <Compile Include="IServices\Wallet\IWalletPaymentLogService.cs" />
     <Compile Include="IServices\Wallet\IWalletService.cs" />
     <Compile Include="IServices\Wallet\IWalletTransactionService.cs" />
+    <Compile Include="IServices\Wallet\IWaybillPaymentLogService.cs" />
     <Compile Include="IServices\Workshops\IWorkshopService.cs" />
     <Compile Include="IServices\Zone\IDeliveryOptionPriceService.cs" />
     <Compile Include="IServices\Zone\IDeliveryOptionService.cs" />

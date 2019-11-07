@@ -5,5 +5,6 @@
         Company,
         IndividualCustomer,
         Partner
+
     }
 }

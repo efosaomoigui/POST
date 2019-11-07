@@ -276,5 +276,35 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             var user = _userManager.Users.Where(x => x.PhoneNumber.Contains(PhoneNumber)).FirstOrDefault();
             return Task.FromResult(user);
         }
+
+        public Task<bool> IsUserHasAdminRole(string userId)
+        {
+            bool hasAdminRole = false;
+
+            var user = _userManager.Users
+                .Where(x => x.IsDeleted == false && x.Id == userId 
+                && (x.SystemUserRole == "Chairman" || x.SystemUserRole == "Administrator" || x.SystemUserRole == "Director")).FirstOrDefault();
+
+            if(user != null)
+            {
+                hasAdminRole = true;
+            }
+
+            return Task.FromResult(hasAdminRole);
+        }
+
+        public Task<GIGL.GIGLS.Core.Domain.User> GetUserByEmailorPhoneNumber(string email, string PhoneNumber)
+        {
+            var user = _userManager.Users.Where(x => x.Email.Equals(email) || x.PhoneNumber.Contains(PhoneNumber)).FirstOrDefault();
+            return Task.FromResult(user);
+        }
+
+        public Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomer(string emailPhoneCode)
+        {
+            var user = _userManager.Users.Where(x => (x.Email.Equals(emailPhoneCode) 
+            || x.UserChannelCode.Equals(emailPhoneCode) || x.PhoneNumber.Contains(emailPhoneCode)) 
+            && (x.IsRegisteredFromMobile == true || x.SystemUserRole == "Dispatch Rider" || x.SystemUserRole == "Captain" )).FirstOrDefault();
+            return Task.FromResult(user);
+        }
     }
 }

@@ -380,6 +380,19 @@ namespace GIGLS.Core
 
                 config.CreateMap<DeliveryLocation, DeliveryLocationDTO>();
                 config.CreateMap<DeliveryLocationDTO, DeliveryLocation>();
+
+                config.CreateMap<LGA, LGADTO>();
+                config.CreateMap<LGADTO, LGA>();
+
+                config.CreateMap<WaybillPaymentLog, WaybillPaymentLogDTO>();
+                config.CreateMap<WaybillPaymentLogDTO, WaybillPaymentLog>();
+
+                config.CreateMap<Bank, BankDTO>();
+                config.CreateMap<BankDTO, Bank>();
+
+
+                config.CreateMap<ActivationCampaignEmail, ActivationCampaignEmailDTO>();
+                config.CreateMap<ActivationCampaignEmailDTO, ActivationCampaignEmail>();
             });
 
             isInit = true;

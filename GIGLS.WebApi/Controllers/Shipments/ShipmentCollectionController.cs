@@ -153,11 +153,11 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = _service.GetShipmentWaitingForCollectionForHub(filterOptionsDto);
+                var result = await _service.GetShipmentWaitingForCollectionForHub(filterOptionsDto);
 
                 return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
                 {
-                    Object = await result.Item1,
+                    Object = result.Item1,
                     Total = result.Item2
                 };
             });
@@ -186,10 +186,10 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipmentCollectionTuple = _service.GetOverDueShipments(filterOptionsDto);
+                var shipmentCollectionTuple = await _service.GetOverDueShipments(filterOptionsDto);
                 return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
                 {
-                    Object = await shipmentCollectionTuple.Item1,
+                    Object = shipmentCollectionTuple.Item1,
                     Total = shipmentCollectionTuple.Item2
                 };
             });
@@ -202,10 +202,10 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipmentCollectionTuple = _service.GetEcommerceOverDueShipments(filterOptionsDto);
+                var shipmentCollectionTuple = await _service.GetEcommerceOverDueShipments(filterOptionsDto);
                 return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
                 {
-                    Object = await shipmentCollectionTuple.Item1,
+                    Object = shipmentCollectionTuple.Item1,
                     Total = shipmentCollectionTuple.Item2
                 };
             });
@@ -250,16 +250,16 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         //---Added for global customer care and ecommerce
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpPost]
+        [HttpGet]
         [Route("overdueshipmentglobal")]
         public async Task<IServiceResponse<IEnumerable<ShipmentCollectionDTO>>> GetOverDueShipmentsGLOBAL([FromUri]FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipmentCollectionTuple = _service.GetOverDueShipmentsGLOBAL(filterOptionsDto);
+                var shipmentCollectionTuple = await _service.GetOverDueShipmentsGLOBAL(filterOptionsDto);
                 return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
                 {
-                    Object = await shipmentCollectionTuple.Item1,
+                    Object = shipmentCollectionTuple.Item1,
                     Total = shipmentCollectionTuple.Item2
                 };
             });
@@ -273,14 +273,15 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipmentCollectionTuple = _service.GetEcommerceOverDueShipmentsGLOBAL(filterOptionsDto);
+                var shipmentCollectionTuple = await _service.GetEcommerceOverDueShipmentsGLOBAL(filterOptionsDto);
                 return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
                 {
-                    Object = await shipmentCollectionTuple.Item1,
+                    Object = shipmentCollectionTuple.Item1,
                     Total = shipmentCollectionTuple.Item2
                 };
             });
         }
+        
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("overdueshipmentecommerceglobal")]
@@ -288,10 +289,10 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipmentCollectionTuple = _service.GetEcommerceOverDueShipmentsGLOBAL();
+                var shipmentCollectionTuple = await _service.GetEcommerceOverDueShipmentsGLOBAL();
                 return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
                 {
-                    Object = await shipmentCollectionTuple
+                    Object = shipmentCollectionTuple
                     
                 };
             });

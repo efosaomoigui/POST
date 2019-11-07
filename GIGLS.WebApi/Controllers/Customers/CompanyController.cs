@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.Core.Enums;
 using GIGLS.WebApi.Filters;
-using System.Linq;
 
 namespace GIGLS.WebApi.Controllers.Customers
 {
@@ -30,17 +29,7 @@ namespace GIGLS.WebApi.Controllers.Customers
         public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompanies()
         {
             return await HandleApiOperationAsync(async () => {
-                var companies = await _service.GetCompanies();
-
-                //get all countries and set the country name
-                var allCountries = await _countryService.GetCountries();
-
-                foreach(var company in companies)
-                {
-                    var country = allCountries.FirstOrDefault(s => s.CountryId == company.UserActiveCountryId);
-                    company.UserActiveCountryName = country?.CountryName;
-                }
-
+                var companies = await _service.GetCompanies();                
                 return new ServiceResponse<IEnumerable<CompanyDTO>>
                 {
                     Object = companies

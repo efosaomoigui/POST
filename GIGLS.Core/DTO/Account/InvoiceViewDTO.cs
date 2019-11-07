@@ -110,6 +110,7 @@ namespace GIGLS.Core.DTO.Account
         public int DepartureCountryId { get; set; }
         public int DestinationCountryId { get; set; }
         public int CountryId { get; set; }
+        public CountryDTO Country { get; set; }
 
         public DateTime DeliveryTime { get; set; }
         public decimal Cash { get; set; }

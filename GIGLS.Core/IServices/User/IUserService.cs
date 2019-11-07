@@ -77,5 +77,8 @@ namespace GIGLS.Core.IServices.User
         Task<CountryDTO> GetUserActiveCountry();
         Task<int> GetUserActiveCountryId();
         Task<int[]> GetRegionServiceCenters(string currentUserId);
+
+        Task<bool> IsUserHasAdminRole(string userId);
+        Task<UserDTO> GetUserUsingCustomer(string emailPhoneCode);
     }
 }

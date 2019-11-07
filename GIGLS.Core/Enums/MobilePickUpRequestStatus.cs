@@ -15,6 +15,8 @@
         EnrouteToPickUp,
         Resolved,
         PickedUp,
-        OnwardProcessing
+        OnwardProcessing,
+        Processing,
+        TimedOut
     }
 }

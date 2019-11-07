@@ -511,7 +511,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               Description = s.Description,
                               GrandTotal = i.Amount,
                               DepartureServiceCentreName = dept.Name,
-                              DestinationServiceCentreName = dest.Name
+                              DestinationServiceCentreName = dest.Name,
+                              DepartureCountryId = s.DepartureCountryId,
+                              DestinationCountryId = s.DestinationCountryId
                           });
             return result;
         }
@@ -530,7 +532,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               Amount = i.Amount,
                               InvoiceNo = i.InvoiceNo,
                               PaymentMethod = i.PaymentMethod,
-                              PaymentStatus = i.PaymentStatus
+                              PaymentStatus = i.PaymentStatus,
+                              DepartureCountryId = s.DepartureCountryId,
+                              DestinationCountryId = s.DestinationCountryId
                           });
             return result;
         }

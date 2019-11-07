@@ -11,5 +11,7 @@ namespace GIGLS.Core.IRepositories.Customers
     {
         Task<List<CompanyDTO>> GetCompanies();
         Task<List<CompanyDTO>> GetCompanies(CompanyType companyType, CustomerSearchOption searchOption);
+        Task<CompanyDTO> GetCompanyById(int companyId);
+        Task<CompanyDTO> GetCompanyByCode(string customerCode);
     }
 }

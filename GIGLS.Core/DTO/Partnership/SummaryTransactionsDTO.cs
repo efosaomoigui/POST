@@ -10,5 +10,7 @@ namespace GIGLS.Core.DTO.Partnership
     {
         public List<PartnerTransactionsDTO> Transactions { get; set; }
         public decimal WalletBalance { get; set; }
+        public string CurrencySymbol { get; set; }
+        public string CurrencyCode { get; set; }
     }
 }

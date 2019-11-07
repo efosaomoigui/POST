@@ -437,6 +437,18 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IDeliveryLocationRepository DeliveryLocation { get; set; }
 
+        [Inject]
+        public ILGARepository LGA { get; set; }
+
+        [Inject]
+        public IWaybillPaymentLogRepository WaybillPaymentLog { get; set; }
+
+        [Inject]
+        public IBankRepository Bank { get; set; }
+
+        [Inject]
+        public IActivationCampaignEmailRepository ActivationCampaignEmail { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

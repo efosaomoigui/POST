@@ -8,6 +8,7 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.DTO.Report;
 using System;
+using GIGL.GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -49,32 +50,48 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (result)
                 {
-                    var newCancel = new ShipmentCancel
-                    {
-                        Waybill = shipment.Waybill,
-                        CreatedBy = shipment.UserId,
-                        ShipmentCreatedDate = shipment.DateCreated,
-                        CancelledBy = user,
-                        CancelReason = shipmentCancelDTO.CancelReason
-                    };
-
-                    _uow.ShipmentCancel.Add(newCancel);
-
-                    //cancel shipment from the shipment service
-                    var boolResult = await _shipmentService.CancelShipment(waybill);
-
-                    await _uow.CompleteAsync();
-                    return new { waybill = newCancel.Waybill };
+                    return await ProcessShipmentCancel(shipment, user, shipmentCancelDTO.CancelReason);
                 }
                 else
                 {
                     throw new GenericException($"Waybill {waybill} was not created at your region.");
                 }
             }
+
+            //Allow Chairman, Director and Administrator to cancelled waybill
+            if(region.Length == 0)
+            {
+                bool hasAdminRole = await _userService.IsUserHasAdminRole(user);
+
+                if (hasAdminRole)
+                {
+                    return await ProcessShipmentCancel(shipment, user, shipmentCancelDTO.CancelReason);
+                }
+            }
+
             return null;
         }
 
-       
+        public async Task<object> ProcessShipmentCancel(Shipment shipment, string userId, string cancelReason)
+        {
+            var newCancel = new ShipmentCancel
+            {
+                Waybill = shipment.Waybill,
+                CreatedBy = shipment.UserId,
+                ShipmentCreatedDate = shipment.DateCreated,
+                CancelledBy = userId,
+                CancelReason = cancelReason
+            };
+
+            _uow.ShipmentCancel.Add(newCancel);
+
+            //cancel shipment from the shipment service
+            var boolResult = await _shipmentService.CancelShipment(shipment.Waybill);
+
+            await _uow.CompleteAsync();
+            return new { waybill = newCancel.Waybill };
+        }
+
         public async Task<ShipmentCancelDTO> GetShipmentCancelById(string waybill)
         {
             return await _uow.ShipmentCancel.GetShipmentCancels(waybill);
