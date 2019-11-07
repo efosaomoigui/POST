@@ -25,6 +25,7 @@ using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -121,6 +122,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false);
                 var incomingShipments = new List<InvoiceViewDTO>();
+                //_uow.
 
                 if (serviceCenters.Length > 0)
                 {
@@ -245,7 +247,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 // get ServiceCentre
                 var departureServiceCentre = await _centreService.GetServiceCentreById(shipment.DepartureServiceCentreId);
                 var destinationServiceCentre = await _centreService.GetServiceCentreById(shipment.DestinationServiceCentreId);
-                
+
                 //Change the Service Centre Code to country name if the shipment is International shipment
                 if (shipmentDto.IsInternational)
                 {
@@ -353,7 +355,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             var price = 0;
             var demurrageDays = 0;
-            
+
             //get GlobalProperty
             var demurrageCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurrageDayCount, shipmentDto.DestinationCountryId);
             var demurragePriceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurragePrice, shipmentDto.DestinationCountryId);
@@ -597,7 +599,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     newShipment.GrandTotal = 0;
                     newShipment.SealNumber = "";
                 }
-                
+
                 return newShipment;
             }
             catch (Exception)
@@ -664,7 +666,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             return createdObject;
         }
-        
+
         private async Task<ShipmentDTO> CreateShipment(ShipmentDTO shipmentDTO)
         {
             await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
@@ -699,7 +701,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
 
             shipmentDTO.Waybill = waybill;
-            
+
             var newShipment = Mapper.Map<Shipment>(shipmentDTO);
 
             // set declared value of the shipment
@@ -745,7 +747,7 @@ namespace GIGLS.Services.Implementation.Shipments
             //save the display value of Insurance and Vat
             newShipment.Vat = shipmentDTO.vatvalue_display;
             newShipment.DiscountValue = shipmentDTO.InvoiceDiscountValue_display;
-            
+
             ////--start--///Set the DepartureCountryId and DestinationCountryId
             var departureCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DepartureServiceCentreId);
             var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DestinationServiceCentreId);
@@ -759,7 +761,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 cashondeliveryentity.CODStatusHistory = CODStatushistory.Created;
                 cashondeliveryentity.Description = "Cod From Sales";
                 //cashondeliveryentity.ServiceCenterCode = newShipment.DepartureServiceCentreId;
-                cashondeliveryentity.ServiceCenterId = 0; 
+                cashondeliveryentity.ServiceCenterId = 0;
                 cashondeliveryentity.Waybill = newShipment.Waybill;
                 cashondeliveryentity.UserId = newShipment.UserId;
                 cashondeliveryentity.DepartureServiceCenterId = newShipment.DepartureServiceCentreId;
@@ -767,7 +769,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
             }
-            
+
             newShipment.DepartureCountryId = departureCountry.CountryId;
             newShipment.DestinationCountryId = destinationCountry.CountryId;
             newShipment.CurrencyRatio = departureCountry.CurrencyRatio;
@@ -927,7 +929,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //var groupedWaybillsAsHashSet = new HashSet<string>(groupWayBillNumberMappings);
                 //var ungroupedWaybills = paidShipments.Where(s => !groupedWaybillsAsHashSet.Contains(s.Waybill)).ToList();
                 var ungroupedWaybills = paidShipments;
-                
+
                 //new solution
                 //1. Get Transit Waybill that is not completed, not group and service centre belong to login user
                 //2. Loop through output of 1 and get the shipment details, then add it to the ungrouped
@@ -1179,7 +1181,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var ungroupedWaybills = await GetUnGroupedWaybillsForServiceCentreDropDown(filterOptionsDto);
 
                 var allServiceCenters = await _centreService.GetServiceCentres();
-                
+
                 var grp = new List<int>();
 
                 foreach (var item in ungroupedWaybills)
@@ -1358,6 +1360,174 @@ namespace GIGLS.Services.Implementation.Shipments
             return dailySalesDTO;
         }
 
+        public async Task<ColoredInvoiceMonitorDTO> GetShipmentMonitor(AccountFilterCriteria accountFilterCriteria)
+        {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
+
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var results = await _uow.Invoice.GetShipmentMonitorSetSP(accountFilterCriteria, serviceCenterIds);
+
+            var result = new MulitipleInvoiceMonitorDTO()
+            {
+                ShipmentCreated = results
+            };
+
+            var shipmentscreated = result.ShipmentCreated;
+            var obj = ReturnShipmentCreated(shipmentscreated, accountFilterCriteria);
+
+            return obj;
+        }
+
+        public async Task<ColoredInvoiceMonitorDTO> GetShipmentMonitorEXpected(AccountFilterCriteria accountFilterCriteria)
+        {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
+
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var results = await _uow.Invoice.GetShipmentMonitorSetSPExpected(accountFilterCriteria, serviceCenterIds);
+
+            var result = new MulitipleInvoiceMonitorDTO()
+            {
+                ShipmentCreated = results
+            };
+
+            var shipmentscreated = result.ShipmentCreated;
+            var obj = ReturnShipmentEXpected(shipmentscreated, accountFilterCriteria);
+
+            return obj;
+        }
+
+        private  ColoredInvoiceMonitorDTO ReturnShipmentCreated(List<InvoiceMonitorDTO> shipmentscreated, AccountFilterCriteria accountFilterCriteria)
+        {
+            var obj = new ColoredInvoiceMonitorDTO();
+
+            //get the green blue red zones for the record set for shipment created
+            var limit_one = Int32.Parse(ConfigurationManager.AppSettings["limit1"]);
+            var limit_two = Int32.Parse(ConfigurationManager.AppSettings["limit2"]);
+            var limit_over_two = Int32.Parse(ConfigurationManager.AppSettings["limit3"]);
+
+            var limit_one_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_one);
+            var limit_two_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_two);
+            var limit_over_two_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_over_two);
+
+            var greencreated = (from list in shipmentscreated
+                                where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_one_date
+                                select new InvoiceMonitorDTO2()
+                                {
+                                    label = list.DestinationServiceCentreName,
+                                    y = list.WayBillCount
+                                }).ToList();
+
+            obj.groupgreen_s = greencreated;
+
+            var bluecreated = (from list in shipmentscreated
+                               where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_over_two_date
+                               select new InvoiceMonitorDTO2()
+                               {
+                                   label = list.DestinationServiceCentreName,
+                                   y = list.WayBillCount
+                               }).ToList();
+
+            obj.groupblue_s = bluecreated;
+
+            var redcreated = (from list in shipmentscreated
+                              where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_two_date
+                              select new InvoiceMonitorDTO2()
+                              {
+                                  label = list.DestinationServiceCentreName,
+                                  y = list.WayBillCount
+                              }).ToList();
+
+            obj.groupred_s = redcreated;
+
+            var totalGreen = (from item in shipmentscreated
+                              where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_one_date
+                              select (long)item.WayBillCount).Sum();
+            obj.totalGreen = totalGreen;
+
+            var totalBlue = (from item in shipmentscreated
+                             where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_over_two_date
+                             select (long)item.WayBillCount).Sum();
+
+            obj.totalBlue = totalBlue;
+
+            var totalRed = (from item in shipmentscreated
+                            where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_two_date
+                            select (long)item.WayBillCount).Sum();
+
+            obj.totalRed = totalRed;
+
+            return obj;
+        }
+
+        private ColoredInvoiceMonitorDTO ReturnShipmentEXpected(List<InvoiceMonitorDTO> shipmentsexpected, AccountFilterCriteria accountFilterCriteria)
+        {
+            var obj = new ColoredInvoiceMonitorDTO();
+             
+            //get the green blue red zones for the record set for shipment created
+            var limit_one = Int32.Parse(ConfigurationManager.AppSettings["limit1"]);
+            var limit_two = Int32.Parse(ConfigurationManager.AppSettings["limit2"]);
+            var limit_over_two = Int32.Parse(ConfigurationManager.AppSettings["limit3"]);
+
+            var limit_one_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_one);
+            var limit_two_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_two);
+            var limit_over_two_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_over_two);
+
+            var greenexpected = (from list in shipmentsexpected
+                                 where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_one_date
+                                select new InvoiceMonitorDTO2()
+                                {
+                                    label = list.DestinationServiceCentreName,
+                                    y = list.WayBillCount
+                                }).ToList();
+
+            obj.groupgreen_s = greenexpected;
+
+            var blueexpected= (from list in shipmentsexpected
+                               where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_over_two_date
+                               select new InvoiceMonitorDTO2()
+                               {
+                                   label = list.DestinationServiceCentreName,
+                                   y = list.WayBillCount
+                               }).ToList();
+
+            obj.groupblue_s = blueexpected;
+
+            var redexpected = (from list in shipmentsexpected
+                               where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_two_date
+                              select new InvoiceMonitorDTO2()
+                              {
+                                  label = list.DestinationServiceCentreName,
+                                  y = list.WayBillCount
+                              }).ToList();
+
+            obj.groupred_s = redexpected;
+
+            var totalGreen = (from item in shipmentsexpected
+                              where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_one_date
+                              select (long)item.WayBillCount).Sum();
+
+            obj.totalGreen = totalGreen;
+
+            var totalBlue = (from item in shipmentsexpected
+                             where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_over_two_date
+                             select (long)item.WayBillCount).Sum();
+
+            obj.totalBlue = totalBlue;
+
+            var totalRed = (from item in shipmentsexpected
+                            where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_two_date
+                            select (long)item.WayBillCount).Sum();
+
+            obj.totalRed = totalRed;
+
+            return obj;
+        }
+
+
         public async Task<DailySalesDTO> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria)
         {
             //set defaults
@@ -1396,7 +1566,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 SalesCount = invoices.Count,
                 TotalSales = invoices.Where(s => s.PaymentStatus == PaymentStatus.Paid).Sum(s => s.Amount),
             };
-            
+
             return dailySalesDTO;
         }
 
@@ -1437,7 +1607,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             return dailySales;
         }
-        
+
         ///////////
         public async Task<bool> ScanShipment(ScanDTO scan)
         {
@@ -1465,7 +1635,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             return await _customerService.GetCustomer(customerId, customerType);
         }
-        
+
         /// <summary>
         /// This method is responsible for cancelling a shipment.
         /// It ensures that accounting entries are reversed accordingly or rolls back if an error occurs.
@@ -1673,23 +1843,23 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<bool> ProcessPaymentForCustomerWeek(ShipmentDTO shipment)
         {
             var processPayment = false;
-            
+
             var customerWeek = System.Configuration.ConfigurationManager.AppSettings["CustomerWeekDate"];
             var customerWeekDate = Convert.ToDateTime(customerWeek);
             var startDate = DateTime.Now.Date;
 
             //if today is customer week
-            if(startDate.ToLongDateString() == customerWeekDate.ToLongDateString())
+            if (startDate.ToLongDateString() == customerWeekDate.ToLongDateString())
             {
                 var endDate = startDate.AddDays(1);
-                
+
                 //1. Get all Individual customer waybills for the service centre for 08/10/2019 sort by date created
-                string individual = CustomerType.IndividualCustomer.ToString();                
+                string individual = CustomerType.IndividualCustomer.ToString();
 
                 var data = _uow.Shipment.GetAllAsQueryable()
-                    .Where(x => x.DateCreated >= startDate && x.DateCreated < endDate && x.DepartureServiceCentreId == shipment.DepartureServiceCentreId 
+                    .Where(x => x.DateCreated >= startDate && x.DateCreated < endDate && x.DepartureServiceCentreId == shipment.DepartureServiceCentreId
                     && x.CompanyType == individual).OrderBy(x => x.DateCreated).Select(x => x.Waybill).ToList();
-                
+
                 //2. Get the Index of the waybill -- eg. if findIndex = 1, then index = 2 or findIndex = -1(Nothing find), then index = 0 
                 int waybillIndex = data.FindIndex(x => x == shipment.Waybill) + 1;
 
@@ -1699,7 +1869,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //4. Process payment for the customer else don't     
                 processPayment = freeShippingItem.Contains(waybillIndex);
-                
+
                 if (processPayment)
                 {
                     var generalLedgerEntity = await _uow.GeneralLedger.GetAsync(s => s.Waybill == shipment.Waybill);
@@ -1722,7 +1892,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
 
-            return processPayment;            
-        }        
+            return processPayment;
+        }
+
+
     }
 }

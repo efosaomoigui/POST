@@ -40,6 +40,7 @@ namespace GIGLS.Services.Implementation.Report
                 var user = await _uow.User.GetUserById(item.UserId);
                 item.UserId = user.FirstName + " " + user.LastName;
             }
+
             return generalLedgerDTO;
         }
 
