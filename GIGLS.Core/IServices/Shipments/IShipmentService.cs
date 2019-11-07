@@ -45,6 +45,9 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ServiceCentreDTO>> GetAllWarehouseServiceCenters();
         Task<DailySalesDTO> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria);
 
+        Task<ColoredInvoiceMonitorDTO> GetShipmentMonitor(AccountFilterCriteria accountFilterCriteria);
+        Task<ColoredInvoiceMonitorDTO> GetShipmentMonitorEXpected(AccountFilterCriteria accountFilterCriteria);
+
         Task<bool> RePrintCountUpdater();
         Task<bool> AddShipmentFromMobile(ShipmentDTO shipment);
     }

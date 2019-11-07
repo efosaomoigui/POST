@@ -14,6 +14,7 @@ using System.Web.Http;
 using GIGLS.CORE.IServices.Report;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
+using System;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -412,6 +413,140 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        // Shipment delivery monitor
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("")]
+        public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> getShipmentCountForDeliveryInGreen([FromUri]FilterOptionsDto filterOptionsDto)
+        {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            filterOptionsDto.CountryId = userActiveCountry?.CountryId;
+
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = _service.GetShipments(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<ShipmentDTO>>
+                {
+                    Object = await shipments.Item1,
+                    Total = shipments.Item2
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("incomingshipments")]
+        public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> getShipmentCountForDeliveryInBlue([FromUri]FilterOptionsDto filterOptionsDto)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = await _service.GetIncomingShipments(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<InvoiceViewDTO>>
+                {
+                    Object = shipments,
+                    Total = shipments.Count
+                };
+            });
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("")]
+        public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> getShipmentCountForDeliveryInRed([FromUri]FilterOptionsDto filterOptionsDto)
+        {
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            filterOptionsDto.CountryId = userActiveCountry?.CountryId;
+
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipments = _service.GetShipments(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<ShipmentDTO>>
+                {
+                    Object = await shipments.Item1,
+                    Total = shipments.Item2
+                };
+            });
+
+        }
+
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("shipmentmonitor")]  // Task<Tuple<List<InvoiceMonitorDTO>, List<InvoiceMonitorDTO>>>
+        public async Task<IServiceResponse<ColoredInvoiceMonitorDTO>> GetShipmentMonitor() 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                var today = DateTime.Now;//new DateTime(2019, 2, 6);
+                var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
+
+                var accountFilterCriteria = new AccountFilterCriteria
+                {
+                    StartDate = firstDayOfMonth,
+                    EndDate = today
+                };
+
+                // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
+                var result = await _service.GetShipmentMonitor(accountFilterCriteria); 
+
+                return new ServiceResponse<ColoredInvoiceMonitorDTO>()
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("GetShipmentMonitorexpected")]  // Task<Tuple<List<InvoiceMonitorDTO>, List<InvoiceMonitorDTO>>>
+        public async Task<IServiceResponse<ColoredInvoiceMonitorDTO>> GetShipmentMonitorexpected()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                var today = DateTime.Now;//new DateTime(2019, 2, 6);
+                var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
+
+                var accountFilterCriteria = new AccountFilterCriteria
+                {
+                    StartDate = firstDayOfMonth,
+                    EndDate = today
+                };
+
+                // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
+                var result = await _service.GetShipmentMonitorEXpected(accountFilterCriteria);
+
+                return new ServiceResponse<ColoredInvoiceMonitorDTO>()
+                {
+                    Object = result
+                };
+            });
+        }
+
+        //[GIGLSActivityAuthorize(Activity = "Post")]
+        //[HttpPost]
+        //[Route("shipmentmonitor")]
+        //public async Task<IServiceResponse<List<InvoiceMonitorDTO>>> PostShipmentMonitor(AccountFilterCriteria accountFilterCriteria)  
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+
+        //        // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
+        //        var result = await _service.GetShipmentMonitor(accountFilterCriteria);
+
+        //        return new ServiceResponse<List<InvoiceMonitorDTO>>
+        //        {
+        //            Object = result
+        //        };
+        //    });
+        //}
 
     }
 }

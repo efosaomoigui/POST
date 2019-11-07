@@ -1,17 +1,17 @@
-﻿using GIGLS.Core.Domain;
+﻿using AutoMapper;
+using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.IRepositories.Account;
+using GIGLS.Core.View;
+using GIGLS.Core.View.AdminReportView;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
+using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
-using GIGLS.CORE.DTO.Report;
-using System;
-using GIGLS.Core.View;
-using System.Data.SqlClient;
-using GIGLS.Core.View.AdminReportView;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 {
@@ -176,13 +176,136 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             return await Task.FromResult(invoicesResult.ToList()); // Task.FromResult(invoicesResult.OrderByDescending(x => x.DateCreated).ToList());
         }
 
+        //Shipent Monitors
+        //Stored Procedure version
+        //var salesPeople = await context.Database.SqlQuery<SalesPerson>("AllSalesPeople").ToListAsync();
+        public async Task<List<InvoiceMonitorDTO>> GetShipmentMonitorSetSP(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
+        {
+
+            //DateTime LimitDate = StartDate.AddDays((int)accountFilterCriteria.limitTime);
+            var queryDate = accountFilterCriteria.getStartDateAndEndDate2(accountFilterCriteria.dateFrom);
+
+            DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
+            DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
+
+            //declare parameters for the stored procedure
+            SqlParameter iscancelled = new SqlParameter("@IsCancelled", (object)accountFilterCriteria.IsCancelled ?? DBNull.Value);
+            SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+            SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+
+
+            SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);//accountFilterCriteria.PaymentStatus
+            var sc = (serviceCentreIds.Length > 0) ? serviceCentreIds[0] : 0;
+            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
+            SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
+            SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
+
+            SqlParameter[] param = new SqlParameter[]
+            {
+                iscancelled,
+                startDate,
+                endDate,
+                paymentStatus,
+                departureServiceCentreId,
+                stationId,
+                CountryId
+            };
+
+            SqlParameter[] param2 = new SqlParameter[]
+            {
+                iscancelled,
+                startDate,
+                endDate,
+                paymentStatus,
+                departureServiceCentreId,
+                stationId,
+                CountryId
+            };
+
+            var listCreated = new List<InvoiceMonitorDTO>();
+
+            try
+            {
+                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceMonitorDTO>("NewSp " +
+                  "@IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CountryId",
+                  param)
+                  .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+            //r results = new Tuple<List<InvoiceMonitorDTO>, List<InvoiceMonitorDTO>>(listCreated, listExpected);
+
+            return await Task.FromResult(listCreated); // 
+
+        }
+
+
+        //Shipent Monitors Expected
+        //Stored Procedure version
+        //var salesPeople = await context.Database.SqlQuery<SalesPerson>("AllSalesPeople").ToListAsync();
+        public async Task<List<InvoiceMonitorDTO>> GetShipmentMonitorSetSPExpected(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
+        {
+             
+            //DateTime LimitDate = StartDate.AddDays((int)accountFilterCriteria.limitTime);
+            var queryDate = accountFilterCriteria.getStartDateAndEndDate2(accountFilterCriteria.dateFrom);         
+
+            DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
+            DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
+
+            //declare parameters for the stored procedure
+            SqlParameter iscancelled = new SqlParameter("@IsCancelled", (object)accountFilterCriteria.IsCancelled ?? DBNull.Value);
+            SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+            SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+
+
+            SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);//accountFilterCriteria.PaymentStatus
+            var sc = (serviceCentreIds.Length > 0) ? serviceCentreIds[0] : 0;
+            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
+            SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
+            SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
+
+            SqlParameter[] param = new SqlParameter[]
+            {
+                iscancelled,
+                startDate,
+                endDate,
+                paymentStatus,
+                departureServiceCentreId,
+                stationId,
+                CountryId
+            };
+
+            var listCreated = new List<InvoiceMonitorDTO>();
+
+            try
+            {
+                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceMonitorDTO>("NewSp_Expected " +
+                  "@IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CountryId",
+                  param)
+                  .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+            //r results = new Tuple<List<InvoiceMonitorDTO>, List<InvoiceMonitorDTO>>(listCreated, listExpected);
+
+            return await Task.FromResult(listCreated); // 
+
+        }
+
         public async Task<List<InvoiceViewDTO>> GetInvoicesFromViewWithDeliveryTimeAsyncFromSP(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
         {
             DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
             DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
 
             var queryDate = accountFilterCriteria.getStartDateAndEndDate();
-
 
             //declare parameters for the stored procedure
             SqlParameter iscancelled = new SqlParameter("@IsCancelled", (object)accountFilterCriteria.IsCancelled ?? DBNull.Value);

@@ -4,6 +4,7 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.View;
 using GIGLS.Core.View.AdminReportView;
 using GIGLS.CORE.DTO.Report;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,6 +25,8 @@ namespace GIGLS.Core.IRepositories.Account
         IQueryable<InvoiceView> GetCustomerTransactions();
         IQueryable<InvoiceView> GetCustomerInvoices();
         Task<List<InvoiceViewDTO>> GetInvoicesFromViewWithDeliveryTimeAsyncFromSP(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
+        Task<List<InvoiceMonitorDTO>> GetShipmentMonitorSetSP(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
+        Task<List<InvoiceMonitorDTO>> GetShipmentMonitorSetSPExpected(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
 
         //Admin Report 
         IQueryable<Report_AllTimeSalesByCountry> GetAllTimeSalesByCountry();
