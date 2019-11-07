@@ -233,8 +233,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (!string.IsNullOrWhiteSpace(searchOption.SearchData))
                 {
                     walletsQueryable = walletsQueryable.Where(x =>
-                        x.CustomerCode.Contains(searchOption.SearchData) ||
-                        x.WalletNumber.Contains(searchOption.SearchData));
+                        x.CustomerCode.Contains(searchOption.SearchData) || x.WalletNumber.Contains(searchOption.SearchData));
                 }
 
                 // handle Individual customers
@@ -275,10 +274,8 @@ namespace GIGLS.Services.Implementation.Wallet
                     else
                     {
                         // handle IndividualCustomers
-                        var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
-                            s => s.IndividualCustomerId == item.CustomerId);
-                        item.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " +
-                            $"{individualCustomerDTO.LastName}");
+                        var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(s => s.IndividualCustomerId == item.CustomerId);
+                        item.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
                     }
                 }
 
