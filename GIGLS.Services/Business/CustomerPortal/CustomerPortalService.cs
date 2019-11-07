@@ -686,50 +686,53 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         if (EmailUser.UserChannelType == UserChannelType.Employee)
                         {
-                            var PartnerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Partner);
-                            user.UserChannelCode = PartnerCode;
-                            var FinalUser = await CreateNewuser(user);
-                            var Vehicle = "";
-                            foreach (var vehicle in user.VehicleType)
+                            if (EmailUser.Email != user.Email)
                             {
-                                Vehicle = vehicle;
+                                var PartnerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Partner);
+                                user.UserChannelCode = PartnerCode;
+                                var FinalUser = await CreateNewuser(user);
+                                var Vehicle = "";
+                                foreach (var vehicle in user.VehicleType)
+                                {
+                                    Vehicle = vehicle;
+                                }
+                                var partnerDTO = new PartnerDTO
+                                {
+                                    PartnerType = PartnerType.DeliveryPartner,
+                                    PartnerName = user.FirstName + " " + user.LastName,
+                                    PartnerCode = FinalUser.UserChannelCode,
+                                    FirstName = user.FirstName,
+                                    LastName = user.LastName,
+                                    Email = user.Email,
+                                    PhoneNumber = user.PhoneNumber,
+                                    UserId = FinalUser.Id,
+                                    IsActivated = false,
+                                };
+                                var FinalPartner = Mapper.Map<Partner>(partnerDTO);
+                                _uow.Partner.Add(FinalPartner);
+
+                                var vehicletypeDTO = new VehicleTypeDTO
+                                {
+                                    Partnercode = FinalPartner.PartnerCode,
+                                    Vehicletype = Vehicle
+                                };
+                                var vehicletype = Mapper.Map<VehicleType>(vehicletypeDTO);
+                                _uow.VehicleType.Add(vehicletype);
+
+                                await _walletService.AddWallet(new WalletDTO
+                                {
+                                    CustomerId = FinalPartner.PartnerId,
+                                    CustomerType = CustomerType.Partner,
+                                    CustomerCode = FinalPartner.PartnerCode,
+                                    CompanyType = CustomerType.Partner.ToString()
+                                });
+
+                                _uow.Complete();
+
+                                result = await SendOTPForRegisteredUser(user);
+                                var User = Mapper.Map<UserDTO>(FinalUser);
+                                await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
                             }
-                            var partnerDTO = new PartnerDTO
-                            {
-                                PartnerType = PartnerType.DeliveryPartner,
-                                PartnerName = user.FirstName + " " + user.LastName,
-                                PartnerCode = FinalUser.UserChannelCode,
-                                FirstName = user.FirstName,
-                                LastName = user.LastName,
-                                Email = user.Email,
-                                PhoneNumber = user.PhoneNumber,
-                                UserId = FinalUser.Id,
-                                IsActivated = false,
-                            };
-                            var FinalPartner = Mapper.Map<Partner>(partnerDTO);
-                            _uow.Partner.Add(FinalPartner);
-
-                            var vehicletypeDTO = new VehicleTypeDTO
-                            {
-                                Partnercode = FinalPartner.PartnerCode,
-                                Vehicletype = Vehicle
-                            };
-                            var vehicletype = Mapper.Map<VehicleType>(vehicletypeDTO);
-                            _uow.VehicleType.Add(vehicletype);
-
-                            await _walletService.AddWallet(new WalletDTO
-                            {
-                                CustomerId = FinalPartner.PartnerId,
-                                CustomerType = CustomerType.Partner,
-                                CustomerCode = FinalPartner.PartnerCode,
-                                CompanyType = CustomerType.Partner.ToString()
-                            });
-
-                            _uow.Complete();
-
-                            result = await SendOTPForRegisteredUser(user);
-                            var User = Mapper.Map<UserDTO>(FinalUser);
-                            await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
                         }
                         else
                         {
@@ -745,6 +748,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                             EmailUser.Email = user.Email;
                             EmailUser.IsRegisteredFromMobile = true;
                             EmailUser.UserActiveCountryId = user.UserActiveCountryId;
+                            var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
+                            var u = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
+
 
                             var partnerDTO = new PartnerDTO
                             {
@@ -775,9 +781,9 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                             await _uow.CompleteAsync();
 
-                            var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
+                            var response = await _userService.ResetPassword(EmailUser.Id, user.Password);
 
-                            if (u.Succeeded)
+                            if (response.Succeeded)
                             {
                                 result = await SendOTPForRegisteredUser(user);
                             }
@@ -868,6 +874,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                         EmailUser.Email = user.Email;
                         EmailUser.IsRegisteredFromMobile = true;
                         EmailUser.UserActiveCountryId = user.UserActiveCountryId;
+                        var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
+                        var u = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
                     }
                     
                     var emailcustomerdetails = await _uow.IndividualCustomer.GetAsync(s => s.Email == user.Email);
@@ -940,6 +948,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             {
                                 Email = user.Email,
                                 PhoneNumber = user.PhoneNumber,
+
                                 FirstName = user.FirstName,
                                 LastName = user.LastName,
                                 Password = user.Password,
@@ -995,6 +1004,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                         EmailUser.Email = user.Email;
                         EmailUser.IsRegisteredFromMobile = true;
                         EmailUser.UserActiveCountryId = user.UserActiveCountryId;
+                        var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
+                        var u = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
                     }
 
                     var emailcompanydetails = await _uow.Company.GetAsync(s => s.Email == user.Email);
@@ -1010,6 +1021,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                             emailcompanydetails.Email = user.Email;
                             emailcompanydetails.Password = user.Password;
                             emailcompanydetails.PhoneNumber = user.PhoneNumber;
+                            emailcompanydetails.FirstName = user.FirstName;
+                            emailcompanydetails.LastName = user.LastName;
                             await _uow.CompleteAsync();
                             var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
                             result = await SendOTPForRegisteredUser(user);
@@ -1031,6 +1044,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                             phonecompanydetails.Email = user.Email;
                             phonecompanydetails.Password = user.Password;
                             phonecompanydetails.PhoneNumber = user.PhoneNumber;
+                            phonecompanydetails.FirstName = user.FirstName;
+                            phonecompanydetails.LastName = user.LastName;
                             await _uow.CompleteAsync();
                             var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
                             result = await SendOTPForRegisteredUser(user);
@@ -1429,6 +1444,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                         //added this to pass channelcode 
                     };
                     var individualCustomerDTO = Mapper.Map<IndividualCustomer>(customer);
+
+                    //update : we need to check if the customer exists before adding 
                     _uow.IndividualCustomer.Add(individualCustomerDTO);
                     await _uow.CompleteAsync();
 
