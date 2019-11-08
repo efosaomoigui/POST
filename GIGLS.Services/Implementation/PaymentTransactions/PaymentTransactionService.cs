@@ -13,7 +13,6 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.IServices.Utility;
 using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.DTO.Customers;
 using System.Linq;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
@@ -378,7 +377,9 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //2b. If the customer country !== Departure Country, Convert the payment
             if(customerCountryId != shipment.DepartureCountryId)
             {
-                
+                var countryRateConversion = await _uow.CountryRateConversion.GetAsync(x => x.DepartureCountryId == shipment.DepartureCountryId && x.DestinationCountryId == shipment.DestinationCountryId);
+
+                amountToDebit = amountToDebit * countryRateConversion.Rate;
             }
 
             return amountToDebit;
