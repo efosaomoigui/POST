@@ -370,9 +370,19 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var Shipmentdto = new PreShipmentMobileDTO();
                 var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
-                var Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(shipment);
-                if (shipment == null)
+                if (shipment != null)
+                {
+                    var Country = await _uow.Country.GetCountryByStationId(shipment.SenderStationId);
+                    Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(shipment);
+                    if (Country != null)
+                    {
+                        Shipmentdto.CurrencyCode = Country.CurrencyCode;
+                        Shipmentdto.CurrencySymbol = Country.CurrencySymbol;
+                    }
+                }
+                else
                 {
                     throw new GenericException($"PreShipment with waybill: {waybill} does not exist");
                 }
