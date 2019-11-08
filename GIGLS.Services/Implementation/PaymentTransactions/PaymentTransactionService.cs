@@ -13,6 +13,8 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.IServices.Utility;
 using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO.Customers;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -124,52 +126,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //settlement by wallet
             if (shipment.CustomerType == CustomerType.Company.ToString() || paymentTransaction.PaymentType == PaymentType.Wallet)
             {
-                //I used transaction code to represent wallet number when processing for wallet
-                var wallet = await _walletService.GetWalletById(paymentTransaction.TransactionCode);
-
-                //Additions for Ecommerce customers (Max wallet negative payment limit)
-                //var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
-                if (shipment != null && CompanyType.Ecommerce.ToString() == shipment.CompanyType)
-                {
-                    //Gets the customer wallet limit for ecommerce
-                    decimal ecommerceNegativeWalletLimit = await GetEcommerceWalletLimit(shipment);
-
-                    //deduct the price for the wallet and update wallet transaction table
-                    if (wallet.Balance - invoiceEntity.Amount < (System.Math.Abs(ecommerceNegativeWalletLimit) * (-1)))
-                    {
-                        throw new GenericException("Ecommerce Customer. Insufficient Balance in the Wallet");
-                    }
-                }
-                
-                //for other customers
-                //deduct the price for the wallet and update wallet transaction table
-                //--Update April 25, 2019: Corporate customers should be debited from wallet
-                if (shipment != null && CompanyType.Client.ToString() == shipment.CompanyType)
-                {
-                    if (wallet.Balance < invoiceEntity.Amount)
-                    {
-                        throw new GenericException("Insufficient Balance in the Wallet");
-                    }
-                }
-
-                wallet.Balance = wallet.Balance - invoiceEntity.Amount;
-
-                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-
-                var newWalletTransaction = new WalletTransaction
-                {
-                    WalletId = wallet.WalletId,
-                    Amount = invoiceEntity.Amount,
-                    DateOfEntry = DateTime.Now,
-                    ServiceCentreId = serviceCenterIds[0],
-                    UserId = currentUserId,
-                    CreditDebitType = CreditDebitType.Debit,
-                    PaymentType = PaymentType.Wallet,
-                    Waybill = paymentTransaction.Waybill,
-                    Description = generalLedgerEntity.Description
-                };
-
-                _uow.WalletTransaction.Add(newWalletTransaction);
+                await ProcessWalletTransaction(paymentTransaction, shipment, invoiceEntity, generalLedgerEntity, currentUserId);
             }
 
             // create payment
@@ -197,9 +154,63 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             return result;
         }
 
-        private async Task<bool> BreakdownPayments(Invoice invoiceEntity, PaymentTransactionDTO paymentTransaction)
+        private async Task ProcessWalletTransaction(PaymentTransactionDTO paymentTransaction, Shipment shipment, Invoice invoiceEntity, GeneralLedger generalLedgerEntity, string currentUserId)
         {
-            var result = false;
+            //I used transaction code to represent wallet number when processing for wallet
+            var wallet = await _walletService.GetWalletById(paymentTransaction.TransactionCode);
+
+            decimal amountToDebit = invoiceEntity.Amount;
+
+            amountToDebit = await GetActualAmountToDebit(shipment, amountToDebit);
+
+            //Additions for Ecommerce customers (Max wallet negative payment limit)
+            //var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
+            if (shipment != null && CompanyType.Ecommerce.ToString() == shipment.CompanyType)
+            {
+                //Gets the customer wallet limit for ecommerce
+                decimal ecommerceNegativeWalletLimit = await GetEcommerceWalletLimit(shipment);
+
+                //deduct the price for the wallet and update wallet transaction table
+                if (wallet.Balance - amountToDebit < (Math.Abs(ecommerceNegativeWalletLimit) * (-1)))
+                {
+                    throw new GenericException("Ecommerce Customer. Insufficient Balance in the Wallet");
+                }
+            }
+
+            //for other customers
+            //deduct the price for the wallet and update wallet transaction table
+            //--Update April 25, 2019: Corporate customers should be debited from wallet
+            if (shipment != null && CompanyType.Client.ToString() == shipment.CompanyType)
+            {
+                if (wallet.Balance < amountToDebit)
+                {
+                    throw new GenericException("Insufficient Balance in the Wallet");
+                }
+            }
+
+            wallet.Balance = wallet.Balance - amountToDebit;
+
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
+            var newWalletTransaction = new WalletTransaction
+            {
+                WalletId = wallet.WalletId,
+                Amount = amountToDebit,
+                DateOfEntry = DateTime.Now,
+                ServiceCentreId = serviceCenterIds[0],
+                UserId = currentUserId,
+                CreditDebitType = CreditDebitType.Debit,
+                PaymentType = PaymentType.Wallet,
+                Waybill = paymentTransaction.Waybill,
+                Description = generalLedgerEntity.Description
+            };
+
+            _uow.WalletTransaction.Add(newWalletTransaction);
+        }
+
+
+        private async Task BreakdownPayments(Invoice invoiceEntity, PaymentTransactionDTO paymentTransaction)
+        {
             if (paymentTransaction.PaymentType == PaymentType.Cash)
             {
                 invoiceEntity.Cash = invoiceEntity.Amount;
@@ -212,10 +223,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             {
                 invoiceEntity.Pos = invoiceEntity.Amount;
             }
-            result = true;
-            return result;
-
         }
+        
         public async Task<bool> ProcessReturnPaymentTransaction(PaymentTransactionDTO paymentTransaction)
         {
             var result = false;
@@ -316,13 +325,8 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var companyObj = await _uow.Company.GetAsync(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower());
             var customerWalletLimitCategory = companyObj.CustomerCategory;
 
-            var userActiveCountryId = 1;
-            try
-            {
-                userActiveCountryId = await _userService.GetUserActiveCountryId();
-            }
-            catch (Exception ex) { }
-
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
+            
             switch (customerWalletLimitCategory)
             {
                 case CustomerCategory.Gold:
@@ -351,6 +355,33 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             }
 
             return ecommerceNegativeWalletLimit;
+        }
+
+        private async Task<decimal> GetActualAmountToDebit(Shipment shipment, decimal amountToDebit)
+        {
+            //1. Get Customer Country detail
+            int customerCountryId = 0;
+
+            if (UserChannelType.Ecommerce.ToString() == shipment.CompanyType || UserChannelType.Corporate.ToString() == shipment.CompanyType)
+            {
+                customerCountryId = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
+            }
+            else
+            {
+                customerCountryId = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
+            }
+
+            //2a. If the Customer Country == Departure Country, no conversion
+            
+
+
+            //2b. If the customer country !== Departure Country, Convert the payment
+            if(customerCountryId != shipment.DepartureCountryId)
+            {
+                
+            }
+
+            return amountToDebit;
         }
     }
 }

@@ -159,6 +159,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<CashOnDeliveryRegisterAccount> CashOnDeliveryRegisterAccount { get; set; }
         public DbSet<DemurrageRegisterAccount> DemurrageRegisterAccount { get; set; }
         public DbSet<WaybillPaymentLog> WaybillPaymentLog { get; set; }
+        public DbSet<CountryRateConversion> CountryRateConversion { get; set; }
 
         //Weight Limit
         public DbSet<WeightLimit> WeightLimits { get; set; }

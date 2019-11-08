@@ -262,6 +262,7 @@
     <Compile Include="Domain\Wallet\AccountTransaction.cs" />
     <Compile Include="Domain\Wallet\CashOnDeliveryAccount.cs" />
     <Compile Include="Domain\Wallet\CashOnDeliveryBalance.cs" />
+    <Compile Include="Domain\Wallet\CountryRateConversion.cs" />
     <Compile Include="Domain\Wallet\Wallet.cs" />
     <Compile Include="Domain\Wallet\WalletNumber.cs" />
     <Compile Include="Domain\Wallet\WalletPaymentLog.cs" />
@@ -436,6 +437,7 @@
     <Compile Include="DTO\Wallet\CashOnDeliveryAccountDTO.cs" />
     <Compile Include="DTO\Wallet\CashOnDeliveryAccountSummaryDTO.cs" />
     <Compile Include="DTO\Wallet\CashOnDeliveryBalanceDTO.cs" />
+    <Compile Include="DTO\Wallet\CountryRateConversionDTO.cs" />
     <Compile Include="DTO\Wallet\WalletDto.cs" />
     <Compile Include="DTO\Wallet\WalletNumberDto.cs" />
     <Compile Include="DTO\Wallet\TransactionResult.cs" />
@@ -631,6 +633,7 @@
     <Compile Include="IRepositories\Utility\IGlobalPropertyRepository.cs" />
     <Compile Include="IRepositories\Utility\INumberGeneratorMonitorRepository.cs" />
     <Compile Include="IRepositories\Vendors\IVendorRepository.cs" />
+    <Compile Include="IRepositories\Wallet\ICountryRateConversionRepository.cs" />
     <Compile Include="IRepositories\Wallet\IDemurrageRegisterAccountRepository.cs" />
     <Compile Include="IRepositories\Wallet\ICashOnDeliveryRegisterAccountRepository.cs" />
     <Compile Include="IRepositories\Wallet\ICashOnDeliveryBalanceRepository.cs" />
@@ -768,6 +771,7 @@
     <Compile Include="IServices\Utility\IPasswordGenerator.cs" />
     <Compile Include="IServices\Vendors\IVendorService.cs" />
     <Compile Include="IServices\BankSettlement\IBankShipmentSettlementService.cs" />
+    <Compile Include="IServices\Wallet\ICountryRateConversionService.cs" />
     <Compile Include="IServices\Wallet\IWalletNumberService.cs" />
     <Compile Include="IServices\Wallet\ICashOnDeliveryBalanceService.cs" />
     <Compile Include="IServices\Wallet\ICashOnDeliveryAccountService.cs" />

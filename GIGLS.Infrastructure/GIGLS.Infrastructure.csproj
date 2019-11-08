@@ -228,6 +228,7 @@
     <Compile Include="Persistence\Repositories\Vendors\VendorRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\CashOnDeliveryAccountRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\CashOnDeliveryBalanceRepository.cs" />
+    <Compile Include="Persistence\Repositories\Wallet\CountryRateConversionRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\IWaybillPaymentLogRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\WalletNumberRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\WalletPaymentLogRepository.cs" />

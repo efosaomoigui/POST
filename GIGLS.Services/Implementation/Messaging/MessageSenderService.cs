@@ -611,13 +611,7 @@ namespace GIGLS.Services.Implementation.Messaging
 
         private async Task<bool> VerifyUserLoginIsWithinTheEmailInterval(string email)
         {
-            var userActiveCountryId = 1;
-            try
-            {
-                userActiveCountryId = await _userService.GetUserActiveCountryId();
-            }
-            catch (Exception ex) { }
-
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
             bool verifySendEmail = true;
 
             //1. check interval from global property

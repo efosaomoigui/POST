@@ -466,13 +466,8 @@ namespace GIGLS.Services.Implementation.Shipments
         //
         public async Task<bool> RePrintCountUpdater()
         {
-            var userActiveCountryId = 1;
-            try
-            {
-                userActiveCountryId = await _userService.GetUserActiveCountryId();
-            }
-            catch (Exception ex) { }
-
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
+            
             try
             {
                 //Get the global properties of the number of days to allow reprint to stop
@@ -515,7 +510,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -1742,13 +1737,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<List<ServiceCentreDTO>> GetAllWarehouseServiceCenters()
         {
-            var userActiveCountryId = 1;
-            try
-            {
-                userActiveCountryId = await _userService.GetUserActiveCountryId();
-            }
-            catch (Exception ex) { }
-
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
+            
             try
             {
                 string[] warehouseServiceCentres = { };

@@ -177,6 +177,8 @@ namespace GIGLS.Core
 
         IActivationCampaignEmailRepository ActivationCampaignEmail { get; set; }
 
+        ICountryRateConversionRepository CountryRateConversion { get; set; }
+
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();
     }
