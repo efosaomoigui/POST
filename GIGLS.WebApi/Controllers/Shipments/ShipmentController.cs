@@ -417,68 +417,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         // Shipment delivery monitor
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("")]
-        public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> getShipmentCountForDeliveryInGreen([FromUri]FilterOptionsDto filterOptionsDto)
-        {
-            //filter by User Active Country
-            var userActiveCountry = await _userService.GetUserActiveCountry();
-            filterOptionsDto.CountryId = userActiveCountry?.CountryId;
-
-
-            return await HandleApiOperationAsync(async () =>
-            {
-                var shipments = _service.GetShipments(filterOptionsDto);
-                return new ServiceResponse<IEnumerable<ShipmentDTO>>
-                {
-                    Object = await shipments.Item1,
-                    Total = shipments.Item2
-                };
-            });
-        }
-
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("incomingshipments")]
-        public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> getShipmentCountForDeliveryInBlue([FromUri]FilterOptionsDto filterOptionsDto)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var shipments = await _service.GetIncomingShipments(filterOptionsDto);
-                return new ServiceResponse<IEnumerable<InvoiceViewDTO>>
-                {
-                    Object = shipments,
-                    Total = shipments.Count
-                };
-            });
-        }
-
-
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("")]
-        public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> getShipmentCountForDeliveryInRed([FromUri]FilterOptionsDto filterOptionsDto)
-        {
-            //filter by User Active Country
-            var userActiveCountry = await _userService.GetUserActiveCountry();
-            filterOptionsDto.CountryId = userActiveCountry?.CountryId;
-
-
-            return await HandleApiOperationAsync(async () =>
-            {
-                var shipments = _service.GetShipments(filterOptionsDto);
-                return new ServiceResponse<IEnumerable<ShipmentDTO>>
-                {
-                    Object = await shipments.Item1,
-                    Total = shipments.Item2
-                };
-            });
-
-        }
-
-
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("shipmentmonitor")]  // Task<Tuple<List<InvoiceMonitorDTO>, List<InvoiceMonitorDTO>>>
+        [Route("shipmentmonitor")]  
         public async Task<IServiceResponse<ColoredInvoiceMonitorDTO>> GetShipmentMonitor() 
         {
             return await HandleApiOperationAsync(async () =>
@@ -505,7 +444,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("GetShipmentMonitorexpected")]  // Task<Tuple<List<InvoiceMonitorDTO>, List<InvoiceMonitorDTO>>>
+        [Route("GetShipmentMonitorexpected")]  
         public async Task<IServiceResponse<ColoredInvoiceMonitorDTO>> GetShipmentMonitorexpected()
         {
             return await HandleApiOperationAsync(async () =>
@@ -529,24 +468,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
-
-        //[GIGLSActivityAuthorize(Activity = "Post")]
-        //[HttpPost]
-        //[Route("shipmentmonitor")]
-        //public async Task<IServiceResponse<List<InvoiceMonitorDTO>>> PostShipmentMonitor(AccountFilterCriteria accountFilterCriteria)  
-        //{
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-
-        //        // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
-        //        var result = await _service.GetShipmentMonitor(accountFilterCriteria);
-
-        //        return new ServiceResponse<List<InvoiceMonitorDTO>>
-        //        {
-        //            Object = result
-        //        };
-        //    });
-        //}
-
+        
     }
 }
