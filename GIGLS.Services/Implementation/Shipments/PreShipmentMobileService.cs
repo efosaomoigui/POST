@@ -2022,6 +2022,11 @@ namespace GIGLS.Services.Implementation.Shipments
                             _uow.PreShipmentItemMobile.Remove(preshipmentitmmobile);
                         }
                         updatedwallet.Balance = ((updatedwallet.Balance + preshipmentmobile.GrandTotal));
+                        await ScanMobileShipment(new ScanDTO
+                        {
+                            WaybillNumber = Waybill,
+                            ShipmentScanStatus = ShipmentScanStatus.MSCC
+                        });
                     }
                 }
                 //FOR PARTNER TRYING TO CANCEL  A SHIPMENT
@@ -2037,7 +2042,15 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     updatedwallet.Balance = ((updatedwallet.Balance + preshipmentmobile.GrandTotal));
                     var pickuprequest = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == Waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
-                    pickuprequest.Status = MobilePickUpRequestStatus.Cancelled.ToString();
+                    if (pickuprequest != null)
+                    {
+                        pickuprequest.Status = MobilePickUpRequestStatus.Cancelled.ToString();
+                        await ScanMobileShipment(new ScanDTO
+                        {
+                            WaybillNumber = Waybill,
+                            ShipmentScanStatus = ShipmentScanStatus.MSCP
+                        });
+                    }
                 }
                 await _uow.CompleteAsync();
                 return new { IsCancelled = true };
