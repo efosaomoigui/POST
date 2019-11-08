@@ -119,6 +119,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task AddWallet(WalletDTO wallet);
         Task<UserDTO> GenerateReferrerCode(UserDTO user);
         Task<string> Decrypt();
+        Task<object> CancelShipmentWithNoCharge(CancelShipmentDTO shipment);
 
 
     }

@@ -1997,6 +1997,57 @@ namespace GIGLS.Services.Implementation.Shipments
 
         }
 
+        public async Task<object> CancelShipmentWithNoCharge(string Waybill,string Userchanneltype)
+        {
+            
+            try
+            {
+                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == Waybill, "PreShipmentItems");
+                var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+                if (Userchanneltype == UserChannelType.IndividualCustomer.ToString())
+                {
+                    var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.Status == MobilePickUpRequestStatus.Accepted.ToString());
+                    if (pickuprequests != null)
+                    {
+                        throw new GenericException("Shipment cannot be cancelled because it has been assigned.");
+                    }
+                    else
+                    {
+                        preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
+                        foreach (var id in preshipmentmobile.PreShipmentItems.ToList())
+                        {
+                            var preshipmentitmmobile = await _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == preshipmentmobile.PreShipmentMobileId && s.PreShipmentItemMobileId == id.PreShipmentItemMobileId);
+                            preshipmentitmmobile.IsCancelled = true;
+                            //we need to modify this to only change the IsCancelled instead of deleting the items.
+                            _uow.PreShipmentItemMobile.Remove(preshipmentitmmobile);
+                        }
+                        updatedwallet.Balance = ((updatedwallet.Balance + preshipmentmobile.GrandTotal));
+                    }
+                }
+                //FOR PARTNER TRYING TO CANCEL  A SHIPMENT
+                else
+                {
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
+                    foreach (var id in preshipmentmobile.PreShipmentItems.ToList())
+                    {
+                        var preshipmentitmmobile = await _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == preshipmentmobile.PreShipmentMobileId && s.PreShipmentItemMobileId == id.PreShipmentItemMobileId);
+                        preshipmentitmmobile.IsCancelled = true;
+                        //we need to modify this to only change the IsCancelled instead of deleting the items.
+                        _uow.PreShipmentItemMobile.Remove(preshipmentitmmobile);
+                    }
+                    updatedwallet.Balance = ((updatedwallet.Balance + preshipmentmobile.GrandTotal));
+                    var pickuprequest = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == Waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
+                    pickuprequest.Status = MobilePickUpRequestStatus.Cancelled.ToString();
+                }
+                await _uow.CompleteAsync();
+                return new { IsCancelled = true };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
     }
 

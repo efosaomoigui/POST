@@ -1706,6 +1706,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             var GoogleApiKey = ConfigurationManager.AppSettings["DistanceApiKey"];
             return await _partnertransactionservice.Decrypt(GoogleApiKey);
         }
+        public async Task<object> CancelShipmentWithNoCharge(CancelShipmentDTO shipment)
+        {
+            return await _preShipmentMobileService.CancelShipmentWithNoCharge(shipment.Waybill, shipment.Userchanneltype);
+        }
 
     }
 }
