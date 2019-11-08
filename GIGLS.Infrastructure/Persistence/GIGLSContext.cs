@@ -289,6 +289,9 @@ namespace GIGLS.Infrastructure.Persistence
 
             modelBuilder.Entity<CountryRouteZoneMap>().Property(p => p.DestinationId).IsOptional();
             modelBuilder.Entity<CountryRouteZoneMap>().Property(p => p.DepartureId).IsOptional();
+
+            modelBuilder.Entity<CountryRateConversion>().Property(p => p.DepartureCountryId).IsOptional();
+            modelBuilder.Entity<CountryRateConversion>().Property(p => p.DestinationCountryId).IsOptional();
         }
 
         #region Customize to handle Date and Delete status of Entities
