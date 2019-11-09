@@ -221,6 +221,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+               
                 if (preShipment.PreShipmentItems.Count() == 0)
                 {
                     throw new GenericException("No Preshipitem was added");
@@ -233,6 +234,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 var Pickuprice = await GetPickUpPrice(preShipment.VehicleType,preShipment.CountryId);
                 var PickupValue = Convert.ToDecimal(Pickuprice);
                 var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
+                var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
+                var Percentage = (Convert.ToDecimal(DiscountPercent.Value));
+                var PercentageTobeUsed = ((100M - Percentage) / 100M);
                 foreach (var preShipmentItem in preShipment.PreShipmentItems)
                 {
                     if (preShipmentItem.Quantity == 0)
@@ -293,11 +297,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     MainCharge = (decimal)preShipment.CalculatedTotal,
                     PickUpCharge = PickupValue,
                     InsuranceValue = preShipment.InsuranceValue,
-                    GrandTotal = ((decimal)preShipment.CalculatedTotal + PickupValue),
+                    GrandTotal = Math.Round(((decimal)preShipment.CalculatedTotal + PickupValue) * PercentageTobeUsed),
                     PreshipmentMobile = preShipment,
                     CurrencySymbol = Country.CurrencySymbol,
                     CurrencyCode = Country.CurrencyCode,
-                    IsWithinProcessingTime = IsWithinProcessingTime
+                    IsWithinProcessingTime = IsWithinProcessingTime,
+                    Discount = Percentage
                 };
                 return returnprice;
             }
@@ -1798,55 +1803,67 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<MobilePriceDTO> GetHaulagePrice(HaulagePriceDTO haulagePricingDto)
         {
-            decimal price = 0;
-
-            var departureStationId = haulagePricingDto.DepartureStationId;
-            var destinationStationId = haulagePricingDto.DestinationStationId;
-            var haulageid = haulagePricingDto.Haulageid;
-            var country = await _uow.Country.GetCountryByStationId(departureStationId);
-            var IsWithinProcessingTime = await WithinProcessingTime(country.CountryId);
-
-            //check haulage exists
-            var haulage = await _haulageService.GetHaulageById(haulageid);
-            if (haulage == null)
+            try
             {
-                throw new GenericException("The Tonne specified has not been mapped");
+                decimal price = 0;
+
+                var departureStationId = haulagePricingDto.DepartureStationId;
+                var destinationStationId = haulagePricingDto.DestinationStationId;
+                var haulageid = haulagePricingDto.Haulageid;
+                var country = await _uow.Country.GetCountryByStationId(departureStationId);
+                var IsWithinProcessingTime = await WithinProcessingTime(country.CountryId);
+                var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, country.CountryId);
+                var Percentage = (Convert.ToDecimal(DiscountPercent.Value));
+                var PercentageTobeUsed = ((100M - Percentage) / 100M);
+                //check haulage exists
+                var haulage = await _haulageService.GetHaulageById(haulageid);
+                if (haulage == null)
+                {
+                    throw new GenericException("The Tonne specified has not been mapped");
+                }
+
+                //get the distance based on the stations
+                var haulageDistanceMapping = await _haulageDistanceMappingService.GetHaulageDistanceMappingForMobile(departureStationId, destinationStationId);
+                var distance = haulageDistanceMapping.Distance;
+
+                //set the default distance to 1
+                if (distance == 0)
+                {
+                    distance = 1;
+                }
+                //Get Haulage Maximum Fixed Distance
+                var userActiveCountryId = country.CountryId;
+                var maximumFixedDistanceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HaulageMaximumFixedDistance, userActiveCountryId);
+                int maximumFixedDistance = int.Parse(maximumFixedDistanceObj.Value);
+
+                //calculate price for the haulage
+                if (distance <= maximumFixedDistance)
+                {
+                    price = haulage.FixedRate;
+                }
+                else
+                {
+                    //1. get the fixed rate and substract the maximum fixed distance from distance
+                    decimal fixedRate = haulage.FixedRate;
+                    distance = distance - maximumFixedDistance;
+
+                    //2. multiply the remaining distance with the additional pate
+                    price = fixedRate + distance * haulage.AdditionalRate;
+                }
+
+                return new MobilePriceDTO
+                {
+                    GrandTotal = price * PercentageTobeUsed,
+                    CurrencySymbol = country.CurrencySymbol,
+                    CurrencyCode = country.CurrencyCode,
+                    IsWithinProcessingTime = IsWithinProcessingTime,
+                    Discount = Percentage
+                };
             }
-
-            //get the distance based on the stations
-            var haulageDistanceMapping = await _haulageDistanceMappingService.GetHaulageDistanceMappingForMobile(departureStationId, destinationStationId);
-            var distance = haulageDistanceMapping.Distance;
-
-            //set the default distance to 1
-            if (distance == 0)
+            catch(Exception)
             {
-                distance = 1;
+                throw;
             }
-            //Get Haulage Maximum Fixed Distance
-            var userActiveCountryId = country.CountryId;
-            var maximumFixedDistanceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HaulageMaximumFixedDistance, userActiveCountryId);
-            int maximumFixedDistance = int.Parse(maximumFixedDistanceObj.Value);
-
-            //calculate price for the haulage
-            if (distance <= maximumFixedDistance)
-            {
-                price = haulage.FixedRate;
-            }
-            else
-            {
-                //1. get the fixed rate and substract the maximum fixed distance from distance
-                decimal fixedRate = haulage.FixedRate;
-                distance = distance - maximumFixedDistance;
-
-                //2. multiply the remaining distance with the additional pate
-                price = fixedRate + distance * haulage.AdditionalRate;
-            }
-
-            return new MobilePriceDTO{ GrandTotal = price,
-                CurrencySymbol = country.CurrencySymbol,
-                CurrencyCode = country.CurrencyCode,
-                IsWithinProcessingTime = IsWithinProcessingTime
-            };
         }
 
 
