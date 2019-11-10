@@ -179,6 +179,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     newPreShipment.DateCreated = DateTime.Now;
                     newPreShipment.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
                     preShipmentDTO.IsBalanceSufficient = true;
+                    preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
                     _uow.PreShipmentMobile.Add(newPreShipment);
                     await _uow.CompleteAsync();
                     await ScanMobileShipment(new ScanDTO
@@ -286,23 +287,26 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     Price += (decimal)preShipmentItem.CalculatedPrice;
                 };
+                
                 decimal EstimatedDeclaredPrice = Convert.ToDecimal(DeclaredValue);
-                preShipment.DeliveryPrice = Price;
+                preShipment.DeliveryPrice = Price * PercentageTobeUsed;
                 preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
                 preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice);
                 preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal);
                 preShipment.Value = DeclaredValue;
+                var discount = Math.Round(Price - (decimal)preShipment.CalculatedTotal);
+                preShipment.DiscountValue = discount;
                 var returnprice = new MobilePriceDTO()
                 {
                     MainCharge = (decimal)preShipment.CalculatedTotal,
                     PickUpCharge = PickupValue,
                     InsuranceValue = preShipment.InsuranceValue,
-                    GrandTotal = Math.Round(((decimal)preShipment.CalculatedTotal + PickupValue) * PercentageTobeUsed),
+                    GrandTotal = ((decimal)preShipment.CalculatedTotal + PickupValue),
                     PreshipmentMobile = preShipment,
                     CurrencySymbol = Country.CurrencySymbol,
                     CurrencyCode = Country.CurrencyCode,
                     IsWithinProcessingTime = IsWithinProcessingTime,
-                    Discount = Percentage
+                    Discount = discount
                 };
                 return returnprice;
             }
@@ -1815,6 +1819,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, country.CountryId);
                 var Percentage = (Convert.ToDecimal(DiscountPercent.Value));
                 var PercentageTobeUsed = ((100M - Percentage) / 100M);
+                var discount = (1 - PercentageTobeUsed);
                 //check haulage exists
                 var haulage = await _haulageService.GetHaulageById(haulageid);
                 if (haulage == null)
@@ -1835,7 +1840,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var userActiveCountryId = country.CountryId;
                 var maximumFixedDistanceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HaulageMaximumFixedDistance, userActiveCountryId);
                 int maximumFixedDistance = int.Parse(maximumFixedDistanceObj.Value);
-
+                
                 //calculate price for the haulage
                 if (distance <= maximumFixedDistance)
                 {
@@ -1849,15 +1854,16 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //2. multiply the remaining distance with the additional pate
                     price = fixedRate + distance * haulage.AdditionalRate;
+                  
                 }
 
                 return new MobilePriceDTO
                 {
-                    GrandTotal = price * PercentageTobeUsed,
+                    GrandTotal = Math.Round(price * PercentageTobeUsed),
                     CurrencySymbol = country.CurrencySymbol,
                     CurrencyCode = country.CurrencyCode,
                     IsWithinProcessingTime = IsWithinProcessingTime,
-                    Discount = Percentage
+                    Discount = Math.Round(price * discount)
                 };
             }
             catch(Exception)
