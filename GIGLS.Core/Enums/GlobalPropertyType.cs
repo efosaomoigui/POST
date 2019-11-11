@@ -40,7 +40,8 @@
         EmailForDeliveryTime,
         ActivationCampaignStartDate,
         ActivationCampaignEndDate,
-        ReferralBonusForActivationCampaign
+        ReferralBonusForActivationCampaign,
+        DiscountPercentage
 
     }
 }

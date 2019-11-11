@@ -880,19 +880,18 @@ namespace GIGLS.Services.Business.Pricing
         public async Task<decimal> GetMobileEcommercePrice(PricingDTO pricingDto)
         {
 
-
-            var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
-
-            //get the deliveryOptionPrice from an array
             decimal deliveryOptionPriceTemp = 0;
-
-            if (pricingDto.DepartureStationId == pricingDto.DestinationStationId)
+            var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
+            if (zone != null)
             {
-                pricingDto.DeliveryOptionId = 3;
-            }
-            else
-            {
-                pricingDto.DeliveryOptionId = 2;
+                if (zone.ZoneId == 1)
+                {
+                    pricingDto.DeliveryOptionId = 7;
+                }
+                else
+                {
+                    pricingDto.DeliveryOptionId = 2;
+                }
             }
 
             deliveryOptionPriceTemp = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
@@ -928,19 +927,19 @@ namespace GIGLS.Services.Business.Pricing
 
         public async Task<decimal> GetMobileSpecialPrice(PricingDTO pricingDto)
         {
-
-            var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
-
-            //get the deliveryOptionPrice from an array
             decimal deliveryOptionPriceTemp = 0;
 
-            if (pricingDto.DepartureStationId == pricingDto.DestinationStationId)
+            var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
+            if (zone != null)
             {
-                pricingDto.DeliveryOptionId = 3;
-            }
-            else
-            {
-                pricingDto.DeliveryOptionId = 2;
+                if (zone.ZoneId == 1)
+                {
+                    pricingDto.DeliveryOptionId = 7;
+                }
+                else
+                {
+                    pricingDto.DeliveryOptionId = 2;
+                }
             }
 
             decimal PackagePrice = await _special.GetSpecialZonePrice(pricingDto.SpecialPackageId, zone.ZoneId, pricingDto.CountryId, pricingDto.Weight);

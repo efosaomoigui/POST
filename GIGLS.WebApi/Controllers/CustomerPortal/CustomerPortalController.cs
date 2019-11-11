@@ -1393,6 +1393,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
 
+        [HttpPost]
+        [Route("cancelshipmentwithnocharge")]
+        public async Task<object> CancelShipmentWithNoCharge(CancelShipmentDTO shipment)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _portalService.CancelShipmentWithNoCharge(shipment);
 
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
     }
 }
