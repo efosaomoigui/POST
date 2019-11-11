@@ -23,14 +23,16 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private readonly IUserService _userService;
         private readonly IWalletService _walletService;
         private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly ICountryRateConversionService _countryRateConversionService;
 
         public PaymentTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService,
-            IGlobalPropertyService globalPropertyService)
+            IGlobalPropertyService globalPropertyService, ICountryRateConversionService countryRateConversionService)
         {
             _uow = uow;
             _userService = userService;
             _walletService = walletService;
             _globalPropertyService = globalPropertyService;
+            _countryRateConversionService = countryRateConversionService;
             MapperConfig.Initialize();
         }
 
@@ -377,9 +379,9 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //2b. If the customer country !== Departure Country, Convert the payment
             if(customerCountryId != shipment.DepartureCountryId)
             {
-                var countryRateConversion = await _uow.CountryRateConversion.GetAsync(x => x.DepartureCountryId == shipment.DepartureCountryId && x.DestinationCountryId == shipment.DestinationCountryId);
+                var countryRateConversion = await _countryRateConversionService.GetCountryRateConversionRate(shipment.DepartureCountryId, shipment.DestinationCountryId);
 
-                amountToDebit = amountToDebit * countryRateConversion.Rate;
+                amountToDebit *= countryRateConversion;
             }
 
             return amountToDebit;
