@@ -393,8 +393,6 @@ namespace GIGLS.Core
                 config.CreateMap<ActivationCampaignEmail, ActivationCampaignEmailDTO>();
                 config.CreateMap<ActivationCampaignEmailDTO, ActivationCampaignEmail>();
 
-                config.CreateMap<CountryRateConversion, CountryRateConversionDTO>();
-                config.CreateMap<CountryRateConversionDTO, CountryRateConversion>();
             });
 
             isInit = true;

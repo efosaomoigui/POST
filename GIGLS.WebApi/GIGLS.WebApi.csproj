@@ -380,7 +380,6 @@
     <Compile Include="Controllers\Utility\GlobalPropertyController.cs" />
     <Compile Include="Controllers\Wallet\CashOnDeliveryAccountController.cs" />
     <Compile Include="Controllers\Wallet\CashOnDeliveryBalanceController.cs" />
-    <Compile Include="Controllers\Wallet\CountryRateConversionController.cs" />
     <Compile Include="Controllers\Wallet\WalletController.cs" />
     <Compile Include="Controllers\Wallet\WalletPaymentLogController.cs" />
     <Compile Include="Controllers\Wallet\WalletTransactionController.cs" />

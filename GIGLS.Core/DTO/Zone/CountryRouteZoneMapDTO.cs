@@ -15,6 +15,8 @@ namespace GIGLS.Core.DTO.Zone
         public int DestinationId { get; set; }        
         public virtual CountryDTO Destination { get; set; }
 
+        public double Rate { get; set; }
+
         public bool Status { get; set; }
     }
 }

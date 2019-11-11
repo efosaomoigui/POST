@@ -174,10 +174,8 @@ namespace GIGLS.Core
         ILGARepository LGA { get; set; }
         IWaybillPaymentLogRepository WaybillPaymentLog {get; set;}
         IBankRepository Bank { get; set; }
-
         IActivationCampaignEmailRepository ActivationCampaignEmail { get; set; }
 
-        ICountryRateConversionRepository CountryRateConversion { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

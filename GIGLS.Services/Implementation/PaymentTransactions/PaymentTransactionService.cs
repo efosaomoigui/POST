@@ -14,6 +14,7 @@ using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.IServices.Utility;
 using GIGL.GIGLS.Core.Domain;
 using System.Linq;
+using GIGLS.Core.IServices.Zone;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -23,16 +24,16 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private readonly IUserService _userService;
         private readonly IWalletService _walletService;
         private readonly IGlobalPropertyService _globalPropertyService;
-        private readonly ICountryRateConversionService _countryRateConversionService;
+        private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
 
         public PaymentTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService,
-            IGlobalPropertyService globalPropertyService, ICountryRateConversionService countryRateConversionService)
+            IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService)
         {
             _uow = uow;
             _userService = userService;
             _walletService = walletService;
             _globalPropertyService = globalPropertyService;
-            _countryRateConversionService = countryRateConversionService;
+            _countryRouteZoneMapService = countryRouteZoneMapService;
             MapperConfig.Initialize();
         }
 
@@ -375,13 +376,14 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             //2a. If the Customer Country == Departure Country, no conversion
             
 
-
             //2b. If the customer country !== Departure Country, Convert the payment
             if(customerCountryId != shipment.DepartureCountryId)
             {
-                var countryRateConversion = await _countryRateConversionService.GetCountryRateConversionRate(shipment.DepartureCountryId, shipment.DestinationCountryId);
+                var countryRateConversion = await _countryRouteZoneMapService.GetZone(shipment.DestinationCountryId, shipment.DepartureCountryId);
 
-                amountToDebit *= countryRateConversion;
+                double amountToDebitDouble = (double)amountToDebit  * countryRateConversion.Rate;
+
+                amountToDebit = (decimal) Math.Round(amountToDebitDouble, 2);
             }
 
             return amountToDebit;

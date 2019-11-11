@@ -159,7 +159,6 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<CashOnDeliveryRegisterAccount> CashOnDeliveryRegisterAccount { get; set; }
         public DbSet<DemurrageRegisterAccount> DemurrageRegisterAccount { get; set; }
         public DbSet<WaybillPaymentLog> WaybillPaymentLog { get; set; }
-        public DbSet<CountryRateConversion> CountryRateConversion { get; set; }
 
         //Weight Limit
         public DbSet<WeightLimit> WeightLimits { get; set; }
@@ -290,8 +289,6 @@ namespace GIGLS.Infrastructure.Persistence
             modelBuilder.Entity<CountryRouteZoneMap>().Property(p => p.DestinationId).IsOptional();
             modelBuilder.Entity<CountryRouteZoneMap>().Property(p => p.DepartureId).IsOptional();
 
-            modelBuilder.Entity<CountryRateConversion>().Property(p => p.DepartureCountryId).IsOptional();
-            modelBuilder.Entity<CountryRateConversion>().Property(p => p.DestinationCountryId).IsOptional();
         }
 
         #region Customize to handle Date and Delete status of Entities
