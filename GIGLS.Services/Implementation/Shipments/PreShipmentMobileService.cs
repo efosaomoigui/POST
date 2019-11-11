@@ -1872,7 +1872,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-
+        //YOU NEED TO WORK ON THIS METHOD TO UPDATE ALL LIKELY TABLES 
         public async Task<bool> EditProfile (UserDTO user)
         {
             try
@@ -1907,6 +1907,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     company.FirstName = user.FirstName;
                     company.LastName = user.LastName;
                     company.Email = user.Email;
+                    company.Name = user.Organisation;
                 }
                 await _uow.CompleteAsync();
                 return true;

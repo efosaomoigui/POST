@@ -886,7 +886,7 @@ namespace GIGLS.Services.Business.Pricing
             {
                 if (zone.ZoneId == 1)
                 {
-                    pricingDto.DeliveryOptionId = 7;
+                    pricingDto.DeliveryOptionId = 4;
                 }
                 else
                 {

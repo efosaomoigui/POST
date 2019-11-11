@@ -836,6 +836,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     };
                     var vehicletype = Mapper.Map<VehicleType>(vehicletypeDTO);
                     _uow.VehicleType.Add(vehicletype);
+                    await _uow.CompleteAsync();
 
                     await _walletService.AddWallet(new WalletDTO
                     {
@@ -845,7 +846,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                         CompanyType = CustomerType.Partner.ToString()
                     });
 
-                    _uow.Complete();
 
                     result = await SendOTPForRegisteredUser(user);
                     var User = Mapper.Map<UserDTO>(FinalUser);
@@ -1430,7 +1430,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 {
                     var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeIndividual);
                     user.UserChannelCode = customerCode;
-                    var customer = new IndividualCustomerDTO
+                    var customer = new IndividualCustomer
                     {
                         Email = user.Email,
                         PhoneNumber = user.PhoneNumber,
@@ -1443,32 +1443,35 @@ namespace GIGLS.Services.Business.CustomerPortal
                       
                         //added this to pass channelcode 
                     };
-                    var individualCustomerDTO = Mapper.Map<IndividualCustomer>(customer);
+
+                    //var individualCustomerDTO = Mapper.Map<IndividualCustomer>(customer);
 
                     //update : we need to check if the customer exists before adding 
-                    _uow.IndividualCustomer.Add(individualCustomerDTO);
+                    _uow.IndividualCustomer.Add(customer);
+                    
+                    // add customer to user's table.
+                    User = await CreateNewuser(user);
+
                     await _uow.CompleteAsync();
 
                     // add customer to a wallet
                     await _walletService.AddWallet(new WalletDTO
                     {
-                        CustomerId = individualCustomerDTO.IndividualCustomerId,
+                        CustomerId = customer.IndividualCustomerId,
                         CustomerType = CustomerType.IndividualCustomer,
-                        CustomerCode = individualCustomerDTO.CustomerCode,
+                        CustomerCode = customer.CustomerCode,
                         CompanyType = CustomerType.IndividualCustomer.ToString()
                     });
 
-                    // add customer to user's table.
-                    User = await CreateNewuser(user);
                     //return user;
                 }
 
                 if (user.UserChannelType == UserChannelType.Ecommerce)
                 {
                     var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
-                   NumberGeneratorType.CustomerCodeEcommerce);
+                    NumberGeneratorType.CustomerCodeEcommerce);
                     user.UserChannelCode = customerCode;
-                    var companydto = new CompanyDTO
+                    var companydto = new Company
                     {
                         Email = user.Email,
                         PhoneNumber = user.PhoneNumber,
@@ -1477,28 +1480,30 @@ namespace GIGLS.Services.Business.CustomerPortal
                         CustomerCode = customerCode,
                         IsRegisteredFromMobile = true,
                         UserActiveCountryId = user.UserActiveCountryId,
-                        CompanyType = CompanyType.Ecommerce
+                        CompanyType = CompanyType.Ecommerce,
+                        Name = user.Organisation
 
                         //added this to pass channelcode 
                     };
 
-                    var company = Mapper.Map<Company>(companydto);
-                    _uow.Company.Add(company);
+                    //var company = Mapper.Map<Company>(companydto);
+                    _uow.Company.Add(companydto);
+
+                    // add customer to user's table.
+                    User = await CreateNewuser(user);
+
+                    await _uow.CompleteAsync();
 
                     // add customer to a wallet
                     await _walletService.AddWallet(new WalletDTO
                     {
-                        CustomerId = company.CompanyId,
+                        CustomerId = companydto.CompanyId,
                         CustomerType = CustomerType.Company,
                         CustomerCode = customerCode,
                         CompanyType = CustomerType.Company.ToString()
                     });
 
-                    // add customer to user's table.
-                    User = await CreateNewuser(user);
                     //return user;
-
-                    await _uow.CompleteAsync();
                 }
 
                 return User;
