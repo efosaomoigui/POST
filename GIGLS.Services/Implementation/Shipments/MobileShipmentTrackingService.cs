@@ -42,6 +42,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var trackings = new MobileShipmentTrackingHistoryDTO();
                 //1. call agility core tracking
                 var shipmentTracking = await _shipmentTrackingService.GetShipmentTrackings(waybill);
 
@@ -70,12 +71,32 @@ namespace GIGLS.Services.Implementation.Shipments
                 //4. append the two lists together
                 MobileshipmentTracking.AddRange(shipmentTrackingMobileVersion);
                 var addresses = await _uow.PreShipmentMobile.GetAsync(s=>s.Waybill == waybill);
-                var trackings = new MobileShipmentTrackingHistoryDTO
+                if(addresses !=null)
                 {
-                    Origin = addresses.SenderAddress,
-                    Destination = addresses.ReceiverAddress,
-                    MobileShipmentTrackings = MobileshipmentTracking
-                };
+                   trackings = new MobileShipmentTrackingHistoryDTO
+                    {
+                        Origin = addresses.SenderAddress,
+                        Destination = addresses.ReceiverAddress,
+                        MobileShipmentTrackings = MobileshipmentTracking
+                    };
+                }
+                else
+                {
+                    var shipmentaddress = await _uow.Shipment.GetAsync(s => s.Waybill == waybill);
+                    if (shipmentaddress != null)
+                    {
+                        trackings = new MobileShipmentTrackingHistoryDTO
+                        {
+                            Origin = shipmentaddress.SenderAddress,
+                            Destination = shipmentaddress.ReceiverAddress,
+                            MobileShipmentTrackings = MobileshipmentTracking
+                        };
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid waybill number!!");
+                    }
+                }
 
                 return trackings;
             }
