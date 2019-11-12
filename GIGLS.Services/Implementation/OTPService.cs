@@ -15,6 +15,7 @@ using System.Linq;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
+using GIGLS.Infrastructure;
 
 namespace GIGLS.Services.Implementation
 {
@@ -55,19 +56,26 @@ namespace GIGLS.Services.Implementation
 
         public async Task<OTPDTO> GenerateOTP(UserDTO user)
         {
-            int id = GeneratePassword();
-            var otp = new OTPDTO
+            try
             {
-                EmailAddress = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                CustomerId = user.UserChannelCode,
-                Otp = id
-            };
+                int id = GeneratePassword();
+                var otp = new OTPDTO
+                {
+                    EmailAddress = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    CustomerId = user.UserChannelCode,
+                    Otp = id
+                };
 
-            var result = Mapper.Map<OTP>(otp);
-            _uow.OTP.Add(result);
-            await _uow.CompleteAsync();
-            return otp;
+                var result = Mapper.Map<OTP>(otp);
+                _uow.OTP.Add(result);
+                await _uow.CompleteAsync();
+                return otp;
+            }
+            catch(Exception)
+            {
+                throw new GenericException("Error occurred while generating OTP....");
+            }
 
         }
 
