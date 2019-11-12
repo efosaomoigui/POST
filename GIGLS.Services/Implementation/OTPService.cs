@@ -167,6 +167,7 @@ namespace GIGLS.Services.Implementation
                 var VehicleType = await _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode);
                 if (VehicleType != null)
                 {
+                    registerUser.VehicleLicenseExpiryDate = VehicleType.VehicleLicenseExpiryDate;
                     if (VehicleType.VehicleType != null)
                     {
                         var vehicletypeDTO = new VehicleTypeDTO

@@ -670,6 +670,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                             throw new GenericException("You cannot use your Employee email to register.");
                         }
                     }
+                    if (EmailUser.IsRegisteredFromMobile == true)
+                    {
+                       throw new GenericException("User with these details already exists!");
+                    }
 
                     var emailpartnerdetails = await _uow.Partner.GetAsync(s => s.Email == user.Email);
                     if (emailpartnerdetails != null)
@@ -718,6 +722,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 };
                                 var vehicletype = Mapper.Map<VehicleType>(vehicletypeDTO);
                                 _uow.VehicleType.Add(vehicletype);
+                                 await _uow.CompleteAsync();
 
                                 await _walletService.AddWallet(new WalletDTO
                                 {
@@ -726,8 +731,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                                     CustomerCode = FinalPartner.PartnerCode,
                                     CompanyType = CustomerType.Partner.ToString()
                                 });
-
-                                _uow.Complete();
 
                                 result = await SendOTPForRegisteredUser(user);
                                 var User = Mapper.Map<UserDTO>(FinalUser);
@@ -866,6 +869,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                             throw new GenericException("You cannot use your Employee email to register.");
                         }
                     }
+                    if (EmailUser.IsRegisteredFromMobile == true)
+                    {
+                        throw new GenericException("User with these details already exists!");
+                    }
                     else
                     {
                         EmailUser.FirstName = user.FirstName;
@@ -995,6 +1002,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                         {
                             throw new GenericException("You cannot use your Employee email to register.");
                         }
+                    }
+                    if (EmailUser.IsRegisteredFromMobile == true)
+                    {
+                        throw new GenericException("User with these details already exists!");
                     }
                     else
                     {

@@ -656,12 +656,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     if (pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString())
                     {
-                        preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
+                        preshipmentmobile.shipmentstatus = "Shipment created";
                     }
-                    else
-                    {
-                        preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
-                    }
+                    
                    newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
                    if(Country !=null)
                     {
