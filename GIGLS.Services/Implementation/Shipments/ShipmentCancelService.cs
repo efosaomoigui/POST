@@ -42,6 +42,15 @@ namespace GIGLS.Services.Implementation.Shipments
             
             //shipment should only be cancel by regional manager or admin
             var user = await _userService.GetCurrentUserId();
+
+            //Allow Chairman, Director and Administrator to cancelled waybill
+            bool hasAdminRole = await _userService.IsUserHasAdminRole(user);
+
+            if (hasAdminRole)
+            {
+                return await ProcessShipmentCancel(shipment, user, shipmentCancelDTO.CancelReason);
+            }
+
             var region = await _userService.GetRegionServiceCenters(user);
 
             if (region.Length > 0)
@@ -55,17 +64,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 else
                 {
                     throw new GenericException($"Waybill {waybill} was not created at your region.");
-                }
-            }
-
-            //Allow Chairman, Director and Administrator to cancelled waybill
-            if(region.Length == 0)
-            {
-                bool hasAdminRole = await _userService.IsUserHasAdminRole(user);
-
-                if (hasAdminRole)
-                {
-                    return await ProcessShipmentCancel(shipment, user, shipmentCancelDTO.CancelReason);
                 }
             }
 
