@@ -73,11 +73,15 @@ namespace GIGLS.Services.Implementation.Wallet
                 var companyDTO = await _uow.Company.GetAsync(s => s.CompanyId == walletDTO.CustomerId);
                 walletDTO.CustomerName = companyDTO.Name;
             }
+            else if (CustomerType.Partner.Equals(wallet.CustomerType))
+            {
+                var partnerDTO = await _uow.Partner.GetAsync(p => p.PartnerId == walletDTO.CustomerId);
+                walletDTO.CustomerName = partnerDTO.PartnerName;
+            }
             else
             {
                 // handle IndividualCustomers
-                var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
-                    s => s.IndividualCustomerId == walletDTO.CustomerId);
+                var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(s => s.IndividualCustomerId == walletDTO.CustomerId);
                 walletDTO.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " +
                     $"{individualCustomerDTO.LastName}");
             }

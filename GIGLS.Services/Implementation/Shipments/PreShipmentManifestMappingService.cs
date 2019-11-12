@@ -64,7 +64,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 _uow.PreShipmentManifestMapping.AddRange(preShipmentMappings);
-                _uow.Complete();
+                await _uow.CompleteAsync();
             }
             catch (Exception)
             {
@@ -149,7 +149,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 preShipment.IsMapped = true;
 
                 _uow.PreShipmentManifestMapping.Remove(manifestWaybillMapping);
-                _uow.Complete();
+                await _uow.CompleteAsync();
             }
             catch (Exception)
             {

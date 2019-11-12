@@ -16,9 +16,10 @@ namespace GIGLS.Core.Domain
 
         public int DestinationId { get; set; }
 
-
         [ForeignKey("DestinationId")]
         public virtual Country Destination { get; set; }
+
+        public double Rate { get; set; }
 
         public bool Status { get; set; }
     }

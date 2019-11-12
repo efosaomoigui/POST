@@ -133,7 +133,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return resultList;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
