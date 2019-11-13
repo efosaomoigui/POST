@@ -9,6 +9,9 @@ using GIGLS.Core.Domain.Partnership;
 using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO.Report;
+using System;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Partnership
 {
@@ -32,6 +35,33 @@ namespace GIGLS.Services.Implementation.Partnership
             var partners = await _uow.Partner.GetPartnersAsync();
             return partners;
         }
+
+        public async Task<List<PartnerDTO>> GetPartnersByDate(BaseFilterCriteria filterCriteria)
+        {
+            var queryDate = filterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+            var allpartners = _uow.Partner.GetAllAsQueryable();
+
+            if (filterCriteria.StartDate == null & filterCriteria.EndDate == null)
+            {
+                startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
+            }
+            var allPartnersResult = allpartners.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+
+            List<PartnerDTO> partnerDTO = (from r in allPartnersResult
+                                           select new PartnerDTO()
+                                           {
+                                               PartnerId = r.PartnerId,
+                                               PartnerName = r.PartnerName,
+                                               PartnerCode = r.PartnerCode,
+                                               PartnerType = r.PartnerType
+                                           }).ToList();
+            return await Task.FromResult(partnerDTO.OrderByDescending(x => x.DateCreated).ToList());
+        }
+
+
 
         public async Task<PartnerDTO> GetPartnerById(int partnerId)
         {
