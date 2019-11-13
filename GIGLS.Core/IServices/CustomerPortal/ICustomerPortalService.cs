@@ -121,6 +121,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<string> Decrypt();
         Task<object> CancelShipmentWithNoCharge(CancelShipmentDTO shipment);
 
+        Task SendPickUpRequestMessage(string userId);
 
     }
 }
