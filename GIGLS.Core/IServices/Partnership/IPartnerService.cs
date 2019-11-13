@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Partnership;
+using GIGLS.CORE.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,5 +12,6 @@ namespace GIGLS.Core.IServices.Partnership
         Task<object> AddPartner(PartnerDTO partner);
         Task UpdatePartner(int partnerId, PartnerDTO partner);
         Task RemovePartner(int partnerId);
+        Task<List<PartnerDTO>> GetPartnersByDate(BaseFilterCriteria filterCriteria);
     }
 }

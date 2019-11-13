@@ -64,6 +64,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IMessageSenderService _messageSenderService;
         private readonly IHaulageService _haulageService;
         private readonly IHaulageDistanceMappingService _haulageDistanceMappingService;
+        private readonly IPartnerService _partnerService;
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre, INumberGeneratorMonitorService numberGeneratorMonitorService,
@@ -71,7 +72,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice, IMobileShipmentTrackingService mobiletrackingservice,
             IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice,
             IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMobileRatingService mobileratingService, IMessageSenderService messageSenderService,
-            IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService)
+            IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -95,6 +96,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _messageSenderService = messageSenderService;
             _haulageService = haulageService;
             _haulageDistanceMappingService = haulageDistanceMappingService;
+            _partnerService = partnerService;
 
             MapperConfig.Initialize();
         }
@@ -317,9 +319,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 var endDate = queryDate.Item2;
                 var allShipments = _uow.PreShipmentMobile.GetAllAsQueryable();
 
-                if (filterOptionsDto.StartDate == null & filterOptionsDto.EndDate == null)
+                if (filterOptionsDto.StartDate == null & filterOptionsDto.EndDate == null && filterOptionsDto.fromGigGoDashboard == false)
                 {
                     startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                    endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
+                }
+
+                else if (filterOptionsDto.StartDate == null && filterOptionsDto.EndDate == null && filterOptionsDto.fromGigGoDashboard == true)
+                {
+                    startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-7);
                     endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
                 }
                 var allShipmentsResult = allShipments.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
@@ -365,7 +373,55 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
         }
+        
+        //GIG Go Dashboard
+        public async Task<GIGGoDashboardDTO> GetDashboardInfo(BaseFilterCriteria filterCriteria)
+        {
+            try
+            {
+                var shipment = await GetShipments(filterCriteria);
 
+                //To get Partners details
+                var partners = await _partnerService.GetPartners();
+                var internals = partners.Where(s => s.PartnerType == PartnerType.InternalDeliveryPartner).Count();
+                var externals = partners.Where(s => s.PartnerType == PartnerType.DeliveryPartner).Count();
+
+                //To get shipment details
+                var all = shipment.Count();
+                var accepted = shipment.Where(s => s.shipmentstatus == "Assigned for Pickup").Count();
+                var cancelled = shipment.Where(s => s.shipmentstatus == "Cancelled").Count();
+                var pickedUp = shipment.Where(s => s.shipmentstatus == "PickedUp").Count();
+                var delivered = shipment.Where(s => s.shipmentstatus == "Delivered").Count();
+                var sum = shipment.Sum(s => s.GrandTotal);
+
+                //To get partner earnings
+                var partnerEarnings = await _uow.PartnerTransactions.GetPartnerTransactionByDate(filterCriteria);
+                var sumPartnerEarnings = partnerEarnings.Sum(s => s.AmountReceived);
+                
+
+                var result = new GIGGoDashboardDTO
+                {
+                    ExternalPartners = externals,
+                    InternalPartners = internals,
+
+                    AcceptedShipments = accepted,
+                    CancelledShipments = cancelled,
+                    PickedupShipments = pickedUp,
+                    DeliveredShipments = delivered,
+                    ShipmentRequests = all,
+                    TotalRevenue = sum,
+                    PartnerEarnings = sumPartnerEarnings
+
+                };
+
+                return result;
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public async Task<PreShipmentMobileDTO> GetPreShipmentDetail(string waybill)
         {
             try

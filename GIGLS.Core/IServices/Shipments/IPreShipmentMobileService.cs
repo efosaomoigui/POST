@@ -55,6 +55,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<MobilePriceDTO> GetHaulagePrice(HaulagePriceDTO haulagePricingDto);
         Task<bool> EditProfile(UserDTO user);
         Task<bool> UpdateVehicleProfile(UserDTO user);
+        Task<GIGGoDashboardDTO> GetDashboardInfo(BaseFilterCriteria filterCriteria);
 
     }
 }
