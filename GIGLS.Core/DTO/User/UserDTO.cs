@@ -78,5 +78,7 @@ namespace GIGLS.Core.DTO.User
 
         public string MobileCountryName { get; set; }
         public bool IsRegisteredFromMobile { get; set; }
+
+        public DateTime? VehicleLicenseExpiryDate { get; set; }
     }
 }
