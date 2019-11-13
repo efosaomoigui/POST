@@ -1727,5 +1727,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _preShipmentMobileService.CancelShipmentWithNoCharge(shipment.Waybill, shipment.Userchanneltype);
         }
 
+        public async Task SendPickUpRequestMessage(string userId)
+        {
+            await _messageSenderService.SendVoiceMessageAsync(userId);
+        }
     }
 }

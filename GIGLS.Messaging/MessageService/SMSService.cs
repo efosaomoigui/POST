@@ -202,5 +202,37 @@ namespace GIGLS.Messaging.MessageService
 
             return await Task.FromResult(result);
         }
+
+        public async Task SendVoiceMessageAsync(string phoneNumber)
+        {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            string accountSID = ConfigurationManager.AppSettings["smsService:accountSID"];
+            string authToken = ConfigurationManager.AppSettings["smsService:authToken"];
+            string voicePhone = ConfigurationManager.AppSettings["voicePhone"];
+            string twiml = ConfigurationManager.AppSettings["smsService:voiceData"];
+
+            TwilioClient.Init(accountSID, authToken);
+
+            string result;
+
+            try
+            {
+                // Send an SMS message.
+                var call = CallResource.Create(
+                    url: new Uri(twiml),
+                    to: new PhoneNumber(phoneNumber),
+                    from: new PhoneNumber(voicePhone)
+                );
+
+                result = call.Status.ToString();
+            }
+            catch (TwilioException ex)
+            {
+                throw ex;
+            }
+
+            await Task.FromResult(result);
+        }
     }
 }
