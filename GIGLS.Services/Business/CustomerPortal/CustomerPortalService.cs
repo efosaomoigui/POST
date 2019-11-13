@@ -1034,6 +1034,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             emailcompanydetails.PhoneNumber = user.PhoneNumber;
                             emailcompanydetails.FirstName = user.FirstName;
                             emailcompanydetails.LastName = user.LastName;
+                            emailcompanydetails.Name = user.Organisation;
                             await _uow.CompleteAsync();
                             var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
                             result = await SendOTPForRegisteredUser(user);
@@ -1057,6 +1058,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             phonecompanydetails.PhoneNumber = user.PhoneNumber;
                             phonecompanydetails.FirstName = user.FirstName;
                             phonecompanydetails.LastName = user.LastName;
+                            phonecompanydetails.Name = user.Organisation;
                             await _uow.CompleteAsync();
                             var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
                             result = await SendOTPForRegisteredUser(user);
@@ -1071,7 +1073,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         {
                             if (EmailUser.Email != user.Email)
                             {
-                                user.UserChannelType = UserChannelType.IndividualCustomer;
+                                user.UserChannelType = UserChannelType.Ecommerce;
                                 user.IsFromMobile = true;
                                 var registeredUser = await CreateUserBasedOnCustomerType(user);
                                 result = await SendOTPForRegisteredUser(registeredUser);
@@ -1095,7 +1097,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 CompanyStatus = CompanyStatus.Active,
                                 SettlementPeriod = 1,
                                 ReturnServiceCentre = 296,
-                                UserActiveCountryId = user.UserActiveCountryId
+                                UserActiveCountryId = user.UserActiveCountryId,
+                                Name = user.Organisation
                             };
                             var company = Mapper.Map<Company>(customer);
                             EmailUser.UserChannelPassword = user.Password;

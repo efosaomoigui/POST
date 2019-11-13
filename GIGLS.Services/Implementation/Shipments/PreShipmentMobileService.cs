@@ -147,6 +147,11 @@ namespace GIGLS.Services.Implementation.Shipments
                   }
                   else
                   {
+                    var exists = await _uow.Company.ExistAsync(s => s.CustomerCode == user.UserChannelCode);
+                    if(user.UserChannelType == UserChannelType.Ecommerce || exists)
+                    {
+                        preShipmentDTO.Shipmentype = ShipmentType.Ecommerce;
+                    }
                         PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
                   }
                
@@ -162,7 +167,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     
                     var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
-
+                    
                     if (user.UserChannelType == UserChannelType.Ecommerce)
                     {
                         newPreShipment.CustomerType = CustomerType.Company.ToString();
@@ -222,7 +227,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-               
+                
                 if (preShipment.PreShipmentItems.Count() == 0)
                 {
                     throw new GenericException("No Preshipitem was added");
@@ -253,22 +258,34 @@ namespace GIGLS.Services.Implementation.Shipments
                         ShipmentType = preShipmentItem.ShipmentType,
                         CountryId = preShipment.CountryId  //Nigeria
                     };
-                    if (preShipmentItem.ShipmentType == ShipmentType.Ecommerce)
-                    {
-                        preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
-                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
-                        //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
-                    }
+                    //if (preShipmentItem.ShipmentType == ShipmentType.Ecommerce)
+                    //{
+                    //    preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
+                    //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                    //    //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+                    //}
                     if (preShipmentItem.ShipmentType == ShipmentType.Special)
                     {
+                        if (preShipment.Shipmentype == ShipmentType.Ecommerce)
+                        {
+                            PriceDTO.DeliveryOptionId = 4;
+                        }
                         preShipmentItem.CalculatedPrice = await _pricingService.GetMobileSpecialPrice(PriceDTO);
                         preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                         //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     }
                     else if (preShipmentItem.ShipmentType == ShipmentType.Regular)
                     {
-                        preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
-                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                        if (preShipment.Shipmentype == ShipmentType.Ecommerce)
+                        {
+                            preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
+                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                        }
+                        else
+                        {
+                            preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
+                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                        }
                         //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     }
                     var vatForPreshipment = (preShipmentItem.CalculatedPrice * 0.05M);
@@ -1925,7 +1942,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var partnerDTO = new PartnerDTO
                     {
                         PartnerType = PartnerType.InternalDeliveryPartner,
-                        PartnerName = user.FirstName + "" + user.LastName,
+                        PartnerName = user.FirstName + " " + user.LastName,
                         PartnerCode = user.UserChannelCode,
                         FirstName = user.FirstName,
                         LastName = user.LastName,
