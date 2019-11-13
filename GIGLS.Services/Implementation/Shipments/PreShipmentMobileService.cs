@@ -198,7 +198,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         WalletId = wallet.WalletId,
                         CreditDebitType = CreditDebitType.Debit,
-                        Amount = (decimal)newPreShipment.GrandTotal,
+                        Amount = newPreShipment.GrandTotal,
                         ServiceCentreId = defaultServiceCenter.ServiceCentreId,
                         Waybill = waybill,
                         Description = "Payment for Shipment",
