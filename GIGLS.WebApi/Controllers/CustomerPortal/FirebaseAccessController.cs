@@ -23,7 +23,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [AllowAnonymous]
-        [HttpPost]
+        [HttpGet]
         [Route("sendpickuprequestmessage/{userid}")]
         public async Task<IServiceResponse<bool>> SendPickUpRequestMessage([FromUri] string userId)
         {

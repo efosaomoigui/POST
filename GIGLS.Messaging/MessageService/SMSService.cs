@@ -209,7 +209,7 @@ namespace GIGLS.Messaging.MessageService
 
             string accountSID = ConfigurationManager.AppSettings["smsService:accountSID"];
             string authToken = ConfigurationManager.AppSettings["smsService:authToken"];
-            string voicePhone = ConfigurationManager.AppSettings["voicePhone"];
+            string voicePhone = ConfigurationManager.AppSettings["smsService:voicePhone"];
             string twiml = ConfigurationManager.AppSettings["smsService:voiceData"];
 
             TwilioClient.Init(accountSID, authToken);
