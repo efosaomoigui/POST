@@ -39,16 +39,29 @@ namespace GIGLS.Services.Implementation.Wallet
                 // handle Company customers
                 if (CustomerType.Company.Equals(item.CustomerType))
                 {
-                    var companyDTO = await _uow.Company.GetAsync(s => s.CompanyId == item.CustomerId);
-                    item.CustomerName = companyDTO.Name;
+                    var companyDTO = await _uow.Company.GetCompanyByIdWithCountry(item.CustomerId);
+
+                    if (companyDTO != null)
+                    {
+                        item.CustomerName = companyDTO.Name;
+                        item.Country = companyDTO.Country;
+                        item.UserActiveCountryId = companyDTO.UserActiveCountryId;
+                    }
+                }
+                if (CustomerType.Partner.Equals(item.CustomerType))
+                {
+                    var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(item.CustomerId);
+                    item.CustomerName = partnerDTO.PartnerName;
+                    item.UserActiveCountryId = partnerDTO.CountryId;
+                    item.Country = partnerDTO.Country;
                 }
                 else
                 {
                     // handle IndividualCustomers
-                    var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
-                        s => s.IndividualCustomerId == item.CustomerId);
-                    item.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " +
-                        $"{individualCustomerDTO.LastName}");
+                    var individualCustomerDTO = await _uow.IndividualCustomer.GetIndividualCustomerByIdWithCountry(item.CustomerId);
+                    item.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
+                    item.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
+                    item.Country = individualCustomerDTO.Country;
                 }
             }
 
@@ -70,20 +83,29 @@ namespace GIGLS.Services.Implementation.Wallet
             // handle Company customers
             if (CustomerType.Company.Equals(wallet.CustomerType))
             {
-                var companyDTO = await _uow.Company.GetAsync(s => s.CompanyId == walletDTO.CustomerId);
-                walletDTO.CustomerName = companyDTO.Name;
+                var companyDTO = await _uow.Company.GetCompanyByIdWithCountry(walletDTO.CustomerId);
+
+                if (companyDTO != null)
+                {
+                    walletDTO.CustomerName = companyDTO.Name;
+                    walletDTO.Country = companyDTO.Country;
+                    walletDTO.UserActiveCountryId = companyDTO.UserActiveCountryId;
+                }
             }
             else if (CustomerType.Partner.Equals(wallet.CustomerType))
             {
-                var partnerDTO = await _uow.Partner.GetAsync(p => p.PartnerId == walletDTO.CustomerId);
+                var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(walletDTO.CustomerId);
                 walletDTO.CustomerName = partnerDTO.PartnerName;
+                walletDTO.UserActiveCountryId = partnerDTO.CountryId;
+                walletDTO.Country = partnerDTO.Country;
             }
             else
             {
                 // handle IndividualCustomers
-                var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(s => s.IndividualCustomerId == walletDTO.CustomerId);
-                walletDTO.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " +
-                    $"{individualCustomerDTO.LastName}");
+                var individualCustomerDTO = await _uow.IndividualCustomer.GetIndividualCustomerByIdWithCountry(walletDTO.CustomerId);
+                walletDTO.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
+                walletDTO.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
+                walletDTO.Country = individualCustomerDTO.Country;
             }
 
             return walletDTO;
@@ -158,9 +180,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 serviceCenterIds = new int[] { 0 };
                 var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
                 serviceCenterIds[0] = defaultServiceCenter.ServiceCentreId;
-
-                //var currentUser = await _userService.GetUserById(walletTransactionDTO.UserId);
-                //throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
             }
 
             var newWalletTransaction = Mapper.Map<WalletTransaction>(walletTransactionDTO);
@@ -269,17 +288,29 @@ namespace GIGLS.Services.Implementation.Wallet
                     // handle Company customers
                     if (CustomerType.Company == item.CustomerType)
                     {
-                        var companyDTO = await _uow.Company.GetAsync(s => s.CompanyId == item.CustomerId);
-                        if(companyDTO != null)
+                        var companyDTO = await _uow.Company.GetCompanyByIdWithCountry(item.CustomerId);
+
+                        if (companyDTO != null)
                         {
                             item.CustomerName = companyDTO.Name;
+                            item.Country = companyDTO.Country;
+                            item.UserActiveCountryId = companyDTO.UserActiveCountryId;
                         }
+                    }
+                    else if (CustomerType.Partner == item.CustomerType)
+                    {
+                        var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(item.CustomerId);
+                        item.CustomerName = partnerDTO.PartnerName;
+                        item.UserActiveCountryId = partnerDTO.CountryId;
+                        item.Country = partnerDTO.Country;
                     }
                     else
                     {
                         // handle IndividualCustomers
-                        var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(s => s.IndividualCustomerId == item.CustomerId);
+                        var individualCustomerDTO = await _uow.IndividualCustomer.GetIndividualCustomerByIdWithCountry(item.CustomerId);
                         item.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
+                        item.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
+                        item.Country = individualCustomerDTO.Country;
                     }
                 }
 
