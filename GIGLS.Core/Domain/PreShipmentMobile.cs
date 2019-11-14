@@ -7,9 +7,9 @@ namespace GIGLS.Core.Domain
 {
     public class PreShipmentMobile : BaseDomain, IAuditable
     {
-         [Key]
+        [Key]
         public int PreShipmentMobileId { get; set; }
-       
+
 
         [MaxLength(100), MinLength(5)]
         [Index(IsUnique = true)]
@@ -21,7 +21,7 @@ namespace GIGLS.Core.Domain
         public string SenderPhoneNumber { get; set; }
         public decimal Value { get; set; }
         public DateTime? DeliveryTime { get; set; }
-       
+
         [MaxLength(100)]
         public string CustomerType { get; set; }
 
@@ -32,7 +32,7 @@ namespace GIGLS.Core.Domain
         public string CustomerCode { get; set; }
 
         //Receivers Information
-         public string ReceiverName { get; set; }
+        public string ReceiverName { get; set; }
         public string ReceiverPhoneNumber { get; set; }
         public string ReceiverEmail { get; set; }
         public string ReceiverAddress { get; set; }
@@ -51,7 +51,7 @@ namespace GIGLS.Core.Domain
         public bool IsHomeDelivery { get; set; }
 
         //General but optional
-      
+
         public DateTime? ExpectedDateOfArrival { get; set; }
         public DateTime? ActualDateOfArrival { get; set; }
 
@@ -66,16 +66,16 @@ namespace GIGLS.Core.Domain
         public decimal? ExpectedAmountToCollect { get; set; }
         public decimal? ActualAmountCollected { get; set; }
 
-        
+
         //General Details comes with role user
         [MaxLength(100)]
         public string UserId { get; set; }
 
         public bool IsdeclaredVal { get; set; }
-       
+
 
         //discount information
-       
+
         public decimal? Total { get; set; }
 
         public decimal? DiscountValue { get; set; }
@@ -112,6 +112,9 @@ namespace GIGLS.Core.Domain
         public string ActualReceiverPhoneNumber { get; set; }
 
         public int CountryId { get; set; }
+        public string ServiceCentreAddress { get; set; }
+        public virtual Location serviceCentreLocation {get;set;}
+       
 
 
     }

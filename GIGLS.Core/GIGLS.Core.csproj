@@ -382,6 +382,7 @@
     <Compile Include="DTO\ShipmentScan\ScanStatusReportDTO.cs" />
     <Compile Include="DTO\Shipments\DemurrageDTO.cs" />
     <Compile Include="DTO\Shipments\FilterOptionsDto.cs" />
+    <Compile Include="DTO\Shipments\GIGGoDashboardDTO.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberDTO.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberMappingDTO.cs" />
     <Compile Include="DTO\Shipments\HUBManifestWaybillMappingDTO.cs" />

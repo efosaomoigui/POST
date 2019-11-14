@@ -1,4 +1,5 @@
-﻿using GIGLS.CORE.DTO;
+﻿using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -126,6 +127,9 @@ namespace GIGLS.Core.DTO.Shipments
         public string CurrencyCode { get; set; }
 
         public int? Haulageid { get; set; }
+        public ShipmentType Shipmentype { get; set; }
+        public string ServiceCentreAddress { get; set; }
+        public LocationDTO serviceCentreLocation { get; set; }
 
     }
 }

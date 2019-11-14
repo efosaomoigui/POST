@@ -12,9 +12,7 @@ using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.CustomerPortal;
-using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
@@ -28,14 +26,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.Enums;
 using GIGLS.Core.DTO.MessagingLog;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.IMessageService;
 using GIGLS.Core.DTO.Admin;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
@@ -44,17 +39,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
     [RoutePrefix("api/portal")]
     public class CustomerPortalController : BaseWebApiController
     {
-        //private readonly IUnitOfWork _uow;
         private readonly ICustomerPortalService _portalService;
         private readonly IPaystackPaymentService _paymentService;
 
         public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService) : base(nameof(CustomerPortalController))
         {
-            // _uow = uow;
             _portalService = portalService;
             _paymentService = paymentService;
-
-
         }
         
         [HttpPost]

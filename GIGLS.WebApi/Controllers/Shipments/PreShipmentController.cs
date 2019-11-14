@@ -365,5 +365,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("GIGGoDashboard")]
+        public async Task<IServiceResponse<GIGGoDashboardDTO>> GetDashboardInfo(BaseFilterCriteria filter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var data = await _preShipmentMobileService.GetDashboardInfo(filter);
+                return new ServiceResponse<GIGGoDashboardDTO>
+                {
+                    Object = data
+                };
+            });
+        }
+
     }
 }
