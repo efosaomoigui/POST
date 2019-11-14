@@ -42,11 +42,17 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                       ReceiverName = x.ReceiverName,
                                                       ReceiverPhoneNumber = x.ReceiverPhoneNumber,
                                                       SenderPhoneNumber = x.SenderPhoneNumber,
+                                                      ServiceCentreAddress = x.ServiceCentreAddress,
                                                       ReceiverLocation = new LocationDTO
                                                        {
                                                            Longitude = x.ReceiverLocation.Longitude,
                                                            Latitude = x.ReceiverLocation.Latitude
                                                        },
+                                                      serviceCentreLocation = new LocationDTO
+                                                      {
+                                                          Longitude = x.serviceCentreLocation.Longitude,
+                                                          Latitude = x.serviceCentreLocation.Latitude
+                                                      },
                                                       SenderLocation = new LocationDTO
                                                       {
                                                           Longitude = x.SenderLocation.Longitude,
@@ -88,10 +94,16 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                       ReceiverName = x.ReceiverName,
                                                       ReceiverPhoneNumber = x.ReceiverPhoneNumber,
                                                       SenderPhoneNumber = x.SenderPhoneNumber,
+                                                      ServiceCentreAddress = x.ServiceCentreAddress,
                                                       ReceiverLocation = new LocationDTO
                                                       {
                                                           Longitude = x.ReceiverLocation.Longitude,
                                                           Latitude = x.ReceiverLocation.Latitude
+                                                      },
+                                                      serviceCentreLocation = new LocationDTO
+                                                      {
+                                                          Longitude = x.serviceCentreLocation.Longitude,
+                                                          Latitude = x.serviceCentreLocation.Latitude
                                                       },
                                                       SenderLocation = new LocationDTO
                                                       {

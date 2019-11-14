@@ -402,6 +402,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var Country = await _uow.Country.GetCountryByStationId(shipment.SenderStationId);
                     Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(shipment);
+                    if (shipment.ServiceCentreAddress != null)
+                    {
+                        Shipmentdto.ReceiverLocation.Latitude = shipment.serviceCentreLocation.Latitude;
+                        Shipmentdto.ReceiverLocation.Longitude = shipment.serviceCentreLocation.Longitude;
+                        Shipmentdto.ReceiverAddress = shipment.ServiceCentreAddress;
+                    }
                     if (Country != null)
                     {
                         Shipmentdto.CurrencyCode = Country.CurrencyCode;
@@ -654,9 +660,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
 
                         var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickuprequest.ServiceCentreId);
-                        preshipmentmobile.ReceiverAddress = DestinationServiceCentreId.Address;
-                        preshipmentmobile.ReceiverLocation.Latitude = DestinationServiceCentreId.Latitude;
-                        preshipmentmobile.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude;
+                        preshipmentmobile.ServiceCentreAddress = DestinationServiceCentreId.Address;
+                        preshipmentmobile.serviceCentreLocation.Latitude = DestinationServiceCentreId.Latitude;
+                        preshipmentmobile.serviceCentreLocation.Longitude = DestinationServiceCentreId.Longitude;
 
                     }
                     if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString())
@@ -676,8 +682,16 @@ namespace GIGLS.Services.Implementation.Shipments
                         preshipmentmobile.shipmentstatus = "Shipment created";
                     }
                     
-                   newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
-                   if(Country !=null)
+                    newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
+                    if (pickuprequest.ServiceCentreId != null)
+                    {
+
+                        newPreShipment.ReceiverAddress = preshipmentmobile.ServiceCentreAddress;
+                        newPreShipment.ReceiverLocation.Latitude = preshipmentmobile.serviceCentreLocation.Latitude;
+                        newPreShipment.ReceiverLocation.Longitude = preshipmentmobile.serviceCentreLocation.Longitude;
+
+                    }
+                    if (Country !=null)
                     {
                         newPreShipment.CurrencyCode = Country.CurrencyCode;
                         newPreShipment.CurrencySymbol = Country.CurrencySymbol;
