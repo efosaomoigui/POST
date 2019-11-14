@@ -37,6 +37,6 @@ namespace GIGLS.Core.DTO.Partnership
         public string VehicleLicenseImageDetails { get; set; }
 
         public int CountryId { get; set; }
-
+        public CountryDTO Country { get; set; }
     }
 }

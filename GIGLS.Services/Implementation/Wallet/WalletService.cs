@@ -50,8 +50,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 if (CustomerType.Partner.Equals(item.CustomerType))
                 {
-                    var partnerDTO = await _uow.Partner.GetAsync(s => s.PartnerId == item.CustomerId);
-                    item.CustomerName = string.Format($"{partnerDTO.FirstName} " + $"{partnerDTO.LastName}");
+                    var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(item.CustomerId);
+                    item.CustomerName = partnerDTO.PartnerName;
+                    item.UserActiveCountryId = partnerDTO.CountryId;
+                    item.Country = partnerDTO.Country;
                 }
                 else
                 {
@@ -92,8 +94,10 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             else if (CustomerType.Partner.Equals(wallet.CustomerType))
             {
-                var partnerDTO = await _uow.Partner.GetAsync(p => p.PartnerId == walletDTO.CustomerId);
+                var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(walletDTO.CustomerId);
                 walletDTO.CustomerName = partnerDTO.PartnerName;
+                walletDTO.UserActiveCountryId = partnerDTO.CountryId;
+                walletDTO.Country = partnerDTO.Country;
             }
             else
             {
@@ -295,11 +299,10 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
                     else if (CustomerType.Partner == item.CustomerType)
                     {
-                        var partnerDTO = await _uow.Partner.GetAsync(s => s.PartnerId == item.CustomerId);
-                        item.CustomerName = string.Format($"{partnerDTO.FirstName} " + $"{partnerDTO.LastName}");
-
-                        //add country later
-
+                        var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(item.CustomerId);
+                        item.CustomerName = partnerDTO.PartnerName;
+                        item.UserActiveCountryId = partnerDTO.CountryId;
+                        item.Country = partnerDTO.Country;
                     }
                     else
                     {
