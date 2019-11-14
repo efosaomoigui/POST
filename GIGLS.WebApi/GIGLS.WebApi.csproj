@@ -307,6 +307,7 @@
     <Compile Include="Controllers\Client\ClientNodeController.cs" />
     <Compile Include="Controllers\CountryController.cs" />
     <Compile Include="Controllers\CustomerPortal\CustomerPortalController.cs" />
+    <Compile Include="Controllers\CustomerPortal\FirebaseAccessController.cs" />
     <Compile Include="Controllers\CustomerPortal\PaystackController.cs" />
     <Compile Include="Controllers\Customers\CompanyContactPersonController.cs" />
     <Compile Include="Controllers\Customers\CompanyController.cs" />

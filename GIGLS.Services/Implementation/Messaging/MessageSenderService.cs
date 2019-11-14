@@ -692,5 +692,16 @@ namespace GIGLS.Services.Implementation.Messaging
 
             return phone;
         }
+
+        public async Task SendVoiceMessageAsync(string userId)
+        {
+            var user = await _userService.GetUserById(userId);
+
+            var country = await _uow.Country.GetAsync(x => x.CountryId == user.UserActiveCountryId);
+
+            string phoneNumber = ReturnPhoneNumberBaseOnCountry(user.PhoneNumber, country.PhoneNumberCode);
+
+            await _sMSService.SendVoiceMessageAsync(phoneNumber);
+        }
     }
 }
