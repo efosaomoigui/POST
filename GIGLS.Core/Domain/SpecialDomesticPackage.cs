@@ -13,6 +13,8 @@ namespace GIGLS.Core.Domain
         //new properties added for categorization
         public virtual SubCategory SubCategory { get; set; }
 
+        public string WeightRange { get; set; }
+
         
     }
 }

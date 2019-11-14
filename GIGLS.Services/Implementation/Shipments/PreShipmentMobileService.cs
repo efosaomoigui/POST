@@ -490,7 +490,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var currentUser = await _userService.GetCurrentUserId();
                 var user = await _uow.User.GetUserById(currentUser);
-                var shipment = await _uow.PreShipmentMobile.FindAsync(x => x.CustomerCode.Equals(user.UserChannelCode), "PreShipmentItems");
+                var shipment = await _uow.PreShipmentMobile.FindAsync(x => x.CustomerCode.Equals(user.UserChannelCode), "PreShipmentItems,SenderLocation,ReceiverLocation");
 
                 List<PreShipmentMobileDTO> shipmentDto = (from r in shipment
                                                           select new PreShipmentMobileDTO()
@@ -518,7 +518,18 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               GrandTotal = r.GrandTotal,
                                                               DeliveryPrice = r.DeliveryPrice,
                                                               CalculatedTotal = r.CalculatedTotal,
-                                                              CustomerCode = r.CustomerCode
+                                                              CustomerCode = r.CustomerCode,
+                                                              VehicleType = r.VehicleType,
+                                                              ReceiverLocation = new LocationDTO
+                                                              {
+                                                                  Longitude = r.ReceiverLocation.Longitude,
+                                                                  Latitude = r.ReceiverLocation.Latitude
+                                                              },
+                                                              SenderLocation = new LocationDTO
+                                                              {
+                                                                  Longitude = r.SenderLocation.Longitude,
+                                                                  Latitude = r.SenderLocation.Latitude
+                                                              }
                                                           }).ToList();
                 foreach (var Shipment in shipmentDto)
                 {

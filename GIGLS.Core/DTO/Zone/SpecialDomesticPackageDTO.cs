@@ -16,6 +16,7 @@ namespace GIGLS.Core.DTO.Zone
 
         //new properties added for categorization
         public SubCategoryDTO SubCategory { get; set; }
+        public string WeightRange { get; set; }
 
     }
 

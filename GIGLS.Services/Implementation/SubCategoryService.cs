@@ -25,7 +25,7 @@ namespace GIGLS.Services.Implementation
             subcategory.SubCategoryName = subcategory.SubCategoryName.Trim().ToLower();
             
 
-            if (await _uow.SubCategory.ExistAsync(v => v.SubCategoryName.ToLower() == subcategory.SubCategoryName && v.Weight == subcategory.Weight))
+            if (await _uow.SubCategory.ExistAsync(v => v.SubCategoryName.ToLower() == subcategory.SubCategoryName && v.Weight == subcategory.Weight.ToString()))
             {
                 throw new GenericException($"Subcategory {subcategory.SubCategoryName} ALREADY EXIST");
             }
@@ -33,7 +33,7 @@ namespace GIGLS.Services.Implementation
             var newSubCategory = new SubCategory
             {
                 SubCategoryName = subcategory.SubCategoryName,
-                Weight = (decimal)subcategory.Weight,
+                Weight = subcategory.Weight.ToString(),
                 CategoryId = (int)subcategory.Category.CategoryId
                 
             };
@@ -72,7 +72,7 @@ namespace GIGLS.Services.Implementation
                 throw new GenericException("SUBCATEGORY INFORMATION DOES NOT EXIST");
             }
             state.SubCategoryName = subcategory.SubCategoryName.Trim();
-            state.Weight = (decimal)subcategory.Weight;
+            state.Weight = subcategory.Weight;
             state.CategoryId = (int)subcategory.CategoryId;
             await _uow.CompleteAsync();
         }

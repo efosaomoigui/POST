@@ -15,6 +15,6 @@ namespace GIGLS.Core.DTO
         public int? CategoryId { get; set; }
         public string SubCategoryName { get; set; }
 
-        public decimal? Weight { get; set; }
+        public string Weight { get; set; }
     }
 }
