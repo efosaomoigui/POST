@@ -128,6 +128,8 @@ namespace GIGLS.Core.DTO.Shipments
 
         public int? Haulageid { get; set; }
         public ShipmentType Shipmentype { get; set; }
+        public string ServiceCentreAddress { get; set; }
+        public LocationDTO serviceCentreLocation { get; set; }
 
     }
 }
