@@ -14,5 +14,8 @@ namespace GIGLS.Core.DTO.Wallet
         public bool IsSystem { get; set; }
         public string CustomerCode { get; set; }
         public string CompanyType { get; set; }
+
+        public int UserActiveCountryId { get; set; }
+        public CountryDTO Country { get; set; }
     }
 }
