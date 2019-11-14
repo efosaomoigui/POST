@@ -651,11 +651,13 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var CountryId = await _preShipmentMobileService.GetCountryId();
                 user.UserActiveCountryId = CountryId;   
             }
+            //to be used when we start getting the country name of the user!!!
             else if (user.MobileCountryName != null)
             {
                 var countryid = await _uow.Country.GetAsync(s => s.CountryName.ToLower().Equals(user.MobileCountryName.ToLower()));
                 user.UserActiveCountryId = countryid.CountryId;
             }
+            //
             var result = new SignResponseDTO();
             if (user.UserChannelType == UserChannelType.Partner)
             {
@@ -711,6 +713,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                     PhoneNumber = user.PhoneNumber,
                                     UserId = FinalUser.Id,
                                     IsActivated = false,
+                                    CountryId = user.UserActiveCountryId
                                 };
                                 var FinalPartner = Mapper.Map<Partner>(partnerDTO);
                                 _uow.Partner.Add(FinalPartner);
@@ -766,6 +769,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 PhoneNumber = user.PhoneNumber,
                                 UserId = EmailUser.Id,
                                 IsActivated = false,
+                                CountryId = user.UserActiveCountryId
                             };
 
                             var FinalPartner = Mapper.Map<Partner>(partnerDTO);
@@ -828,6 +832,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         PhoneNumber = user.PhoneNumber,
                         UserId = FinalUser.Id,
                         IsActivated = false,
+                        CountryId = user.UserActiveCountryId
                     };
                     var FinalPartner = Mapper.Map<Partner>(partnerDTO);
                     _uow.Partner.Add(FinalPartner);

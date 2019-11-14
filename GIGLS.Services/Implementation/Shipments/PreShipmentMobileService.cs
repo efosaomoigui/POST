@@ -387,7 +387,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               InsuranceValue = r.InsuranceValue,
                                                               DiscountValue = r.DiscountValue,
                                                               CompanyType = r.CompanyType,
-                                                              CustomerCode = r.CustomerCode
+                                                              CustomerCode = r.CustomerCode,
+                                                              VehicleType = r.VehicleType
                                                           }).ToList();
 
                 return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
@@ -1413,6 +1414,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         partnerDTO.PhoneNumber = user.PhoneNumber;
                         partnerDTO.UserId = user.Id;
                         partnerDTO.IsActivated = true;
+                        partnerDTO.CountryId = user.UserActiveCountryId;
                         
 
                     }
@@ -1427,6 +1429,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         partnerDTO.PhoneNumber = user.PhoneNumber;
                         partnerDTO.UserId = user.Id;
                         partnerDTO.IsActivated = false;
+                        partnerDTO.CountryId = user.UserActiveCountryId;
                     }
                      var FinalPartner = Mapper.Map<Partner>(partnerDTO);
                     _uow.Partner.Add(FinalPartner);
@@ -1437,10 +1440,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         partner.PartnerType = PartnerType.InternalDeliveryPartner;
                         partner.IsActivated = true;
+                        partner.CountryId = user.UserActiveCountryId;
                     }
                     else
                     {
                         partner.PartnerType = PartnerType.DeliveryPartner;
+                        partner.CountryId = user.UserActiveCountryId;
                     }
 
                 }
