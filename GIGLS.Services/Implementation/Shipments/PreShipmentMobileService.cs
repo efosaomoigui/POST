@@ -410,7 +410,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //To get Partners details
                 var partners = await _partnerService.GetPartners();
                 var internals = partners.Where(s => s.PartnerType == PartnerType.InternalDeliveryPartner).Count();
-                var externals = partners.Where(s => s.PartnerType == PartnerType.DeliveryPartner).Count();
+                var externals = partners.Where(s => s.PartnerType == PartnerType.DeliveryPartner && s.IsActivated ==true).Count();
 
                 //To get shipment details
                 var all = shipment.Count();
@@ -1803,7 +1803,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
               
-                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == waybillNumber, "SenderLocation,ReceiverLocation");
+                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == waybillNumber, "SenderLocation,ReceiverLocation,serviceCentreLocation");
                 var Pickupprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId);
                 var Partnerid = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == waybillNumber && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
                 await ScanMobileShipment(new ScanDTO
