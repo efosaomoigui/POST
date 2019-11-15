@@ -1256,9 +1256,9 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return _countryService.GetUpdatedCountries();
         }
-        public async Task<bool> ApproveShipment(string waybillNumber)
+        public async Task<bool> ApproveShipment(ApproveShipmentDTO detail)
         {
-            return await _preShipmentMobileService.ApproveShipment(waybillNumber);
+            return await _preShipmentMobileService.ApproveShipment(detail);
         }
 
         public Task<PreShipmentSummaryDTO> GetShipmentDetailsFromDeliveryNumber(string DeliveryNumber)

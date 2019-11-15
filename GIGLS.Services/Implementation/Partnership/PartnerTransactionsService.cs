@@ -62,7 +62,7 @@ namespace GIGLS.Services.Implementation.Partnership
             var TotalPrice = 0.0M;
             if (partnerpay.ZoneMapping == 1)
             {
-                var TotalAmount = (partnerpay.ShipmentPrice + partnerpay.PickUprice);
+                var TotalAmount = (partnerpay.ShipmentPrice);
                 var amount = (0.8M * TotalAmount);
                 TotalPrice = Convert.ToDecimal(string.Format("{0:F2}", amount));
             }

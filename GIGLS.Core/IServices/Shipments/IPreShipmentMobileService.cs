@@ -49,7 +49,7 @@ namespace GIGLS.Core.IServices.Shipments
 
         Task<List<Uri>> DisplayImages();
         Task<PreShipmentSummaryDTO> GetShipmentDetailsFromDeliveryNumber(string DeliveryNumber);
-        Task<bool> ApproveShipment(string waybillNumber);
+        Task<bool> ApproveShipment(ApproveShipmentDTO detail);
 
         Task<bool> CreateCompany(string CustomerCode);
         Task<MobilePriceDTO> GetHaulagePrice(HaulagePriceDTO haulagePricingDto);

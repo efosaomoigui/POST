@@ -1812,19 +1812,14 @@ namespace GIGLS.Services.Implementation.Shipments
             
         }
 
-        public async Task<bool> ApproveShipment(string waybillNumber)
+        public async Task<bool> ApproveShipment(ApproveShipmentDTO detail)
         {
             try
             {
-              
-                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == waybillNumber, "SenderLocation,ReceiverLocation,serviceCentreLocation");
+                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == detail.WaybillNumber, "PreShipmentItems,SenderLocation,ReceiverLocation");
                 var Pickupprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId);
-                var Partnerid = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == waybillNumber && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
-                await ScanMobileShipment(new ScanDTO
-                {
-                   WaybillNumber = waybillNumber,
-                   ShipmentScanStatus = ShipmentScanStatus.MSVC
-                });
+                var user = await _userService.GetUserByChannelCode(preshipmentmobile.CustomerCode);
+               
                 if (preshipmentmobile.ZoneMapping != 1)
                 {
                     //var Location = new LocationDTO
@@ -1838,11 +1833,66 @@ namespace GIGLS.Services.Implementation.Shipments
                     //RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
                     if (preshipmentmobile.IsApproved != true)
                     {
+                        var Partnerid = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == detail.WaybillNumber && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
+                        var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+
+                        int customerid = 0;
+                        if (CustomerId != null)
+                        {
+                            customerid = CustomerId.IndividualCustomerId;
+                        }
+                        else
+                        {
+                            var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+                            customerid = companyid.CompanyId;
+                        }
+                       
+                        var MobileShipment = new ShipmentDTO
+                        {
+                            Waybill = preshipmentmobile.Waybill,
+                            ReceiverName = preshipmentmobile.ReceiverName,
+                            ReceiverPhoneNumber = preshipmentmobile.ReceiverPhoneNumber,
+                            ReceiverEmail = preshipmentmobile.ReceiverEmail,
+                            ReceiverAddress = preshipmentmobile.ReceiverAddress,
+                            DeliveryOptionId = 2,
+                            GrandTotal = preshipmentmobile.GrandTotal,
+                            Insurance = preshipmentmobile.InsuranceValue,
+                            Vat = preshipmentmobile.Vat,
+                            SenderAddress = preshipmentmobile.SenderAddress,
+                            IsCashOnDelivery = false,
+                            CustomerCode = preshipmentmobile.CustomerCode,
+                            DestinationServiceCentreId = detail.ReceiverServiceCentreId,
+                            DepartureServiceCentreId = detail.SenderServiceCentreId,
+                            CustomerId = customerid,
+                            UserId = user.Id,
+                            PickupOptions = PickupOptions.HOMEDELIVERY,
+                            IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
+                            ShipmentPackagePrice = preshipmentmobile.GrandTotal,
+                            ApproximateItemsWeight = 0.00,
+                            ReprintCounterStatus = false,
+                            CustomerType = preshipmentmobile.CustomerType,
+                            CompanyType = preshipmentmobile.CompanyType,
+                            Value = preshipmentmobile.Value,
+                            PaymentStatus = PaymentStatus.Paid,
+                            IsFromMobile = true,
+                            ShipmentPickupPrice = Pickupprice,
+                            ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
+                            {
+                                Description = s.Description,
+                                IsVolumetric = s.IsVolumetric,
+                                Weight = s.Weight,
+                                Nature = s.ItemType,
+                                Price = (decimal)s.CalculatedPrice,
+                                Quantity = s.Quantity
+
+                            }).ToList()
+                        };
+                        var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
                         var Partner = new PartnerPayDTO
                         {
                             //Distance = details.rows[0].elements[0].distance.value.ToString(),
                             //Time = details.rows[0].elements[0].duration.value.ToString(),
-                            ShipmentPrice = (decimal)preshipmentmobile.CalculatedTotal,
+                            ShipmentPrice = preshipmentmobile.GrandTotal,
                             PickUprice = Pickupprice
                         };
                         decimal price = await _partnertransactionservice.GetPriceForPartner(Partner);
@@ -1859,6 +1909,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
                         preshipmentmobile.IsApproved = true;
+                        await ScanMobileShipment(new ScanDTO
+                        {
+                            WaybillNumber = detail.WaybillNumber,
+                            ShipmentScanStatus = ShipmentScanStatus.MSVC
+                        });
                         await _uow.CompleteAsync();
                     }
                     else

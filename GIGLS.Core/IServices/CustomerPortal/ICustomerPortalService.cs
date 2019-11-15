@@ -76,7 +76,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<Dictionary<string, List<StationDTO>>> GetAllStations();
         Task<MobilePriceDTO> GetHaulagePrice(HaulagePriceDTO haulagePricingDto);
         Task<IEnumerable<NewCountryDTO>> GetUpdatedCountries();
-        Task<bool> ApproveShipment(string waybillNumber);
+        Task<bool> ApproveShipment(ApproveShipmentDTO detail);
         Task<PreShipmentSummaryDTO> GetShipmentDetailsFromDeliveryNumber(string DeliveryNumber);
 
         Task<bool> UpdateReceiverDetails(PreShipmentMobileDTO receiver);
