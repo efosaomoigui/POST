@@ -1904,7 +1904,8 @@ namespace GIGLS.Services.Implementation.Shipments
                             Destination = preshipmentmobile.ReceiverAddress,
                             Departure = preshipmentmobile.SenderAddress,
                             AmountReceived = price,
-                            Waybill = preshipmentmobile.Waybill
+                            Waybill = preshipmentmobile.Waybill,
+                            IsFromServiceCentre = true
                         };
                         var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
