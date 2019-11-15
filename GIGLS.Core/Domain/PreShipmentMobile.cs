@@ -114,7 +114,8 @@ namespace GIGLS.Core.Domain
         public int CountryId { get; set; }
         public string ServiceCentreAddress { get; set; }
         public virtual Location serviceCentreLocation {get;set;}
-       
+        public bool? IsApproved { get; set; }
+
 
 
     }

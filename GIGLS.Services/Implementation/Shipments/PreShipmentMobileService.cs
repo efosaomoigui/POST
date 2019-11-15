@@ -1838,27 +1838,35 @@ namespace GIGLS.Services.Implementation.Shipments
                     //};
 
                     //RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
-                    var Partner = new PartnerPayDTO
+                    if (preshipmentmobile.IsApproved != true)
                     {
-                        //Distance = details.rows[0].elements[0].distance.value.ToString(),
-                        //Time = details.rows[0].elements[0].duration.value.ToString(),
-                        ShipmentPrice = (decimal)preshipmentmobile.CalculatedTotal,
-                        PickUprice = Pickupprice
-                    };
-                    decimal price = await _partnertransactionservice.GetPriceForPartner(Partner);
-                    var partneruser = await _userService.GetUserById(Partnerid.UserId);
-                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode);
-                    wallet.Balance = wallet.Balance + price;
-                    var partnertransactions = new PartnerTransactionsDTO
+                        var Partner = new PartnerPayDTO
+                        {
+                            //Distance = details.rows[0].elements[0].distance.value.ToString(),
+                            //Time = details.rows[0].elements[0].duration.value.ToString(),
+                            ShipmentPrice = (decimal)preshipmentmobile.CalculatedTotal,
+                            PickUprice = Pickupprice
+                        };
+                        decimal price = await _partnertransactionservice.GetPriceForPartner(Partner);
+                        var partneruser = await _userService.GetUserById(Partnerid.UserId);
+                        var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode);
+                        wallet.Balance = wallet.Balance + price;
+                        var partnertransactions = new PartnerTransactionsDTO
+                        {
+                            Destination = preshipmentmobile.ReceiverAddress,
+                            Departure = preshipmentmobile.SenderAddress,
+                            AmountReceived = price,
+                            Waybill = preshipmentmobile.Waybill
+                        };
+                        var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
+                        preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
+                        preshipmentmobile.IsApproved = true;
+                        await _uow.CompleteAsync();
+                    }
+                    else
                     {
-                        Destination = preshipmentmobile.ReceiverAddress,
-                        Departure = preshipmentmobile.SenderAddress,
-                        AmountReceived = price,
-                        Waybill = preshipmentmobile.Waybill
-                    };
-                    var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
-                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
-                    await _uow.CompleteAsync();
+                        throw new GenericException("Shipment has already been approved!!!");
+                    }
                 }
                 else
                 {

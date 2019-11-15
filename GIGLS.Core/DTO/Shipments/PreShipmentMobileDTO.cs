@@ -130,6 +130,7 @@ namespace GIGLS.Core.DTO.Shipments
         public ShipmentType Shipmentype { get; set; }
         public string ServiceCentreAddress { get; set; }
         public LocationDTO serviceCentreLocation { get; set; }
+        public bool? IsApproved { get; set; }
 
     }
 }
