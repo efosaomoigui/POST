@@ -264,24 +264,28 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 //}
 
 
+                decimal amountToDebit = invoiceEntity.Amount;
+
+                amountToDebit = await GetActualAmountToDebit(shipment, amountToDebit);
+
                 //for other customers
                 //deduct the price for the wallet and update wallet transaction table
                 if (shipment != null && CompanyType.Ecommerce.ToString() != shipment.CompanyType)
                 {
-                    if (wallet.Balance < invoiceEntity.Amount)
+                    if (wallet.Balance < amountToDebit)
                     {
                         throw new GenericException("Insufficient Balance in the Wallet");
                     }
                 }
 
-                wallet.Balance = wallet.Balance - invoiceEntity.Amount;
+                wallet.Balance = wallet.Balance - amountToDebit;
 
                 var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
 
                 var newWalletTransaction = new WalletTransaction
                 {
                     WalletId = wallet.WalletId,
-                    Amount = invoiceEntity.Amount,
+                    Amount = amountToDebit,
                     DateOfEntry = DateTime.Now,
                     ServiceCentreId = serviceCenterIds[0],
                     UserId = currentUserId,
@@ -373,10 +377,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 customerCountryId = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
             }
 
-            //2a. If the Customer Country == Departure Country, no conversion
-            
-
-            //2b. If the customer country !== Departure Country, Convert the payment
+            //2. If the customer country !== Departure Country, Convert the payment
             if(customerCountryId != shipment.DepartureCountryId)
             {
                 var countryRateConversion = await _countryRouteZoneMapService.GetZone(shipment.DestinationCountryId, shipment.DepartureCountryId);
