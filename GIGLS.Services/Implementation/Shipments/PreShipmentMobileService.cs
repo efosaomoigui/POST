@@ -1888,26 +1888,30 @@ namespace GIGLS.Services.Implementation.Shipments
                             }).ToList()
                         };
                         var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
-                        var Partner = new PartnerPayDTO
+                        //if a partner accepted the shipment, pay the partner
+                        if (Partnerid != null)
                         {
-                            //Distance = details.rows[0].elements[0].distance.value.ToString(),
-                            //Time = details.rows[0].elements[0].duration.value.ToString(),
-                            ShipmentPrice = preshipmentmobile.GrandTotal,
-                            PickUprice = Pickupprice
-                        };
-                        decimal price = await _partnertransactionservice.GetPriceForPartner(Partner);
-                        var partneruser = await _userService.GetUserById(Partnerid.UserId);
-                        var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode);
-                        wallet.Balance = wallet.Balance + price;
-                        var partnertransactions = new PartnerTransactionsDTO
-                        {
-                            Destination = preshipmentmobile.ReceiverAddress,
-                            Departure = preshipmentmobile.SenderAddress,
-                            AmountReceived = price,
-                            Waybill = preshipmentmobile.Waybill,
-                            IsFromServiceCentre = true
-                        };
-                        var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
+                            var Partner = new PartnerPayDTO
+                            {
+                                //Distance = details.rows[0].elements[0].distance.value.ToString(),
+                                //Time = details.rows[0].elements[0].duration.value.ToString(),
+                                ShipmentPrice = preshipmentmobile.GrandTotal,
+                                PickUprice = Pickupprice
+                            };
+                            decimal price = await _partnertransactionservice.GetPriceForPartner(Partner);
+                            var partneruser = await _userService.GetUserById(Partnerid.UserId);
+                            var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode);
+                            wallet.Balance = wallet.Balance + price;
+                            var partnertransactions = new PartnerTransactionsDTO
+                            {
+                                Destination = preshipmentmobile.ReceiverAddress,
+                                Departure = preshipmentmobile.SenderAddress,
+                                AmountReceived = price,
+                                Waybill = preshipmentmobile.Waybill,
+                                IsFromServiceCentre = true
+                            };
+                            var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
+                        }
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
                         preshipmentmobile.IsApproved = true;
                         await ScanMobileShipment(new ScanDTO
