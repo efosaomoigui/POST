@@ -533,7 +533,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                                           }).ToList();
                 foreach (var Shipment in shipmentDto)
                 {
-                    var PartnerId = await _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == Shipment.Waybill && r.Status != MobilePickUpRequestStatus.Rejected.ToString());
+                    var PartnerId = await _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == Shipment.Waybill && (r.Status != MobilePickUpRequestStatus.Rejected.ToString() || r.Status != MobilePickUpRequestStatus.TimedOut.ToString()));
                     if (PartnerId != null)
                     {
                         var partneruser = await _uow.User.GetUserById(PartnerId.UserId);
@@ -1175,7 +1175,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch(Exception)
             {
-                throw new GenericException("Please an error occurred while trying to get partne's transactions.");
+                throw new GenericException("Please an error occurred while trying to get partner's transactions.");
             }
         }
 
@@ -1257,7 +1257,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     //we need to modify this to only change the IsCancelled instead of deleting the items.
                     _uow.PreShipmentItemMobile.Remove(preshipmentitmmobile);
                 }
-                var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
+                var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && (s.Status != MobilePickUpRequestStatus.Rejected.ToString()  || s.Status != MobilePickUpRequestStatus.TimedOut.ToString()));
                 if (pickuprequests != null)
                 {
                     var user = await _userService.GetUserById(pickuprequests.UserId);
@@ -1833,7 +1833,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     //RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
                     if (preshipmentmobile.IsApproved != true)
                     {
-                        var Partnerid = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == detail.WaybillNumber && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
+                        var Partnerid = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == detail.WaybillNumber && (s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString()));
                         var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
 
                         int customerid = 0;
@@ -2145,7 +2145,7 @@ namespace GIGLS.Services.Implementation.Shipments
         }
         public async Task DetermineShipmentstatus(string waybill, int countryid,DateTime ExpectedTimeOfDelivery)
         {
-            var status = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
+            var status = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == waybill && (s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString()));
             if(status!=null)
             {
                 if(status.Status != MobilePickUpRequestStatus.Delivered.ToString())
@@ -2184,7 +2184,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
                 if (Userchanneltype == UserChannelType.IndividualCustomer.ToString())
                 {
-                    var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.Status == MobilePickUpRequestStatus.Accepted.ToString());
+                    var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && (s.Status == MobilePickUpRequestStatus.Accepted.ToString() || s.Status == MobilePickUpRequestStatus.ProceedToPickUp.ToString()));
                     if (pickuprequests != null)
                     {
                         throw new GenericException("Shipment cannot be cancelled because it has been assigned.");
@@ -2219,7 +2219,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         _uow.PreShipmentItemMobile.Remove(preshipmentitmmobile);
                     }
                     updatedwallet.Balance = ((updatedwallet.Balance + preshipmentmobile.GrandTotal));
-                    var pickuprequest = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == Waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
+                    var pickuprequest = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == Waybill && (s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString()));
                     if (pickuprequest != null)
                     {
                         pickuprequest.Status = MobilePickUpRequestStatus.Cancelled.ToString();
@@ -2242,7 +2242,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<PreShipmentSummaryDTO> GetPartnerDetailsFromWaybill(string Waybill)
         {
             var ShipmentSummaryDetails = new PreShipmentSummaryDTO();
-            var partner = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == Waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
+            var partner = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == Waybill && (s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString()));
             if (partner != null)
             {
                 var Partnerdetails = await _uow.Partner.GetAsync(s => s.UserId == partner.UserId);
