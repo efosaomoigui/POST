@@ -16,5 +16,7 @@ namespace GIGLS.Core.DTO
         public string SubCategoryName { get; set; }
 
         public string Weight { get; set; }
+
+        public string WeightRange { get; set; }
     }
 }

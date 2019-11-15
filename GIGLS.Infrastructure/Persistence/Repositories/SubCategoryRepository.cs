@@ -31,7 +31,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                                                      CategoryId = x.CategoryId
                                                  }).FirstOrDefault(),
                                                  SubCategoryId = s.SubCategoryId,
-                                                 Weight = s.Weight
+                                                 Weight = s.Weight,
+                                                 WeightRange = s.WeightRange
                                                 }).ToList();
 
             return Task.FromResult(categoryDto);

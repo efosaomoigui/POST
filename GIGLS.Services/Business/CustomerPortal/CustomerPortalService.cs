@@ -874,6 +874,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                             throw new GenericException("You cannot use your Employee email to register.");
                         }
                     }
+                    if (EmailUser.UserChannelType == UserChannelType.Ecommerce && EmailUser.IsRegisteredFromMobile != true)
+                    {
+                       throw new GenericException("This is an e-commerce account.Kindly Login with your details!!!");
+                    }
                     if (EmailUser.IsRegisteredFromMobile == true)
                     {
                         throw new GenericException("User with these details already exists!");
@@ -1008,6 +1012,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                             throw new GenericException("You cannot use your Employee email to register.");
                         }
                     }
+                    if (EmailUser.UserChannelType == UserChannelType.Ecommerce && EmailUser.IsRegisteredFromMobile != true)
+                    {
+                        throw new GenericException("This is an e-commerce account.Kindly Login with your details!!!");
+                    }
                     if (EmailUser.IsRegisteredFromMobile == true)
                     {
                         throw new GenericException("User with these details already exists!");
@@ -1039,7 +1047,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             emailcompanydetails.PhoneNumber = user.PhoneNumber;
                             emailcompanydetails.FirstName = user.FirstName;
                             emailcompanydetails.LastName = user.LastName;
-                            emailcompanydetails.Name = user.Organisation;
+                            emailcompanydetails.Name = user.FirstName + " " + user.LastName;
                             await _uow.CompleteAsync();
                             var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
                             result = await SendOTPForRegisteredUser(user);
@@ -1063,7 +1071,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             phonecompanydetails.PhoneNumber = user.PhoneNumber;
                             phonecompanydetails.FirstName = user.FirstName;
                             phonecompanydetails.LastName = user.LastName;
-                            phonecompanydetails.Name = user.Organisation;
+                            phonecompanydetails.Name = user.FirstName + " " + user.LastName;
                             await _uow.CompleteAsync();
                             var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
                             result = await SendOTPForRegisteredUser(user);
@@ -1103,7 +1111,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 SettlementPeriod = 1,
                                 ReturnServiceCentre = 296,
                                 UserActiveCountryId = user.UserActiveCountryId,
-                                Name = user.Organisation
+                                Name = user.FirstName + " " + user.LastName
                             };
                             var company = Mapper.Map<Company>(customer);
                             EmailUser.UserChannelPassword = user.Password;
@@ -1500,7 +1508,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         IsRegisteredFromMobile = true,
                         UserActiveCountryId = user.UserActiveCountryId,
                         CompanyType = CompanyType.Ecommerce,
-                        Name = user.Organisation
+                        Name = user.FirstName + " " + user.LastName
 
                         //added this to pass channelcode 
                     };

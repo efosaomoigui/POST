@@ -285,6 +285,7 @@
     <Compile Include="DTO\Account\VATDTO.cs" />
     <Compile Include="DTO\ActivationCampaignEmailDTO.cs" />
     <Compile Include="DTO\Admin\AdminReportDTO.cs" />
+    <Compile Include="DTO\ApproveShipmentDTO.cs" />
     <Compile Include="DTO\BankSettlement\BankDTO.cs" />
     <Compile Include="DTO\BankSettlement\BankProcessingOrderForShipmentAndCODDTO.cs" />
     <Compile Include="DTO\BankSettlement\CODSettlementSheetDTO.cs" />

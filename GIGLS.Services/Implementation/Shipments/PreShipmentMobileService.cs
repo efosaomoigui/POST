@@ -590,7 +590,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                        },
                                        SubCategoryId = s.SubCategory.SubCategoryId,
                                        CategoryId = s.SubCategory.CategoryId,
-                                       Weight = s.SubCategory.Weight
+                                       Weight = s.SubCategory.Weight,
+                                       WeightRange = s.SubCategory.WeightRange
                                    }
 
 
@@ -1770,41 +1771,38 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var ShipmentSummaryDetails = new PreShipmentSummaryDTO();
-                var result = await _uow.Shipment.GetAsync(s => s.DeliveryNumber == DeliveryNumber);
-                var partner = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == result.Waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
-                if (partner != null)
-                {
-                    var Partnerdetails = await _uow.Partner.GetAsync(s => s.UserId == partner.UserId);
-                    var userdetails = await _userService.GetUserById(partner.UserId);
-                    if (Partnerdetails ==null)
-                    {
-                        throw new GenericException("Partner Details does not exist!!");
-                    }
-                    else
-                    {
-                        var partnerinfo = Mapper.Map<PartnerDTO>(Partnerdetails);
-                        ShipmentSummaryDetails.partnerdetails = partnerinfo;
-                        ShipmentSummaryDetails.partnerdetails.PictureUrl = userdetails.PictureUrl;
-                    }
-                }
-                else
-                {
-                    throw new GenericException("No Partner has accepted shipment with this Delivery Number");
-                }
+                var result = await _uow.Shipment.GetAsync(s => s.DeliveryNumber == DeliveryNumber || s.Waybill == DeliveryNumber);
                 if (result != null)
                 {
+                    ShipmentSummaryDetails = await GetPartnerDetailsFromWaybill(result.Waybill);
                     var details = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == result.Waybill, "PreShipmentItems");
                     if(details ==null)
                     {
-                        throw new GenericException("Shipment with this delivery number cannot be found in PreshipmentMobile");
+                        throw new GenericException("Shipment cannot be found in PreshipmentMobile");
                     }
                     var PreShipmentdto = Mapper.Map<PreShipmentMobileDTO>(details);
                     ShipmentSummaryDetails.shipmentdetails = PreShipmentdto;
                     return ShipmentSummaryDetails;
                 }
+                else if (result==null)
+                {
+                    var details = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == DeliveryNumber, "PreShipmentItems");
+                    if (details == null)
+                    {
+                        throw new GenericException("Shipment cannot be found in PreshipmentMobile");
+                    }
+                    else
+                    {
+                        ShipmentSummaryDetails = await GetPartnerDetailsFromWaybill(details.Waybill);
+                        var PreShipmentdto = Mapper.Map<PreShipmentMobileDTO>(details);
+                        ShipmentSummaryDetails.shipmentdetails = PreShipmentdto;
+                        return ShipmentSummaryDetails;
+                    }
+                   
+                }
                 else
                 {
-                    throw new GenericException("Shipment with this delivery number cannot be found");
+                    throw new GenericException("Shipment cannot be found");
                 }
             }
             catch(Exception)
@@ -1895,7 +1893,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         PhoneNumber = user.PhoneNumber,
                         FirstName = user.FirstName,
                         LastName = user.LastName,
-                        Name = user.Organisation,
+                        Name = user.FirstName + " " + user.LastName,
                         CompanyType = CompanyType.Ecommerce,
                         Password = user.Password,
                         CustomerCode = user.UserChannelCode,
@@ -1994,28 +1992,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 await _userService.UpdateUser(User.Id, User);
                 if (user.UserChannelType.ToString() == UserChannelType.Partner.ToString())
                 {
-                    var partner = await _uow.Partner.GetAsync(s => s.PartnerCode == user.UserChannelCode);
-                    partner.FirstName = user.FirstName;
-                    partner.LastName = user.LastName;
-                    partner.Email = user.Email;
-                    partner.PictureUrl = user.PictureUrl;
+                    await UpdatePartner(user);
+                    await UpdateCustomer(user);
+                    await UpdateCompany(user);
                     
                 }
                 if (user.UserChannelType.ToString() == UserChannelType.IndividualCustomer.ToString())
                 {
-                    var customer = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == user.UserChannelCode);
-                    customer.FirstName = user.FirstName;
-                    customer.LastName = user.LastName;
-                    customer.Email = user.Email;
-                    customer.PictureUrl = user.PictureUrl;
-                }
-                if (user.UserChannelType.ToString() == UserChannelType.Ecommerce.ToString())
-                {
-                    var company = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
-                    company.FirstName = user.FirstName;
-                    company.LastName = user.LastName;
-                    company.Email = user.Email;
-                    company.Name = user.Organisation;
+                    await UpdatePartner(user);
+                    await UpdateCustomer(user);
+                    await UpdateCompany(user);
                 }
                 await _uow.CompleteAsync();
                 return true;
@@ -2190,6 +2176,62 @@ namespace GIGLS.Services.Implementation.Shipments
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        private async Task<PreShipmentSummaryDTO> GetPartnerDetailsFromWaybill(string Waybill)
+        {
+            var ShipmentSummaryDetails = new PreShipmentSummaryDTO();
+            var partner = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == Waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
+            if (partner != null)
+            {
+                var Partnerdetails = await _uow.Partner.GetAsync(s => s.UserId == partner.UserId);
+                var userdetails = await _userService.GetUserById(partner.UserId);
+                if (Partnerdetails == null)
+                {
+                    throw new GenericException("Partner Details does not exist!!");
+                }
+                else
+                {
+                    var partnerinfo = Mapper.Map<PartnerDTO>(Partnerdetails);
+                    ShipmentSummaryDetails.partnerdetails = partnerinfo;
+                    ShipmentSummaryDetails.partnerdetails.PictureUrl = userdetails.PictureUrl;
+                }
+            }
+            return ShipmentSummaryDetails;
+        }
+
+        private async Task UpdatePartner(UserDTO user)
+        {
+            var partner = await _uow.Partner.GetAsync(s => s.PartnerCode == user.UserChannelCode);
+            if (partner != null)
+            {
+                partner.FirstName = user.FirstName;
+                partner.LastName = user.LastName;
+                partner.Email = user.Email;
+                partner.PictureUrl = user.PictureUrl;
+            }
+        }
+        private async Task UpdateCustomer(UserDTO user)
+        {
+            var customer = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+            if (customer != null)
+            {
+                customer.FirstName = user.FirstName;
+                customer.LastName = user.LastName;
+                customer.Email = user.Email;
+                customer.PictureUrl = user.PictureUrl;
+            }
+        }
+        private async Task UpdateCompany(UserDTO user)
+        {
+            var company = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+            if (company != null)
+            {
+                company.FirstName = user.FirstName;
+                company.LastName = user.LastName;
+                company.Email = user.Email;
+                company.Name = user.Organisation;
             }
         }
 
