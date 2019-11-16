@@ -1846,7 +1846,8 @@ namespace GIGLS.Services.Implementation.Shipments
                             var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
                             customerid = companyid.CompanyId;
                         }
-                       
+                        var DepartureCountryId = await GetCountryByServiceCentreId(detail.SenderServiceCentreId);
+                        var DestinationCountryId = await GetCountryByServiceCentreId(detail.ReceiverServiceCentreId);
                         var MobileShipment = new ShipmentDTO
                         {
                             Waybill = preshipmentmobile.Waybill,
@@ -1876,6 +1877,8 @@ namespace GIGLS.Services.Implementation.Shipments
                             PaymentStatus = PaymentStatus.Paid,
                             IsFromMobile = true,
                             ShipmentPickupPrice = Pickupprice,
+                            DestinationCountryId = DestinationCountryId,
+                            DepartureCountryId = DepartureCountryId,
                             ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
                             {
                                 Description = s.Description,
@@ -2293,6 +2296,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 company.Email = user.Email;
                 company.Name = user.Organisation;
             }
+        }
+        private async Task<int> GetCountryByServiceCentreId(int ServicecentreId)
+        {
+            int CountryId = 0;
+            var ServiceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == ServicecentreId);
+            if (ServiceCentre != null)
+            {
+                var Country = await _uow.Country.GetCountryByStationId(ServiceCentre.StationId);
+                if(Country != null)
+                {
+                    CountryId = Country.CountryId;
+                }
+            }
+            return CountryId;
         }
 
 
