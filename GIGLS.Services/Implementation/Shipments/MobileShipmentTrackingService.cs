@@ -70,6 +70,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 );
                 //4. append the two lists together
                 MobileshipmentTracking.AddRange(shipmentTrackingMobileVersion);
+                var orderedtrackings = MobileshipmentTracking.OrderByDescending(x => x.DateTime).ToList();
                 var addresses = await _uow.PreShipmentMobile.GetAsync(s=>s.Waybill == waybill);
                 if(addresses !=null)
                 {
@@ -77,8 +78,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         Origin = addresses.SenderAddress,
                         Destination = addresses.ReceiverAddress,
-                        MobileShipmentTrackings = MobileshipmentTracking
-                    };
+                        MobileShipmentTrackings = orderedtrackings
+                   };
                 }
                 else
                 {
@@ -89,7 +90,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             Origin = shipmentaddress.SenderAddress,
                             Destination = shipmentaddress.ReceiverAddress,
-                            MobileShipmentTrackings = MobileshipmentTracking
+                            MobileShipmentTrackings = orderedtrackings
                         };
                     }
                     else
