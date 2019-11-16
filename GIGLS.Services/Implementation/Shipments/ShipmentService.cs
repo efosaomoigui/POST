@@ -1385,7 +1385,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var limit_over_two_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_over_two);
 
             var greencreated = (from list in shipmentscreated
-                                where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_one_date
+                                where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate >= limit_one_date && list.ShipmentDate <= limit_two_date
                                 select new InvoiceMonitorDTO2()
                                 {
                                     label = list.DestinationServiceCentreName,
@@ -1395,7 +1395,7 @@ namespace GIGLS.Services.Implementation.Shipments
             obj.groupgreen_s = greencreated;
 
             var bluecreated = (from list in shipmentscreated
-                               where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_over_two_date
+                               where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_two_date && list.ShipmentDate <= limit_over_two_date
                                select new InvoiceMonitorDTO2()
                                {
                                    label = list.DestinationServiceCentreName,
@@ -1405,7 +1405,7 @@ namespace GIGLS.Services.Implementation.Shipments
             obj.groupblue_s = bluecreated;
 
             var redcreated = (from list in shipmentscreated
-                              where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_two_date
+                              where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate >= limit_over_two_date
                               select new InvoiceMonitorDTO2()
                               {
                                   label = list.DestinationServiceCentreName,
@@ -1415,18 +1415,18 @@ namespace GIGLS.Services.Implementation.Shipments
             obj.groupred_s = redcreated;
 
             var totalGreen = (from item in shipmentscreated
-                              where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_one_date
+                              where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate >= limit_one_date && item.ShipmentDate <= limit_two_date
                               select (long)item.WayBillCount).Sum();
             obj.totalGreen = totalGreen;
 
             var totalBlue = (from item in shipmentscreated
-                             where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_over_two_date
+                             where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_two_date && item.ShipmentDate <= limit_over_two_date
                              select (long)item.WayBillCount).Sum();
 
             obj.totalBlue = totalBlue;
 
             var totalRed = (from item in shipmentscreated
-                            where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_two_date
+                            where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate >= limit_over_two_date
                             select (long)item.WayBillCount).Sum();
 
             obj.totalRed = totalRed;
@@ -1448,8 +1448,8 @@ namespace GIGLS.Services.Implementation.Shipments
             var limit_over_two_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_over_two);
 
             var greenexpected = (from list in shipmentsexpected
-                                 where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_one_date
-                                select new InvoiceMonitorDTO2()
+                                 where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate >= limit_one_date && list.ShipmentDate <= limit_two_date
+                                 select new InvoiceMonitorDTO2()
                                 {
                                     label = list.DestinationServiceCentreName,
                                     y = list.WayBillCount
@@ -1458,7 +1458,7 @@ namespace GIGLS.Services.Implementation.Shipments
             obj.groupgreen_s = greenexpected;
 
             var blueexpected= (from list in shipmentsexpected
-                               where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_over_two_date
+                               where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_two_date && list.ShipmentDate <= limit_over_two_date
                                select new InvoiceMonitorDTO2()
                                {
                                    label = list.DestinationServiceCentreName,
@@ -1468,8 +1468,8 @@ namespace GIGLS.Services.Implementation.Shipments
             obj.groupblue_s = blueexpected;
 
             var redexpected = (from list in shipmentsexpected
-                               where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_two_date
-                              select new InvoiceMonitorDTO2()
+                               where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate >= limit_over_two_date
+                               select new InvoiceMonitorDTO2()
                               {
                                   label = list.DestinationServiceCentreName,
                                   y = list.WayBillCount
@@ -1478,19 +1478,19 @@ namespace GIGLS.Services.Implementation.Shipments
             obj.groupred_s = redexpected;
 
             var totalGreen = (from item in shipmentsexpected
-                              where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_one_date
+                              where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate >= limit_one_date && item.ShipmentDate <= limit_two_date
                               select (long)item.WayBillCount).Sum();
 
             obj.totalGreen = totalGreen;
 
             var totalBlue = (from item in shipmentsexpected
-                             where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_over_two_date
+                             where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_two_date && item.ShipmentDate <= limit_over_two_date
                              select (long)item.WayBillCount).Sum();
 
             obj.totalBlue = totalBlue;
 
             var totalRed = (from item in shipmentsexpected
-                            where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_two_date
+                            where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate >= limit_over_two_date
                             select (long)item.WayBillCount).Sum();
 
             obj.totalRed = totalRed;
