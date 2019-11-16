@@ -94,7 +94,7 @@ namespace GIGLS.Services.Implementation
                 SenderEmail = user.EmailAddress,
                 SenderPhoneNumber = user.PhoneNumber,
                 OTP = user.Otp,
-                SMSSenderPlatform = SMSSenderPlatform.OGOSMS
+                SMSSenderPlatform = SMSSenderPlatform.TWILIO
             };
 
             var response = await _messageSenderService.SendMessage(MessageType.OTP, EmailSmsType.All, message);
