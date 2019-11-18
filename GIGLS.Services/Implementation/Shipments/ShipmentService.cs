@@ -1389,7 +1389,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                 select new InvoiceMonitorDTO2()
                                 {
                                     label = list.DestinationServiceCentreName,
-                                    y = list.WayBillCount
+                                    y = list.WayBillCount  
                                 }).ToList();
 
             obj.groupgreen_s = greencreated;
