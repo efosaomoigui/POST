@@ -88,7 +88,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var wallet = await _walletService.GetWalletById(walletId);
 
             //get the customer info
-            var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
+            //var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
             
             var walletTransactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == walletId);
             if (walletTransactions.Count() < 1)
@@ -98,10 +98,10 @@ namespace GIGLS.Services.Implementation.Wallet
                     WalletTransactions = new List<WalletTransactionDTO>(),
                     WalletNumber = wallet.WalletNumber,
                     WalletBalance = wallet.Balance,
-                    WalletOwnerName = customerDTO.CustomerName,
+                    WalletOwnerName = wallet.CustomerName,
                     WalletId = walletId,
-                    CurrencyCode = customerDTO.Country.CurrencyCode,
-                    CurrencySymbol = customerDTO.Country.CurrencySymbol
+                    CurrencyCode = wallet.Country.CurrencyCode,
+                    CurrencySymbol = wallet.Country.CurrencySymbol
                 };
             }
             var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(s => s.DateCreated));
@@ -118,10 +118,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 WalletTransactions = walletTransactionDTOList,
                 WalletNumber = wallet.WalletNumber,
                 WalletBalance = wallet.Balance,
-                WalletOwnerName = customerDTO.CustomerName,
+                WalletOwnerName = wallet.CustomerName,
                 WalletId = walletId,
-                CurrencyCode = customerDTO.Country.CurrencyCode,
-                CurrencySymbol = customerDTO.Country.CurrencySymbol
+                CurrencyCode = wallet.Country.CurrencyCode,
+                CurrencySymbol = wallet.Country.CurrencySymbol
             };
         }
 
