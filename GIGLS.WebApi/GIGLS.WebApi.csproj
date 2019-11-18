@@ -309,6 +309,7 @@
     <Compile Include="Controllers\CustomerPortal\CustomerPortalController.cs" />
     <Compile Include="Controllers\CustomerPortal\FirebaseAccessController.cs" />
     <Compile Include="Controllers\CustomerPortal\PaystackController.cs" />
+    <Compile Include="Controllers\CustomerPortal\PublicTrackingController.cs" />
     <Compile Include="Controllers\Customers\CompanyContactPersonController.cs" />
     <Compile Include="Controllers\Customers\CompanyController.cs" />
     <Compile Include="Controllers\Customers\CustomerController.cs" />
