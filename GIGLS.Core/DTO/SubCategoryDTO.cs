@@ -1,11 +1,4 @@
-﻿using GIGLS.Core.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GIGLS.Core.DTO
+﻿namespace GIGLS.Core.DTO
 {
     public class SubCategoryDTO
     {
@@ -15,7 +8,7 @@ namespace GIGLS.Core.DTO
         public int? CategoryId { get; set; }
         public string SubCategoryName { get; set; }
 
-        public string Weight { get; set; }
+        public decimal? Weight { get; set; }
 
         public string WeightRange { get; set; }
     }
