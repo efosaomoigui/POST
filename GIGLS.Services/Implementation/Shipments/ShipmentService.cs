@@ -1385,17 +1385,17 @@ namespace GIGLS.Services.Implementation.Shipments
             var limit_over_two_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_over_two);
 
             var greencreated = (from list in shipmentscreated
-                                where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_one_date
+                                where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate >= limit_one_date && list.ShipmentDate <= limit_two_date
                                 select new InvoiceMonitorDTO2()
                                 {
                                     label = list.DestinationServiceCentreName,
-                                    y = list.WayBillCount
+                                    y = list.WayBillCount  
                                 }).ToList();
 
             obj.groupgreen_s = greencreated;
 
             var bluecreated = (from list in shipmentscreated
-                               where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_over_two_date
+                               where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_two_date && list.ShipmentDate <= limit_over_two_date
                                select new InvoiceMonitorDTO2()
                                {
                                    label = list.DestinationServiceCentreName,
@@ -1405,7 +1405,7 @@ namespace GIGLS.Services.Implementation.Shipments
             obj.groupblue_s = bluecreated;
 
             var redcreated = (from list in shipmentscreated
-                              where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_two_date
+                              where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate >= limit_over_two_date
                               select new InvoiceMonitorDTO2()
                               {
                                   label = list.DestinationServiceCentreName,
@@ -1415,18 +1415,18 @@ namespace GIGLS.Services.Implementation.Shipments
             obj.groupred_s = redcreated;
 
             var totalGreen = (from item in shipmentscreated
-                              where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_one_date
+                              where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate >= limit_one_date && item.ShipmentDate <= limit_two_date
                               select (long)item.WayBillCount).Sum();
             obj.totalGreen = totalGreen;
 
             var totalBlue = (from item in shipmentscreated
-                             where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_over_two_date
+                             where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_two_date && item.ShipmentDate <= limit_over_two_date
                              select (long)item.WayBillCount).Sum();
 
             obj.totalBlue = totalBlue;
 
             var totalRed = (from item in shipmentscreated
-                            where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_two_date
+                            where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate >= limit_over_two_date
                             select (long)item.WayBillCount).Sum();
 
             obj.totalRed = totalRed;
@@ -1448,8 +1448,8 @@ namespace GIGLS.Services.Implementation.Shipments
             var limit_over_two_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_over_two);
 
             var greenexpected = (from list in shipmentsexpected
-                                 where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_one_date
-                                select new InvoiceMonitorDTO2()
+                                 where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate >= limit_one_date && list.ShipmentDate <= limit_two_date
+                                 select new InvoiceMonitorDTO2()
                                 {
                                     label = list.DestinationServiceCentreName,
                                     y = list.WayBillCount
@@ -1458,7 +1458,7 @@ namespace GIGLS.Services.Implementation.Shipments
             obj.groupgreen_s = greenexpected;
 
             var blueexpected= (from list in shipmentsexpected
-                               where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_over_two_date
+                               where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_two_date && list.ShipmentDate <= limit_over_two_date
                                select new InvoiceMonitorDTO2()
                                {
                                    label = list.DestinationServiceCentreName,
@@ -1468,8 +1468,8 @@ namespace GIGLS.Services.Implementation.Shipments
             obj.groupblue_s = blueexpected;
 
             var redexpected = (from list in shipmentsexpected
-                               where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_two_date
-                              select new InvoiceMonitorDTO2()
+                               where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate >= limit_over_two_date
+                               select new InvoiceMonitorDTO2()
                               {
                                   label = list.DestinationServiceCentreName,
                                   y = list.WayBillCount
@@ -1478,19 +1478,19 @@ namespace GIGLS.Services.Implementation.Shipments
             obj.groupred_s = redexpected;
 
             var totalGreen = (from item in shipmentsexpected
-                              where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_one_date
+                              where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate >= limit_one_date && item.ShipmentDate <= limit_two_date
                               select (long)item.WayBillCount).Sum();
 
             obj.totalGreen = totalGreen;
 
             var totalBlue = (from item in shipmentsexpected
-                             where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_over_two_date
+                             where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_two_date && item.ShipmentDate <= limit_over_two_date
                              select (long)item.WayBillCount).Sum();
 
             obj.totalBlue = totalBlue;
 
             var totalRed = (from item in shipmentsexpected
-                            where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_two_date
+                            where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate >= limit_over_two_date
                             select (long)item.WayBillCount).Sum();
 
             obj.totalRed = totalRed;
@@ -1661,19 +1661,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     var currentUserId = await _userService.GetCurrentUserId();
 
                     ////--start--///Set the DepartureCountryId
-                    int countryIdFromServiceCentreId = 0;
-                    try
-                    {
-                        var departureCountry = await _uow.Country.GetCountryByServiceCentreId(shipment.DepartureServiceCentreId);
-                        countryIdFromServiceCentreId = departureCountry.CountryId;
-                    }
-                    catch (Exception) { }
+                    var departureCountry = await _uow.Country.GetCountryByServiceCentreId(shipment.DepartureServiceCentreId);
+                    int countryIdFromServiceCentreId = departureCountry.CountryId;
                     ////--end--///Set the DepartureCountryId
 
                     var generalLedger = new GeneralLedger()
                     {
                         DateOfEntry = DateTime.Now,
-
                         ServiceCentreId = shipment.DepartureServiceCentreId,
                         CountryId = countryIdFromServiceCentreId,
                         UserId = currentUserId,
@@ -1693,15 +1687,20 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipment.CustomerType = CustomerType.IndividualCustomer.ToString();
                     }
                     CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
+
+                    //return the actual amount collected in case shipment departure and destination country is different
                     var wallet = _uow.Wallet.SingleOrDefault(s => s.CustomerId == shipment.CustomerId && s.CustomerType == customerType);
-                    wallet.Balance = wallet.Balance + invoice.Amount;
+
+                    decimal amountToCredit = invoice.Amount;
+                    amountToCredit = await GetActualAmountToCredit(shipment, amountToCredit);
+                    wallet.Balance = wallet.Balance + amountToCredit;
 
                     //2.4.2 Update customers wallet's Transaction (credit)
                     //var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
                     var newWalletTransaction = new WalletTransaction
                     {
                         WalletId = wallet.WalletId,
-                        Amount = invoice.Amount,
+                        Amount = amountToCredit,
                         DateOfEntry = DateTime.Now,
                         ServiceCentreId = shipment.DepartureServiceCentreId,
                         UserId = currentUserId,
@@ -1872,6 +1871,33 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
             return processPayment;            
-        }        
+        }
+        
+        private async Task<decimal> GetActualAmountToCredit(Shipment shipment, decimal amountToDebit)
+        {
+            //1. Get Customer Country detail
+            int customerCountryId = 0;
+
+            if (UserChannelType.Ecommerce.ToString() == shipment.CompanyType || UserChannelType.Corporate.ToString() == shipment.CompanyType)
+            {
+                customerCountryId = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
+            }
+            else
+            {
+                customerCountryId = _uow.IndividualCustomer.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
+            }
+
+            //2. If the customer country !== Departure Country, Convert the payment
+            if (customerCountryId != shipment.DepartureCountryId)
+            {
+                var countryRateConversion = await _countryRouteZoneMapService.GetZone(shipment.DestinationCountryId, shipment.DepartureCountryId);
+
+                double amountToDebitDouble = (double)amountToDebit * countryRateConversion.Rate;
+
+                amountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
+            }
+
+            return amountToDebit;
+        }
     }
 }

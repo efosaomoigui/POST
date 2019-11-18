@@ -309,6 +309,7 @@
     <Compile Include="Controllers\CustomerPortal\CustomerPortalController.cs" />
     <Compile Include="Controllers\CustomerPortal\FirebaseAccessController.cs" />
     <Compile Include="Controllers\CustomerPortal\PaystackController.cs" />
+    <Compile Include="Controllers\CustomerPortal\PublicTrackingController.cs" />
     <Compile Include="Controllers\Customers\CompanyContactPersonController.cs" />
     <Compile Include="Controllers\Customers\CompanyController.cs" />
     <Compile Include="Controllers\Customers\CustomerController.cs" />
@@ -432,6 +433,7 @@
     <None Include="Properties\PublishProfiles\agagilitysystemapilive - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agagilitysystemapilive - FTP1.pubxml" />
     <None Include="Properties\PublishProfiles\agagilitysystemapilive - FTP2.pubxml" />
+    <None Include="Properties\PublishProfiles\agagilitysystemapilive - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agagilitysystemapilive - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\agagilitysystemapilive - Web Deploy1.pubxml" />
     <None Include="Properties\PublishProfiles\agagilitysystemapilive - Web Deploy2.pubxml" />
@@ -464,6 +466,7 @@
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP6.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP7.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - FTP8.pubxml" />
+    <None Include="Properties\PublishProfiles\agilitysystemapidevm - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\agilitysystemapidevm - Web Deploy %284%29.pubxml" />
