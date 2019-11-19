@@ -958,7 +958,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         AmountReceived = price,
                         Waybill = preshipmentmobile.Waybill
                     };
-
+                    
                     await _uow.CompleteAsync();
 
                     var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
@@ -985,6 +985,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else
                     {
+                        pickuprequest.Status = MobilePickUpRequestStatus.Confirmed.ToString();
+                        await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
                         throw new GenericException("This is an interstate delivery, drop at assigned service centre!!");
                     }
                     
