@@ -455,15 +455,19 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var Shipmentdto = new PreShipmentMobileDTO();
-                var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
+                var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
                 if (shipment != null)
                 {
                     var Country = await _uow.Country.GetCountryByStationId(shipment.SenderStationId);
                     Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(shipment);
                     if (shipment.ServiceCentreAddress != null)
                     {
-                        Shipmentdto.ReceiverLocation.Latitude = shipment.serviceCentreLocation.Latitude;
-                        Shipmentdto.ReceiverLocation.Longitude = shipment.serviceCentreLocation.Longitude;
+                        var Locationdto = new LocationDTO
+                        {
+                            Latitude = shipment.serviceCentreLocation.Latitude,
+                            Longitude = shipment.serviceCentreLocation.Latitude
+                        };
+                        Shipmentdto.ReceiverLocation = Locationdto;
                         Shipmentdto.ReceiverAddress = shipment.ServiceCentreAddress;
                     }
                     if (Country != null)
@@ -1849,7 +1853,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     //RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
                     if (preshipmentmobile.IsApproved != true)
                     {
-                        var Partnerid = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == detail.WaybillNumber && (s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString()));
+                        var Partnerid = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == detail.WaybillNumber && (s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString() || s.Status != MobilePickUpRequestStatus.Processing.ToString()));
                         var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
 
                         int customerid = 0;
