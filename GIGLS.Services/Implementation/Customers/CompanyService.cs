@@ -52,7 +52,7 @@ namespace GIGLS.Services.Implementation.Customers
                 }
 
                 var newCompany = Mapper.Map<Company>(company);
-                newCompany.CompanyStatus = CompanyStatus.Pending;
+                newCompany.CompanyStatus = CompanyStatus.Active;
 
                 //get the CompanyType
                 var companyType = "";
@@ -125,7 +125,8 @@ namespace GIGLS.Services.Implementation.Customers
                     UserChannelPassword = password,
                     UserChannelType = userChannelType,
                     PasswordExpireDate = DateTime.Now,
-                    UserActiveCountryId = newCompany.UserActiveCountryId
+                    UserActiveCountryId = newCompany.UserActiveCountryId,
+                    IsActive = true
                 });
 
                 //complete
