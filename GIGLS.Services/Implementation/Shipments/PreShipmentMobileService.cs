@@ -729,18 +729,23 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException($"Shipment has already been accepted by another Partner..");
                     }
                 }
-                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
+                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
                 if (preshipmentmobile != null)
                 {
                     var Country = await _uow.Country.GetCountryByStationId(preshipmentmobile.SenderStationId);
-                    
+
                     if (pickuprequest.ServiceCentreId != null)
                     {
 
                         var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickuprequest.ServiceCentreId);
                         preshipmentmobile.ServiceCentreAddress = DestinationServiceCentreId.Address;
-                        preshipmentmobile.serviceCentreLocation.Latitude = DestinationServiceCentreId.Latitude;
-                        preshipmentmobile.serviceCentreLocation.Longitude = DestinationServiceCentreId.Longitude;
+                        var Locationdto = new LocationDTO
+                        {
+                            Latitude = DestinationServiceCentreId.Latitude,
+                            Longitude = DestinationServiceCentreId.Longitude
+                        };
+                        var LOcation = Mapper.Map<Location>(Locationdto);
+                        preshipmentmobile.serviceCentreLocation = LOcation;
 
                     }
                     if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString())

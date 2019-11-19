@@ -1767,10 +1767,13 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 //check if shipment already exists
-                var shipmentexists = await _uow.Shipment.ExistAsync(s => s.Waybill == shipment.Waybill);
-                if(shipmentexists)
+                var shipmentexists = await _uow.Shipment.GetAsync(s => s.Waybill == shipment.Waybill);
+                if(shipmentexists !=null)
                 {
-                    throw new GenericException($"Shipment with waybill number: {shipment.Waybill} already exists.");
+                    shipmentexists.DestinationServiceCentreId = shipment.DestinationServiceCentreId;
+                    shipmentexists.DepartureServiceCentreId = shipment.DepartureServiceCentreId;
+                    shipmentexists.DepartureCountryId = shipment.DepartureCountryId;
+                    shipmentexists.DestinationCountryId = shipment.DestinationCountryId;
                 }
 
                 shipment.ApproximateItemsWeight = 0;
