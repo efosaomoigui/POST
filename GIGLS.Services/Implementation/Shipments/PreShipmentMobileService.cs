@@ -929,7 +929,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "SenderLocation,ReceiverLocation");
-                preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Delivered.ToString();
+                //preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Delivered.ToString();
                 preshipmentmobile.IsDelivered = true;
 
                 var Pickuprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId);
@@ -945,7 +945,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     decimal price = await _partnertransactionservice.GetPriceForPartner(Partnerpaymentfordelivery);
                     var partneruser = await _userService.GetUserById(userId);
                     var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode);
-
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Delivered.ToString();
                     if (wallet != null)
                     {
                         wallet.Balance = wallet.Balance + price;
@@ -977,9 +977,17 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                     await _messageSenderService.SendMessage(MessageType.OKC, EmailSmsType.SMS, messageextensionDTO);
                 }
-                else
+                else 
                 {
-                    throw new GenericException("This shipment is an interstate delivery, drop at the assigned service centre");
+                    if(preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString())
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        throw new GenericException("This is an interstate delivery, drop at assigned service centre!!");
+                    }
+                    
                 }
             }
             catch (Exception ex)
