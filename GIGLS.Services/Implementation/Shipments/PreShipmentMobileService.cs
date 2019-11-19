@@ -462,12 +462,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(shipment);
                     if (shipment.ServiceCentreAddress != null)
                     {
-                        var Locationdto = new LocationDTO
+                        Shipmentdto.ReceiverLocation = new LocationDTO
                         {
                             Latitude = shipment.serviceCentreLocation.Latitude,
-                            Longitude = shipment.serviceCentreLocation.Latitude
+                            Longitude = shipment.serviceCentreLocation.Longitude
                         };
-                        Shipmentdto.ReceiverLocation = Locationdto;
+                        //Shipmentdto.ReceiverLocation.Longitude = Locationdto.Longitude;
                         Shipmentdto.ReceiverAddress = shipment.ServiceCentreAddress;
                     }
                     if (Country != null)
@@ -1808,7 +1808,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     ShipmentSummaryDetails = await GetPartnerDetailsFromWaybill(result.Waybill);
                     var details = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == result.Waybill, "PreShipmentItems");
-                    if(details ==null)
+                    if(details == null)
                     {
                         throw new GenericException("Shipment cannot be found in PreshipmentMobile");
                     }
