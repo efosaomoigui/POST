@@ -981,6 +981,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     if(preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString())
                     {
+                        pickuprequest.Status = MobilePickUpRequestStatus.Delivered.ToString();
+                        await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
                         return;
                     }
                     else
