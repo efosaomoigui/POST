@@ -1661,19 +1661,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     var currentUserId = await _userService.GetCurrentUserId();
 
                     ////--start--///Set the DepartureCountryId
-                    int countryIdFromServiceCentreId = 0;
-                    try
-                    {
-                        var departureCountry = await _uow.Country.GetCountryByServiceCentreId(shipment.DepartureServiceCentreId);
-                        countryIdFromServiceCentreId = departureCountry.CountryId;
-                    }
-                    catch (Exception) { }
+                    var departureCountry = await _uow.Country.GetCountryByServiceCentreId(shipment.DepartureServiceCentreId);
+                    int countryIdFromServiceCentreId = departureCountry.CountryId;
                     ////--end--///Set the DepartureCountryId
 
                     var generalLedger = new GeneralLedger()
                     {
                         DateOfEntry = DateTime.Now,
-
                         ServiceCentreId = shipment.DepartureServiceCentreId,
                         CountryId = countryIdFromServiceCentreId,
                         UserId = currentUserId,
@@ -1693,15 +1687,20 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipment.CustomerType = CustomerType.IndividualCustomer.ToString();
                     }
                     CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
+
+                    //return the actual amount collected in case shipment departure and destination country is different
                     var wallet = _uow.Wallet.SingleOrDefault(s => s.CustomerId == shipment.CustomerId && s.CustomerType == customerType);
-                    wallet.Balance = wallet.Balance + invoice.Amount;
+
+                    decimal amountToCredit = invoice.Amount;
+                    amountToCredit = await GetActualAmountToCredit(shipment, amountToCredit);
+                    wallet.Balance = wallet.Balance + amountToCredit;
 
                     //2.4.2 Update customers wallet's Transaction (credit)
                     //var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
                     var newWalletTransaction = new WalletTransaction
                     {
                         WalletId = wallet.WalletId,
-                        Amount = invoice.Amount,
+                        Amount = amountToCredit,
                         DateOfEntry = DateTime.Now,
                         ServiceCentreId = shipment.DepartureServiceCentreId,
                         UserId = currentUserId,
@@ -1768,10 +1767,13 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 //check if shipment already exists
-                var shipmentexists = await _uow.Shipment.ExistAsync(s => s.Waybill == shipment.Waybill);
-                if(shipmentexists)
+                var shipmentexists = await _uow.Shipment.GetAsync(s => s.Waybill == shipment.Waybill);
+                if(shipmentexists !=null)
                 {
-                    throw new GenericException($"Shipment with waybill number: {shipment.Waybill} already exists.");
+                    shipmentexists.DestinationServiceCentreId = shipment.DestinationServiceCentreId;
+                    shipmentexists.DepartureServiceCentreId = shipment.DepartureServiceCentreId;
+                    shipmentexists.DepartureCountryId = shipment.DepartureCountryId;
+                    shipmentexists.DestinationCountryId = shipment.DestinationCountryId;
                 }
 
                 shipment.ApproximateItemsWeight = 0;
@@ -1872,6 +1874,33 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
             return processPayment;            
-        }        
+        }
+        
+        private async Task<decimal> GetActualAmountToCredit(Shipment shipment, decimal amountToDebit)
+        {
+            //1. Get Customer Country detail
+            int customerCountryId = 0;
+
+            if (UserChannelType.Ecommerce.ToString() == shipment.CompanyType || UserChannelType.Corporate.ToString() == shipment.CompanyType)
+            {
+                customerCountryId = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
+            }
+            else
+            {
+                customerCountryId = _uow.IndividualCustomer.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
+            }
+
+            //2. If the customer country !== Departure Country, Convert the payment
+            if (customerCountryId != shipment.DepartureCountryId)
+            {
+                var countryRateConversion = await _countryRouteZoneMapService.GetZone(shipment.DestinationCountryId, shipment.DepartureCountryId);
+
+                double amountToDebitDouble = (double)amountToDebit * countryRateConversion.Rate;
+
+                amountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
+            }
+
+            return amountToDebit;
+        }
     }
 }

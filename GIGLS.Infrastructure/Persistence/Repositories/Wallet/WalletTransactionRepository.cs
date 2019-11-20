@@ -96,7 +96,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                                                                      CustomerId = x.CustomerId,
                                                                      CustomerType = x.CustomerType,
                                                                      WalletNumber = x.WalletNumber,
-                                                                     CustomerName = Context.Company.Where(s => s.CustomerCode == x.CustomerCode).FirstOrDefault().Name
+                                                                     //CustomerName = Context.Company.Where(s => s.CustomerCode == x.CustomerCode).FirstOrDefault().Name
                                                                  }).FirstOrDefault()
                                                              }).OrderByDescending(s => s.DateOfEntry).ToList();
 

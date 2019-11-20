@@ -79,7 +79,9 @@ namespace GIGLS.Services.Implementation.Partnership
                 //Totalprice = Convert.ToDecimal(string.Format("{0:F2}", Totalprice));
                 //var Sumofpickupandgooglapicalc =  (Totalprice + partnerpay.ShipmentPrice);
                 //var pickupprice = partnerpay.PickUprice;
-                TotalPrice = Convert.ToDecimal(string.Format("{0:F2}", partnerpay.PickUprice));
+                var TotalAmount = (partnerpay.PickUprice);
+                var amount = (0.8M * TotalAmount);
+                TotalPrice = Convert.ToDecimal(string.Format("{0:F2}", amount));
             }
             return await Task.FromResult(TotalPrice);
         }

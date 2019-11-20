@@ -265,6 +265,11 @@ namespace GIGLS.Services.Implementation.Wallet
                     walletsQueryable = walletsQueryable.Where(x => x.CustomerType == CustomerType.IndividualCustomer);
                     walletsDto = Mapper.Map<List<WalletDTO>>(walletsQueryable.ToList());
                 }
+                else if (FilterCustomerType.Partner.Equals(searchOption.CustomerType))
+                {
+                    walletsQueryable = walletsQueryable.Where(x => x.CustomerType == CustomerType.Partner);
+                    walletsDto = Mapper.Map<List<WalletDTO>>(walletsQueryable.ToList());
+                }
                 else
                 {
                     CompanyType companyType;

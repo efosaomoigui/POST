@@ -305,6 +305,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice);
                     }
                     Price += (decimal)preShipmentItem.CalculatedPrice;
+                    
                 };
                 
                 decimal EstimatedDeclaredPrice = Convert.ToDecimal(DeclaredValue);
@@ -454,15 +455,19 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var Shipmentdto = new PreShipmentMobileDTO();
-                var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
+                var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
                 if (shipment != null)
                 {
                     var Country = await _uow.Country.GetCountryByStationId(shipment.SenderStationId);
                     Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(shipment);
                     if (shipment.ServiceCentreAddress != null)
                     {
-                        Shipmentdto.ReceiverLocation.Latitude = shipment.serviceCentreLocation.Latitude;
-                        Shipmentdto.ReceiverLocation.Longitude = shipment.serviceCentreLocation.Longitude;
+                        Shipmentdto.ReceiverLocation = new LocationDTO
+                        {
+                            Latitude = shipment.serviceCentreLocation.Latitude,
+                            Longitude = shipment.serviceCentreLocation.Longitude
+                        };
+                        //Shipmentdto.ReceiverLocation.Longitude = Locationdto.Longitude;
                         Shipmentdto.ReceiverAddress = shipment.ServiceCentreAddress;
                     }
                     if (Country != null)
@@ -699,7 +704,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else
                     {
-                        throw new GenericException($"Shipment with waybill number: {pickuprequest.Waybill} exists already");
+                        throw new GenericException($"You have rejected shipment with waybill number: {pickuprequest.Waybill} already");
                     }
                 }
                 if (pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString())
@@ -717,21 +722,34 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 else
                 {
-                    pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
-                    await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
+                    var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.Status == MobilePickUpRequestStatus.Accepted.ToString());
+                    if (request == null)
+                    {
+                        pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
+                        await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
+                    }
+                    else
+                    {
+                        throw new GenericException($"Shipment has already been accepted by another Partner..");
+                    }
                 }
-                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
+                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
                 if (preshipmentmobile != null)
                 {
                     var Country = await _uow.Country.GetCountryByStationId(preshipmentmobile.SenderStationId);
-                    
+
                     if (pickuprequest.ServiceCentreId != null)
                     {
 
                         var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickuprequest.ServiceCentreId);
                         preshipmentmobile.ServiceCentreAddress = DestinationServiceCentreId.Address;
-                        preshipmentmobile.serviceCentreLocation.Latitude = DestinationServiceCentreId.Latitude;
-                        preshipmentmobile.serviceCentreLocation.Longitude = DestinationServiceCentreId.Longitude;
+                        var Locationdto = new LocationDTO
+                        {
+                            Latitude = DestinationServiceCentreId.Latitude,
+                            Longitude = DestinationServiceCentreId.Longitude
+                        };
+                        var LOcation = Mapper.Map<Location>(Locationdto);
+                        preshipmentmobile.serviceCentreLocation = LOcation;
 
                     }
                     if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString())
@@ -911,7 +929,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "SenderLocation,ReceiverLocation");
-                preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Delivered.ToString();
+                //preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Delivered.ToString();
                 preshipmentmobile.IsDelivered = true;
 
                 var Pickuprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId);
@@ -920,14 +938,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     var Partnerpaymentfordelivery = new PartnerPayDTO
                     {
                         PickUprice = Pickuprice,
-                        ShipmentPrice = (decimal)preshipmentmobile.CalculatedTotal,
+                        ShipmentPrice = preshipmentmobile.GrandTotal,
                         ZoneMapping = (int)preshipmentmobile.ZoneMapping
                     };
 
                     decimal price = await _partnertransactionservice.GetPriceForPartner(Partnerpaymentfordelivery);
                     var partneruser = await _userService.GetUserById(userId);
                     var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode);
-
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Delivered.ToString();
                     if (wallet != null)
                     {
                         wallet.Balance = wallet.Balance + price;
@@ -940,7 +958,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         AmountReceived = price,
                         Waybill = preshipmentmobile.Waybill
                     };
-
+                    
                     await _uow.CompleteAsync();
 
                     var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
@@ -959,9 +977,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                     await _messageSenderService.SendMessage(MessageType.OKC, EmailSmsType.SMS, messageextensionDTO);
                 }
-                else
+                else 
                 {
-                    throw new GenericException("This shipment is an interstate delivery, drop at the assigned service centre");
+                    if(preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString())
+                    {
+                        pickuprequest.Status = MobilePickUpRequestStatus.Delivered.ToString();
+                        await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
+                        return;
+                    }
+                    else
+                    {
+                        pickuprequest.Status = MobilePickUpRequestStatus.Confirmed.ToString();
+                        await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
+                        throw new GenericException("This is an interstate delivery, drop at assigned service centre!!");
+                    }
+                    
                 }
             }
             catch (Exception ex)
@@ -1280,6 +1310,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
                     updatedwallet.Balance = ((updatedwallet.Balance + preshipmentmobile.GrandTotal));
+
+
                 }
                 await _uow.CompleteAsync();
                 return new { IsCancelled = true };
@@ -1776,7 +1808,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     ShipmentSummaryDetails = await GetPartnerDetailsFromWaybill(result.Waybill);
                     var details = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == result.Waybill, "PreShipmentItems");
-                    if(details ==null)
+                    if(details == null)
                     {
                         throw new GenericException("Shipment cannot be found in PreshipmentMobile");
                     }
@@ -1833,7 +1865,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     //RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
                     if (preshipmentmobile.IsApproved != true)
                     {
-                        var Partnerid = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == detail.WaybillNumber && (s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString()));
+                        var Partnerid = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == detail.WaybillNumber && (s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString() || s.Status != MobilePickUpRequestStatus.Processing.ToString()));
                         var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
 
                         int customerid = 0;
@@ -2185,14 +2217,11 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == Waybill, "PreShipmentItems");
                 var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+                var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
                 if (Userchanneltype == UserChannelType.IndividualCustomer.ToString())
                 {
-                    var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && (s.Status == MobilePickUpRequestStatus.Accepted.ToString() || s.Status == MobilePickUpRequestStatus.ProceedToPickUp.ToString()));
-                    if (pickuprequests != null)
-                    {
-                        throw new GenericException("Shipment cannot be cancelled because it has been assigned.");
-                    }
-                    else
+                    //var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && (s.Status != MobilePickUpRequestStatus.TimedOut.ToString() || s.Status != MobilePickUpRequestStatus.Rejected.ToString()));
+                    if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Rejected.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.TimedOut.ToString())
                     {
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
                         foreach (var id in preshipmentmobile.PreShipmentItems.ToList())
@@ -2203,35 +2232,53 @@ namespace GIGLS.Services.Implementation.Shipments
                             _uow.PreShipmentItemMobile.Remove(preshipmentitmmobile);
                         }
                         updatedwallet.Balance = ((updatedwallet.Balance + preshipmentmobile.GrandTotal));
+                        var transaction = new WalletTransactionDTO
+                        {
+                            WalletId = updatedwallet.WalletId,
+                            CreditDebitType = CreditDebitType.Credit,
+                            Amount = preshipmentmobile.GrandTotal,
+                            ServiceCentreId = defaultServiceCenter.ServiceCentreId,
+                            Waybill = preshipmentmobile.Waybill,
+                            Description = "Cancelled Shipment",
+                            PaymentType = PaymentType.Online,
+                            UserId = preshipmentmobile.UserId
+                        };
+                        var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
                         await ScanMobileShipment(new ScanDTO
                         {
                             WaybillNumber = Waybill,
                             ShipmentScanStatus = ShipmentScanStatus.MSCC
                         });
                     }
+                    else
+                    {
+                        throw new GenericException("Shipment cannot be cancelled because it has been assigned.");
+                    }
                 }
                 //FOR PARTNER TRYING TO CANCEL  A SHIPMENT
                 else
                 {
-                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
-                    foreach (var id in preshipmentmobile.PreShipmentItems.ToList())
-                    {
-                        var preshipmentitmmobile = await _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == preshipmentmobile.PreShipmentMobileId && s.PreShipmentItemMobileId == id.PreShipmentItemMobileId);
-                        preshipmentitmmobile.IsCancelled = true;
-                        //we need to modify this to only change the IsCancelled instead of deleting the items.
-                        _uow.PreShipmentItemMobile.Remove(preshipmentitmmobile);
-                    }
-                    updatedwallet.Balance = ((updatedwallet.Balance + preshipmentmobile.GrandTotal));
-                    var pickuprequest = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == Waybill && (s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString()));
-                    if (pickuprequest != null)
-                    {
-                        pickuprequest.Status = MobilePickUpRequestStatus.Cancelled.ToString();
-                        await ScanMobileShipment(new ScanDTO
-                        {
-                            WaybillNumber = Waybill,
-                            ShipmentScanStatus = ShipmentScanStatus.MSCP
-                        });
-                    }
+                    var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.Status == MobilePickUpRequestStatus.Accepted.ToString());
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
+                    pickuprequests.Status = MobilePickUpRequestStatus.Processing.ToString();
+                    //foreach (var id in preshipmentmobile.PreShipmentItems.ToList())
+                    //{
+                    //    var preshipmentitmmobile = await _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == preshipmentmobile.PreShipmentMobileId && s.PreShipmentItemMobileId == id.PreShipmentItemMobileId);
+                    //    preshipmentitmmobile.IsCancelled = true;
+                    //    //we need to modify this to only change the IsCancelled instead of deleting the items.
+                    //    _uow.PreShipmentItemMobile.Remove(preshipmentitmmobile);
+                    //}
+                    //updatedwallet.Balance = ((updatedwallet.Balance + preshipmentmobile.GrandTotal));
+                    //var pickuprequest = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == Waybill && (s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString()));
+                    //if (pickuprequest != null)
+                    //{
+                    //    pickuprequest.Status = MobilePickUpRequestStatus.Cancelled.ToString();
+                    //    await ScanMobileShipment(new ScanDTO
+                    //    {
+                    //        WaybillNumber = Waybill,
+                    //        ShipmentScanStatus = ShipmentScanStatus.MSCP
+                    //    });
+                    //}
                 }
                 await _uow.CompleteAsync();
                 return new { IsCancelled = true };

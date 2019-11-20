@@ -374,7 +374,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             }
             else
             {
-                customerCountryId = _uow.Company.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
+                customerCountryId = _uow.IndividualCustomer.GetAllAsQueryable().Where(x => x.CustomerCode.ToLower() == shipment.CustomerCode.ToLower()).Select(x => x.UserActiveCountryId).FirstOrDefault();
             }
 
             //2. If the customer country !== Departure Country, Convert the payment

@@ -33,6 +33,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"Shipment with waybill {waybill} already cancelled");
             }
 
+            if(await _uow.ShipmentReroute.ExistAsync(x => x.WaybillNew == waybill || x.WaybillOld == waybill))
+            {
+                throw new GenericException($"Shipment with waybill {waybill} has been initiated for reroute, it can not be cancel");
+            }
+            
+            if (await _uow.ShipmentReturn.ExistAsync(x => x.WaybillNew == waybill || x.WaybillOld == waybill))
+            {
+                throw new GenericException($"Shipment with waybill {waybill} has been initiated for return, it can not be cancel");
+            }
+
             var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
 
             if (shipment == null)
