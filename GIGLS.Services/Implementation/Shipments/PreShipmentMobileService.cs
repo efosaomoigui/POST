@@ -733,7 +733,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                         else
                         {
-                            throw new GenericException($"Shipment has already been accepted by another Partner..");
+                            throw new GenericException($"Shipment has already been accepted..");
                         }
                     }
                 }
