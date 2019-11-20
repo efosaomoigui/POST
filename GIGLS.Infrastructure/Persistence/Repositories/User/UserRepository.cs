@@ -306,5 +306,16 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             && (x.IsRegisteredFromMobile == true || x.SystemUserRole == "Dispatch Rider" || x.SystemUserRole == "Captain" || x.UserChannelType==UserChannelType.Ecommerce)).FirstOrDefault();
             return Task.FromResult(user);
         }
+
+        public async Task<GIGL.GIGLS.Core.Domain.User> ActivateUserByEmail(string email, bool isActive)
+        {
+            var user = _userManager.Users.Where(x => x.Email.Equals(email)).FirstOrDefault();
+            if(user != null)
+            {
+                user.IsActive = isActive;
+                await _userManager.UpdateAsync(user);
+            }
+            return await Task.FromResult(user);
+        }
     }
 }
