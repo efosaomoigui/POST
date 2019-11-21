@@ -278,9 +278,11 @@
     <Compile Include="DTO\Account\GeneralLedgerDTO.cs" />
     <Compile Include="DTO\Account\InsuranceDTO.cs" />
     <Compile Include="DTO\Account\InvoiceDTO.cs" />
+    <Compile Include="DTO\Account\InvoiceReportDTO.cs" />
     <Compile Include="DTO\Account\InvoiceShipmentDTO.cs" />
     <Compile Include="DTO\Account\NewInvoiceViewDTO.cs" />
     <Compile Include="DTO\Account\InvoiceViewDTO.cs" />
+    <Compile Include="DTO\Account\SalesByServiceCentersDTO.cs" />
     <Compile Include="DTO\Account\ServiceCenreDTO.cs" />
     <Compile Include="DTO\Account\VATDTO.cs" />
     <Compile Include="DTO\ActivationCampaignEmailDTO.cs" />

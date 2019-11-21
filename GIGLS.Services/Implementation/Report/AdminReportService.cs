@@ -1,7 +1,10 @@
 ﻿using GIGLS.Core;
+using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Admin;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Report;
+using GIGLS.Core.View;
 using GIGLS.Core.View.AdminReportView;
 using System;
 using System.Collections.Generic;
@@ -20,22 +23,24 @@ namespace GIGLS.Services.Implementation.Report
             _uow = uow;
         }
 
-        public async Task<AdminReportDTO> GetAdminReport()
+        public async Task<AdminReportDTO> GetAdminReport(ShipmentCollectionFilterCriteria filterCriteria)
         {
             var result = new AdminReportDTO();
-
-            result.AllTimeSalesByCountry = await GetAllTimeSalesByCountries();
+                                                
+            //result.AllTimeSalesByCountry = await GetAllTimeSalesByCountries();
             result.BusiestRoute = await GetBusiestRoutes();
-            result.CustomerRevenue = await GetCustomerRevenues();
+            //result.CustomerRevenue = await GetCustomerRevenues();
             result.MostShippedItemByWeight = await GetMostShippedItemByWeights();
-            result.RevenuePerServiceCentre = await GetRevenuePerServiceCentres();
+            //result.RevenuePerServiceCentre = await GetRevenuePerServiceCentres();
             result.TotalServiceCentreByState = await GetTotalServiceCentreByStates();
-            result.TotalOrdersDelivered = await GetTotalOrdersDelivered();
+            //result.TotalOrdersDelivered = await GetTotalOrdersDelivered();
 
             //Get customer count
-            result.NumberOfCustomer.Corporate = await GetCorporateCount();
-            result.NumberOfCustomer.Ecommerce = await GetEcommerceCount();
-            result.NumberOfCustomer.Individual = await GetIndividaulCount();
+            result.NumberOfCustomer.Corporate = await GetCorporateCount(filterCriteria);
+            result.NumberOfCustomer.Ecommerce = await GetEcommerceCount(filterCriteria);
+            result.NumberOfCustomer.Individual = await GetIndividaulCount(filterCriteria);
+
+            result.InvoiceReportDTO = await InvoiceInformation(filterCriteria);
 
             return result;
         }
@@ -53,7 +58,7 @@ namespace GIGLS.Services.Implementation.Report
             result.TotalOrdersDelivered = await GetTotalOrdersDelivered();
             return result;
         }
-
+                
         private async Task<List<Report_AllTimeSalesByCountry>> GetAllTimeSalesByCountries()
         {
             var result = _uow.Invoice.GetAllTimeSalesByCountry().ToList();
@@ -70,6 +75,118 @@ namespace GIGLS.Services.Implementation.Report
         {
             var result = _uow.Invoice.GetCustomerRevenue().ToList();
             return await Task.FromResult(result);
+        }
+
+        private async Task<InvoiceReportDTO> InvoiceInformation(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            var result = new InvoiceReportDTO();
+            var invoice = _uow.Invoice.GetAllFromInvoiceAndShipments(filterCriteria).ToList();
+
+            List<InvoiceView> invoices;
+            List<InvoiceView> destInvoices;
+            decimal avgDestShipmentCostPerSC = 0;
+            decimal avgOriginShipmentCostPerSC = 0;
+            var createdShipments = 0;
+            var departedShipments = 0;
+
+            //Filter by Service Center
+            if (filterCriteria.ServiceCentreId != 0)
+            {
+                //For the Departure Service Center Data Only
+                invoices = invoice.Where(s => s.DepartureServiceCentreId == filterCriteria.ServiceCentreId).ToList();
+
+                //For the Detination Service Center Data Only, so as to calaulate the average coming in
+                destInvoices = invoice.Where(s => s.DestinationServiceCentreId == filterCriteria.ServiceCentreId).ToList();
+
+                //Average Price Of Shipments coming to that service Center
+                avgDestShipmentCostPerSC = (destInvoices.Sum(p => p.GrandTotal) / destInvoices.Count());
+                                
+            }
+            else
+            {
+                invoices = invoice;
+            }
+           
+
+            var revenue = invoices.Sum(x => x.GrandTotal);
+            var shipmentDeliverd = invoices.Where(x => x.IsShipmentCollected == true).Count();
+            var shipmentOrdered = invoices.Count();
+
+            //Revenue per customer type
+            var individualRevenue = invoices.Where(x => x.CompanyType == "IndividualCustomer").Sum(x => x.GrandTotal);
+            var ecommerceRevenue = invoices.Where(x => x.CompanyType == "Ecommerce").Sum(x => x.GrandTotal);
+            var corporateRevenue = invoices.Where(x => x.CompanyType == "Corporate").Sum(x => x.GrandTotal);
+
+            //Count of Shipments Per Customer Type 
+            var individualShipmentCount = invoices.Where(x => x.CompanyType == "IndividualCustomer").Count();
+            var ecommerceShipmentCount = invoices.Where(x => x.CompanyType == "Ecommerce").Count();
+            var corporateShipmentCount = invoices.Where(x => x.CompanyType == "Corporate").Count();
+
+            //Get Average Spent Per Customer Type
+            var avgIndividualCost = individualRevenue / ((individualShipmentCount == 0) ? 1 : individualShipmentCount) ;
+            var avgEcommerceCost = ecommerceRevenue / ((ecommerceShipmentCount == 0) ? 1 : ecommerceShipmentCount);
+            var avgCorporateCost = corporateRevenue / ((corporateShipmentCount == 0) ? 1 : corporateShipmentCount);
+
+            //All home delivery
+            var homeDeliveries = invoices.Where(x => x.PickupOptions == PickupOptions.HOMEDELIVERY).Count();
+            //All Terminal Pickup
+            var terminalPickups = invoices.Where(x => x.PickupOptions == PickupOptions.SERVICECENTER).Count();
+
+            //Ecommerce home delivery
+            var ecommerceHome = invoices.Where(x => x.PickupOptions == PickupOptions.HOMEDELIVERY && x.CompanyType == "Ecommerce").Count();
+            //Ecommerce Terminal Pickup
+            var ecommerceTerminal = invoices.Where(x => x.PickupOptions == PickupOptions.SERVICECENTER && x.CompanyType == "Ecommerce").Count();
+
+            //Service Centers Revenue By Sales No Service Center Filtering
+            var wow = await SalesPerServiceCenter(invoice);
+
+            if(filterCriteria.ServiceCentreId > 0)
+            {
+                //Average Price of shipments leaving that service center
+                avgOriginShipmentCostPerSC = revenue / shipmentOrdered;
+            }
+
+            //Shipments Created
+            createdShipments = invoices.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.CRT).Count();
+
+            //Shipments departed service center
+            departedShipments = invoices.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.DSC || x.ShipmentScanStatus == ShipmentScanStatus.DTR || x.ShipmentScanStatus == ShipmentScanStatus.DPC).Count();
+
+            result.Revenue = revenue;
+            result.ShipmentDelivered = shipmentDeliverd;
+            result.ShipmentOrdered = shipmentOrdered;
+            result.CorporateRevenue = corporateRevenue;
+            result.EcommerceRevenue = ecommerceRevenue;
+            result.IndividualRevenue = individualRevenue;
+            result.IndividualShipments = individualShipmentCount;
+            result.EcommerceShipments = ecommerceShipmentCount;
+            result.CorporateShipments = corporateShipmentCount;
+
+            result.AverageShipmentIndividual = avgIndividualCost;
+            result.AverageShipmentECommerce = avgEcommerceCost;
+            result.AverageShipmentCorporate = avgCorporateCost;
+
+            result.ECommerceHomeDeliveries = ecommerceHome;
+            result.ECommerceTerminalPickups = ecommerceTerminal;
+
+            result.HomeDeliveries = homeDeliveries;
+            result.TerminalPickups = terminalPickups;
+
+            result.Sales = wow;
+
+            result.AvgOriginCostPerServiceCenter = avgOriginShipmentCostPerSC;
+            result.AvgDestCostPerServiceCenter = avgDestShipmentCostPerSC;
+
+            result.CreatedShipments = createdShipments;
+            result.DepartedShipments = departedShipments;
+
+            return result;
+        }
+
+        private async Task<List<object>> SalesPerServiceCenter(List<InvoiceView> invoice)
+        {
+            var salesData = await _uow.Invoice.SalesPerServiceCenter(invoice);
+            return salesData;
         }
 
         private async Task<List<Report_MostShippedItemByWeight>> GetMostShippedItemByWeights()
@@ -101,16 +218,47 @@ namespace GIGLS.Services.Implementation.Report
             var result = _uow.Company.GetAllAsQueryable().Where(x => x.CompanyType == CompanyType.Corporate).Count();
             return await Task.FromResult(result);
         }
-        
+
+        private async Task<int> GetCorporateCount(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            var queryDate = filterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var result = _uow.Company.GetAllAsQueryable().Where(x => x.CompanyType == CompanyType.Corporate
+            && (x.DateCreated >= startDate && x.DateCreated < endDate) ).Count();
+            return await Task.FromResult(result);
+        }
+
         private async Task<int> GetEcommerceCount()
         {
             var result = _uow.Company.GetAllAsQueryable().Where(x => x.CompanyType == CompanyType.Ecommerce).Count();
+            return await Task.FromResult(result);
+        }
+        private async Task<int> GetEcommerceCount(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            var queryDate = filterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+                        
+            var result = _uow.Company.GetAllAsQueryable().Where(x => x.CompanyType == CompanyType.Ecommerce
+            && (x.DateCreated >= startDate && x.DateCreated < endDate)).Count();
             return await Task.FromResult(result);
         }
 
         private async Task<int> GetIndividaulCount()
         {
             var result = _uow.IndividualCustomer.GetAllAsQueryable().Select(x => x.PhoneNumber).Distinct().Count();
+            return await Task.FromResult(result);
+        }
+        private async Task<int> GetIndividaulCount(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            var queryDate = filterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var result = _uow.IndividualCustomer.GetAllAsQueryable().Where(x => x.DateCreated >= startDate && x.DateCreated < endDate)
+                .Select(x => x.PhoneNumber).Distinct().Count();
             return await Task.FromResult(result);
         }
     }
