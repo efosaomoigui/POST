@@ -646,6 +646,12 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<SignResponseDTO> SignUp(UserDTO user) 
         {
+            if(user.Email != null)
+            {
+                user.Email = user.Email.Trim();
+                user.Email = user.Email.ToLower();
+            }
+
             if ((user.UserActiveCountryId).ToString() == null || user.UserActiveCountryId == 0)
             {
                 var CountryId = await _preShipmentMobileService.GetCountryId();
@@ -657,389 +663,115 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var countryid = await _uow.Country.GetAsync(s => s.CountryName.ToLower().Equals(user.MobileCountryName.ToLower()));
                 user.UserActiveCountryId = countryid.CountryId;
             }
-            //
+            
             var result = new SignResponseDTO();
             if (user.UserChannelType == UserChannelType.Partner)
             {
                 return await PartnerRegistration(user);
             }
-            if (user.UserChannelType == UserChannelType.IndividualCustomer)
+            else if (user.UserChannelType == UserChannelType.IndividualCustomer)
             {
-                var PhoneNumber = user.PhoneNumber.Remove(0, 4);
-                var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
-
-                if (EmailUser != null)
-                {
-                    if (EmailUser.UserChannelType == UserChannelType.Employee)
-                    {
-                        if(EmailUser.Email == user.Email)
-                        {
-                            throw new GenericException("You cannot use your Employee email to register.");
-                        }
-                    }
-                    if (EmailUser.UserChannelType == UserChannelType.Ecommerce && EmailUser.IsRegisteredFromMobile != true)
-                    {
-                       throw new GenericException("This is an e-commerce account.Kindly Login with your details!!!");
-                    }
-                    if (EmailUser.IsRegisteredFromMobile == true)
-                    {
-                        throw new GenericException("User with these details already exists!");
-                    }
-                    else
-                    {
-                        EmailUser.FirstName = user.FirstName;
-                        EmailUser.LastName = user.LastName;
-                        EmailUser.PhoneNumber = user.PhoneNumber;
-                        EmailUser.Email = user.Email;
-                        EmailUser.IsRegisteredFromMobile = true;
-                        EmailUser.UserActiveCountryId = user.UserActiveCountryId;
-                        var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
-                        var u = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
-                    }
-                    
-                    var emailcustomerdetails = await _uow.IndividualCustomer.GetAsync(s => s.Email == user.Email);
-                    if (emailcustomerdetails != null)
-                    {
-                        if (emailcustomerdetails.IsRegisteredFromMobile == true)
-                        {
-                            throw new GenericException("Email already Exists on Customers!");
-                        }
-                        else
-                        {
-                            emailcustomerdetails.IsRegisteredFromMobile = true;
-                            emailcustomerdetails.Email = user.Email;
-                            emailcustomerdetails.Password = user.Password;
-                            emailcustomerdetails.PhoneNumber = user.PhoneNumber;
-                            emailcustomerdetails.FirstName = user.FirstName;
-                            emailcustomerdetails.LastName = user.LastName;
-                            var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
-                            await _uow.CompleteAsync();
-
-                            result = await SendOTPForRegisteredUser(user);
-                            var User = Mapper.Map<UserDTO>(EmailUser);
-                            await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
-                            return result;
-                        }
-
-                    }
-                    
-                    var phonecustomerdetails = await _uow.IndividualCustomer.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber));
-                    if (phonecustomerdetails != null)
-                    {
-                        if (phonecustomerdetails.IsRegisteredFromMobile == true)
-                        {
-                            throw new GenericException("Phone number already Exists on Customers!");
-                        }
-                        else 
-                        {
-                            phonecustomerdetails.IsRegisteredFromMobile = true;
-                            phonecustomerdetails.Email = user.Email;
-                            phonecustomerdetails.Password = user.Password;
-                            phonecustomerdetails.PhoneNumber = user.PhoneNumber;
-                            phonecustomerdetails.FirstName = user.FirstName;
-                            phonecustomerdetails.LastName = user.LastName;
-                            var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
-                            await _uow.CompleteAsync();
-
-                            result = await SendOTPForRegisteredUser(user);
-                            var User = Mapper.Map<UserDTO>(EmailUser);
-                            await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
-                            return result;
-                        }
-                    }
-                    else
-                    {
-                        if (EmailUser.UserChannelType == UserChannelType.Employee)
-                        {
-                            if (EmailUser.Email != user.Email)
-                            {
-                                user.UserChannelType = UserChannelType.IndividualCustomer;
-                                user.IsFromMobile = true;
-                                var registeredUser = await CreateUserBasedOnCustomerType(user);
-                                result = await SendOTPForRegisteredUser(registeredUser);
-                                await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
-                                return result;
-                            }
-                        }
-                        else
-                        {
-                            var customer = new IndividualCustomerDTO
-                            {
-                                Email = user.Email,
-                                PhoneNumber = user.PhoneNumber,
-
-                                FirstName = user.FirstName,
-                                LastName = user.LastName,
-                                Password = user.Password,
-                                CustomerCode = EmailUser.UserChannelCode,
-                                PictureUrl = user.PictureUrl,
-                                userId = EmailUser.Id,
-                                IsRegisteredFromMobile = true
-                            };
-
-                            var individualCustomer = Mapper.Map<IndividualCustomer>(customer);
-                            EmailUser.UserChannelPassword = user.Password;
-                            var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
-                            _uow.IndividualCustomer.Add(individualCustomer);
-                            await _uow.CompleteAsync();
-
-                            result = await SendOTPForRegisteredUser(user);
-                            var User = Mapper.Map<UserDTO>(EmailUser);
-                            await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
-                            return result;
-
-                        }
-
-                    }
-                }
-                else if(EmailUser ==null)
-                {
-                    user.UserChannelType = UserChannelType.IndividualCustomer;
-                    user.IsFromMobile = true;
-                    var registeredUser = await CreateUserBasedOnCustomerType(user);
-                    result = await SendOTPForRegisteredUser(registeredUser);
-                    //var User = Mapper.Map<UserDTO>(EmailUser);
-                    await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
-                }
+                return await IndividualRegistration(user);
             }
             else if (user.UserChannelType == UserChannelType.Ecommerce)
             {
-                var PhoneNumber = user.PhoneNumber.Remove(0, 4);
-                var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
-                if (EmailUser != null)
-                {
-                    if (EmailUser.UserChannelType == UserChannelType.Employee)
-                    {
-                        if (EmailUser.Email == user.Email)
-                        {
-                            throw new GenericException("You cannot use your Employee email to register.");
-                        }
-                    }
-                    if (EmailUser.UserChannelType == UserChannelType.Ecommerce && EmailUser.IsRegisteredFromMobile != true)
-                    {
-                        throw new GenericException("This is an e-commerce account.Kindly Login with your details!!!");
-                    }
-                    if (EmailUser.IsRegisteredFromMobile == true)
-                    {
-                        throw new GenericException("User with these details already exists!");
-                    }
-                    else
-                    {
-                        EmailUser.FirstName = user.FirstName;
-                        EmailUser.LastName = user.LastName;
-                        EmailUser.PhoneNumber = user.PhoneNumber;
-                        EmailUser.Email = user.Email;
-                        EmailUser.IsRegisteredFromMobile = true;
-                        EmailUser.UserActiveCountryId = user.UserActiveCountryId;
-                        var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
-                        var u = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
-                    }
-
-                    var emailcompanydetails = await _uow.Company.GetAsync(s => s.Email == user.Email);
-                    if (emailcompanydetails != null)
-                    {
-                        if (emailcompanydetails.IsRegisteredFromMobile == true)
-                        {
-                            throw new GenericException("Email already Exists on Company!");
-                        }
-                        else
-                        {
-                            emailcompanydetails.IsRegisteredFromMobile = true;
-                            emailcompanydetails.Email = user.Email;
-                            emailcompanydetails.Password = user.Password;
-                            emailcompanydetails.PhoneNumber = user.PhoneNumber;
-                            emailcompanydetails.FirstName = user.FirstName;
-                            emailcompanydetails.LastName = user.LastName;
-                            emailcompanydetails.Name = user.FirstName + " " + user.LastName;
-                            await _uow.CompleteAsync();
-                            var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
-                            result = await SendOTPForRegisteredUser(user);
-                            var User = Mapper.Map<UserDTO>(EmailUser);
-                            await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
-                            return result;
-                        }
-                    }
-                    var phonecompanydetails = await _uow.Company.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber));
-                    if (phonecompanydetails != null)
-                    {
-                        if (phonecompanydetails.IsRegisteredFromMobile == true)
-                        {
-                            throw new GenericException("Phone number already Exists on Company!");
-                        }
-                        else
-                        {
-                            phonecompanydetails.IsRegisteredFromMobile = true;
-                            phonecompanydetails.Email = user.Email;
-                            phonecompanydetails.Password = user.Password;
-                            phonecompanydetails.PhoneNumber = user.PhoneNumber;
-                            phonecompanydetails.FirstName = user.FirstName;
-                            phonecompanydetails.LastName = user.LastName;
-                            phonecompanydetails.Name = user.FirstName + " " + user.LastName;
-                            await _uow.CompleteAsync();
-                            var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
-                            result = await SendOTPForRegisteredUser(user);
-                            var User = Mapper.Map<UserDTO>(EmailUser);
-                            await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
-                            return result;
-                        }
-                    }
-                    else
-                    {
-                        if (EmailUser.UserChannelType == UserChannelType.Employee)
-                        {
-                            if (EmailUser.Email != user.Email)
-                            {
-                                user.UserChannelType = UserChannelType.Ecommerce;
-                                user.IsFromMobile = true;
-                                var registeredUser = await CreateUserBasedOnCustomerType(user);
-                                result = await SendOTPForRegisteredUser(registeredUser);
-                                await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
-                                return result;
-                            }
-                        }
-                        else
-                        {
-                            var customer = new CompanyDTO
-                            {
-                                Email = user.Email,
-                                PhoneNumber = user.PhoneNumber,
-                                FirstName = user.FirstName,
-                                LastName = user.LastName,
-                                Password = user.Password,
-                                CustomerCode = EmailUser.UserChannelCode,
-                                CompanyType = CompanyType.Ecommerce,
-                                Discount = 0.00M,
-                                IsRegisteredFromMobile = true,
-                                CompanyStatus = CompanyStatus.Active,
-                                SettlementPeriod = 1,
-                                ReturnServiceCentre = 296,
-                                UserActiveCountryId = user.UserActiveCountryId,
-                                Name = user.FirstName + " " + user.LastName
-                            };
-                            var company = Mapper.Map<Company>(customer);
-                            EmailUser.UserChannelPassword = user.Password;
-                            var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
-                            _uow.Company.Add(company);
-                            await _uow.CompleteAsync();
-
-                            result = await SendOTPForRegisteredUser(user);
-                            var userDTO = Mapper.Map<UserDTO>(EmailUser);
-                            await CalculateReferralBonus(user.Referrercode, userDTO, user.UserActiveCountryId);
-                        }                        
-                    }
-                }
-                else if(EmailUser ==null)
-                {
-                    user.UserChannelType = UserChannelType.Ecommerce;
-                    user.IsFromMobile = true;
-                    var registeredUser = await CreateUserBasedOnCustomerType(user);
-                    result = await SendOTPForRegisteredUser(registeredUser);
-                    //var User = Mapper.Map<UserDTO>(EmailUser);
-                    await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
-                }
+                return await EcommerceRegistration(user);
             }
             return result;
         }
         
-
         private async Task<SignResponseDTO> PartnerRegistration(UserDTO user)
         {
             var result = new SignResponseDTO();
 
             var PhoneNumber = user.PhoneNumber.Remove(0, 4);
             var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
+
             if (EmailUser != null)
             {
-                if (EmailUser.UserChannelType == UserChannelType.Employee)
+                EmailUser.Email = EmailUser.Email.Trim();
+                EmailUser.Email = EmailUser.Email.ToLower();
+
+                if (EmailUser.UserChannelType == UserChannelType.Employee && EmailUser.Email == user.Email)
                 {
-                    if (EmailUser.Email == user.Email)
-                    {
-                        throw new GenericException("You cannot use your Employee email to register.");
-                    }
+                    throw new GenericException("Employee email not allowed.");
                 }
                 else if (EmailUser.IsRegisteredFromMobile == true)
                 {
                     throw new GenericException("User with these details already exists!");
                 }
-
-                var phonepartnerdetails = await _uow.Partner.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber) || s.Email == user.Email);
-                if (phonepartnerdetails != null)
-                {
-                    throw new GenericException("User details already Exists as a Partner!");
-                }
                 else
                 {
-                    //1. add new
-                    if (EmailUser.UserChannelType == UserChannelType.Employee)
+                    var phonepartnerdetails = await _uow.Partner.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber) || s.Email == user.Email);
+                    if (phonepartnerdetails != null)
                     {
-                        if (EmailUser.Email != user.Email)
-                        {
-                            return await AddNewPartner(user, PhoneNumber);
-                        }
+                        throw new GenericException("User details already Exists as a Partner!");
                     }
                     else
                     {
-                        //1. update partner record
-                        var Vehicle = "";
-                        foreach (var vehicle in user.VehicleType)
+                        //1. add new
+                        if (EmailUser.UserChannelType == UserChannelType.Employee && EmailUser.Email != user.Email)
                         {
-                            Vehicle = vehicle;
+                            return await AddNewPartner(user, PhoneNumber);
                         }
-
-                        EmailUser.FirstName = user.FirstName;
-                        EmailUser.LastName = user.LastName;
-                        EmailUser.PhoneNumber = user.PhoneNumber;
-                        EmailUser.Email = user.Email;
-                        EmailUser.IsRegisteredFromMobile = true;
-                        EmailUser.UserActiveCountryId = user.UserActiveCountryId;
-                        var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
-                        var u = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
-                        
-                        var partnerDTO = new Partner
+                        else
                         {
-                            PartnerType = PartnerType.DeliveryPartner,
-                            PartnerName = user.FirstName + " " + user.LastName,
-                            PartnerCode = EmailUser.UserChannelCode,
-                            FirstName = user.FirstName,
-                            LastName = user.LastName,
-                            Email = user.Email,
-                            PhoneNumber = user.PhoneNumber,
-                            UserId = EmailUser.Id,
-                            IsActivated = false,
-                            CountryId = user.UserActiveCountryId
-                        };
+                            //1. update partner record
+                            var Vehicle = "";
+                            foreach (var vehicle in user.VehicleType)
+                            {
+                                Vehicle = vehicle;
+                            }
 
-                       // var FinalPartner = Mapper.Map<Partner>(partnerDTO);
-                        _uow.Partner.Add(partnerDTO);
+                            EmailUser.FirstName = user.FirstName;
+                            EmailUser.LastName = user.LastName;
+                            EmailUser.PhoneNumber = user.PhoneNumber;
+                            EmailUser.Email = user.Email;
+                            EmailUser.IsRegisteredFromMobile = true;
+                            EmailUser.UserActiveCountryId = user.UserActiveCountryId;
+                            var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
+                            var u = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
 
-                        var vehicletypeDTO = new VehicleTypeDTO
-                        {
-                            Partnercode = partnerDTO.PartnerCode,
-                            Vehicletype = Vehicle
-                        };
+                            var partnerDTO = new Partner
+                            {
+                                PartnerType = PartnerType.DeliveryPartner,
+                                PartnerName = user.FirstName + " " + user.LastName,
+                                PartnerCode = EmailUser.UserChannelCode,
+                                FirstName = user.FirstName,
+                                LastName = user.LastName,
+                                Email = user.Email,
+                                PhoneNumber = user.PhoneNumber,
+                                UserId = EmailUser.Id,
+                                IsActivated = false,
+                                CountryId = user.UserActiveCountryId
+                            };
+                            _uow.Partner.Add(partnerDTO);
 
-                        var vehicletype = Mapper.Map<VehicleType>(vehicletypeDTO);
-                        _uow.VehicleType.Add(vehicletype);
+                            var vehicletypeDTO = new VehicleType
+                            {
+                                Partnercode = partnerDTO.PartnerCode,
+                                Vehicletype = Vehicle
+                            };
+                            _uow.VehicleType.Add(vehicletypeDTO);
 
-                        EmailUser.UserChannelPassword = user.Password;
+                            EmailUser.UserChannelPassword = user.Password;
+                            await _uow.CompleteAsync();
 
-                        await _uow.CompleteAsync();
-
-                        var response = await _userService.ResetPassword(EmailUser.Id, user.Password);
-
-                        if (response.Succeeded)
-                        {
-                            result = await SendOTPForRegisteredUser(user);
+                            var response = await _userService.ResetPassword(EmailUser.Id, user.Password);
+                            if (response.Succeeded)
+                            {
+                                result = await SendOTPForRegisteredUser(user);
+                            }
+                            var User = Mapper.Map<UserDTO>(EmailUser);
+                            await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
                         }
-                        var User = Mapper.Map<UserDTO>(EmailUser);
-                        await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
                     }
                 }
             }
             else
             {
                 //2. New user
-                result = await AddNewPartner(user, PhoneNumber);
+                return await AddNewPartner(user, PhoneNumber);
             }
 
             return result;
@@ -1108,6 +840,226 @@ namespace GIGLS.Services.Business.CustomerPortal
             return result;
         }
 
+        private async Task<SignResponseDTO> IndividualRegistration(UserDTO user)
+        {
+            var result = new SignResponseDTO();
+
+            var PhoneNumber = user.PhoneNumber.Remove(0, 4);
+            var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
+
+            if (EmailUser != null)
+            {
+                EmailUser.Email = EmailUser.Email.Trim();
+                EmailUser.Email = EmailUser.Email.ToLower();
+
+                if (EmailUser.UserChannelType == UserChannelType.Employee && EmailUser.Email == user.Email)
+                {
+                    throw new GenericException("Employee email not allowed.");
+                }
+                else if (EmailUser.UserChannelType == UserChannelType.Ecommerce && EmailUser.IsRegisteredFromMobile != true)
+                {
+                    throw new GenericException("Account Already Exists. Kindly Login!!!");
+                }
+                else if (EmailUser.IsRegisteredFromMobile == true)
+                {
+                    throw new GenericException("User already exists!");
+                }
+                else
+                {
+                    var emailcustomerdetails = await _uow.IndividualCustomer.GetAsync(s => s.Email == user.Email || s.PhoneNumber.Contains(PhoneNumber));
+                    if (emailcustomerdetails != null)
+                    {
+                        if (emailcustomerdetails.IsRegisteredFromMobile == true)
+                        {
+                            throw new GenericException("Detail aready exists!");
+                        }
+                        else
+                        {
+                            emailcustomerdetails.IsRegisteredFromMobile = true;
+                            emailcustomerdetails.Email = user.Email;
+                            emailcustomerdetails.Password = user.Password;
+                            emailcustomerdetails.PhoneNumber = user.PhoneNumber;
+                            emailcustomerdetails.FirstName = user.FirstName;
+                            emailcustomerdetails.LastName = user.LastName;                                                       
+                        }
+                    }
+                    else
+                    {
+                        if (EmailUser.UserChannelType == UserChannelType.Employee & EmailUser.Email != user.Email)
+                        {
+                            user.UserChannelType = UserChannelType.IndividualCustomer;
+                            user.IsFromMobile = true;
+                            var registeredUser = await CreateUserBasedOnCustomerType(user);
+                            result = await SendOTPForRegisteredUser(registeredUser);
+                            await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
+                            return result;
+                        }
+                        else
+                        {
+                            var customer = new IndividualCustomer
+                            {
+                                Email = user.Email,
+                                PhoneNumber = user.PhoneNumber,
+                                FirstName = user.FirstName,
+                                LastName = user.LastName,
+                                Password = user.Password,
+                                CustomerCode = EmailUser.UserChannelCode,
+                                PictureUrl = user.PictureUrl,
+                                IsRegisteredFromMobile = true
+                            };
+
+                            _uow.IndividualCustomer.Add(customer);
+                            EmailUser.UserChannelPassword = user.Password;                  
+                        }
+                    }
+
+                    //update user table
+                    EmailUser.FirstName = user.FirstName;
+                    EmailUser.LastName = user.LastName;
+                    EmailUser.PhoneNumber = user.PhoneNumber;
+                    EmailUser.Email = user.Email;
+                    EmailUser.IsRegisteredFromMobile = true;
+                    EmailUser.UserActiveCountryId = user.UserActiveCountryId;
+                    EmailUser.DateModified = DateTime.Now;
+                    var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
+                    var update = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
+                    var resetPassword = await _userService.ResetPassword(EmailUser.Id, user.Password);
+                    await _uow.CompleteAsync();
+
+                    result = await SendOTPForRegisteredUser(user);
+                    var User = Mapper.Map<UserDTO>(EmailUser);
+                    await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
+                    return result;
+                }                                
+            }
+            else if (EmailUser == null)
+            {
+                user.UserChannelType = UserChannelType.IndividualCustomer;
+                user.IsFromMobile = true;
+                var registeredUser = await CreateUserBasedOnCustomerType(user);
+                result = await SendOTPForRegisteredUser(registeredUser);
+                await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
+            }
+
+            return result;
+        }
+
+        private async Task<SignResponseDTO> EcommerceRegistration(UserDTO user)
+        {
+            var result = new SignResponseDTO();
+
+            if (user.Organisation == null)
+            {
+                user.Organisation = user.FirstName + " " + user.LastName;
+            }
+
+            var PhoneNumber = user.PhoneNumber.Remove(0, 4);
+            var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
+            if (EmailUser != null)
+            {
+                EmailUser.Email = EmailUser.Email.Trim();
+                EmailUser.Email = EmailUser.Email.ToLower();
+
+                if (EmailUser.UserChannelType == UserChannelType.Employee && EmailUser.Email == user.Email)
+                {
+                    throw new GenericException("Employee email not allowed.");
+                }
+                else if (EmailUser.UserChannelType == UserChannelType.Ecommerce && EmailUser.IsRegisteredFromMobile != true)
+                {
+                    throw new GenericException("Account Already Exists. Kindly Login!!!");
+                }
+                else if (EmailUser.IsRegisteredFromMobile == true)
+                {
+                    throw new GenericException("User with these details already exists!");
+                }
+                else
+                {
+                    var emailcompanydetails = await _uow.Company.GetAsync(s => s.Email == user.Email || s.PhoneNumber.Contains(PhoneNumber));
+                                       
+
+                    if (emailcompanydetails != null)
+                    {
+                        if (emailcompanydetails.IsRegisteredFromMobile == true)
+                        {
+                            throw new GenericException("Email already Exists on Company!");
+                        }
+                        else
+                        {
+                            emailcompanydetails.IsRegisteredFromMobile = true;
+                            emailcompanydetails.Email = user.Email;
+                            emailcompanydetails.Password = user.Password;
+                            emailcompanydetails.PhoneNumber = user.PhoneNumber;
+                            emailcompanydetails.FirstName = user.FirstName;
+                            emailcompanydetails.LastName = user.LastName;
+                            emailcompanydetails.Name = user.Organisation;                            
+                        }
+                    }
+                    else
+                    {
+                        if (EmailUser.UserChannelType == UserChannelType.Employee && EmailUser.Email != user.Email)
+                        {
+                            user.UserChannelType = UserChannelType.Ecommerce;
+                            user.IsFromMobile = true;
+                            var registeredUser = await CreateUserBasedOnCustomerType(user);
+                            result = await SendOTPForRegisteredUser(registeredUser);
+                            await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
+                            return result;
+                        }
+                        else
+                        {                           
+
+                            var customer = new Company
+                            {
+                                Email = user.Email,
+                                PhoneNumber = user.PhoneNumber,
+                                FirstName = user.FirstName,
+                                LastName = user.LastName,
+                                Password = user.Password,
+                                CustomerCode = EmailUser.UserChannelCode,
+                                CompanyType = CompanyType.Ecommerce,
+                                Discount = 0.00M,
+                                IsRegisteredFromMobile = true,
+                                CompanyStatus = CompanyStatus.Active,
+                                SettlementPeriod = 1,
+                                ReturnServiceCentre = 0,
+                                UserActiveCountryId = user.UserActiveCountryId,
+                                Name = user.Organisation
+                            };
+                            _uow.Company.Add(customer);
+
+                            EmailUser.UserChannelPassword = user.Password;
+                        }
+                    }
+                    
+                    EmailUser.FirstName = user.FirstName;
+                    EmailUser.LastName = user.LastName;
+                    EmailUser.PhoneNumber = user.PhoneNumber;
+                    EmailUser.Email = user.Email;
+                    EmailUser.IsRegisteredFromMobile = true;
+                    EmailUser.UserActiveCountryId = user.UserActiveCountryId;
+
+                    var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
+                    var update = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
+                    var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
+                    await _uow.CompleteAsync();
+
+                    result = await SendOTPForRegisteredUser(user);
+                    await CalculateReferralBonus(user.Referrercode, UpdatedUser, user.UserActiveCountryId);
+                    return result;
+                }
+
+            }
+            else if (EmailUser == null)
+            {
+                user.UserChannelType = UserChannelType.Ecommerce;
+                user.IsFromMobile = true;
+                var registeredUser = await CreateUserBasedOnCustomerType(user);
+                result = await SendOTPForRegisteredUser(registeredUser);
+                await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
+            }
+
+            return result;
+        }
 
         private async Task<SignResponseDTO> SendOTPForRegisteredUser(UserDTO user)
         {
@@ -1419,12 +1371,19 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             await _walletService.AddWallet(wallet);
         }
+       
         private async Task<UserDTO> CreateUserBasedOnCustomerType (UserDTO user)
         {
             try
             {
                 var User = new UserDTO();
-                if (user.UserChannelType== UserChannelType.IndividualCustomer)
+
+                if (user.Organisation.Trim() == null)
+                {
+                    user.Organisation = user.FirstName + " " + user.LastName;
+                }
+
+                if (user.UserChannelType == UserChannelType.IndividualCustomer)
                 {
                     var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeIndividual);
                     user.UserChannelCode = customerCode;
@@ -1441,9 +1400,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                       
                         //added this to pass channelcode 
                     };
-
-                    //var individualCustomerDTO = Mapper.Map<IndividualCustomer>(customer);
-
+                    
                     //update : we need to check if the customer exists before adding 
                     _uow.IndividualCustomer.Add(customer);
                     
@@ -1479,7 +1436,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         IsRegisteredFromMobile = true,
                         UserActiveCountryId = user.UserActiveCountryId,
                         CompanyType = CompanyType.Ecommerce,
-                        Name = user.FirstName + " " + user.LastName
+                        Name = user.Organisation
 
                         //added this to pass channelcode 
                     };
