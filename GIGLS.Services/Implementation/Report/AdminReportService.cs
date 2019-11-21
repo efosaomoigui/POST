@@ -6,6 +6,7 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Report;
 using GIGLS.Core.View;
 using GIGLS.Core.View.AdminReportView;
+using GIGLS.CORE.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,15 +26,17 @@ namespace GIGLS.Services.Implementation.Report
 
         public async Task<AdminReportDTO> GetAdminReport(ShipmentCollectionFilterCriteria filterCriteria)
         {
-            var result = new AdminReportDTO();
-                                                
-            //result.AllTimeSalesByCountry = await GetAllTimeSalesByCountries();
-            result.BusiestRoute = await GetBusiestRoutes();
-            //result.CustomerRevenue = await GetCustomerRevenues();
-            result.MostShippedItemByWeight = await GetMostShippedItemByWeights();
-            //result.RevenuePerServiceCentre = await GetRevenuePerServiceCentres();
-            result.TotalServiceCentreByState = await GetTotalServiceCentreByStates();
-            //result.TotalOrdersDelivered = await GetTotalOrdersDelivered();
+            AdminReportDTO result = new AdminReportDTO
+            {
+                BusiestRoute = await GetBusiestRoutes(),
+                MostShippedItemByWeight = await GetMostShippedItemByWeights(),
+                TotalServiceCentreByState = await GetTotalServiceCentreByStates()
+
+                //result.AllTimeSalesByCountry = await GetAllTimeSalesByCountries();
+                //result.CustomerRevenue = await GetCustomerRevenues();
+                //result.RevenuePerServiceCentre = await GetRevenuePerServiceCentres();
+                //result.TotalOrdersDelivered = await GetTotalOrdersDelivered();
+            };
 
             //Get customer count
             result.NumberOfCustomer.Corporate = await GetCorporateCount(filterCriteria);
@@ -47,8 +50,7 @@ namespace GIGLS.Services.Implementation.Report
         //To display data for the website
         public async Task<AdminReportDTO> DisplayWebsiteData()
         {
-            var result = new AdminReportDTO();
-
+            AdminReportDTO result = new AdminReportDTO();
             
             result.NumberOfCustomer.Ecommerce = await GetEcommerceCount();
             result.NumberOfCustomer.Individual = await GetIndividaulCount();
@@ -90,7 +92,7 @@ namespace GIGLS.Services.Implementation.Report
             var departedShipments = 0;
 
             //Filter by Service Center
-            if (filterCriteria.ServiceCentreId != 0)
+            if (filterCriteria.ServiceCentreId > 0)
             {
                 //For the Departure Service Center Data Only
                 invoices = invoice.Where(s => s.DepartureServiceCentreId == filterCriteria.ServiceCentreId).ToList();
@@ -112,15 +114,21 @@ namespace GIGLS.Services.Implementation.Report
             var shipmentDeliverd = invoices.Where(x => x.IsShipmentCollected == true).Count();
             var shipmentOrdered = invoices.Count();
 
+            //customer Type
+            string individual = FilterCustomerType.IndividualCustomer.ToString();
+            string ecommerce = FilterCustomerType.Ecommerce.ToString();
+            string corporate = FilterCustomerType.Corporate.ToString();
+
+
             //Revenue per customer type
-            var individualRevenue = invoices.Where(x => x.CompanyType == "IndividualCustomer").Sum(x => x.GrandTotal);
-            var ecommerceRevenue = invoices.Where(x => x.CompanyType == "Ecommerce").Sum(x => x.GrandTotal);
-            var corporateRevenue = invoices.Where(x => x.CompanyType == "Corporate").Sum(x => x.GrandTotal);
+            var individualRevenue = invoices.Where(x => x.CompanyType == individual).Sum(x => x.GrandTotal);
+            var ecommerceRevenue = invoices.Where(x => x.CompanyType == ecommerce).Sum(x => x.GrandTotal);
+            var corporateRevenue = invoices.Where(x => x.CompanyType == corporate).Sum(x => x.GrandTotal);
 
             //Count of Shipments Per Customer Type 
-            var individualShipmentCount = invoices.Where(x => x.CompanyType == "IndividualCustomer").Count();
-            var ecommerceShipmentCount = invoices.Where(x => x.CompanyType == "Ecommerce").Count();
-            var corporateShipmentCount = invoices.Where(x => x.CompanyType == "Corporate").Count();
+            var individualShipmentCount = invoices.Where(x => x.CompanyType == individual).Count();
+            var ecommerceShipmentCount = invoices.Where(x => x.CompanyType == ecommerce).Count();
+            var corporateShipmentCount = invoices.Where(x => x.CompanyType == corporate).Count();
 
             //Get Average Spent Per Customer Type
             var avgIndividualCost = individualRevenue / ((individualShipmentCount == 0) ? 1 : individualShipmentCount) ;
@@ -129,16 +137,18 @@ namespace GIGLS.Services.Implementation.Report
 
             //All home delivery
             var homeDeliveries = invoices.Where(x => x.PickupOptions == PickupOptions.HOMEDELIVERY).Count();
+
             //All Terminal Pickup
             var terminalPickups = invoices.Where(x => x.PickupOptions == PickupOptions.SERVICECENTER).Count();
 
             //Ecommerce home delivery
-            var ecommerceHome = invoices.Where(x => x.PickupOptions == PickupOptions.HOMEDELIVERY && x.CompanyType == "Ecommerce").Count();
+            var ecommerceHome = invoices.Where(x => x.PickupOptions == PickupOptions.HOMEDELIVERY && x.CompanyType == ecommerce).Count();
+
             //Ecommerce Terminal Pickup
-            var ecommerceTerminal = invoices.Where(x => x.PickupOptions == PickupOptions.SERVICECENTER && x.CompanyType == "Ecommerce").Count();
+            var ecommerceTerminal = invoices.Where(x => x.PickupOptions == PickupOptions.SERVICECENTER && x.CompanyType == ecommerce).Count();
 
             //Service Centers Revenue By Sales No Service Center Filtering
-            var wow = await SalesPerServiceCenter(invoice);
+            var salesPerServiceCenter = await SalesPerServiceCenter(invoice);
 
             if(filterCriteria.ServiceCentreId > 0)
             {
@@ -172,7 +182,7 @@ namespace GIGLS.Services.Implementation.Report
             result.HomeDeliveries = homeDeliveries;
             result.TerminalPickups = terminalPickups;
 
-            result.Sales = wow;
+            result.Sales = salesPerServiceCenter;
 
             result.AvgOriginCostPerServiceCenter = avgOriginShipmentCostPerSC;
             result.AvgDestCostPerServiceCenter = avgDestShipmentCostPerSC;

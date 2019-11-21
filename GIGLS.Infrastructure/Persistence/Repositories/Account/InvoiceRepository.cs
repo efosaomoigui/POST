@@ -441,6 +441,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                           });
             return result;
         }
+
         public IQueryable<InvoiceView> GetAllFromInvoiceAndShipments(ShipmentCollectionFilterCriteria filterCriteria)
         {
             // get startDate and endDate
@@ -448,10 +449,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            //var shipments = Context.Shipment.AsQueryable();
-            
-            // filter by cancelled shipments
-            var shipments = Context.Shipment.AsQueryable().Where(s => s.IsCancelled == false && s.IsDeleted == false && s.DateCreated >= startDate && s.DateCreated < endDate && s.DepartureCountryId == 1 && s.DestinationCountryId == 1);
+            int[] testingServiceCentre = { 314, 315, 332, 338, 339, 340 };
+
+            // filter by cancelled shipments and exclude all our testing service money from the list
+            var shipments = Context.Shipment.AsQueryable()
+                .Where(s => s.IsCancelled == false && s.IsDeleted == false && s.DateCreated >= startDate && s.DateCreated < endDate  && s.DepartureCountryId == 1 
+                && !testingServiceCentre.Contains(s.DepartureServiceCentreId) && !testingServiceCentre.Contains(s.DestinationServiceCentreId));
+                
 
             var result = (from s in shipments
                           join i in Context.Invoice on s.Waybill equals i.Waybill
