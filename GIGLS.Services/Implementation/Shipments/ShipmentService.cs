@@ -1768,44 +1768,59 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //check if shipment already exists
                 var shipmentexists = await _uow.Shipment.GetAsync(s => s.Waybill == shipment.Waybill);
-                if(shipmentexists !=null)
+                if (shipmentexists != null)
                 {
                     shipmentexists.DestinationServiceCentreId = shipment.DestinationServiceCentreId;
                     shipmentexists.DepartureServiceCentreId = shipment.DepartureServiceCentreId;
                     shipmentexists.DepartureCountryId = shipment.DepartureCountryId;
                     shipmentexists.DestinationCountryId = shipment.DestinationCountryId;
+
+                    var invoice = await _uow.Invoice.GetAsync(s => s.Waybill == shipment.Waybill);
+                    if (invoice != null)
+                    {
+                        invoice.CountryId = shipment.DepartureCountryId;
+                    }
+                    var GeneralLedger = await _uow.GeneralLedger.GetAsync(s => s.Waybill == shipment.Waybill);
+                    if (GeneralLedger != null)
+                    {
+                        GeneralLedger.CountryId = shipment.DepartureCountryId;
+                    }
+                    await _uow.CompleteAsync();
+                    return true;
                 }
-
-                shipment.ApproximateItemsWeight = 0;
-
-                // add serial numbers to the ShipmentItems
-                var serialNumber = 1;
-                foreach (var shipmentItem in shipment.ShipmentItems)
+                else
                 {
-                    shipmentItem.SerialNumber = serialNumber;
+                    shipment.ApproximateItemsWeight = 0;
 
-                    //sum item weight
-                    //check for volumetric weight
-                    if (shipmentItem.IsVolumetric)
+                    // add serial numbers to the ShipmentItems
+                    var serialNumber = 1;
+                    foreach (var shipmentItem in shipment.ShipmentItems)
                     {
-                        double volume = (shipmentItem.Length * shipmentItem.Height * shipmentItem.Width) / 5000;
-                        double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
+                        shipmentItem.SerialNumber = serialNumber;
 
-                        shipment.ApproximateItemsWeight += Weight;
-                    }
-                    else
-                    {
-                        shipment.ApproximateItemsWeight += shipmentItem.Weight;
-                    }
+                        //sum item weight
+                        //check for volumetric weight
+                        if (shipmentItem.IsVolumetric)
+                        {
+                            double volume = (shipmentItem.Length * shipmentItem.Height * shipmentItem.Width) / 5000;
+                            double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
 
-                    serialNumber++;
+                            shipment.ApproximateItemsWeight += Weight;
+                        }
+                        else
+                        {
+                            shipment.ApproximateItemsWeight += shipmentItem.Weight;
+                        }
+
+                        serialNumber++;
+                    }
+                    await CreateInvoice(shipment);
+                    CreateGeneralLedger(shipment);
+                    var newShipment = Mapper.Map<Shipment>(shipment);
+                    _uow.Shipment.Add(newShipment);
+                    //await _uow.CompleteAsync();
+                    return true;
                 }
-                await CreateInvoice(shipment);
-                CreateGeneralLedger(shipment);
-                var newShipment = Mapper.Map<Shipment>(shipment);
-                _uow.Shipment.Add(newShipment);
-                //await _uow.CompleteAsync();
-                return true;
             }
             catch (Exception ex)
             {
