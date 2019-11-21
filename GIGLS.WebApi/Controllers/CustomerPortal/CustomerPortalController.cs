@@ -495,6 +495,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        
         [AllowAnonymous]
         [HttpPost]
         [Route("register")]
@@ -1357,7 +1358,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-
+        //Remove this 
         [AllowAnonymous]
         [HttpPost]
         [Route("addmobilepickuprequestfortimedoutrequests")]
