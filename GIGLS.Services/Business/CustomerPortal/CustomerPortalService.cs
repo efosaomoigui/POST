@@ -698,14 +698,14 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else if (EmailUser.IsRegisteredFromMobile == true)
                 {
-                    throw new GenericException("User with these details already exists!");
+                    throw new GenericException("User already exists!");
                 }
                 else
                 {
                     var phonepartnerdetails = await _uow.Partner.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber) || s.Email == user.Email);
                     if (phonepartnerdetails != null)
                     {
-                        throw new GenericException("User details already Exists as a Partner!");
+                        throw new GenericException("User already Exists as a Partner!");
                     }
                     else
                     {
@@ -871,7 +871,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         if (emailcustomerdetails.IsRegisteredFromMobile == true)
                         {
-                            throw new GenericException("Detail aready exists!");
+                            throw new GenericException("User aready exists!");
                         }
                         else
                         {
@@ -970,7 +970,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else if (EmailUser.IsRegisteredFromMobile == true)
                 {
-                    throw new GenericException("User with these details already exists!");
+                    throw new GenericException("User already exists!");
                 }
                 else
                 {
@@ -1378,7 +1378,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 var User = new UserDTO();
 
-                if (user.Organisation.Trim() == null)
+                if (user.Organisation == null)
                 {
                     user.Organisation = user.FirstName + " " + user.LastName;
                 }
