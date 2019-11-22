@@ -13,7 +13,7 @@ using GIGLS.Core.Enums;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
 {
-    public class UserRepository : AuthRepository<GIGL.GIGLS.Core.Domain.User, GIGLSContext>, IUserRepository//IUserRepository
+    public class UserRepository : AuthRepository<GIGL.GIGLS.Core.Domain.User, GIGLSContext>, IUserRepository
     {
         public UserRepository(GIGLSContext context) : base(context)
         {
@@ -298,6 +298,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             var user = _userManager.Users.Where(x => x.Email.Equals(email) || x.PhoneNumber.Contains(PhoneNumber)).ToList();
             var lastUser = user.LastOrDefault();
             return Task.FromResult(lastUser);
+        }
+
+        public Task<List<GIGL.GIGLS.Core.Domain.User>> GetUserListByEmailorPhoneNumber(string email, string PhoneNumber)
+        {
+            var user = _userManager.Users.Where(x => x.Email.Equals(email) || x.PhoneNumber.Contains(PhoneNumber)).ToList();
+            return Task.FromResult(user);
         }
 
         public Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomer(string emailPhoneCode)

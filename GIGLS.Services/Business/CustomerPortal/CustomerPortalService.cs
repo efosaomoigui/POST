@@ -665,19 +665,53 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             
             var result = new SignResponseDTO();
-            if (user.UserChannelType == UserChannelType.Partner)
+
+            bool checkRegistrationAccess = await CheckRegistrationAccess(user);
+
+            if (checkRegistrationAccess)
             {
-                return await PartnerRegistration(user);
+                if (user.UserChannelType == UserChannelType.Partner)
+                {
+                    return await PartnerRegistration(user);
+                }
+                else if (user.UserChannelType == UserChannelType.IndividualCustomer)
+                {
+                    return await IndividualRegistration(user);
+                }
+                else if (user.UserChannelType == UserChannelType.Ecommerce)
+                {
+                    return await EcommerceRegistration(user);
+                }
             }
-            else if (user.UserChannelType == UserChannelType.IndividualCustomer)
+            else
             {
-                return await IndividualRegistration(user);
+                throw new GenericException("User already exists for this check!");
             }
-            else if (user.UserChannelType == UserChannelType.Ecommerce)
-            {
-                return await EcommerceRegistration(user);
-            }
+
             return result;
+        }
+
+        private async Task<bool> CheckRegistrationAccess(UserDTO user)
+        {
+            var PhoneNumber = user.PhoneNumber.Remove(0, 4);
+            var emailUsers = await _uow.User.GetUserListByEmailorPhoneNumber(user.Email, PhoneNumber);
+            
+            foreach(var u in emailUsers)
+            {
+                if(u.UserChannelType == UserChannelType.Ecommerce || u.UserChannelType == UserChannelType.Partner)
+                {
+                    return false;
+                }
+                else
+                {
+                    if(u.UserChannelType == UserChannelType.IndividualCustomer && u.IsRegisteredFromMobile == true)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
         
         private async Task<SignResponseDTO> PartnerRegistration(UserDTO user)
