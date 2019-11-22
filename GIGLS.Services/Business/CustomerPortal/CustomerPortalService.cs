@@ -685,7 +685,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             else
             {
-                throw new GenericException("User already exists for this check!");
+                throw new GenericException("User already exists!!!");
             }
 
             return result;
