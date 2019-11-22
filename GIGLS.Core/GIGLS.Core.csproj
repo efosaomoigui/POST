@@ -449,6 +449,7 @@
     <Compile Include="DTO\Wallet\WalletTransactionDto.cs" />
     <Compile Include="DTO\Wallet\WalletTransactionSummaryDTO.cs" />
     <Compile Include="DTO\Wallet\WaybillPaymentLogDTO.cs" />
+    <Compile Include="DTO\WebsiteMessageDTO.cs" />
     <Compile Include="DTO\Workshops\WorkshopDTO.cs" />
     <Compile Include="DTO\Zone\DeliveryOptionDTO.cs" />
     <Compile Include="DTO\Zone\DeliveryOptionPriceDTO.cs" />
@@ -781,6 +782,7 @@
     <Compile Include="IServices\Wallet\IWalletService.cs" />
     <Compile Include="IServices\Wallet\IWalletTransactionService.cs" />
     <Compile Include="IServices\Wallet\IWaybillPaymentLogService.cs" />
+    <Compile Include="IServices\Website\IWebsiteService.cs" />
     <Compile Include="IServices\Workshops\IWorkshopService.cs" />
     <Compile Include="IServices\Zone\IDeliveryOptionPriceService.cs" />
     <Compile Include="IServices\Zone\IDeliveryOptionService.cs" />
