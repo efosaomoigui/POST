@@ -229,17 +229,36 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                
+                var IndividualPrice = 0.00M;
                 if (preShipment.PreShipmentItems.Count() == 0)
                 {
                     throw new GenericException("No Preshipitem was added");
                 }
-                //var ShipmentCount = preShipment.PreShipmentItems.Count();
+                
+
+                var ShipmentCount = preShipment.PreShipmentItems.Count();
+
                 var Price = 0.0M;
+
                 decimal DeclaredValue = 0.0M;
+
                 var Country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
+
                 preShipment.CountryId = Country.CountryId;
+
                 var Pickuprice = await GetPickUpPrice(preShipment.VehicleType,preShipment.CountryId);
+
+                //Added to calculate extra charges based on time and distance;
+                if (preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
+                {
+                    var amount = await CalculateGeoDetailsBasedonLocation(preShipment);
+                    if (amount > 0.00M)
+                    {
+                        IndividualPrice = (amount / ShipmentCount);
+                    }
+                }
+                
+                //var IndividualPrice = (amount / ShipmentCount);
                 var PickupValue = Convert.ToDecimal(Pickuprice);
                 var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
                 var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
@@ -274,7 +293,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                         preShipmentItem.CalculatedPrice = await _pricingService.GetMobileSpecialPrice(PriceDTO);
                         preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
-                        //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     }
                     else if (preShipmentItem.ShipmentType == ShipmentType.Regular)
                     {
@@ -282,11 +301,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                         }
                         else
                         {
                             preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                         }
                         //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     }
@@ -831,6 +852,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Dispute.ToString();
+                    pickuprequest.Status = MobilePickUpRequestStatus.Dispute.ToString();
+                    await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
                     await _uow.CompleteAsync();
                 }
 
@@ -1254,8 +1277,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
                 updatedwallet.Balance = updatedwallet.Balance + (decimal)difference;
-                var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobilegrandtotal.Waybill);
-                pickuprequests.Status = MobilePickUpRequestStatus.Resolved.ToString();
+                var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobilegrandtotal.Waybill && s.Status == MobilePickUpRequestStatus.Dispute.ToString());
+                if (pickuprequests != null)
+                {
+                    pickuprequests.Status = MobilePickUpRequestStatus.Resolved.ToString();
+                }
                 await _uow.CompleteAsync();
                 return new { IsResolved = true };
             }
@@ -2361,6 +2387,35 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
             return CountryId;
+        }
+        private async Task<decimal> CalculateGeoDetailsBasedonLocation(PreShipmentMobileDTO item)
+        {
+            var FixedDistance = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GiglgoMaximumFixedDistance, item.CountryId);
+            var FixedPriceForTime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GiglgoFixedPriceForTime, item.CountryId);
+            var FixedPriceForDistance = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GiglgoFixedPriceForDistance, item.CountryId);
+
+            var FixedDistanceValue = int.Parse(FixedDistance.Value);
+            var FixedPriceForTimeValue = Convert.ToDecimal(FixedPriceForTime.Value);
+            var FixedPriceForDistanceValue = Convert.ToDecimal(FixedPriceForDistance.Value);
+            var amount = 0.00M;
+            var Location = new LocationDTO
+            {
+                DestinationLatitude = (double)item.ReceiverLocation.Latitude,
+                DestinationLongitude = (double)item.ReceiverLocation.Longitude,
+                OriginLatitude = (double)item.SenderLocation.Latitude,
+                OriginLongitude = (double)item.SenderLocation.Longitude
+            };
+            RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
+            var time = (details.rows[0].elements[0].duration.value / 60);
+            var distance = (details.rows[0].elements[0].distance.value / 1000);
+            amount = time * FixedPriceForTimeValue;
+            if (distance > FixedDistanceValue)
+            {
+                amount += distance * FixedPriceForDistanceValue;
+                //amount += time * 7.00M;
+            }
+            return amount;
+
         }
 
 
