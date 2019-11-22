@@ -93,6 +93,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> AddRatings(MobileRatingDTO rating);
         Task<object> CancelShipment(string Waybill);
         Task<UserDTO> IsOTPValid(int OTP);
+        Task<UserDTO> ValidateOTP(OTPDTO otp);
         Task<UserDTO> CheckDetails(string user, string userchanneltype);
         Task<bool> CreateCustomer(string CustomerCode);
         Task<PartnerDTO> CreatePartner(string CustomerCode);

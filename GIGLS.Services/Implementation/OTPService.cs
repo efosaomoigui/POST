@@ -53,6 +53,41 @@ namespace GIGLS.Services.Implementation
             return userdto;
         }
 
+        public async Task<UserDTO> ValidateOTP(OTPDTO otp)
+        {
+            var userdto = new UserDTO();
+
+            //get the otp details using the email 
+            var result = _uow.OTP.GetAllAsQueryable().Where(x => x.EmailAddress == otp.EmailAddress && x.Otp == otp.Otp).ToList();
+            var otpbody = result.LastOrDefault();
+
+            if (otpbody == null)
+            {
+                throw new GenericException("Invalid OTP");
+            }
+            else
+            {
+                DateTime LatestTime = DateTime.Now;
+
+                TimeSpan span = LatestTime.Subtract(otpbody.DateCreated);
+                int difference = Convert.ToInt32(span.TotalMinutes);
+                if (difference < 5)
+                {
+                    userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true);
+                    _uow.OTP.Remove(otpbody);
+                    await _uow.CompleteAsync();
+                }
+                else
+                {
+                    _uow.OTP.Remove(otpbody);
+                    await _uow.CompleteAsync();
+                    throw new GenericException("OTP has expired!.Kindly Resend OTP.");
+                }
+            }
+                       
+            return userdto;
+        }
+
         public async Task<OTPDTO> GenerateOTP(UserDTO user)
         {
             try

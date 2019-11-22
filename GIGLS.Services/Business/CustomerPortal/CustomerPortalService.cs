@@ -1284,6 +1284,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _otpService.IsOTPValid(OTP);
         }
 
+        public async Task<UserDTO> ValidateOTP(OTPDTO otp)
+        {
+            return await _otpService.ValidateOTP(otp);
+        }
+
         public async Task<UserDTO> CheckDetails(string user, string userchanneltype)
         {
             string emailPhone = "";

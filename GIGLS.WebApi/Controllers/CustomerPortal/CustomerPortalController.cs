@@ -657,6 +657,74 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [AllowAnonymous]
         [HttpPost]
+        [Route("verifyotp")]
+        public async Task<IServiceResponse<JObject>> ValidateOTP(OTPDTO otp)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var userDto = await _portalService.ValidateOTP(otp);
+                if (userDto != null && userDto.IsActive == true)
+                {
+                    string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+                    string getTokenResponse;
+
+                    using (var client = new HttpClient())
+                    {
+                        //setup client
+                        client.BaseAddress = new Uri(apiBaseUri);
+                        client.DefaultRequestHeaders.Accept.Clear();
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                        //setup login data
+                        var formContent = new FormUrlEncodedContent(new[]
+                            {
+                         new KeyValuePair<string, string>("grant_type", "password"),
+                         new KeyValuePair<string, string>("Username", userDto.Username),
+                         new KeyValuePair<string, string>("Password", userDto.UserChannelPassword),
+                         });
+
+                        //setup login data
+                        HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
+
+                        if (!responseMessage.IsSuccessStatusCode)
+                        {
+                            throw new GenericException("Operation could not complete login successfully:");
+                        }
+                        else
+                        {
+                            userDto = await _portalService.GenerateReferrerCode(userDto);
+                        }
+
+                        //get access token from response body
+                        var responseJson = await responseMessage.Content.ReadAsStringAsync();
+                        var jObject = JObject.Parse(responseJson);
+
+                        getTokenResponse = jObject.GetValue("access_token").ToString();
+
+                        return new ServiceResponse<JObject>
+                        {
+                            Object = jObject,
+                            ReferrerCode = userDto.Referrercode
+                        };
+                    }
+                }
+                else
+                {
+                    var data = new { IsActive = false };
+
+                    var jObject = JObject.FromObject(data);
+
+                    return new ServiceResponse<JObject>
+                    {
+                        ShortDescription = "User has not been verified",
+                        Object = jObject
+                    };
+                }
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
         [Route("resendotp")]
         public async Task<IServiceResponse<SignResponseDTO>> ResendOTP(UserDTO user)
         {
