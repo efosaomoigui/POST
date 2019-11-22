@@ -3,9 +3,6 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Website;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Website
@@ -13,6 +10,7 @@ namespace GIGLS.Services.Implementation.Website
     public class WebsiteService : IWebsiteService
     {
         private readonly IMessageSenderService _messageSenderService;
+
         public WebsiteService(IMessageSenderService messageSenderService)
         {
             _messageSenderService = messageSenderService;
@@ -24,8 +22,7 @@ namespace GIGLS.Services.Implementation.Website
             {
                 var messageType = MessageType.WEBPICKUP;
                 var emailSmsType = EmailSmsType.Email;
-                
-                
+                                
                 var result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
                 return await Task.FromResult(result);
             }
@@ -40,7 +37,6 @@ namespace GIGLS.Services.Implementation.Website
             {
                 var messageType = MessageType.WEBQUOTE;
                 var emailSmsType = EmailSmsType.Email;
-
 
                 var result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
                 return await Task.FromResult(result);
