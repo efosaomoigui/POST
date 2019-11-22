@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.IServices;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Services.Implementation;
 using System.Linq;
@@ -35,6 +36,31 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                     if (token == key)
                     {
                         await _portalService.SendPickUpRequestMessage(userId);
+                        response.Object = true;
+                    }
+                }
+                return response;
+            });
+        }
+
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("addmobilepickuprequestfortimedoutrequests")]
+        public async Task<IServiceResponse<bool>> AddPickupRequestForTimedOutRequest([FromBody] MobilePickUpRequestsDTO PickupRequest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<bool>();
+                var request = Request;
+                var headers = request.Headers;
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _portalService.Decrypt();
+                    string token = headers.GetValues("api_key").FirstOrDefault();
+                    if (token == key)
+                    {
+                        var shipmentItem = await _portalService.AddMobilePickupRequest(PickupRequest);
                         response.Object = true;
                     }
                 }

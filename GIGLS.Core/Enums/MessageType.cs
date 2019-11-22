@@ -38,6 +38,8 @@
         SMIM, //SHIPMENT MISSED DURING ARRIVAL TRANSIT MANIFEST
         FMS,  //FOUND MISSING SHIPMENT
         OTP, //Message for One Time Password
-        UDM //Message for shipment that has exceeded delivery time
+        UDM, //Message for shipment that has exceeded delivery time
+        WEBPICKUP, //Message for website mail for Schedlue Pickup
+        WEBQUOTE //Message for website mail for Request Quote
     } 
 }
