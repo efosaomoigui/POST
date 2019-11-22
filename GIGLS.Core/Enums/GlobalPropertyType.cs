@@ -41,7 +41,10 @@
         ActivationCampaignStartDate,
         ActivationCampaignEndDate,
         ReferralBonusForActivationCampaign,
-        DiscountPercentage
+        DiscountPercentage,
+        GiglgoMaximumFixedDistance,
+        GiglgoFixedPriceForDistance,
+        GiglgoFixedPriceForTime
 
     }
 }
