@@ -504,6 +504,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 var checkIfWaybillExistForGroup = await _uow.GroupWaybillNumberMapping.FindAsync(x => x.GroupWaybillNumber == groupWaybillNumber);
                 if(checkIfWaybillExistForGroup.Count() == 0)
                 {
+                    //Delete the manifest mapping if groupway has been mapped to manifest
+                    _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupWaybillNumberMapping);
+
                     await _groupWaybillNumberService.RemoveGroupWaybillNumber(groupWaybillNumberDTO.GroupWaybillNumberId);
                 }
             }
