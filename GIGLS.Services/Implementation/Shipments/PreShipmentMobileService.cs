@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core;
@@ -17,7 +16,6 @@ using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Infrastructure;
 using GIGLS.Core.DTO.Wallet;
-using GIGLS.CORE.DTO.Shipments;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.DTO.Zone;
@@ -25,15 +23,10 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Partnership;
 using GIGLS.Core.DTO.Partnership;
-using System.Configuration;
-using GIGLS.Core.IMessage;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.DTO.Customers;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.Domain.Partnership;
-using System.IO;
-using System.Drawing;
-using System.Web;
 using GIGLS.Core.DTO.User;
 using VehicleType = GIGLS.Core.Domain.VehicleType;
 using Hangfire;
@@ -686,65 +679,48 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException("Error: You cannot track this waybill number.");
             }
         }
+        
         public async Task<PreShipmentMobileDTO> AddMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest)
         {
             try
             {
-                var newPreShipment = new PreShipmentMobileDTO();
-                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
                 if (pickuprequest.UserId == null)
                 {
                     pickuprequest.UserId = await _userService.GetCurrentUserId();
                 }
-                if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
-                {
-                    var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.UserId == pickuprequest.UserId && s.Status == MobilePickUpRequestStatus.Rejected.ToString());
-                    if (request == null)
-                    {
-                        await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
-                    }
-                    else
-                    {
-                        throw new GenericException($"You have rejected shipment with waybill number: {pickuprequest.Waybill} already");
-                    }
-                }
-                if (pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString())
-                {
-                    var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.UserId == pickuprequest.UserId && s.Status == MobilePickUpRequestStatus.TimedOut.ToString());
-                    if (request == null)
-                    {
-                        await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
-                    }
-                    else
-                    {
-                        throw new GenericException($"Shipment with waybill number: {pickuprequest.Waybill} exists already");
-                    }
-                }
 
-                else
+                var newPreShipment = new PreShipmentMobileDTO();
+                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
+
+                if (preshipmentmobile != null)
                 {
-                    //var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.Status == MobilePickUpRequestStatus.Accepted.ToString());
-                    if (preshipmentmobile != null)
+                    if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString())
                     {
-                        if (preshipmentmobile.shipmentstatus == "Shipment created")
+                        var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.UserId == pickuprequest.UserId 
+                        && (s.Status == MobilePickUpRequestStatus.Rejected.ToString() || s.Status == MobilePickUpRequestStatus.TimedOut.ToString()));
+
+                        if (request == null)
                         {
-                            pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
                             await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
                         }
                         else
                         {
-                            throw new GenericException($"Shipment has already been accepted..");
+                            throw new GenericException($"Shipment with waybill number: {pickuprequest.Waybill} exists already");
                         }
                     }
-                }
-                //var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
-                if (preshipmentmobile != null)
-                {
-                    var Country = await _uow.Country.GetCountryByStationId(preshipmentmobile.SenderStationId);
+                    else if (preshipmentmobile.shipmentstatus == "Shipment created")
+                    {
+                        pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
+                        await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
+                    }
+                    else
+                    {
+                        throw new GenericException($"Shipment has already been accepted..");
+                    }
+                                                        
 
                     if (pickuprequest.ServiceCentreId != null)
                     {
-
                         var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickuprequest.ServiceCentreId);
                         preshipmentmobile.ServiceCentreAddress = DestinationServiceCentreId.Address;
                         var Locationdto = new LocationDTO
@@ -754,40 +730,43 @@ namespace GIGLS.Services.Implementation.Shipments
                         };
                         var LOcation = Mapper.Map<Location>(Locationdto);
                         preshipmentmobile.serviceCentreLocation = LOcation;
-
                     }
+
                     if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString())
                     {
                         preshipmentmobile.shipmentstatus = "Assigned for Pickup";
-                        
 
                         await ScanMobileShipment(new ScanDTO
                         {
                             WaybillNumber = pickuprequest.Waybill,
                             ShipmentScanStatus = ShipmentScanStatus.MAPT
                         });
-                       
+
                     }
+
                     if (pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString())
                     {
                         preshipmentmobile.shipmentstatus = "Shipment created";
                     }
-                    
+
                     newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
+
                     if (pickuprequest.ServiceCentreId != null)
                     {
-
                         newPreShipment.ReceiverAddress = preshipmentmobile.ServiceCentreAddress;
                         newPreShipment.ReceiverLocation.Latitude = preshipmentmobile.serviceCentreLocation.Latitude;
                         newPreShipment.ReceiverLocation.Longitude = preshipmentmobile.serviceCentreLocation.Longitude;
-
                     }
-                    if (Country !=null)
+                    
+                    var Country = await _uow.Country.GetCountryByStationId(preshipmentmobile.SenderStationId);
+
+                    if (Country != null)
                     {
                         newPreShipment.CurrencyCode = Country.CurrencyCode;
                         newPreShipment.CurrencySymbol = Country.CurrencySymbol;
                     }
-                   await _uow.CompleteAsync();
+
+                    await _uow.CompleteAsync();
                 }
                 else
                 {
