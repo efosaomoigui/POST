@@ -479,7 +479,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               IsGrouped = s.IsGrouped,
                               DepartureCountryId = s.DepartureCountryId,
                               DestinationCountryId = s.DestinationCountryId,
-                              PickupOptions = s.PickupOptions
+                              PickupOptions = s.PickupOptions,
+                              ApproximateItemsWeight = s.ApproximateItemsWeight
                           });
             return result;
         }
@@ -642,6 +643,20 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               Revenue = sales.Sum(p => p.GrandTotal)
                           }).OrderByDescending(i => i.Revenue).ToList();
                        
+            var results = result.ToList();
+            return await Task.FromResult(results);
+        }
+
+        public async Task<List<object>> MostShippedItemsByWeight(List<InvoiceView> invoice)
+        {
+            IEnumerable<object> result = (from s in invoice
+                                          group s by s.ApproximateItemsWeight into weight
+                                          select new
+                                          {
+                                              Weight = weight.Key,
+                                              WeightCount = weight.Count()
+                                          }).OrderByDescending(i => i.WeightCount).Take(5).ToList();
+
             var results = result.ToList();
             return await Task.FromResult(results);
         }

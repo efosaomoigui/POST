@@ -38,6 +38,11 @@ namespace GIGLS.Core.DTO.Account
 
         public int CreatedShipments { get; set; }
         public int DepartedShipments { get; set; }
+        public double TotalWeight { get; set; }
+        public decimal TotalShipmentAvg{ get; set; }
+
+        public List<object> WeightData { get; set; }
+        public decimal AvgLagosShipment { get; set; }
 
     }
 }

@@ -1,9 +1,12 @@
-﻿using GIGLS.Core;
+﻿using AutoMapper;
+using GIGLS.Core;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Admin;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Report;
+using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.View;
 using GIGLS.Core.View.AdminReportView;
 using GIGLS.CORE.Enums;
@@ -18,10 +21,12 @@ namespace GIGLS.Services.Implementation.Report
     public class AdminReportService : IAdminReportService
     {
         private readonly IUnitOfWork _uow;
+        private IServiceCentreService _serviceCenterService;
 
-        public AdminReportService(IUnitOfWork uow)
+        public AdminReportService(IUnitOfWork uow, IServiceCentreService serviceCenterService)
         {
             _uow = uow;
+            _serviceCenterService = serviceCenterService;
         }
 
         public async Task<AdminReportDTO> GetAdminReport(ShipmentCollectionFilterCriteria filterCriteria)
@@ -162,6 +167,27 @@ namespace GIGLS.Services.Implementation.Report
             //Shipments departed service center
             departedShipments = invoices.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.DSC || x.ShipmentScanStatus == ShipmentScanStatus.DTR || x.ShipmentScanStatus == ShipmentScanStatus.DPC).Count();
 
+            //Total Weight
+            var totalWeight = invoices.Sum(x => x.ApproximateItemsWeight);
+
+            //Average Price of Total Shipments
+            var avgTotalShipments = revenue / ((shipmentOrdered == 0) ? 1 : shipmentOrdered);
+
+            //Most Shipped Items By Weight
+            var weight = await MostShippedItemByWeight(invoices);
+
+            //Average Shipment Cost for only Shipments within Lagos
+            int lagosStationId = 4;
+
+            // get the service centre
+            var serviceCentres = await _serviceCenterService.GetServiceCentresByStationId(lagosStationId);
+            int[] serviceCenterIds = serviceCentres.Select(s => s.ServiceCentreId).ToArray();
+            
+            var lagosShipments = invoice.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId) && serviceCenterIds.Contains(s.DestinationServiceCentreId));
+            var sumlagosShipments = lagosShipments.Sum(x => x.GrandTotal);
+            var countLagosShipments = lagosShipments.Count();
+            var avgLagosShipments = sumlagosShipments / ((countLagosShipments == 0 ? 1 : countLagosShipments));
+
             result.Revenue = revenue;
             result.ShipmentDelivered = shipmentDeliverd;
             result.ShipmentOrdered = shipmentOrdered;
@@ -183,12 +209,14 @@ namespace GIGLS.Services.Implementation.Report
             result.TerminalPickups = terminalPickups;
 
             result.Sales = salesPerServiceCenter;
-
             result.AvgOriginCostPerServiceCenter = avgOriginShipmentCostPerSC;
             result.AvgDestCostPerServiceCenter = avgDestShipmentCostPerSC;
-
             result.CreatedShipments = createdShipments;
             result.DepartedShipments = departedShipments;
+            result.TotalWeight = totalWeight;
+            result.TotalShipmentAvg = avgTotalShipments;
+            result.WeightData = weight;
+            result.AvgLagosShipment = avgLagosShipments;
 
             return result;
         }
@@ -197,6 +225,12 @@ namespace GIGLS.Services.Implementation.Report
         {
             var salesData = await _uow.Invoice.SalesPerServiceCenter(invoice);
             return salesData;
+        }
+
+        private async Task<List<object>> MostShippedItemByWeight(List<InvoiceView> invoice)
+        {
+            var weightData = await _uow.Invoice.MostShippedItemsByWeight(invoice);
+            return weightData;
         }
 
         private async Task<List<Report_MostShippedItemByWeight>> GetMostShippedItemByWeights()
