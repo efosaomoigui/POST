@@ -222,36 +222,17 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var IndividualPrice = 0.00M;
+
                 if (preShipment.PreShipmentItems.Count() == 0)
                 {
                     throw new GenericException("No Preshipitem was added");
                 }
-                
-
-                var ShipmentCount = preShipment.PreShipmentItems.Count();
-
+                //var ShipmentCount = preShipment.PreShipmentItems.Count();
                 var Price = 0.0M;
-
                 decimal DeclaredValue = 0.0M;
-
                 var Country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
-
                 preShipment.CountryId = Country.CountryId;
-
-                var Pickuprice = await GetPickUpPrice(preShipment.VehicleType,preShipment.CountryId);
-
-                //Added to calculate extra charges based on time and distance;
-                if (preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
-                {
-                    var amount = await CalculateGeoDetailsBasedonLocation(preShipment);
-                    if (amount > 0.00M)
-                    {
-                        IndividualPrice = (amount / ShipmentCount);
-                    }
-                }
-                
-                //var IndividualPrice = (amount / ShipmentCount);
+                var Pickuprice = await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId);
                 var PickupValue = Convert.ToDecimal(Pickuprice);
                 var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
                 var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
@@ -286,7 +267,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                         preShipmentItem.CalculatedPrice = await _pricingService.GetMobileSpecialPrice(PriceDTO);
                         preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
-                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+                        //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     }
                     else if (preShipmentItem.ShipmentType == ShipmentType.Regular)
                     {
@@ -294,13 +275,11 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
-                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                         }
                         else
                         {
                             preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
-                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                         }
                         //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     }
@@ -319,9 +298,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice);
                     }
                     Price += (decimal)preShipmentItem.CalculatedPrice;
-                    
+
                 };
-                
+
                 decimal EstimatedDeclaredPrice = Convert.ToDecimal(DeclaredValue);
                 preShipment.DeliveryPrice = Price * PercentageTobeUsed;
                 preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
@@ -344,7 +323,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
                 return returnprice;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw;
             }
