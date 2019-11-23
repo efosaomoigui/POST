@@ -644,49 +644,59 @@ namespace GIGLS.Services.Business.CustomerPortal
             return items;
         }
 
-        public async Task<SignResponseDTO> SignUp(UserDTO user) 
+        public async Task<SignResponseDTO> SignUp(UserDTO user)
         {
-            if(user.Email != null)
-            {
-                user.Email = user.Email.Trim();
-                user.Email = user.Email.ToLower();
-            }
-
-            if ((user.UserActiveCountryId).ToString() == null || user.UserActiveCountryId == 0)
-            {
-                var CountryId = await _preShipmentMobileService.GetCountryId();
-                user.UserActiveCountryId = CountryId;   
-            }
-            //to be used when we start getting the country name of the user!!!
-            else if (user.MobileCountryName != null)
-            {
-                var countryid = await _uow.Country.GetAsync(s => s.CountryName.ToLower().Equals(user.MobileCountryName.ToLower()));
-                user.UserActiveCountryId = countryid.CountryId;
-            }
-            
             var result = new SignResponseDTO();
 
-            bool checkRegistrationAccess = await CheckRegistrationAccess(user);
-
-            if (checkRegistrationAccess)
+            if (user.UserChannelType == UserChannelType.Ecommerce)
             {
-                if (user.UserChannelType == UserChannelType.Partner)
-                {
-                    return await PartnerRegistration(user);
-                }
-                else if (user.UserChannelType == UserChannelType.IndividualCustomer)
-                {
-                    return await IndividualRegistration(user);
-                }
-                else if (user.UserChannelType == UserChannelType.Ecommerce)
-                {
-                    return await EcommerceRegistration(user);
-                }
+                throw new GenericException("Send a mail to ecommerce@goglogistics.ng to get registered.");
             }
             else
             {
-                throw new GenericException("User already exists for this check!");
+
+                if (user.Email != null)
+                {
+                    user.Email = user.Email.Trim();
+                    user.Email = user.Email.ToLower();
+                }
+
+                if ((user.UserActiveCountryId).ToString() == null || user.UserActiveCountryId == 0)
+                {
+                    var CountryId = await _preShipmentMobileService.GetCountryId();
+                    user.UserActiveCountryId = CountryId;
+                }
+                //to be used when we start getting the country name of the user!!!
+                else if (user.MobileCountryName != null)
+                {
+                    var countryid = await _uow.Country.GetAsync(s => s.CountryName.ToLower().Equals(user.MobileCountryName.ToLower()));
+                    user.UserActiveCountryId = countryid.CountryId;
+                }
+
+
+                bool checkRegistrationAccess = await CheckRegistrationAccess(user);
+
+                if (checkRegistrationAccess)
+                {
+                    if (user.UserChannelType == UserChannelType.Partner)
+                    {
+                        return await PartnerRegistration(user);
+                    }
+                    else if (user.UserChannelType == UserChannelType.IndividualCustomer)
+                    {
+                        return await IndividualRegistration(user);
+                    }
+                    else if (user.UserChannelType == UserChannelType.Ecommerce)
+                    {
+                        return await EcommerceRegistration(user);
+                    }
+                }
+                else
+                {
+                    throw new GenericException("User already exists!!!");
+                }
             }
+
 
             return result;
         }
@@ -1008,8 +1018,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else
                 {
-                    var emailcompanydetails = await _uow.Company.GetAsync(s => s.Email == user.Email || s.PhoneNumber.Contains(PhoneNumber));
-                                       
+                    var emailcompanydetails = await _uow.Company.GetAsync(s => s.Email == user.Email || s.PhoneNumber.Contains(PhoneNumber));                                       
 
                     if (emailcompanydetails != null)
                     {

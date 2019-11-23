@@ -9,7 +9,6 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
@@ -29,8 +28,7 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task AddMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest)
         {
             try
-            {
-               
+            {               
                 var newMobilePickUpRequest = Mapper.Map<MobilePickUpRequests>(PickUpRequest);
                 _uow.MobilePickUpRequests.Add(newMobilePickUpRequest);
                 await _uow.CompleteAsync();
