@@ -53,12 +53,40 @@ namespace GIGLS.Services.Implementation
             return userdto;
         }
 
+        private string ExtractPhoneNumber(string phoneNumber)
+        {
+            phoneNumber = phoneNumber.Trim();
+
+            bool IsPhone = Regex.IsMatch(phoneNumber, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
+
+            if (IsPhone)
+            {
+                if(!(phoneNumber.StartsWith("0") || phoneNumber.StartsWith("+"))){
+                    phoneNumber = phoneNumber.Remove(0, 4);
+                }
+
+                if (phoneNumber.StartsWith("+"))
+                {
+                    phoneNumber = phoneNumber.Remove(0, 4);
+                }
+
+                if (phoneNumber.StartsWith("0"))
+                {
+                    phoneNumber = phoneNumber.Remove(0, 1);
+                }
+            }
+
+            return phoneNumber;
+        }
+
         public async Task<UserDTO> ValidateOTP(OTPDTO otp)
         {
             var userdto = new UserDTO();
 
+            otp.EmailAddress = ExtractPhoneNumber(otp.EmailAddress);
+
             //get the otp details using the email 
-            var result = _uow.OTP.GetAllAsQueryable().Where(x => x.EmailAddress == otp.EmailAddress && x.Otp == otp.Otp).ToList();
+            var result = _uow.OTP.GetAllAsQueryable().Where(x => x.Otp == otp.Otp && (x.EmailAddress.ToLower() == otp.EmailAddress.ToLower() || x.PhoneNumber.Contains(otp.EmailAddress))).ToList();
             var otpbody = result.LastOrDefault();
 
             if (otpbody == null)

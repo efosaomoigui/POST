@@ -8,12 +8,16 @@ namespace GIGLS.Core.Domain.Partnership
     {
         public int PartnerId { get; set; }
 
+        [MaxLength(100)]
         public string PartnerName { get; set; }
 
         [MaxLength(100)]
         public string PartnerCode { get; set; }
 
+        [MaxLength(100)]
         public string FirstName { get; set; }
+
+        [MaxLength(100)]
         public string LastName { get; set; }
 
         [MaxLength(100)]
@@ -30,7 +34,9 @@ namespace GIGLS.Core.Domain.Partnership
 
         [MaxLength(128)]
         public string UserId { get; set; }
+
         public bool IsActivated { get; set; }
+
         [MaxLength(100)]
         public string VehicleType { get; set; }
 
@@ -43,18 +49,14 @@ namespace GIGLS.Core.Domain.Partnership
 
         [MaxLength(100)]
         public string AccountName { get; set; }
+
+        [MaxLength(100)]
         public string VehicleLicenseNumber { get; set; }
+
         public DateTime? VehicleLicenseExpiryDate { get; set; }
 
         public string VehicleLicenseImageDetails { get; set; }
         public int CountryId { get; set; }
 
-
-        // Foreign Key
-        // public int PartnerApplicationId { get; set; }
-        //public virtual PartnerApplication PartnerApplication { get; set; }
-
-        // public int WalletId { get; set; }
-        //  public virtual Wallet.Wallet Wallet { get; set; }
     }
 }
