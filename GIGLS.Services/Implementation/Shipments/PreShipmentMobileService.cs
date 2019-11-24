@@ -2369,8 +2369,8 @@ namespace GIGLS.Services.Implementation.Shipments
             amount = time * FixedPriceForTimeValue;
             if (distance > FixedDistanceValue)
             {
-                amount += distance * FixedPriceForDistanceValue;
-                //amount += time * 7.00M;
+                var distancedifference = (distance - FixedDistanceValue);
+                amount += distancedifference * FixedPriceForDistanceValue;
             }
             return amount;
 
