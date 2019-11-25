@@ -72,8 +72,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                         LastName = partner.LastName,
                                         IdentificationNumber = "",
                                         WalletPan = "",
-                                        CountryId = partner.CountryId,
-                                        Country = _context.Country.Where(x => x.CountryId == partner.CountryId).Select(x => new CountryDTO
+                                        UserActiveCountryId = partner.UserActiveCountryId,
+                                        Country = _context.Country.Where(x => x.CountryId == partner.UserActiveCountryId).Select(x => new CountryDTO
                                         {
                                             CountryId = x.CountryId,
                                             CountryName = x.CountryName,

@@ -787,7 +787,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 PhoneNumber = user.PhoneNumber,
                                 UserId = EmailUser.Id,
                                 IsActivated = false,
-                                CountryId = user.UserActiveCountryId
+                                UserActiveCountryId = user.UserActiveCountryId
                             };
                             _uow.Partner.Add(partnerDTO);
 
@@ -855,7 +855,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     PhoneNumber = user.PhoneNumber,
                     UserId = FinalUser.Id,
                     IsActivated = false,
-                    CountryId = user.UserActiveCountryId
+                    UserActiveCountryId = user.UserActiveCountryId
                 };
                 _uow.Partner.Add(partnerDTO);
 

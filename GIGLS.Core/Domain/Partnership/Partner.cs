@@ -56,7 +56,8 @@ namespace GIGLS.Core.Domain.Partnership
         public DateTime? VehicleLicenseExpiryDate { get; set; }
 
         public string VehicleLicenseImageDetails { get; set; }
-        public int CountryId { get; set; }
+
+        public int UserActiveCountryId { get; set; }
 
     }
 }
