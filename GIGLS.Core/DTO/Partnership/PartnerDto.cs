@@ -28,7 +28,7 @@ namespace GIGLS.Core.DTO.Partnership
 
         public string PictureUrl { get; set; }
         public string BankName { get; set; }
-        public long? AccountNumber { get; set; }
+        public string AccountNumber { get; set; }
 
         public string AccountName { get; set; }
         public string VehicleLicenseNumber { get; set; }
