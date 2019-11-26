@@ -43,5 +43,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string PictureName { get; set; }
 
         public DateTime? PictureDate { get; set; }
+        public string WeightRange { get; set; }
     }
 }
