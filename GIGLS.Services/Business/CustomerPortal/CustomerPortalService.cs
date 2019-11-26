@@ -650,7 +650,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (user.UserChannelType == UserChannelType.Ecommerce)
             {
-                throw new GenericException("Send a mail to ecommerce@goglogistics.ng to get registered.");
+                var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
+                throw new GenericException($"{ecommerceEmail.Value}");
             }
             else
             {
