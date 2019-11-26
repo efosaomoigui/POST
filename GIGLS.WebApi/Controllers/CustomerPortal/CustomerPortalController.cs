@@ -1354,6 +1354,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("getallstations")]
         public async Task<IServiceResponse<Dictionary<string, List<StationDTO>>>> getstations()
@@ -1395,6 +1396,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("getactivelgas")]
         public async Task<IServiceResponse<IEnumerable<LGADTO>>> GetActiveLGAs()
