@@ -995,8 +995,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     if(preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString())
                     {
-                        if (preshipmentmobile.IsApproved == true)
-                        {
+                       
                             pickuprequest.Status = MobilePickUpRequestStatus.Delivered.ToString();
                             await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
                             var Pickupprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId);
@@ -1031,8 +1030,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                 UserId = userId
                             };
                             var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
-                        }
-                        return;
+                            return;
                     }
                     else
                     {
