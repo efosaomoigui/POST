@@ -866,8 +866,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     customerid = companyid.CompanyId;
                 }
 
-            var MobileShipment = new ShipmentDTO
-            {
+                var MobileShipment = new ShipmentDTO
+                {
                 Waybill = preshipmentmobile.Waybill,
                 ReceiverName = preshipmentmobile.ReceiverName,
                 ReceiverPhoneNumber = preshipmentmobile.ReceiverPhoneNumber,
@@ -904,21 +904,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     Quantity = s.Quantity
 
                 }).ToList()
-            };
-            var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
-            preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.PickedUp.ToString();
-            preshipmentmobile.IsConfirmed = true;
+              };
+              var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
+              preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.PickedUp.ToString();
+              preshipmentmobile.IsConfirmed = true;
 
                await _uow.CompleteAsync();
 
-                await ScanMobileShipment(new ScanDTO
-                {
+               await ScanMobileShipment(new ScanDTO
+               {
                     WaybillNumber = pickuprequest.Waybill,
                     ShipmentScanStatus = ShipmentScanStatus.MSHC
-                });
+               });
 
-            var item = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
-            await CheckDeliveryTimeAndSendMail(item);
+              var item = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
+              await CheckDeliveryTimeAndSendMail(item);
 
             }
             catch (Exception ex)
