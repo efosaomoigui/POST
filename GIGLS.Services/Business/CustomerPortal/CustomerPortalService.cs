@@ -1417,7 +1417,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
         public async Task AddWallet(WalletDTO wallet)
         {
-            await _walletService.AddWallet(wallet);
+            var exists = await _uow.Wallet.ExistAsync(s => s.CustomerCode == wallet.CustomerCode);
+            if (!exists)
+            {
+                await _walletService.AddWallet(wallet);
+            }
         }
        
         private async Task<UserDTO> CreateUserBasedOnCustomerType (UserDTO user)

@@ -147,7 +147,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         preShipmentDTO.Shipmentype = ShipmentType.Ecommerce;
                     }
-                        PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
+                    preShipmentDTO.IsFromShipment = true;
+                    PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
                   }
                
                 var wallet = await _walletService.GetWalletBalance();
@@ -227,17 +228,30 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("No Preshipitem was added");
                 }
-                //var ShipmentCount = preShipment.PreShipmentItems.Count();
+                var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
+                
+                var ShipmentCount = preShipment.PreShipmentItems.Count();
+
                 var Price = 0.0M;
+
+                var amount = 0.0M;
+                var IndividualPrice = 0.0M;
                 decimal DeclaredValue = 0.0M;
                 var Country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
                 preShipment.CountryId = Country.CountryId;
                 var Pickuprice = await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId);
+                if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
+                {
+                    amount = await CalculateGeoDetailsBasedonLocation(preShipment);
+                    IndividualPrice = (amount / ShipmentCount);
+                }
                 var PickupValue = Convert.ToDecimal(Pickuprice);
                 var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
                 var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
                 var Percentage = (Convert.ToDecimal(DiscountPercent.Value));
                 var PercentageTobeUsed = ((100M - Percentage) / 100M);
+                
+                
                 foreach (var preShipmentItem in preShipment.PreShipmentItems)
                 {
                     if (preShipmentItem.Quantity == 0)
@@ -267,7 +281,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                         preShipmentItem.CalculatedPrice = await _pricingService.GetMobileSpecialPrice(PriceDTO);
                         preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
-                        //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     }
                     else if (preShipmentItem.ShipmentType == ShipmentType.Regular)
                     {
@@ -275,11 +289,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                         }
                         else
                         {
                             preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                         }
                         //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     }
@@ -298,9 +314,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice);
                     }
                     Price += (decimal)preShipmentItem.CalculatedPrice;
+                   
 
                 };
-
                 decimal EstimatedDeclaredPrice = Convert.ToDecimal(DeclaredValue);
                 preShipment.DeliveryPrice = Price * PercentageTobeUsed;
                 preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
@@ -947,6 +963,19 @@ namespace GIGLS.Services.Implementation.Shipments
                     await _uow.CompleteAsync();
 
                     var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
+                    var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
+                    var transaction = new WalletTransactionDTO
+                    {
+                        WalletId = wallet.WalletId,
+                        CreditDebitType = CreditDebitType.Credit,
+                        Amount = price,
+                        ServiceCentreId = defaultServiceCenter.ServiceCentreId,
+                        Waybill = preshipmentmobile.Waybill,
+                        Description = "Credit for Delivered Shipment Request",
+                        PaymentType = PaymentType.Online,
+                        UserId = userId
+                    };
+                    var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
 
                     await ScanMobileShipment(new ScanDTO
                     {
@@ -966,8 +995,43 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     if(preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString())
                     {
-                        pickuprequest.Status = MobilePickUpRequestStatus.Delivered.ToString();
-                        await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
+                        if (preshipmentmobile.IsApproved == true)
+                        {
+                            pickuprequest.Status = MobilePickUpRequestStatus.Delivered.ToString();
+                            await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
+                            var Pickupprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId);
+                            var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
+                            var Partner = new PartnerPayDTO
+                            {
+                                ShipmentPrice = preshipmentmobile.GrandTotal,
+                                PickUprice = Pickupprice
+                            };
+                            decimal price = await _partnertransactionservice.GetPriceForPartner(Partner);
+                            var partneruser = await _userService.GetUserById(userId);
+                            var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode);
+                            wallet.Balance = wallet.Balance + price;
+                            var partnertransactions = new PartnerTransactionsDTO
+                            {
+                                Destination = preshipmentmobile.ReceiverAddress,
+                                Departure = preshipmentmobile.SenderAddress,
+                                AmountReceived = price,
+                                Waybill = preshipmentmobile.Waybill,
+                                IsFromServiceCentre = true
+                            };
+                            var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
+                            var transaction = new WalletTransactionDTO
+                            {
+                                WalletId = wallet.WalletId,
+                                CreditDebitType = CreditDebitType.Credit,
+                                Amount = price,
+                                ServiceCentreId = defaultServiceCenter.ServiceCentreId,
+                                Waybill = preshipmentmobile.Waybill,
+                                Description = "Credit for Delivered Shipment Request",
+                                PaymentType = PaymentType.Online,
+                                UserId = userId
+                            };
+                            var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
+                        }
                         return;
                     }
                     else
@@ -1842,18 +1906,8 @@ namespace GIGLS.Services.Implementation.Shipments
                
                 if (preshipmentmobile.ZoneMapping != 1)
                 {
-                    //var Location = new LocationDTO
-                    //{
-                    //    DestinationLatitude = (double)preshipmentmobile.ReceiverLocation.Latitude,
-                    //    DestinationLongitude = (double)preshipmentmobile.ReceiverLocation.Longitude,
-                    //    OriginLatitude = (double)preshipmentmobile.SenderLocation.Latitude,
-                    //    OriginLongitude = (double)preshipmentmobile.SenderLocation.Longitude
-                    //};
-
-                    //RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
                     if (preshipmentmobile.IsApproved != true)
                     {
-                        var Partnerid = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == detail.WaybillNumber && (s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString() || s.Status != MobilePickUpRequestStatus.Processing.ToString()));
                         var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
 
                         int customerid = 0;
@@ -1911,36 +1965,21 @@ namespace GIGLS.Services.Implementation.Shipments
                             }).ToList()
                         };
                         var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
-                        //if a partner accepted the shipment, pay the partner
-                        if (Partnerid != null)
-                        {
-                            var Partner = new PartnerPayDTO
-                            {
-                                //Distance = details.rows[0].elements[0].distance.value.ToString(),
-                                //Time = details.rows[0].elements[0].duration.value.ToString(),
-                                ShipmentPrice = preshipmentmobile.GrandTotal,
-                                PickUprice = Pickupprice
-                            };
-                            decimal price = await _partnertransactionservice.GetPriceForPartner(Partner);
-                            var partneruser = await _userService.GetUserById(Partnerid.UserId);
-                            var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode);
-                            wallet.Balance = wallet.Balance + price;
-                            var partnertransactions = new PartnerTransactionsDTO
-                            {
-                                Destination = preshipmentmobile.ReceiverAddress,
-                                Departure = preshipmentmobile.SenderAddress,
-                                AmountReceived = price,
-                                Waybill = preshipmentmobile.Waybill,
-                                IsFromServiceCentre = true
-                            };
-                            var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
-                        }
+
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
                         preshipmentmobile.IsApproved = true;
+
+                        //add scan status into Mobiletracking and Shipmenttracking
                         await ScanMobileShipment(new ScanDTO
                         {
                             WaybillNumber = detail.WaybillNumber,
                             ShipmentScanStatus = ShipmentScanStatus.MSVC
+                        });
+
+                        await _shipmentService.ScanShipment(new ScanDTO
+                        {
+                            WaybillNumber = detail.WaybillNumber,
+                            ShipmentScanStatus = ShipmentScanStatus.ARO
                         });
                         await _uow.CompleteAsync();
                     }
