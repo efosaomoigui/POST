@@ -1141,12 +1141,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 var Categories = await GetCategories();
                 var Subcategories = await GetSubCategories();
                 var dictionaryCategories = await GetDictionaryCategories();
+                var WeightDictionaryCategories = await GetWeightRangeDictionaryCategories();
                 var result = new SpecialResultDTO
                 {
                     Specialpackages = packages.ToList(),
                     Categories = Categories,
                     SubCategories = Subcategories,
-                    DictionaryCategory = dictionaryCategories
+                    DictionaryCategory = dictionaryCategories,
+                    WeightRangeDictionaryCategory = WeightDictionaryCategories
 
                 };
                 return result;
@@ -1189,6 +1191,51 @@ namespace GIGLS.Services.Implementation.Shipments
                     var list = new List<decimal>();
                     var listOfWeights = Subcategories.Where(s => s.SubCategoryName == subcategory.SubCategoryName).
                         Select(s => s.Weight.ToString()).ToList();
+
+                    //add to dictionary
+                    if (!finalDictionary.ContainsKey(subcategory.SubCategoryName))
+                    {
+                        finalDictionary.Add(subcategory.SubCategoryName, listOfWeights);
+                    }
+                }
+                return finalDictionary;
+            }
+            catch (Exception)
+            {
+                throw new GenericException("Please an error occurred while trying to get the categorization of special packages.");
+            }
+        }
+        private async Task<Dictionary<string, List<string>>> GetWeightRangeDictionaryCategories()
+        {
+            try
+            {
+                //
+                Dictionary<string, List<string>> finalDictionary = new Dictionary<string, List<string>>();
+
+                //1. category
+                var Categories = await GetCategories();
+                finalDictionary.Add("CATEGORY", Categories.Select(s => s.CategoryName).OrderBy(s => s).ToList());
+
+
+                //2. subcategory
+                var Subcategories = await GetSubCategories();
+                foreach (var category in Categories)
+                {
+                    var listOfSubcategory = Subcategories.Where(s => s.Category.CategoryId == category.CategoryId).
+                        Select(s => s.SubCategoryName).Distinct().ToList();
+
+                    //add to dictionary
+                    finalDictionary.Add(category.CategoryName, listOfSubcategory);
+
+                }
+
+                //3. subsubcategory
+                //var specialDomesticPackages = await GetSpecialDomesticPackages();
+                foreach (var subcategory in Subcategories)
+                {
+                    var list = new List<decimal>();
+                    var listOfWeights = Subcategories.Where(s => s.SubCategoryName == subcategory.SubCategoryName).
+                        Select(s => s.WeightRange.ToString()).ToList();
 
                     //add to dictionary
                     if (!finalDictionary.ContainsKey(subcategory.SubCategoryName))
