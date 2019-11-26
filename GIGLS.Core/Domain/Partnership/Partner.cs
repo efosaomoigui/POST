@@ -44,7 +44,8 @@ namespace GIGLS.Core.Domain.Partnership
 
         [MaxLength(100)]
         public string BankName { get; set; }
-        
+
+        [MaxLength(100)]
         public string AccountNumber { get; set; }
 
         [MaxLength(100)]
