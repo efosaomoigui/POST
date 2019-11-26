@@ -83,5 +83,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("trackshipment/{waybillNumber}")]
+        public async Task<IServiceResponse<MobileShipmentTrackingHistoryDTO>> TrackMobileShipment(string waybillNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.trackShipment(waybillNumber);
+
+                return new ServiceResponse<MobileShipmentTrackingHistoryDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

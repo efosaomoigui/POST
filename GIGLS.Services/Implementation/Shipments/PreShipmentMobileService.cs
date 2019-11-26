@@ -1510,7 +1510,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         partnerDTO.PhoneNumber = user.PhoneNumber;
                         partnerDTO.UserId = user.Id;
                         partnerDTO.IsActivated = true;
-                        partnerDTO.CountryId = user.UserActiveCountryId;
+                        partnerDTO.UserActiveCountryId = user.UserActiveCountryId;
                         
 
                     }
@@ -1525,7 +1525,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         partnerDTO.PhoneNumber = user.PhoneNumber;
                         partnerDTO.UserId = user.Id;
                         partnerDTO.IsActivated = false;
-                        partnerDTO.CountryId = user.UserActiveCountryId;
+                        partnerDTO.UserActiveCountryId = user.UserActiveCountryId;
                     }
                      var FinalPartner = Mapper.Map<Partner>(partnerDTO);
                     _uow.Partner.Add(FinalPartner);
@@ -1536,12 +1536,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         partner.PartnerType = PartnerType.InternalDeliveryPartner;
                         partner.IsActivated = true;
-                        partner.CountryId = user.UserActiveCountryId;
+                        partner.UserActiveCountryId = user.UserActiveCountryId;
                     }
                     else
                     {
                         partner.PartnerType = PartnerType.DeliveryPartner;
-                        partner.CountryId = user.UserActiveCountryId;
+                        partner.UserActiveCountryId = user.UserActiveCountryId;
                     }
 
                 }

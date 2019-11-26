@@ -52,7 +52,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(item.CustomerId);
                     item.CustomerName = partnerDTO.PartnerName;
-                    item.UserActiveCountryId = partnerDTO.CountryId;
+                    item.UserActiveCountryId = partnerDTO.UserActiveCountryId;
                     item.Country = partnerDTO.Country;
                 }
                 else
@@ -96,7 +96,7 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(walletDTO.CustomerId);
                 walletDTO.CustomerName = partnerDTO.PartnerName;
-                walletDTO.UserActiveCountryId = partnerDTO.CountryId;
+                walletDTO.UserActiveCountryId = partnerDTO.UserActiveCountryId;
                 walletDTO.Country = partnerDTO.Country;
             }
             else
@@ -306,7 +306,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     {
                         var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(item.CustomerId);
                         item.CustomerName = partnerDTO.PartnerName;
-                        item.UserActiveCountryId = partnerDTO.CountryId;
+                        item.UserActiveCountryId = partnerDTO.UserActiveCountryId;
                         item.Country = partnerDTO.Country;
                     }
                     else

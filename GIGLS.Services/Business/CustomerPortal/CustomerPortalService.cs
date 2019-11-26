@@ -733,8 +733,11 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (EmailUser != null)
             {
-                EmailUser.Email = EmailUser.Email.Trim();
-                EmailUser.Email = EmailUser.Email.ToLower();
+                if (EmailUser.Email != null)
+                {
+                    EmailUser.Email = EmailUser.Email.Trim();
+                    EmailUser.Email = EmailUser.Email.ToLower();
+                }
 
                 if (EmailUser.UserChannelType == UserChannelType.Employee && EmailUser.Email == user.Email)
                 {
@@ -787,7 +790,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 PhoneNumber = user.PhoneNumber,
                                 UserId = EmailUser.Id,
                                 IsActivated = false,
-                                CountryId = user.UserActiveCountryId
+                                UserActiveCountryId = user.UserActiveCountryId
                             };
                             _uow.Partner.Add(partnerDTO);
 
@@ -855,7 +858,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     PhoneNumber = user.PhoneNumber,
                     UserId = FinalUser.Id,
                     IsActivated = false,
-                    CountryId = user.UserActiveCountryId
+                    UserActiveCountryId = user.UserActiveCountryId
                 };
                 _uow.Partner.Add(partnerDTO);
 
@@ -893,8 +896,11 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (EmailUser != null)
             {
-                EmailUser.Email = EmailUser.Email.Trim();
-                EmailUser.Email = EmailUser.Email.ToLower();
+                if (EmailUser.Email != null)
+                {
+                    EmailUser.Email = EmailUser.Email.Trim();
+                    EmailUser.Email = EmailUser.Email.ToLower();
+                }
 
                 if (EmailUser.UserChannelType == UserChannelType.Employee && EmailUser.Email == user.Email)
                 {
@@ -1001,8 +1007,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
             if (EmailUser != null)
             {
-                EmailUser.Email = EmailUser.Email.Trim();
-                EmailUser.Email = EmailUser.Email.ToLower();
+                if (EmailUser.Email != null)
+                {
+                    EmailUser.Email = EmailUser.Email.Trim();
+                    EmailUser.Email = EmailUser.Email.ToLower();
+                }
 
                 if (EmailUser.UserChannelType == UserChannelType.Employee && EmailUser.Email == user.Email)
                 {
