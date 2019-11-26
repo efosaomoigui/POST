@@ -44,7 +44,7 @@
         DiscountPercentage,
         GiglgoMaximumFixedDistance,
         GiglgoFixedPriceForDistance,
-        GiglgoFixedPriceForTime
-
+        GiglgoFixedPriceForTime,
+        EcommerceEmail
     }
 }
