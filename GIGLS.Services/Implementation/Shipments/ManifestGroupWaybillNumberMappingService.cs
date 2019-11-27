@@ -241,7 +241,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 else
                 {
                     //ensure that the Manifest containing the Groupwaybill has not been dispatched
-                    if (manifestObj != null && manifestObj.IsDispatched)
+                    if (manifestObj.IsDispatched)
                     {
                         throw new GenericException($"Error: The Manifest: {manifestObj.ManifestCode} assigned to this Group Waybill has already been dispatched.");
                     }
