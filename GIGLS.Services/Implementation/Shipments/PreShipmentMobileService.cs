@@ -240,11 +240,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 var Country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
                 preShipment.CountryId = Country.CountryId;
                 var Pickuprice = await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId);
-                if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
-                {
-                    amount = await CalculateGeoDetailsBasedonLocation(preShipment);
-                    IndividualPrice = (amount / ShipmentCount);
-                }
+
+                //undo comment when App is updated
+                //if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
+                //{
+                //    amount = await CalculateGeoDetailsBasedonLocation(preShipment);
+                //    IndividualPrice = (amount / ShipmentCount);
+                //}
                 var PickupValue = Convert.ToDecimal(Pickuprice);
                 var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
                 var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
