@@ -547,7 +547,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                                           }).ToList();
                 foreach (var Shipment in shipmentDto)
                 {
-                    var PartnerId = await _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == Shipment.Waybill && (r.Status != MobilePickUpRequestStatus.Rejected.ToString() || r.Status != MobilePickUpRequestStatus.TimedOut.ToString()));
+                    var PartnerId = await _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == Shipment.Waybill && (r.Status == MobilePickUpRequestStatus.Delivered.ToString()));
                     if (PartnerId != null)
                     {
                         var partneruser = await _uow.User.GetUserById(PartnerId.UserId);
@@ -1021,7 +1021,8 @@ namespace GIGLS.Services.Implementation.Shipments
                             Departure = preshipmentmobile.SenderAddress,
                             AmountReceived = price,
                             Waybill = preshipmentmobile.Waybill,
-                            IsFromServiceCentre = true
+                            UserId = userId
+
                         };
                         var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
                         var transaction = new WalletTransactionDTO
