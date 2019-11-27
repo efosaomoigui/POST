@@ -238,8 +238,15 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                     _uow.Manifest.Add(newManifest);
                 }
-
-
+                else
+                {
+                    //ensure that the Manifest containing the Groupwaybill has not been dispatched
+                    if (manifestObj != null && manifestObj.IsDispatched)
+                    {
+                        throw new GenericException($"Error: The Manifest: {manifestObj.ManifestCode} assigned to this Group Waybill has already been dispatched.");
+                    }
+                }
+                
                 //convert the list to HashSet to remove duplicate
                 var newGroupWaybillNumberList = new HashSet<string>(groupWaybillNumberList);
 
