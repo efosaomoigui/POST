@@ -808,6 +808,7 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
+    <Compile Include="DTO\Customers\EcommerceWalletDTO.cs" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>

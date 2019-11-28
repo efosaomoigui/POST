@@ -1894,7 +1894,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<decimal> GetActualAmountToCredit(Shipment shipment, decimal amountToDebit)
         {
             //1. Get Customer Country detail
-            int customerCountryId = 0;
+            int customerCountryId = 1;
 
             if (UserChannelType.Ecommerce.ToString() == shipment.CompanyType || UserChannelType.Corporate.ToString() == shipment.CompanyType)
             {

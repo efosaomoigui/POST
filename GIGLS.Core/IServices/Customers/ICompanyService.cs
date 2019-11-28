@@ -8,6 +8,7 @@ namespace GIGLS.Core.IServices.Customers
     public interface ICompanyService : IServiceDependencyMarker
     {
         Task<List<CompanyDTO>> GetCompanies();
+        Task<List<CompanyDTO>> GetCompaniesWithoutWallet();
         Task<CompanyDTO> GetCompanyById(int companyId);
         Task<CompanyDTO> GetCompanyByCode(string customerCode);
         Task UpdateCompany(int companyId, CompanyDTO company);
@@ -15,5 +16,6 @@ namespace GIGLS.Core.IServices.Customers
         Task DeleteCompany(int companyId);
         Task UpdateCompanyStatus(int companyId, CompanyStatus status);
         Task<List<CompanyDTO>> GetCompanies(CompanyType companyType, CustomerSearchOption searchOption);
+        Task<EcommerceWalletDTO> GetECommerceWalletById(int companyId);
     }
 }

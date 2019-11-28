@@ -37,6 +37,34 @@ namespace GIGLS.WebApi.Controllers.Customers
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("withoutwallet")]
+        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompaniesWithoutWallet()
+        {
+            return await HandleApiOperationAsync(async () => {
+                var companies = await _service.GetCompaniesWithoutWallet();
+                return new ServiceResponse<IEnumerable<CompanyDTO>>
+                {
+                    Object = companies
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{companyId:int}/getwallet")]
+        public async Task<IServiceResponse<EcommerceWalletDTO>> GettWalletDetailsForCompany(int companyId)
+        {
+            return await HandleApiOperationAsync(async () => {
+                var company = await _service.GetECommerceWalletById(companyId);
+                return new ServiceResponse<EcommerceWalletDTO>
+                {
+                    Object = company
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]

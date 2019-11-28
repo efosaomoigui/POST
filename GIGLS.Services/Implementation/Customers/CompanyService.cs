@@ -187,6 +187,12 @@ namespace GIGLS.Services.Implementation.Customers
             return _uow.Company.GetCompanies();
         }
 
+        public Task<List<CompanyDTO>> GetCompaniesWithoutWallet()
+        {
+            var companies = _uow.Company.GetAll().ToList();
+            return Task.FromResult(Mapper.Map<List<CompanyDTO>>(companies));
+        }
+
         public async Task<CompanyDTO> GetCompanyById(int companyId)
         {
             try
@@ -392,6 +398,25 @@ namespace GIGLS.Services.Implementation.Customers
                 companyDto.UserActiveCountryName = companyDto.Country.CountryName;
 
                 return companyDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<EcommerceWalletDTO> GetECommerceWalletById(int companyId)
+        {
+            try
+            {
+                var company = await _uow.Company.GetWalletDetailsForCompany(companyId);
+
+                if (company == null)
+                {
+                    throw new GenericException("Wallet information does not exist");
+                }
+
+                return company;
+                
             }
             catch (Exception)
             {
