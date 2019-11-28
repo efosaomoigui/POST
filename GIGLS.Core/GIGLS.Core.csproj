@@ -278,9 +278,11 @@
     <Compile Include="DTO\Account\GeneralLedgerDTO.cs" />
     <Compile Include="DTO\Account\InsuranceDTO.cs" />
     <Compile Include="DTO\Account\InvoiceDTO.cs" />
+    <Compile Include="DTO\Account\InvoiceReportDTO.cs" />
     <Compile Include="DTO\Account\InvoiceShipmentDTO.cs" />
     <Compile Include="DTO\Account\NewInvoiceViewDTO.cs" />
     <Compile Include="DTO\Account\InvoiceViewDTO.cs" />
+    <Compile Include="DTO\Account\SalesByServiceCentersDTO.cs" />
     <Compile Include="DTO\Account\ServiceCenreDTO.cs" />
     <Compile Include="DTO\Account\VATDTO.cs" />
     <Compile Include="DTO\ActivationCampaignEmailDTO.cs" />
@@ -447,6 +449,7 @@
     <Compile Include="DTO\Wallet\WalletTransactionDto.cs" />
     <Compile Include="DTO\Wallet\WalletTransactionSummaryDTO.cs" />
     <Compile Include="DTO\Wallet\WaybillPaymentLogDTO.cs" />
+    <Compile Include="DTO\WebsiteMessageDTO.cs" />
     <Compile Include="DTO\Workshops\WorkshopDTO.cs" />
     <Compile Include="DTO\Zone\DeliveryOptionDTO.cs" />
     <Compile Include="DTO\Zone\DeliveryOptionPriceDTO.cs" />
@@ -779,6 +782,7 @@
     <Compile Include="IServices\Wallet\IWalletService.cs" />
     <Compile Include="IServices\Wallet\IWalletTransactionService.cs" />
     <Compile Include="IServices\Wallet\IWaybillPaymentLogService.cs" />
+    <Compile Include="IServices\Website\IWebsiteService.cs" />
     <Compile Include="IServices\Workshops\IWorkshopService.cs" />
     <Compile Include="IServices\Zone\IDeliveryOptionPriceService.cs" />
     <Compile Include="IServices\Zone\IDeliveryOptionService.cs" />

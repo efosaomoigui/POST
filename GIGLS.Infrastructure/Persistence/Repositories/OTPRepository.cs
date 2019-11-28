@@ -4,7 +4,6 @@ using GIGLS.Core.IRepositories;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System.Linq;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories
 {
@@ -31,7 +30,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                     TimeSpan span = LatestTime.Subtract(message.DateCreated);
                     int difference = Convert.ToInt32(span.TotalMinutes);
                     if (difference < 5)
+                    {
                         message.IsValid = true;
+                    }
                     else
                     {
                         throw new GenericException("OTP has expired!.Kindly click on Resendotp.");

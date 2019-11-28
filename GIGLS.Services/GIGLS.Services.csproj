@@ -296,6 +296,7 @@
     <Compile Include="Implementation\Wallet\WalletService.cs" />
     <Compile Include="Implementation\Wallet\WalletTransactionService.cs" />
     <Compile Include="Implementation\Wallet\WaybillPaymentLogService.cs" />
+    <Compile Include="Implementation\Website\WebsiteService.cs" />
     <Compile Include="Implementation\Workshops\WorkshopService.cs" />
     <Compile Include="Implementation\Zone\DeliveryOptionPriceService.cs" />
     <Compile Include="Implementation\Zone\DeliveryOptionService.cs" />

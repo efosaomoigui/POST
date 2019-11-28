@@ -342,6 +342,78 @@ namespace GIGLS.Services.Implementation.Messaging
                 //use to determine sms sender service to use
                 messageDTO.SMSSenderPlatform = mobileMessageDTO.SMSSenderPlatform;
             }
+            if (obj is WebsiteMessageDTO)
+            {
+                var strArray = new string[]
+                {
+                    "SenderFullName",
+                    "SenderMail",
+                    "SenderPhone",
+                    "ReceiverFullName",
+                    "ReceiverMail",
+                    "ReceiverPhone",
+                    "PickupAddress",
+                    "DestAddress",
+                    "PickupCity",
+                    "PickupState",
+                    "PickupZip",
+                    "DestZip",
+                    "DestState",
+                    "DestCity",
+                    "NumberofPieces",
+                    "Weight",
+                    "Dimension",
+                    "PackageInfo",
+                    "SpeciaInstruct",
+                    "gig mail",
+                    "contactFullName",
+                    "contactMail",
+                    "contactPhone"
+                };
+
+                    var messageObj = (WebsiteMessageDTO)obj;  
+
+                    //map the array
+                    strArray[0] = messageObj.senderFullName;
+                    strArray[1] = messageObj.senderMail;
+                    strArray[2] = messageObj.senderPhone;
+                    strArray[3] = messageObj.receiverFullName;
+                    strArray[4] = messageObj.receiverMail;
+                    strArray[5] = messageObj.receiverPhone;
+                    strArray[6] = messageObj.pickupAddress;
+                    strArray[7] = messageObj.destAddress;
+                    strArray[8] = messageObj.pickupCity;
+                    strArray[9] = messageObj.pickupState;
+                    strArray[10] = messageObj.pickupZip;
+                    strArray[11] = messageObj.DestZip;
+                    strArray[12] = messageObj.DestState;
+                    strArray[13] = messageObj.DestCity;
+                    strArray[14] = messageObj.numberofPieces;
+                    strArray[15] = messageObj.weight;
+                    strArray[16] = messageObj.dimension;
+                    strArray[17] = messageObj.packageInfo;
+                    strArray[18] = messageObj.speciaInstruct;
+                    strArray[19] = messageObj.gigMail;
+                    strArray[20] = messageObj.contactFullName;
+                    strArray[21] = messageObj.contactMail;
+                    strArray[22] = messageObj.contactPhone;
+
+                    //B. decode url parameter
+                    messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                    //C. populate the message subject
+                    messageDTO.Subject =
+                        string.Format(messageDTO.Subject, strArray);
+
+                    //populate the message template
+                    messageDTO.FinalBody =
+                        string.Format(messageDTO.Body, strArray);
+
+               
+
+                messageDTO.ToEmail = messageObj.gigMail;
+
+            }
 
             return await Task.FromResult(true);
         }

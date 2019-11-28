@@ -42,15 +42,77 @@ namespace GIGLS.Services.Implementation
         public async Task<UserDTO> IsOTPValid(int OTP)
         {
             var otpbody = await _uow.OTP.IsOTPValid(OTP);
-            var result = Mapper.Map<OTPDTO>(otpbody);
-            var userdto = await _UserService.GetUserByEmail(result.EmailAddress);
-            if (result.IsValid == true)
-            {
-                userdto.IsActive = true;
-                await _UserService.UpdateUser(userdto.Id, userdto);
+            var userdto = new UserDTO();
+
+            if (otpbody.IsValid == true)
+            { 
+                userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true); 
                 _uow.OTP.Remove(otpbody);
                 await _uow.CompleteAsync();
             }
+            return userdto;
+        }
+
+        private string ExtractPhoneNumber(string phoneNumber)
+        {
+            phoneNumber = phoneNumber.Trim();
+
+            bool IsPhone = Regex.IsMatch(phoneNumber, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
+
+            if (IsPhone)
+            {
+                if(!(phoneNumber.StartsWith("0") || phoneNumber.StartsWith("+"))){
+                    phoneNumber = phoneNumber.Remove(0, 4);
+                }
+
+                if (phoneNumber.StartsWith("+"))
+                {
+                    phoneNumber = phoneNumber.Remove(0, 4);
+                }
+
+                if (phoneNumber.StartsWith("0"))
+                {
+                    phoneNumber = phoneNumber.Remove(0, 1);
+                }
+            }
+
+            return phoneNumber;
+        }
+
+        public async Task<UserDTO> ValidateOTP(OTPDTO otp)
+        {
+            var userdto = new UserDTO();
+
+            otp.EmailAddress = ExtractPhoneNumber(otp.EmailAddress);
+
+            //get the otp details using the email 
+            var result = _uow.OTP.GetAllAsQueryable().Where(x => x.Otp == otp.Otp && (x.EmailAddress.ToLower() == otp.EmailAddress.ToLower() || x.PhoneNumber.Contains(otp.EmailAddress))).ToList();
+            var otpbody = result.LastOrDefault();
+
+            if (otpbody == null)
+            {
+                throw new GenericException("Invalid OTP");
+            }
+            else
+            {
+                DateTime LatestTime = DateTime.Now;
+
+                TimeSpan span = LatestTime.Subtract(otpbody.DateCreated);
+                int difference = Convert.ToInt32(span.TotalMinutes);
+                if (difference < 5)
+                {
+                    userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true);
+                    _uow.OTP.Remove(otpbody);
+                    await _uow.CompleteAsync();
+                }
+                else
+                {
+                    _uow.OTP.Remove(otpbody);
+                    await _uow.CompleteAsync();
+                    throw new GenericException("OTP has expired!.Kindly Resend OTP.");
+                }
+            }
+                       
             return userdto;
         }
 

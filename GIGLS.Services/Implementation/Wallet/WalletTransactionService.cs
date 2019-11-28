@@ -62,6 +62,40 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var walletTransactions = await _uow.WalletTransaction.GetWalletTransactionDateAsync(serviceCenterIds, dateFilter);
+
+            //get customer details
+            ////set the customer name
+            foreach (var item in walletTransactions)
+            {
+                // handle Company customers
+                if (CustomerType.Company == item.Wallet.CustomerType)
+                {
+                    var companyDTO = await _uow.Company.GetCompanyByIdWithCountry(item.Wallet.CustomerId);
+
+                    if (companyDTO != null)
+                    {
+                        item.Wallet.CustomerName = companyDTO.Name;
+                        item.Wallet.Country = companyDTO.Country;
+                        item.Wallet.UserActiveCountryId = companyDTO.UserActiveCountryId;
+                    }
+                }
+                else if (CustomerType.Partner == item.Wallet.CustomerType)
+                {
+                    var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(item.Wallet.CustomerId);
+                    item.Wallet.CustomerName = partnerDTO.PartnerName;
+                    item.Wallet.UserActiveCountryId = partnerDTO.UserActiveCountryId;
+                    item.Wallet.Country = partnerDTO.Country;
+                }
+                else
+                {
+                    // handle IndividualCustomers
+                    var individualCustomerDTO = await _uow.IndividualCustomer.GetIndividualCustomerByIdWithCountry(item.Wallet.CustomerId);
+                    item.Wallet.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
+                    item.Wallet.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
+                    item.Wallet.Country = individualCustomerDTO.Country;
+                }
+            }
+
             return walletTransactions;
         }
 
@@ -90,7 +124,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(item.Wallet.CustomerId);
                     item.Wallet.CustomerName = partnerDTO.PartnerName;
-                    item.Wallet.UserActiveCountryId = partnerDTO.CountryId;
+                    item.Wallet.UserActiveCountryId = partnerDTO.UserActiveCountryId;
                     item.Wallet.Country = partnerDTO.Country;
                 }
                 else

@@ -1,6 +1,4 @@
-﻿using GIGLS.Core.IMessage;
-using System;
-using System.Net.Mail;
+﻿using System.Net.Mail;
 using GIGLS.Core.Config;
 using GIGLS.Core.IMessage.Config;
 using System.Net;

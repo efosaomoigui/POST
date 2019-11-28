@@ -234,7 +234,7 @@ namespace GIGLS.Services.Implementation.Customers
                 company.ReturnServiceCentre = companyDto.ReturnServiceCentre;
                 company.ReturnAddress = companyDto.ReturnAddress;
                 company.RcNumber = companyDto.RcNumber;
-                company.UserActiveCountryId = companyDto.UserActiveCountryId;
+                //company.UserActiveCountryId = companyDto.UserActiveCountryId;
                 company.isCodNeeded = companyDto.isCodNeeded;
 
                 if (companyDto.ContactPersons.Any())
@@ -257,7 +257,7 @@ namespace GIGLS.Services.Implementation.Customers
                 user.LastName = companyDto.Name;
                 user.FirstName = companyDto.Name;
                 user.Email = companyDto.Email;
-                user.UserActiveCountryId = companyDto.UserActiveCountryId;
+                //user.UserActiveCountryId = companyDto.UserActiveCountryId;
 
                 await _userService.UpdateUser(user.Id, user);
 

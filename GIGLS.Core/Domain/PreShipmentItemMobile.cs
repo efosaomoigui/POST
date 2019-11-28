@@ -39,5 +39,6 @@ namespace GIGLS.Core.Domain
         public string PictureName { get; set; }
 
         public DateTime? PictureDate { get; set; }
+        public string WeightRange { get; set; }
     }
 }

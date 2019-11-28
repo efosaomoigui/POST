@@ -1,6 +1,7 @@
 ﻿using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.View;
 using GIGLS.Core.View.AdminReportView;
 using GIGLS.CORE.DTO.Report;
@@ -38,5 +39,8 @@ namespace GIGLS.Core.IRepositories.Account
         IQueryable<Report_RevenuePerServiceCentre> GetRevenuePerServiceCentre();
         IQueryable<Report_TotalServiceCentreByState> GetTotalServiceCentreByState();
         IQueryable<Report_TotalOrdersDelivered> GetTotalOrdersDelivered();
+        IQueryable<InvoiceView> GetAllFromInvoiceAndShipments(ShipmentCollectionFilterCriteria filterCriteria);
+        Task<List<object>> SalesPerServiceCenter(List<InvoiceView> invoice);
+        Task<List<object>> MostShippedItemsByWeight(List<InvoiceView> invoice);
     }
 }

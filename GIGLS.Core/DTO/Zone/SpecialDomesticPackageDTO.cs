@@ -29,6 +29,7 @@ namespace GIGLS.Core.DTO.Zone
         public List<SubCategoryDTO> SubCategories { get; set; }
 
         public Dictionary<string, List<string>> DictionaryCategory { get; set; }
+        public Dictionary<string, List<string>> WeightRangeDictionaryCategory { get; set; }
 
     }
 }

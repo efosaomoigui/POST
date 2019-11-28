@@ -132,5 +132,7 @@ namespace GIGLS.Core.DTO.Shipments
         public LocationDTO serviceCentreLocation { get; set; }
         public bool? IsApproved { get; set; }
 
+        public bool? IsFromShipment { get; set; }
+
     }
 }

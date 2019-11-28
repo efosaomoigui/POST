@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Admin;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Report;
 using GIGLS.Services.Implementation;
@@ -20,13 +21,13 @@ namespace GIGLS.WebApi.Controllers.Report
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
+        [HttpPost]
         [Route("report")]
-        public async Task<IServiceResponse<AdminReportDTO>> GetAdminReport()
+        public async Task<IServiceResponse<AdminReportDTO>> GetAdminReport(ShipmentCollectionFilterCriteria filterCriteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _report.GetAdminReport();
+                var result = await _report.GetAdminReport(filterCriteria);
 
                 return new ServiceResponse<AdminReportDTO>
                 {
