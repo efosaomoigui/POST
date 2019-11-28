@@ -492,7 +492,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else if(shipment==null)
                 {
-                    var agilityshipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill, "ShipmentItems,ShipmentScanStatus");
+                    var agilityshipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill, "ShipmentItems");
                     if(agilityshipment != null)
                     {
                         var countryId = await GetCountryByServiceCentreId(agilityshipment.DepartureServiceCentreId);
