@@ -98,5 +98,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        [HttpPost]
+        [Route("reportIssues")]
+        public async Task<IServiceResponse<bool>> SendGIGGoIssuesMail(AppMessageDTO obj)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _websiteService.SendGIGGoIssuesMail(obj);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }
