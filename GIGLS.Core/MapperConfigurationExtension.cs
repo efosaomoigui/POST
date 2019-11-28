@@ -393,6 +393,9 @@ namespace GIGLS.Core
                 config.CreateMap<ActivationCampaignEmail, ActivationCampaignEmailDTO>();
                 config.CreateMap<ActivationCampaignEmailDTO, ActivationCampaignEmail>();
 
+                config.CreateMap<Shipment, PreShipmentMobileDTO>();
+                config.CreateMap<PreShipmentMobileDTO, Shipment>();
+
             });
 
             isInit = true;
