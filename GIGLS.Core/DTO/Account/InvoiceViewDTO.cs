@@ -118,11 +118,27 @@ namespace GIGLS.Core.DTO.Account
         public decimal Pos { get; set; }
     }
 
+    public class InvoiceViewDTOUNGROUPED
+    {
+        public string DestinationServiceCentreName { get; set; }
+        public decimal Amount { get; set; }
+        public string PaymentMethod { get; set; }
+        public DateTime ShipmentDate { get; set; } 
+        public string Waybill { get; set; }
+    }
+
     public class InvoiceMonitorDTO
-    { 
+    {
         public string DestinationServiceCentreName { get; set; }
         public int WayBillCount { get; set; }
         public DateTime ShipmentDate { get; set; }
+    }
+
+    public class LimitDates
+    {
+        public int StartLimit { get; set; }
+        public int EndLimit { get; set; }
+        public string ScName { get; set; } 
     }
 
     public class InvoiceMonitorDTO2
@@ -130,27 +146,28 @@ namespace GIGLS.Core.DTO.Account
         public string label { get; set; }
         public int y { get; set; }
         //public string color { get; set; }
-        //public DateTime ShipmentDate { get; set; }
+        public DateTime ShipmentDate { get; set; }
     }
 
-    public class MulitipleInvoiceMonitorDTO  
+
+    public class MulitipleInvoiceMonitorDTO
     {
 
-        public List<InvoiceMonitorDTO> ShipmentCreated { get; set; } 
-        public List<InvoiceMonitorDTO> ShipmentExpected { get; set; } 
+        public List<InvoiceMonitorDTO> ShipmentCreated { get; set; }
+        public List<InvoiceMonitorDTO> ShipmentExpected { get; set; }
 
     }
 
     public class ColoredInvoiceMonitorDTO
     {
+        public object[] groupgreen_s { get; set; }
+        public object[] groupblue_s { get; set; }
+        public object[] groupred_s { get; set; }
+        public object[] totalZones { get; set; }
 
-        public List<InvoiceMonitorDTO2> groupgreen_s { get; set; } 
-        public List<InvoiceMonitorDTO2> groupblue_s { get; set; }
-        public List<InvoiceMonitorDTO2> groupred_s { get; set; }
-
-        public double totalGreen { get; set; }
-        public double totalBlue { get; set; }
-        public double totalRed { get; set; }
+        //public double totalGreen { get; set; }
+        //public double totalBlue { get; set; }
+        //public double totalRed { get; set; }
 
     }
 
