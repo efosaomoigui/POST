@@ -193,6 +193,18 @@ namespace GIGLS.Services.Implementation.Customers
             return Task.FromResult(Mapper.Map<List<CompanyDTO>>(companies));
         }
 
+        public async Task<List<CompanyDTO>> GetEcommerceWithoutWallet()
+        {
+            var companies = await _uow.Company.FindAsync(x => x.CompanyType == CompanyType.Ecommerce);
+            return Mapper.Map<List<CompanyDTO>>(companies);
+        }
+
+        public async Task<List<CompanyDTO>> GetCorporateWithoutWallet()
+        {
+            var companies = await _uow.Company.FindAsync(x => x.CompanyType == CompanyType.Corporate);
+            return Mapper.Map<List<CompanyDTO>>(companies);
+        }
+
         public async Task<CompanyDTO> GetCompanyById(int companyId)
         {
             try
