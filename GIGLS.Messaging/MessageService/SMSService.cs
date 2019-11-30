@@ -53,6 +53,8 @@ namespace GIGLS.Messaging.MessageService
 
             try
             {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls ;
+
                 var smsURL = await ReturnValidUrl(message);
                 var smsApiKey = ConfigurationManager.AppSettings["smsApiKey"];
 
