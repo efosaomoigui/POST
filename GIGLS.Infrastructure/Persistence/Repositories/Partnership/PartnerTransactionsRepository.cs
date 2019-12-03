@@ -29,7 +29,12 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                 startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-7);
                 endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
             }
-            var partnersTrans = Context.PartnerTransactions.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).AsQueryable();
+
+            //Excluding It Test
+            string[] testUserId = { "2932eb15-aa30-462c-89f0-7247670f504b", "ab3722d7-57f3-4e6e-a32d-1580315b7da6", "e67d50c2-953a-44b2-bbcd-c38fadef237f" };
+           
+            var partnersTrans = Context.PartnerTransactions.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate
+                                && !testUserId.Contains(s.UserId)).AsQueryable();
 
             List<PartnerTransactionsDTO> partnerTransDTO = (from r in partnersTrans
                                                             select new PartnerTransactionsDTO()

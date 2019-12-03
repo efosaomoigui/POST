@@ -11,6 +11,7 @@ namespace GIGLS.Core.IServices.Website
     {
         Task<bool> SendSchedulePickupMail(WebsiteMessageDTO obj);
         Task<bool> SendQuoteMail(WebsiteMessageDTO obj);
+        Task<bool> SendGIGGoIssuesMail(AppMessageDTO obj);
     }
     
 }

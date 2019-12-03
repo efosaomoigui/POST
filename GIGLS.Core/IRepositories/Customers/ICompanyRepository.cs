@@ -14,5 +14,6 @@ namespace GIGLS.Core.IRepositories.Customers
         Task<CompanyDTO> GetCompanyById(int companyId);
         Task<CompanyDTO> GetCompanyByCode(string customerCode);
         Task<CompanyDTO> GetCompanyByIdWithCountry(int companyId);
+        Task<EcommerceWalletDTO> GetWalletDetailsForCompany(int companyId);
     }
 }
