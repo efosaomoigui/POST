@@ -1418,16 +1418,45 @@ namespace GIGLS.Services.Implementation.Shipments
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var results = await _uow.Invoice.GetShipmentMonitorSetSP_NotGrouped(accountFilterCriteria, serviceCenterIds);
 
-            var v = (from list in results
-                          where list.ShipmentDate >= LimitStartDate && list.ShipmentDate <= LimitEndDate && list.DestinationServiceCentreName == Limitdates.ScName
-                     select new InvoiceViewDTOUNGROUPED()
-                          {
-                              DestinationServiceCentreName = list.DestinationServiceCentreName,
-                              Waybill = list.Waybill,
-                              ShipmentDate = list.ShipmentDate,
-                              PaymentMethod = list.PaymentMethod,
-                              Amount = list.Amount
-                          }).ToList();
+            //var v = (from list in results
+            //              where list.ShipmentDate >= LimitStartDate && list.ShipmentDate <= LimitEndDate && list.DestinationServiceCentreName == Limitdates.ScName
+            //         select new InvoiceViewDTOUNGROUPED()
+            //              {
+            //                  DestinationServiceCentreName = list.DestinationServiceCentreName,
+            //                  Waybill = list.Waybill,
+            //                  ShipmentDate = list.ShipmentDate,
+            //                  PaymentMethod = list.PaymentMethod,
+            //                  Amount = list.Amount
+            //              }).ToList();
+
+            var v = new List<InvoiceViewDTOUNGROUPED>();
+
+            if (Limitdates.EndLimit < 4)
+            {
+                v = (from list in results
+                         where list.ShipmentDate >= LimitStartDate && list.ShipmentDate <= LimitEndDate && list.DestinationServiceCentreName == Limitdates.ScName
+                         select new InvoiceViewDTOUNGROUPED()
+                         {
+                             DestinationServiceCentreName = list.DestinationServiceCentreName,
+                             Waybill = list.Waybill,
+                             ShipmentDate = list.ShipmentDate,
+                             PaymentMethod = list.PaymentMethod,
+                             Amount = list.Amount
+                         }).ToList();
+            }
+            else if (Limitdates.EndLimit == 4)
+            {
+                v = (from list in results
+                         where list.ShipmentDate >= LimitStartDate && list.ShipmentDate >= LimitEndDate && list.DestinationServiceCentreName == Limitdates.ScName
+                         select new InvoiceViewDTOUNGROUPED()
+                         {
+                             DestinationServiceCentreName = list.DestinationServiceCentreName,
+                             Waybill = list.Waybill,
+                             ShipmentDate = list.ShipmentDate,
+                             PaymentMethod = list.PaymentMethod,
+                             Amount = list.Amount
+                         }).ToList();
+            }
 
             //var shipmentscreated = results;
             //var obj = ReturnShipmentCreatedByLimitDates(shipmentscreated, accountFilterCriteria, Limitdates);
@@ -1476,14 +1505,29 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var LimitStartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(Limitdates.StartLimit);
             var LimitEndDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(Limitdates.EndLimit);
+            var result = new List<InvoiceMonitorDTO2>();
 
-            var result = (from list in shipmentscreated
-                                where list.ShipmentDate >= LimitStartDate && list.ShipmentDate <= LimitEndDate
-                                   select new InvoiceMonitorDTO2()
-                                {
-                                    label = list.DestinationServiceCentreName,
-                                    y = list.WayBillCount
-                                }).ToList();
+            if (Limitdates.EndLimit < 4)
+            {
+                result = (from list in shipmentscreated
+                              where list.ShipmentDate >= LimitStartDate && list.ShipmentDate <= LimitEndDate
+                              select new InvoiceMonitorDTO2()
+                              {
+                                  label = list.DestinationServiceCentreName,
+                                  y = list.WayBillCount
+                              }).ToList();
+            }else if (Limitdates.EndLimit == 4)
+            {
+                result = (from list in shipmentscreated
+                              where list.ShipmentDate >= LimitStartDate //&& list.ShipmentDate >= LimitEndDate
+                          select new InvoiceMonitorDTO2()
+                              {
+                                  label = list.DestinationServiceCentreName,
+                                  y = list.WayBillCount
+                              }).ToList();
+            }
+
+
 
             var v = (from a in result
                      group a by a.label into g
@@ -1641,13 +1685,13 @@ namespace GIGLS.Services.Implementation.Shipments
             //obj.totalGreen = totalGreen;
 
             var totalyellow = (from item in shipmentscreated
-                             where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_two_date && item.ShipmentDate <= limit_three_date
+                             where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate >= limit_two_date && item.ShipmentDate <= limit_three_date
                                select (long)item.WayBillCount).Sum();
 
             //obj.totalBlue = totalBlue;
 
             var totalRed = (from item in shipmentscreated
-                            where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate >= limit_three_date && item.ShipmentDate <= limit_four_date
+                            where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate >= limit_three_date //&& item.ShipmentDate >= limit_four_date
                             select (long)item.WayBillCount).Sum();
 
             var totalzones = ReturnTotalZonesArray(totalGreen, totalyellow, totalRed, shipmentscreated);
@@ -1858,7 +1902,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     EndDate = (DateTime)accountFilterCriteria.EndDate,
                     Invoices = invoicesByServiceCentre,
                     SalesCount = invoicesByServiceCentre.Count,
-                    TotalSales = invoicesByServiceCentre.Sum(s => s.Amount),
+                    TotalSales = invoicesByServiceCentre.Sum(s => (decimal?)s.Amount ??0),
                     DepartureServiceCentreId = invoicesByServiceCentre[0].DepartureServiceCentreId,
                     DepartureServiceCentreName = serviceCentreName
                 };
