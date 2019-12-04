@@ -256,5 +256,33 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 throw;
             }
         }
+
+        public Task<EcommerceWalletDTO> GetWalletDetailsForCompany(int companyId)
+        {
+            try
+            {
+                var company = _context.Company.Where(x => x.CompanyId == companyId);
+                var companiesDto = from c in company
+                                   join w in _context.Wallets on c.CustomerCode equals w.CustomerCode
+                                   join co in _context.Country on c.UserActiveCountryId equals co.CountryId
+                                   select new EcommerceWalletDTO
+                                   {
+                                       WalletBalance = w.Balance,
+                                       Country = _context.Country.Where(x => x.CountryId == c.UserActiveCountryId).Select(x => new CountryDTO
+                                       {
+                                           CountryId = x.CountryId,
+                                           CountryName = x.CountryName,
+                                           CurrencySymbol = x.CurrencySymbol,
+                                           CurrencyCode = x.CurrencyCode,
+                                           PhoneNumberCode = x.PhoneNumberCode
+                                       }).FirstOrDefault(),
+                                   };
+                return Task.FromResult(companiesDto.FirstOrDefault());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

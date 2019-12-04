@@ -22,7 +22,8 @@ namespace GIGLS.Services.Implementation.Website
             {
                 var messageType = MessageType.WEBPICKUP;
                 var emailSmsType = EmailSmsType.Email;
-                                
+                obj.gigMail = "info@giglogistics.com";
+
                 var result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
                 return await Task.FromResult(result);
             }
@@ -37,6 +38,7 @@ namespace GIGLS.Services.Implementation.Website
             {
                 var messageType = MessageType.WEBQUOTE;
                 var emailSmsType = EmailSmsType.Email;
+                obj.gigMail = "info@giglogistics.com";
 
                 var result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
                 return await Task.FromResult(result);
@@ -46,5 +48,22 @@ namespace GIGLS.Services.Implementation.Website
                 throw;
             }
         }
+        public async Task<bool> SendGIGGoIssuesMail(AppMessageDTO obj)
+        {
+            try
+            {
+                var messageType = MessageType.APPREPORT;
+                var emailSmsType = EmailSmsType.Email;
+                obj.Recipient = "gopartners@giglogistics.ng";
+
+                var result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
+                return await Task.FromResult(result);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

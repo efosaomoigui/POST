@@ -40,6 +40,7 @@
         OTP, //Message for One Time Password
         UDM, //Message for shipment that has exceeded delivery time
         WEBPICKUP, //Message for website mail for Schedlue Pickup
-        WEBQUOTE //Message for website mail for Request Quote
+        WEBQUOTE, //Message for website mail for Request Quote
+        APPREPORT //Mail sent containing Issues reported by GIGGo Users
     } 
 }
