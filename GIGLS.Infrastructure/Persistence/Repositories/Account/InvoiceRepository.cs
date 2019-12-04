@@ -244,7 +244,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             var queryDate = accountFilterCriteria.getStartDateAndEndDate2(accountFilterCriteria.dateFrom);
 
             DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
-            DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate; 
+            DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
 
             //declare parameters for the stored procedure
             SqlParameter iscancelled = new SqlParameter("@IsCancelled", (object)accountFilterCriteria.IsCancelled ?? DBNull.Value);
@@ -350,9 +350,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
         //var salesPeople = await context.Database.SqlQuery<SalesPerson>("AllSalesPeople").ToListAsync();
         public async Task<List<InvoiceMonitorDTO>> GetShipmentMonitorSetSPExpected(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
         {
-             
+
             //DateTime LimitDate = StartDate.AddDays((int)accountFilterCriteria.limitTime);
-            var queryDate = accountFilterCriteria.getStartDateAndEndDate2(accountFilterCriteria.dateFrom);         
+            var queryDate = accountFilterCriteria.getStartDateAndEndDate2(accountFilterCriteria.dateFrom);
 
             DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
             DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
@@ -551,9 +551,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             // filter by cancelled shipments and exclude all our testing service money from the list
             var shipments = Context.Shipment.AsQueryable()
-                .Where(s => s.IsCancelled == false && s.IsDeleted == false && s.DateCreated >= startDate && s.DateCreated < endDate  && s.DepartureCountryId == 1 
+                .Where(s => s.IsCancelled == false && s.IsDeleted == false && s.DateCreated >= startDate && s.DateCreated < endDate  && s.DepartureCountryId == 1
                 && !testingServiceCentre.Contains(s.DepartureServiceCentreId) && !testingServiceCentre.Contains(s.DestinationServiceCentreId));
-                
+
 
             var result = (from s in shipments
                           join i in Context.Invoice on s.Waybill equals i.Waybill
@@ -578,7 +578,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               DepartureCountryId = s.DepartureCountryId,
                               DestinationCountryId = s.DestinationCountryId,
                               PickupOptions = s.PickupOptions,
-                              ApproximateItemsWeight = s.ApproximateItemsWeight
+                              ApproximateItemsWeight = s.ApproximateItemsWeight,
+                              CustomerCode = s.CustomerCode
                           });
             return result;
         }
@@ -729,18 +730,18 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
         {
             IEnumerable<object> result = (from s in invoice
                                           group s by s.DepartureServiceCentreId into sales
-                                    select new 
-                          {
-                              ServiceCenterId = sales.Key,
-                              Name = Context.ServiceCentre.Where(c => c.ServiceCentreId == sales.Key).Select(x => new ServiceCentreDTO
-                              {
-                                  Code = x.Code,
-                                  Name = x.Name
-                              }).FirstOrDefault(),
+                                          select new
+                                          {
+                                              ServiceCenterId = sales.Key,
+                                              Name = Context.ServiceCentre.Where(c => c.ServiceCentreId == sales.Key).Select(x => new ServiceCentreDTO
+                                              {
+                                                  Code = x.Code,
+                                                  Name = x.Name
+                                              }).FirstOrDefault(),
 
-                              Revenue = sales.Sum(p => p.GrandTotal)
-                          }).OrderByDescending(i => i.Revenue).ToList();
-                       
+                                              Revenue = sales.Sum(p => p.GrandTotal)
+                                          }).OrderByDescending(i => i.Revenue).ToList();
+
             var results = result.ToList();
             return await Task.FromResult(results);
         }
@@ -754,6 +755,20 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                                               Weight = weight.Key,
                                               WeightCount = weight.Count()
                                           }).OrderByDescending(i => i.WeightCount).Take(5).ToList();
+
+            var results = result.ToList();
+            return await Task.FromResult(results);
+        }
+
+        public async Task<List<object>> CountOfCustomers(List<InvoiceView> invoice)
+        {
+            IEnumerable<object> result = (from s in invoice
+                                          group s by s.CustomerCode into customers
+                                          select new
+                                          {
+                                              CustomerCode = customers.Key,
+                                              Count = customers.Count()
+                                          }).OrderByDescending(i => i.Count).ToList();
 
             var results = result.ToList();
             return await Task.FromResult(results);
