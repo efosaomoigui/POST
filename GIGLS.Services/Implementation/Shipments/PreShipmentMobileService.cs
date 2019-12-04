@@ -252,7 +252,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
                 var Percentage = (Convert.ToDecimal(DiscountPercent.Value));
                 var PercentageTobeUsed = ((100M - Percentage) / 100M);
-                
+
+                //Get the customer Type
+                var userChannelCode = await _userService.GetUserChannelCode();
+                var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == userChannelCode);
+
+                if (userChannel != null)
+                {
+                    preShipment.Shipmentype = ShipmentType.Ecommerce;
+                }
                 
                 foreach (var preShipmentItem in preShipment.PreShipmentItems)
                 {
@@ -275,15 +283,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                     //    //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     //}
-
-                    //Get the customer Type
-                    var userChannelCode = await _userService.GetUserChannelCode();
-                    var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == userChannelCode);
-
-                    if(userChannel != null)
-                    {
-                        preShipment.Shipmentype = ShipmentType.Ecommerce;
-                    }
+                                       
                     
                     if (preShipmentItem.ShipmentType == ShipmentType.Special)
                     {
