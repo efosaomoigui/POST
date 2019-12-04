@@ -919,6 +919,58 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<IEnumerable<ShipmentCollectionDTO>> GetEcommerceOverDueShipmentsGLOBAL(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
+
+            try
+            {
+                //get startDate and endDate
+                var queryDate = filterCriteria.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+
+                // filter by global property for OverDueShipments
+                var overDueDaysCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceOverDueDaysCount, userActiveCountryId);
+                if (overDueDaysCountObj == null)
+                {
+                    throw new GenericException($"The Global property 'Over Due Days Count for Ecommerce customer' has not been set. Kindly contact admin.");
+                }
+                var overDueDaysCount = overDueDaysCountObj.Value;
+                int globalProp = int.Parse(overDueDaysCount);
+                var overdueDate = DateTime.Now.Subtract(TimeSpan.FromDays(globalProp));
+
+                var shipmentCollectionObj = _uow.ShipmentCollection.ShipmentCollectionsForEcommerceAsQueryable(true).
+                   Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && (x.DateCreated >= startDate && x.DateCreated < endDate) && (x.DateCreated <= overdueDate));
+
+                if (serviceCenters.Length > 0)
+                {
+                    shipmentCollectionObj = shipmentCollectionObj.Where(x => serviceCenters.Contains(x.DestinationServiceCentreId));
+                }
+
+                var shipmentCollection = shipmentCollectionObj.ToList();
+
+                //ensure that already grouped waybills don't appear with this list
+                var overdueShipment = _uow.OverdueShipment.GetAllAsQueryable().
+                    Where(s => s.OverdueShipmentStatus == OverdueShipmentStatus.Grouped).ToList();
+
+                //filter the two lists
+                shipmentCollection = shipmentCollection.Where(s => !overdueShipment.Select(d => d.Waybill).Contains(s.Waybill)).ToList();
+
+                int count = shipmentCollection.Count();
+
+                var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollection);
+
+                return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateCreated));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
         public async Task<IEnumerable<ShipmentCollectionDTO>> GetEcommerceOverDueShipments()
         {

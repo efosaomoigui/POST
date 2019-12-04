@@ -278,6 +278,16 @@ namespace GIGLS.Services.Implementation.Shipments
                     //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                     //    //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     //}
+
+                    //Get the customer Type
+                    var userChannelCode = await _userService.GetUserChannelCode();
+                    var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == userChannelCode);
+
+                    if(userChannel != null)
+                    {
+                        preShipment.Shipmentype = ShipmentType.Ecommerce;
+                    }
+                    
                     if (preShipmentItem.ShipmentType == ShipmentType.Special)
                     {
                         if (preShipment.Shipmentype == ShipmentType.Ecommerce)
@@ -371,8 +381,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-7);
                     endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
                 }
-                var allShipmentsResult = allShipments.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
 
+                //Excluding It Test
+                string [] testUserId = { "2932eb15-aa30-462c-89f0-7247670f504b", "ab3722d7-57f3-4e6e-a32d-1580315b7da6", "e67d50c2-953a-44b2-bbcd-c38fadef237f" };
+
+                var allShipmentsResult = allShipments.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && 
+                                            !testUserId.Contains(s.UserId) && s.SenderName != "it_test test");
+                
                 List<PreShipmentMobileDTO> shipmentDto = (from r in allShipmentsResult
                                                           select new PreShipmentMobileDTO()
                                                           {
@@ -426,7 +441,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //To get Partners details
                 var partners = await _partnerService.GetPartners();
                 var internals = partners.Where(s => s.PartnerType == PartnerType.InternalDeliveryPartner).Count();
-                var externals = partners.Where(s => s.PartnerType == PartnerType.DeliveryPartner && s.IsActivated ==true).Count();
+                var externals = partners.Where(s => s.PartnerType == PartnerType.DeliveryPartner && s.IsActivated == true ).Count();
 
                 //To get shipment details
                 var all = shipment.Count();
