@@ -242,7 +242,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 decimal DeclaredValue = 0.0M;
                 var Country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
                 preShipment.CountryId = Country.CountryId;
-                var Pickuprice = await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId);
+               
+                var Pickuprice = await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId, preShipment.UserId);
 
                 //undo comment when App is updated
                 //if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
@@ -968,12 +969,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 //preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Delivered.ToString();
                 preshipmentmobile.IsDelivered = true;
 
-                var Pickuprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId);
                 if (preshipmentmobile.ZoneMapping == 1)
                 {
                     var Partnerpaymentfordelivery = new PartnerPayDTO
                     {
-                        PickUprice = Pickuprice,
                         ShipmentPrice = preshipmentmobile.GrandTotal,
                         ZoneMapping = (int)preshipmentmobile.ZoneMapping
                     };
@@ -1030,15 +1029,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     if (preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString())
                     {
-
+                        var Pickuprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId, preshipmentmobile.UserId =null);
                         pickuprequest.Status = MobilePickUpRequestStatus.Delivered.ToString();
                         await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
-                        var Pickupprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId);
+                        //var Pickupprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId, preshipmentmobile.UserId=null);
                         var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
                         var Partner = new PartnerPayDTO
                         {
                             ShipmentPrice = preshipmentmobile.GrandTotal,
-                            PickUprice = Pickupprice
+                            PickUprice = Pickuprice
                         };
                         decimal price = await _partnertransactionservice.GetPriceForPartner(Partner);
                         var partneruser = await _userService.GetUserById(userId);
@@ -1423,7 +1422,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Shipment does not exist");
                 }
-                var pickuprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId);
+                var pickuprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId,preshipmentmobile.UserId=null);
                 var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
                 foreach (var id in preshipmentmobile.PreShipmentItems.ToList())
                 {
@@ -1882,28 +1881,30 @@ namespace GIGLS.Services.Implementation.Shipments
             return userActiveCountryId;
         }
 
-        public async Task<decimal> GetPickUpPrice(string vehicleType,int CountryId)
+        public async Task<decimal> GetPickUpPrice(string vehicleType,int CountryId, string UserId)
         {
             try
             {
                 var PickUpPrice = 0.0M;
                 if (vehicleType != null)
                 {
-                   
-                    if (vehicleType.ToLower() == Vehicletype.Car.ToString().ToLower())
+                    if (UserId == null)
                     {
-                        var carPickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.CarPickupPrice, CountryId);
-                        PickUpPrice = (Convert.ToDecimal(carPickUprice.Value));
+                        PickUpPrice = await  GetPickUpPriceForIndividual(vehicleType, CountryId);
                     }
-                    if (vehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower())
+                    else
                     {
-                        var bikePickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BikePickUpPrice, CountryId);
-                        PickUpPrice = (Convert.ToDecimal(bikePickUprice.Value));
-                    }
-                    if (vehicleType.ToLower() == Vehicletype.Van.ToString().ToLower())
-                    {
-                        var vanPickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.VanPickupPrice, CountryId);
-                        PickUpPrice = (Convert.ToDecimal(vanPickUprice.Value));
+
+                        var user = await _userService.GetUserById(UserId);
+                        var exists = await _uow.Company.ExistAsync(s => s.CustomerCode == user.UserChannelCode);
+                        if (user.UserChannelType == UserChannelType.Ecommerce || exists)
+                        {
+                            PickUpPrice = await GetPickUpPriceForEcommerce(vehicleType, CountryId);
+                        }
+                        else
+                        {
+                            PickUpPrice = await GetPickUpPriceForIndividual(vehicleType, CountryId);
+                        }
                     }
                     
                 }
@@ -1994,7 +1995,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == detail.WaybillNumber, "PreShipmentItems,SenderLocation,ReceiverLocation");
-                var Pickupprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId);
+                var Pickupprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId, preshipmentmobile.UserId);
                 var user = await _userService.GetUserByChannelCode(preshipmentmobile.CustomerCode);
                
                 if (preshipmentmobile.ZoneMapping != 1)
@@ -2557,6 +2558,46 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        private async Task<decimal> GetPickUpPriceForIndividual(string vehicleType, int CountryId)
+        {
+            var PickUpPrice = 0.0M;
+            if (vehicleType.ToLower() == Vehicletype.Car.ToString().ToLower())
+            {
+                var carPickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.CarPickupPrice, CountryId);
+                PickUpPrice = (Convert.ToDecimal(carPickUprice.Value));
+            }
+            else if (vehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower())
+            {
+                var bikePickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BikePickUpPrice, CountryId);
+                PickUpPrice = (Convert.ToDecimal(bikePickUprice.Value));
+            }
+            else if (vehicleType.ToLower() == Vehicletype.Van.ToString().ToLower())
+            {
+                var vanPickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.VanPickupPrice, CountryId);
+                PickUpPrice = (Convert.ToDecimal(vanPickUprice.Value));
+            }
+            return PickUpPrice;
+        }
+        private async Task<decimal> GetPickUpPriceForEcommerce(string vehicleType, int CountryId)
+        {
+            var PickUpPrice = 0.0M;
+            if (vehicleType.ToLower() == Vehicletype.Car.ToString().ToLower())
+            {
+                var carPickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceCarPickupPrice, CountryId);
+                PickUpPrice = (Convert.ToDecimal(carPickUprice.Value));
+            }
+            else if (vehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower())
+            {
+                var bikePickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceBikePickUpPrice, CountryId);
+                PickUpPrice = (Convert.ToDecimal(bikePickUprice.Value));
+            }
+            else if (vehicleType.ToLower() == Vehicletype.Van.ToString().ToLower())
+            {
+                var vanPickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceVanPickupPrice, CountryId);
+                PickUpPrice = (Convert.ToDecimal(vanPickUprice.Value));
+            }
+            return PickUpPrice;
+        }
     }
     
 
