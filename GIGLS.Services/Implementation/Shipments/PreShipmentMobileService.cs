@@ -275,6 +275,16 @@ namespace GIGLS.Services.Implementation.Shipments
                     //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                     //    //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     //}
+
+                    //Get the customer Type
+                    var userChannelCode = await _userService.GetUserChannelCode();
+                    var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == userChannelCode);
+
+                    if(userChannel != null)
+                    {
+                        preShipment.Shipmentype = ShipmentType.Ecommerce;
+                    }
+                    
                     if (preShipmentItem.ShipmentType == ShipmentType.Special)
                     {
                         if (preShipment.Shipmentype == ShipmentType.Ecommerce)
