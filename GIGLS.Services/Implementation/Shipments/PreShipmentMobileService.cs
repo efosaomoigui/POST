@@ -245,18 +245,27 @@ namespace GIGLS.Services.Implementation.Shipments
                 var Pickuprice = await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId);
 
                 //undo comment when App is updated
-                //if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
-                //{
-                //    amount = await CalculateGeoDetailsBasedonLocation(preShipment);
-                //    IndividualPrice = (amount / ShipmentCount);
-                //}
+                if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
+                {
+                    amount = await CalculateGeoDetailsBasedonLocation(preShipment);
+                    IndividualPrice = (amount / ShipmentCount);
+                }
+
                 var PickupValue = Convert.ToDecimal(Pickuprice);
                 var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
                 var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
                 var Percentage = (Convert.ToDecimal(DiscountPercent.Value));
                 var PercentageTobeUsed = ((100M - Percentage) / 100M);
                 
-                
+                //Get the customer Type
+                var userChannelCode = await _userService.GetUserChannelCode();
+                var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == userChannelCode);
+
+                if (userChannel != null)
+                {
+                    preShipment.Shipmentype = ShipmentType.Ecommerce;
+                }
+
                 foreach (var preShipmentItem in preShipment.PreShipmentItems)
                 {
                     if (preShipmentItem.Quantity == 0)
@@ -278,22 +287,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     //    preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                     //    //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     //}
-
-                    //Get the customer Type
-                    var userChannelCode = await _userService.GetUserChannelCode();
-                    var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == userChannelCode);
-
-                    if(userChannel != null)
-                    {
-                        preShipment.Shipmentype = ShipmentType.Ecommerce;
-                    }
-                    
+                                        
                     if (preShipmentItem.ShipmentType == ShipmentType.Special)
                     {
                         if (preShipment.Shipmentype == ShipmentType.Ecommerce)
                         {
                             PriceDTO.DeliveryOptionId = 4;
                         }
+
                         preShipmentItem.CalculatedPrice = await _pricingService.GetMobileSpecialPrice(PriceDTO);
                         preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                         preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
@@ -2493,6 +2494,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             return CountryId;
         }
+
         private async Task<decimal> CalculateGeoDetailsBasedonLocation(PreShipmentMobileDTO item)
         {
             var FixedDistance = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GiglgoMaximumFixedDistance, item.CountryId);
@@ -2502,7 +2504,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var FixedDistanceValue = int.Parse(FixedDistance.Value);
             var FixedPriceForTimeValue = Convert.ToDecimal(FixedPriceForTime.Value);
             var FixedPriceForDistanceValue = Convert.ToDecimal(FixedPriceForDistance.Value);
-            var amount = 0.00M;
+
             var Location = new LocationDTO
             {
                 DestinationLatitude = (double)item.ReceiverLocation.Latitude,
@@ -2510,18 +2512,22 @@ namespace GIGLS.Services.Implementation.Shipments
                 OriginLatitude = (double)item.SenderLocation.Latitude,
                 OriginLongitude = (double)item.SenderLocation.Longitude
             };
+
             RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
             var time = (details.rows[0].elements[0].duration.value / 60);
             var distance = (details.rows[0].elements[0].distance.value / 1000);
-            amount = time * FixedPriceForTimeValue;
+
+            decimal amount = time * FixedPriceForTimeValue;
+
             if (distance > FixedDistanceValue)
             {
                 var distancedifference = (distance - FixedDistanceValue);
                 amount += distancedifference * FixedPriceForDistanceValue;
             }
-            return amount;
 
+            return amount;
         }
+
         public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForEcommerce()
         {
             try
