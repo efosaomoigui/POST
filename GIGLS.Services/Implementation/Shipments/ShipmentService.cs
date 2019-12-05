@@ -1321,77 +1321,18 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<List<InvoiceViewDTOUNGROUPED>> GetShipmentWaybillsByDateMonitor(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates) 
         {
-            //filter by User Active Country
-            var userActiveCountry = await _userService.GetUserActiveCountry();
-            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
-
-            var LimitStartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(Limitdates.StartLimit);
-            var LimitEndDate = (Limitdates.EndLimit == 3 || Limitdates.EndLimit == 4) ? accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(Limitdates.EndLimit + 1) : 
-                accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(Limitdates.EndLimit);
+            var dataValues = ReturnStartAndEndDateLimit(accountFilterCriteria, Limitdates);
+            var LimitStartDate = dataValues.Item1;
+            var LimitEndDate = dataValues.Item2;
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var results = await _uow.Invoice.GetShipmentMonitorSetSP_NotGrouped(accountFilterCriteria, serviceCenterIds);
 
-            //var v = (from list in results
-            //              where list.ShipmentDate >= LimitStartDate && list.ShipmentDate <= LimitEndDate && list.DestinationServiceCentreName == Limitdates.ScName
-            //         select new InvoiceViewDTOUNGROUPED()
-            //              {
-            //                  DestinationServiceCentreName = list.DestinationServiceCentreName,
-            //                  Waybill = list.Waybill,
-            //                  ShipmentDate = list.ShipmentDate,
-            //                  PaymentMethod = list.PaymentMethod,
-            //                  Amount = list.Amount
-            //              }).ToList();
-
             var v = new List<InvoiceViewDTOUNGROUPED>();
 
-            if (Limitdates.EndLimit < 4)
+            if (Limitdates.StartLimit == 1 && Limitdates.EndLimit == 2)
             {
                 v = (from list in results
-                         where list.ShipmentDate >= LimitStartDate && list.ShipmentDate <= LimitEndDate && list.DestinationServiceCentreName == Limitdates.ScName
-                         select new InvoiceViewDTOUNGROUPED()
-                         {
-                             DestinationServiceCentreName = list.DestinationServiceCentreName,
-                             Waybill = list.Waybill,
-                             ShipmentDate = list.ShipmentDate,
-                             PaymentMethod = list.PaymentMethod,
-                             Amount = list.Amount
-                         }).ToList();
-            }
-            else if (Limitdates.EndLimit == 4)
-            {
-                v = (from list in results
-                         where list.ShipmentDate >= LimitStartDate && list.ShipmentDate >= LimitEndDate && list.DestinationServiceCentreName == Limitdates.ScName
-                         select new InvoiceViewDTOUNGROUPED()
-                         {
-                             DestinationServiceCentreName = list.DestinationServiceCentreName,
-                             Waybill = list.Waybill,
-                             ShipmentDate = list.ShipmentDate,
-                             PaymentMethod = list.PaymentMethod,
-                             Amount = list.Amount
-                         }).ToList();
-            }
-
-            //var shipmentscreated = results;
-            //var obj = ReturnShipmentCreatedByLimitDates(shipmentscreated, accountFilterCriteria, Limitdates);
-
-            return v;
-        }
-
-        public async Task<List<InvoiceViewDTOUNGROUPED>> GetShipmentWaybillsByDateMonitorx(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates)
-        {
-            //filter by User Active Country
-            var userActiveCountry = await _userService.GetUserActiveCountry();
-            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
-
-            var LimitStartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(Limitdates.StartLimit);
-            var LimitEndDate = (Limitdates.EndLimit == 3 || Limitdates.EndLimit == 4) ? accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(Limitdates.EndLimit + 1) :
-                accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(Limitdates.EndLimit);
-
-            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            var results = await _uow.Invoice.GetShipmentMonitorSetSP_NotGroupedx(accountFilterCriteria, serviceCenterIds);
-
-            var v = (from list in results
                      where list.ShipmentDate >= LimitStartDate && list.ShipmentDate <= LimitEndDate && list.DestinationServiceCentreName == Limitdates.ScName
                      select new InvoiceViewDTOUNGROUPED()
                      {
@@ -1401,47 +1342,129 @@ namespace GIGLS.Services.Implementation.Shipments
                          PaymentMethod = list.PaymentMethod,
                          Amount = list.Amount
                      }).ToList();
-
-            //var shipmentscreated = results;
-            //var obj = ReturnShipmentCreatedByLimitDates(shipmentscreated, accountFilterCriteria, Limitdates);
+            }
+            else
+            {
+                v = (from list in results
+                     where list.ShipmentDate > LimitStartDate && list.ShipmentDate <= LimitEndDate && list.DestinationServiceCentreName == Limitdates.ScName
+                     select new InvoiceViewDTOUNGROUPED()
+                     {
+                         DestinationServiceCentreName = list.DestinationServiceCentreName,
+                         Waybill = list.Waybill,
+                         ShipmentDate = list.ShipmentDate,
+                         PaymentMethod = list.PaymentMethod,
+                         Amount = list.Amount
+                     }).ToList();
+            }
 
             return v;
+        }
+
+        public async Task<List<InvoiceViewDTOUNGROUPED>> GetShipmentWaybillsByDateMonitorx(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates)
+        {
+            var dataValues = ReturnStartAndEndDateLimit(accountFilterCriteria, Limitdates);
+            var LimitStartDate = dataValues.Item1;
+            var LimitEndDate = dataValues.Item2;
+
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var results = await _uow.Invoice.GetShipmentMonitorSetSP_NotGroupedx(accountFilterCriteria, serviceCenterIds);
+
+            var v = new List<InvoiceViewDTOUNGROUPED>();
+
+            if (Limitdates.StartLimit == 1 && Limitdates.EndLimit == 2)
+            {
+                v = (from list in results
+                     where list.ShipmentDate >= LimitStartDate && list.ShipmentDate <= LimitEndDate && list.DestinationServiceCentreName == Limitdates.ScName
+                     select new InvoiceViewDTOUNGROUPED()
+                     {
+                         DestinationServiceCentreName = list.DestinationServiceCentreName,
+                         Waybill = list.Waybill,
+                         ShipmentDate = list.ShipmentDate,
+                         PaymentMethod = list.PaymentMethod,
+                         Amount = list.Amount
+                     }).ToList();
+            }
+            else
+            {
+                v = (from list in results
+                     where list.ShipmentDate > LimitStartDate && list.ShipmentDate <= LimitEndDate && list.DestinationServiceCentreName == Limitdates.ScName
+                     select new InvoiceViewDTOUNGROUPED()
+                     {
+                         DestinationServiceCentreName = list.DestinationServiceCentreName,
+                         Waybill = list.Waybill,
+                         ShipmentDate = list.ShipmentDate,
+                         PaymentMethod = list.PaymentMethod,
+                         Amount = list.Amount
+                     }).ToList();
+            }
+
+            return v;
+        }
+
+        private Tuple<DateTime, DateTime> ReturnStartAndEndDateLimit(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates)
+        {
+            var limit_one = Int32.Parse(ConfigurationManager.AppSettings["limit1"]);
+            var limit_two = Int32.Parse(ConfigurationManager.AppSettings["limit2"]);
+            var limit_over_two = Int32.Parse(ConfigurationManager.AppSettings["limit3"]);
+            var limit_over_four = Int32.Parse(ConfigurationManager.AppSettings["limitSpan"]);
+
+            var limit_one_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_one);
+            var limit_two_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_two);
+            var limit_three_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_over_two);
+            var limit_four_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_over_four);
+
+            var StartDate = new DateTime();
+            var EndDate = new DateTime(); 
+
+            if (Limitdates.StartLimit == 1 && Limitdates.EndLimit == 2)
+            {
+                StartDate = limit_one_date;
+                EndDate = limit_two_date.AddHours(23);
+            }
+            else if (Limitdates.StartLimit == 2 && Limitdates.EndLimit == 3)
+            {
+                StartDate = limit_two_date;
+                EndDate = limit_three_date;
+            }
+            else if (Limitdates.StartLimit == 3 && Limitdates.EndLimit == 4)
+            {
+                StartDate = limit_three_date;
+                EndDate = limit_four_date;
+            }
+
+            return Tuple.Create<DateTime, DateTime>(StartDate, EndDate);
         }
 
         private Object[] ReturnShipmentCreatedByLimitDates(List<InvoiceMonitorDTO> shipmentscreated, AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates)
         {
             var obj = new InvoiceMonitorDTO2();
 
-            //get the green blue red zones for the record set for shipment created
-            //var limit_one = Int32.Parse(ConfigurationManager.AppSettings["limit1"]);
-            //var limit_two = Int32.Parse(ConfigurationManager.AppSettings["limit2"]);
-            //var limit_over_two = Int32.Parse(ConfigurationManager.AppSettings["limit3"]);
+            var dataValues = ReturnStartAndEndDateLimit(accountFilterCriteria, Limitdates);
+            var LimitStartDate = dataValues.Item1;
+            var LimitEndDate = dataValues.Item2;
 
-            var LimitStartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(Limitdates.StartLimit);
-            var LimitEndDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(Limitdates.EndLimit);
             var result = new List<InvoiceMonitorDTO2>();
 
-            if (Limitdates.EndLimit < 4)
+            if (Limitdates.StartLimit == 1 && Limitdates.EndLimit == 2)
             {
                 result = (from list in shipmentscreated
-                              where list.ShipmentDate >= LimitStartDate && list.ShipmentDate <= LimitEndDate
-                              select new InvoiceMonitorDTO2()
-                              {
-                                  label = list.DestinationServiceCentreName,
-                                  y = list.WayBillCount
-                              }).ToList();
-            }else if (Limitdates.EndLimit == 4)
-            {
-                result = (from list in shipmentscreated
-                              where list.ShipmentDate >= LimitStartDate //&& list.ShipmentDate >= LimitEndDate
+                          where list.ShipmentDate >= LimitStartDate && list.ShipmentDate <= LimitEndDate
                           select new InvoiceMonitorDTO2()
-                              {
-                                  label = list.DestinationServiceCentreName,
-                                  y = list.WayBillCount
-                              }).ToList();
+                          {
+                              label = list.DestinationServiceCentreName,
+                              y = list.WayBillCount
+                          }).ToList();
             }
-
-
+            else
+            {
+                result = (from list in shipmentscreated
+                          where list.ShipmentDate > LimitStartDate && list.ShipmentDate <= LimitEndDate
+                          select new InvoiceMonitorDTO2()
+                          {
+                              label = list.DestinationServiceCentreName,
+                              y = list.WayBillCount
+                          }).ToList();
+            }
 
             var v = (from a in result
                      group a by a.label into g
@@ -1452,8 +1475,6 @@ namespace GIGLS.Services.Implementation.Shipments
                      }).ToList();
 
             var finalresult = ReturnChartDataArray(v);
-
-            //obj.totalRed = totalRed;
             return finalresult;
         }
 
@@ -1486,60 +1507,26 @@ namespace GIGLS.Services.Implementation.Shipments
             var limit_one = Int32.Parse(ConfigurationManager.AppSettings["limit1"]);
             var limit_two = Int32.Parse(ConfigurationManager.AppSettings["limit2"]);
             var limit_over_two = Int32.Parse(ConfigurationManager.AppSettings["limit3"]);
-            var limit_over_four = 4; //Int32.Parse(ConfigurationManager.AppSettings["limit4"]);
+            var limit_over_four = Int32.Parse(ConfigurationManager.AppSettings["limitSpan"]);
 
             var limit_one_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_one);
             var limit_two_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_two);
             var limit_three_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_over_two);
             var limit_four_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_over_four);
 
-
-            //var greencreated = (from list in shipmentscreated
-            //                    where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate >= limit_one_date && list.ShipmentDate <= limit_two_date
-            //                    select new InvoiceMonitorDTO2()
-            //                    {
-            //                        label = list.DestinationServiceCentreName,
-            //                        y = list.WayBillCount
-            //                    }).ToList();
-
-            //obj.groupgreen_s = ReturnChartDataArray(greencreated);
-
-            //var bluecreated = (from list in shipmentscreated
-            //                   where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_two_date && list.ShipmentDate <= limit_over_two_date
-            //                   select new InvoiceMonitorDTO2()
-            //                   {
-            //                       label = list.DestinationServiceCentreName,
-            //                       y = list.WayBillCount
-            //                   }).ToList();
-
-            //obj.groupblue_s = ReturnChartDataArray(bluecreated);
-
-            //var redcreated = (from list in shipmentscreated
-            //                  where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate >= limit_over_two_date
-            //                  select new InvoiceMonitorDTO2()
-            //                  {
-            //                      label = list.DestinationServiceCentreName,
-            //                      y = list.WayBillCount
-            //                  }).ToList();
-
-            //obj.groupred_s = ReturnChartDataArray(redcreated);
-
             var totalGreen = (from item in shipmentsexpected
-                              where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate >= limit_one_date && item.ShipmentDate <= limit_two_date
+                              where item.ShipmentDate >= limit_one_date && item.ShipmentDate <= limit_two_date
                               select (long)item.WayBillCount).Sum();
-            //obj.totalGreen = totalGreen;
 
             var totalyellow = (from item in shipmentsexpected
-                               where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate < limit_two_date && item.ShipmentDate <= limit_three_date
+                               where item.ShipmentDate < limit_two_date && item.ShipmentDate <= limit_three_date
                                select (long)item.WayBillCount).Sum();
 
-            //obj.totalBlue = totalBlue;
-
             var totalRed = (from item in shipmentsexpected
-                            where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate >= limit_three_date && item.ShipmentDate <= limit_four_date
+                            where item.ShipmentDate > limit_three_date && item.ShipmentDate <= limit_four_date
                             select (long)item.WayBillCount).Sum();
 
-            var totalzones = ReturnTotalZonesArray(totalGreen, totalyellow, totalRed, shipmentsexpected);
+            var totalzones = ReturnTotalZonesArray(totalGreen, totalyellow, totalRed);
             obj.totalZones = totalzones;
 
             //obj.totalRed = totalRed;
@@ -1555,7 +1542,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var limit_one = Int32.Parse(ConfigurationManager.AppSettings["limit1"]);
             var limit_two = Int32.Parse(ConfigurationManager.AppSettings["limit2"]);
             var limit_over_two = Int32.Parse(ConfigurationManager.AppSettings["limit3"]);
-            var limit_over_four = 4; //Int32.Parse(ConfigurationManager.AppSettings["limit4"]);
+            var limit_over_four = Int32.Parse(ConfigurationManager.AppSettings["limitSpan"]);
 
             var limit_one_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_one);
             var limit_two_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_two);
@@ -1563,55 +1550,21 @@ namespace GIGLS.Services.Implementation.Shipments
             var limit_four_date = accountFilterCriteria.StartDate.GetValueOrDefault().Date.AddDays(limit_over_four);
 
 
-            //var greencreated = (from list in shipmentscreated
-            //                    where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate >= limit_one_date && list.ShipmentDate <= limit_two_date
-            //                    select new InvoiceMonitorDTO2()
-            //                    {
-            //                        label = list.DestinationServiceCentreName,
-            //                        y = list.WayBillCount
-            //                    }).ToList();
-
-            //obj.groupgreen_s = ReturnChartDataArray(greencreated);
-
-            //var bluecreated = (from list in shipmentscreated
-            //                   where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate < limit_two_date && list.ShipmentDate <= limit_over_two_date
-            //                   select new InvoiceMonitorDTO2()
-            //                   {
-            //                       label = list.DestinationServiceCentreName,
-            //                       y = list.WayBillCount
-            //                   }).ToList();
-
-            //obj.groupblue_s = ReturnChartDataArray(bluecreated);
-
-            //var redcreated = (from list in shipmentscreated
-            //                  where list.ShipmentDate > accountFilterCriteria.StartDate && list.ShipmentDate >= limit_over_two_date
-            //                  select new InvoiceMonitorDTO2()
-            //                  {
-            //                      label = list.DestinationServiceCentreName,
-            //                      y = list.WayBillCount
-            //                  }).ToList();
-
-            //obj.groupred_s = ReturnChartDataArray(redcreated);
-
             var totalGreen = (from item in shipmentscreated
-                              where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate >= limit_one_date && item.ShipmentDate <= limit_two_date
+                              where item.ShipmentDate >= limit_one_date && item.ShipmentDate <= limit_two_date
                               select (long)item.WayBillCount).Sum();
-            //obj.totalGreen = totalGreen;
 
             var totalyellow = (from item in shipmentscreated
-                             where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate >= limit_two_date && item.ShipmentDate <= limit_three_date
+                             where item.ShipmentDate > limit_two_date && item.ShipmentDate <= limit_three_date
                                select (long)item.WayBillCount).Sum();
 
-            //obj.totalBlue = totalBlue;
-
             var totalRed = (from item in shipmentscreated
-                            where item.ShipmentDate > accountFilterCriteria.StartDate && item.ShipmentDate >= limit_three_date //&& item.ShipmentDate >= limit_four_date
+                            where item.ShipmentDate > limit_three_date && item.ShipmentDate <= limit_four_date
                             select (long)item.WayBillCount).Sum();
 
-            var totalzones = ReturnTotalZonesArray(totalGreen, totalyellow, totalRed, shipmentscreated);
+            var totalzones = ReturnTotalZonesArray(totalGreen, totalyellow, totalRed);
             obj.totalZones = totalzones;
 
-            //obj.totalRed = totalRed;
             return obj;
         }
 
@@ -1622,7 +1575,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (values != null)
             {
-                var objectarray = new object[3];
 
                 chartData[0] = new object[]
                 {
@@ -1647,7 +1599,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
 
 
-        public object[] ReturnTotalZonesArray(double totalgreen, double totalyellow, double totalred, List<InvoiceMonitorDTO> shipmentscreated)
+        public object[] ReturnTotalZonesArray(double totalgreen, double totalyellow, double totalred)
         {
 
             //var chartData = new object[3];
