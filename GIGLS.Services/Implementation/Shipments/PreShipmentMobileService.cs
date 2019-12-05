@@ -529,11 +529,17 @@ namespace GIGLS.Services.Implementation.Shipments
                         var countryId = await GetCountryByServiceCentreId(agilityshipment.DepartureServiceCentreId);
 
                         var Country = await _uow.Country.GetAsync(countryId);
+                        CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), agilityshipment.CustomerType);
+                        var CustomerDetails = await _customerService.GetCustomer(agilityshipment.CustomerId, customerType);
 
                         Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(agilityshipment);
+                        Shipmentdto.SenderAddress = CustomerDetails.Address;
+                        Shipmentdto.SenderName = CustomerDetails.Name;
+                        Shipmentdto.SenderPhoneNumber = CustomerDetails.PhoneNumber;
                         Shipmentdto.PreShipmentItems = new List<PreShipmentItemMobileDTO>();
+
                        foreach (var shipments in agilityshipment.ShipmentItems)
-                        {
+                       {
                             var item = Mapper.Map<PreShipmentItemMobileDTO>(shipments);
                             item.ItemName = shipments.Description;
                             item.ImageUrl = "";
