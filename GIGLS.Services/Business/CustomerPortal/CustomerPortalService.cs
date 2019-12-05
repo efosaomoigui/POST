@@ -713,6 +713,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                 {
                     return false;
                 }
+                if(u.UserChannelType == UserChannelType.Employee && u.Email == user.Email)
+                {
+                    return false;
+                }
                 else
                 {
                     if(u.UserChannelType == UserChannelType.IndividualCustomer && u.IsRegisteredFromMobile == true)
@@ -1517,7 +1521,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         CustomerId = companydto.CompanyId,
                         CustomerType = CustomerType.Company,
                         CustomerCode = customerCode,
-                        CompanyType = CustomerType.Company.ToString()
+                        CompanyType = CompanyType.Ecommerce.ToString()
                     });
 
                     //return user;

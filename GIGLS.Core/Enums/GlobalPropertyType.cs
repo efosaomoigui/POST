@@ -45,6 +45,9 @@
         GiglgoMaximumFixedDistance,
         GiglgoFixedPriceForDistance,
         GiglgoFixedPriceForTime,
-        EcommerceEmail
+        EcommerceEmail,
+        EcommerceBikePickUpPrice,
+        EcommerceCarPickupPrice,
+        EcommerceVanPickupPrice
     }
 }

@@ -90,11 +90,6 @@ namespace GIGLS.Services.Implementation.Partnership
         {
             
             walletPaymentLogDto.UserId = await _userService.GetCurrentUserId();
-            if(walletPaymentLogDto.IsFromServiceCentre)
-            {
-                var Partnerid = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == walletPaymentLogDto.Waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
-                walletPaymentLogDto.UserId = Partnerid.UserId;
-            }
             var walletPaymentLog = Mapper.Map<PartnerTransactions>(walletPaymentLogDto);
             _uow.PartnerTransactions.Add(walletPaymentLog);
             await _uow.CompleteAsync();
