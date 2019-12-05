@@ -321,13 +321,23 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         DeclaredValue += Convert.ToDecimal(preShipmentItem.Value);
                         var DeclaredValueForPreShipment = Convert.ToDecimal(preShipmentItem.Value);
-                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M) + vatForPreshipment;
+                        if (preShipment.Shipmentype == ShipmentType.Ecommerce)
+                        {
+                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M);
+                        }
+                        else
+                        {
+                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M) + vatForPreshipment;
+                        }
                         preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice);
                         preShipment.IsdeclaredVal = true;
                     }
                     else
                     {
-                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + vatForPreshipment;
+                        if (preShipment.Shipmentype != ShipmentType.Ecommerce)
+                        {
+                           preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + vatForPreshipment;
+                        }
                         preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice);
                     }
                     Price += (decimal)preShipmentItem.CalculatedPrice;
@@ -2557,7 +2567,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               Value = r.Value,
                                                               GrandTotal = r.GrandTotal,
                                                               CustomerCode = r.CustomerCode,
-                                                              DepartureServiceCentreId = r.DepartureServiceCentreId
+                                                              DepartureServiceCentreId = r.DepartureServiceCentreId,
+                                                              shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString()
 
                                                           }).ToList();
                 foreach ( var shipments in shipmentDto)
