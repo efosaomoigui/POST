@@ -42,5 +42,6 @@ namespace GIGLS.Core.IRepositories.Account
         IQueryable<InvoiceView> GetAllFromInvoiceAndShipments(ShipmentCollectionFilterCriteria filterCriteria);
         Task<List<object>> SalesPerServiceCenter(List<InvoiceView> invoice);
         Task<List<object>> MostShippedItemsByWeight(List<InvoiceView> invoice);
+        Task<List<object>> CountOfCustomers(List<InvoiceView> invoice);
     }
 }
