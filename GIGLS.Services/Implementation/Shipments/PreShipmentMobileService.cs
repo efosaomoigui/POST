@@ -31,6 +31,7 @@ using GIGLS.Core.DTO.User;
 using VehicleType = GIGLS.Core.Domain.VehicleType;
 using Hangfire;
 using GIGLS.Core.IServices.ShipmentScan;
+using GIGLS.Core.IServices.Customers;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -59,7 +60,8 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IHaulageService _haulageService;
         private readonly IHaulageDistanceMappingService _haulageDistanceMappingService;
         private readonly IPartnerService _partnerService;
-        
+        private readonly ICustomerService _customerService;
+
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre, INumberGeneratorMonitorService numberGeneratorMonitorService,
@@ -67,7 +69,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice, IMobileShipmentTrackingService mobiletrackingservice,
             IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice,
             IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMobileRatingService mobileratingService, IMessageSenderService messageSenderService,
-            IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService)
+            IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -92,7 +94,9 @@ namespace GIGLS.Services.Implementation.Shipments
             _haulageService = haulageService;
             _haulageDistanceMappingService = haulageDistanceMappingService;
             _partnerService = partnerService;
-           
+            _customerService = customerService;
+
+
 
             MapperConfig.Initialize();
         }
@@ -2568,18 +2572,25 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               GrandTotal = r.GrandTotal,
                                                               CustomerCode = r.CustomerCode,
                                                               DepartureServiceCentreId = r.DepartureServiceCentreId,
-                                                              shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString()
+                                                              shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString(),
+                                                              CustomerId = r.CustomerId,
+                                                              CustomerType = r.CustomerType
 
                                                           }).ToList();
                 foreach ( var shipments in shipmentDto)
                 {
                     var Countryid = await GetCountryByServiceCentreId(shipments.DepartureServiceCentreId);
                     var Country = await _uow.Country.GetAsync(Countryid);
+                    
                     if(Country !=null)
                     {
                         shipments.CurrencyCode = Country.CurrencyCode;
                         shipments.CurrencySymbol = Country.CurrencySymbol;
                     }
+                    CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipments.CustomerType);
+                    var CustomerDetails = await _customerService.GetCustomer(shipments.CustomerId, customerType);
+                    shipments.SenderAddress = CustomerDetails.Address;
+                    shipments.SenderName = CustomerDetails.Name;
                 }
                 
                 return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
