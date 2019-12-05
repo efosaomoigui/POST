@@ -43,6 +43,10 @@ namespace GIGLS.Core.DTO.Account
 
         public List<object> WeightData { get; set; }
         public decimal AvgLagosShipment { get; set; }
+        public decimal AvgOutLagosShipment { get; set; }
 
+        public int IndCustomerCount { get; set; }
+        public int EcomCustomerCount { get; set; }
+        public int CorpCustomerCount { get; set; }
     }
 }

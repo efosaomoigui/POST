@@ -2,6 +2,7 @@
 using GIGLS.Core;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Admin;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.Enums;
@@ -34,13 +35,13 @@ namespace GIGLS.Services.Implementation.Report
             AdminReportDTO result = new AdminReportDTO
             {
                 BusiestRoute = await GetBusiestRoutes(),
-                MostShippedItemByWeight = await GetMostShippedItemByWeights(),
                 TotalServiceCentreByState = await GetTotalServiceCentreByStates()
 
                 //result.AllTimeSalesByCountry = await GetAllTimeSalesByCountries();
                 //result.CustomerRevenue = await GetCustomerRevenues();
                 //result.RevenuePerServiceCentre = await GetRevenuePerServiceCentres();
                 //result.TotalOrdersDelivered = await GetTotalOrdersDelivered();
+                //MostShippedItemByWeight = await GetMostShippedItemByWeights(),
             };
 
             //Get customer count
@@ -124,16 +125,20 @@ namespace GIGLS.Services.Implementation.Report
             string ecommerce = FilterCustomerType.Ecommerce.ToString();
             string corporate = FilterCustomerType.Corporate.ToString();
 
+            //Shipments per Customer Type
+            var individualShipments = invoices.Where(x => x.CompanyType == individual);
+            var ecommerceShipments = invoices.Where(x => x.CompanyType == ecommerce);
+            var corporateShipments = invoices.Where(x => x.CompanyType == corporate);
 
             //Revenue per customer type
-            var individualRevenue = invoices.Where(x => x.CompanyType == individual).Sum(x => x.GrandTotal);
-            var ecommerceRevenue = invoices.Where(x => x.CompanyType == ecommerce).Sum(x => x.GrandTotal);
-            var corporateRevenue = invoices.Where(x => x.CompanyType == corporate).Sum(x => x.GrandTotal);
+            var individualRevenue = individualShipments.Sum(x => x.GrandTotal);
+            var ecommerceRevenue = ecommerceShipments.Sum(x => x.GrandTotal);
+            var corporateRevenue = corporateShipments.Sum(x => x.GrandTotal);
 
             //Count of Shipments Per Customer Type 
-            var individualShipmentCount = invoices.Where(x => x.CompanyType == individual).Count();
-            var ecommerceShipmentCount = invoices.Where(x => x.CompanyType == ecommerce).Count();
-            var corporateShipmentCount = invoices.Where(x => x.CompanyType == corporate).Count();
+            var individualShipmentCount = individualShipments.Count();
+            var ecommerceShipmentCount = ecommerceShipments.Count();
+            var corporateShipmentCount = corporateShipments.Count();
 
             //Get Average Spent Per Customer Type
             var avgIndividualCost = individualRevenue / ((individualShipmentCount == 0) ? 1 : individualShipmentCount) ;
@@ -183,10 +188,26 @@ namespace GIGLS.Services.Implementation.Report
             var serviceCentres = await _serviceCenterService.GetServiceCentresByStationId(lagosStationId);
             int[] serviceCenterIds = serviceCentres.Select(s => s.ServiceCentreId).ToArray();
             
+            //Shipments within Lagos
             var lagosShipments = invoice.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId) && serviceCenterIds.Contains(s.DestinationServiceCentreId));
             var sumlagosShipments = lagosShipments.Sum(x => x.GrandTotal);
             var countLagosShipments = lagosShipments.Count();
             var avgLagosShipments = sumlagosShipments / ((countLagosShipments == 0 ? 1 : countLagosShipments));
+
+            //Shipments Leaving Lagos
+            var OutlagosShipments = invoice.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId) && !serviceCenterIds.Contains(s.DestinationServiceCentreId));
+            var sumOutlagosShipments = OutlagosShipments.Sum(x => x.GrandTotal);
+            var countOutLagosShipments = OutlagosShipments.Count();
+            var avgOutLagosShipments = sumOutlagosShipments / ((countOutLagosShipments == 0 ? 1 : countOutLagosShipments));
+
+            //get the distinct count of customers
+            var individualCustomerShipments = await CountCustomers(individualShipments.ToList());
+            var ecommerceCustomerShipments = await CountCustomers(ecommerceShipments.ToList());
+            var corporateCustomerShipments = await CountCustomers(corporateShipments.ToList());
+
+            var individualCustomerShipmentsCount = individualCustomerShipments.Count();
+            var ecommerceCustomerShipmentsCount = ecommerceCustomerShipments.Count();
+            var corporateCustomerShipmentsCount = corporateCustomerShipments.Count();
 
             result.Revenue = revenue;
             result.ShipmentDelivered = shipmentDeliverd;
@@ -217,6 +238,11 @@ namespace GIGLS.Services.Implementation.Report
             result.TotalShipmentAvg = avgTotalShipments;
             result.WeightData = weight;
             result.AvgLagosShipment = avgLagosShipments;
+            result.AvgOutLagosShipment = avgOutLagosShipments;
+
+            result.IndCustomerCount = individualCustomerShipmentsCount;
+            result.EcomCustomerCount = ecommerceCustomerShipmentsCount;
+            result.CorpCustomerCount = corporateCustomerShipmentsCount;
 
             return result;
         }
@@ -231,6 +257,12 @@ namespace GIGLS.Services.Implementation.Report
         {
             var weightData = await _uow.Invoice.MostShippedItemsByWeight(invoice);
             return weightData;
+        }
+
+        private async Task<List<object>> CountCustomers(List<InvoiceView> invoice)
+        {
+            var custData = await _uow.Invoice.CountOfCustomers(invoice);
+            return custData;
         }
 
         private async Task<List<Report_MostShippedItemByWeight>> GetMostShippedItemByWeights()
