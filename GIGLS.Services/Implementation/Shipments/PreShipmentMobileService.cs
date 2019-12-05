@@ -531,6 +531,15 @@ namespace GIGLS.Services.Implementation.Shipments
                         var Country = await _uow.Country.GetAsync(countryId);
 
                         Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(agilityshipment);
+                        Shipmentdto.PreShipmentItems = new List<PreShipmentItemMobileDTO>();
+                       foreach (var shipments in agilityshipment.ShipmentItems)
+                        {
+                            var item = Mapper.Map<PreShipmentItemMobileDTO>(shipments);
+                            item.ItemName = shipments.Description;
+                            item.ImageUrl = "";
+                            Shipmentdto.PreShipmentItems.Add(item);
+                        }
+                             
 
                         if (Country != null)
                         {

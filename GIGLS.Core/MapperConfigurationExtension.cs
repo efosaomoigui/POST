@@ -395,6 +395,8 @@ namespace GIGLS.Core
 
                 config.CreateMap<Shipment, PreShipmentMobileDTO>();
                 config.CreateMap<PreShipmentMobileDTO, Shipment>();
+                config.CreateMap<PreShipmentItemMobileDTO, ShipmentItem>();
+                config.CreateMap<ShipmentItem, PreShipmentItemMobileDTO>();
 
             });
 
