@@ -2572,7 +2572,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               GrandTotal = r.GrandTotal,
                                                               CustomerCode = r.CustomerCode,
                                                               DepartureServiceCentreId = r.DepartureServiceCentreId,
-                                                              shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString(),
+                                                              shipmentstatus = "Shipment",
                                                               CustomerId = r.CustomerId,
                                                               CustomerType = r.CustomerType
 
