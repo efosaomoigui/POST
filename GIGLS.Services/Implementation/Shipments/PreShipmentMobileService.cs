@@ -2564,7 +2564,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var currentUser = await _userService.GetCurrentUserId();
                 var user = await _uow.User.GetUserById(currentUser);
-                var shipment = await _uow.Shipment.FindAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
+                var shipment = await _uow.Shipment.FindAsync(x => x.CustomerCode.Equals(user.UserChannelCode) && x.IsCancelled == false);
 
                 List<PreShipmentMobileDTO> shipmentDto = (from r in shipment
                                                           select new PreShipmentMobileDTO()
