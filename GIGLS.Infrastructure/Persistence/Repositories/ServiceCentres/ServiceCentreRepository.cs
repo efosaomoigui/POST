@@ -53,6 +53,36 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
             }
         }
 
+        public Task<List<ServiceCentreDTO>> GetServiceCentresWithoutStation()
+        {
+            try
+            {
+                var centres = _context.ServiceCentre;
+                var centreDto = from s in centres
+                                select new ServiceCentreDTO
+                                {
+                                    Name = s.Name,
+                                    Address = s.Address,
+                                    City = s.City,
+                                    Email = s.Email,
+                                    PhoneNumber = s.PhoneNumber,
+                                    ServiceCentreId = s.ServiceCentreId,
+                                    Code = s.Code,
+                                    IsActive = s.IsActive,
+                                    TargetAmount = s.TargetAmount,
+                                    TargetOrder = s.TargetOrder,
+                                    StationId = s.StationId,
+                                    IsDefault = s.IsDefault,
+                                    IsHUB = s.IsHUB
+                                };
+                return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public Task<List<ServiceCentreDTO>> GetServiceCentresForInternational()
         {
             try

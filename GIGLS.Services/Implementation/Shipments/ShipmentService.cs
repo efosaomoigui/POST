@@ -869,8 +869,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 //filter by DestinationServiceCentreId
                 var filter = filterOptionsDto.filter;
                 var filterValue = filterOptionsDto.filterValue;
-                int destinationSCId = 0;
-                var boolResult = int.TryParse(filterValue, out destinationSCId);
+                //int destinationSCId = 0;
+                var boolResult = int.TryParse(filterValue, out int destinationSCId);
                 if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
                 {
                     if (filter == "DestinationServiceCentreId" && boolResult)
@@ -883,14 +883,16 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //2. get only paid shipments from Invoice for Individuals
                 // and allow Ecommerce and Corporate customers to be grouped
-                var paidShipments = new List<InvoiceView>();
+                //var paidShipments = new List<InvoiceView>();
+                var finalUngroupedList = new HashSet<InvoiceView>();
+
                 foreach (var shipmentItem in shipmentsBySC)
                 {
-                    var invoice = shipmentItem;
+                    //var invoice = shipmentItem;
 
-                    if (invoice.PaymentStatus == PaymentStatus.Paid || shipmentItem.CompanyType == CompanyType.Corporate.ToString())
+                    if (shipmentItem.PaymentStatus == PaymentStatus.Paid || shipmentItem.CompanyType == CompanyType.Corporate.ToString())
                     {
-                        paidShipments.Add(shipmentItem);
+                        finalUngroupedList.Add(shipmentItem);
                     }
                 }
 
@@ -901,17 +903,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 //var groupedWaybillsAsStringList = groupWayBillNumberMappings.ToList().Select(a => a.WaybillNumber);
                 //var groupedWaybillsAsHashSet = new HashSet<string>(groupWayBillNumberMappings);
                 //var ungroupedWaybills = paidShipments.Where(s => !groupedWaybillsAsHashSet.Contains(s.Waybill)).ToList();
-                var ungroupedWaybills = paidShipments;
+                //var ungroupedWaybills = paidShipments;
 
                 //new solution
                 //1. Get Transit Waybill that is not completed, not group and service centre belong to login user
                 //2. Loop through output of 1 and get the shipment details, then add it to the ungrouped
-                var finalUngroupedList = new List<InvoiceView>();
+                //var finalUngroupedList = new List<InvoiceView>();
 
-                foreach (var item in ungroupedWaybills)
-                {
-                    finalUngroupedList.Add(item);
-                }
+                //foreach (var item in ungroupedWaybills)
+                //{
+                //    finalUngroupedList.Add(item);
+                //}
                 int currentServiceCentre = serviceCenters[0];
 
                 var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable()
@@ -928,72 +930,27 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                //5. Ensure the waybills are in this ServiceCentre from the TransitWaybill entity
-                //Get TransitWaybillNumber as a querable list
-                //var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable().Where(x => x.IsTransitCompleted == false).ToList();
-
-                //// final ungroupedList
-                //var finalUngroupedList = new List<InvoiceView>();
-                //foreach (var item in ungroupedWaybills)
-                //{
-                //    var tranWaybillObj = allTransitWaybillNumberList.LastOrDefault(s => s.WaybillNumber == item.Waybill);
-                //    if (tranWaybillObj != null)
-                //    {
-                //        if (tranWaybillObj.ServiceCentreId == serviceCenters[0] && tranWaybillObj.IsGrouped == false)
-                //        {
-                //            finalUngroupedList.Add(item);
-                //            break;
-                //        }
-                //    }
-                //    else
-                //    {
-                //        finalUngroupedList.Add(item);
-                //    }
-                //}
-
-                //The problem might be from here
-                //6.added for Transitwaybills
-                //var transitWaybillNumberList = allTransitWaybillNumberList.Where(s =>
-                //    serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsDeleted == false && s.IsTransitCompleted == false).ToList();
-
-                //foreach (var item in transitWaybillNumberList)
-                //{
-                //    var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().FirstOrDefault(s => s.IsShipmentCollected == false && s.Waybill == item.WaybillNumber);
-
-                //    if (filterByDestinationSC && shipmentsBySC.Count > 0)
-                //    {
-                //        var destinationSC = shipmentsBySC[0].DestinationServiceCentreId;
-                //        if (shipment != null && shipment.DestinationServiceCentreId == destinationSC)
-                //        {
-                //            finalUngroupedList.Add(shipment);
-                //        }
-                //    }
-                //    //else
-                //    //{
-                //    //    finalUngroupedList.Add(shipment);
-                //    //}
-                //}
-
                 //7.
                 var finalList = new List<InvoiceViewDTO>();
 
-                var allServiceCenters = await _centreService.GetServiceCentres();
+                //var allServiceCenters = await _centreService.GetServiceCentres();
+                var allServiceCenters = await _uow.ServiceCentre.GetServiceCentresWithoutStation();
 
                 foreach (var finalUngroupedItem in finalUngroupedList)
                 {
-                    var shipment = finalUngroupedItem;
-                    if (shipment != null)
+                    //var shipment = finalUngroupedItem;
+                    if (finalUngroupedItem != null)
                     {
-                        var invoiceViewDTO = Mapper.Map<InvoiceViewDTO>(shipment);
+                        var invoiceViewDTO = Mapper.Map<InvoiceViewDTO>(finalUngroupedItem);
 
-                        invoiceViewDTO.DepartureServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == shipment.DepartureServiceCentreId).Select(s => new ServiceCentreDTO
+                        invoiceViewDTO.DepartureServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == finalUngroupedItem.DepartureServiceCentreId).Select(s => new ServiceCentreDTO
                         {
                             Name = s.Name,
                             Code = s.Code,
                             ServiceCentreId = s.ServiceCentreId
                         }).FirstOrDefault();
 
-                        invoiceViewDTO.DestinationServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == shipment.DestinationServiceCentreId).Select(s => new ServiceCentreDTO
+                        invoiceViewDTO.DestinationServiceCentre = allServiceCenters.Where(x => x.ServiceCentreId == finalUngroupedItem.DestinationServiceCentreId).Select(s => new ServiceCentreDTO
                         {
                             Name = s.Name,
                             Code = s.Code,
@@ -1036,8 +993,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 //filter by DestinationServiceCentreId
                 var filter = filterOptionsDto.filter;
                 var filterValue = filterOptionsDto.filterValue;
-                int destinationSCId = 0;
-                var boolResult = int.TryParse(filterValue, out destinationSCId);
+                //int destinationSCId = 0;
+                var boolResult = int.TryParse(filterValue, out int destinationSCId);
                 if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
                 {
                     if (filter == "DestinationServiceCentreId" && boolResult)
@@ -1050,28 +1007,29 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //2. get only paid shipments from Invoice for Individuals
                 // and allow Ecommerce and Corporate customers to be grouped
-                var paidShipments = new List<InvoiceView>();
+                //var ungroupedWaybills = new HashSet<InvoiceView>();
+                var finalUngroupedList = new List<InvoiceView>();
+
                 foreach (var shipmentItem in shipmentsBySC)
                 {
-                    var invoice = shipmentItem;
-
-                    if (invoice.PaymentStatus == PaymentStatus.Paid || shipmentItem.CompanyType == CompanyType.Corporate.ToString())
+                    if (shipmentItem.PaymentStatus == PaymentStatus.Paid || shipmentItem.CompanyType == CompanyType.Corporate.ToString())
                     {
-                        paidShipments.Add(shipmentItem);
+                        finalUngroupedList.Add(shipmentItem);
                     }
                 }
 
-                var ungroupedWaybills = paidShipments;
+                //var ungroupedWaybills = paidShipments;
 
                 //new solution
                 //1. Get Transit Waybill that is not completed, not group and service centre belong to login user
                 //2. Loop through output of 1 and get the shipment details, then add it to the ungrouped
-                var finalUngroupedList = new List<InvoiceView>();
+                //var finalUngroupedList = new List<InvoiceView>();
 
-                foreach (var item in ungroupedWaybills)
-                {
-                    finalUngroupedList.Add(item);
-                }
+                //foreach (var item in ungroupedWaybills)
+                //{
+                //    finalUngroupedList.Add(item);
+                //}
+
                 int currentServiceCentre = serviceCenters[0];
 
                 var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable()
@@ -1086,52 +1044,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         finalUngroupedList.Add(shipment);
                     }
                 }
-
-                //old algorithm
-                ////Get TransitWaybillNumber as a querable list
-                //var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable().Where(x => x.IsTransitCompleted == false).ToList();
-
-                //// final ungroupedList
-                //var finalUngroupedList = new List<InvoiceView>();
-                //foreach (var item in ungroupedWaybills)
-                //{
-                //    var tranWaybillObj = allTransitWaybillNumberList.LastOrDefault(s => s.WaybillNumber == item.Waybill);
-                //    if (tranWaybillObj != null)
-                //    {
-                //        if (tranWaybillObj.ServiceCentreId == serviceCenters[0] && tranWaybillObj.IsGrouped == false)
-                //        {
-                //            finalUngroupedList.Add(item);
-                //            break;
-                //        }
-                //    }
-                //    else
-                //    {
-                //        finalUngroupedList.Add(item);
-                //    }
-                //}
-
-                ////6.added for Transitwaybills
-                //var transitWaybillNumberList = allTransitWaybillNumberList.Where(s =>
-                //    serviceCenters[0] == s.ServiceCentreId && s.IsGrouped == false && s.IsTransitCompleted == false).ToList();
-
-                //foreach (var item in transitWaybillNumberList)
-                //{
-                //    var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().FirstOrDefault(s => s.IsShipmentCollected == false && s.Waybill == item.WaybillNumber);
-
-                //    if (filterByDestinationSC && shipmentsBySC.Count > 0)
-                //    {
-                //        var destinationSC = shipmentsBySC[0].DestinationServiceCentreId;
-                //        if (shipment != null && shipment.DestinationServiceCentreId == destinationSC)
-                //        {
-                //            finalUngroupedList.Add(shipment);
-                //        }
-                //    }
-                //    //else
-                //    //{
-                //    //    finalUngroupedList.Add(shipment);
-                //    //}
-                //}
-
+                
                 return finalUngroupedList;
             }
             catch (Exception)
@@ -1153,9 +1066,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var ungroupedWaybills = await GetUnGroupedWaybillsForServiceCentreDropDown(filterOptionsDto);
 
+                //Get only service centre without station
                 var allServiceCenters = await _centreService.GetServiceCentres();
 
-                var grp = new List<int>();
+                var grp = new HashSet<int>();
 
                 foreach (var item in ungroupedWaybills)
                 {
