@@ -2602,6 +2602,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipments.CurrencyCode = Country.CurrencyCode;
                         shipments.CurrencySymbol = Country.CurrencySymbol;
                     }
+                    if (shipments.CustomerType == "Individual")
+                    {
+                        shipments.CustomerType = CustomerType.IndividualCustomer.ToString();
+                    }
                     CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipments.CustomerType);
                     var CustomerDetails = await _customerService.GetCustomer(shipments.CustomerId, customerType);
                     shipments.SenderAddress = CustomerDetails.Address;
