@@ -332,7 +332,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
 
-               // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
+                // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
 
                 var dailySales = await _service.GetDailySales(accountFilterCriteria);
 
@@ -362,7 +362,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 var dailySales = await _service.GetSalesForServiceCentre(accountFilterCriteria);
-                
+
                 return new ServiceResponse<DailySalesDTO>
                 {
                     Object = dailySales
@@ -427,7 +427,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             {
 
                 var limitspan = Int32.Parse(ConfigurationManager.AppSettings["limitSpan"]) * -1;
-                var today = DateTime.Now; // new DateTime(2019, 2, 6); // new DateTime(2019, 2, 6);
+                var today = DateTime.Now;  //new DateTime(2019, 2, 6);
                 var firstDayOfMonth = today.AddDays(limitspan); //DateTime.Now.AddDays(limitspan); //   new DateTime(today.Year, today.Month, 1); 
 
                 var accountFilterCriteria = new AccountFilterCriteria
@@ -450,13 +450,13 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("GetShipmentCreatedByDateMonitor")]
-        public async Task<IServiceResponse<System.Web.Mvc.JsonResult>> GetShipmentCreatedByDateMonitor(int limitStart, int limitEnd) 
+        public async Task<IServiceResponse<System.Web.Mvc.JsonResult>> GetShipmentCreatedByDateMonitor(int limitStart, int limitEnd)
         {
             return await HandleApiOperationAsync(async () =>
             {
 
                 var limitspan = Int32.Parse(ConfigurationManager.AppSettings["limitSpan"]) * -1;
-                var today = DateTime.Now; // new DateTime(2019, 2, 6); // new DateTime(2019, 2, 6);
+                var today = DateTime.Now;  //new DateTime(2019, 2, 6);
                 var firstDayOfMonth = today.AddDays(limitspan); //DateTime.Now.AddDays(limitspan); //   new DateTime(today.Year, today.Month, 1); 
 
                 var accountFilterCriteria = new AccountFilterCriteria
@@ -490,7 +490,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 var limitspan = Int32.Parse(ConfigurationManager.AppSettings["limitSpan"]) * -1;
-                var today = DateTime.Now; // new DateTime(2019, 2, 6); // new DateTime(2019, 2, 6);
+                var today = DateTime.Now;  //new DateTime(2019, 2, 6);
                 var firstDayOfMonth = today.AddDays(limitspan); //DateTime.Now.AddDays(limitspan); //   new DateTime(today.Year, today.Month, 1); 
 
                 var accountFilterCriteria = new AccountFilterCriteria
@@ -498,7 +498,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                     StartDate = firstDayOfMonth,
                     EndDate = today
                 };
-                 
+
                 var limitdates = new LimitDates
                 {
                     StartLimit = limitStart,
@@ -527,7 +527,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             {
 
                 var limitspan = Int32.Parse(ConfigurationManager.AppSettings["limitSpan"]) * -1;
-                var today = DateTime.Now; // new DateTime(2019, 2, 6); // new DateTime(2019, 2, 6);
+                var today = DateTime.Now;  //new DateTime(2019, 2, 6);
                 var firstDayOfMonth = today.AddDays(limitspan); //DateTime.Now.AddDays(limitspan); //   new DateTime(today.Year, today.Month, 1); 
 
                 var accountFilterCriteria = new AccountFilterCriteria
@@ -544,7 +544,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                     Object = new System.Web.Mvc.JsonResult { Data = results.totalZones, JsonRequestBehavior = System.Web.Mvc.JsonRequestBehavior.AllowGet }
                 };
             });
-        } 
+        }
 
         // Shipment monitor
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -555,7 +555,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 var limitspan = Int32.Parse(ConfigurationManager.AppSettings["limitSpan"]) * -1;
-                var today = DateTime.Now; // new DateTime(2019, 2, 6); // new DateTime(2019, 2, 6);
+                var today = DateTime.Now;  //new DateTime(2019, 2, 6);
                 var firstDayOfMonth = today.AddDays(limitspan); //DateTime.Now.AddDays(limitspan); //   new DateTime(today.Year, today.Month, 1); 
 
                 var accountFilterCriteria = new AccountFilterCriteria
@@ -589,7 +589,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 var limitspan = Int32.Parse(ConfigurationManager.AppSettings["limitSpan"]) * -1;
-                var today = DateTime.Now; // new DateTime(2019, 2, 6); // new DateTime(2019, 2, 6);
+                var today = DateTime.Now;  //new DateTime(2019, 2, 6);
                 var firstDayOfMonth = today.AddDays(limitspan); //DateTime.Now.AddDays(limitspan); //   new DateTime(today.Year, today.Month, 1); 
 
                 var accountFilterCriteria = new AccountFilterCriteria

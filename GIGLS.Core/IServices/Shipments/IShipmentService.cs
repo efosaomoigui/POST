@@ -41,8 +41,8 @@ namespace GIGLS.Core.IServices.Shipments
 
         Task<Object[]> GetShipmentCreatedByDateMonitor(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates);
         Task<Object[]> GetShipmentCreatedByDateMonitorx(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates);
-        Task<List<InvoiceViewDTOUNGROUPED>> GetShipmentWaybillsByDateMonitor(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates);
-        Task<List<InvoiceViewDTOUNGROUPED>> GetShipmentWaybillsByDateMonitorx(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates);
+        Task<List<InvoiceViewDTOUNGROUPED2>> GetShipmentWaybillsByDateMonitor(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates);
+        Task<List<InvoiceViewDTOUNGROUPED2>> GetShipmentWaybillsByDateMonitorx(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates);
         Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType);
         Task<bool> CancelShipment(string waybill);
 

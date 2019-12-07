@@ -117,21 +117,35 @@ namespace GIGLS.Core.DTO.Account
         public decimal Transfer { get; set; }
         public decimal Pos { get; set; }
     }
-
+     
     public class InvoiceViewDTOUNGROUPED
+    {
+        public string Name { get; set; }
+        public decimal Amount { get; set; }
+        public string PaymentMethod { get; set; }
+        public DateTime DateCreated { get; set; } 
+        public string Waybill { get; set; }
+    }
+
+    public class InvoiceViewDTOUNGROUPED2
     {
         public string DestinationServiceCentreName { get; set; }
         public decimal Amount { get; set; }
         public string PaymentMethod { get; set; }
-        public DateTime ShipmentDate { get; set; } 
+        public DateTime ShipmentDate { get; set; }
         public string Waybill { get; set; }
     }
 
     public class InvoiceMonitorDTO
     {
-        public string DestinationServiceCentreName { get; set; }
-        public int WayBillCount { get; set; }
-        public DateTime ShipmentDate { get; set; }
+        public string Waybill { get; set; } 
+        public DateTime DateCreated { get; set; }
+        public int DepartureServiceCentreId { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+        public string Name { get; set; }
+        public string Status { get; set; }
+        public long Rn { get; set; } 
+
     }
 
     public class LimitDates
@@ -146,6 +160,13 @@ namespace GIGLS.Core.DTO.Account
         public string label { get; set; }
         public int y { get; set; }
         //public string color { get; set; }
+        public DateTime ShipmentDate { get; set; }
+    }
+
+    public class InvoiceMonitorDTO3
+    {
+        public string label { get; set; }
+        public string waybill { get; set; }
         public DateTime ShipmentDate { get; set; }
     }
 
