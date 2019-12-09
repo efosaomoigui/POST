@@ -212,6 +212,7 @@ namespace GIGLS.Services.Implementation
 
 
         }
+        
         public async Task<bool> IsPartnerActivated(string CustomerCode)
         {
             try
@@ -250,16 +251,20 @@ namespace GIGLS.Services.Implementation
                         VehicleType.VehicleType = null;
                         await _uow.CompleteAsync();
                     }
-                }
-                var vehicle = _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode).Result.ToList();
-                if (vehicle.Count() != 0)
-                {
-                    registerUser.VehicleType = new List<string>();
-                    foreach (var item in vehicle)
+                    
+                    var vehicle = await _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode);
+                    if (vehicle.Count() > 0)
                     {
-                        registerUser.VehicleType.Add(item.Vehicletype);
+                        registerUser.VehicleType = new List<string>();
+                        foreach (var item in vehicle)
+                        {
+                            registerUser.VehicleType.Add(item.Vehicletype);
+                        }
                     }
+                    
+                    registerUser.IsVerified = VehicleType.IsActivated;
                 }
+
                 var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.UserCode == registerUser.UserChannelCode);
                 if (referrerCode != null)
                 {
@@ -269,10 +274,10 @@ namespace GIGLS.Services.Implementation
                 {
                     registerUser = await GenerateReferrerCode(registerUser);
                 }
+
                 var averageratings = await GetAverageRating(registerUser.UserChannelCode, userchanneltype);
-                var IsVerified = await IsPartnerActivated(registerUser.UserChannelCode);
+                
                 registerUser.AverageRatings = averageratings;
-                registerUser.IsVerified = IsVerified;
                 return registerUser;
             }
             catch (Exception)
