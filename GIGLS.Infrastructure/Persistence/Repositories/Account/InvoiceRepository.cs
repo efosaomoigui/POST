@@ -209,7 +209,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                 endDate,
                 paymentStatus,
                 departureServiceCentreId,
-                stationId,
+                //stationId,
                 CountryId
             };
 
@@ -218,7 +218,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             try
             {
                 listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceMonitorDTO>("NewSp " +
-                  "@IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CountryId",
+                  "@IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @CountryId",
                   param)
                   .ToListAsync();
             }
@@ -229,7 +229,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             }
 
             //r results = new Tuple<List<InvoiceMonitorDTO>, List<InvoiceMonitorDTO>>(listCreated, listExpected);
-
             return await Task.FromResult(listCreated); // 
 
         }
@@ -273,7 +272,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             try
             {
-                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTOUNGROUPED>("NewSp2 " +
+                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTOUNGROUPED>("NewSp " +
                   "@IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CountryId",
                   param)
                   .ToListAsync();
@@ -327,7 +326,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             try
             {
-                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTOUNGROUPED>("NewSp_Expected2 " +
+                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTOUNGROUPED>("NewSp_Expected " +
                   "@IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CountryId",
                   param)
                   .ToListAsync();

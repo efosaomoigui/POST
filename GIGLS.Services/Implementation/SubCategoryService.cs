@@ -3,10 +3,7 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
 using GIGLS.Core.IServices;
 using GIGLS.Infrastructure;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation
@@ -22,8 +19,7 @@ namespace GIGLS.Services.Implementation
         }
         public async Task<object> AddSubCategory(SubCategoryDTO subcategory)
         {
-            subcategory.SubCategoryName = subcategory.SubCategoryName.Trim().ToLower();
-            
+            subcategory.SubCategoryName = subcategory.SubCategoryName.Trim().ToLower();            
 
             if (await _uow.SubCategory.ExistAsync(v => v.SubCategoryName.ToLower() == subcategory.SubCategoryName && v.Weight == subcategory.Weight))
             {
@@ -34,8 +30,7 @@ namespace GIGLS.Services.Implementation
             {
                 SubCategoryName = subcategory.SubCategoryName,
                 Weight = (decimal)subcategory.Weight,
-                CategoryId = (int)subcategory.Category.CategoryId
-                
+                CategoryId = (int)subcategory.Category.CategoryId                
             };
 
             _uow.SubCategory.Add(newSubCategory);
@@ -46,10 +41,8 @@ namespace GIGLS.Services.Implementation
         public async Task<List<SubCategoryDTO>> GetSubCategories()
         {
             var subcategories = await _uow.SubCategory.GetSubCategories();
-            return subcategories.OrderBy(x => x.SubCategoryName).ToList();
-        }
-
-        
+            return subcategories;
+        }               
 
         public async Task RemoveSubCategory(int subcategoryId)
         {
