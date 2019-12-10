@@ -229,7 +229,6 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-
                 if (preShipment.PreShipmentItems.Count() == 0)
                 {
                     throw new GenericException("No Preshipitem was added");
@@ -305,6 +304,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else if (preShipmentItem.ShipmentType == ShipmentType.Regular)
                     {
+                        if(preShipmentItem.Weight == 0)
+                        {
+                            throw new GenericException("Item weight cannot be zero");
+                        }
+                        
                         if (preShipment.Shipmentype == ShipmentType.Ecommerce)
                         {
                             preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
