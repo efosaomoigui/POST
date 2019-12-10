@@ -1145,7 +1145,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var CountryId = await _preShipmentMobileService.GetCountryId();
             var countryIds = new int[1];   //NIGERIA
             countryIds[0] = CountryId;
-            return await _uow.Station.GetLocalStations(countryIds);
+            return await _uow.Station.GetLocalStationsWithoutSuperServiceCentre(countryIds);
         }
 
         public async Task<UserDTO> CheckUser(UserDTO user)
