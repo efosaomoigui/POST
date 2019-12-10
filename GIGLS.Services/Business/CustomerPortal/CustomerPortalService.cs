@@ -631,17 +631,20 @@ namespace GIGLS.Services.Business.CustomerPortal
             return wallet.WalletId;
         }
 
-        public List<string> GetItemTypes()
+        public async Task<List<string>> GetItemTypes()
         {
-            List<string> items = new List<string>();
-            items.Add("NORMAL");
-            items.Add("DANGEROUS GOODS");
-            items.Add("FRAGILE");
-            items.Add("KEEP AT ROOM TEMPERATURE");
-            items.Add("KEEP UPRIGHT");
-            items.Add("REFRIGERATED ON ARRIVAL");
-            items.Add("SENSITIVE");
-            return items;
+            List<string> items = new List<string>
+            {
+                "NORMAL",
+                "DANGEROUS GOODS",
+                "FRAGILE",
+                "KEEP AT ROOM TEMPERATURE",
+                "KEEP UPRIGHT",
+                "REFRIGERATED ON ARRIVAL",
+                "SENSITIVE"
+            };
+
+            return await Task.FromResult(items);
         }
 
         public async Task<SignResponseDTO> SignUp(UserDTO user)

@@ -677,11 +677,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                         //setup login data
                         var formContent = new FormUrlEncodedContent(new[]
-                            {
-                         new KeyValuePair<string, string>("grant_type", "password"),
-                         new KeyValuePair<string, string>("Username", userDto.Username),
-                         new KeyValuePair<string, string>("Password", userDto.UserChannelPassword),
-                         });
+                        {
+                            new KeyValuePair<string, string>("grant_type", "password"),
+                            new KeyValuePair<string, string>("Username", userDto.Username),
+                            new KeyValuePair<string, string>("Password", userDto.UserChannelPassword),
+                        });
 
                         //setup login data
                         HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
@@ -875,7 +875,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var ItemTypes = _portalService.GetItemTypes();
+                var ItemTypes = await _portalService.GetItemTypes();
                 return new ServiceResponse<List<string>>
                 {
                     Object = ItemTypes,
