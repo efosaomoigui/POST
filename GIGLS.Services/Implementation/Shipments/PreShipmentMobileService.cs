@@ -2239,7 +2239,6 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        //YOU NEED TO WORK ON THIS METHOD TO UPDATE ALL LIKELY TABLES 
         public async Task<bool> EditProfile (UserDTO user)
         {
             try
@@ -2247,22 +2246,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 var User = await _userService.GetUserByEmail(user.Email);
                 User.FirstName = user.FirstName;
                 User.LastName = user.LastName;
-                User.PhoneNumber = user.PhoneNumber;
-                User.Email = user.Email;
+                //User.PhoneNumber = user.PhoneNumber;
+                //User.Email = user.Email;
                 User.PictureUrl = user.PictureUrl;
                 await _userService.UpdateUser(User.Id, User);
-                if (user.UserChannelType.ToString() == UserChannelType.Partner.ToString())
+
+                string userChannelType = user.UserChannelType.ToString();
+
+                if (userChannelType == UserChannelType.Partner.ToString() 
+                    || userChannelType == UserChannelType.IndividualCustomer.ToString() 
+                    || userChannelType == UserChannelType.Ecommerce.ToString())
                 {
                     await UpdatePartner(user);
                     await UpdateCustomer(user);
-                    await UpdateCompany(user);
-                    
-                }
-                if (user.UserChannelType.ToString() == UserChannelType.IndividualCustomer.ToString())
-                {
-                    await UpdatePartner(user);
-                    await UpdateCustomer(user);
-                    await UpdateCompany(user);
+                    await UpdateCompany(user);                    
                 }
                 await _uow.CompleteAsync();
                 return true;
@@ -2484,7 +2481,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 partner.FirstName = user.FirstName;
                 partner.LastName = user.LastName;
-                partner.Email = user.Email;
+                //partner.Email = user.Email;
                 partner.PictureUrl = user.PictureUrl;
             }
         }
@@ -2495,7 +2492,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 customer.FirstName = user.FirstName;
                 customer.LastName = user.LastName;
-                customer.Email = user.Email;
+                //customer.Email = user.Email;
                 customer.PictureUrl = user.PictureUrl;
             }
         }
@@ -2506,7 +2503,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 company.FirstName = user.FirstName;
                 company.LastName = user.LastName;
-                company.Email = user.Email;
+                //company.Email = user.Email;
                 company.Name = user.Organisation;
             }
         }
