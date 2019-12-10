@@ -682,16 +682,15 @@ namespace GIGLS.Services.Implementation.Shipments
                                        Weight = s.SubCategory.Weight,
                                        WeightRange = s.SubCategory.WeightRange
                                    }
-
-
                                };
-                return packages;
+                return await Task.FromResult(packages);
             }
             catch(Exception)
             {
                 throw new GenericException("Please an error occured while getting Special Packages");
             }
         }
+
         public async Task<List<CategoryDTO>> GetCategories()
         {
             try
@@ -704,6 +703,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException("Please an error occured while getting categories.Please try again");
             }
         }
+
         public async Task<List<SubCategoryDTO>> GetSubCategories()
         {
             try
@@ -1230,16 +1230,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 var packages = await GetSpecialDomesticPackages();
                 var Categories = await GetCategories();
                 var Subcategories = await GetSubCategories();
-                var dictionaryCategories = await GetDictionaryCategories();
-                var WeightDictionaryCategories = await GetWeightRangeDictionaryCategories();
+                var dictionaryCategories = await GetDictionaryCategories(Categories, Subcategories);
+                var WeightDictionaryCategories = await GetWeightRangeDictionaryCategories(Categories, Subcategories);
                 var result = new SpecialResultDTO
                 {
-                    Specialpackages = packages.ToList(),
+                    Specialpackages = packages,
                     Categories = Categories,
                     SubCategories = Subcategories,
                     DictionaryCategory = dictionaryCategories,
                     WeightRangeDictionaryCategory = WeightDictionaryCategories
-
                 };
                 return result;
             }
@@ -1249,18 +1248,59 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        private async Task<Dictionary<string, List<string>>> GetDictionaryCategories(List<CategoryDTO> categories, List<SubCategoryDTO> subcategories)
+        {
+            try
+            {
+                Dictionary<string, List<string>> finalDictionary = new Dictionary<string, List<string>>
+                {
+                    //1. category
+                    { "CATEGORY", categories.Select(s => s.CategoryName).OrderBy(s => s).ToList() }
+                };
+
+                //2. subcategory
+                //var Subcategories = await GetSubCategories();
+                foreach (var category in categories)
+                {
+                    var listOfSubcategory = subcategories.Where(s => s.Category.CategoryId == category.CategoryId).
+                        Select(s => s.SubCategoryName).Distinct().ToList();
+
+                    //add to dictionary
+                    finalDictionary.Add(category.CategoryName, listOfSubcategory);
+                }
+                
+                //3. subsubcategory
+                //var specialDomesticPackages = await GetSpecialDomesticPackages();
+                foreach (var subcategory in subcategories)
+                {
+                    var list = new List<decimal>();
+                    var listOfWeights = subcategories.Where(s => s.SubCategoryName == subcategory.SubCategoryName).
+                        Select(s => s.Weight.ToString()).ToList();
+
+                    //add to dictionary
+                    if (!finalDictionary.ContainsKey(subcategory.SubCategoryName))
+                    {
+                        finalDictionary.Add(subcategory.SubCategoryName, listOfWeights);
+                    }
+                }
+                return await Task.FromResult(finalDictionary);
+            }
+            catch (Exception)
+            {
+                throw new GenericException("Please an error occurred while trying to get the categorization of special packages.");
+            }
+        }
+
         private async Task<Dictionary<string, List<string>>> GetDictionaryCategories()
         {
             try
             {
-                //
                 Dictionary<string, List<string>> finalDictionary = new Dictionary<string, List<string>>();
 
                 //1. category
                 var Categories = await GetCategories();
                 finalDictionary.Add("CATEGORY", Categories.Select(s => s.CategoryName).OrderBy(s => s).ToList());
-
-
+                
                 //2. subcategory
                 var Subcategories = await GetSubCategories();
                 foreach (var category in Categories)
@@ -1270,7 +1310,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //add to dictionary
                     finalDictionary.Add(category.CategoryName, listOfSubcategory);
-
                 }
 
 
@@ -1295,6 +1334,48 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException("Please an error occurred while trying to get the categorization of special packages.");
             }
         }
+
+        private async Task<Dictionary<string, List<string>>> GetWeightRangeDictionaryCategories(List<CategoryDTO> categories, List<SubCategoryDTO> subcategories)
+        {
+            try
+            {
+                Dictionary<string, List<string>> finalDictionary = new Dictionary<string, List<string>>
+                {
+                    //1. category
+                    { "CATEGORY", categories.Select(s => s.CategoryName).OrderBy(s => s).ToList() }
+                };
+
+                //2. subcategory
+                foreach (var category in categories)
+                {
+                    var listOfSubcategory = subcategories.Where(s => s.Category.CategoryId == category.CategoryId).
+                        Select(s => s.SubCategoryName).Distinct().ToList();
+
+                    //add to dictionary
+                    finalDictionary.Add(category.CategoryName, listOfSubcategory);
+                }
+
+                //3. subsubcategory
+                foreach (var subcategory in subcategories)
+                {
+                    var list = new List<decimal>();
+                    var listOfWeights = subcategories.Where(s => s.SubCategoryName == subcategory.SubCategoryName).
+                        Select(s => s.WeightRange.ToString()).ToList();
+
+                    //add to dictionary
+                    if (!finalDictionary.ContainsKey(subcategory.SubCategoryName))
+                    {
+                        finalDictionary.Add(subcategory.SubCategoryName, listOfWeights);
+                    }
+                }
+                return await Task.FromResult(finalDictionary);
+            }
+            catch (Exception)
+            {
+                throw new GenericException("Please an error occurred while trying to get the categorization of special packages.");
+            }
+        }
+
         private async Task<Dictionary<string, List<string>>> GetWeightRangeDictionaryCategories()
         {
             try
@@ -1340,7 +1421,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException("Please an error occurred while trying to get the categorization of special packages.");
             }
         }
-
+        
         public async Task<List<PreShipmentMobileDTO>> GetDisputePreShipment()
         {
             try

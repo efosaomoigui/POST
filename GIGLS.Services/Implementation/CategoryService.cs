@@ -63,7 +63,6 @@ namespace GIGLS.Services.Implementation
         {
             var categories = _uow.Category.GetAll();
             return Task.FromResult(Mapper.Map<List<CategoryDTO>>(categories));
-
         }
 
         public async Task<CategoryDTO> GetCategoryById(int categoryId)

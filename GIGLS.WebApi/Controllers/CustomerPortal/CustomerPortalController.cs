@@ -986,6 +986,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        
         [HttpGet]
         [Route("getspecialpackages")]
         public async Task<IServiceResponse<SpecialResultDTO>> GetSpecialPackages()
