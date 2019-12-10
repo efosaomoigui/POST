@@ -45,8 +45,8 @@ namespace GIGLS.Services.Implementation
             var userdto = new UserDTO();
 
             if (otpbody.IsValid == true)
-            { 
-                userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true); 
+            {
+                userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true);
                 _uow.OTP.Remove(otpbody);
                 await _uow.CompleteAsync();
             }
@@ -61,7 +61,8 @@ namespace GIGLS.Services.Implementation
 
             if (IsPhone)
             {
-                if(!(phoneNumber.StartsWith("0") || phoneNumber.StartsWith("+"))){
+                if (!(phoneNumber.StartsWith("0") || phoneNumber.StartsWith("+")))
+                {
                     phoneNumber = phoneNumber.Remove(0, 4);
                 }
 
@@ -81,8 +82,6 @@ namespace GIGLS.Services.Implementation
 
         public async Task<UserDTO> ValidateOTP(OTPDTO otp)
         {
-            var userdto = new UserDTO();
-
             otp.EmailAddress = ExtractPhoneNumber(otp.EmailAddress);
 
             //get the otp details using the email 
@@ -96,14 +95,14 @@ namespace GIGLS.Services.Implementation
             else
             {
                 DateTime LatestTime = DateTime.Now;
-
                 TimeSpan span = LatestTime.Subtract(otpbody.DateCreated);
                 int difference = Convert.ToInt32(span.TotalMinutes);
                 if (difference < 5)
                 {
-                    userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true);
+                    var userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true);
                     _uow.OTP.Remove(otpbody);
                     await _uow.CompleteAsync();
+                    return userdto;
                 }
                 else
                 {
@@ -112,8 +111,6 @@ namespace GIGLS.Services.Implementation
                     throw new GenericException("OTP has expired!.Kindly Resend OTP.");
                 }
             }
-                       
-            return userdto;
         }
 
         public async Task<OTPDTO> GenerateOTP(UserDTO user)
@@ -134,7 +131,7 @@ namespace GIGLS.Services.Implementation
                 await _uow.CompleteAsync();
                 return otp;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw new GenericException("Error occurred while generating OTP....");
             }
@@ -168,10 +165,10 @@ namespace GIGLS.Services.Implementation
             try
             {
                 var registerUser = await _UserService.GetUserUsingCustomer(user);
-                
+
                 UserDTO registerUserDTo = new UserDTO();
                 registerUserDTo = await CheckVehicleInformation(registerUser, userchanneltype);
-                
+
                 return registerUserDTo;
             }
             catch (Exception)
@@ -212,7 +209,7 @@ namespace GIGLS.Services.Implementation
 
 
         }
-        
+
         public async Task<bool> IsPartnerActivated(string CustomerCode)
         {
             try
@@ -251,7 +248,7 @@ namespace GIGLS.Services.Implementation
                         VehicleType.VehicleType = null;
                         await _uow.CompleteAsync();
                     }
-                    
+
                     var vehicle = await _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode);
                     if (vehicle.Count() > 0)
                     {
@@ -261,7 +258,7 @@ namespace GIGLS.Services.Implementation
                             registerUser.VehicleType.Add(item.Vehicletype);
                         }
                     }
-                    
+
                     registerUser.IsVerified = VehicleType.IsActivated;
                 }
 
@@ -276,7 +273,7 @@ namespace GIGLS.Services.Implementation
                 }
 
                 var averageratings = await GetAverageRating(registerUser.UserChannelCode, userchanneltype);
-                
+
                 registerUser.AverageRatings = averageratings;
                 return registerUser;
             }
@@ -288,7 +285,7 @@ namespace GIGLS.Services.Implementation
 
         public async Task<UserDTO> GenerateReferrerCode(UserDTO user)
         {
-            
+
             var code = await _codegenerator.Generate(5);
             var ReferrerCodeExists = await _uow.ReferrerCode.GetAsync(s => s.UserCode == user.UserChannelCode);
             if (ReferrerCodeExists == null)
@@ -298,7 +295,6 @@ namespace GIGLS.Services.Implementation
                     Referrercode = code,
                     UserId = user.Id,
                     UserCode = user.UserChannelCode
-
                 };
                 var referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
                 _uow.ReferrerCode.Add(referrercode);
