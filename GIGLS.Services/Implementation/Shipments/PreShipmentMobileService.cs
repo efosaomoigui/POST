@@ -2334,15 +2334,18 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var User = await _userService.GetUserByEmail(user.Email);
-                User.FirstName = user.FirstName;
-                User.LastName = user.LastName;
+                string currentUserId = await _userService.GetCurrentUserId();
+                var currentUser = await _userService.GetUserById(currentUserId);
+
+                currentUser.FirstName = user.FirstName;
+                currentUser.LastName = user.LastName;
                 //User.PhoneNumber = user.PhoneNumber;
                 //User.Email = user.Email;
-                User.PictureUrl = user.PictureUrl;
-                await _userService.UpdateUser(User.Id, User);
+                currentUser.PictureUrl = user.PictureUrl;
+                await _userService.UpdateUser(currentUser.Id, currentUser);
 
                 string userChannelType = user.UserChannelType.ToString();
+                user.UserChannelCode = currentUser.UserChannelCode;
 
                 if (userChannelType == UserChannelType.Partner.ToString()
                     || userChannelType == UserChannelType.IndividualCustomer.ToString()
