@@ -229,7 +229,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             }
 
             //r results = new Tuple<List<InvoiceMonitorDTO>, List<InvoiceMonitorDTO>>(listCreated, listExpected);
-
             return await Task.FromResult(listCreated); // 
 
         }
