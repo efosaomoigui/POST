@@ -30,7 +30,6 @@ using GIGLS.Core.Domain.Partnership;
 using GIGLS.Core.DTO.User;
 using VehicleType = GIGLS.Core.Domain.VehicleType;
 using Hangfire;
-using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Core.IServices.Customers;
 
 namespace GIGLS.Services.Implementation.Shipments
@@ -503,7 +502,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
                 if (shipment != null)
                 {
-                    var Country = await _uow.Country.GetCountryByStationId(shipment.SenderStationId);
                     Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(shipment);
                     if (shipment.ServiceCentreAddress != null)
                     {
@@ -515,27 +513,28 @@ namespace GIGLS.Services.Implementation.Shipments
                         //Shipmentdto.ReceiverLocation.Longitude = Locationdto.Longitude;
                         Shipmentdto.ReceiverAddress = shipment.ServiceCentreAddress;
                     }
-                    if (Country != null)
+
+                    var country = await _uow.Country.GetCountryByStationId(shipment.SenderStationId);
+                    if (country != null)
                     {
-                        Shipmentdto.CurrencyCode = Country.CurrencyCode;
-                        Shipmentdto.CurrencySymbol = Country.CurrencySymbol;
+                        Shipmentdto.CurrencyCode = country.CurrencyCode;
+                        Shipmentdto.CurrencySymbol = country.CurrencySymbol;
                     }
                 }
-                else if(shipment==null)
+                else 
                 {
                     var agilityshipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill, "ShipmentItems");
                     if(agilityshipment != null)
                     {
-                        var countryId = await GetCountryByServiceCentreId(agilityshipment.DepartureServiceCentreId);
+                        Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(agilityshipment);
 
-                        var Country = await _uow.Country.GetAsync(countryId);
                         CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), agilityshipment.CustomerType);
                         var CustomerDetails = await _customerService.GetCustomer(agilityshipment.CustomerId, customerType);
 
-                        Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(agilityshipment);
                         Shipmentdto.SenderAddress = CustomerDetails.Address;
                         Shipmentdto.SenderName = CustomerDetails.Name;
                         Shipmentdto.SenderPhoneNumber = CustomerDetails.PhoneNumber;
+
                         Shipmentdto.PreShipmentItems = new List<PreShipmentItemMobileDTO>();
 
                        foreach (var shipments in agilityshipment.ShipmentItems)
@@ -545,27 +544,26 @@ namespace GIGLS.Services.Implementation.Shipments
                             item.ImageUrl = "";
                             Shipmentdto.PreShipmentItems.Add(item);
                         }
-                             
-
-                        if (Country != null)
+                       
+                        var country = await GetCountryDTOByServiceCentreId(agilityshipment.DepartureServiceCentreId); 
+                        if (country != null)
                         {
-                            Shipmentdto.CurrencyCode = Country.CurrencyCode;
-                            Shipmentdto.CurrencySymbol = Country.CurrencySymbol;
-                        }
-                        
+                            Shipmentdto.CurrencyCode = country.CurrencyCode;
+                            Shipmentdto.CurrencySymbol = country.CurrencySymbol;
+                        }                        
+                    }
+                    else
+                    {
+                        throw new GenericException($"Shipment with waybill: {waybill} does not exist");
                     }
                 }
-                else
-                {
-                    throw new GenericException($"Shipment with waybill: {waybill} does not exist");
-                }
+
                 return await Task.FromResult(Shipmentdto);
             }
             catch (Exception)
             {
                 throw;
             }
-
         }
 
         public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser()
@@ -2601,6 +2599,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             }
             return CountryId;
+        }
+
+        private async Task<CountryDTO> GetCountryDTOByServiceCentreId(int ServicecentreId)
+        {
+            var ServiceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == ServicecentreId);
+            if (ServiceCentre != null)
+            {
+                var countryDto = await _uow.Country.GetCountryByStationId(ServiceCentre.StationId);
+                return countryDto;
+            }
+            return new CountryDTO { };
         }
 
         private async Task<decimal> CalculateGeoDetailsBasedonLocation(PreShipmentMobileDTO item)
