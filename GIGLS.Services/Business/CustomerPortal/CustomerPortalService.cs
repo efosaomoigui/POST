@@ -1120,30 +1120,19 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         private async Task<SignResponseDTO> SendOTPForRegisteredUser(UserDTO user)
         {
-            var responseDto = new SignResponseDTO();
-
             var Otp = await _otpService.GenerateOTP(user);
-            var message = await _otpService.SendOTP(Otp);
-            bool CombinedMessage = message;
-            if (CombinedMessage == true)
-            {
-                responseDto.EmailSent = true;
-            }
-            if (CombinedMessage == true)
-            {
-                responseDto.PhoneSent = true;
-            }
+            await _otpService.SendOTP(Otp);
 
-            return responseDto;
+            return new SignResponseDTO
+            {
+                EmailSent = true,
+                PhoneSent = true
+            };            
         }
 
         public async Task<SignResponseDTO> ResendOTP(UserDTO user)
         {
             var registerUser = await CheckUser(user);
-            if (registerUser == null)
-            {
-                throw new GenericException("User has not registered!");
-            }
             var result = await SendOTPForRegisteredUser(registerUser);
             return result;
         }
@@ -1158,12 +1147,12 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<UserDTO> CheckUser(UserDTO user)
         {
-            var registerUser = new UserDTO();
             bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
             if (isEmail)
             {
                 user.Email.Trim();
-                registerUser = await _userService.GetUserByEmail(user.Email);
+                var registerUser = await _userService.GetUserByEmail(user.Email);
+                return registerUser;
             }
             else
             {
@@ -1171,15 +1160,14 @@ namespace GIGLS.Services.Business.CustomerPortal
                 if (IsPhone)
                 {
                     user.PhoneNumber = user.PhoneNumber.Remove(0, 1);
-                    registerUser = await _userService.GetUserByPhone(user.PhoneNumber);
+                    var registerUser = await _userService.GetUserByPhone(user.PhoneNumber);
+                    return registerUser;
                 }
                 else
                 {
                     throw new GenericException("Invalid Details");
                 }
             }
-
-            return registerUser;
         }
 
 
