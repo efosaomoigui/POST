@@ -584,6 +584,11 @@ namespace GIGLS.Services.Implementation.Shipments
             var customerDTO = shipmentDTO.Customer[0];
             var customerType = shipmentDTO.CustomerType;
 
+            if(customerDTO.UserActiveCountryId == 0)
+            {
+                customerDTO.UserActiveCountryId = await GetUserCountryId();
+            }
+
             //reset rowversion
             customerDTO.RowVersion = null;
 
@@ -835,6 +840,21 @@ namespace GIGLS.Services.Implementation.Shipments
             };
 
             _uow.GeneralLedger.Add(generalLedger);
+        }
+
+        public async Task<int> GetUserCountryId()
+        {
+            int userCountryId = 1; //default country
+
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            if (currentUser.UserActiveCountryId > 0)
+            {
+                userCountryId = currentUser.UserActiveCountryId;
+            }
+
+            return userCountryId;
         }
 
         //This is used because I don't want an Exception to be thrown when calling it
@@ -1819,8 +1839,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     var currentUserId = await _userService.GetCurrentUserId();
 
                     ////--start--///Set the DepartureCountryId
-                    var departureCountry = await _uow.Country.GetCountryByServiceCentreId(shipment.DepartureServiceCentreId);
-                    int countryIdFromServiceCentreId = departureCountry.CountryId;
+                    //var departureCountry = await _uow.Country.GetCountryByServiceCentreId(shipment.DepartureServiceCentreId);
+                    int countryIdFromServiceCentreId = shipment.DepartureCountryId; //departureCountry.CountryId;
                     ////--end--///Set the DepartureCountryId
 
                     var generalLedger = new GeneralLedger()
