@@ -498,20 +498,25 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var currentUser = await _userService.GetCurrentUserId();
+                var user = await _uow.User.GetUserById(currentUser);
                 var Shipmentdto = new PreShipmentMobileDTO();
                 var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
                 if (shipment != null)
                 {
                     Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(shipment);
-                    if (shipment.ServiceCentreAddress != null)
+                    if (user.UserChannelType.ToString() == UserChannelType.Partner.ToString() || user.SystemUserRole == "Dispatch Rider")
                     {
-                        Shipmentdto.ReceiverLocation = new LocationDTO
+                        if (shipment.ServiceCentreAddress != null)
                         {
-                            Latitude = shipment.serviceCentreLocation.Latitude,
-                            Longitude = shipment.serviceCentreLocation.Longitude
-                        };
-                        Shipmentdto.ReceiverAddress = shipment.ServiceCentreAddress;
-                    }
+                            Shipmentdto.ReceiverLocation = new LocationDTO
+                            {
+                                Latitude = shipment.serviceCentreLocation.Latitude,
+                                Longitude = shipment.serviceCentreLocation.Longitude
+                            };
+                            Shipmentdto.ReceiverAddress = shipment.ServiceCentreAddress;
+                        }
+                    } 
 
                     var country = await _uow.Country.GetCountryByStationId(shipment.SenderStationId);
                     if (country != null)
