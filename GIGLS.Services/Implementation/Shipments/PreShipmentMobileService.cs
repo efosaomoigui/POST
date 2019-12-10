@@ -618,9 +618,8 @@ namespace GIGLS.Services.Implementation.Shipments
                                                           }).ToList();
                 
                 //added agility shipment to Giglgo list of shipments.
-                shipmentDto.AddRange(AgilityShipment);
-
-                foreach (var Shipment in shipmentDto)
+               // var newlist = shipmentDto.Union(AgilityShipment).OrderByDescending(x => x.DateCreated).Take(30).ToList();
+                foreach (var Shipment in shipmentDto.ToList())
                 {
                     var PartnerId = await _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == Shipment.Waybill && (r.Status == MobilePickUpRequestStatus.Delivered.ToString()));
                     if (PartnerId != null)
@@ -648,8 +647,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         Shipment.CurrencyCode = country.CurrencyCode;
                         Shipment.CurrencySymbol = country.CurrencySymbol;
                     }
+                    if (AgilityShipment.Exists(s=>s.Waybill==Shipment.Waybill))
+                    {
+                        shipmentDto.Remove(Shipment);
+                    }
                 }
-                return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
+                var newlist = shipmentDto.Union(AgilityShipment).OrderByDescending(x => x.DateCreated).Take(30).ToList();
+                return await Task.FromResult(newlist.OrderByDescending(x => x.DateCreated).ToList());
             }
             catch (Exception ex)
             {
@@ -2660,6 +2664,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             return PickUpPrice;
         }
+        
     }
     
 
