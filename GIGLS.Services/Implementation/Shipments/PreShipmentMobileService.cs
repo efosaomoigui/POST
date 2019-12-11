@@ -502,12 +502,12 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var currentUser = await _userService.GetCurrentUserId();
-                var user = await _uow.User.GetUserById(currentUser);
                 var Shipmentdto = new PreShipmentMobileDTO();
                 var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
                 if (shipment != null)
                 {
+                    var currentUser = await _userService.GetCurrentUserId();
+                    var user = await _uow.User.GetUserById(currentUser);
                     Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(shipment);
                     if (user.UserChannelType.ToString() == UserChannelType.Partner.ToString() || user.SystemUserRole == "Dispatch Rider")
                     {
@@ -671,7 +671,11 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var result = _uow.SpecialDomesticPackage.GetAll();
+                //Exclude those package from showing on gig go
+                int[] excludePackage = new int[] { 11, 12, 13, 14, 15, 16, 17, 32, 33, 34, 35, 36, 37, 38 };
+
+                var result = _uow.SpecialDomesticPackage.GetAll().Where(x => !excludePackage.Contains(x.SpecialDomesticPackageId));
+
                 var packages = from s in result
                                select new SpecialDomesticPackageDTO
                                {
@@ -1370,7 +1374,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var list = new List<decimal>();
                     var listOfWeights = subcategories.Where(s => s.SubCategoryName == subcategory.SubCategoryName).
-                        Select(s => s.WeightRange.ToString()).ToList();
+                        Select(s => s.WeightRange).ToList();
 
                     //add to dictionary
                     if (!finalDictionary.ContainsKey(subcategory.SubCategoryName))
