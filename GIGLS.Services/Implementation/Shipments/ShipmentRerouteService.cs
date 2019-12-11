@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.IServices.Shipments;
+using GIGLS.Core.IServices.Business;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -20,14 +21,16 @@ namespace GIGLS.Services.Implementation.Shipments
         private IUserService _userService;
         private readonly IShipmentService _shipmentService;
         private readonly IShipmentCollectionService _collectionService;
+        private readonly IShipmentTrackService _shipmentTrackService;
 
         public ShipmentRerouteService(IUnitOfWork uow, IUserService userService,
-            IShipmentService shipmentService, IShipmentCollectionService collectionService)
+            IShipmentService shipmentService, IShipmentCollectionService collectionService, IShipmentTrackService shipmentTrackService)
         {
             _uow = uow;
             _userService = userService;
             _shipmentService = shipmentService;
             _collectionService = collectionService;
+            _shipmentTrackService = shipmentTrackService;
             MapperConfig.Initialize();
         }
 
@@ -67,13 +70,23 @@ namespace GIGLS.Services.Implementation.Shipments
                 var originalShipment = await _shipmentService.GetShipment(shipmentDTO.Waybill);
                 int originalDestinationId = originalShipment.DestinationServiceCentreId;
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+
+                var trackInfo = await _shipmentTrackService.TrackShipment(originalShipment.Waybill);
+                var trackInfos = trackInfo.ToList();
                 if (serviceCenters.Length == 1 && serviceCenters[0] == originalDestinationId)
                 {
                     //do nothing
                 }
                 else
                 {
-                    throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+                    if (serviceCenters.Length == 1 && trackInfos[0].ScanStatus.Code == ShipmentScanStatus.AST.ToString())
+                    {
+                        //do nothing
+                    }
+                    else
+                    {
+                        throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
+                    }
                 }
                                
                 ////5. Create new shipment
@@ -125,9 +138,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 ////7. return new shipment 
                 return newShipment;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
 
         }
