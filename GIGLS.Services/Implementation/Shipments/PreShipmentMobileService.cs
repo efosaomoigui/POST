@@ -581,7 +581,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 var currentUser = await _userService.GetCurrentUserId();
                 var user = await _uow.User.GetUserById(currentUser);
                 var mobileShipment = await _uow.PreShipmentMobile.FindAsync(x => x.CustomerCode.Equals(user.UserChannelCode), "PreShipmentItems,SenderLocation,ReceiverLocation");
-                //shipment = shipment.Take(10).ToList();
 
                 List<PreShipmentMobileDTO> shipmentDto = (from r in mobileShipment
                                                           select new PreShipmentMobileDTO()
@@ -623,48 +622,49 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               }
                                                           }).OrderByDescending(x => x.DateCreated).Take(20).ToList();
                 
-
                 var agilityShipment = await GetPreShipmentForEcommerce(user.UserChannelCode);
 
                 //added agility shipment to Giglgo list of shipments.
-                //ar newlist = shipmentDto.Union(AgilityShipment).OrderByDescending(x => x.DateCreated).Take(30).ToList();
                 foreach (var shipment in shipmentDto)
                 {
-                    var partnerId = await _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == shipment.Waybill && (r.Status == MobilePickUpRequestStatus.Delivered.ToString()));
-                    if (partnerId != null)
+
+                    if (agilityShipment.Exists(s => s.Waybill == shipment.Waybill))
                     {
-                        var partneruser = await _uow.User.GetUserById(partnerId.UserId);
-                        if (partneruser != null)
+                        agilityShipment.Remove(shipment);
+                    }
+                    else
+                    {
+                        var partnerId = await _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == shipment.Waybill && (r.Status == MobilePickUpRequestStatus.Delivered.ToString()));
+                        if (partnerId != null)
                         {
-                            shipment.PartnerFirstName = partneruser.FirstName;
-                            shipment.PartnerLastName = partneruser.LastName;
-                            shipment.PartnerImageUrl = partneruser.PictureUrl;
+                            var partneruser = await _uow.User.GetUserById(partnerId.UserId);
+                            if (partneruser != null)
+                            {
+                                shipment.PartnerFirstName = partneruser.FirstName;
+                                shipment.PartnerLastName = partneruser.LastName;
+                                shipment.PartnerImageUrl = partneruser.PictureUrl;
+                            }
                         }
-                    }
 
-                    shipment.IsRated = false;
+                        shipment.IsRated = false;
 
-                    var rating = await _uow.MobileRating.GetAsync(j => j.Waybill == shipment.Waybill);
-                    if (rating != null)
-                    {
-                        shipment.IsRated = rating.IsRatedByCustomer;
-                    }
+                        var rating = await _uow.MobileRating.GetAsync(j => j.Waybill == shipment.Waybill);
+                        if (rating != null)
+                        {
+                            shipment.IsRated = rating.IsRatedByCustomer;
+                        }
 
-                    var country = await _uow.Country.GetCountryByStationId(shipment.SenderStationId);
-                    if (country != null)
-                    {
-                        shipment.CurrencyCode = country.CurrencyCode;
-                        shipment.CurrencySymbol = country.CurrencySymbol;
-                    }
-
-                    if (agilityShipment.Exists(s=>s.Waybill == shipment.Waybill))
-                    {
-                        shipmentDto.Remove(shipment);
-                    }
+                        var country = await _uow.Country.GetCountryByStationId(shipment.SenderStationId);
+                        if (country != null)
+                        {
+                            shipment.CurrencyCode = country.CurrencyCode;
+                            shipment.CurrencySymbol = country.CurrencySymbol;
+                        }
+                    }                  
                 }
 
-                var newlist = shipmentDto.Union(agilityShipment); //.OrderByDescending(x => x.DateCreated);
-                return await Task.FromResult(newlist.OrderByDescending(x => x.DateCreated).ToList());
+                var newlist = shipmentDto.Union(agilityShipment);
+                return await Task.FromResult(newlist.OrderByDescending(x => x.DateCreated).Take(20).ToList());
             }
             catch (Exception ex)
             {
@@ -2662,8 +2662,6 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //var currentUser = await _userService.GetCurrentUserId();
-                //var user = await _uow.User.GetUserById(currentUser);
                 var shipment = await _uow.Shipment.FindAsync(x => x.CustomerCode.Equals(userChannelCode) && x.IsCancelled == false);
                 
                 List<PreShipmentMobileDTO> shipmentDto = (from r in shipment
@@ -2695,7 +2693,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 foreach (var shipments in shipmentDto)
                 {
-                    //var Countryid = await GetCountryByServiceCentreId(shipments.DepartureServiceCentreId);
                     var country = await _uow.Country.GetAsync(shipments.CountryId);
 
                     if (country != null)
@@ -2703,10 +2700,12 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipments.CurrencyCode = country.CurrencyCode;
                         shipments.CurrencySymbol = country.CurrencySymbol;
                     }
+
                     if (shipments.CustomerType == "Individual")
                     {
                         shipments.CustomerType = CustomerType.IndividualCustomer.ToString();
                     }
+
                     if (shipments.SenderAddress == null)
                     {
                         CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipments.CustomerType);
