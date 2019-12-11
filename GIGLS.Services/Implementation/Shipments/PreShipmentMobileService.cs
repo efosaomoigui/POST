@@ -1003,7 +1003,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 });
 
                 var item = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
-                await CheckDeliveryTimeAndSendMail(item);
+                //await CheckDeliveryTimeAndSendMail(item);
 
             }
             catch (Exception ex)
