@@ -581,6 +581,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var currentUser = await _userService.GetCurrentUserId();
                 var user = await _uow.User.GetUserById(currentUser);
                 var shipment = await _uow.PreShipmentMobile.FindAsync(x => x.CustomerCode.Equals(user.UserChannelCode), "PreShipmentItems,SenderLocation,ReceiverLocation");
+                shipment = shipment.Take(10).ToList();
                 var AgilityShipment = await GetPreShipmentForEcommerce();
 
                 List<PreShipmentMobileDTO> shipmentDto = (from r in shipment
@@ -624,7 +625,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                                           }).ToList();
 
                 //added agility shipment to Giglgo list of shipments.
-               // var newlist = shipmentDto.Union(AgilityShipment).OrderByDescending(x => x.DateCreated).Take(30).ToList();
+               //ar newlist = shipmentDto.Union(AgilityShipment).OrderByDescending(x => x.DateCreated).Take(30).ToList();
                 foreach (var Shipment in shipmentDto.ToList())
                 {
                     var PartnerId = await _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == Shipment.Waybill && (r.Status == MobilePickUpRequestStatus.Delivered.ToString()));
@@ -658,7 +659,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipmentDto.Remove(Shipment);
                     }
                 }
-                var newlist = shipmentDto.Union(AgilityShipment).OrderByDescending(x => x.DateCreated).Take(30).ToList();
+                var newlist = shipmentDto.Union(AgilityShipment).OrderByDescending(x => x.DateCreated);
                 return await Task.FromResult(newlist.OrderByDescending(x => x.DateCreated).ToList());
             }
             catch (Exception ex)
@@ -2653,6 +2654,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var currentUser = await _userService.GetCurrentUserId();
                 var user = await _uow.User.GetUserById(currentUser);
                 var shipment = await _uow.Shipment.FindAsync(x => x.CustomerCode.Equals(user.UserChannelCode) && x.IsCancelled == false);
+                shipment = shipment.Take(10).ToList();
 
                 List<PreShipmentMobileDTO> shipmentDto = (from r in shipment
                                                           select new PreShipmentMobileDTO()
@@ -2678,7 +2680,6 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               shipmentstatus = "Shipment",
                                                               CustomerId = r.CustomerId,
                                                               CustomerType = r.CustomerType
-
                                                           }).ToList();
                 foreach (var shipments in shipmentDto)
                 {
@@ -2694,10 +2695,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         shipments.CustomerType = CustomerType.IndividualCustomer.ToString();
                     }
-                    CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipments.CustomerType);
-                    var CustomerDetails = await _customerService.GetCustomer(shipments.CustomerId, customerType);
-                    shipments.SenderAddress = CustomerDetails.Address;
-                    shipments.SenderName = CustomerDetails.Name;
+                    if (shipments.SenderAddress == null)
+                    {
+                        CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipments.CustomerType);
+                        var CustomerDetails = await _customerService.GetCustomer(shipments.CustomerId, customerType);
+                        shipments.SenderAddress = CustomerDetails.Address;
+                        shipments.SenderName = CustomerDetails.Name;
+                    }
                 }
 
                 return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
