@@ -548,9 +548,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             int[] testingServiceCentre = { 314, 315, 332, 338, 339, 340 };
 
-            // filter by cancelled shipments and exclude all our testing service money from the list
+            // filter by cancelled shipments, country and exclude all our testing service money from the list
             var shipments = Context.Shipment.AsQueryable()
-                .Where(s => s.IsCancelled == false && s.IsDeleted == false && s.DateCreated >= startDate && s.DateCreated < endDate  && s.DepartureCountryId == 1
+                .Where(s => s.IsCancelled == false && s.IsDeleted == false && s.DateCreated >= startDate && s.DateCreated < endDate  && s.DepartureCountryId == filterCriteria.CountryId
                 && !testingServiceCentre.Contains(s.DepartureServiceCentreId) && !testingServiceCentre.Contains(s.DestinationServiceCentreId));
 
 
