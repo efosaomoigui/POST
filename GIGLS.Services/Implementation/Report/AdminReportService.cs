@@ -301,7 +301,7 @@ namespace GIGLS.Services.Implementation.Report
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var result = _uow.Company.GetAllAsQueryable().Where(x => x.CompanyType == CompanyType.Corporate
+            var result = _uow.Company.GetAllAsQueryable().Where(x => x.CompanyType == CompanyType.Corporate && x.UserActiveCountryId == filterCriteria.CountryId
             && (x.DateCreated >= startDate && x.DateCreated < endDate) ).Count();
             return await Task.FromResult(result);
         }
@@ -317,7 +317,7 @@ namespace GIGLS.Services.Implementation.Report
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
                         
-            var result = _uow.Company.GetAllAsQueryable().Where(x => x.CompanyType == CompanyType.Ecommerce
+            var result = _uow.Company.GetAllAsQueryable().Where(x => x.CompanyType == CompanyType.Ecommerce && x.UserActiveCountryId == filterCriteria.CountryId
             && (x.DateCreated >= startDate && x.DateCreated < endDate)).Count();
             return await Task.FromResult(result);
         }
@@ -333,7 +333,7 @@ namespace GIGLS.Services.Implementation.Report
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var result = _uow.IndividualCustomer.GetAllAsQueryable().Where(x => x.DateCreated >= startDate && x.DateCreated < endDate)
+            var result = _uow.IndividualCustomer.GetAllAsQueryable().Where(x => x.UserActiveCountryId == filterCriteria.CountryId && x.DateCreated >= startDate && x.DateCreated < endDate )
                 .Select(x => x.PhoneNumber).Distinct().Count();
             return await Task.FromResult(result);
         }

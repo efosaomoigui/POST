@@ -426,8 +426,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
 
-                //var limitspan = Int32.Parse(ConfigurationManager.AppSettings["limitSpan"]);
-                var today = DateTime.Now.Date; // new DateTime(2019, 2, 6);
+                var today = DateTime.Now.Date;  // ;new DateTime(2019, 2, 6)
                 var firstDayOfMonth = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]); //today.AddDays(limitspan); //DateTime.Now.AddDays(limitspan); //   new DateTime(today.Year, today.Month, 1); 
 
                 var accountFilterCriteria = new AccountFilterCriteria
@@ -455,7 +454,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
 
-                var today = DateTime.Now.Date; // new DateTime(2019, 2, 6);
+                var today = DateTime.Now.Date;  // ;new DateTime(2019, 2, 6)
                 var firstDayOfMonth = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
 
                 var accountFilterCriteria = new AccountFilterCriteria
@@ -488,8 +487,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                //var limitspan = Int32.Parse(ConfigurationManager.AppSettings["limitSpan"]) * -1;
-                var today = DateTime.Now.Date; // new DateTime(2019, 2, 6);
+                var today = DateTime.Now.Date;  // ;new DateTime(2019, 2, 6)
                 var firstDayOfMonth = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
                 //today.AddDays(limitspan); //DateTime.Now.AddDays(limitspan); //   new DateTime(today.Year, today.Month, 1);  
 
@@ -526,8 +524,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
 
-                //var limitspan = Int32.Parse(ConfigurationManager.AppSettings["limitSpan"]) * -1;
-                var today = DateTime.Now.Date; // new DateTime(2019, 2, 6);
+                var today = DateTime.Now.Date;  // ;new DateTime(2019, 2, 6)
                 var firstDayOfMonth = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
                 //today.AddDays(limitspan); //DateTime.Now.AddDays(limitspan); //   new DateTime(today.Year, today.Month, 1);  
 
@@ -555,8 +552,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                //var limitspan = Int32.Parse(ConfigurationManager.AppSettings["limitSpan"]) * -1;
-                var today = DateTime.Now.Date; // new DateTime(2019, 2, 6);
+                var today = DateTime.Now.Date;  // ;new DateTime(2019, 2, 6)
                 var firstDayOfMonth = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
                 //today.AddDays(limitspan); //DateTime.Now.AddDays(limitspan); //   new DateTime(today.Year, today.Month, 1);  
 
@@ -590,8 +586,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                //var limitspan = Int32.Parse(ConfigurationManager.AppSettings["limitSpan"]) * -1;
-                var today = DateTime.Now.Date; // new DateTime(2019, 2, 6);
+                var today = DateTime.Now.Date;  // ;new DateTime(2019, 2, 6)
                 var firstDayOfMonth = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
 
                 var accountFilterCriteria = new AccountFilterCriteria
