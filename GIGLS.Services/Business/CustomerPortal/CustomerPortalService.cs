@@ -961,7 +961,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 Password = user.Password,
                                 CustomerCode = EmailUser.UserChannelCode,
                                 PictureUrl = user.PictureUrl,
-                                IsRegisteredFromMobile = true
+                                IsRegisteredFromMobile = true,
+                                UserActiveCountryId = user.UserActiveCountryId
                             };
 
                             _uow.IndividualCustomer.Add(customer);
