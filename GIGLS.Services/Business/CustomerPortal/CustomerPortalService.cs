@@ -1083,7 +1083,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 SettlementPeriod = 1,
                                 ReturnServiceCentre = 0,
                                 UserActiveCountryId = user.UserActiveCountryId,
-                                Name = user.Organisation
+                                Name = user.Organisation,
+                                isCodNeeded = user.RequireCod
                             };
                             _uow.Company.Add(customer);
 
@@ -1493,7 +1494,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                         IsRegisteredFromMobile = true,
                         UserActiveCountryId = user.UserActiveCountryId,
                         CompanyType = CompanyType.Ecommerce,
-                        Name = user.Organisation
+                        Name = user.Organisation,
+                        isCodNeeded = user.RequireCod
 
                         //added this to pass channelcode 
                     };

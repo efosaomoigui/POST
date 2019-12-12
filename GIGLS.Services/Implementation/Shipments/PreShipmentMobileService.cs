@@ -134,6 +134,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 var currentUserId = await _userService.GetCurrentUserId();
                 preShipmentDTO.UserId = currentUserId;
                 var user = await _userService.GetUserById(currentUserId);
+                var exists = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+                if(exists.IsEligible != true)
+                {
+                    throw new GenericException("Customer is not Eligible");
+                }
                 var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
                 preShipmentDTO.CountryId = Country.CountryId;
                 if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
@@ -148,8 +153,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    var exists = await _uow.Company.ExistAsync(s => s.CustomerCode == user.UserChannelCode);
-                    if (user.UserChannelType == UserChannelType.Ecommerce || exists)
+                    //var exists = await _uow.Company.ExistAsync(s => s.CustomerCode == user.UserChannelCode);
+                    if (user.UserChannelType == UserChannelType.Ecommerce || exists != null)
                     {
                         preShipmentDTO.Shipmentype = ShipmentType.Ecommerce;
                     }
@@ -912,6 +917,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Dispute.ToString();
                     pickuprequest.Status = MobilePickUpRequestStatus.Dispute.ToString();
                     await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
+                    await _uow.CompleteAsync();
+                }
+                else if(pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
+                {
+                    var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
                     await _uow.CompleteAsync();
                 }
 

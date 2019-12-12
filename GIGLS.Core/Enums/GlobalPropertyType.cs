@@ -48,6 +48,8 @@
         EcommerceEmail,
         EcommerceBikePickUpPrice,
         EcommerceCarPickupPrice,
-        EcommerceVanPickupPrice
+        EcommerceVanPickupPrice,
+        EcommerceCodAmount,
+        EcommerceNoCodAmount
     }
 }
