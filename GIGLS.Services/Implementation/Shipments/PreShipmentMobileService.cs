@@ -1558,39 +1558,30 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<object> CancelShipment(string Waybill)
         {
-            var CountryId = await GetCountryId();
-            var userActiveCountryId = CountryId;
             try
             {
-                userActiveCountryId = await _userService.GetUserActiveCountryId();
-            }
-            catch (Exception ex) { }
-
-            try
-            {
-                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == Waybill, "PreShipmentItems");
+                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == Waybill);
                 if (preshipmentmobile == null)
                 {
                     throw new GenericException("Shipment does not exist");
                 }
-                var pickuprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId, preshipmentmobile.UserId = null);
+                                
                 var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                foreach (var id in preshipmentmobile.PreShipmentItems.ToList())
-                {
-                    var preshipmentitmmobile = await _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == preshipmentmobile.PreShipmentMobileId && s.PreShipmentItemMobileId == id.PreShipmentItemMobileId);
-                    preshipmentitmmobile.IsCancelled = true;
-                    //we need to modify this to only change the IsCancelled instead of deleting the items.
-                    _uow.PreShipmentItemMobile.Remove(preshipmentitmmobile);
-                }
+
                 var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && (s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString()));
                 if (pickuprequests != null)
                 {
-                    var user = await _userService.GetUserById(pickuprequests.UserId);
-                    pickuprequests.Status = MobilePickUpRequestStatus.Cancelled.ToString();
+                    var pickuprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId, preshipmentmobile.UserId = null);
                     updatedwallet.Balance = ((updatedwallet.Balance + preshipmentmobile.GrandTotal) - Convert.ToDecimal(pickuprice));
                     var Partnersprice = (0.4M * Convert.ToDecimal(pickuprice));
-                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == user.UserChannelCode);
-                    wallet.Balance = wallet.Balance + Partnersprice;
+                    
+                    var rider = await _userService.GetUserById(pickuprequests.UserId);
+                    var riderWallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == rider.UserChannelCode);
+                    riderWallet.Balance = riderWallet.Balance + Partnersprice;
+                    
+                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
+                    pickuprequests.Status = MobilePickUpRequestStatus.Cancelled.ToString();
+
                     var partnertransactions = new PartnerTransactionsDTO
                     {
                         Destination = preshipmentmobile.ReceiverAddress,
@@ -1598,15 +1589,12 @@ namespace GIGLS.Services.Implementation.Shipments
                         AmountReceived = Partnersprice,
                         Waybill = preshipmentmobile.Waybill
                     };
-                    var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
-                    preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
+                    await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
                 }
                 else
                 {
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
                     updatedwallet.Balance = ((updatedwallet.Balance + preshipmentmobile.GrandTotal));
-
-
                 }
                 await _uow.CompleteAsync();
                 return new { IsCancelled = true };

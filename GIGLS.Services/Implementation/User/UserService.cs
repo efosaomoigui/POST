@@ -1319,10 +1319,10 @@ namespace GIGLS.Services.Implementation.User
 
         public async Task<int> GetUserActiveCountryId()
         {
-            int UserCountryId = 0;
 
             //1. Get the user active country
             var countries = await GetPriviledgeCountrys();
+            int UserCountryId;
             if (countries.Count == 1)
             {
                 var userActiveCountry = countries[0];
