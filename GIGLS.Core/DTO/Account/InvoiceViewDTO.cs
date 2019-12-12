@@ -125,6 +125,8 @@ namespace GIGLS.Core.DTO.Account
         public string PaymentMethod { get; set; }
         public DateTime DateCreated { get; set; } 
         public string Waybill { get; set; }
+        public int DepartureServiceCentreId { get; set; }
+        public int DestinationServiceCentreId { get; set; }
     }
 
     public class InvoiceViewDTOUNGROUPED2
@@ -134,6 +136,7 @@ namespace GIGLS.Core.DTO.Account
         public string PaymentMethod { get; set; }
         public DateTime ShipmentDate { get; set; }
         public string Waybill { get; set; }
+
     }
 
     public class InvoiceMonitorDTO
