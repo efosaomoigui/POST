@@ -396,15 +396,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<List<ServiceCentreDTO>> GetLocalServiceCentres()
         {
-            var countryIds = new int[] { };
-            try
-            {
-                countryIds = await _userService.GetPriviledgeCountryIds();
-            }
-            catch
-            {
-
-            }
+            var countryIds = await _userService.GetPriviledgeCountryIds();
             return await _uow.ServiceCentre.GetLocalServiceCentres(countryIds);
         }
 

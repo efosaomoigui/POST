@@ -507,12 +507,12 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var currentUser = await _userService.GetCurrentUserId();
-                var user = await _uow.User.GetUserById(currentUser);
                 var Shipmentdto = new PreShipmentMobileDTO();
                 var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
                 if (shipment != null)
                 {
+                    var currentUser = await _userService.GetCurrentUserId();
+                    var user = await _uow.User.GetUserById(currentUser);
                     Shipmentdto = Mapper.Map<PreShipmentMobileDTO>(shipment);
                     if (user.UserChannelType.ToString() == UserChannelType.Partner.ToString() || user.SystemUserRole == "Dispatch Rider")
                     {
@@ -585,11 +585,9 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var currentUser = await _userService.GetCurrentUserId();
                 var user = await _uow.User.GetUserById(currentUser);
-                var shipment = await _uow.PreShipmentMobile.FindAsync(x => x.CustomerCode.Equals(user.UserChannelCode), "PreShipmentItems,SenderLocation,ReceiverLocation");
-                shipment = shipment.Take(10).ToList();
-                var AgilityShipment = await GetPreShipmentForEcommerce();
+                var mobileShipment = await _uow.PreShipmentMobile.FindAsync(x => x.CustomerCode.Equals(user.UserChannelCode), "PreShipmentItems,SenderLocation,ReceiverLocation");
 
-                List<PreShipmentMobileDTO> shipmentDto = (from r in shipment
+                List<PreShipmentMobileDTO> shipmentDto = (from r in mobileShipment
                                                           select new PreShipmentMobileDTO()
                                                           {
                                                               PreShipmentMobileId = r.PreShipmentMobileId,
@@ -627,45 +625,51 @@ namespace GIGLS.Services.Implementation.Shipments
                                                                   Longitude = r.SenderLocation.Longitude,
                                                                   Latitude = r.SenderLocation.Latitude
                                                               }
-                                                          }).ToList();
+                                                          }).OrderByDescending(x => x.DateCreated).Take(20).ToList();
+                
+                var agilityShipment = await GetPreShipmentForEcommerce(user.UserChannelCode);
 
                 //added agility shipment to Giglgo list of shipments.
-               //ar newlist = shipmentDto.Union(AgilityShipment).OrderByDescending(x => x.DateCreated).Take(30).ToList();
-                foreach (var Shipment in shipmentDto.ToList())
+                foreach (var shipment in shipmentDto)
                 {
-                    var PartnerId = await _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == Shipment.Waybill && (r.Status == MobilePickUpRequestStatus.Delivered.ToString()));
-                    if (PartnerId != null)
+
+                    if (agilityShipment.Exists(s => s.Waybill == shipment.Waybill))
                     {
-                        var partneruser = await _uow.User.GetUserById(PartnerId.UserId);
-                        if (partneruser != null)
-                        {
-                            Shipment.PartnerFirstName = partneruser.FirstName;
-                            Shipment.PartnerLastName = partneruser.LastName;
-                            Shipment.PartnerImageUrl = partneruser.PictureUrl;
-                        }
-                    }
-                    var rating = await _uow.MobileRating.GetAsync(j => j.Waybill == Shipment.Waybill);
-                    if (rating != null)
-                    {
-                        Shipment.IsRated = rating.IsRatedByCustomer;
+                        agilityShipment.Remove(shipment);
                     }
                     else
                     {
-                        Shipment.IsRated = false;
-                    }
-                    var country = await _uow.Country.GetCountryByStationId(Shipment.SenderStationId);
-                    if (country != null)
-                    {
-                        Shipment.CurrencyCode = country.CurrencyCode;
-                        Shipment.CurrencySymbol = country.CurrencySymbol;
-                    }
-                    if (AgilityShipment.Exists(s=>s.Waybill==Shipment.Waybill))
-                    {
-                        shipmentDto.Remove(Shipment);
-                    }
+                        var partnerId = await _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == shipment.Waybill && (r.Status == MobilePickUpRequestStatus.Delivered.ToString()));
+                        if (partnerId != null)
+                        {
+                            var partneruser = await _uow.User.GetUserById(partnerId.UserId);
+                            if (partneruser != null)
+                            {
+                                shipment.PartnerFirstName = partneruser.FirstName;
+                                shipment.PartnerLastName = partneruser.LastName;
+                                shipment.PartnerImageUrl = partneruser.PictureUrl;
+                            }
+                        }
+
+                        shipment.IsRated = false;
+
+                        var rating = await _uow.MobileRating.GetAsync(j => j.Waybill == shipment.Waybill);
+                        if (rating != null)
+                        {
+                            shipment.IsRated = rating.IsRatedByCustomer;
+                        }
+
+                        var country = await _uow.Country.GetCountryByStationId(shipment.SenderStationId);
+                        if (country != null)
+                        {
+                            shipment.CurrencyCode = country.CurrencyCode;
+                            shipment.CurrencySymbol = country.CurrencySymbol;
+                        }
+                    }                  
                 }
-                var newlist = shipmentDto.Union(AgilityShipment).OrderByDescending(x => x.DateCreated);
-                return await Task.FromResult(newlist.OrderByDescending(x => x.DateCreated).ToList());
+
+                var newlist = shipmentDto.Union(agilityShipment);
+                return await Task.FromResult(newlist.OrderByDescending(x => x.DateCreated).Take(20).ToList());
             }
             catch (Exception ex)
             {
@@ -677,7 +681,11 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var result = _uow.SpecialDomesticPackage.GetAll();
+                //Exclude those package from showing on gig go
+                int[] excludePackage = new int[] { 11, 12, 13, 14, 15, 16, 17, 32, 33, 34, 35, 36, 37, 38 };
+
+                var result = _uow.SpecialDomesticPackage.GetAll().Where(x => !excludePackage.Contains(x.SpecialDomesticPackageId));
+
                 var packages = from s in result
                                select new SpecialDomesticPackageDTO
                                {
@@ -1015,7 +1023,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 });
 
                 var item = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
-                await CheckDeliveryTimeAndSendMail(item);
+                //await CheckDeliveryTimeAndSendMail(item);
 
             }
             catch (Exception ex)
@@ -1382,7 +1390,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var list = new List<decimal>();
                     var listOfWeights = subcategories.Where(s => s.SubCategoryName == subcategory.SubCategoryName).
-                        Select(s => s.WeightRange.ToString()).ToList();
+                        Select(s => s.WeightRange).ToList();
 
                     //add to dictionary
                     if (!finalDictionary.ContainsKey(subcategory.SubCategoryName))
@@ -2346,15 +2354,18 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var User = await _userService.GetUserByEmail(user.Email);
-                User.FirstName = user.FirstName;
-                User.LastName = user.LastName;
+                string currentUserId = await _userService.GetCurrentUserId();
+                var currentUser = await _userService.GetUserById(currentUserId);
+
+                currentUser.FirstName = user.FirstName;
+                currentUser.LastName = user.LastName;
                 //User.PhoneNumber = user.PhoneNumber;
                 //User.Email = user.Email;
-                User.PictureUrl = user.PictureUrl;
-                await _userService.UpdateUser(User.Id, User);
+                currentUser.PictureUrl = user.PictureUrl;
+                await _userService.UpdateUser(currentUser.Id, currentUser);
 
                 string userChannelType = user.UserChannelType.ToString();
+                user.UserChannelCode = currentUser.UserChannelCode;
 
                 if (userChannelType == UserChannelType.Partner.ToString()
                     || userChannelType == UserChannelType.IndividualCustomer.ToString()
@@ -2658,15 +2669,12 @@ namespace GIGLS.Services.Implementation.Shipments
             return amount;
         }
 
-        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForEcommerce()
+        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForEcommerce(string userChannelCode)
         {
             try
             {
-                var currentUser = await _userService.GetCurrentUserId();
-                var user = await _uow.User.GetUserById(currentUser);
-                var shipment = await _uow.Shipment.FindAsync(x => x.CustomerCode.Equals(user.UserChannelCode) && x.IsCancelled == false);
-                shipment = shipment.Take(10).ToList();
-
+                var shipment = await _uow.Shipment.FindAsync(x => x.CustomerCode.Equals(userChannelCode) && x.IsCancelled == false);
+                
                 List<PreShipmentMobileDTO> shipmentDto = (from r in shipment
                                                           select new PreShipmentMobileDTO()
                                                           {
@@ -2690,22 +2698,25 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               DepartureServiceCentreId = r.DepartureServiceCentreId,
                                                               shipmentstatus = "Shipment",
                                                               CustomerId = r.CustomerId,
-                                                              CustomerType = r.CustomerType
-                                                          }).ToList();
+                                                              CustomerType = r.CustomerType,
+                                                              CountryId = r.DepartureCountryId
+                                                          }).OrderByDescending(x => x.DateCreated).Take(20).ToList();
+
                 foreach (var shipments in shipmentDto)
                 {
-                    var Countryid = await GetCountryByServiceCentreId(shipments.DepartureServiceCentreId);
-                    var Country = await _uow.Country.GetAsync(Countryid);
+                    var country = await _uow.Country.GetAsync(shipments.CountryId);
 
-                    if (Country != null)
+                    if (country != null)
                     {
-                        shipments.CurrencyCode = Country.CurrencyCode;
-                        shipments.CurrencySymbol = Country.CurrencySymbol;
+                        shipments.CurrencyCode = country.CurrencyCode;
+                        shipments.CurrencySymbol = country.CurrencySymbol;
                     }
+
                     if (shipments.CustomerType == "Individual")
                     {
                         shipments.CustomerType = CustomerType.IndividualCustomer.ToString();
                     }
+
                     if (shipments.SenderAddress == null)
                     {
                         CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipments.CustomerType);
@@ -2715,7 +2726,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
+                return await Task.FromResult(shipmentDto);
             }
             catch (Exception ex)
             {

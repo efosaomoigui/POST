@@ -15,8 +15,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
         }
         
         public Task<List<SubCategoryDTO>> GetSubCategories()
-        {
-            var subcategories = Context.SubCategory.AsQueryable();
+        {            
+            //Exclude those package from showing on gig go
+            int[] excludePackage = new int[] { 12, 14, 15, 16, 17, 18, 19, 34, 38, 39, 40, 41, 42, 43 };
+
+            var subcategories = Context.SubCategory.AsQueryable().Where(x => !excludePackage.Contains(x.SubCategoryId));
 
             List<SubCategoryDTO> categoryDto = (from s in subcategories
                                                 select new SubCategoryDTO
