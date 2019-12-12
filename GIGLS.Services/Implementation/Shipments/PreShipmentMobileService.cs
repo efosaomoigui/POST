@@ -134,11 +134,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 var currentUserId = await _userService.GetCurrentUserId();
                 preShipmentDTO.UserId = currentUserId;
                 var user = await _userService.GetUserById(currentUserId);
-                var exists = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
-                if(exists.IsEligible != true)
+                                
+                var customer = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+                if(customer != null)
                 {
-                    throw new GenericException("Customer is not Eligible");
+                    if (customer.IsEligible != true)
+                    {
+                        throw new GenericException("Customer is not Eligible");
+                    }
                 }
+                
                 var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
                 preShipmentDTO.CountryId = Country.CountryId;
                 if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
@@ -154,7 +159,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 else
                 {
                     //var exists = await _uow.Company.ExistAsync(s => s.CustomerCode == user.UserChannelCode);
-                    if (user.UserChannelType == UserChannelType.Ecommerce || exists != null)
+                    if (user.UserChannelType == UserChannelType.Ecommerce || customer != null)
                     {
                         preShipmentDTO.Shipmentype = ShipmentType.Ecommerce;
                     }
