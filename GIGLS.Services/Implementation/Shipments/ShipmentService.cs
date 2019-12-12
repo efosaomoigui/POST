@@ -1582,7 +1582,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //DateTime now = DateTime.Now.Date;
             var now = DateTime.Now.Date;
-            //DateTime now = new DateTime(2019, 2, 6); 
+            //DateTime now = new DateTime(2019, 2, 6);
 
             var dashboardStartDate = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
 

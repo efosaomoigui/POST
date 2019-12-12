@@ -12,6 +12,7 @@ using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
@@ -197,8 +198,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
 
             SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);//accountFilterCriteria.PaymentStatus
-            var sc = (serviceCentreIds.Length > 0) ? serviceCentreIds[0] : 0;
+            var sc = returnScList(serviceCentreIds);
+            //var sc = serviceCentreIds.ToList();
             SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
+            departureServiceCentreId.SqlDbType = SqlDbType.Structured;
+            departureServiceCentreId.TypeName = "dbo.IdList";
             SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
             SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
 
@@ -233,6 +237,19 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
         }
 
+        private DataTable returnScList(int[] scs)
+        {
+
+            DataTable tvp = new DataTable();
+            tvp.Columns.Add(new DataColumn("Id", typeof(int)));
+
+            // populate DataTable from your List here
+            foreach (var id in scs)
+                tvp.Rows.Add(id);
+
+            return tvp;
+        }
+
 
         //Shipent Monitors
         //Stored Procedure version
@@ -252,8 +269,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
 
             SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);//accountFilterCriteria.PaymentStatus
-            var sc = (serviceCentreIds.Length > 0) ? serviceCentreIds[0] : 0;
+            var sc = returnScList(serviceCentreIds);
             SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
+            departureServiceCentreId.SqlDbType = SqlDbType.Structured;
+            departureServiceCentreId.TypeName = "dbo.IdList";
             SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
             SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
 
@@ -306,8 +325,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
 
             SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);//accountFilterCriteria.PaymentStatus
-            var sc = (serviceCentreIds.Length > 0) ? serviceCentreIds[0] : 0;
+            var sc = returnScList(serviceCentreIds);
             SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
+            departureServiceCentreId.SqlDbType = SqlDbType.Structured;
+            departureServiceCentreId.TypeName = "dbo.IdList";
             SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
             SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
 
@@ -363,8 +384,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
 
             SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);//accountFilterCriteria.PaymentStatus
-            var sc = (serviceCentreIds.Length > 0) ? serviceCentreIds[0] : 0;
+            var sc = returnScList(serviceCentreIds);
             SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
+            departureServiceCentreId.SqlDbType = SqlDbType.Structured;
+            departureServiceCentreId.TypeName = "dbo.IdList";
             SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
             SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
 
