@@ -46,5 +46,9 @@ namespace GIGL.GIGLS.Core.Domain
         public string LastName { get; set; }
         public bool IsRegisteredFromMobile { get; set; }
         public bool isCodNeeded { get; set; }
+
+        //added this for Giglgo customers
+        public decimal? WalletAmount { get; set; }
+        public bool? IsEligible { get; set; }
     }
 }

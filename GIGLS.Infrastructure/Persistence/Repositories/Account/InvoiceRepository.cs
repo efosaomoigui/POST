@@ -209,7 +209,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                 endDate,
                 paymentStatus,
                 departureServiceCentreId,
-                //stationId,
+                stationId,
                 CountryId
             };
 
@@ -218,7 +218,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             try
             {
                 listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceMonitorDTO>("NewSp " +
-                  "@IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @CountryId",
+                  "@IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CountryId",
                   param)
                   .ToListAsync();
             }
