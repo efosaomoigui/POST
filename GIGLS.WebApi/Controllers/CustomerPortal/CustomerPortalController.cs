@@ -1109,6 +1109,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
         [HttpGet]
         [Route("getpartnerwallettransactions")]
         public async Task<IServiceResponse<SummaryTransactionsDTO>> GetPartnerwalletTransactions()
@@ -1138,6 +1139,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
         [HttpPost]
         [Route("cancelshipment/{waybillNumber}")]
         public async Task<object> CancelShipment(string waybillNumber)

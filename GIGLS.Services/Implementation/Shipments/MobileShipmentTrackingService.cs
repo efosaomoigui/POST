@@ -40,7 +40,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 //1. call agility core tracking
-                var shipmentTracking = await _shipmentTrackService.TrackShipment(waybill);
+                var shipmentTracking = await _shipmentTrackService.TrackShipmentForMobile(waybill);
 
                 //2. call mobile tracking
                 var MobileshipmentTracking = await _uow.MobileShipmentTracking.GetMobileShipmentTrackingsAsync(waybill);
@@ -70,11 +70,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var orderedtrackings = MobileshipmentTracking.OrderByDescending(x => x.DateTime).ToList();
                 
-                var trackings = new MobileShipmentTrackingHistoryDTO();
-
                 var addresses = await _uow.PreShipmentMobile.GetAsync(s=>s.Waybill == waybill);
 
-                if(addresses !=null)
+                var trackings = new MobileShipmentTrackingHistoryDTO();
+
+                if (addresses !=null)
                 {
                    trackings = new MobileShipmentTrackingHistoryDTO
                     {
