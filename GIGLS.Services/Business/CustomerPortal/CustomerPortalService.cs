@@ -1539,20 +1539,21 @@ namespace GIGLS.Services.Business.CustomerPortal
         private async Task CalculateReferralBonus (UserDTO User)
         {
             var transaction = new WalletTransactionDTO();
-            if (User.Referrercode == null)
+            if (User.Referrercode == null || User.Referrercode == "")
             {
                 //Generate referrercode for user that is signing up and didnt 
                 //supply a referrecode
-                await GenerateReferrerCode(User);
+                var code = await GenerateReferrerCode(User);
             }
             else
             {
                 
-                //Generate referrercode for user that is signing up and supplies a referrerCode
-                await GenerateReferrerCode(User);
-
                 //based on the referrercode supplied, use it to get the wallet and update the balance 
                 var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == User.Referrercode);
+
+                //Generate referrercode for user that is signing up and supplies a referrerCode
+                var code = await GenerateReferrerCode(User);
+
                 if (referrerCode != null && User.IsUniqueInstalled==true)
                 {
                     var userDTO = await _userService.GetUserByChannelCode(referrerCode.UserCode);
