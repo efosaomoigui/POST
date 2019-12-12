@@ -48,6 +48,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
         private readonly IPaymentService _paymentService;
+        private readonly IGroupWaybillNumberMappingService _groupWaybillNumberMappingService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
@@ -57,7 +58,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
-            IPaymentService paymentService
+            IPaymentService paymentService, IGroupWaybillNumberMappingService groupWaybillNumberMappingService
             )
         {
             _uow = uow;
@@ -75,6 +76,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _globalPropertyService = globalPropertyService;
             _countryRouteZoneMapService = countryRouteZoneMapService;
             _paymentService = paymentService;
+            _groupWaybillNumberMappingService = groupWaybillNumberMappingService;
             MapperConfig.Initialize();
         }
 
@@ -1900,10 +1902,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     ShipmentScanStatus = ShipmentScanStatus.SSC
                 });
 
+                //remove waybill from manifest and groupwaybill
+                await _groupWaybillNumberMappingService.RemoveWaybillNumberFromGroup(groupwaybillMapping.GroupWaybillNumber, groupwaybillMapping.WaybillNumber);
+
                 //send message
                 //await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All, waybill);
                 boolRresult = true;
-
+                
                 return boolRresult;
             }
             catch (Exception)
