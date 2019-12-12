@@ -122,5 +122,40 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             }
             return scanTracking;
         }
+
+
+        public Task<List<ShipmentTrackingDTO>> GetShipmentTrackingsForMobileAsync(string waybill)
+        {
+            try
+            {
+                var shipmentTrackings = Context.ShipmentTracking.Where(x => x.Waybill == waybill);
+
+                var shipmentTrackingDto = from shipmentTracking in shipmentTrackings
+                                          select new ShipmentTrackingDTO
+                                          {
+                                              DateTime = shipmentTracking.DateTime,
+                                              Location = shipmentTracking.Location,
+                                              Waybill = shipmentTracking.Waybill,
+                                              ShipmentTrackingId = shipmentTracking.ShipmentTrackingId,
+                                              TrackingType = shipmentTracking.TrackingType,
+                                              User = shipmentTracking.User.FirstName + " " + shipmentTracking.User.LastName,
+                                              Status = shipmentTracking.Status,
+                                              ServiceCentreId = shipmentTracking.ServiceCentreId,
+                                              ScanStatus = Context.ScanStatus.Where(c => c.Code == shipmentTracking.Status).Select(x => new ScanStatusDTO
+                                              {
+                                                  Code = x.Code,
+                                                  Incident = x.Incident,
+                                                  Reason = x.Reason,
+                                                  Comment = x.Comment
+                                              }).FirstOrDefault()
+                                          };
+                return Task.FromResult(shipmentTrackingDto.ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
     }
 }
