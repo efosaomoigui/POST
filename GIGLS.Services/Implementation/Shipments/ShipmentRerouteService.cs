@@ -72,21 +72,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
                 var trackInfo = await _shipmentTrackService.TrackShipment(originalShipment.Waybill);
-                var trackInfos = trackInfo.ToList();
-                if (serviceCenters.Length == 1 && serviceCenters[0] == originalDestinationId)
+
+                if (serviceCenters.Length == 1 && (serviceCenters[0] == originalDestinationId || 
+                    (trackInfo.FirstOrDefault().ScanStatus.Code == ShipmentScanStatus.AST.ToString() || 
+                    trackInfo.FirstOrDefault().ScanStatus.Code == ShipmentScanStatus.ARP.ToString() ||
+                    trackInfo.FirstOrDefault().ScanStatus.Code == ShipmentScanStatus.APT.ToString()) ))
                 {
                     //do nothing
                 }
                 else
                 {
-                    if (serviceCenters.Length == 1 && trackInfos[0].ScanStatus.Code == ShipmentScanStatus.AST.ToString())
-                    {
-                        //do nothing
-                    }
-                    else
-                    {
-                        throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
-                    }
+                    throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
                 }
                                
                 ////5. Create new shipment
