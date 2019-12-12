@@ -1638,7 +1638,6 @@ namespace GIGLS.Services.Implementation.Shipments
                         existingrating.IsRatedByPartner = true;
                         existingrating.DatePartnerRated = DateTime.Now;
                     }
-
                 }
                 else
                 {
@@ -2271,35 +2270,34 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 decimal price = 0;
-
-                var departureStationId = haulagePricingDto.DepartureStationId;
-                var destinationStationId = haulagePricingDto.DestinationStationId;
-                var haulageid = haulagePricingDto.Haulageid;
-                var country = await _uow.Country.GetCountryByStationId(departureStationId);
-                var IsWithinProcessingTime = await WithinProcessingTime(country.CountryId);
-                var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, country.CountryId);
-                var Percentage = (Convert.ToDecimal(DiscountPercent.Value));
-                var PercentageTobeUsed = ((100M - Percentage) / 100M);
-                var discount = (1 - PercentageTobeUsed);
+                
                 //check haulage exists
-                var haulage = await _haulageService.GetHaulageById(haulageid);
+                var haulage = await _haulageService.GetHaulageById(haulagePricingDto.Haulageid);
                 if (haulage == null)
                 {
                     throw new GenericException("The Tonne specified has not been mapped");
                 }
+                
+                var country = await _uow.Country.GetCountryByStationId(haulagePricingDto.DestinationStationId);
+                var IsWithinProcessingTime = await WithinProcessingTime(country.CountryId);
+                var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, country.CountryId);
 
+                var Percentage = (Convert.ToDecimal(DiscountPercent.Value));
+                var PercentageTobeUsed = ((100M - Percentage) / 100M);
+                var discount = (1 - PercentageTobeUsed);
+                
                 //get the distance based on the stations
-                var haulageDistanceMapping = await _haulageDistanceMappingService.GetHaulageDistanceMappingForMobile(departureStationId, destinationStationId);
-                var distance = haulageDistanceMapping.Distance;
+                var haulageDistanceMapping = await _haulageDistanceMappingService.GetHaulageDistanceMappingForMobile(haulagePricingDto.DepartureStationId, haulagePricingDto.DestinationStationId);
+                int distance = haulageDistanceMapping.Distance;
 
                 //set the default distance to 1
                 if (distance == 0)
                 {
                     distance = 1;
                 }
+
                 //Get Haulage Maximum Fixed Distance
-                var userActiveCountryId = country.CountryId;
-                var maximumFixedDistanceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HaulageMaximumFixedDistance, userActiveCountryId);
+                var maximumFixedDistanceObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HaulageMaximumFixedDistance, country.CountryId);
                 int maximumFixedDistance = int.Parse(maximumFixedDistanceObj.Value);
 
                 //calculate price for the haulage
@@ -2310,12 +2308,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 else
                 {
                     //1. get the fixed rate and substract the maximum fixed distance from distance
-                    decimal fixedRate = haulage.FixedRate;
                     distance = distance - maximumFixedDistance;
 
                     //2. multiply the remaining distance with the additional pate
-                    price = fixedRate + distance * haulage.AdditionalRate;
-
+                    price = haulage.FixedRate + distance * haulage.AdditionalRate;
                 }
 
                 return new MobilePriceDTO
