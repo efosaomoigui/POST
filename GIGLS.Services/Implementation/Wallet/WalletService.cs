@@ -374,7 +374,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     codAmountValue = Convert.ToDecimal(noCoDAmount.Value);
                 }
 
-                company.WalletAmount += amount;
+                company.WalletAmount = Convert.ToDecimal(company.WalletAmount) + amount;
 
                 if (company.WalletAmount >= codAmountValue)
                 {

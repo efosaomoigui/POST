@@ -832,7 +832,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                                 ReferrerCode = user.Referrercode,
                                 AverageRatings = user.AverageRatings,
                                 IsVerified = user.IsVerified,
-                                PartnerType = partnerType
+                                PartnerType = partnerType,
+                                IsEligible =user.IsEligible
 
                             };
                         }

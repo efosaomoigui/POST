@@ -776,6 +776,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             EmailUser.Email = user.Email;
                             EmailUser.IsRegisteredFromMobile = true;
                             EmailUser.UserActiveCountryId = user.UserActiveCountryId;
+                            EmailUser.AppType = user.AppType;
                             var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
                             var u = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
 
@@ -802,6 +803,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                             _uow.VehicleType.Add(vehicletypeDTO);
 
                             EmailUser.UserChannelPassword = user.Password;
+                            user.UserChannelCode = EmailUser.UserChannelCode;
+                            user.Id = EmailUser.Id;
                             await _uow.CompleteAsync();
 
                             var response = await _userService.ResetPassword(EmailUser.Id, user.Password);
@@ -810,7 +813,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 result = await SendOTPForRegisteredUser(user);
                             }
                             var User = Mapper.Map<UserDTO>(EmailUser);
-                            await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
+                            await CalculateReferralBonus(user);
                         }
                     }
                 }
@@ -881,7 +884,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 result = await SendOTPForRegisteredUser(user);
                 var User = Mapper.Map<UserDTO>(FinalUser);
-                await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
+                user.Id = FinalUser.Id;
+                await CalculateReferralBonus(user);
             }            
 
             return result;
@@ -940,8 +944,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                             user.UserChannelType = UserChannelType.IndividualCustomer;
                             user.IsFromMobile = true;
                             var registeredUser = await CreateUserBasedOnCustomerType(user);
+                            user.UserChannelCode = registeredUser.UserChannelCode;
+                            user.Id = registeredUser.Id;
                             result = await SendOTPForRegisteredUser(registeredUser);
-                            await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
+                            await CalculateReferralBonus(user);
                             return result;
                         }
                         else
@@ -971,6 +977,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     EmailUser.IsRegisteredFromMobile = true;
                     EmailUser.UserActiveCountryId = user.UserActiveCountryId;
                     EmailUser.DateModified = DateTime.Now;
+                    EmailUser.AppType = user.AppType;
                     var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
                     var update = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
                     var resetPassword = await _userService.ResetPassword(EmailUser.Id, user.Password);
@@ -978,7 +985,9 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                     result = await SendOTPForRegisteredUser(user);
                     var User = Mapper.Map<UserDTO>(EmailUser);
-                    await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
+                    user.UserChannelCode = EmailUser.UserChannelCode;
+                    user.Id = EmailUser.Id;
+                    await CalculateReferralBonus(user);
                     return result;
                 }                                
             }
@@ -988,7 +997,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                 user.IsFromMobile = true;
                 var registeredUser = await CreateUserBasedOnCustomerType(user);
                 result = await SendOTPForRegisteredUser(registeredUser);
-                await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
+                user.UserChannelCode = registeredUser.UserChannelCode;
+                user.Id = registeredUser.Id;
+                await CalculateReferralBonus(user);
             }
 
             return result;
@@ -1053,8 +1064,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                             user.UserChannelType = UserChannelType.Ecommerce;
                             user.IsFromMobile = true;
                             var registeredUser = await CreateUserBasedOnCustomerType(user);
+                            user.UserChannelCode = registeredUser.UserChannelCode;
+                            user.Id = registeredUser.Id;
                             result = await SendOTPForRegisteredUser(registeredUser);
-                            await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
+                            await CalculateReferralBonus(user);
                             return result;
                         }
                         else
@@ -1076,7 +1089,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 ReturnServiceCentre = 0,
                                 UserActiveCountryId = user.UserActiveCountryId,
                                 Name = user.Organisation,
-                                isCodNeeded = user.RequireCod
+                                isCodNeeded = user.RequiresCod
                             };
                             _uow.Company.Add(customer);
 
@@ -1090,6 +1103,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     EmailUser.Email = user.Email;
                     EmailUser.IsRegisteredFromMobile = true;
                     EmailUser.UserActiveCountryId = user.UserActiveCountryId;
+                    EmailUser.AppType = user.AppType;
 
                     var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
                     var update = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
@@ -1097,7 +1111,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                     await _uow.CompleteAsync();
 
                     result = await SendOTPForRegisteredUser(user);
-                    await CalculateReferralBonus(user.Referrercode, UpdatedUser, user.UserActiveCountryId);
+                    user.UserChannelCode = EmailUser.UserChannelCode;
+                    user.Id = EmailUser.Id;
+                    await CalculateReferralBonus(user);
                     return result;
                 }
 
@@ -1108,7 +1124,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                 user.IsFromMobile = true;
                 var registeredUser = await CreateUserBasedOnCustomerType(user);
                 result = await SendOTPForRegisteredUser(registeredUser);
-                await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
+                user.UserChannelCode = registeredUser.UserChannelCode;
+                user.Id = registeredUser.Id;
+                await CalculateReferralBonus(user);
             }
 
             return result;
@@ -1487,7 +1505,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         UserActiveCountryId = user.UserActiveCountryId,
                         CompanyType = CompanyType.Ecommerce,
                         Name = user.Organisation,
-                        isCodNeeded = user.RequireCod
+                        isCodNeeded = user.RequiresCod
 
                         //added this to pass channelcode 
                     };
@@ -1520,65 +1538,71 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
-        private async Task CalculateReferralBonus (string referrercode, UserDTO User, int Countryid)
+        private async Task CalculateReferralBonus (UserDTO User)
         {
             var transaction = new WalletTransactionDTO();
-            if (referrercode == null)
+            if (User.Referrercode == null)
             {
                 //Generate referrercode for user that is signing up and didnt 
                 //supply a referrecode
-                User = await GenerateReferrerCode(User);
+                await GenerateReferrerCode(User);
             }
             else
             {
                 
                 //Generate referrercode for user that is signing up and supplies a referrerCode
-                User = await GenerateReferrerCode(User);
+                await GenerateReferrerCode(User);
 
                 //based on the referrercode supplied, use it to get the wallet and update the balance 
-                var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == referrercode);
-                if (referrerCode != null)
+                var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == User.Referrercode);
+                if (referrerCode != null && User.IsUniqueInstalled==true)
                 {
                     var userDTO = await _userService.GetUserByChannelCode(referrerCode.UserCode);
-                    var campaignEmail = await _uow.ActivationCampaignEmail.GetAsync(s => s.Email == userDTO.Email);
-                    var activationStartDate = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ActivationCampaignStartDate, Countryid);
-                    var activationEndDate = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ActivationCampaignEndDate, Countryid);
-                    var startdate = Convert.ToDateTime(activationStartDate.Value);
-                    var endDate = Convert.ToDateTime(activationEndDate.Value);
-                    if (campaignEmail != null && (DateTime.Now >= startdate && DateTime.Now <= endDate))
+                    //var campaignEmail = await _uow.ActivationCampaignEmail.GetAsync(s => s.Email == userDTO.Email);
+                    //var activationStartDate = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ActivationCampaignStartDate, User.UserActiveCountryId);
+                    //var activationEndDate = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ActivationCampaignEndDate, User.UserActiveCountryId);
+                    //var startdate = Convert.ToDateTime(activationStartDate.Value);
+                    //var endDate = Convert.ToDateTime(activationEndDate.Value);
+                    //if (campaignEmail != null && (DateTime.Now >= startdate && DateTime.Now <= endDate))
+                    //{
+                    //    var referrerCodeForActivationCampaign = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferralBonusForActivationCampaign, User.UserActiveCountryId);
+                    //    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrerCode.UserCode);
+                    //    wallet.Balance = wallet.Balance + Convert.ToDecimal(referrerCodeForActivationCampaign.Value);
+                    //    transaction = new WalletTransactionDTO
+                    //    {
+                    //        WalletId = wallet.WalletId,
+                    //        CreditDebitType = CreditDebitType.Credit,
+                    //        Amount = Convert.ToDecimal(referrerCodeForActivationCampaign.Value),
+                    //        ServiceCentreId = 296,
+                    //        Waybill = "",
+                    //        Description = "Activation Campaign Referral Bonus",
+                    //        PaymentType = PaymentType.Online,
+                    //        UserId = referrerCode.UserId
+                    //    };
+                    //    var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
+                    //    await _uow.CompleteAsync();
+                    //    var messageExtensionDTO = new MobileMessageDTO()
+                    //    {
+                    //        SenderName = userDTO.FirstName + " " + userDTO.LastName,
+                    //        SenderEmail = userDTO.Email
+
+                    //    };
+                    //    await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
+                    //}
+                    var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, User.UserActiveCountryId);
+                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrerCode.UserCode);
+                    wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
+                    transaction = new WalletTransactionDTO
                     {
-                        var referrerCodeForActivationCampaign = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferralBonusForActivationCampaign, Countryid);
-                        var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrerCode.UserCode);
-                        wallet.Balance = wallet.Balance + Convert.ToDecimal(referrerCodeForActivationCampaign.Value);
-                        transaction = new WalletTransactionDTO
-                        {
-                            WalletId = wallet.WalletId,
-                            CreditDebitType = CreditDebitType.Credit,
-                            Amount = Convert.ToDecimal(referrerCodeForActivationCampaign.Value),
-                            ServiceCentreId = 296,
-                            Waybill = "",
-                            Description = "Activation Campaign Referral Bonus",
-                            PaymentType = PaymentType.Online,
-                            UserId = referrerCode.UserId
-                        };
-                    }
-                    else
-                    {
-                        var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, Countryid);
-                        var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrerCode.UserCode);
-                        wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
-                        transaction = new WalletTransactionDTO
-                        {
-                            WalletId = wallet.WalletId,
-                            CreditDebitType = CreditDebitType.Credit,
-                            Amount = Convert.ToDecimal(bonus.Value),
-                            ServiceCentreId = 296,
-                            Waybill = "",
-                            Description = "Referral Bonus",
-                            PaymentType = PaymentType.Online,
-                            UserId = referrerCode.UserId
-                        };
-                    }
+                        WalletId = wallet.WalletId,
+                        CreditDebitType = CreditDebitType.Credit,
+                        Amount = Convert.ToDecimal(bonus.Value),
+                        ServiceCentreId = 296,
+                        Waybill = "",
+                        Description = "Referral Bonus",
+                        PaymentType = PaymentType.Online,
+                        UserId = referrerCode.UserId
+                    };
                     var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
                     await _uow.CompleteAsync();
                     var messageExtensionDTO = new MobileMessageDTO()
@@ -1612,7 +1636,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                     PasswordExpireDate = DateTime.Now,
                     UserActiveCountryId = user.UserActiveCountryId,
                     IsFromMobile = true,
-                    IsRegisteredFromMobile = true
+                    IsRegisteredFromMobile = true,
+                    AppType = user.AppType
                 };
 
                 string username = null;
