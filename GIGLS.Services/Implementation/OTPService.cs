@@ -163,7 +163,7 @@ namespace GIGLS.Services.Implementation
                     var company = await _uow.Company.GetAsync(s => s.CustomerCode == registerUser.UserChannelCode);
                     if(company != null)
                     {
-                        registerUser.IsEligible = (bool)company.IsEligible;
+                        registerUser.IsEligible = Convert.ToBoolean(company.IsEligible);
                     }
                 }
 

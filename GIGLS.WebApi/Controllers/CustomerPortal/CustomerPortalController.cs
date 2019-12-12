@@ -833,7 +833,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                                 AverageRatings = user.AverageRatings,
                                 IsVerified = user.IsVerified,
                                 PartnerType = partnerType,
-                                IsEligible =user.IsEligible
+                                IsEligible = user.IsEligible
 
                             };
                         }
