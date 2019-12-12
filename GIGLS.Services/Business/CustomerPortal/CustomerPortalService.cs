@@ -643,57 +643,54 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var result = new SignResponseDTO();
 
-            if (user.UserChannelType == UserChannelType.Ecommerce)
+            //if (user.UserChannelType == UserChannelType.Ecommerce)
+            //{
+            //    var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
+            //    throw new GenericException($"{ecommerceEmail.Value}");
+            //}
+
+            if (user.Email != null)
             {
-                var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
-                throw new GenericException($"{ecommerceEmail.Value}");
+                user.Email = user.Email.Trim();
+                user.Email = user.Email.ToLower();
+            }
+
+            if ((user.UserActiveCountryId).ToString() == null || user.UserActiveCountryId == 0)
+            {
+                var CountryId = await _preShipmentMobileService.GetCountryId();
+                user.UserActiveCountryId = CountryId;
+            }
+            //to be used when we start getting the country name of the user!!!
+            else if (user.MobileCountryName != null)
+            {
+                var countryid = await _uow.Country.GetAsync(s => s.CountryName.ToLower().Equals(user.MobileCountryName.ToLower()));
+                user.UserActiveCountryId = countryid.CountryId;
+            }
+
+
+            bool checkRegistrationAccess = await CheckRegistrationAccess(user);
+
+            if (checkRegistrationAccess)
+            {
+                if (user.UserChannelType == UserChannelType.Partner)
+                {
+                    return await PartnerRegistration(user);
+                }
+                else if (user.UserChannelType == UserChannelType.IndividualCustomer)
+                {
+                    return await IndividualRegistration(user);
+                }
+                else if (user.UserChannelType == UserChannelType.Ecommerce)
+                {
+                    return await EcommerceRegistration(user);
+                }
             }
             else
             {
-
-                if (user.Email != null)
-                {
-                    user.Email = user.Email.Trim();
-                    user.Email = user.Email.ToLower();
-                }
-
-                if ((user.UserActiveCountryId).ToString() == null || user.UserActiveCountryId == 0)
-                {
-                    var CountryId = await _preShipmentMobileService.GetCountryId();
-                    user.UserActiveCountryId = CountryId;
-                }
-                //to be used when we start getting the country name of the user!!!
-                else if (user.MobileCountryName != null)
-                {
-                    var countryid = await _uow.Country.GetAsync(s => s.CountryName.ToLower().Equals(user.MobileCountryName.ToLower()));
-                    user.UserActiveCountryId = countryid.CountryId;
-                }
-
-
-                bool checkRegistrationAccess = await CheckRegistrationAccess(user);
-
-                if (checkRegistrationAccess)
-                {
-                    if (user.UserChannelType == UserChannelType.Partner)
-                    {
-                        return await PartnerRegistration(user);
-                    }
-                    else if (user.UserChannelType == UserChannelType.IndividualCustomer)
-                    {
-                        return await IndividualRegistration(user);
-                    }
-                    else if (user.UserChannelType == UserChannelType.Ecommerce)
-                    {
-                        return await EcommerceRegistration(user);
-                    }
-                }
-                else
-                {
-                    throw new GenericException("User already exists!!!");
-                }
+                throw new GenericException("User already exists!!!");
             }
-
-
+            //}
+            
             return result;
         }
 
