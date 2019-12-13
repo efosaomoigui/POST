@@ -48,7 +48,6 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
         private readonly IPaymentService _paymentService;
-        //private readonly IGroupWaybillNumberMappingService _groupWaybillNumberMappingService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
@@ -58,7 +57,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
-            IPaymentService paymentService //IGroupWaybillNumberMappingService groupWaybillNumberMappingService
+            IPaymentService paymentService 
             )
         {
             _uow = uow;
@@ -76,7 +75,6 @@ namespace GIGLS.Services.Implementation.Shipments
             _globalPropertyService = globalPropertyService;
             _countryRouteZoneMapService = countryRouteZoneMapService;
             _paymentService = paymentService;
-            //_groupWaybillNumberMappingService = groupWaybillNumberMappingService;
             MapperConfig.Initialize();
         }
 
@@ -1834,7 +1832,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //remove waybill from manifest and groupwaybill
                     await RemoveWaybillNumberFromGroupForCancelledShipment(groupwaybillMapping.GroupWaybillNumber, groupwaybillMapping.WaybillNumber);
-                    //await _groupWaybillNumberMappingService.RemoveWaybillNumberFromGroupForCancelledShipment(groupwaybillMapping.GroupWaybillNumber, groupwaybillMapping.WaybillNumber);
                 }
 
                 //2.1 Update shipment to cancelled
@@ -1851,8 +1848,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var currentUserId = await _userService.GetCurrentUserId();
 
                     ////--start--///Set the DepartureCountryId
-                    //var departureCountry = await _uow.Country.GetCountryByServiceCentreId(shipment.DepartureServiceCentreId);
-                    int countryIdFromServiceCentreId = shipment.DepartureCountryId; //departureCountry.CountryId;
+                    int countryIdFromServiceCentreId = shipment.DepartureCountryId; 
                     ////--end--///Set the DepartureCountryId
 
                     var generalLedger = new GeneralLedger()
@@ -1886,7 +1882,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     wallet.Balance = wallet.Balance + amountToCredit;
 
                     //2.4.2 Update customers wallet's Transaction (credit)
-                    //var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
                     var newWalletTransaction = new WalletTransaction
                     {
                         WalletId = wallet.WalletId,
@@ -1954,7 +1949,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         _uow.GroupWaybillNumber.Remove(groupWaybillNumberDTO);
                     }
-                    //await _groupWaybillNumberService.RemoveGroupWaybillNumber(groupWaybillNumberDTO.GroupWaybillNumberId);
 
                     await _uow.CompleteAsync();
                 }
