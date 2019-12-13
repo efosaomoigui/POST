@@ -687,7 +687,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             else
             {
-                throw new GenericException("User already exists!!!");
+                throw new GenericException("Customer already exists!!!");
             }
             //}
             
@@ -742,14 +742,14 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else if (EmailUser.IsRegisteredFromMobile == true)
                 {
-                    throw new GenericException("User already exists!");
+                    throw new GenericException("Partner already exists!");
                 }
                 else
                 {
                     var phonepartnerdetails = await _uow.Partner.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber) || s.Email == user.Email);
                     if (phonepartnerdetails != null)
                     {
-                        throw new GenericException("User already Exists as a Partner!");
+                        throw new GenericException("Customer already Exists as a Partner!");
                     }
                     else
                     {
@@ -831,7 +831,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var phonepartnerdetails = await _uow.Partner.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber) || s.Email == user.Email);
             if (phonepartnerdetails != null)
             {
-                throw new GenericException("User details already Exists as a Partner!");
+                throw new GenericException("Customer details already Exists as a Partner!");
             }
             else
             {
@@ -913,7 +913,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else if (EmailUser.IsRegisteredFromMobile == true)
                 {
-                    throw new GenericException("User already exists!");
+                    throw new GenericException("Customer already exists!");
                 }
                 else
                 {
@@ -922,7 +922,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         if (emailcustomerdetails.IsRegisteredFromMobile == true)
                         {
-                            throw new GenericException("User aready exists!");
+                            throw new GenericException("Customer aready exists!");
                         }
                         else
                         {
@@ -1032,7 +1032,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else if (EmailUser.IsRegisteredFromMobile == true)
                 {
-                    throw new GenericException("User already exists!");
+                    throw new GenericException("Customer already exists!");
                 }
                 else
                 {
@@ -1042,7 +1042,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         if (emailcompanydetails.IsRegisteredFromMobile == true)
                         {
-                            throw new GenericException("Email already Exists on Company!");
+                            throw new GenericException("Email already Exists as Company Customer!");
                         }
                         else
                         {
