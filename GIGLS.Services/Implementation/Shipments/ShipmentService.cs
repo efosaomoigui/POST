@@ -26,7 +26,11 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
@@ -523,6 +527,18 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var hashString = await ComputeHash(shipmentDTO);
+                
+                var checkForHash = _uow.Shipment.GetAsync(x => x.ShipmentHash == hashString);
+                if (checkForHash != null)
+                {
+                    throw new GenericException("This waybill already exists");
+                }
+                else
+                {
+                    shipmentDTO.ShipmentHash = hashString;
+                }
+
                 // create the customer, if not recorded in the system
                 var customerId = await CreateCustomer(shipmentDTO);
 
@@ -581,6 +597,51 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        private async Task<string> ComputeHash(ShipmentDTO shipmentDTO)
+        {
+            //Create Hash Set
+            var shipmentHash = new HashSet<ShipmentHashDTO>();
+            var shipmentHashDto = new ShipmentHashDTO();
+
+            shipmentHashDto.DeptServId = shipmentDTO.DepartureServiceCentreId;
+            shipmentHashDto.DestServId = shipmentDTO.DestinationServiceCentreId;
+            shipmentHashDto.Description = shipmentDTO.Description;
+            foreach (var item in shipmentDTO.ShipmentItems)
+            {
+                shipmentHashDto.Weight.Add(item.Weight);
+            }
+            shipmentHash.Add(shipmentHashDto);
+
+            // Create a SHA256   
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                //convert the object to a byte array
+                byte[] objectToArray = ObjectToByteArray(shipmentHash);
+
+                // ComputeHash - returns byte array  
+                byte[] bytes = sha256Hash.ComputeHash(objectToArray);
+
+                // Convert byte array to a string   
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return await Task.FromResult(builder.ToString());
+            }
+
+        }
+
+        // Convert an object to a byte array
+        private static byte[] ObjectToByteArray(HashSet<ShipmentHashDTO> obj)
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            using (var ms = new MemoryStream())
+            {
+                bf.Serialize(ms, obj);
+                return ms.ToArray();
+            }
+        }
         private async Task<CustomerDTO> CreateCustomer(ShipmentDTO shipmentDTO)
         {
             var customerDTO = shipmentDTO.Customer[0];
@@ -752,6 +813,7 @@ namespace GIGLS.Services.Implementation.Shipments
             newShipment.DestinationCountryId = destinationCountry.CountryId;
             newShipment.CurrencyRatio = departureCountry.CurrencyRatio;
             newShipment.ShipmentPickupPrice = shipmentDTO.ShipmentPickupPrice;
+            newShipment.ShipmentHash = shipmentDTO.ShipmentHash;
             ////--end--///Set the DepartureCountryId and DestinationCountryId
 
             _uow.Shipment.Add(newShipment);
@@ -770,7 +832,7 @@ namespace GIGLS.Services.Implementation.Shipments
             //set before returning
             shipmentDTO.DepartureCountryId = departureCountry.CountryId;
             shipmentDTO.DestinationCountryId = destinationCountry.CountryId;
-
+            
             return shipmentDTO;
         }
 
