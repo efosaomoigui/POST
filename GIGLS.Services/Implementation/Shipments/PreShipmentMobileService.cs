@@ -137,7 +137,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw new GenericException("An error occurred while attempting to add preshipment.");
+                throw;
             }
         }
 
@@ -254,7 +254,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw new GenericException("An error occurred while attempting to create shipment.");
+                throw;
             }
         }
 
