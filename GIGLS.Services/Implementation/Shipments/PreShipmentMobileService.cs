@@ -137,7 +137,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw new GenericException("An error occurred while attempting to add preshipment.");
+                throw;
             }
         }
 
@@ -145,6 +145,10 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                if(preShipmentDTO.VehicleType == null || preShipmentDTO.VehicleType == "")
+                {
+                    throw new GenericException("Please select a vehicle type");
+                }
                 var PreshipmentPriceDTO = new MobilePriceDTO();
                 // get the current user info
                 var currentUserId = await _userService.GetCurrentUserId();
@@ -250,7 +254,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw new GenericException("An error occurred while attempting to create shipment.");
+                throw;
             }
         }
 
