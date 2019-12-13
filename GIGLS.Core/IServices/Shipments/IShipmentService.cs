@@ -56,5 +56,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> RePrintCountUpdater();
         Task<bool> AddShipmentFromMobile(ShipmentDTO shipment);
         Task<bool> ScanShipment(ScanDTO scan);
+        Task RemoveWaybillNumberFromGroupForCancelledShipment(string groupWaybillNumber, string waybillNumber);
     }
 }
