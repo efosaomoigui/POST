@@ -440,7 +440,6 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        //remove waybillNumber from groupWaybillNumber
         public async Task RemoveWaybillNumberFromGroup(string groupWaybillNumber, string waybillNumber)
         {
             try
@@ -508,6 +507,43 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupWaybillNumberMapping);
 
                     await _groupWaybillNumberService.RemoveGroupWaybillNumber(groupWaybillNumberDTO.GroupWaybillNumberId);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task RemoveWaybillNumberFromGroupForCancelledShipment(string groupWaybillNumber, string waybillNumber)
+        {
+            try
+            {                            
+                var groupWaybillNumberMapping = _uow.GroupWaybillNumberMapping.SingleOrDefault(x => (x.GroupWaybillNumber == groupWaybillNumber) && (x.WaybillNumber == waybillNumber));
+                if (groupWaybillNumberMapping != null)
+                {
+                    _uow.GroupWaybillNumberMapping.Remove(groupWaybillNumberMapping);
+                }
+                                             
+                await _uow.CompleteAsync();
+                
+                //Delete the GroupWaybill If All the Waybills attached to it have been deleted.
+                var checkIfWaybillExistForGroup = await _uow.GroupWaybillNumberMapping.FindAsync(x => x.GroupWaybillNumber == groupWaybillNumber);
+                if (checkIfWaybillExistForGroup.Count() == 0)
+                {
+                    //ensure that the Manifest containing the Groupwaybill has not been dispatched
+                    var manifestGroupWaybillNumberMapping = _uow.ManifestGroupWaybillNumberMapping.SingleOrDefault(x => x.GroupWaybillNumber == groupWaybillNumber);
+                    if (manifestGroupWaybillNumberMapping != null)
+                    {
+                        //Delete the manifest mapping if groupway has been mapped to manifest
+                        _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupWaybillNumberMapping);
+                    }
+
+                    //remove group waybill
+                    var groupWaybillNumberDTO = await _uow.GroupWaybillNumber.GetAsync(x => x.GroupWaybillCode.Equals(groupWaybillNumber));
+                    await _groupWaybillNumberService.RemoveGroupWaybillNumber(groupWaybillNumberDTO.GroupWaybillNumberId);
+
+                    await _uow.CompleteAsync();
                 }
             }
             catch (Exception)

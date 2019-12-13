@@ -1831,6 +1831,9 @@ namespace GIGLS.Services.Implementation.Shipments
                                 $" vehicle number {dispatch.RegistrationNumber}.");
                         }
                     }
+                    
+                    //remove waybill from manifest and groupwaybill
+                    await _groupWaybillNumberMappingService.RemoveWaybillNumberFromGroupForCancelledShipment(groupwaybillMapping.GroupWaybillNumber, groupwaybillMapping.WaybillNumber);
                 }
 
                 //2.1 Update shipment to cancelled
@@ -1907,10 +1910,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     WaybillNumber = waybill,
                     ShipmentScanStatus = ShipmentScanStatus.SSC
                 });
-
-                //remove waybill from manifest and groupwaybill
-                await _groupWaybillNumberMappingService.RemoveWaybillNumberFromGroup(groupwaybillMapping.GroupWaybillNumber, groupwaybillMapping.WaybillNumber);
-
+                
                 //send message
                 //await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All, waybill);
                 boolRresult = true;
