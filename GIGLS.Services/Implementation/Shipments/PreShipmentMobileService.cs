@@ -145,6 +145,10 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                if(preShipmentDTO.VehicleType == null || preShipmentDTO.VehicleType == "")
+                {
+                    throw new GenericException("Please select a vehicle type");
+                }
                 var PreshipmentPriceDTO = new MobilePriceDTO();
                 // get the current user info
                 var currentUserId = await _userService.GetCurrentUserId();
