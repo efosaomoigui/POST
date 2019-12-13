@@ -440,7 +440,6 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        //remove waybillNumber from groupWaybillNumber
         public async Task RemoveWaybillNumberFromGroup(string groupWaybillNumber, string waybillNumber)
         {
             try
