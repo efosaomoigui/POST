@@ -31,6 +31,7 @@ using GIGLS.Core.DTO.User;
 using VehicleType = GIGLS.Core.Domain.VehicleType;
 using Hangfire;
 using GIGLS.Core.IServices.Customers;
+using GIGLS.Core.DTO.Utility;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -117,6 +118,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     message = "Insufficient Wallet Balance";
                     IsBalanceSufficient = false;
                 }
+                else if (newPreShipment.IsEligible == false)
+                {
+                    var carPickUprice = new GlobalPropertyDTO();
+                    if (newPreShipment.IsCodNeeded == false)
+                    {
+                        carPickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceNoCodAmount, newPreShipment.CountryId);
+                    }
+                    else
+                    {
+                        carPickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceCodAmount, newPreShipment.CountryId);
+                    }
+
+                    message = $"You are not yet eligible to create shipment on the Platform. Please fund your wallet with a minimum of {preShipment.CurrencySymbol}{carPickUprice.Value}";
+                    newPreShipment.Waybill = "";
+                }
                 return new { waybill = newPreShipment.Waybill, message = message, IsBalanceSufficient, Zone = zoneid.ZoneId };
             }
             catch (Exception)
@@ -134,18 +150,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 var currentUserId = await _userService.GetCurrentUserId();
                 preShipmentDTO.UserId = currentUserId;
                 var user = await _userService.GetUserById(currentUserId);
-                                
+                var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
+                preShipmentDTO.CountryId = Country.CountryId;
                 var customer = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
                 if(customer != null)
                 {
                     if (customer.IsEligible != true)
                     {
-                        throw new GenericException("Customer is not Eligible");
+                        preShipmentDTO.IsEligible = false;
+                        preShipmentDTO.IsCodNeeded = customer.isCodNeeded;
+                        preShipmentDTO.CurrencySymbol = Country.CurrencySymbol;
+                        return preShipmentDTO;
                     }
                 }
-                
-                var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
-                preShipmentDTO.CountryId = Country.CountryId;
+               
                 if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
                 {
                     PreshipmentPriceDTO = await GetHaulagePrice(new HaulagePriceDTO

@@ -135,6 +135,9 @@ namespace GIGLS.Core.DTO.Shipments
         public bool? IsFromShipment { get; set; }
         public int DepartureServiceCentreId { get; set; }
         public int CustomerId { get; set; }
+        
+       public bool? IsEligible { get; set; }
+        public bool IsCodNeeded { get; set; }
 
     }
 }
