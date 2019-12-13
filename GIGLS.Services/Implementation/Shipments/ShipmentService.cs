@@ -48,6 +48,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
         private readonly IPaymentService _paymentService;
+        private readonly IGroupWaybillNumberMappingService _groupWaybillNumberMappingService;
 
         public ShipmentService(IUnitOfWork uow, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre,
@@ -57,7 +58,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IWalletService walletService, IShipmentTrackingService shipmentTrackingService,
             IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService,
-            IPaymentService paymentService
+            IPaymentService paymentService, IGroupWaybillNumberMappingService groupWaybillNumberMappingService
             )
         {
             _uow = uow;
@@ -75,6 +76,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _globalPropertyService = globalPropertyService;
             _countryRouteZoneMapService = countryRouteZoneMapService;
             _paymentService = paymentService;
+            _groupWaybillNumberMappingService = groupWaybillNumberMappingService;
             MapperConfig.Initialize();
         }
 
@@ -1272,7 +1274,8 @@ namespace GIGLS.Services.Implementation.Shipments
             accountFilterCriteria.CountryId = userActiveCountry.CountryId;
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            var results = await _uow.Invoice.GetShipmentMonitorSetSP(accountFilterCriteria, serviceCenterIds);
+            var results1 = await _uow.Invoice.GetShipmentMonitorSetSP(accountFilterCriteria, serviceCenterIds);
+            var results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
 
             var result = new MulitipleInvoiceMonitorDTO()
             {
@@ -1292,7 +1295,8 @@ namespace GIGLS.Services.Implementation.Shipments
             accountFilterCriteria.CountryId = userActiveCountry.CountryId;
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            var results = await _uow.Invoice.GetShipmentMonitorSetSPExpected(accountFilterCriteria, serviceCenterIds);
+            var results1 = await _uow.Invoice.GetShipmentMonitorSetSPExpected(accountFilterCriteria, serviceCenterIds);
+            var results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
 
             var result = new MulitipleInvoiceMonitorDTO()
             {
@@ -1312,7 +1316,8 @@ namespace GIGLS.Services.Implementation.Shipments
             accountFilterCriteria.CountryId = userActiveCountry.CountryId;
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            var results = await _uow.Invoice.GetShipmentMonitorSetSP(accountFilterCriteria, serviceCenterIds);
+            var results1 = await _uow.Invoice.GetShipmentMonitorSetSP(accountFilterCriteria, serviceCenterIds);
+            var results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
 
             var shipmentscreated = results;
 
@@ -1328,7 +1333,8 @@ namespace GIGLS.Services.Implementation.Shipments
             accountFilterCriteria.CountryId = userActiveCountry.CountryId;
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            var results = await _uow.Invoice.GetShipmentMonitorSetSPExpected(accountFilterCriteria, serviceCenterIds);
+            var results1 = await _uow.Invoice.GetShipmentMonitorSetSPExpected(accountFilterCriteria, serviceCenterIds);
+            var results = results1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
 
             var shipmentsexpected = results;
 
@@ -1344,7 +1350,8 @@ namespace GIGLS.Services.Implementation.Shipments
             var LimitEndDate = dataValues.Item2;
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            var results = await _uow.Invoice.GetShipmentMonitorSetSP_NotGrouped(accountFilterCriteria, serviceCenterIds);
+            var results1 = await _uow.Invoice.GetShipmentMonitorSetSP_NotGrouped(accountFilterCriteria, serviceCenterIds);
+            var results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
 
             var v = new List<InvoiceViewDTOUNGROUPED2>();
 
@@ -1398,7 +1405,8 @@ namespace GIGLS.Services.Implementation.Shipments
             var LimitEndDate = dataValues.Item2;
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            var results = await _uow.Invoice.GetShipmentMonitorSetSP_NotGroupedx(accountFilterCriteria, serviceCenterIds);
+            var results1 = await _uow.Invoice.GetShipmentMonitorSetSP_NotGroupedx(accountFilterCriteria, serviceCenterIds);
+            var results = results1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
 
             var v = new List<InvoiceViewDTOUNGROUPED2>();
 
@@ -1582,7 +1590,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //DateTime now = DateTime.Now.Date;
             var now = DateTime.Now.Date;
-            //DateTime now = new DateTime(2019, 2, 6); 
+            //DateTime now = new DateTime(2019, 2, 6);
 
             var dashboardStartDate = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
 
@@ -1900,10 +1908,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     ShipmentScanStatus = ShipmentScanStatus.SSC
                 });
 
+                //remove waybill from manifest and groupwaybill
+                await _groupWaybillNumberMappingService.RemoveWaybillNumberFromGroup(groupwaybillMapping.GroupWaybillNumber, groupwaybillMapping.WaybillNumber);
+
                 //send message
                 //await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All, waybill);
                 boolRresult = true;
-
+                
                 return boolRresult;
             }
             catch (Exception)
