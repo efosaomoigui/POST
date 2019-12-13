@@ -138,6 +138,7 @@ namespace GIGLS.Core.DTO.Shipments
         
        public bool? IsEligible { get; set; }
         public bool IsCodNeeded { get; set; }
+        public decimal CurrentWalletAmount { get; set; }
 
     }
 }

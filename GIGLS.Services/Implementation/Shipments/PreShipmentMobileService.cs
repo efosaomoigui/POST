@@ -129,8 +129,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         carPickUprice = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceCodAmount, newPreShipment.CountryId);
                     }
-
-                    message = $"You are not yet eligible to create shipment on the Platform. Please fund your wallet with a minimum of {preShipment.CurrencySymbol}{carPickUprice.Value}";
+                    var remainingamount = (Convert.ToDecimal(carPickUprice.Value) - newPreShipment.CurrentWalletAmount);
+                    message = $"You are not yet eligible to create shipment on the Platform. You need a minimum balance of {preShipment.CurrencySymbol}{carPickUprice.Value}, please fund your wallet with {preShipment.CurrencySymbol}{remainingamount} to complete the process. Thank you";
                     newPreShipment.Waybill = "";
                 }
                 return new { waybill = newPreShipment.Waybill, message = message, IsBalanceSufficient, Zone = zoneid.ZoneId };
@@ -160,6 +160,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         preShipmentDTO.IsEligible = false;
                         preShipmentDTO.IsCodNeeded = customer.isCodNeeded;
                         preShipmentDTO.CurrencySymbol = Country.CurrencySymbol;
+                        preShipmentDTO.CurrentWalletAmount = Convert.ToDecimal(customer.WalletAmount);
                         return preShipmentDTO;
                     }
                 }
