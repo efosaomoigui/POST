@@ -94,7 +94,10 @@ namespace GIGLS.Services.Business.Scanning
 
 
             //block scanning if the waybill has been collected
-            await BlockAnyScanOnCollectedShipment(scan.WaybillNumber, scan);
+            if(scan.ShipmentScanStatus != ShipmentScanStatus.SMIM)
+            {
+                await BlockAnyScanOnCollectedShipment(scan.WaybillNumber, scan);
+            }
 
             //check if the waybill has not been scan for (AHK) shipment collecte or Delivered status before
             //var shipmentCollected = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(scan.WaybillNumber) && (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC));
