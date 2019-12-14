@@ -643,6 +643,12 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var result = new SignResponseDTO();
 
+            if(user.UserChannelType != UserChannelType.Ecommerce && user.UserChannelType != UserChannelType.IndividualCustomer 
+                && user.UserChannelType != UserChannelType.Partner)
+            {
+                throw new GenericException($"Kindly supply valid customer channel ");
+            }
+
             if (user.UserChannelType == UserChannelType.Ecommerce)
             {
                 var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
