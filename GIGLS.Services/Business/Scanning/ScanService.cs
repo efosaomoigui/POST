@@ -92,17 +92,21 @@ namespace GIGLS.Services.Business.Scanning
             var currentCenter = serviceCenters[0].ServiceCentreId;
             var cashondeliveryinfo = new List<CashOnDeliveryRegisterAccount>();
 
+
+            //block scanning if the waybill has been collected
+            await BlockAnyScanOnCollectedShipment(scan.WaybillNumber, scan);
+
             //check if the waybill has not been scan for (AHK) shipment collecte or Delivered status before
-            var shipmentCollected = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(scan.WaybillNumber) && (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC));
+            //var shipmentCollected = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(scan.WaybillNumber) && (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC));
 
-            if (shipmentCollected != null)
-            {
-                //Send Email to Regional Managers whenever this occurs
-                scan.CancelledOrCollected = "Collected";
-                bool emailSentResult = await SendEmailOnAttemptedScanOfCancelledShipment(scan);
+            //if (shipmentCollected != null)
+            //{
+            //    //Send Email to Regional Managers whenever this occurs
+            //    scan.CancelledOrCollected = "Collected";
+            //    bool emailSentResult = await SendEmailOnAttemptedScanOfCancelledShipment(scan);
 
-                throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already collected, no further scan is required!");
-            }
+            //    throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already collected, no further scan is required!");
+            //}
 
             string scanStatus = scan.ShipmentScanStatus.ToString();
 
@@ -174,6 +178,9 @@ namespace GIGLS.Services.Business.Scanning
                     ////// GroupShipmentCheck  - CheckIfUserIsAtShipmentFinalDestination
                     foreach (var item in groupShipmentList)
                     {
+                        //block scanning if any of the waybill has been collected
+                        await BlockAnyScanOnCollectedShipment(item.Waybill, scan);
+
                         await CheckIfUserIsAtShipmentFinalDestination(scan, item.DestinationServiceCentreId);
                     }
 
@@ -219,6 +226,18 @@ namespace GIGLS.Services.Business.Scanning
                     //In case no shipment attached to the manifest  
                     if (groupWaybillInManifestList.Count > 0)
                     {
+                        //block scanning if any of the waybill has been collected
+                        foreach (var groupShipment in groupWaybillInManifestList)
+                        {
+                            if (groupShipment.WaybillNumbers.Count > 0)
+                            {
+                                foreach (var waybill in groupShipment.WaybillNumbers)
+                                {
+                                    await BlockAnyScanOnCollectedShipment(waybill, scan);
+                                }
+                            }
+                        }
+
                         foreach (var groupShipment in groupWaybillInManifestList)
                         {
                             if (groupShipment.WaybillNumbers.Count > 0)
@@ -293,6 +312,11 @@ namespace GIGLS.Services.Business.Scanning
 
                     if (waybillInManifestList.Count > 0)
                     {
+                        //block scanning if any of the waybill has been collected
+                        foreach (var item in waybillInManifestList)
+                        {
+                            await BlockAnyScanOnCollectedShipment(item.Waybill, scan);
+                        }
 
                         //update dispatch to scan for Shipment recieved by Courier for delivery manifest
                         if (scan.ShipmentScanStatus == ShipmentScanStatus.SRC) // ||scan.ShipmentScanStatus == ShipmentScanStatus.WC )
@@ -357,7 +381,6 @@ namespace GIGLS.Services.Business.Scanning
                         throw new GenericException($"No Shipment attached to this Manifest: {scan.WaybillNumber} ");
                     }
 
-
                     return true;
                 }
 
@@ -367,12 +390,22 @@ namespace GIGLS.Services.Business.Scanning
                     var waybillInHUBManifestList = await _hubmanifestWaybillService.GetWaybillsInManifest(manifest.ManifestCode);
                     if (waybillInHUBManifestList.Count > 0)
                     {
+                        List<string> waybills = new List<string>();
+
+                        //block scanning if any of the waybill has been collected
+                        foreach (var hubManifest in waybillInHUBManifestList)
+                        {
+                            waybills.Add(hubManifest.Waybill);
+                            await BlockAnyScanOnCollectedShipment(hubManifest.Waybill, scan);
+                        }                      
+                        
                         //if the shipment scan status is shipment arrive HUB then
                         //update Dispatch Receiver and manifest receiver id
                         if (scan.ShipmentScanStatus == ShipmentScanStatus.ARP)
                         {
+                            //var waybills = waybillInHUBManifestList.Select(s => s.Waybill).ToList();
+
                             //Process Shipment Return to Service centre for repackaging
-                            var waybills = waybillInHUBManifestList.Select(s => s.Waybill).ToList();
                             await _hubmanifestWaybillService.ReturnWaybillsInManifest(manifest.ManifestCode, waybills);
 
                             var dispatch = await _dispatchService.GetDispatchManifestCode(scan.WaybillNumber);
@@ -399,7 +432,6 @@ namespace GIGLS.Services.Business.Scanning
                         }
                         return true;
                     }
-
                 }
             }
 
@@ -773,6 +805,22 @@ namespace GIGLS.Services.Business.Scanning
             });
 
             return true;
+        }
+
+
+        private async Task BlockAnyScanOnCollectedShipment(string waybill, ScanDTO scan)
+        {
+            //check if the waybill has not been scan for (AHK) shipment collecte or Delivered status before
+            var checkShipmentCollected = await _uow.Invoice.GetAsync(x => x.Waybill.Equals(waybill) && x.IsShipmentCollected == true);
+
+            if (checkShipmentCollected != null)
+            {
+                //Send Email to Regional Managers whenever this occurs
+                scan.CancelledOrCollected = "Collected";
+                bool emailSentResult = await SendEmailOnAttemptedScanOfCancelledShipment(scan);
+
+                throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already collected, no further scan is required!");
+            }
         }
     }
 }
