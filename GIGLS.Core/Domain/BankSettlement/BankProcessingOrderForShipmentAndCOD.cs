@@ -1,10 +1,9 @@
 ﻿using GIGLS.Core.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GIGLS.Core.Domain.BankSettlement
-{ 
+{
 
     public class BankProcessingOrderForShipmentAndCOD : BaseDomain, IAuditable  
     {
@@ -49,6 +48,7 @@ namespace GIGLS.Core.Domain.BankSettlement
         public DepositType DepositType { get; set; }
         public DateTime StartDateTime { get; set; }
         public DepositStatus Status { get; set; }
+        public string BankName { get; set; }
 
         [MaxLength(128)]
         public string VerifiedBy { get; set; }

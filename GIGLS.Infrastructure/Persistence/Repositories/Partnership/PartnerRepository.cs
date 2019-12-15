@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Partnership;
 using System.Data.Entity;
+using GIGLS.Core.DTO;
+using System;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
 {
@@ -45,9 +47,48 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                     LastName = partner.LastName,
                                     IdentificationNumber = "",
                                     WalletPan = "",
+                                    IsActivated = partner.IsActivated
                                 };
 
             return Task.FromResult(partnerDto.ToList());
+        }
+
+        public Task<PartnerDTO> GetPartnerByIdWithCountry(int customerId)
+        {
+            try
+            {
+                var partners = _context.Partners.Where(x => x.PartnerId == customerId);
+                var partnersDto = from partner in partners
+                                    select new PartnerDTO
+                                    {
+                                        PartnerId = partner.PartnerId,
+                                        PartnerName = partner.PartnerName,
+                                        Email = partner.Email,
+                                        Address = partner.Address,
+                                        PartnerCode = partner.PartnerCode,
+                                        PhoneNumber = partner.PhoneNumber,
+                                        OptionalPhoneNumber = partner.OptionalPhoneNumber,
+                                        PartnerType = partner.PartnerType,
+                                        FirstName = partner.FirstName,
+                                        LastName = partner.LastName,
+                                        IdentificationNumber = "",
+                                        WalletPan = "",
+                                        UserActiveCountryId = partner.UserActiveCountryId,
+                                        Country = _context.Country.Where(x => x.CountryId == partner.UserActiveCountryId).Select(x => new CountryDTO
+                                        {
+                                            CountryId = x.CountryId,
+                                            CountryName = x.CountryName,
+                                            CurrencySymbol = x.CurrencySymbol,
+                                            CurrencyCode = x.CurrencyCode,
+                                            PhoneNumberCode = x.PhoneNumberCode
+                                        }).FirstOrDefault()
+                                    };
+                return Task.FromResult(partnersDto.FirstOrDefault());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

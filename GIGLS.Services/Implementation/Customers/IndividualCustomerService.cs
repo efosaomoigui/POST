@@ -63,9 +63,9 @@ namespace GIGLS.Services.Implementation.Customers
                 }
 
                 //generate customer code
-                var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
-                    NumberGeneratorType.CustomerCodeIndividual);
+                var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeIndividual);
                 newCustomer.CustomerCode = customerCode;
+
                 //added this line of code for mobile registration
                 if(customer.IsFromMobile ==true)
                 {
@@ -91,42 +91,44 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     newCustomer.Email = newCustomer.CustomerCode;
                 }
-                try
-                {
-                    var password = "";
-                    if (newCustomer.Password == null)
-                    {
-                        password = await _passwordGenerator.Generate();
-                    }
-                    else
-                    {
-                        password = newCustomer.Password;
-                    }
-                    var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
-                    {
-                        ConfirmPassword = password,
-                        Department = CustomerType.IndividualCustomer.ToString(),
-                        DateCreated = DateTime.Now,
-                        Designation = CustomerType.IndividualCustomer.ToString(),
-                        Email=newCustomer.Email,
-                        FirstName = newCustomer.FirstName,
-                        LastName = newCustomer.LastName,
-                        Organisation = CustomerType.IndividualCustomer.ToString(),
-                        Password = password,
-                        PhoneNumber = newCustomer.PhoneNumber,
-                        UserType = UserType.Regular,
-                        Username = newCustomer.CustomerCode,
-                        UserChannelCode = newCustomer.CustomerCode,
-                        UserChannelPassword = password,
-                        UserChannelType = UserChannelType.IndividualCustomer,
-                        PasswordExpireDate = DateTime.Now,
-                        UserActiveCountryId = newCustomer.UserActiveCountryId
-                    });
-                }
-                catch (Exception)
-                {
-                    // do nothing
-                }
+
+                //create login for the user
+                //try
+                //{
+                //    var password = "";
+                //    if (newCustomer.Password == null)
+                //    {
+                //        password = await _passwordGenerator.Generate();
+                //    }
+                //    else
+                //    {
+                //        password = newCustomer.Password;
+                //    }
+                //    var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
+                //    {
+                //        ConfirmPassword = password,
+                //        Department = CustomerType.IndividualCustomer.ToString(),
+                //        DateCreated = DateTime.Now,
+                //        Designation = CustomerType.IndividualCustomer.ToString(),
+                //        Email=newCustomer.Email,
+                //        FirstName = newCustomer.FirstName,
+                //        LastName = newCustomer.LastName,
+                //        Organisation = CustomerType.IndividualCustomer.ToString(),
+                //        Password = password,
+                //        PhoneNumber = newCustomer.PhoneNumber,
+                //        UserType = UserType.Regular,
+                //        Username = newCustomer.CustomerCode,
+                //        UserChannelCode = newCustomer.CustomerCode,
+                //        UserChannelPassword = password,
+                //        UserChannelType = UserChannelType.IndividualCustomer,
+                //        PasswordExpireDate = DateTime.Now,
+                //        UserActiveCountryId = newCustomer.UserActiveCountryId
+                //    });
+                //}
+                //catch (Exception)
+                //{
+                //    // do nothing
+                //}
                 
                 return Mapper.Map<IndividualCustomerDTO>(newCustomer);
             }
@@ -268,16 +270,16 @@ namespace GIGLS.Services.Implementation.Customers
             customer.Password = customerDto.Password;
             customer.UserActiveCountryId = customerDto.UserActiveCountryId;
             
-            var user = await _userService.GetUserByChannelCode(customer.CustomerCode);
-            user.FirstName = customerDto.FirstName;
-            user.LastName = customerDto.LastName;
-            user.PhoneNumber = customerDto.PhoneNumber;
-            user.Email = customerDto.Email;
-            user.PictureUrl = customerDto.PictureUrl;
-            user.UserActiveCountryId = customerDto.UserActiveCountryId;
-            await _userService.UpdateUser(user.Id, user);
-            await _uow.CompleteAsync();
-           
+            //var user = await _userService.GetUserByChannelCode(customer.CustomerCode);
+            //user.FirstName = customerDto.FirstName;
+            //user.LastName = customerDto.LastName;
+            //user.PhoneNumber = customerDto.PhoneNumber;
+            //user.Email = customerDto.Email;
+            //user.PictureUrl = customerDto.PictureUrl;
+            //user.UserActiveCountryId = customerDto.UserActiveCountryId;
+            //await _userService.UpdateUser(user.Id, user);
+
+            await _uow.CompleteAsync();           
         }
 
         public async Task<List<IndividualCustomerDTO>> GetIndividualCustomers(string searchData)

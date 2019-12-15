@@ -208,5 +208,81 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 throw;
             }
         }
+
+        public Task<CompanyDTO> GetCompanyByIdWithCountry(int companyId)
+        {
+            try
+            {
+                var companies = _context.Company.Where(x => x.CompanyId == companyId);
+                var companiesDto = from c in companies
+                                   select new CompanyDTO
+                                   {
+                                       CompanyId = c.CompanyId,
+                                       Name = c.Name,
+                                       RcNumber = c.RcNumber,
+                                       Email = c.Email,
+                                       City = c.City,
+                                       State = c.State,
+                                       Address = c.Address,
+                                       PhoneNumber = c.PhoneNumber,
+                                       Industry = c.Industry,
+                                       CompanyType = c.CompanyType,
+                                       CompanyStatus = c.CompanyStatus,
+                                       Discount = c.Discount,
+                                       SettlementPeriod = c.SettlementPeriod,
+                                       CustomerCode = c.CustomerCode,
+                                       CustomerCategory = c.CustomerCategory,
+                                       ReturnOption = c.ReturnOption,
+                                       ReturnServiceCentre = c.ReturnServiceCentre,
+                                       ReturnServiceCentreName = _context.ServiceCentre.Where(x => x.ServiceCentreId == c.ReturnServiceCentre).Select(x => x.Name).FirstOrDefault(),
+                                       ReturnAddress = c.ReturnAddress,
+                                       DateCreated = c.DateCreated,
+                                       DateModified = c.DateModified,
+                                       isCodNeeded = c.isCodNeeded,
+                                       UserActiveCountryId = c.UserActiveCountryId,
+                                       Country = _context.Country.Where(x => x.CountryId == c.UserActiveCountryId).Select(x => new CountryDTO
+                                       {
+                                           CountryId = x.CountryId,
+                                           CountryName = x.CountryName,
+                                           CurrencySymbol = x.CurrencySymbol,
+                                           CurrencyCode = x.CurrencyCode,
+                                           PhoneNumberCode = x.PhoneNumberCode
+                                       }).FirstOrDefault()
+                                   };
+                return Task.FromResult(companiesDto.FirstOrDefault());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<EcommerceWalletDTO> GetWalletDetailsForCompany(int companyId)
+        {
+            try
+            {
+                var company = _context.Company.Where(x => x.CompanyId == companyId);
+                var companiesDto = from c in company
+                                   join w in _context.Wallets on c.CustomerCode equals w.CustomerCode
+                                   join co in _context.Country on c.UserActiveCountryId equals co.CountryId
+                                   select new EcommerceWalletDTO
+                                   {
+                                       WalletBalance = w.Balance,
+                                       Country = _context.Country.Where(x => x.CountryId == c.UserActiveCountryId).Select(x => new CountryDTO
+                                       {
+                                           CountryId = x.CountryId,
+                                           CountryName = x.CountryName,
+                                           CurrencySymbol = x.CurrencySymbol,
+                                           CurrencyCode = x.CurrencyCode,
+                                           PhoneNumberCode = x.PhoneNumberCode
+                                       }).FirstOrDefault(),
+                                   };
+                return Task.FromResult(companiesDto.FirstOrDefault());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

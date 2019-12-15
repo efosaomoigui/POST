@@ -40,6 +40,9 @@ namespace GIGL.GIGLS.Core.Domain
         //User Active CountryId
         public int UserActiveCountryId { get; set; }
 
+        public bool IsRegisteredFromMobile { get; set; }
+        public string AppType { get; set; }
+
         //public async Task GenerateUserIdentityAsync(Microsoft.AspNet.Identity.UserManager manager)
         //{
         //    return await GenerateUserIdentityAsync(manager, DefaultAuthenticationTypes.ApplicationCookie);

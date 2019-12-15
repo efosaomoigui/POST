@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using GIGLS.Core.Enums;
 
 namespace GIGLS.Core.DTO
 {
@@ -15,6 +11,7 @@ namespace GIGLS.Core.DTO
 
         public int OTP { get; set; }
         public string ExpectedTimeofDelivery { get; set; }
-       
+        public SMSSenderPlatform SMSSenderPlatform { get; set; }
+
     }
 }

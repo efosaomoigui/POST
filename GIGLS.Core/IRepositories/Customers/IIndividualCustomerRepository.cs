@@ -10,5 +10,6 @@ namespace GIGLS.Core.IRepositories.Customers
     {
         Task<List<IndividualCustomerDTO>> GetIndividualCustomers();
         Task<List<IndividualCustomerDTO>> GetIndividualCustomers(string searchData);
+        Task<IndividualCustomerDTO> GetIndividualCustomerByIdWithCountry(int customerId);
     }
 }

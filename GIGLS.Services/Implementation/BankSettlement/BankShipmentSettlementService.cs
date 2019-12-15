@@ -30,14 +30,17 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly INumberGeneratorMonitorService _service;
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IInvoiceService _invoiceService;
+        private readonly IBankService _bankService;
 
-        public BankShipmentSettlementService(IUnitOfWork uow, IWalletService walletService, IUserService userService, INumberGeneratorMonitorService service, IGlobalPropertyService globalPropertyService, IInvoiceService invoiceservice)
+        public BankShipmentSettlementService(IUnitOfWork uow, IWalletService walletService, IUserService userService, INumberGeneratorMonitorService service, IGlobalPropertyService globalPropertyService, 
+            IInvoiceService invoiceservice, IBankService bankService)
         {
             _uow = uow;
             _walletService = walletService;
             _userService = userService;
             _service = service;
             _invoiceService = invoiceservice;
+            _bankService = bankService;
             MapperConfig.Initialize();
             _globalPropertyService = globalPropertyService;
         }
@@ -733,6 +736,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //update Shipment
             nonDepsitedValue.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
+            bankorder.BankName = bankrefcode.BankName;
+
             await _uow.CompleteAsync();
         }
 
@@ -798,7 +803,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             codsforservicecenter.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
             bankorder.Status = bankrefcode.Status;
-
+            bankorder.BankName = bankrefcode.BankName;
             await _uow.CompleteAsync();
         }
 
@@ -829,6 +834,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             codsforservicecenter.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
             bankorder.Status = bankrefcode.Status;
+            bankorder.BankName = bankrefcode.BankName;
 
             await _uow.CompleteAsync();
         }
@@ -964,5 +970,11 @@ namespace GIGLS.Services.Implementation.Wallet
 
             await _uow.CompleteAsync();
         }
+
+        public Task<IEnumerable<BankDTO>> GetBanks()
+        {
+            return _bankService.GetBanks();
+        }
+
     }
 }

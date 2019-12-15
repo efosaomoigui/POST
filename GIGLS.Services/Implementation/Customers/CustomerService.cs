@@ -90,7 +90,7 @@ namespace GIGLS.Services.Implementation.Customers
             }
             catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 

@@ -402,7 +402,7 @@ namespace GIGLS.Services.Implementation.Report
             dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
             dashboardDTO.GraphData = new List<GraphDataDTO> { };
 
-            return dashboardDTO;
+            return await Task.FromResult(dashboardDTO);
         }
 
         //Shipment Breakdown

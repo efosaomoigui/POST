@@ -44,8 +44,8 @@ namespace GIGLS.WebApi
                 UsePageLocksOnDequeue = true,
                 DisableGlobalLocks = true
             });
-            app.UseHangfireServer();
-            app.UseHangfireDashboard();
+            //app.UseHangfireServer();
+            //app.UseHangfireDashboard();
            
         }
 

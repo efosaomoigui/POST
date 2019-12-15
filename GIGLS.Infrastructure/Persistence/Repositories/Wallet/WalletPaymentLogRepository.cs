@@ -8,7 +8,6 @@ using GIGLS.Infrastructure.Persistence.Repository;
 using System.Linq;
 using AutoMapper;
 using GIGLS.Core.Domain.Wallet;
-using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.View;
 
@@ -97,8 +96,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                             break;
                     }
                 }
-
-
+                
                 //populate the count variable
                 var totalCount = queryable.Count();
 

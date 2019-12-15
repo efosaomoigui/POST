@@ -37,7 +37,19 @@
         PickUpStartTime,
         PickUpEndTime,
         AddedMinutesForDeliveryTime,
-        EmailForDeliveryTime
-
+        EmailForDeliveryTime,
+        ActivationCampaignStartDate,
+        ActivationCampaignEndDate,
+        ReferralBonusForActivationCampaign,
+        DiscountPercentage,
+        GiglgoMaximumFixedDistance,
+        GiglgoFixedPriceForDistance,
+        GiglgoFixedPriceForTime,
+        EcommerceEmail,
+        EcommerceBikePickUpPrice,
+        EcommerceCarPickupPrice,
+        EcommerceVanPickupPrice,
+        EcommerceCodAmount,
+        EcommerceNoCodAmount
     }
 }

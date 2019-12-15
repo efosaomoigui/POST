@@ -315,12 +315,8 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //validate the ids are in the system
-                var serviceCenterId = int.Parse(groupWaybillNumber.Substring(1, 3));
-                var serviceCentre = await _centreService.GetServiceCentreById(serviceCenterId);
-                
                 // get the service centres of login user
-                var serviceCenters = await _userService.GetPriviledgeServiceCenters();           
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 if (serviceCenters.Length == 0)
                 {
                     throw new GenericException("Error processing request. The login user is not assign to any service centre nor has the right privilege");
@@ -329,6 +325,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 int departureServiceCenterId = serviceCenters[0];
                 var currentUserId = await _userService.GetCurrentUserId();
 
+                //validate the ids are in the system
+                var serviceCenterId = int.Parse(groupWaybillNumber.Substring(1, 3));
+                var serviceCentre = await _centreService.GetServiceCentreById(serviceCenterId);
+                
                 //Get GroupWaybill Details
                 var groupwaybillObj = await _uow.GroupWaybillNumber.GetAsync(x => x.GroupWaybillCode.Equals(groupWaybillNumber));
 
@@ -357,9 +357,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
                 }                
-
-                List<GroupWaybillNumberMapping> groupWaybillNumberMapping = new List<GroupWaybillNumberMapping>();
-
+                
                 //Get All Waybills that need to be group by the service centre
                 var filterOptionsDto = new FilterOptionsDto
                 {
@@ -379,10 +377,15 @@ namespace GIGLS.Services.Implementation.Shipments
                         ungroupedWaybillsList.Add(item.Waybill);
                     }
                 }
-               
+                
+                List<GroupWaybillNumberMapping> groupWaybillNumberMapping = new List<GroupWaybillNumberMapping>();
+
+                //convert the list to HashSet to remove duplicate
+                var newWaybillNumberList = new HashSet<string>(waybillNumberList);
+
                 //check if the waybill that need to be grouped are in ungroupedWaybills above
                 //var getWaybillNotAvailableForGrouping = waybillNumberList.Where(x => !ungroupedWaybills.Select(w => w.Waybill).Contains(x));
-                var getWaybillNotAvailableForGrouping = waybillNumberList.Where(x => !ungroupedWaybillsList.Contains(x)).ToList();
+                var getWaybillNotAvailableForGrouping = newWaybillNumberList.Where(x => !ungroupedWaybillsList.Contains(x));
 
                 if (getWaybillNotAvailableForGrouping.Count() > 0)
                 {
@@ -391,7 +394,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    foreach (var waybillNumber in waybillNumberList)
+                    foreach (var waybillNumber in newWaybillNumberList)
                     {
                         var shipmentDTO = await _uow.Shipment.GetAsync(x => x.Waybill == waybillNumber);
 
@@ -437,7 +440,6 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        //remove waybillNumber from groupWaybillNumber
         public async Task RemoveWaybillNumberFromGroup(string groupWaybillNumber, string waybillNumber)
         {
             try
@@ -501,6 +503,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 var checkIfWaybillExistForGroup = await _uow.GroupWaybillNumberMapping.FindAsync(x => x.GroupWaybillNumber == groupWaybillNumber);
                 if(checkIfWaybillExistForGroup.Count() == 0)
                 {
+                    //Delete the manifest mapping if groupway has been mapped to manifest
+                    _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupWaybillNumberMapping);
+
                     await _groupWaybillNumberService.RemoveGroupWaybillNumber(groupWaybillNumberDTO.GroupWaybillNumberId);
                 }
             }

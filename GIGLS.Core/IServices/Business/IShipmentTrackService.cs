@@ -11,5 +11,6 @@ namespace GIGLS.Core.IServices.Business
     public interface IShipmentTrackService : IServiceDependencyMarker
     {
         Task<IEnumerable<ShipmentTrackingDTO>> TrackShipment(string waybillNumber);
+        Task<IEnumerable<ShipmentTrackingDTO>> TrackShipmentForMobile(string waybillNumber);
     }
 }

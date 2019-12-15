@@ -99,7 +99,7 @@ namespace GIGLS.Core
         IPackingListRepository PackingList { get; set; }
         ICashOnDeliveryAccountRepository CashOnDeliveryAccount { get; set; }
         ICashOnDeliveryRegisterAccountRepository CashOnDeliveryRegisterAccount { get; set; }
-        IDemurrageRegisterAccountRepository DemurrageRegisterAccount { get; set; } 
+        IDemurrageRegisterAccountRepository DemurrageRegisterAccount { get; set; }
         ICashOnDeliveryBalanceRepository CashOnDeliveryBalance { get; set; }
         IDispatchRepository Dispatch { get; set; }
         IDispatchActivityRepository DispatchActivity { get; set; }
@@ -118,7 +118,7 @@ namespace GIGLS.Core
         IManifestWaybillMappingRepository ManifestWaybillMapping { get; set; }
         IDeviceRepository Device { get; set; }
         IDeviceManagementRepository DeviceManagement { get; set; }
-        IShipmentDeliveryOptionMappingRepository ShipmentDeliveryOptionMapping {get; set;}
+        IShipmentDeliveryOptionMappingRepository ShipmentDeliveryOptionMapping { get; set; }
         ICODSettlementSheetRepository CODSettlementSheet { get; set; }
         IPreShipmentItemRepository PreShipmentItem { get; set; }
         IPreShipmentRepository PreShipment { get; set; }
@@ -172,6 +172,10 @@ namespace GIGLS.Core
         IRiderDeliveryRepository RiderDelivery { get; set; }
         IDeliveryLocationRepository DeliveryLocation { get; set; }
         ILGARepository LGA { get; set; }
+        IWaybillPaymentLogRepository WaybillPaymentLog {get; set;}
+        IBankRepository Bank { get; set; }
+        IActivationCampaignEmailRepository ActivationCampaignEmail { get; set; }
+
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

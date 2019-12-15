@@ -4,6 +4,7 @@ using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Account
 {
@@ -111,10 +112,93 @@ namespace GIGLS.Core.DTO.Account
         public int CountryId { get; set; }
         public CountryDTO Country { get; set; }
 
-        public DateTime DeliveryTime { get; set; }  
+        public DateTime DeliveryTime { get; set; }
         public decimal Cash { get; set; }
         public decimal Transfer { get; set; }
         public decimal Pos { get; set; }
     }
+     
+    public class InvoiceViewDTOUNGROUPED
+    {
+        public string Name { get; set; }
+        public decimal Amount { get; set; }
+        public string PaymentMethod { get; set; }
+        public DateTime DateCreated { get; set; } 
+        public string Waybill { get; set; }
+        public int DepartureServiceCentreId { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+    }
 
+    public class InvoiceViewDTOUNGROUPED2
+    {
+        public string DestinationServiceCentreName { get; set; }
+        public decimal Amount { get; set; }
+        public string PaymentMethod { get; set; }
+        public DateTime ShipmentDate { get; set; }
+        public string Waybill { get; set; }
+
+    }
+
+    public class InvoiceMonitorDTO
+    {
+        public string Waybill { get; set; } 
+        public DateTime DateCreated { get; set; }
+        public int DepartureServiceCentreId { get; set; }
+        public int DestinationServiceCentreId { get; set; }
+        public string Name { get; set; }
+        public string Status { get; set; }
+        public long Rn { get; set; } 
+
+    }
+
+    public class LimitDates
+    {
+        public int StartLimit { get; set; }
+        public int EndLimit { get; set; }
+        public string ScName { get; set; } 
+    }
+
+    public class InvoiceMonitorDTO2
+    {
+        public string label { get; set; }
+        public int y { get; set; }
+        //public string color { get; set; }
+        public DateTime ShipmentDate { get; set; }
+    }
+
+    public class InvoiceMonitorDTO3
+    {
+        public string label { get; set; }
+        public string waybill { get; set; }
+        public DateTime ShipmentDate { get; set; }
+    }
+
+
+    public class MulitipleInvoiceMonitorDTO
+    {
+
+        public List<InvoiceMonitorDTO> ShipmentCreated { get; set; }
+        public List<InvoiceMonitorDTO> ShipmentExpected { get; set; }
+
+    }
+
+    public class ColoredInvoiceMonitorDTO
+    {
+        public object[] groupgreen_s { get; set; }
+        public object[] groupblue_s { get; set; }
+        public object[] groupred_s { get; set; }
+        public object[] totalZones { get; set; }
+
+        //public double totalGreen { get; set; }
+        //public double totalBlue { get; set; }
+        //public double totalRed { get; set; }
+
+    }
+
+    public class InvoiceMonitorDTO_total
+    {
+
+        public int WayBillCount { get; set; }
+
+    }
 }

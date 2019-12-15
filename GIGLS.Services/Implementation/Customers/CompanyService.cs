@@ -52,7 +52,7 @@ namespace GIGLS.Services.Implementation.Customers
                 }
 
                 var newCompany = Mapper.Map<Company>(company);
-                newCompany.CompanyStatus = CompanyStatus.Pending;
+                newCompany.CompanyStatus = CompanyStatus.Active;
 
                 //get the CompanyType
                 var companyType = "";
@@ -125,7 +125,8 @@ namespace GIGLS.Services.Implementation.Customers
                     UserChannelPassword = password,
                     UserChannelType = userChannelType,
                     PasswordExpireDate = DateTime.Now,
-                    UserActiveCountryId = newCompany.UserActiveCountryId
+                    UserActiveCountryId = newCompany.UserActiveCountryId,
+                    IsActive = true
                 });
 
                 //complete
@@ -186,6 +187,24 @@ namespace GIGLS.Services.Implementation.Customers
             return _uow.Company.GetCompanies();
         }
 
+        public Task<List<CompanyDTO>> GetCompaniesWithoutWallet()
+        {
+            var companies = _uow.Company.GetAll().ToList();
+            return Task.FromResult(Mapper.Map<List<CompanyDTO>>(companies));
+        }
+
+        public async Task<List<CompanyDTO>> GetEcommerceWithoutWallet()
+        {
+            var companies = await _uow.Company.FindAsync(x => x.CompanyType == CompanyType.Ecommerce);
+            return Mapper.Map<List<CompanyDTO>>(companies);
+        }
+
+        public async Task<List<CompanyDTO>> GetCorporateWithoutWallet()
+        {
+            var companies = await _uow.Company.FindAsync(x => x.CompanyType == CompanyType.Corporate);
+            return Mapper.Map<List<CompanyDTO>>(companies);
+        }
+
         public async Task<CompanyDTO> GetCompanyById(int companyId)
         {
             try
@@ -233,7 +252,7 @@ namespace GIGLS.Services.Implementation.Customers
                 company.ReturnServiceCentre = companyDto.ReturnServiceCentre;
                 company.ReturnAddress = companyDto.ReturnAddress;
                 company.RcNumber = companyDto.RcNumber;
-                company.UserActiveCountryId = companyDto.UserActiveCountryId;
+                //company.UserActiveCountryId = companyDto.UserActiveCountryId;
                 company.isCodNeeded = companyDto.isCodNeeded;
 
                 if (companyDto.ContactPersons.Any())
@@ -256,7 +275,7 @@ namespace GIGLS.Services.Implementation.Customers
                 user.LastName = companyDto.Name;
                 user.FirstName = companyDto.Name;
                 user.Email = companyDto.Email;
-                user.UserActiveCountryId = companyDto.UserActiveCountryId;
+                //user.UserActiveCountryId = companyDto.UserActiveCountryId;
 
                 await _userService.UpdateUser(user.Id, user);
 
@@ -391,6 +410,25 @@ namespace GIGLS.Services.Implementation.Customers
                 companyDto.UserActiveCountryName = companyDto.Country.CountryName;
 
                 return companyDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<EcommerceWalletDTO> GetECommerceWalletById(int companyId)
+        {
+            try
+            {
+                var company = await _uow.Company.GetWalletDetailsForCompany(companyId);
+
+                if (company == null)
+                {
+                    throw new GenericException("Wallet information does not exist");
+                }
+
+                return company;
+                
             }
             catch (Exception)
             {

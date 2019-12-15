@@ -1,19 +1,15 @@
 ﻿using AutoMapper;
-using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
-using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.CORE.Domain;
 using GIGLS.Infrastructure;
-using GIGLS.Services.Implementation.Utility;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
@@ -1323,10 +1319,10 @@ namespace GIGLS.Services.Implementation.User
 
         public async Task<int> GetUserActiveCountryId()
         {
-            int UserCountryId = 0;
 
             //1. Get the user active country
             var countries = await GetPriviledgeCountrys();
+            int UserCountryId;
             if (countries.Count == 1)
             {
                 var userActiveCountry = countries[0];
@@ -1396,6 +1392,37 @@ namespace GIGLS.Services.Implementation.User
             }
 
             return serviceCenterIds;
+        }
+
+        public async Task<bool> IsUserHasAdminRole(string userId)
+        {
+            return await _unitOfWork.User.IsUserHasAdminRole(userId);
+        }
+
+
+        //use for mobile request
+        public async Task<UserDTO> GetUserUsingCustomer(string emailPhoneCode)
+        {
+            var user = await _unitOfWork.User.GetUserUsingCustomer(emailPhoneCode);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!");
+            }
+
+            return Mapper.Map<UserDTO>(user);
+        }
+
+        public async Task<UserDTO> GetActivatedUserByEmail(string email, bool isActive)
+        {
+            var user = await _unitOfWork.User.ActivateUserByEmail(email, isActive);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!");
+            }
+
+            return Mapper.Map<UserDTO>(user);
         }
     }
 }

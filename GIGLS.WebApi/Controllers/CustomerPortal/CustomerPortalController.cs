@@ -12,9 +12,7 @@ using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.CustomerPortal;
-using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
@@ -28,14 +26,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.Enums;
 using GIGLS.Core.DTO.MessagingLog;
-using GIGLS.Core.IServices.Utility;
-using GIGLS.Core.IMessageService;
 using GIGLS.Core.DTO.Admin;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
@@ -44,24 +39,15 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
     [RoutePrefix("api/portal")]
     public class CustomerPortalController : BaseWebApiController
     {
-        //private readonly IUnitOfWork _uow;
         private readonly ICustomerPortalService _portalService;
         private readonly IPaystackPaymentService _paymentService;
-        private readonly IPreShipmentMobileService _preshipmentmobileService;
-        
 
-
-        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService, IPreShipmentMobileService preshipmentmobileService
-            ) : base(nameof(CustomerPortalController))
+        public CustomerPortalController(ICustomerPortalService portalService, IPaystackPaymentService paymentService) : base(nameof(CustomerPortalController))
         {
-            // _uow = uow;
             _portalService = portalService;
             _paymentService = paymentService;
-            _preshipmentmobileService = preshipmentmobileService;
-            
         }
-
-
+        
         [HttpPost]
         [Route("transaction")]
         public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentCollectionFilterCriteria f_Criteria)
@@ -509,6 +495,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        
         [AllowAnonymous]
         [HttpPost]
         [Route("register")]
@@ -604,14 +591,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("validateotp/{OTP}")]
         public async Task<IServiceResponse<JObject>> IsOTPValid(int OTP)
         {
-            var Otp = await _portalService.IsOTPValid(OTP);
-            if (Otp != null && Otp.IsActive == true)
+            return await HandleApiOperationAsync(async () =>
             {
-                string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
-                string getTokenResponse;
-
-                return await HandleApiOperationAsync(async () =>
+                var Otp = await _portalService.IsOTPValid(OTP);
+                if (Otp != null && Otp.IsActive == true)
                 {
+                    string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+                    string getTokenResponse;
+
                     using (var client = new HttpClient())
                     {
                         //setup client
@@ -634,6 +621,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                         {
                             throw new GenericException("Operation could not complete login successfully:");
                         }
+                        else
+                        {
+                            Otp = await _portalService.GenerateReferrerCode(Otp);
+                        }
 
                         //get access token from response body
                         var responseJson = await responseMessage.Content.ReadAsStringAsync();
@@ -643,21 +634,93 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                         return new ServiceResponse<JObject>
                         {
-                            Object = jObject
+                            Object = jObject,
+                            ReferrerCode = Otp.Referrercode
                         };
                     }
-                });
-            }
-            else
-            {
-                var jObject = JObject.FromObject(Otp);
-                return new ServiceResponse<JObject>
-                {
-                    ShortDescription = "User has not been verified",
-                    Object = jObject
 
-                };
-            }
+                }
+                else
+                {
+                    var data = new { IsActive = false };
+
+                    var jObject = JObject.FromObject(data);
+
+                    return new ServiceResponse<JObject>
+                    {
+                        ShortDescription = "User has not been verified",
+                        Object = jObject
+                    };
+                }
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("verifyotp")]
+        public async Task<IServiceResponse<JObject>> ValidateOTP(OTPDTO otp)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var userDto = await _portalService.ValidateOTP(otp);
+                if (userDto != null && userDto.IsActive == true)
+                {
+                    string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+                    string getTokenResponse;
+
+                    using (var client = new HttpClient())
+                    {
+                        //setup client
+                        client.BaseAddress = new Uri(apiBaseUri);
+                        client.DefaultRequestHeaders.Accept.Clear();
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                        //setup login data
+                        var formContent = new FormUrlEncodedContent(new[]
+                        {
+                            new KeyValuePair<string, string>("grant_type", "password"),
+                            new KeyValuePair<string, string>("Username", userDto.Username),
+                            new KeyValuePair<string, string>("Password", userDto.UserChannelPassword),
+                        });
+
+                        //setup login data
+                        HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
+
+                        if (!responseMessage.IsSuccessStatusCode)
+                        {
+                            throw new GenericException("Operation could not complete login successfully:");
+                        }
+                        else
+                        {
+                            userDto = await _portalService.GenerateReferrerCode(userDto);
+                        }
+
+                        //get access token from response body
+                        var responseJson = await responseMessage.Content.ReadAsStringAsync();
+                        var jObject = JObject.Parse(responseJson);
+
+                        getTokenResponse = jObject.GetValue("access_token").ToString();
+
+                        return new ServiceResponse<JObject>
+                        {
+                            Object = jObject,
+                            ReferrerCode = userDto.Referrercode
+                        };
+                    }
+                }
+                else
+                {
+                    var data = new { IsActive = false };
+
+                    var jObject = JObject.FromObject(data);
+
+                    return new ServiceResponse<JObject>
+                    {
+                        ShortDescription = "User has not been verified",
+                        Object = jObject
+                    };
+                }
+            });
         }
 
         [AllowAnonymous]
@@ -683,9 +746,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var user = await _portalService.CheckDetails(logindetail.UserDetail,logindetail.UserChannelType);
+                var user = await _portalService.CheckDetails(logindetail.UserDetail, logindetail.UserChannelType);
+
                 var vehicle = user.VehicleType;
                 var partnerType = "";
+
                 if (user.Username != null)
                 {
                     user.Username = user.Username.Trim();
@@ -695,6 +760,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 {
                     logindetail.Password = logindetail.Password.Trim();
                 }
+
+                if (user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
+                {
+                    throw new GenericException("You are not authorized to login on this platform.");
+                }
+
                 if (user != null && user.IsActive == true)
                 {
                     using (var client = new HttpClient())
@@ -709,10 +780,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                         //setup login data
                         var formContent = new FormUrlEncodedContent(new[]
                         {
-                         new KeyValuePair<string, string>("grant_type", "password"),
-                         new KeyValuePair<string, string>("Username", user.Username),
-                         new KeyValuePair<string, string>("Password", logindetail.Password),
-                         });
+                        new KeyValuePair<string, string>("grant_type", "password"),
+                        new KeyValuePair<string, string>("Username", user.Username),
+                        new KeyValuePair<string, string>("Password", logindetail.Password),
+                        });
 
                         //setup login data
                         HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
@@ -729,37 +800,52 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             }
                             if (logindetail.UserChannelType == UserChannelType.Partner.ToString())
                             {
-                                var response = await _portalService.CreatePartner(user.UserChannelCode);
-                                partnerType = response;
+                                var partner = await _portalService.CreatePartner(user.UserChannelCode);
+                                partnerType = partner.PartnerType.ToString();
                                 if (partnerType == PartnerType.InternalDeliveryPartner.ToString())
+                                {
                                     user.IsVerified = true;
+                                    await _portalService.AddWallet(new WalletDTO
+                                    {
+                                        CustomerId = partner.PartnerId,
+                                        CustomerType = CustomerType.Partner,
+                                        CustomerCode = user.UserChannelCode,
+                                        CompanyType = CustomerType.Partner.ToString()
+                                    });
+
+                                }
+                                if (logindetail.UserChannelType == UserChannelType.Ecommerce.ToString())
+                                {
+                                    var response = await _portalService.CreateCompany(user.UserChannelCode);
+                                }
+
                             }
-                            if (logindetail.UserChannelType == UserChannelType.Ecommerce.ToString())
+                            //get access token from response body
+                            var responseJson = await responseMessage.Content.ReadAsStringAsync();
+                            var jObject = JObject.Parse(responseJson);
+
+                            getTokenResponse = jObject.GetValue("access_token").ToString();
+                            return new ServiceResponse<JObject>
                             {
-                                var response = await _portalService.CreateCompany(user.UserChannelCode);
-                            }
+                                VehicleType = vehicle,
+                                Object = jObject,
+                                ReferrerCode = user.Referrercode,
+                                AverageRatings = user.AverageRatings,
+                                IsVerified = user.IsVerified,
+                                PartnerType = partnerType,
+                                IsEligible = user.IsEligible
 
+                            };
                         }
-                        //get access token from response body
-                        var responseJson = await responseMessage.Content.ReadAsStringAsync();
-                        var jObject = JObject.Parse(responseJson);
-
-                        getTokenResponse = jObject.GetValue("access_token").ToString();
-                        return new ServiceResponse<JObject>
-                        {
-                            VehicleType = vehicle,
-                            Object = jObject,
-                            ReferrerCode = user.Referrercode,
-                            AverageRatings = user.AverageRatings,
-                            IsVerified = user.IsVerified,
-                            PartnerType = partnerType
-
-                        };
                     }
                 }
                 else
                 {
-                    var jObject = JObject.FromObject(user);
+
+                    var data = new { IsActive = false };
+
+                    var jObject = JObject.FromObject(data);
+
                     return new ServiceResponse<JObject>
                     {
                         ShortDescription = "User has not been verified",
@@ -790,7 +876,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var ItemTypes = _portalService.GetItemTypes();
+                var ItemTypes = await _portalService.GetItemTypes();
                 return new ServiceResponse<List<string>>
                 {
                     Object = ItemTypes,
@@ -901,6 +987,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        
         [HttpGet]
         [Route("getspecialpackages")]
         public async Task<IServiceResponse<SpecialResultDTO>> GetSpecialPackages()
@@ -1022,6 +1109,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
         [HttpGet]
         [Route("getpartnerwallettransactions")]
         public async Task<IServiceResponse<SummaryTransactionsDTO>> GetPartnerwalletTransactions()
@@ -1051,6 +1139,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
         [HttpPost]
         [Route("cancelshipment/{waybillNumber}")]
         public async Task<object> CancelShipment(string waybillNumber)
@@ -1177,7 +1266,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                
+
                 var response = await _portalService.LoadImage(images);
                 return new ServiceResponse<string>
                 {
@@ -1242,12 +1331,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
         [HttpPost]
-        [Route("approveshipment/{waybill}")]
-        public async Task<IServiceResponse<bool>> Approveshipment(string waybill)
+        [Route("approveshipment")]
+        public async Task<IServiceResponse<bool>> Approveshipment(ApproveShipmentDTO detail)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _portalService.ApproveShipment(waybill);
+                var result = await _portalService.ApproveShipment(detail);
                 return new ServiceResponse<bool>
                 {
                     Object = result
@@ -1269,6 +1358,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("getallstations")]
         public async Task<IServiceResponse<Dictionary<string, List<StationDTO>>>> getstations()
@@ -1310,6 +1400,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("getactivelgas")]
         public async Task<IServiceResponse<IEnumerable<LGADTO>>> GetActiveLGAs()
@@ -1341,7 +1432,46 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        //Remove this 
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("addmobilepickuprequestfortimedoutrequests")]
+        public async Task<IServiceResponse<bool>> AddPickupRequestForTimedOutRequest([FromBody] MobilePickUpRequestsDTO PickupRequest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var response = new ServiceResponse<bool>();
+                var request = Request;
+                var headers = request.Headers;
+                //headers.Add("Content-Type", "application/json");
+                if (headers.Contains("api_key"))
+                {
+                    var key = await _portalService.Decrypt();
+                    string token = headers.GetValues("api_key").FirstOrDefault();
+                    if (token == key)
+                    {
+                        var shipmentItem = await _portalService.AddMobilePickupRequest(PickupRequest);
+                        response.Object = true;
+                    }
+                }
+                return response;
+            });
+        }
 
 
+        [HttpPost]
+        [Route("cancelshipmentwithnocharge")]
+        public async Task<object> CancelShipmentWithNoCharge(CancelShipmentDTO shipment)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _portalService.CancelShipmentWithNoCharge(shipment);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
     }
 }

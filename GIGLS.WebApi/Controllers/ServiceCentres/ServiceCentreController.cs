@@ -241,5 +241,21 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("ServiceCentresByCountryId/{countryId:int}")]
+        public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetServiceCentresByCountryId(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var servicecentres = await _service.GetServiceCentresByCountryId(countryId);
+
+                return new ServiceResponse<List<ServiceCentreDTO>>
+                {
+                    Object = servicecentres
+                };
+            });
+        }
+
     }
 }

@@ -53,8 +53,39 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                 walletTransactionContext = walletTransactionContext.Where(s => serviceCentreIds.Contains(s.ServiceCentreId));
             }
 
-            var walletTransactions = walletTransactionContext.Include(s => s.ServiceCentre).ToList();
-            var walletTransactionDTO = Mapper.Map<IEnumerable<WalletTransactionDTO>>(walletTransactions);
+            //var walletTransactions = walletTransactionContext.Include(s => s.ServiceCentre).ToList();        
+            //var walletTransactionDTO = Mapper.Map<IEnumerable<WalletTransactionDTO>>(walletTransactions);
+
+            List<WalletTransactionDTO> walletTransactionDTO = (from w in walletTransactionContext
+                                                               select new WalletTransactionDTO()
+                                                               {
+                                                                   WalletTransactionId = w.WalletTransactionId,
+                                                                   DateOfEntry = w.DateOfEntry,
+                                                                   Amount = w.Amount,
+                                                                   CreditDebitType = w.CreditDebitType,
+                                                                   Description = w.Description,
+                                                                   IsDeferred = w.IsDeferred,
+                                                                   PaymentType = w.PaymentType,
+                                                                   UserId = w.UserId,
+                                                                   ServiceCentreId = w.ServiceCentreId,
+                                                                   ServiceCentre = Context.ServiceCentre.Where(s => s.ServiceCentreId == w.ServiceCentreId).Select(x => new ServiceCentreDTO
+                                                                   {
+                                                                       Code = x.Code,
+                                                                       Name = x.Name
+                                                                   }).FirstOrDefault(),
+                                                                   WalletId = w.WalletId,
+                                                                   Wallet = Context.Wallets.Where(s => s.WalletId == w.WalletId).Select(x => new WalletDTO
+                                                                   {
+                                                                       Balance = x.Balance,
+                                                                       CompanyType = x.CompanyType,
+                                                                       CustomerCode = x.CustomerCode,
+                                                                       CustomerId = x.CustomerId,
+                                                                       CustomerType = x.CustomerType,
+                                                                       WalletNumber = x.WalletNumber,
+                                                                   }).FirstOrDefault()
+                                                               }).OrderByDescending(s => s.DateOfEntry).ToList();
+
+
             return Task.FromResult(walletTransactionDTO.OrderByDescending(s => s.DateOfEntry).ToList());
         }
 
@@ -96,7 +127,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                                                                      CustomerId = x.CustomerId,
                                                                      CustomerType = x.CustomerType,
                                                                      WalletNumber = x.WalletNumber,
-                                                                     CustomerName = Context.Company.Where(s => s.CustomerCode == x.CustomerCode).FirstOrDefault().Name
+                                                                     //CustomerName = Context.Company.Where(s => s.CustomerCode == x.CustomerCode).FirstOrDefault().Name
                                                                  }).FirstOrDefault()
                                                              }).OrderByDescending(s => s.DateOfEntry).ToList();
 

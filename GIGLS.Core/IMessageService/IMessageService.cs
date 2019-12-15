@@ -8,5 +8,6 @@ namespace GIGLS.Core.IMessageService
     {
         Task<bool> SendMessage(MessageType messageType, EmailSmsType emailSmsType, object obj);
         Task SendGenericEmailMessage(MessageType messageType, object obj);
+        Task SendVoiceMessageAsync(string userId);
     }
 }

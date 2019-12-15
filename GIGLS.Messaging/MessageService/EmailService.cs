@@ -24,7 +24,7 @@ namespace GIGLS.Messaging.MessageService
             var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
 
             myMessage.AddTo(message.ToEmail);
-            myMessage.From = new SendGrid.Helpers.Mail.EmailAddress(fromEmail, fromName);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
             myMessage.Subject = message.Subject;
             myMessage.PlainTextContent = message.FinalBody;
             myMessage.HtmlContent = message.FinalBody;

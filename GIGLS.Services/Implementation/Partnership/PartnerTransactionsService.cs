@@ -36,7 +36,7 @@ namespace GIGLS.Services.Implementation.Partnership
             {
                 var GoogleURL = ConfigurationManager.AppSettings["DistanceURL"];
                 var GoogleApiKey = ConfigurationManager.AppSettings["DistanceApiKey"];
-                GoogleApiKey = Decrypt(GoogleApiKey);
+                GoogleApiKey = await Decrypt(GoogleApiKey);
                 var finalURL = $"{GoogleURL}{GoogleApiKey}&units=metric&origins={location.OriginLatitude},{location.OriginLongitude}&destinations={location.DestinationLatitude},{location.DestinationLongitude}";
                 var httpWebRequest = (HttpWebRequest)WebRequest.Create(finalURL);
                 using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
@@ -62,37 +62,34 @@ namespace GIGLS.Services.Implementation.Partnership
             var TotalPrice = 0.0M;
             if (partnerpay.ZoneMapping == 1)
             {
-                var TotalAmount = (partnerpay.ShipmentPrice + partnerpay.PickUprice);
+                var TotalAmount = (partnerpay.ShipmentPrice);
                 var amount = (0.8M * TotalAmount);
                 TotalPrice = Convert.ToDecimal(string.Format("{0:F2}", amount));
             }
             else
             {
-                var distance = Convert.ToDecimal(partnerpay.Distance);
-                var actualdistance = distance / 1000;
-                var TotalAmountBasedonDistance = actualdistance * 3;
-                var Time = Convert.ToDecimal(partnerpay.Time);
-                var actualTimeinMinutes = Convert.ToDecimal(string.Format("{0:F2}", (Time / 60)));
-                var TotalAmountBasedonTime = actualTimeinMinutes * 2;
-                var TotalAmountBasedonShipment = partnerpay.ShipmentPrice * 0.05M;
-                var Totalprice = TotalAmountBasedonDistance + TotalAmountBasedonTime + TotalAmountBasedonShipment;
-                Totalprice = Convert.ToDecimal(string.Format("{0:F2}", Totalprice));
-                var Sumofpickupandgooglapicalc =  0.8M * (Totalprice + partnerpay.ShipmentPrice);
-                TotalPrice = Convert.ToDecimal(string.Format("{0:F2}", Sumofpickupandgooglapicalc));
-
-
+                //var distance = Convert.ToDecimal(partnerpay.Distance);
+                //var actualdistance = distance / 1000;
+                //var TotalAmountBasedonDistance = actualdistance * 3;
+                //var Time = Convert.ToDecimal(partnerpay.Time);
+                //var actualTimeinMinutes = Convert.ToDecimal(string.Format("{0:F2}", (Time / 60)));
+                //var TotalAmountBasedonTime = actualTimeinMinutes * 2;
+                //var TotalAmountBasedonShipment = partnerpay.ShipmentPrice * 0.05M;
+                //var Totalprice = TotalAmountBasedonDistance + TotalAmountBasedonTime + TotalAmountBasedonShipment;
+                //Totalprice = Convert.ToDecimal(string.Format("{0:F2}", Totalprice));
+                //var Sumofpickupandgooglapicalc =  (Totalprice + partnerpay.ShipmentPrice);
+                //var pickupprice = partnerpay.PickUprice;
+                var TotalAmount = (partnerpay.PickUprice);
+                var amount = (0.8M * TotalAmount);
+                TotalPrice = Convert.ToDecimal(string.Format("{0:F2}", amount));
             }
             return await Task.FromResult(TotalPrice);
         }
+
         public async Task<object> AddPartnerPaymentLog(PartnerTransactionsDTO walletPaymentLogDto)
         {
             
             walletPaymentLogDto.UserId = await _userService.GetCurrentUserId();
-            if(walletPaymentLogDto.IsFromServiceCentre)
-            {
-                var Partnerid = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == walletPaymentLogDto.Waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
-                walletPaymentLogDto.UserId = Partnerid.UserId;
-            }
             var walletPaymentLog = Mapper.Map<PartnerTransactions>(walletPaymentLogDto);
             _uow.PartnerTransactions.Add(walletPaymentLog);
             await _uow.CompleteAsync();
@@ -119,7 +116,7 @@ namespace GIGLS.Services.Implementation.Partnership
                 }
                 return clearText;
             }
-        public string Decrypt(string cipherText)
+        public async Task<string> Decrypt(string cipherText)
             {
                 string EncryptionKey = "abc123";
                 cipherText = cipherText.Replace(" ", "+");

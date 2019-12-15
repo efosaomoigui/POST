@@ -383,6 +383,21 @@ namespace GIGLS.Core
 
                 config.CreateMap<LGA, LGADTO>();
                 config.CreateMap<LGADTO, LGA>();
+
+                config.CreateMap<WaybillPaymentLog, WaybillPaymentLogDTO>();
+                config.CreateMap<WaybillPaymentLogDTO, WaybillPaymentLog>();
+
+                config.CreateMap<Bank, BankDTO>();
+                config.CreateMap<BankDTO, Bank>();
+                
+                config.CreateMap<ActivationCampaignEmail, ActivationCampaignEmailDTO>();
+                config.CreateMap<ActivationCampaignEmailDTO, ActivationCampaignEmail>();
+
+                config.CreateMap<Shipment, PreShipmentMobileDTO>();
+                config.CreateMap<PreShipmentMobileDTO, Shipment>();
+                config.CreateMap<PreShipmentItemMobileDTO, ShipmentItem>();
+                config.CreateMap<ShipmentItem, PreShipmentItemMobileDTO>();
+
             });
 
             isInit = true;

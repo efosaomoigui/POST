@@ -281,7 +281,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
-        
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("overdueshipmentecommerceglobal")]
@@ -290,6 +289,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 var shipmentCollectionTuple = await _service.GetEcommerceOverDueShipmentsGLOBAL();
+                return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
+                {
+                    Object = shipmentCollectionTuple
+
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("overdueshipmentecommerceglobalByDate")]
+        public async Task<IServiceResponse<IEnumerable<ShipmentCollectionDTO>>> GetOverDueShipmentEcommerceGLOBALl( ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentCollectionTuple = await _service.GetEcommerceOverDueShipmentsGLOBAL(filterCriteria);
                 return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
                 {
                     Object = shipmentCollectionTuple

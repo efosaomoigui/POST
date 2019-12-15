@@ -34,7 +34,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> CreateCustomer(string CustomerCode);
 
         Task<bool> UpdateDeliveryNumber(MobileShipmentNumberDTO detail);
-        Task<string> CreatePartner(string CustomerCode);
+        Task<PartnerDTO> CreatePartner(string CustomerCode);
         Task<bool> deleterecord(string detail);
         Task<bool> VerifyPartnerDetails(PartnerDTO partner);
 
@@ -49,12 +49,14 @@ namespace GIGLS.Core.IServices.Shipments
 
         Task<List<Uri>> DisplayImages();
         Task<PreShipmentSummaryDTO> GetShipmentDetailsFromDeliveryNumber(string DeliveryNumber);
-        Task<bool> ApproveShipment(string waybillNumber);
+        Task<bool> ApproveShipment(ApproveShipmentDTO detail);
 
         Task<bool> CreateCompany(string CustomerCode);
         Task<MobilePriceDTO> GetHaulagePrice(HaulagePriceDTO haulagePricingDto);
         Task<bool> EditProfile(UserDTO user);
         Task<bool> UpdateVehicleProfile(UserDTO user);
+        Task<GIGGoDashboardDTO> GetDashboardInfo(BaseFilterCriteria filterCriteria);
+        Task<object> CancelShipmentWithNoCharge(string Waybill, string Userchanneltype);
 
     }
 }

@@ -43,7 +43,8 @@ namespace GIGLS.Services.Implementation.Zone
                 DepartureId = routeZoneMap.DepartureId,
                 DestinationId = routeZoneMap.DestinationId,
                 ZoneId = routeZoneMap.ZoneId,
-                Status = true
+                Status = true,
+                Rate = routeZoneMap.Rate
             };
 
             _unitOfWork.CountryRouteZoneMap.Add(Mapping);
@@ -108,6 +109,7 @@ namespace GIGLS.Services.Implementation.Zone
             zoneMap.DestinationId = routeZoneMap.DestinationId;
             zoneMap.ZoneId = routeZoneMap.ZoneId;
             zoneMap.Status = routeZoneMap.Status;
+            zoneMap.Rate = routeZoneMap.Rate;
 
             await _unitOfWork.CompleteAsync();
         }
@@ -122,5 +124,6 @@ namespace GIGLS.Services.Implementation.Zone
             zoneMap.Status = status;
             await _unitOfWork.CompleteAsync();
         }
+
     }
 }

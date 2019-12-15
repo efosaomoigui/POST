@@ -5,14 +5,13 @@ using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.DTO;
 using GIGLS.Core.Enums;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using GIGLS.Infrastructure;
-using GIGLS.CORE.Domain;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.Core.IServices.Business;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -21,18 +20,16 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
         private readonly IMessageSenderService _messageSenderService;
-        private readonly IShipmentTrackingService _shipmentTrackingService;
-       
+        private readonly IShipmentTrackService _shipmentTrackService;
+
 
         public MobileShipmentTrackingService(IUnitOfWork uow, IUserService userService, IMessageSenderService messageSenderService,
-            IShipmentTrackingService shipmentTrackingService
-            )
+            IShipmentTrackService shipmentTrackService)
         {
             _uow = uow;
             _userService = userService;
             _messageSenderService = messageSenderService;
-            _shipmentTrackingService = shipmentTrackingService;
-
+            _shipmentTrackService = shipmentTrackService;
 
         }
 
@@ -43,43 +40,70 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 //1. call agility core tracking
-                var shipmentTracking = await _shipmentTrackingService.GetShipmentTrackings(waybill);
+                var shipmentTracking = await _shipmentTrackService.TrackShipmentForMobile(waybill);
 
                 //2. call mobile tracking
                 var MobileshipmentTracking = await _uow.MobileShipmentTracking.GetMobileShipmentTrackingsAsync(waybill);
 
                 //3. convert agility tracking object to mobile tracking object
                 var shipmentTrackingMobileVersion = shipmentTracking.Select(s => new MobileShipmentTrackingDTO
-                {
-                    Waybill = s.Waybill,
-                    Location = s.Location,
-                    Status = s.Status,
-                    DateTime = s.DateTime,
-                    TrackingType = s.TrackingType,
-                    User = s.User,
-                    MobileShipmentTrackingId = s.ShipmentTrackingId,
-                    ScanStatus = new MobileScanStatusDTO
                     {
-                        Code = s.ScanStatus.Code,
-                        Incident = s.ScanStatus.Incident,
-                        Reason = s.ScanStatus.Reason,
-                        Comment = s.ScanStatus.Comment
+                        Waybill = s.Waybill,
+                        Location = s.Location,
+                        Status = s.Status,
+                        DateTime = s.DateTime,
+                        TrackingType = s.TrackingType,
+                        User = s.User,
+                        MobileShipmentTrackingId = s.ShipmentTrackingId,
+                        ScanStatus = new MobileScanStatusDTO
+                        {
+                            Code = s.ScanStatus.Code,
+                            Incident = s.ScanStatus.Incident,
+                            Reason = s.ScanStatus.Reason,
+                            Comment = s.ScanStatus.Comment
+                        }
                     }
-                }
                 );
+
                 //4. append the two lists together
                 MobileshipmentTracking.AddRange(shipmentTrackingMobileVersion);
+
+                var orderedtrackings = MobileshipmentTracking.OrderByDescending(x => x.DateTime).ToList();
+                
                 var addresses = await _uow.PreShipmentMobile.GetAsync(s=>s.Waybill == waybill);
-                var trackings = new MobileShipmentTrackingHistoryDTO
+
+                var trackings = new MobileShipmentTrackingHistoryDTO();
+
+                if (addresses !=null)
                 {
-                    Origin = addresses.SenderAddress,
-                    Destination = addresses.ReceiverAddress,
-                    MobileShipmentTrackings = MobileshipmentTracking
-                };
+                   trackings = new MobileShipmentTrackingHistoryDTO
+                    {
+                        Origin = addresses.SenderAddress,
+                        Destination = addresses.ReceiverAddress,
+                        MobileShipmentTrackings = orderedtrackings
+                   };
+                }
+                else
+                {
+                    var shipmentaddress = await _uow.Shipment.GetAsync(s => s.Waybill == waybill);
+                    if (shipmentaddress != null)
+                    {
+                        trackings = new MobileShipmentTrackingHistoryDTO
+                        {
+                            Origin = shipmentaddress.SenderAddress,
+                            Destination = shipmentaddress.ReceiverAddress,
+                            MobileShipmentTrackings = orderedtrackings
+                        };
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid waybill number!!");
+                    }
+                }
 
                 return trackings;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

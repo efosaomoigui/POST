@@ -1,9 +1,11 @@
 ﻿using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.View;
 using GIGLS.Core.View.AdminReportView;
 using GIGLS.CORE.DTO.Report;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,6 +26,10 @@ namespace GIGLS.Core.IRepositories.Account
         IQueryable<InvoiceView> GetCustomerTransactions();
         IQueryable<InvoiceView> GetCustomerInvoices();
         Task<List<InvoiceViewDTO>> GetInvoicesFromViewWithDeliveryTimeAsyncFromSP(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
+        Task<List<InvoiceMonitorDTO>> GetShipmentMonitorSetSP(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
+        Task<List<InvoiceMonitorDTO>> GetShipmentMonitorSetSPExpected(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
+        Task<List<InvoiceViewDTOUNGROUPED>> GetShipmentMonitorSetSP_NotGrouped(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
+        Task<List<InvoiceViewDTOUNGROUPED>> GetShipmentMonitorSetSP_NotGroupedx(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
 
         //Admin Report 
         IQueryable<Report_AllTimeSalesByCountry> GetAllTimeSalesByCountry();
@@ -33,5 +39,9 @@ namespace GIGLS.Core.IRepositories.Account
         IQueryable<Report_RevenuePerServiceCentre> GetRevenuePerServiceCentre();
         IQueryable<Report_TotalServiceCentreByState> GetTotalServiceCentreByState();
         IQueryable<Report_TotalOrdersDelivered> GetTotalOrdersDelivered();
+        IQueryable<InvoiceView> GetAllFromInvoiceAndShipments(ShipmentCollectionFilterCriteria filterCriteria);
+        Task<List<object>> SalesPerServiceCenter(List<InvoiceView> invoice);
+        Task<List<object>> MostShippedItemsByWeight(List<InvoiceView> invoice);
+        Task<List<object>> CountOfCustomers(List<InvoiceView> invoice);
     }
 }

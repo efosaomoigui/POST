@@ -1,15 +1,11 @@
 ﻿using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.BankSettlement;
 using GIGLS.Core.DTO.Report;
-using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.BankSettlement;
-using GIGLS.Core.IServices.CashOnDeliveryBalance;
-using GIGLS.CORE.DTO.Report;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -349,6 +345,21 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
 
                 return new ServiceResponse<object>
                 {
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getBanks")]
+        public async Task<IServiceResponse<IEnumerable<BankDTO>>> GetBanks()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var banks = await _bankprocessingorder.GetBanks();
+                return new ServiceResponse<IEnumerable<BankDTO>>
+                {
+                    Object = banks
                 };
             });
         }

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28803.202
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.757
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GIGLS.WebApi", "GIGLS.WebApi\GIGLS.WebApi.csproj", "{34F0A9AD-90CD-4E09-9034-10A5F730F85A}"
 EndProject
@@ -17,9 +17,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReprintReminder", "ReprintR
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiProcessor", "ApiProcessor\ApiProcessor.csproj", "{117C4B24-C6D3-4D17-BA8D-02E717CEAA94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvoiceReminderJob", "InvoiceReminderJob\InvoiceReminderJob.csproj", "{DD4DC220-45D5-476F-BDB7-2AFD10D1EAE9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvoiceReminderJob", "InvoiceReminderJob\InvoiceReminderJob.csproj", "{DD4DC220-45D5-476F-BDB7-2AFD10D1EAE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletReminderJobs", "WalletReminderJobs\WalletReminderJobs.csproj", "{BFEF64E0-9061-4865-87B2-A41F33383695}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WalletReminderJobs", "WalletReminderJobs\WalletReminderJobs.csproj", "{BFEF64E0-9061-4865-87B2-A41F33383695}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
