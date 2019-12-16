@@ -171,6 +171,7 @@
     <Compile Include="Domain\FleetPartInventoryHistory.cs" />
     <Compile Include="Domain\FleetTrip.cs" />
     <Compile Include="Domain\GeneralLedger.cs" />
+    <Compile Include="Domain\GiglgoStation.cs" />
     <Compile Include="Domain\GIGLSContext.cs" />
     <Compile Include="Domain\GroupWaybillNumber.cs" />
     <Compile Include="Domain\GroupWaybillNumberMapping.cs" />
@@ -320,6 +321,7 @@
     <Compile Include="DTO\Fleets\FleetPartInventoryDTO.cs" />
     <Compile Include="DTO\Fleets\FleetPartInventoryHistoryDTO.cs" />
     <Compile Include="DTO\Fleets\FleetTripDTO.cs" />
+    <Compile Include="DTO\GiglgoStationDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDistanceMappingPriceDTO.cs" />
     <Compile Include="DTO\Haulage\PackingListDTO.cs" />
@@ -563,6 +565,7 @@
     <Compile Include="IRepositories\ICountryRepository.cs" />
     <Compile Include="IRepositories\IDeliveryLocationRepository.cs" />
     <Compile Include="IRepositories\IDeliveryNumberRepository.cs" />
+    <Compile Include="IRepositories\IGiglgoStationRepository.cs" />
     <Compile Include="IRepositories\IMessageRepository.cs" />
     <Compile Include="IRepositories\IMobileRatingRepository.cs" />
     <Compile Include="IRepositories\INotificationRepository.cs" />
@@ -700,6 +703,7 @@
     <Compile Include="IServices\ICountryService.cs" />
     <Compile Include="IServices\IDeliveryLocationService.cs" />
     <Compile Include="IServices\IDeliveryNumberService.cs" />
+    <Compile Include="IServices\IGiglgoStationService.cs" />
     <Compile Include="IServices\IMessageService.cs" />
     <Compile Include="IServices\IMobileRatingService.cs" />
     <Compile Include="IServices\IMobileResponse.cs" />

@@ -1662,7 +1662,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     customerType = CustomerType.IndividualCustomer.ToString();
                     result.Department = customerType;
                     result.Designation = customerType;
-                    result.Organisation = customerType;
                     result.UserChannelType = UserChannelType.IndividualCustomer;
                     username = (user.UserChannelType == UserChannelType.IndividualCustomer) ? user.Email : user.UserChannelCode;
                 }
@@ -1671,7 +1670,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     customerType = CustomerType.Company.ToString();
                     result.Department = customerType;
                     result.Designation = customerType;
-                    result.Organisation = customerType;
+                    result.Organisation = user.Organisation;
                     result.UserChannelType = UserChannelType.Ecommerce;
                     username = (user.UserChannelType == UserChannelType.Ecommerce) ? user.Email : user.UserChannelCode;               
                 }
@@ -1680,8 +1679,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     customerType = CustomerType.Partner.ToString();
                     result.Department = customerType;
                     result.Designation = customerType;
-                    result.Organisation = customerType;
-                    result.UserChannelType = UserChannelType.Ecommerce;
+                    result.UserChannelType = UserChannelType.Partner;
                     username = (user.UserChannelType == UserChannelType.Partner) ? user.Email : user.UserChannelCode;
                 }
                                
@@ -1719,6 +1717,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task SendPickUpRequestMessage(string userId)
         {
             await _messageSenderService.SendVoiceMessageAsync(userId);
+        }
+        public async Task<List<GiglgoStationDTO>> GetGoStations()
+        {
+            return await _preShipmentMobileService.GetGoStations();
         }
     }
 }

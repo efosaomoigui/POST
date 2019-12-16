@@ -123,6 +123,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> CancelShipmentWithNoCharge(CancelShipmentDTO shipment);
 
         Task SendPickUpRequestMessage(string userId);
+        Task<List<GiglgoStationDTO>> GetGoStations();
 
     }
 }

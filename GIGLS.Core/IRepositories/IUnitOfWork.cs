@@ -176,6 +176,8 @@ namespace GIGLS.Core
         IBankRepository Bank { get; set; }
         IActivationCampaignEmailRepository ActivationCampaignEmail { get; set; }
 
+        IGiglgoStationRepository GiglgoStation { get; set; }
+
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

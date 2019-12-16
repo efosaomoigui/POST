@@ -148,6 +148,7 @@
     <Compile Include="Persistence\Repositories\Fleets\FleetPartRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\FleetRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\FleetTripRepository.cs" />
+    <Compile Include="Persistence\Repositories\GiglgoStationRepository.cs" />
     <Compile Include="Persistence\Repositories\Haulage\HaulageDistanceMappingPriceRepository.cs" />
     <Compile Include="Persistence\Repositories\Haulage\HaulageDistanceMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Haulage\HaulageRepository.cs" />
