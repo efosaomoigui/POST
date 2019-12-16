@@ -1369,7 +1369,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [AllowAnonymous]
         [HttpGet]
-        [Route("getallstations")]
+        [Route("getallstation_s")]
         public async Task<IServiceResponse<Dictionary<string, List<StationDTO>>>> getstations()
         {
             return await HandleApiOperationAsync(async () =>
@@ -1482,8 +1482,9 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        [AllowAnonymous]
         [HttpGet]
-        [Route("getgostations")]
+        [Route("getallstations")]
         public async Task<IServiceResponse<List<GiglgoStationDTO>>> GetGostations()
         {
             return await HandleApiOperationAsync(async () =>
