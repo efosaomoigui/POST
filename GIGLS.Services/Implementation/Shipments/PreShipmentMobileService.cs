@@ -665,7 +665,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     if (agilityShipment.Exists(s => s.Waybill == shipment.Waybill))
                     {
-                        agilityShipment.Remove(shipment);
+                        var s = agilityShipment.Where(x => x.Waybill == shipment.Waybill).FirstOrDefault();
+                        agilityShipment.Remove(s);
                     }
                     else
                     {
