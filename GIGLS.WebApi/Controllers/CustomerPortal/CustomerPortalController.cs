@@ -747,6 +747,16 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return await HandleApiOperationAsync(async () =>
             {
                 var user = await _portalService.CheckDetails(logindetail.UserDetail, logindetail.UserChannelType);
+                
+                if (user.RequiresCod == null)
+                    user.RequiresCod = false;
+
+                if (user.IsUniqueInstalled == null)
+                    user.IsUniqueInstalled = false;
+
+                if (user.IsEligible == null)
+                    user.IsEligible = false;
+
 
                 var vehicle = user.VehicleType;
                 var partnerType = "";
@@ -833,8 +843,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                                 AverageRatings = user.AverageRatings,
                                 IsVerified = user.IsVerified,
                                 PartnerType = partnerType,
-                                IsEligible = user.IsEligible
-
+                                IsEligible = (bool) user.IsEligible
                             };
                         }
                     }

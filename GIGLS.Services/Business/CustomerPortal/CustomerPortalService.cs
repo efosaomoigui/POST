@@ -643,7 +643,16 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var result = new SignResponseDTO();
 
-            if(user.UserChannelType != UserChannelType.Ecommerce && user.UserChannelType != UserChannelType.IndividualCustomer 
+            if (user.RequiresCod == null)
+                user.RequiresCod = false;
+
+            if (user.IsUniqueInstalled == null)
+                user.IsUniqueInstalled = false;
+
+            if (user.IsEligible == null)
+                user.IsEligible = false;
+
+            if (user.UserChannelType != UserChannelType.Ecommerce && user.UserChannelType != UserChannelType.IndividualCustomer 
                 && user.UserChannelType != UserChannelType.Partner)
             {
                 throw new GenericException($"Kindly supply valid customer channel ");
@@ -1093,7 +1102,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 ReturnServiceCentre = 0,
                                 UserActiveCountryId = user.UserActiveCountryId,
                                 Name = user.Organisation,
-                                isCodNeeded = user.RequiresCod
+                                isCodNeeded = (bool)user.RequiresCod
                             };
                             _uow.Company.Add(customer);
 
@@ -1509,7 +1518,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         UserActiveCountryId = user.UserActiveCountryId,
                         CompanyType = CompanyType.Ecommerce,
                         Name = user.Organisation,
-                        isCodNeeded = user.RequiresCod
+                        isCodNeeded = (bool) user.RequiresCod
 
                         //added this to pass channelcode 
                     };
