@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.DTO.Shipments
 {
-    public class ShipmentHashDTO : BaseDomainDTO
+    [Serializable()]
+    public class ShipmentHashDTO 
     {
         public int DestServId { get; set; }
         public int DeptServId { get; set; }

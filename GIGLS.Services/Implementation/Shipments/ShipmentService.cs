@@ -527,9 +527,10 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var hashString = await ComputeHash(shipmentDTO);
                 
-                var checkForHash = _uow.Shipment.GetAsync(x => x.ShipmentHash == hashString);
+                var checkForHash = await _uow.Shipment.GetAsync(x => x.ShipmentHash == hashString);
                 if (checkForHash != null)
                 {
+                    
                     throw new GenericException("This waybill already exists");
                 }
                 else
@@ -589,9 +590,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return newShipment;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 
@@ -612,12 +613,14 @@ namespace GIGLS.Services.Implementation.Shipments
             var shipmentHashDto = new ShipmentHashDTO
             {
                 DeptServId = shipmentDTO.DepartureServiceCentreId,
-                DestServId = shipmentDTO.DestinationServiceCentreId
+                DestServId = shipmentDTO.DestinationServiceCentreId,
+                Weight = new List<double>()
             };
 
             if (shipmentDTO.Description != null)
                 shipmentHashDto.Description = shipmentDTO.Description.ToLower();
             
+
             foreach (var item in shipmentDTO.ShipmentItems)
             {
                     shipmentHashDto.Weight.Add(item.Weight);
