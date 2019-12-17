@@ -207,6 +207,7 @@
     <Compile Include="Domain\RiderDelivery.cs" />
     <Compile Include="Domain\ShipmentDeliveryOptionMapping.cs" />
     <Compile Include="Domain\PreShipmentItem.cs" />
+    <Compile Include="Domain\ShipmentHash.cs" />
     <Compile Include="Domain\ShipmentPackagePrice.cs" />
     <Compile Include="Domain\PackingList .cs" />
     <Compile Include="Domain\IndividualCustomer.cs" />
@@ -404,6 +405,7 @@
     <Compile Include="DTO\Shipments\PickupManifestWaybillMappingDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentItemMobileDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentMobileDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentHashDTO.cs" />
     <Compile Include="DTO\Shipments\ThirdPartyPreShipmentItemDTO.cs" />
     <Compile Include="DTO\Shipments\ThirdPartyPreShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentManifestMappingDTO.cs" />
@@ -621,6 +623,7 @@
     <Compile Include="IRepositories\Shipments\IShipmentCancelRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentCollectionRepository.cs" />
     <Compile Include="IRepositories\Shipments\IPreShipmentItemRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentHashRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentItemRepository.cs" />
     <Compile Include="IRepositories\Shipments\IMissingShipmentRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentPackagePriceRepository.cs" />

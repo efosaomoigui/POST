@@ -448,6 +448,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IGiglgoStationRepository GiglgoStation { get; set; }
 
+        [Inject]
+        public IShipmentHashRepository ShipmentHash { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();
