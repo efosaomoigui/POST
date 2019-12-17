@@ -126,13 +126,13 @@ namespace GIGLS.Services.Implementation.Wallet
             //1. Generate reference code
             string reference = "wb-" + waybillPaymentLog.Waybill + "-" + await _passwordGenerator.Generate();
             
-            //2. Log the detail
-            
+            //2. Log the detail            
             if (waybillPaymentLog.UserId == null)
             {
                 waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
             }
 
+            waybillPaymentLog.Reference = reference;
             var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
 
             _uow.WaybillPaymentLog.Add(newPaymentLog);
@@ -162,7 +162,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     //client.BaseAddress = new Uri(payStackChargeAPI);
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-                    client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(payStackChargeAPI);
+                    client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(payStackSecretGhana);
 
                     MobileMoneyDTO mobileMoney = new MobileMoneyDTO
                     {
