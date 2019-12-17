@@ -316,10 +316,10 @@ namespace GIGLS.Services.Business.Scanning
                     if (waybillInManifestList.Count > 0)
                     {
                         //block scanning if any of the waybill has been collected
-                        foreach (var item in waybillInManifestList)
-                        {
-                            await BlockAnyScanOnCollectedShipment(item.Waybill, scan);
-                        }
+                        //foreach (var item in waybillInManifestList)
+                        //{
+                        //    await BlockAnyScanOnCollectedShipment(item.Waybill, scan);
+                        //}
 
                         //update dispatch to scan for Shipment recieved by Courier for delivery manifest
                         if (scan.ShipmentScanStatus == ShipmentScanStatus.SRC) // ||scan.ShipmentScanStatus == ShipmentScanStatus.WC )
