@@ -602,6 +602,10 @@ namespace GIGLS.Services.Implementation.Shipments
             //3. How do you handle special shipment that might not have weight
             //4. 
 
+            //get user Service center
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            shipmentDTO.DepartureServiceCentreId = serviceCenterIds[0];
+
             //Create Hash Set
             var shipmentHash = new HashSet<ShipmentHashDTO>();
 
@@ -616,7 +620,7 @@ namespace GIGLS.Services.Implementation.Shipments
             
             foreach (var item in shipmentDTO.ShipmentItems)
             {
-                shipmentHashDto.Weight.Add(item.Weight);
+                    shipmentHashDto.Weight.Add(item.Weight);
             }
 
             shipmentHash.Add(shipmentHashDto);
