@@ -660,11 +660,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException($"Kindly supply valid customer channel ");
             }
 
-            //if (user.UserChannelType == UserChannelType.Ecommerce)
-            //{
-            //    var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
-            //    throw new GenericException($"{ecommerceEmail.Value}");
-            //}
+            if (user.UserChannelType == UserChannelType.Ecommerce)
+            {
+                var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
+                throw new GenericException($"{ecommerceEmail.Value}");
+            }
 
             if (user.Email != null)
             {
