@@ -10,5 +10,6 @@ namespace GIGLS.Core.DTO
     {
         public int StationId { get; set; }
         public string StationName { get; set; }
+        public bool IsActive { get; set; }
     }
 }

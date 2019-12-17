@@ -13,5 +13,7 @@ namespace GIGLS.Core.Domain
         public string StateName { get; set; }
         public string StationCode { get; set; }
 
+        public bool IsActive { get; set; }
+
     }
 }
