@@ -530,10 +530,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
                 if (checkForHash != null)
                 {
-                    DateTime date = DateTime.Now.AddMinutes(-30);
-                    if (checkForHash.DateCreated < date)
+                    DateTime dateTime = DateTime.Now.AddMinutes(-30);
+
+                    if (checkForHash.DateCreated < dateTime)
                     {
-                        throw new GenericException("This waybill already exists");
+                        throw new GenericException("A similar shipment already exists on Agility, kinldy view your created shipment to confirm.");
                     }
                 }
                 else
