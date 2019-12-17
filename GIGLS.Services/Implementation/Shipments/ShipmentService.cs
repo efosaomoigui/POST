@@ -597,17 +597,28 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private async Task<string> ComputeHash(ShipmentDTO shipmentDTO)
         {
+            //1. Departure Service centre can be zero or null
+            //2. Description should be converted to lower case and you must check for null too  -- Done
+            //3. How do you handle special shipment that might not have weight
+            //4. 
+
             //Create Hash Set
             var shipmentHash = new HashSet<ShipmentHashDTO>();
-            var shipmentHashDto = new ShipmentHashDTO();
 
-            shipmentHashDto.DeptServId = shipmentDTO.DepartureServiceCentreId;
-            shipmentHashDto.DestServId = shipmentDTO.DestinationServiceCentreId;
-            shipmentHashDto.Description = shipmentDTO.Description;
+            var shipmentHashDto = new ShipmentHashDTO
+            {
+                DeptServId = shipmentDTO.DepartureServiceCentreId,
+                DestServId = shipmentDTO.DestinationServiceCentreId
+            };
+
+            if (shipmentDTO.Description != null)
+                shipmentHashDto.Description = shipmentDTO.Description.ToLower();
+            
             foreach (var item in shipmentDTO.ShipmentItems)
             {
                 shipmentHashDto.Weight.Add(item.Weight);
             }
+
             shipmentHash.Add(shipmentHashDto);
 
             // Create a SHA256   
@@ -627,7 +638,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 return await Task.FromResult(builder.ToString());
             }
-
         }
 
         // Convert an object to a byte array
@@ -640,6 +650,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 return ms.ToArray();
             }
         }
+
         private async Task<CustomerDTO> CreateCustomer(ShipmentDTO shipmentDTO)
         {
             var customerDTO = shipmentDTO.Customer[0];
