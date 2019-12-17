@@ -530,7 +530,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
                 if (checkForHash != null)
                 {
-                    DateTime dateTime = DateTime.Now.AddMinutes(-30);
+                    DateTime dateTime = DateTime.Now.AddMinutes(30);
 
                     if (checkForHash.DateCreated < dateTime)
                     {
