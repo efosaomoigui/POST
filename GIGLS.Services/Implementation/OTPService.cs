@@ -320,13 +320,9 @@ namespace GIGLS.Services.Implementation
             return user;
         }
         private async Task CalculateReferralBonus(UserDTO User)
-        {
-           
+        {           
             if (User.RegistrationReferrercode != null && User.IsUniqueInstalled == true)
             {
-
-                //}
-                //}
                 var referrercode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == User.RegistrationReferrercode);
                 if (referrercode != null)
                 {
