@@ -528,18 +528,22 @@ namespace GIGLS.Services.Implementation.Shipments
                 var hashString = await ComputeHash(shipmentDTO);
 
                 var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
-                //var checkForHash = await _uow.Shipment.GetAsync(x => x.ShipmentHash == hashString);
                 if (checkForHash != null)
                 {
-                    if (checkForHash.DateCreated < DateTime.Now.AddMinutes(-30))
+                    DateTime date = DateTime.Now.AddMinutes(-30);
+                    if (checkForHash.DateCreated < date)
                     {
                         throw new GenericException("This waybill already exists");
                     }
                 }
                 else
                 {
-                    shipmentDTO.ShipmentHash = hashString;
-                }
+                    var hasher = new ShipmentHash()
+                    {
+                        HashedShipment = hashString
+                    };
+                    _uow.ShipmentHash.Add(hasher);
+                }    
 
                 // create the customer, if not recorded in the system
                 var customerId = await CreateCustomer(shipmentDTO);
@@ -834,9 +838,6 @@ namespace GIGLS.Services.Implementation.Shipments
             newShipment.DestinationCountryId = destinationCountry.CountryId;
             newShipment.CurrencyRatio = departureCountry.CurrencyRatio;
             newShipment.ShipmentPickupPrice = shipmentDTO.ShipmentPickupPrice;
-            newShipment.ShipmentHash = shipmentDTO.ShipmentHash;
-            
-
             ////--end--///Set the DepartureCountryId and DestinationCountryId
 
             _uow.Shipment.Add(newShipment);
