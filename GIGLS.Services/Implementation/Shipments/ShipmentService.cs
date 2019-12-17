@@ -526,8 +526,9 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var hashString = await ComputeHash(shipmentDTO);
-                
-                var checkForHash = await _uow.Shipment.GetAsync(x => x.ShipmentHash == hashString);
+
+                var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
+                //var checkForHash = await _uow.Shipment.GetAsync(x => x.ShipmentHash == hashString);
                 if (checkForHash != null)
                 {
                     if (checkForHash.DateCreated < DateTime.Now.AddMinutes(-30))
@@ -834,6 +835,8 @@ namespace GIGLS.Services.Implementation.Shipments
             newShipment.CurrencyRatio = departureCountry.CurrencyRatio;
             newShipment.ShipmentPickupPrice = shipmentDTO.ShipmentPickupPrice;
             newShipment.ShipmentHash = shipmentDTO.ShipmentHash;
+            
+
             ////--end--///Set the DepartureCountryId and DestinationCountryId
 
             _uow.Shipment.Add(newShipment);

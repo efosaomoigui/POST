@@ -130,9 +130,7 @@ namespace GIGL.GIGLS.Core.Domain
 
         //new property for mobile
         public string DeliveryNumber { get; set; }
-
-        [MaxLength(256)]
-        public string ShipmentHash { get; set; }
+               
 
     }
 }

@@ -445,6 +445,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IActivationCampaignEmailRepository ActivationCampaignEmail { get; set; }
 
+        [Inject]
+        public IShipmentHashRepository ShipmentHash { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();
