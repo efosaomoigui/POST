@@ -22,7 +22,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
         {
             try
             {
-                var stations = _context.GiglgoStation;
+                var stations = _context.GiglgoStation.Where(s=>s.IsActive==true);
                 var stationsDto = from station in stations
                                  select new GiglgoStationDTO
                                  {
