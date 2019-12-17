@@ -16,6 +16,8 @@ using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Infrastructure;
+using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.IServices.Wallet;
 
 namespace GIGLS.Services.Implementation
 {
@@ -27,9 +29,12 @@ namespace GIGLS.Services.Implementation
         private readonly IUserService _UserService;
         private readonly IPasswordGenerator _codegenerator;
         private readonly IMessageSenderService _messageSenderService;
+        private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly IWalletTransactionService _iWalletTransactionService;
 
         public OTPService(IUnitOfWork uow, ISMSService MessageService, IEmailService EmailService, IUserService UserService,
-            IPasswordGenerator codegenerator, IMessageSenderService messageSenderService)
+            IPasswordGenerator codegenerator, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService,
+            IWalletTransactionService iWalletTransactionService)
         {
             _uow = uow;
             _SmsService = MessageService;
@@ -37,6 +42,8 @@ namespace GIGLS.Services.Implementation
             _UserService = UserService;
             _codegenerator = codegenerator;
             _messageSenderService = messageSenderService;
+            _globalPropertyService = globalPropertyService;
+            _iWalletTransactionService = iWalletTransactionService;
             MapperConfig.Initialize();
         }
         public async Task<UserDTO> IsOTPValid(int OTP)
@@ -100,6 +107,10 @@ namespace GIGLS.Services.Implementation
                 if (difference < 5)
                 {
                     var userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true);
+                    if(userdto.IsActive)
+                    {
+                        await CalculateReferralBonus(userdto);
+                    }
                     _uow.OTP.Remove(otpbody);
                     await _uow.CompleteAsync();
                     return userdto;
@@ -307,6 +318,39 @@ namespace GIGLS.Services.Implementation
                 user.Referrercode = ReferrerCodeExists.Referrercode;
             }
             return user;
+        }
+        private async Task CalculateReferralBonus(UserDTO User)
+        {
+           
+            if (User.RegistrationReferrercode != null && User.IsUniqueInstalled == true)
+            {
+
+                //}
+                var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, User.UserActiveCountryId);
+                var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == User.UserChannelCode);
+                wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
+                var transaction = new WalletTransactionDTO
+                {
+                    WalletId = wallet.WalletId,
+                    CreditDebitType = CreditDebitType.Credit,
+                    Amount = Convert.ToDecimal(bonus.Value),
+                    ServiceCentreId = 296,
+                    Waybill = "",
+                    Description = "Referral Bonus",
+                    PaymentType = PaymentType.Online,
+                    UserId = User.Id
+                };
+                var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
+                await _uow.CompleteAsync();
+                var messageExtensionDTO = new MobileMessageDTO()
+                {
+                    SenderName = User.FirstName + " " + User.LastName,
+                    SenderEmail = User.Email
+
+                };
+                await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
+            }
+
         }
 
     }
