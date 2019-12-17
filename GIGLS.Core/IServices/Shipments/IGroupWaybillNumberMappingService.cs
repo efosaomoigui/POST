@@ -17,6 +17,5 @@ namespace GIGLS.Core.IServices.Shipments
         Task<GroupWaybillNumberMappingDTO> GetWaybillNumbersInGroup(string groupWaybillNumber);
         Task RemoveWaybillNumberFromGroup(string groupWaybillNumber, string waybillNumber);
         Task MappingWaybillNumberToGroupForOverdue(string groupWaybillNumber, List<string> waybillNumber);
-        Task RemoveWaybillNumberFromGroupForCancelledShipment(string groupWaybillNumber, string waybillNumber);
     }
 }

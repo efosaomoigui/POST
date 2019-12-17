@@ -157,6 +157,15 @@ namespace GIGLS.Services.Implementation
             try
             {
                 var registerUser = await _UserService.GetUserUsingCustomer(user);
+                
+                if (registerUser != null)
+                {
+                    var company = await _uow.Company.GetAsync(s => s.CustomerCode == registerUser.UserChannelCode);
+                    if(company != null)
+                    {
+                        registerUser.IsEligible = Convert.ToBoolean(company.IsEligible);
+                    }
+                }
 
                 UserDTO registerUserDTo = new UserDTO();
                 registerUserDTo = await CheckVehicleInformation(registerUser, userchanneltype);

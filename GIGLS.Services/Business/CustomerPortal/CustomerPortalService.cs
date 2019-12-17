@@ -643,57 +643,69 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var result = new SignResponseDTO();
 
+            if (user.RequiresCod == null)
+                user.RequiresCod = false;
+
+            if (user.IsUniqueInstalled == null)
+                user.IsUniqueInstalled = false;
+
+            if (user.IsEligible == null)
+                user.IsEligible = false;
+
+            if (user.UserChannelType != UserChannelType.Ecommerce && user.UserChannelType != UserChannelType.IndividualCustomer 
+                && user.UserChannelType != UserChannelType.Partner)
+            {
+                throw new GenericException($"Kindly supply valid customer channel ");
+            }
+
             if (user.UserChannelType == UserChannelType.Ecommerce)
             {
                 var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
                 throw new GenericException($"{ecommerceEmail.Value}");
             }
-            else
+
+            if (user.Email != null)
             {
+                user.Email = user.Email.Trim();
+                user.Email = user.Email.ToLower();
+            }
 
-                if (user.Email != null)
-                {
-                    user.Email = user.Email.Trim();
-                    user.Email = user.Email.ToLower();
-                }
-
-                if ((user.UserActiveCountryId).ToString() == null || user.UserActiveCountryId == 0)
-                {
-                    var CountryId = await _preShipmentMobileService.GetCountryId();
-                    user.UserActiveCountryId = CountryId;
-                }
-                //to be used when we start getting the country name of the user!!!
-                else if (user.MobileCountryName != null)
-                {
-                    var countryid = await _uow.Country.GetAsync(s => s.CountryName.ToLower().Equals(user.MobileCountryName.ToLower()));
-                    user.UserActiveCountryId = countryid.CountryId;
-                }
-
-
-                bool checkRegistrationAccess = await CheckRegistrationAccess(user);
-
-                if (checkRegistrationAccess)
-                {
-                    if (user.UserChannelType == UserChannelType.Partner)
-                    {
-                        return await PartnerRegistration(user);
-                    }
-                    else if (user.UserChannelType == UserChannelType.IndividualCustomer)
-                    {
-                        return await IndividualRegistration(user);
-                    }
-                    else if (user.UserChannelType == UserChannelType.Ecommerce)
-                    {
-                        return await EcommerceRegistration(user);
-                    }
-                }
-                else
-                {
-                    throw new GenericException("User already exists!!!");
-                }
+            if ((user.UserActiveCountryId).ToString() == null || user.UserActiveCountryId == 0)
+            {
+                var CountryId = await _preShipmentMobileService.GetCountryId();
+                user.UserActiveCountryId = CountryId;
+            }
+            //to be used when we start getting the country name of the user!!!
+            else if (user.MobileCountryName != null)
+            {
+                var countryid = await _uow.Country.GetAsync(s => s.CountryName.ToLower().Equals(user.MobileCountryName.ToLower()));
+                user.UserActiveCountryId = countryid.CountryId;
             }
 
 
+            bool checkRegistrationAccess = await CheckRegistrationAccess(user);
+
+            if (checkRegistrationAccess)
+            {
+                if (user.UserChannelType == UserChannelType.Partner)
+                {
+                    return await PartnerRegistration(user);
+                }
+                else if (user.UserChannelType == UserChannelType.IndividualCustomer)
+                {
+                    return await IndividualRegistration(user);
+                }
+                else if (user.UserChannelType == UserChannelType.Ecommerce)
+                {
+                    return await EcommerceRegistration(user);
+                }
+            }
+            else
+            {
+                throw new GenericException("Customer already exists!!!");
+            }
+            //}
+            
             return result;
         }
 
@@ -745,14 +757,14 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else if (EmailUser.IsRegisteredFromMobile == true)
                 {
-                    throw new GenericException("User already exists!");
+                    throw new GenericException("Partner already exists!");
                 }
                 else
                 {
                     var phonepartnerdetails = await _uow.Partner.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber) || s.Email == user.Email);
                     if (phonepartnerdetails != null)
                     {
-                        throw new GenericException("User already Exists as a Partner!");
+                        throw new GenericException("Customer already Exists as a Partner!");
                     }
                     else
                     {
@@ -776,6 +788,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             EmailUser.Email = user.Email;
                             EmailUser.IsRegisteredFromMobile = true;
                             EmailUser.UserActiveCountryId = user.UserActiveCountryId;
+                            EmailUser.AppType = user.AppType;
                             var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
                             var u = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
 
@@ -802,6 +815,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                             _uow.VehicleType.Add(vehicletypeDTO);
 
                             EmailUser.UserChannelPassword = user.Password;
+                            user.UserChannelCode = EmailUser.UserChannelCode;
+                            user.Id = EmailUser.Id;
                             await _uow.CompleteAsync();
 
                             var response = await _userService.ResetPassword(EmailUser.Id, user.Password);
@@ -810,7 +825,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 result = await SendOTPForRegisteredUser(user);
                             }
                             var User = Mapper.Map<UserDTO>(EmailUser);
-                            await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
+                            await CalculateReferralBonus(user);
                         }
                     }
                 }
@@ -831,7 +846,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var phonepartnerdetails = await _uow.Partner.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber) || s.Email == user.Email);
             if (phonepartnerdetails != null)
             {
-                throw new GenericException("User details already Exists as a Partner!");
+                throw new GenericException("Customer details already Exists as a Partner!");
             }
             else
             {
@@ -881,7 +896,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 result = await SendOTPForRegisteredUser(user);
                 var User = Mapper.Map<UserDTO>(FinalUser);
-                await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
+                user.Id = FinalUser.Id;
+                await CalculateReferralBonus(user);
             }            
 
             return result;
@@ -912,7 +928,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else if (EmailUser.IsRegisteredFromMobile == true)
                 {
-                    throw new GenericException("User already exists!");
+                    throw new GenericException("Customer already exists!");
                 }
                 else
                 {
@@ -921,7 +937,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         if (emailcustomerdetails.IsRegisteredFromMobile == true)
                         {
-                            throw new GenericException("User aready exists!");
+                            throw new GenericException("Customer aready exists!");
                         }
                         else
                         {
@@ -940,8 +956,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                             user.UserChannelType = UserChannelType.IndividualCustomer;
                             user.IsFromMobile = true;
                             var registeredUser = await CreateUserBasedOnCustomerType(user);
+                            user.UserChannelCode = registeredUser.UserChannelCode;
+                            user.Id = registeredUser.Id;
                             result = await SendOTPForRegisteredUser(registeredUser);
-                            await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
+                            await CalculateReferralBonus(user);
                             return result;
                         }
                         else
@@ -955,7 +973,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 Password = user.Password,
                                 CustomerCode = EmailUser.UserChannelCode,
                                 PictureUrl = user.PictureUrl,
-                                IsRegisteredFromMobile = true
+                                IsRegisteredFromMobile = true,
+                                UserActiveCountryId = user.UserActiveCountryId
                             };
 
                             _uow.IndividualCustomer.Add(customer);
@@ -971,6 +990,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     EmailUser.IsRegisteredFromMobile = true;
                     EmailUser.UserActiveCountryId = user.UserActiveCountryId;
                     EmailUser.DateModified = DateTime.Now;
+                    EmailUser.AppType = user.AppType;
                     var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
                     var update = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
                     var resetPassword = await _userService.ResetPassword(EmailUser.Id, user.Password);
@@ -978,7 +998,9 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                     result = await SendOTPForRegisteredUser(user);
                     var User = Mapper.Map<UserDTO>(EmailUser);
-                    await CalculateReferralBonus(user.Referrercode, User, user.UserActiveCountryId);
+                    user.UserChannelCode = EmailUser.UserChannelCode;
+                    user.Id = EmailUser.Id;
+                    await CalculateReferralBonus(user);
                     return result;
                 }                                
             }
@@ -988,7 +1010,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                 user.IsFromMobile = true;
                 var registeredUser = await CreateUserBasedOnCustomerType(user);
                 result = await SendOTPForRegisteredUser(registeredUser);
-                await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
+                user.UserChannelCode = registeredUser.UserChannelCode;
+                user.Id = registeredUser.Id;
+                await CalculateReferralBonus(user);
             }
 
             return result;
@@ -1023,7 +1047,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else if (EmailUser.IsRegisteredFromMobile == true)
                 {
-                    throw new GenericException("User already exists!");
+                    throw new GenericException("Customer already exists!");
                 }
                 else
                 {
@@ -1033,7 +1057,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         if (emailcompanydetails.IsRegisteredFromMobile == true)
                         {
-                            throw new GenericException("Email already Exists on Company!");
+                            throw new GenericException("Email already Exists as Company Customer!");
                         }
                         else
                         {
@@ -1053,8 +1077,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                             user.UserChannelType = UserChannelType.Ecommerce;
                             user.IsFromMobile = true;
                             var registeredUser = await CreateUserBasedOnCustomerType(user);
+                            user.UserChannelCode = registeredUser.UserChannelCode;
+                            user.Id = registeredUser.Id;
                             result = await SendOTPForRegisteredUser(registeredUser);
-                            await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
+                            await CalculateReferralBonus(user);
                             return result;
                         }
                         else
@@ -1075,7 +1101,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 SettlementPeriod = 1,
                                 ReturnServiceCentre = 0,
                                 UserActiveCountryId = user.UserActiveCountryId,
-                                Name = user.Organisation
+                                Name = user.Organisation,
+                                isCodNeeded = (bool)user.RequiresCod
                             };
                             _uow.Company.Add(customer);
 
@@ -1089,6 +1116,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     EmailUser.Email = user.Email;
                     EmailUser.IsRegisteredFromMobile = true;
                     EmailUser.UserActiveCountryId = user.UserActiveCountryId;
+                    EmailUser.AppType = user.AppType;
 
                     var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
                     var update = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
@@ -1096,7 +1124,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                     await _uow.CompleteAsync();
 
                     result = await SendOTPForRegisteredUser(user);
-                    await CalculateReferralBonus(user.Referrercode, UpdatedUser, user.UserActiveCountryId);
+                    user.UserChannelCode = EmailUser.UserChannelCode;
+                    user.Id = EmailUser.Id;
+                    await CalculateReferralBonus(user);
                     return result;
                 }
 
@@ -1107,7 +1137,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                 user.IsFromMobile = true;
                 var registeredUser = await CreateUserBasedOnCustomerType(user);
                 result = await SendOTPForRegisteredUser(registeredUser);
-                await CalculateReferralBonus(user.Referrercode, registeredUser, user.UserActiveCountryId);
+                user.UserChannelCode = registeredUser.UserChannelCode;
+                user.Id = registeredUser.Id;
+                await CalculateReferralBonus(user);
             }
 
             return result;
@@ -1485,7 +1517,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                         IsRegisteredFromMobile = true,
                         UserActiveCountryId = user.UserActiveCountryId,
                         CompanyType = CompanyType.Ecommerce,
-                        Name = user.Organisation
+                        Name = user.Organisation,
+                        isCodNeeded = (bool) user.RequiresCod
 
                         //added this to pass channelcode 
                     };
@@ -1518,65 +1551,72 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
-        private async Task CalculateReferralBonus (string referrercode, UserDTO User, int Countryid)
+        private async Task CalculateReferralBonus (UserDTO User)
         {
             var transaction = new WalletTransactionDTO();
-            if (referrercode == null)
+            if (User.Referrercode == null || User.Referrercode == "")
             {
                 //Generate referrercode for user that is signing up and didnt 
                 //supply a referrecode
-                User = await GenerateReferrerCode(User);
+                var code = await GenerateReferrerCode(User);
             }
             else
             {
                 
-                //Generate referrercode for user that is signing up and supplies a referrerCode
-                User = await GenerateReferrerCode(User);
-
                 //based on the referrercode supplied, use it to get the wallet and update the balance 
-                var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == referrercode);
-                if (referrerCode != null)
+                var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == User.Referrercode);
+
+                //Generate referrercode for user that is signing up and supplies a referrerCode
+                var code = await GenerateReferrerCode(User);
+
+                if (referrerCode != null && User.IsUniqueInstalled==true)
                 {
                     var userDTO = await _userService.GetUserByChannelCode(referrerCode.UserCode);
-                    var campaignEmail = await _uow.ActivationCampaignEmail.GetAsync(s => s.Email == userDTO.Email);
-                    var activationStartDate = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ActivationCampaignStartDate, Countryid);
-                    var activationEndDate = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ActivationCampaignEndDate, Countryid);
-                    var startdate = Convert.ToDateTime(activationStartDate.Value);
-                    var endDate = Convert.ToDateTime(activationEndDate.Value);
-                    if (campaignEmail != null && (DateTime.Now >= startdate && DateTime.Now <= endDate))
+                    //var campaignEmail = await _uow.ActivationCampaignEmail.GetAsync(s => s.Email == userDTO.Email);
+                    //var activationStartDate = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ActivationCampaignStartDate, User.UserActiveCountryId);
+                    //var activationEndDate = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ActivationCampaignEndDate, User.UserActiveCountryId);
+                    //var startdate = Convert.ToDateTime(activationStartDate.Value);
+                    //var endDate = Convert.ToDateTime(activationEndDate.Value);
+                    //if (campaignEmail != null && (DateTime.Now >= startdate && DateTime.Now <= endDate))
+                    //{
+                    //    var referrerCodeForActivationCampaign = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferralBonusForActivationCampaign, User.UserActiveCountryId);
+                    //    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrerCode.UserCode);
+                    //    wallet.Balance = wallet.Balance + Convert.ToDecimal(referrerCodeForActivationCampaign.Value);
+                    //    transaction = new WalletTransactionDTO
+                    //    {
+                    //        WalletId = wallet.WalletId,
+                    //        CreditDebitType = CreditDebitType.Credit,
+                    //        Amount = Convert.ToDecimal(referrerCodeForActivationCampaign.Value),
+                    //        ServiceCentreId = 296,
+                    //        Waybill = "",
+                    //        Description = "Activation Campaign Referral Bonus",
+                    //        PaymentType = PaymentType.Online,
+                    //        UserId = referrerCode.UserId
+                    //    };
+                    //    var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
+                    //    await _uow.CompleteAsync();
+                    //    var messageExtensionDTO = new MobileMessageDTO()
+                    //    {
+                    //        SenderName = userDTO.FirstName + " " + userDTO.LastName,
+                    //        SenderEmail = userDTO.Email
+
+                    //    };
+                    //    await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
+                    //}
+                    var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, User.UserActiveCountryId);
+                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrerCode.UserCode);
+                    wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
+                    transaction = new WalletTransactionDTO
                     {
-                        var referrerCodeForActivationCampaign = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferralBonusForActivationCampaign, Countryid);
-                        var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrerCode.UserCode);
-                        wallet.Balance = wallet.Balance + Convert.ToDecimal(referrerCodeForActivationCampaign.Value);
-                        transaction = new WalletTransactionDTO
-                        {
-                            WalletId = wallet.WalletId,
-                            CreditDebitType = CreditDebitType.Credit,
-                            Amount = Convert.ToDecimal(referrerCodeForActivationCampaign.Value),
-                            ServiceCentreId = 296,
-                            Waybill = "",
-                            Description = "Activation Campaign Referral Bonus",
-                            PaymentType = PaymentType.Online,
-                            UserId = referrerCode.UserId
-                        };
-                    }
-                    else
-                    {
-                        var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, Countryid);
-                        var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrerCode.UserCode);
-                        wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
-                        transaction = new WalletTransactionDTO
-                        {
-                            WalletId = wallet.WalletId,
-                            CreditDebitType = CreditDebitType.Credit,
-                            Amount = Convert.ToDecimal(bonus.Value),
-                            ServiceCentreId = 296,
-                            Waybill = "",
-                            Description = "Referral Bonus",
-                            PaymentType = PaymentType.Online,
-                            UserId = referrerCode.UserId
-                        };
-                    }
+                        WalletId = wallet.WalletId,
+                        CreditDebitType = CreditDebitType.Credit,
+                        Amount = Convert.ToDecimal(bonus.Value),
+                        ServiceCentreId = 296,
+                        Waybill = "",
+                        Description = "Referral Bonus",
+                        PaymentType = PaymentType.Online,
+                        UserId = referrerCode.UserId
+                    };
                     var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
                     await _uow.CompleteAsync();
                     var messageExtensionDTO = new MobileMessageDTO()
@@ -1610,7 +1650,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                     PasswordExpireDate = DateTime.Now,
                     UserActiveCountryId = user.UserActiveCountryId,
                     IsFromMobile = true,
-                    IsRegisteredFromMobile = true
+                    IsRegisteredFromMobile = true,
+                    AppType = user.AppType
                 };
 
                 string username = null;

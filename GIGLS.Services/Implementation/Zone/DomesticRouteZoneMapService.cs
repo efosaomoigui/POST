@@ -7,7 +7,6 @@ using GIGLS.Infrastructure;
 using GIGLS.Core.DTO.Zone;
 using AutoMapper;
 using GIGLS.Core.IServices.ServiceCentres;
-using System;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -131,8 +130,7 @@ namespace GIGLS.Services.Implementation.Zone
         public async Task<DomesticRouteZoneMapDTO> GetZoneMobile(int departure, int destination)
         {
             var routeZoneMap = await _unitOfWork.DomesticRouteZoneMap.GetAsync(r =>
-               r.DepartureId == departure &&
-               r.DestinationId == destination, "Zone,Destination,Departure");
+               r.DepartureId == departure && r.DestinationId == destination, "Zone,Destination,Departure");
 
             if (routeZoneMap == null)
                 throw new GenericException("The Mapping of Route to Zone does not exist");

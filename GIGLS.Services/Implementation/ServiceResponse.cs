@@ -38,5 +38,6 @@ namespace GIGLS.Services.Implementation
 
         public bool IsVerified { get; set; }
         public string PartnerType { get; set; }
+        public bool IsEligible { get; set; }
     }
 }
