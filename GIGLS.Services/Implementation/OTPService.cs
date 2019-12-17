@@ -326,37 +326,29 @@ namespace GIGLS.Services.Implementation
             {
 
                 //}
-                var referrercode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == User.RegistrationReferrercode);
-                if (referrercode != null)
+                var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, User.UserActiveCountryId);
+                var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == User.UserChannelCode);
+                wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
+                var transaction = new WalletTransactionDTO
                 {
-                    var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, User.UserActiveCountryId);
-                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrercode.UserCode);
-                    var ReferrerUser = await _UserService.GetUserByChannelCode(referrercode.UserCode);
-                    if (wallet != null)
-                    {
-                        wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
-                    }
-                    var transaction = new WalletTransactionDTO
-                    {
-                        WalletId = wallet.WalletId,
-                        CreditDebitType = CreditDebitType.Credit,
-                        Amount = Convert.ToDecimal(bonus.Value),
-                        ServiceCentreId = 296,
-                        Waybill = "",
-                        Description = "Referral Bonus",
-                        PaymentType = PaymentType.Online,
-                        UserId = ReferrerUser.Id
-                    };
-                    var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
-                    await _uow.CompleteAsync();
-                    var messageExtensionDTO = new MobileMessageDTO()
-                    {
-                        SenderName = ReferrerUser.FirstName + " " + ReferrerUser.LastName,
-                        SenderEmail = ReferrerUser.Email
+                    WalletId = wallet.WalletId,
+                    CreditDebitType = CreditDebitType.Credit,
+                    Amount = Convert.ToDecimal(bonus.Value),
+                    ServiceCentreId = 296,
+                    Waybill = "",
+                    Description = "Referral Bonus",
+                    PaymentType = PaymentType.Online,
+                    UserId = User.Id
+                };
+                var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
+                await _uow.CompleteAsync();
+                var messageExtensionDTO = new MobileMessageDTO()
+                {
+                    SenderName = User.FirstName + " " + User.LastName,
+                    SenderEmail = User.Email
 
-                    };
-                    await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
-                }
+                };
+                await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
             }
 
         }
