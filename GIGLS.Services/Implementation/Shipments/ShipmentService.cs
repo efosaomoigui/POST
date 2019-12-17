@@ -528,7 +528,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var hashString = await ComputeHash(shipmentDTO);
                 
                 var checkForHash = await _uow.Shipment.GetAsync(x => x.ShipmentHash == hashString);
-                if (checkForHash != null)
+                if (checkForHash != null && shipmentDTO.DateCreated < DateTime.Now.AddMinutes(-30))
                 {
                     
                     throw new GenericException("This waybill already exists");
@@ -614,6 +614,8 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 DeptServId = shipmentDTO.DepartureServiceCentreId,
                 DestServId = shipmentDTO.DestinationServiceCentreId,
+                SenderPhoneNumber = shipmentDTO.Customer[0].PhoneNumber,
+                ReceiverPhoneNumber = shipmentDTO.ReceiverPhoneNumber,
                 Weight = new List<double>()
             };
 
