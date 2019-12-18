@@ -525,26 +525,27 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //var hashString = await ComputeHash(shipmentDTO);
+                var hashString = await ComputeHash(shipmentDTO);
 
-                //var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
-                //if (checkForHash != null)
-                //{
-                //    DateTime dateTime = DateTime.Now.AddMinutes(30);
+                var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
+                if (checkForHash != null)
+                {
+                    DateTime dateTime = DateTime.Now.AddMinutes(-30);
+                    int timeResult = DateTime.Compare(checkForHash.DateCreated, dateTime);
 
-                //    if (checkForHash.DateCreated < dateTime)
-                //    {
-                //        throw new GenericException("A similar shipment already exists on Agility, kinldy view your created shipment to confirm.");
-                //    }
-                //}
-                //else
-                //{
-                //    var hasher = new ShipmentHash()
-                //    {
-                //        HashedShipment = hashString
-                //    };
-                //    _uow.ShipmentHash.Add(hasher);
-                //}    
+                    if (timeResult > 0)
+                    {
+                        throw new GenericException("A similar shipment already exists on Agility, kindly view your created shipment to confirm.");
+                    }
+                }
+                else
+                {
+                    var hasher = new ShipmentHash()
+                    {
+                        HashedShipment = hashString
+                    };
+                    _uow.ShipmentHash.Add(hasher);
+                }
 
                 // create the customer, if not recorded in the system
                 var customerId = await CreateCustomer(shipmentDTO);
