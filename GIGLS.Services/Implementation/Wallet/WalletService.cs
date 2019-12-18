@@ -20,12 +20,14 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly IUserService _userService;
         private readonly IUnitOfWork _uow;
+        private readonly IGlobalPropertyService _globalPropertyService;
 
-        public WalletService(IUserService userService, INumberGeneratorMonitorService numberGeneratorMonitorService, IUnitOfWork uow)
+        public WalletService(IUserService userService, INumberGeneratorMonitorService numberGeneratorMonitorService, IUnitOfWork uow, IGlobalPropertyService globalPropertyService)
         {
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _userService = userService;
             _uow = uow;
+            _globalPropertyService = globalPropertyService;
             MapperConfig.Initialize();
         }
 
@@ -161,6 +163,8 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 throw new GenericException("Wallet does not exists");
             }
+
+            await CheckIfEcommerceIsEligible(wallet, walletTransactionDTO.Amount);
 
             if (walletTransactionDTO.UserId == null)
             {
@@ -346,6 +350,41 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var wallet = _uow.Wallet.GetAllAsQueryable();
             return wallet;
+        }
+
+        private async Task CheckIfEcommerceIsEligible (Core.Domain.Wallet.Wallet wallet, decimal amount)
+        {
+            var company = await _uow.Company.GetAsync(s => s.CustomerCode == wallet.CustomerCode);
+            
+            if(company != null)
+            {
+                if (company.IsEligible == true)
+                    return;
+                
+                decimal codAmountValue;
+
+                if (company.isCodNeeded)
+                {
+                    var codAmount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceCodAmount, company.UserActiveCountryId);
+                    codAmountValue = Convert.ToDecimal(codAmount.Value);
+                }
+                else
+                {
+                    var noCoDAmount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceNoCodAmount, company.UserActiveCountryId);
+                    codAmountValue = Convert.ToDecimal(noCoDAmount.Value);
+                }
+
+                company.WalletAmount = Convert.ToDecimal(company.WalletAmount) + amount;
+
+                if (company.WalletAmount >= codAmountValue)
+                {
+                    company.IsEligible = true;
+                }
+                else
+                {
+                    company.IsEligible = false;
+                }                
+            }            
         }
     }
 }

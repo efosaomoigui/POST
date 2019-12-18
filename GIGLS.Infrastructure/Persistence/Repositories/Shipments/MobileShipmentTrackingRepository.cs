@@ -1,9 +1,7 @@
 ﻿using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IRepositories.Shipments;
-using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
@@ -16,11 +14,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
     {
         private GIGLSContext _context;
        
-        public MobileShipmentTrackingRepository(GIGLSContext context)
-            : base(context)
+        public MobileShipmentTrackingRepository(GIGLSContext context) : base(context)
         {
-            _context = context;
-            
+            _context = context;            
         }
 
        public Task<List<MobileShipmentTrackingDTO>> GetMobileShipmentTrackingsAsync(string waybill)
@@ -47,8 +43,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                   Comment = x.Comment
                                               }).FirstOrDefault(),
                                           };
-                var AllshipmentTrackings = MobileshipmentTrackingDto.ToList();
-                return Task.FromResult(AllshipmentTrackings.ToList().OrderByDescending(x => x.DateTime).ToList());
+                return Task.FromResult(MobileshipmentTrackingDto.ToList());
             }
             catch (Exception)
             {
