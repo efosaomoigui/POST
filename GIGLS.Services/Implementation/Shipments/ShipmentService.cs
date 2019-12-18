@@ -531,11 +531,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (checkForHash != null)
                 {
                     DateTime dateTime = DateTime.Now.AddMinutes(-30);
-                    int timeResult = DateTime.Compare(checkForHash.DateCreated, dateTime);
+                    int timeResult = DateTime.Compare(checkForHash.DateModified, dateTime);
 
                     if (timeResult > 0)
                     {
                         throw new GenericException("A similar shipment already exists on Agility, kindly view your created shipment to confirm.");
+                    }
+                    else
+                    {
+                        checkForHash.DateModified = DateTime.Now;
                     }
                 }
                 else
