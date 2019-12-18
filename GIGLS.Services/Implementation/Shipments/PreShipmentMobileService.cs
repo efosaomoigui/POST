@@ -61,6 +61,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IHaulageDistanceMappingService _haulageDistanceMappingService;
         private readonly IPartnerService _partnerService;
         private readonly ICustomerService _customerService;
+        private readonly IGiglgoStationService _giglgoStationService;
 
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, IDeliveryOptionService deliveryService,
@@ -69,7 +70,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice, IMobileShipmentTrackingService mobiletrackingservice,
             IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice,
             IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMobileRatingService mobileratingService, IMessageSenderService messageSenderService,
-            IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService)
+            IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService, IGiglgoStationService giglgoStationService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -95,6 +96,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _haulageDistanceMappingService = haulageDistanceMappingService;
             _partnerService = partnerService;
             _customerService = customerService;
+            _giglgoStationService = giglgoStationService;
 
 
 
@@ -2784,6 +2786,13 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             return PickUpPrice;
         }
-        
+
+        public async Task<List<GiglgoStationDTO>> GetGoStations()
+        {
+            var stations = await _giglgoStationService.GetGoStations();
+            return stations;
+
+        }
+
     }
 }

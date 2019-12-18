@@ -135,5 +135,7 @@ namespace GIGLS.Core.DTO.Shipments
         public int DepartureCountryId { get; set; }
         public int DestinationCountryId { get; set; }
         public decimal CurrencyRatio { get; set; }
+
+        public string ShipmentHash { get; set; }
     }
 }

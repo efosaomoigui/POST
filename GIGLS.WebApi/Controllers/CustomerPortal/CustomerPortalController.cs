@@ -909,7 +909,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpGet]
-        [Route("getStations")]
+        [Route("getStation_s")]
         public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetStations()
         {
             return await HandleApiOperationAsync(async () =>
@@ -1479,6 +1479,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<object>
                 {
                     Object = flag
+                };
+            });
+        }
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("getStations")]
+        public async Task<IServiceResponse<List<GiglgoStationDTO>>> GetGostations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stations = await _portalService.GetGoStations();
+
+                return new ServiceResponse<List<GiglgoStationDTO>>
+                {
+                    Object = stations
                 };
             });
         }

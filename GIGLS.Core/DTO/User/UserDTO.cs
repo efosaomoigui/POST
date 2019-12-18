@@ -88,5 +88,6 @@ namespace GIGLS.Core.DTO.User
         public string AppType { get; set; }
 
         public bool? IsEligible { get; set; }
+        public string RegistrationReferrercode { get; set; }
     }
 }

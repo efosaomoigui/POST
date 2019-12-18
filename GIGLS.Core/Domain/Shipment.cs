@@ -130,6 +130,7 @@ namespace GIGL.GIGLS.Core.Domain
 
         //new property for mobile
         public string DeliveryNumber { get; set; }
+               
 
     }
 }
