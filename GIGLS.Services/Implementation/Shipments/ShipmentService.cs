@@ -1367,8 +1367,18 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var results1 = await _uow.Invoice.GetShipmentMonitorSetSP(accountFilterCriteria, serviceCenterIds);
-            var results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
 
+            var results = new List<InvoiceMonitorDTO>();
+
+            if(serviceCenterIds.Length > 0)
+            {
+                results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
+            }
+            else
+            {
+                results = results1;
+            }
+                       
             var result = new MulitipleInvoiceMonitorDTO()
             {
                 ShipmentCreated = results
@@ -1388,8 +1398,18 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var results1 = await _uow.Invoice.GetShipmentMonitorSetSPExpected(accountFilterCriteria, serviceCenterIds);
-            var results = results1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
+            
+            var results = new List<InvoiceMonitorDTO>();
 
+            if (serviceCenterIds.Length > 0)
+            {
+                results = results1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
+            }
+            else
+            {
+                results = results1;
+            }
+            
             var result = new MulitipleInvoiceMonitorDTO()
             {
                 ShipmentCreated = results
@@ -1409,8 +1429,18 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var results1 = await _uow.Invoice.GetShipmentMonitorSetSP(accountFilterCriteria, serviceCenterIds);
-            var results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
 
+            var results = new List<InvoiceMonitorDTO>();
+
+            if (serviceCenterIds.Length > 0)
+            {
+                results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
+            }
+            else
+            {
+                results = results1;
+            }
+            
             var shipmentscreated = results;
 
             var obj = ReturnShipmentCreatedByLimitDates(shipmentscreated, accountFilterCriteria, Limitdates);
@@ -1426,8 +1456,18 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var results1 = await _uow.Invoice.GetShipmentMonitorSetSPExpected(accountFilterCriteria, serviceCenterIds);
-            var results = results1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
 
+            var results = new List<InvoiceMonitorDTO>();
+
+            if (serviceCenterIds.Length > 0)
+            {
+                results = results1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
+            }
+            else
+            {
+                results = results1;
+            }
+            
             var shipmentsexpected = results;
 
             var obj = ReturnShipmentCreatedByLimitDates(shipmentsexpected, accountFilterCriteria, Limitdates);
@@ -1443,8 +1483,18 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var results1 = await _uow.Invoice.GetShipmentMonitorSetSP_NotGrouped(accountFilterCriteria, serviceCenterIds);
-            var results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
 
+            var results = new List<InvoiceViewDTOUNGROUPED>();
+
+            if (serviceCenterIds.Length > 0)
+            {
+                results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
+            }
+            else
+            {
+                results = results1;
+            }
+            
             var v = new List<InvoiceViewDTOUNGROUPED2>();
 
             if (Limitdates.StartLimit == 1 && Limitdates.EndLimit == 2)
@@ -1498,8 +1548,18 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var results1 = await _uow.Invoice.GetShipmentMonitorSetSP_NotGroupedx(accountFilterCriteria, serviceCenterIds);
-            var results = results1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
 
+            var results = new List<InvoiceViewDTOUNGROUPED>();
+
+            if (serviceCenterIds.Length > 0)
+            {
+                results = results1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
+            }
+            else
+            {
+                results = results1;
+            }
+            
             var v = new List<InvoiceViewDTOUNGROUPED2>();
 
             if (Limitdates.StartLimit == 1 && Limitdates.EndLimit == 2)
