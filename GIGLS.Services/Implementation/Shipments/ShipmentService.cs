@@ -1547,31 +1547,31 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private Tuple<DateTime, DateTime> ReturnStartAndEndDateLimit(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates)
         {
-
             var StartDate = new DateTime();
             var EndDate = new DateTime();
-            DateTime now = DateTime.Now.Date;
 
             //var now = new DateTime(2019, 2, 6);
-            var dashboardStartDate = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
+            //var dashboardStartDate = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
+            var dashboardStartDate = (DateTime) accountFilterCriteria.StartDate;
+            var dashboardEndDate = (DateTime) accountFilterCriteria.EndDate;
 
             if (Limitdates.StartLimit == 1 && Limitdates.EndLimit == 2)
             {
-                StartDate = now.AddHours(-24);
-                EndDate = now; 
+                StartDate = dashboardStartDate.AddHours(-24);
+                EndDate = dashboardEndDate; 
             }
             else if (Limitdates.StartLimit == 2 && Limitdates.EndLimit == 3)
             {
-                StartDate = now.AddHours(-48);
-                EndDate = now.AddHours(-24);
+                StartDate = dashboardStartDate.AddHours(-48);
+                EndDate = dashboardEndDate.AddHours(-24);
             }
             else if (Limitdates.StartLimit == 3 && Limitdates.EndLimit == 4)
             {
                 StartDate = dashboardStartDate;
-                EndDate = now.AddHours(-48);
+                EndDate = dashboardEndDate.AddHours(-48);
             }
 
-            return Tuple.Create<DateTime, DateTime>(StartDate.Date, EndDate.Date);
+            return Tuple.Create(StartDate.Date, EndDate.Date);
         }
 
         private Object[] ReturnShipmentCreatedByLimitDates(List<InvoiceMonitorDTO> shipmentscreated, AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates)
@@ -1706,12 +1706,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public object[] ReturnChartDataArray(List<InvoiceMonitorDTO2> values)
         {
-
             var chartData = new object[values.Count() + 1];
 
             if (values != null)
             {
-
                 chartData[0] = new object[]
                 {
                     "ServiceCenter",
@@ -1723,14 +1721,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     j++;
                     chartData[j] = new object[] {
-                    i.label,
-                    i.y
-                };
+                        i.label,
+                        i.y
+                    };
                 }
             }
 
             return chartData;
-
         }
 
         public object[] ReturnTotalZonesArray(double totalgreen, double totalyellow, double totalred)
