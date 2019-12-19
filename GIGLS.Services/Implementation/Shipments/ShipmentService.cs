@@ -1737,38 +1737,37 @@ namespace GIGLS.Services.Implementation.Shipments
         {
 
             //var chartData = new object[3];
-            List<object[]> termsList = new List<object[]>();
-
-            termsList.Add(new object[]
+            List<object[]> termsList = new List<object[]>
+            {
+                new object[]
                     {
                     "Zones",
                     "WaybillCount",
                     "Color"
-                    });
+                    },
 
-            termsList.Add(new object[] {
+                new object[] {
                     "Shipments Created within 24hrs",
                     totalgreen,
                     "green"
-                });
-            termsList.Add(new object[] {
+                },
+                new object[] {
                     "Shipments Created over 24hrs within 48hrs",
                     totalyellow,
                     "yellow"
-                });
+                },
 
-            termsList.Add(new object[] {
+                new object[] {
                     "Shipments Created Over 48hrs - 72hrs plus",
                     totalred,
                     "red"
-                });
-
+                }
+            };
 
             // You can convert it back to an array if you would like to
             object[] chartData = termsList.ToArray();
 
             return chartData;
-
         }
 
         private ColoredInvoiceMonitorDTO ReturnShipmentEXpected(List<InvoiceMonitorDTO> shipmentsexpected, AccountFilterCriteria accountFilterCriteria)
