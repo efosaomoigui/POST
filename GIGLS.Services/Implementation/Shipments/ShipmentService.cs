@@ -1388,7 +1388,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var results1 = await _uow.Invoice.GetShipmentMonitorSetSPExpected(accountFilterCriteria, serviceCenterIds);
-            var results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
+            var results = results1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
 
             var result = new MulitipleInvoiceMonitorDTO()
             {
