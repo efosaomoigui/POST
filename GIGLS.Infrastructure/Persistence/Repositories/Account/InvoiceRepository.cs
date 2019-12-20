@@ -189,7 +189,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
             DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
-
+            
             //declare parameters for the stored procedure
             SqlParameter iscancelled = new SqlParameter("@IsCancelled", (object)accountFilterCriteria.IsCancelled ?? DBNull.Value);
             SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
@@ -218,7 +218,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             try
             {
-                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceMonitorDTO>("NewSp " +
+                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceMonitorDTO>("NewSp2 " +
                   "@IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CountryId",
                   param)
                   .ToListAsync();
@@ -268,7 +268,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             try
             {
-                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTOUNGROUPED>("NewSp " +
+                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTOUNGROUPED>("NewSp2 " +
                   "@IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CountryId",
                   param)
                   .ToListAsync();

@@ -433,7 +433,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var accountFilterCriteria = new AccountFilterCriteria
                 {
                     StartDate = firstDayOfMonth,
-                    EndDate = today
+                    EndDate = today.AddDays(1)
                 };
 
                 // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
@@ -462,7 +462,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var accountFilterCriteria = new AccountFilterCriteria
                 {
                     StartDate = firstDayOfMonth,
-                    EndDate = today
+                    EndDate = today.AddDays(1)
                 };
 
                 var limitdates = new LimitDates
@@ -497,7 +497,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var accountFilterCriteria = new AccountFilterCriteria
                 {
                     StartDate = firstDayOfMonth,
-                    EndDate = today
+                    EndDate = today.AddDays(1)
                 };
 
                 var limitdates = new LimitDates
@@ -535,7 +535,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var accountFilterCriteria = new AccountFilterCriteria
                 {
                     StartDate = firstDayOfMonth,
-                    EndDate = today
+                    EndDate = today.AddDays(1)
                 };
 
                 // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
@@ -564,7 +564,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var accountFilterCriteria = new AccountFilterCriteria
                 {
                     StartDate = firstDayOfMonth,
-                    EndDate = today
+                    EndDate = today.AddDays(1)
                 };
 
                 var limitdates = new LimitDates
@@ -598,7 +598,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var accountFilterCriteria = new AccountFilterCriteria
                 {
                     StartDate = firstDayOfMonth,
-                    EndDate = today
+                    EndDate = today.AddDays(1)
                 };
 
                 var limitdates = new LimitDates

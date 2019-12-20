@@ -1712,10 +1712,8 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             var obj = new ColoredInvoiceMonitorDTO();
 
-            var now = DateTime.Now.Date;
-            //var now = new DateTime(2019, 2, 6);
-
-            var dashboardStartDate = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
+            var now = DateTime.Now;            
+            var dashboardStartDate = (DateTime)accountFilterCriteria.StartDate;
 
             var totalGreen = (from item in shipmentsexpected
                               where item.DateCreated > now.AddHours(-24) && item.DateCreated <= now
@@ -1740,11 +1738,8 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             var obj = new ColoredInvoiceMonitorDTO();
 
-            //DateTime now = DateTime.Now.Date;
-            var now = DateTime.Now.Date;
-            //DateTime now = new DateTime(2019, 2, 6);
-
-            var dashboardStartDate = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
+            var now = DateTime.Now; 
+            var dashboardStartDate = (DateTime)accountFilterCriteria.StartDate;
 
             var totalGreen = (from item in shipmentscreated
                               where item.DateCreated > now.AddHours(-24) && item.DateCreated <= now
