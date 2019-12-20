@@ -48,5 +48,9 @@ namespace GIGLS.Core.DTO.Account
         public int IndCustomerCount { get; set; }
         public int EcomCustomerCount { get; set; }
         public int CorpCustomerCount { get; set; }
+
+        public int IsCOD { get; set; }
+        public int IsNotCOD { get; set; }
+        public decimal? CODAmount { get; set; }
     }
 }

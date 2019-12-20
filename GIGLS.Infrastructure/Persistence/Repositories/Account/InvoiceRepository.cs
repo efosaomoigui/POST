@@ -578,7 +578,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               DestinationCountryId = s.DestinationCountryId,
                               PickupOptions = s.PickupOptions,
                               ApproximateItemsWeight = s.ApproximateItemsWeight,
-                              CustomerCode = s.CustomerCode
+                              CustomerCode = s.CustomerCode,
+                              IsCashOnDelivery = s.IsCashOnDelivery,
+                              CODAmount = s.CashOnDeliveryAmount
                           });
             return result;
         }
