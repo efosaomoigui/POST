@@ -265,6 +265,26 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("unmappedgroupedwaybillsforservicecentre/{serviceCentreId}")]
+        public async Task<IServiceResponse<IEnumerable<GroupWaybillNumberDTO>>> GetUnmappedGroupedWaybillsForServiceCentre(int serviceCentreId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                FilterOptionsDto filterOptionsDto = new FilterOptionsDto
+                {
+                    filterValue = serviceCentreId.ToString()
+                };
+
+                var unmappedGroupWaybills = await _shipmentService.GetUnmappedGroupedWaybillsForServiceCentre(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<GroupWaybillNumberDTO>>
+                {
+                    Object = unmappedGroupWaybills,
+                    Total = unmappedGroupWaybills.Count
+                };
+            });
+        }
 
         //Delivery Manifest
         //------------------
