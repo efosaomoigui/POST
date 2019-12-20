@@ -677,11 +677,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                         //setup login data
                         var formContent = new FormUrlEncodedContent(new[]
-                            {
-                         new KeyValuePair<string, string>("grant_type", "password"),
-                         new KeyValuePair<string, string>("Username", userDto.Username),
-                         new KeyValuePair<string, string>("Password", userDto.UserChannelPassword),
-                         });
+                        {
+                            new KeyValuePair<string, string>("grant_type", "password"),
+                            new KeyValuePair<string, string>("Username", userDto.Username),
+                            new KeyValuePair<string, string>("Password", userDto.UserChannelPassword),
+                        });
 
                         //setup login data
                         HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
@@ -747,6 +747,16 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return await HandleApiOperationAsync(async () =>
             {
                 var user = await _portalService.CheckDetails(logindetail.UserDetail, logindetail.UserChannelType);
+                
+                if (user.RequiresCod == null)
+                    user.RequiresCod = false;
+
+                if (user.IsUniqueInstalled == null)
+                    user.IsUniqueInstalled = false;
+
+                if (user.IsEligible == null)
+                    user.IsEligible = false;
+
 
                 var vehicle = user.VehicleType;
                 var partnerType = "";
@@ -832,8 +842,8 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                                 ReferrerCode = user.Referrercode,
                                 AverageRatings = user.AverageRatings,
                                 IsVerified = user.IsVerified,
-                                PartnerType = partnerType
-
+                                PartnerType = partnerType,
+                                IsEligible = (bool) user.IsEligible
                             };
                         }
                     }
@@ -875,7 +885,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var ItemTypes = _portalService.GetItemTypes();
+                var ItemTypes = await _portalService.GetItemTypes();
                 return new ServiceResponse<List<string>>
                 {
                     Object = ItemTypes,
@@ -899,7 +909,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpGet]
-        [Route("getStations")]
+        [Route("getStation_s")]
         public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetStations()
         {
             return await HandleApiOperationAsync(async () =>
@@ -986,6 +996,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        
         [HttpGet]
         [Route("getspecialpackages")]
         public async Task<IServiceResponse<SpecialResultDTO>> GetSpecialPackages()
@@ -1107,6 +1118,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
         [HttpGet]
         [Route("getpartnerwallettransactions")]
         public async Task<IServiceResponse<SummaryTransactionsDTO>> GetPartnerwalletTransactions()
@@ -1136,6 +1148,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
         [HttpPost]
         [Route("cancelshipment/{waybillNumber}")]
         public async Task<object> CancelShipment(string waybillNumber)
@@ -1466,6 +1479,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<object>
                 {
                     Object = flag
+                };
+            });
+        }
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("getStations")]
+        public async Task<IServiceResponse<List<GiglgoStationDTO>>> GetGostations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stations = await _portalService.GetGoStations();
+
+                return new ServiceResponse<List<GiglgoStationDTO>>
+                {
+                    Object = stations
                 };
             });
         }

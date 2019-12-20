@@ -80,5 +80,14 @@ namespace GIGLS.Core.DTO.User
         public bool IsRegisteredFromMobile { get; set; }
 
         public DateTime? VehicleLicenseExpiryDate { get; set; }
+
+        public bool? RequiresCod { get; set; }
+
+        public bool? IsUniqueInstalled { get; set; }
+
+        public string AppType { get; set; }
+
+        public bool? IsEligible { get; set; }
+        public string RegistrationReferrercode { get; set; }
     }
 }

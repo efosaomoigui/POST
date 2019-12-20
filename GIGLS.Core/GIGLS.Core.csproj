@@ -171,6 +171,7 @@
     <Compile Include="Domain\FleetPartInventoryHistory.cs" />
     <Compile Include="Domain\FleetTrip.cs" />
     <Compile Include="Domain\GeneralLedger.cs" />
+    <Compile Include="Domain\GiglgoStation.cs" />
     <Compile Include="Domain\GIGLSContext.cs" />
     <Compile Include="Domain\GroupWaybillNumber.cs" />
     <Compile Include="Domain\GroupWaybillNumberMapping.cs" />
@@ -206,6 +207,7 @@
     <Compile Include="Domain\RiderDelivery.cs" />
     <Compile Include="Domain\ShipmentDeliveryOptionMapping.cs" />
     <Compile Include="Domain\PreShipmentItem.cs" />
+    <Compile Include="Domain\ShipmentHash.cs" />
     <Compile Include="Domain\ShipmentPackagePrice.cs" />
     <Compile Include="Domain\PackingList .cs" />
     <Compile Include="Domain\IndividualCustomer.cs" />
@@ -320,6 +322,7 @@
     <Compile Include="DTO\Fleets\FleetPartInventoryDTO.cs" />
     <Compile Include="DTO\Fleets\FleetPartInventoryHistoryDTO.cs" />
     <Compile Include="DTO\Fleets\FleetTripDTO.cs" />
+    <Compile Include="DTO\GiglgoStationDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDistanceMappingPriceDTO.cs" />
     <Compile Include="DTO\Haulage\PackingListDTO.cs" />
@@ -402,6 +405,7 @@
     <Compile Include="DTO\Shipments\PickupManifestWaybillMappingDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentItemMobileDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentMobileDTO.cs" />
+    <Compile Include="DTO\Shipments\ShipmentHashDTO.cs" />
     <Compile Include="DTO\Shipments\ThirdPartyPreShipmentItemDTO.cs" />
     <Compile Include="DTO\Shipments\ThirdPartyPreShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentManifestMappingDTO.cs" />
@@ -563,6 +567,7 @@
     <Compile Include="IRepositories\ICountryRepository.cs" />
     <Compile Include="IRepositories\IDeliveryLocationRepository.cs" />
     <Compile Include="IRepositories\IDeliveryNumberRepository.cs" />
+    <Compile Include="IRepositories\IGiglgoStationRepository.cs" />
     <Compile Include="IRepositories\IMessageRepository.cs" />
     <Compile Include="IRepositories\IMobileRatingRepository.cs" />
     <Compile Include="IRepositories\INotificationRepository.cs" />
@@ -618,6 +623,7 @@
     <Compile Include="IRepositories\Shipments\IShipmentCancelRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentCollectionRepository.cs" />
     <Compile Include="IRepositories\Shipments\IPreShipmentItemRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IShipmentHashRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentItemRepository.cs" />
     <Compile Include="IRepositories\Shipments\IMissingShipmentRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentPackagePriceRepository.cs" />
@@ -700,6 +706,7 @@
     <Compile Include="IServices\ICountryService.cs" />
     <Compile Include="IServices\IDeliveryLocationService.cs" />
     <Compile Include="IServices\IDeliveryNumberService.cs" />
+    <Compile Include="IServices\IGiglgoStationService.cs" />
     <Compile Include="IServices\IMessageService.cs" />
     <Compile Include="IServices\IMobileRatingService.cs" />
     <Compile Include="IServices\IMobileResponse.cs" />

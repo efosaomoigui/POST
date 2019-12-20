@@ -16,6 +16,8 @@ using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Infrastructure;
+using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.IServices.Wallet;
 
 namespace GIGLS.Services.Implementation
 {
@@ -27,9 +29,12 @@ namespace GIGLS.Services.Implementation
         private readonly IUserService _UserService;
         private readonly IPasswordGenerator _codegenerator;
         private readonly IMessageSenderService _messageSenderService;
+        private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly IWalletTransactionService _iWalletTransactionService;
 
         public OTPService(IUnitOfWork uow, ISMSService MessageService, IEmailService EmailService, IUserService UserService,
-            IPasswordGenerator codegenerator, IMessageSenderService messageSenderService)
+            IPasswordGenerator codegenerator, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService,
+            IWalletTransactionService iWalletTransactionService)
         {
             _uow = uow;
             _SmsService = MessageService;
@@ -37,6 +42,8 @@ namespace GIGLS.Services.Implementation
             _UserService = UserService;
             _codegenerator = codegenerator;
             _messageSenderService = messageSenderService;
+            _globalPropertyService = globalPropertyService;
+            _iWalletTransactionService = iWalletTransactionService;
             MapperConfig.Initialize();
         }
         public async Task<UserDTO> IsOTPValid(int OTP)
@@ -45,8 +52,8 @@ namespace GIGLS.Services.Implementation
             var userdto = new UserDTO();
 
             if (otpbody.IsValid == true)
-            { 
-                userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true); 
+            {
+                userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true);
                 _uow.OTP.Remove(otpbody);
                 await _uow.CompleteAsync();
             }
@@ -61,7 +68,8 @@ namespace GIGLS.Services.Implementation
 
             if (IsPhone)
             {
-                if(!(phoneNumber.StartsWith("0") || phoneNumber.StartsWith("+"))){
+                if (!(phoneNumber.StartsWith("0") || phoneNumber.StartsWith("+")))
+                {
                     phoneNumber = phoneNumber.Remove(0, 4);
                 }
 
@@ -81,8 +89,6 @@ namespace GIGLS.Services.Implementation
 
         public async Task<UserDTO> ValidateOTP(OTPDTO otp)
         {
-            var userdto = new UserDTO();
-
             otp.EmailAddress = ExtractPhoneNumber(otp.EmailAddress);
 
             //get the otp details using the email 
@@ -96,14 +102,18 @@ namespace GIGLS.Services.Implementation
             else
             {
                 DateTime LatestTime = DateTime.Now;
-
                 TimeSpan span = LatestTime.Subtract(otpbody.DateCreated);
                 int difference = Convert.ToInt32(span.TotalMinutes);
                 if (difference < 5)
                 {
-                    userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true);
+                    var userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true);
+                    if(userdto.IsActive)
+                    {
+                        await CalculateReferralBonus(userdto);
+                    }
                     _uow.OTP.Remove(otpbody);
                     await _uow.CompleteAsync();
+                    return userdto;
                 }
                 else
                 {
@@ -112,33 +122,23 @@ namespace GIGLS.Services.Implementation
                     throw new GenericException("OTP has expired!.Kindly Resend OTP.");
                 }
             }
-                       
-            return userdto;
         }
 
         public async Task<OTPDTO> GenerateOTP(UserDTO user)
         {
-            try
+            int id = GeneratePassword();
+            var otp = new OTPDTO
             {
-                int id = GeneratePassword();
-                var otp = new OTPDTO
-                {
-                    EmailAddress = user.Email,
-                    PhoneNumber = user.PhoneNumber,
-                    CustomerId = user.UserChannelCode,
-                    Otp = id
-                };
+                EmailAddress = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                CustomerId = user.UserChannelCode,
+                Otp = id
+            };
 
-                var result = Mapper.Map<OTP>(otp);
-                _uow.OTP.Add(result);
-                await _uow.CompleteAsync();
-                return otp;
-            }
-            catch(Exception)
-            {
-                throw new GenericException("Error occurred while generating OTP....");
-            }
-
+            var result = Mapper.Map<OTP>(otp);
+            _uow.OTP.Add(result);
+            await _uow.CompleteAsync();
+            return otp;
         }
 
         private static int GeneratePassword()
@@ -169,9 +169,18 @@ namespace GIGLS.Services.Implementation
             {
                 var registerUser = await _UserService.GetUserUsingCustomer(user);
                 
+                if (registerUser != null)
+                {
+                    var company = await _uow.Company.GetAsync(s => s.CustomerCode == registerUser.UserChannelCode);
+                    if(company != null)
+                    {
+                        registerUser.IsEligible = Convert.ToBoolean(company.IsEligible);
+                    }
+                }
+
                 UserDTO registerUserDTo = new UserDTO();
                 registerUserDTo = await CheckVehicleInformation(registerUser, userchanneltype);
-                
+
                 return registerUserDTo;
             }
             catch (Exception)
@@ -212,7 +221,7 @@ namespace GIGLS.Services.Implementation
 
 
         }
-        
+
         public async Task<bool> IsPartnerActivated(string CustomerCode)
         {
             try
@@ -251,7 +260,7 @@ namespace GIGLS.Services.Implementation
                         VehicleType.VehicleType = null;
                         await _uow.CompleteAsync();
                     }
-                    
+
                     var vehicle = await _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode);
                     if (vehicle.Count() > 0)
                     {
@@ -261,7 +270,7 @@ namespace GIGLS.Services.Implementation
                             registerUser.VehicleType.Add(item.Vehicletype);
                         }
                     }
-                    
+
                     registerUser.IsVerified = VehicleType.IsActivated;
                 }
 
@@ -276,7 +285,7 @@ namespace GIGLS.Services.Implementation
                 }
 
                 var averageratings = await GetAverageRating(registerUser.UserChannelCode, userchanneltype);
-                
+
                 registerUser.AverageRatings = averageratings;
                 return registerUser;
             }
@@ -288,7 +297,7 @@ namespace GIGLS.Services.Implementation
 
         public async Task<UserDTO> GenerateReferrerCode(UserDTO user)
         {
-            
+
             var code = await _codegenerator.Generate(5);
             var ReferrerCodeExists = await _uow.ReferrerCode.GetAsync(s => s.UserCode == user.UserChannelCode);
             if (ReferrerCodeExists == null)
@@ -298,7 +307,6 @@ namespace GIGLS.Services.Implementation
                     Referrercode = code,
                     UserId = user.Id,
                     UserCode = user.UserChannelCode
-
                 };
                 var referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
                 _uow.ReferrerCode.Add(referrercode);
@@ -310,6 +318,44 @@ namespace GIGLS.Services.Implementation
                 user.Referrercode = ReferrerCodeExists.Referrercode;
             }
             return user;
+        }
+        private async Task CalculateReferralBonus(UserDTO User)
+        {           
+            if (User.RegistrationReferrercode != null && User.IsUniqueInstalled == true)
+            {
+                var referrercode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == User.RegistrationReferrercode);
+                if (referrercode != null)
+                {
+                    var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, User.UserActiveCountryId);
+                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrercode.UserCode);
+                    var ReferrerUser = await _UserService.GetUserByChannelCode(referrercode.UserCode);
+                    if (wallet != null)
+                    {
+                        wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
+                    }
+                    var transaction = new WalletTransactionDTO
+                    {
+                        WalletId = wallet.WalletId,
+                        CreditDebitType = CreditDebitType.Credit,
+                        Amount = Convert.ToDecimal(bonus.Value),
+                        ServiceCentreId = 296,
+                        Waybill = "",
+                        Description = "Referral Bonus",
+                        PaymentType = PaymentType.Online,
+                        UserId = ReferrerUser.Id
+                    };
+                    var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
+                    await _uow.CompleteAsync();
+                    var messageExtensionDTO = new MobileMessageDTO()
+                    {
+                        SenderName = ReferrerUser.FirstName + " " + ReferrerUser.LastName,
+                        SenderEmail = ReferrerUser.Email
+
+                    };
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
+                }
+            }
+
         }
 
     }

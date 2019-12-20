@@ -69,7 +69,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         //Payment Log
         Task<Tuple<Task<List<WalletPaymentLogDTO>>, int>> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto);
 
-        List<string> GetItemTypes();
+        Task<List<string>> GetItemTypes();
 
         Task<List<StationDTO>> GetLocalStations();
 
@@ -123,6 +123,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> CancelShipmentWithNoCharge(CancelShipmentDTO shipment);
 
         Task SendPickUpRequestMessage(string userId);
+        Task<List<GiglgoStationDTO>> GetGoStations();
 
     }
 }

@@ -49,5 +49,9 @@ namespace GIGLS.Core.DTO.Customers
 
         public CountryDTO Country { get; set; }
         public bool isCodNeeded { get; set; }
+
+        //added this for Giglgo customers
+        public decimal? WalletAmount { get; set; }
+        public bool? IsEligible { get; set; }
     }
 }

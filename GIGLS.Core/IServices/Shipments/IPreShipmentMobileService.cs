@@ -57,6 +57,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> UpdateVehicleProfile(UserDTO user);
         Task<GIGGoDashboardDTO> GetDashboardInfo(BaseFilterCriteria filterCriteria);
         Task<object> CancelShipmentWithNoCharge(string Waybill, string Userchanneltype);
+        Task<List<GiglgoStationDTO>> GetGoStations();
 
     }
 }

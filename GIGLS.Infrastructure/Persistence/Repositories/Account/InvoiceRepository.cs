@@ -197,7 +197,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
 
             SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);//accountFilterCriteria.PaymentStatus
-            var sc = (serviceCentreIds.Length > 0) ? serviceCentreIds[0] : 0;
+            var sc = (serviceCentreIds.Length == 0) ? serviceCentreIds[0] : 0;
             SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
             SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
             SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
@@ -209,7 +209,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                 endDate,
                 paymentStatus,
                 departureServiceCentreId,
-                //stationId,
+                stationId,
                 CountryId
             };
 
@@ -218,7 +218,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             try
             {
                 listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceMonitorDTO>("NewSp " +
-                  "@IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @CountryId",
+                  "@IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CountryId",
                   param)
                   .ToListAsync();
             }
@@ -252,7 +252,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
 
             SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);//accountFilterCriteria.PaymentStatus
-            var sc = (serviceCentreIds.Length > 0) ? serviceCentreIds[0] : 0;
+            var sc = (serviceCentreIds.Length == 0) ? serviceCentreIds[0] : 0;
             SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
             SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
             SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
@@ -306,7 +306,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
 
             SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);//accountFilterCriteria.PaymentStatus
-            var sc = (serviceCentreIds.Length > 0) ? serviceCentreIds[0] : 0;
+            var sc = (serviceCentreIds.Length == 0) ? serviceCentreIds[0] : 0;
             SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
             SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
             SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
@@ -363,7 +363,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
 
             SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);//accountFilterCriteria.PaymentStatus
-            var sc = (serviceCentreIds.Length > 0) ? serviceCentreIds[0] : 0;
+            var sc = (serviceCentreIds.Length == 1) ? serviceCentreIds[0] : 0;
             SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
             SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
             SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
