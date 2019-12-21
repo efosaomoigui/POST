@@ -356,8 +356,10 @@ namespace GIGLS.Services.Implementation.Report
 
             //allShipmentsQueryable = allShipmentsQueryable.Where(s => !shipmentTrackingHistory.Contains(s.Waybill));
 
-            allShipmentsQueryable = allShipmentsQueryable.Where(x => !(x.ShipmentScanStatus == ShipmentScanStatus.DSC 
-            || x.ShipmentScanStatus == ShipmentScanStatus.TRO || x.ShipmentScanStatus == ShipmentScanStatus.DTR));
+            //allShipmentsQueryable = allShipmentsQueryable.Where(x => !(x.ShipmentScanStatus == ShipmentScanStatus.DSC 
+            //|| x.ShipmentScanStatus == ShipmentScanStatus.TRO || x.ShipmentScanStatus == ShipmentScanStatus.DTR));
+
+            allShipmentsQueryable = allShipmentsQueryable.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.CRT);
 
             dashboardDTO.TotalShipmentOrdered = allShipmentsQueryable.Count();
             
@@ -519,8 +521,10 @@ namespace GIGLS.Services.Implementation.Report
                 allShipmentsQueryable = allShipmentsQueryable.Where(x => x.CashOnDeliveryAmount > 0);
             }
 
-            allShipmentsQueryable = allShipmentsQueryable.Where(x => !(x.ShipmentScanStatus == ShipmentScanStatus.DSC
-            || x.ShipmentScanStatus == ShipmentScanStatus.TRO || x.ShipmentScanStatus == ShipmentScanStatus.DTR));
+            //allShipmentsQueryable = allShipmentsQueryable.Where(x => !(x.ShipmentScanStatus == ShipmentScanStatus.DSC
+            //|| x.ShipmentScanStatus == ShipmentScanStatus.TRO || x.ShipmentScanStatus == ShipmentScanStatus.DTR));
+
+            allShipmentsQueryable = allShipmentsQueryable.Where(x => x.ShipmentScanStatus == ShipmentScanStatus.CRT);
 
             //var shipmentTrackingHistory = _uow.ShipmentTracking.GetAllAsQueryable()
             //    .Where(x => x.Status == ShipmentScanStatus.DSC.ToString() || x.Status == ShipmentScanStatus.DPC.ToString()).Select(x => x.Waybill).Distinct();
