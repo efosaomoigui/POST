@@ -314,7 +314,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             try
             {
-                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTOUNGROUPED>("NewSp_Expected " +
+                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTOUNGROUPED>("NewSp_Expected2 " +
                   "@IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CountryId",
                   param)
                   .ToListAsync();
@@ -366,7 +366,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             try
             {
-                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceMonitorDTO>("NewSp_Expected " +
+                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceMonitorDTO>("NewSp_Expected2 " +
                   "@IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CountryId",
                   param)
                   .ToListAsync();
