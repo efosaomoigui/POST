@@ -343,11 +343,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
 
 
-            SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);//accountFilterCriteria.PaymentStatus
+            SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);
 
             var sc = (serviceCentreIds.Length == 1) ? serviceCentreIds[0] : 0;  
             //var sc = (serviceCentreIds.Length == 0) ? 0 : serviceCentreIds;  //we need contain function to handle list of service centre fixing -- bug
-            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
+            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); 
             SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
             SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
 

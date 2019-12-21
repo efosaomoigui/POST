@@ -426,9 +426,8 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
 
-                var today = DateTime.Now.Date; // ;new DateTime(2019, 2, 6)
+                var today = DateTime.Now.Date;
                 var firstDayOfMonth = today.AddDays(-7);
-                //var firstDayOfMonth = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]); //today.AddDays(limitspan); //DateTime.Now.AddDays(limitspan); //   new DateTime(today.Year, today.Month, 1); 
 
                 var accountFilterCriteria = new AccountFilterCriteria
                 {
@@ -436,7 +435,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
                     EndDate = today.AddDays(1)
                 };
 
-                // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
                 var results = await _service.GetShipmentMonitor(accountFilterCriteria);
 
                 return new ServiceResponse<System.Web.Mvc.JsonResult>()
@@ -455,9 +453,8 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
 
-                var today = DateTime.Now.Date; // ;new DateTime(2019, 2, 6)
+                var today = DateTime.Now.Date; 
                 var firstDayOfMonth = today.AddDays(-7);
-                //var firstDayOfMonth = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
 
                 var accountFilterCriteria = new AccountFilterCriteria
                 {
@@ -470,8 +467,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                     StartLimit = limitStart,
                     EndLimit = limitEnd
                 };
-
-                // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
+                
                 var chartData = await _service.GetShipmentCreatedByDateMonitor(accountFilterCriteria, limitdates);
 
                 return new ServiceResponse<System.Web.Mvc.JsonResult>()
@@ -489,10 +485,8 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var today = DateTime.Now.Date; // ;new DateTime(2019, 2, 6)
+                var today = DateTime.Now.Date; 
                 var firstDayOfMonth = today.AddDays(-7);
-                //var firstDayOfMonth = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
-                //today.AddDays(limitspan); //DateTime.Now.AddDays(limitspan); //   new DateTime(today.Year, today.Month, 1);  
 
                 var accountFilterCriteria = new AccountFilterCriteria
                 {
@@ -507,7 +501,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
                     ScName = scname
                 };
 
-                // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
                 var chartData = await _service.GetShipmentWaybillsByDateMonitor(accountFilterCriteria, limitdates);
 
                 return new ServiceResponse<System.Web.Mvc.JsonResult>()
@@ -527,10 +520,8 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
 
-                var today = DateTime.Now.Date; // ;new DateTime(2019, 2, 6)
+                var today = DateTime.Now.Date; 
                 var firstDayOfMonth = today.AddDays(-7);
-                //var firstDayOfMonth = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
-                //today.AddDays(limitspan); //DateTime.Now.AddDays(limitspan); //   new DateTime(today.Year, today.Month, 1);  
 
                 var accountFilterCriteria = new AccountFilterCriteria
                 {
@@ -538,7 +529,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
                     EndDate = today.AddDays(1)
                 };
 
-                // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
                 var results = await _service.GetShipmentMonitorx(accountFilterCriteria);
 
                 return new ServiceResponse<System.Web.Mvc.JsonResult>()
@@ -556,10 +546,8 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var today = DateTime.Now.Date; // ;new DateTime(2019, 2, 6)
+                var today = DateTime.Now.Date;
                 var firstDayOfMonth = today.AddDays(-7);
-                //var firstDayOfMonth = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
-                //today.AddDays(limitspan); //DateTime.Now.AddDays(limitspan); //   new DateTime(today.Year, today.Month, 1);  
 
                 var accountFilterCriteria = new AccountFilterCriteria
                 {
@@ -573,7 +561,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
                     EndLimit = limitEnd
                 };
 
-                // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
                 var chartData = await _service.GetShipmentCreatedByDateMonitorx(accountFilterCriteria, limitdates);
 
                 return new ServiceResponse<System.Web.Mvc.JsonResult>()
@@ -591,9 +578,8 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var today = DateTime.Now.Date; // ;new DateTime(2019, 2, 6)
+                var today = DateTime.Now.Date; 
                 var firstDayOfMonth = today.AddDays(-7);
-                //var firstDayOfMonth = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
 
                 var accountFilterCriteria = new AccountFilterCriteria
                 {
@@ -608,7 +594,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
                     ScName = scname
                 };
 
-                // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
                 var chartData = await _service.GetShipmentWaybillsByDateMonitorx(accountFilterCriteria, limitdates);
 
                 return new ServiceResponse<System.Web.Mvc.JsonResult>()
