@@ -1609,29 +1609,27 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             var StartDate = new DateTime();
             var EndDate = new DateTime();
+            DateTime now = DateTime.Now;
 
-            //var now = new DateTime(2019, 2, 6);
-            //var dashboardStartDate = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
-            var dashboardStartDate = (DateTime) accountFilterCriteria.StartDate;
-            var dashboardEndDate = (DateTime) accountFilterCriteria.EndDate;
+            var dashboardStartDate = (DateTime)accountFilterCriteria.StartDate;
 
             if (Limitdates.StartLimit == 1 && Limitdates.EndLimit == 2)
             {
-                StartDate = dashboardStartDate.AddHours(-24);
-                EndDate = dashboardEndDate; 
+                StartDate = now.AddHours(-24);
+                EndDate = now;
             }
             else if (Limitdates.StartLimit == 2 && Limitdates.EndLimit == 3)
             {
-                StartDate = dashboardStartDate.AddHours(-48);
-                EndDate = dashboardEndDate.AddHours(-24);
+                StartDate = now.AddHours(-48);
+                EndDate = now.AddHours(-24);
             }
             else if (Limitdates.StartLimit == 3 && Limitdates.EndLimit == 4)
             {
                 StartDate = dashboardStartDate;
-                EndDate = dashboardEndDate.AddHours(-48);
+                EndDate = now.AddHours(-48);
             }
-
-            return Tuple.Create(StartDate.Date, EndDate.Date);
+            
+            return Tuple.Create(StartDate, EndDate);
         }
 
         private Object[] ReturnShipmentCreatedByLimitDates(List<InvoiceMonitorDTO> shipmentscreated, AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates)
