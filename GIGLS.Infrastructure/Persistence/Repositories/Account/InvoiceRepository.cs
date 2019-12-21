@@ -314,7 +314,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             try
             {
-                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTOUNGROUPED>("NewSp_Expected " +
+                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTOUNGROUPED>("NewSp_Expected2 " +
                   "@IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CountryId",
                   param)
                   .ToListAsync();
@@ -343,11 +343,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
 
 
-            SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);//accountFilterCriteria.PaymentStatus
+            SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);
 
             var sc = (serviceCentreIds.Length == 1) ? serviceCentreIds[0] : 0;  
             //var sc = (serviceCentreIds.Length == 0) ? 0 : serviceCentreIds;  //we need contain function to handle list of service centre fixing -- bug
-            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
+            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); 
             SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
             SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
 
@@ -366,7 +366,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
 
             try
             {
-                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceMonitorDTO>("NewSp_Expected " +
+                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceMonitorDTO>("NewSp_Expected2 " +
                   "@IsCancelled, @StartDate, @EndDate, @PaymentStatus, @DepartureServiceCentreId, @StationId, @CountryId",
                   param)
                   .ToListAsync();

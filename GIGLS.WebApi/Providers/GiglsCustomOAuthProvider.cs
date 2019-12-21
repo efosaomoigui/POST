@@ -166,6 +166,7 @@ namespace GIGLS.WebApi.Providers
                     { "PhoneNumber", user.PhoneNumber},
                     { "IsActive", user.IsActive.ToString()},
                     { "Organization", user.Organisation},
+                    { "Organisation", user.Organisation},
                     { "UserChannelCode", user.UserChannelCode},
                     { "PictureUrl", user.PictureUrl}
                 };
