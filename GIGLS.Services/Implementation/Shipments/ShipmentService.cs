@@ -1398,25 +1398,32 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var results1 = await _uow.Invoice.GetShipmentMonitorSetSPExpected(accountFilterCriteria, serviceCenterIds);
-            
+            var collectionResults1 = await _uow.Invoice.GetShipmentWaitingForCollection(accountFilterCriteria, serviceCenterIds);
+
             var results = new List<InvoiceMonitorDTO>();
+            var collectionResults = new List<InvoiceMonitorDTO>();
 
             if (serviceCenterIds.Length > 0)
             {
                 results = results1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
+                collectionResults = collectionResults1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
             }
             else
             {
                 results = results1;
+                collectionResults = collectionResults1;
             }
             
             var result = new MulitipleInvoiceMonitorDTO()
             {
-                ShipmentCreated = results
+                ShipmentCreated = results,
+                ShipmentCollection = collectionResults
             };
 
             var shipmentsexpected = result.ShipmentCreated;
-            var obj = ReturnShipmentCreatedx(shipmentsexpected, accountFilterCriteria);
+            var shipmentscollected = result.ShipmentCollection;
+
+            var obj = ReturnShipmentCreatedx(shipmentsexpected, shipmentscollected, accountFilterCriteria);
 
             return obj;
         }
@@ -1706,7 +1713,7 @@ namespace GIGLS.Services.Implementation.Shipments
             return obj;
         }
 
-        private ColoredInvoiceMonitorDTO ReturnShipmentCreatedx(List<InvoiceMonitorDTO> shipmentsexpected, AccountFilterCriteria accountFilterCriteria)
+        private ColoredInvoiceMonitorDTO ReturnShipmentCreatedx(List<InvoiceMonitorDTO> shipmentsexpected, List<InvoiceMonitorDTO> shipmentscollected, AccountFilterCriteria accountFilterCriteria)
         {
             var obj = new ColoredInvoiceMonitorDTO();
 
@@ -1725,7 +1732,15 @@ namespace GIGLS.Services.Implementation.Shipments
                             where item.DateCreated > dashboardStartDate && item.DateCreated <= now.AddHours(-48)
                             select item.Waybill).Count();
 
-            var totalzones = ReturnTotalZonesArray(totalGreen, totalyellow, totalRed);
+            var totalPurple = (from item in shipmentscollected
+                               where item.PickupOptions == PickupOptions.SERVICECENTER && item.DateCreated < now.AddHours(-48)
+                               select item.Waybill).Count();
+
+            var totalBrown = (from item in shipmentscollected
+                               where item.PickupOptions == PickupOptions.HOMEDELIVERY && item.DateCreated < now.AddHours(-48)
+                               select item.Waybill).Count();
+            
+            var totalzones = ReturnTotalZonesArray(totalGreen, totalyellow, totalRed, totalPurple, totalBrown);
             obj.totalZones = totalzones;
               
             return obj;
@@ -1783,7 +1798,7 @@ namespace GIGLS.Services.Implementation.Shipments
             return chartData;
         }
 
-        public object[] ReturnTotalZonesArray(double totalgreen, double totalyellow, double totalred)
+        public object[] ReturnTotalZonesArray(double totalgreen, double totalyellow, double totalred, double terminal = 0, double homeDelivery = 0)
         {
 
             //var chartData = new object[3];
@@ -1811,6 +1826,16 @@ namespace GIGLS.Services.Implementation.Shipments
                     "Shipments Created Over 48hrs - 72hrs plus",
                     totalred,
                     "red"
+                },
+                new object[] {
+                    "Terminal Delivery Shipments Over 48hrs plus",
+                    terminal,
+                    "purple"
+                },
+                new object[] {
+                    "Home Delivery Shipments Over 48hrs plus",
+                    homeDelivery,
+                    "brown"
                 }
             };
 

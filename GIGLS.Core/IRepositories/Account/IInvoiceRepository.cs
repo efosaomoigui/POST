@@ -5,11 +5,10 @@ using GIGLS.Core.DTO.Report;
 using GIGLS.Core.View;
 using GIGLS.Core.View.AdminReportView;
 using GIGLS.CORE.DTO.Report;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
- 
+
 namespace GIGLS.Core.IRepositories.Account
 {
     public interface IInvoiceRepository : IRepository<Invoice>
@@ -30,6 +29,7 @@ namespace GIGLS.Core.IRepositories.Account
         Task<List<InvoiceMonitorDTO>> GetShipmentMonitorSetSPExpected(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
         Task<List<InvoiceViewDTOUNGROUPED>> GetShipmentMonitorSetSP_NotGrouped(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
         Task<List<InvoiceViewDTOUNGROUPED>> GetShipmentMonitorSetSP_NotGroupedx(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
+        Task<List<InvoiceMonitorDTO>> GetShipmentWaitingForCollection(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds);
 
         //Admin Report 
         IQueryable<Report_AllTimeSalesByCountry> GetAllTimeSalesByCountry();

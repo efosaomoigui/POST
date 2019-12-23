@@ -147,7 +147,8 @@ namespace GIGLS.Core.DTO.Account
         public int DestinationServiceCentreId { get; set; }
         public string Name { get; set; }
         public string Status { get; set; }
-        public long Rn { get; set; } 
+        public long Rn { get; set; }
+        public PickupOptions PickupOptions { get; set; }
 
     }
 
@@ -179,6 +180,7 @@ namespace GIGLS.Core.DTO.Account
 
         public List<InvoiceMonitorDTO> ShipmentCreated { get; set; }
         public List<InvoiceMonitorDTO> ShipmentExpected { get; set; }
+        public List<InvoiceMonitorDTO> ShipmentCollection { get; set; }
 
     }
 
