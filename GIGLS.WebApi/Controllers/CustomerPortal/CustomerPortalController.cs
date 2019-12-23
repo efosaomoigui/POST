@@ -879,6 +879,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("itemTypes")]
         public async Task<IServiceResponse<List<string>>> GetItemTypes()
@@ -1352,6 +1353,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        
         [AllowAnonymous]
         [HttpGet]
         [Route("getcountries")]
