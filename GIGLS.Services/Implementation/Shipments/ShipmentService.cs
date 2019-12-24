@@ -1438,6 +1438,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var results1 = await _uow.Invoice.GetShipmentMonitorSetSP(accountFilterCriteria, serviceCenterIds);
 
             var results = new List<InvoiceMonitorDTO>();
+            var collectionResults = new List<InvoiceMonitorDTO>();
 
             if (serviceCenterIds.Length > 0)
             {
@@ -1450,7 +1451,7 @@ namespace GIGLS.Services.Implementation.Shipments
             
             var shipmentscreated = results;
 
-            var obj = ReturnShipmentCreatedByLimitDates(shipmentscreated, accountFilterCriteria, Limitdates);
+            var obj = ReturnShipmentCreatedByLimitDates(shipmentscreated, collectionResults, accountFilterCriteria, Limitdates);
 
             return obj;
         }
@@ -1463,21 +1464,26 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var results1 = await _uow.Invoice.GetShipmentMonitorSetSPExpected(accountFilterCriteria, serviceCenterIds);
+            var collectionResults1 = await _uow.Invoice.GetShipmentWaitingForCollection(accountFilterCriteria, serviceCenterIds);
 
             var results = new List<InvoiceMonitorDTO>();
+            var collectionResults = new List<InvoiceMonitorDTO>();
 
             if (serviceCenterIds.Length > 0)
             {
                 results = results1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
+                collectionResults = collectionResults1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
             }
             else
             {
                 results = results1;
+                collectionResults = collectionResults1;
             }
             
             var shipmentsexpected = results;
+            var shipmentscollected = collectionResults;
 
-            var obj = ReturnShipmentCreatedByLimitDates(shipmentsexpected, accountFilterCriteria, Limitdates);
+            var obj = ReturnShipmentCreatedByLimitDates(shipmentsexpected, shipmentscollected, accountFilterCriteria, Limitdates);
 
             return obj;
         }
@@ -1635,11 +1641,21 @@ namespace GIGLS.Services.Implementation.Shipments
                 StartDate = dashboardStartDate;
                 EndDate = now.AddHours(-48);
             }
-            
+            else if (Limitdates.StartLimit == 4 && Limitdates.EndLimit == 5)
+            {
+                StartDate = dashboardStartDate;
+                EndDate = now.AddHours(-48);
+            }
+            else if (Limitdates.StartLimit == 5 && Limitdates.EndLimit == 6)
+            {
+                StartDate = dashboardStartDate;
+                EndDate = now.AddHours(-48);
+            }
+
             return Tuple.Create(StartDate, EndDate);
         }
 
-        private Object[] ReturnShipmentCreatedByLimitDates(List<InvoiceMonitorDTO> shipmentscreated, AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates)
+        private Object[] ReturnShipmentCreatedByLimitDates(List<InvoiceMonitorDTO> shipmentscreated, List<InvoiceMonitorDTO> shipmentscollected, AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates)
         {
             var obj = new InvoiceMonitorDTO2();
 
@@ -1673,6 +1689,26 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 result = (from list in shipmentscreated
                           where list.DateCreated > LimitStartDate && list.DateCreated <= LimitEndDate
+                          select new InvoiceMonitorDTO3()
+                          {
+                              label = list.Name,
+                              waybill = list.Waybill
+                          }).ToList();
+            }
+            else if (Limitdates.StartLimit == 4 && Limitdates.EndLimit == 5)
+            {
+                result = (from list in shipmentscollected
+                          where list.PickupOptions == PickupOptions.SERVICECENTER && list.DateCreated <= LimitEndDate
+                          select new InvoiceMonitorDTO3()
+                          {
+                              label = list.Name,
+                              waybill = list.Waybill
+                          }).ToList();
+            }
+            else if (Limitdates.StartLimit == 5 && Limitdates.EndLimit == 6)
+            {
+                result = (from list in shipmentscollected
+                          where list.PickupOptions == PickupOptions.HOMEDELIVERY && list.DateCreated <= LimitEndDate
                           select new InvoiceMonitorDTO3()
                           {
                               label = list.Name,
