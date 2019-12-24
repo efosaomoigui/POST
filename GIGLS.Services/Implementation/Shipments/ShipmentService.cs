@@ -1490,6 +1490,10 @@ namespace GIGLS.Services.Implementation.Shipments
             var dataValues = ReturnStartAndEndDateLimit(accountFilterCriteria, Limitdates);
             var LimitStartDate = dataValues.Item1;
             var LimitEndDate = dataValues.Item2;
+            
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var results1 = await _uow.Invoice.GetShipmentMonitorSetSP_NotGrouped(accountFilterCriteria, serviceCenterIds);
@@ -1555,6 +1559,10 @@ namespace GIGLS.Services.Implementation.Shipments
             var dataValues = ReturnStartAndEndDateLimit(accountFilterCriteria, Limitdates);
             var LimitStartDate = dataValues.Item1;
             var LimitEndDate = dataValues.Item2;
+
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
 

@@ -183,10 +183,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
         //Stored Procedure version
         public async Task<List<InvoiceMonitorDTO>> GetShipmentMonitorSetSP(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
         {
-
-            //DateTime LimitDate = StartDate.AddDays((int)accountFilterCriteria.limitTime);
-            //var queryDate = accountFilterCriteria.getStartDateAndEndDate2(accountFilterCriteria.dateFrom);
-
             DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
             DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
             
@@ -196,10 +192,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
 
 
-            SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);//accountFilterCriteria.PaymentStatus
+            SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);
             //var sc = (serviceCentreIds.Length == 0) ? serviceCentreIds[0] : 0;
             var sc = (serviceCentreIds.Length == 1) ? serviceCentreIds[0] : 0;
-            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
+            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); 
             SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
             SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
 
@@ -228,9 +224,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                 throw ex;
             }
 
-            //r results = new Tuple<List<InvoiceMonitorDTO>, List<InvoiceMonitorDTO>>(listCreated, listExpected);
-            return await Task.FromResult(listCreated); // 
-
+            return await Task.FromResult(listCreated); 
         }
 
 
@@ -247,9 +241,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
 
 
-            SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);//accountFilterCriteria.PaymentStatus
+            SqlParameter paymentStatus = new SqlParameter("@PaymentStatus", DBNull.Value);
             var sc = (serviceCentreIds.Length == 1) ? serviceCentreIds[0] : 0;
-            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
+            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); 
             SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
             SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
 

@@ -53,6 +53,7 @@ namespace GIGLS.Services.Implementation.Report
 
             return result;
         }
+
         //To display data for the website
         public async Task<AdminReportDTO> DisplayWebsiteData()
         {
