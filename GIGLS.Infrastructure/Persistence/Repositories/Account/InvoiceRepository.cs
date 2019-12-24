@@ -421,6 +421,49 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
             return await Task.FromResult(listCreated);
         }
 
+        public async Task<List<InvoiceViewDTOUNGROUPED>> GetShipmentWaitingForCollection_NotGrouped(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
+        {
+            DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;
+            DateTime EndDate = accountFilterCriteria.EndDate?.Date ?? StartDate;
+
+            //declare parameters for the stored procedure
+            SqlParameter iscancelled = new SqlParameter("@IsCancelled", (object)accountFilterCriteria.IsCancelled ?? DBNull.Value);
+            SqlParameter startDate = new SqlParameter("@StartDate", StartDate);
+            SqlParameter endDate = new SqlParameter("@EndDate", EndDate);
+
+            var sc = (serviceCentreIds.Length == 1) ? serviceCentreIds[0] : 0;
+            SqlParameter departureServiceCentreId = new SqlParameter("@DepartureServiceCentreId", sc); //serviceCentreIds[0]
+            SqlParameter stationId = new SqlParameter("@StationId", (int)accountFilterCriteria.StationId);
+            SqlParameter CountryId = new SqlParameter("@CountryId", (int)accountFilterCriteria.CountryId);
+
+            SqlParameter[] param = new SqlParameter[]
+            {
+                iscancelled,
+                startDate,
+                endDate,
+                departureServiceCentreId,
+                stationId,
+                CountryId
+            };
+
+            var listCreated = new List<InvoiceViewDTOUNGROUPED>();
+
+            try
+            {
+                listCreated = await _GIGLSContextForView.Database.SqlQuery<InvoiceViewDTOUNGROUPED>("ShipmentWaitingForCollection " +
+                  "@IsCancelled, @StartDate, @EndDate,@DepartureServiceCentreId, @StationId, @CountryId",
+                  param)
+                  .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+            return await Task.FromResult(listCreated);
+        }
+
         public async Task<List<InvoiceViewDTO>> GetInvoicesFromViewWithDeliveryTimeAsyncFromSP(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
         {
             DateTime StartDate = accountFilterCriteria.StartDate.GetValueOrDefault().Date;

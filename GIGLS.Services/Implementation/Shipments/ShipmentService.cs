@@ -1560,17 +1560,22 @@ namespace GIGLS.Services.Implementation.Shipments
             var LimitEndDate = dataValues.Item2;
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
             var results1 = await _uow.Invoice.GetShipmentMonitorSetSP_NotGroupedx(accountFilterCriteria, serviceCenterIds);
+            var collectionResults1 = await _uow.Invoice.GetShipmentWaitingForCollection_NotGrouped(accountFilterCriteria, serviceCenterIds);
 
             var results = new List<InvoiceViewDTOUNGROUPED>();
+            var collectionResults = new List<InvoiceViewDTOUNGROUPED>();
 
             if (serviceCenterIds.Length > 0)
             {
                 results = results1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
+                collectionResults = collectionResults1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
             }
             else
             {
                 results = results1;
+                collectionResults = collectionResults1;
             }
             
             var v = new List<InvoiceViewDTOUNGROUPED2>();
@@ -1605,6 +1610,32 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 v = (from list in results
                      where list.DateCreated > LimitStartDate && list.DateCreated <= LimitEndDate && list.Name == Limitdates.ScName
+                     select new InvoiceViewDTOUNGROUPED2()
+                     {
+                         DestinationServiceCentreName = list.Name,
+                         Waybill = list.Waybill,
+                         ShipmentDate = list.DateCreated,
+                         PaymentMethod = list.PaymentMethod,
+                         Amount = list.Amount
+                     }).ToList();
+            }
+            else if (Limitdates.StartLimit == 4 && Limitdates.EndLimit == 5)
+            {
+                v = (from list in collectionResults
+                     where list.PickupOptions == PickupOptions.SERVICECENTER && list.DateCreated <= LimitEndDate && list.Name == Limitdates.ScName
+                     select new InvoiceViewDTOUNGROUPED2()
+                     {
+                         DestinationServiceCentreName = list.Name,
+                         Waybill = list.Waybill,
+                         ShipmentDate = list.DateCreated,
+                         PaymentMethod = list.PaymentMethod,
+                         Amount = list.Amount
+                     }).ToList();
+            }
+            else if (Limitdates.StartLimit == 5 && Limitdates.EndLimit == 6)
+            {
+                v = (from list in collectionResults
+                     where list.PickupOptions == PickupOptions.HOMEDELIVERY && list.DateCreated <= LimitEndDate && list.Name == Limitdates.ScName
                      select new InvoiceViewDTOUNGROUPED2()
                      {
                          DestinationServiceCentreName = list.Name,

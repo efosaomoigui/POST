@@ -127,6 +127,7 @@ namespace GIGLS.Core.DTO.Account
         public string Waybill { get; set; }
         public int DepartureServiceCentreId { get; set; }
         public int DestinationServiceCentreId { get; set; }
+        public PickupOptions PickupOptions { get; set; }
     }
 
     public class InvoiceViewDTOUNGROUPED2
