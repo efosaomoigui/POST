@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.Domain.BankSettlement;
+﻿using GIGLS.Core.Domain;
+using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Admin;
@@ -124,6 +125,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
 
         Task SendPickUpRequestMessage(string userId);
         Task<List<GiglgoStationDTO>> GetGoStations();
+        Task<List<DeliveryNumberDTO>> GetDeliveryNumbers(int count);
 
     }
 }

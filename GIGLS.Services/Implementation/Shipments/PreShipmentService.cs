@@ -19,6 +19,8 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
@@ -647,20 +649,56 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
 
-        public async Task<List<DeliveryNumberDTO>> GetDeliveryNumbers(FilterOptionsDto filterOptionsDto)
+        public async Task<List<DeliveryNumberDTO>> GetDeliveryNumbers(string count)
         {
             try
             {
-                var query = _uow.DeliveryNumber.GetAll();
-                query = query.Where(s => s.IsUsed != true);
-                var deliverynumbers = query.ToList();
-                var deliverynumberDto = Mapper.Map<List<DeliveryNumberDTO>>(deliverynumbers);
+                var value = Convert.ToInt32(count);
+                var deliverynumberDto = new List<DeliveryNumberDTO>();
+                //var query = _uow.DeliveryNumber.GetAll();
+                deliverynumberDto = await GenerateDeliveryNumber(value);
+                //query = query.Where(s => s.IsUsed != true);
+                //var deliverynumbers = query.ToList();
+                //deliverynumberDto = Mapper.Map<List<DeliveryNumberDTO>>(deliverynumbers);
                 return await Task.FromResult(deliverynumberDto);
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+        private async Task<List<DeliveryNumberDTO>> GenerateDeliveryNumber(int value)
+        {
+            var deliveryNumberlist = new List<DeliveryNumberDTO>();
+            for (int i = 0; i < value; i++)
+            {
+                int maxSize = 6;
+                char[] chars = new char[62];
+                string a;
+                a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+                chars = a.ToCharArray();
+                int size = maxSize;
+                byte[] data = new byte[1];
+                RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
+                crypto.GetNonZeroBytes(data);
+                size = maxSize;
+                data = new byte[size];
+                crypto.GetNonZeroBytes(data);
+                StringBuilder result = new StringBuilder(size);
+                foreach (byte b in data)
+                { result.Append(chars[b % (chars.Length - 1)]); }
+                var strippedText = result.ToString();
+                var number = new DeliveryNumber
+                {
+                    Number = "DN" + strippedText.ToUpper(),
+                    IsUsed = false,
+                };
+                var deliverynumberDTO = Mapper.Map<DeliveryNumberDTO>(number);
+                deliveryNumberlist.Add(deliverynumberDTO);
+                _uow.DeliveryNumber.Add(number);
+                await _uow.CompleteAsync();
+            }
+            return await Task.FromResult(deliveryNumberlist);
         }
     }
 }

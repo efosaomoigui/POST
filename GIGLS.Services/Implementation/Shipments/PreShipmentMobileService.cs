@@ -2361,6 +2361,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return new MobilePriceDTO
                 {
+                    DeliveryPrice = price,
                     GrandTotal = Math.Round(price * PercentageTobeUsed),
                     CurrencySymbol = country.CurrencySymbol,
                     CurrencyCode = country.CurrencyCode,
@@ -2453,7 +2454,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             bool IsWithinTime = false;
             var Startime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpStartTime, CountryId);
-            var Endtime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpEndTime, CountryId); ;
+            var Endtime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpEndTime, CountryId);
             TimeSpan start = new TimeSpan(Convert.ToInt32(Startime.Value), 0, 0);
             TimeSpan end = new TimeSpan(Convert.ToInt32(Endtime.Value), 0, 0);
             //TimeSpan now = new TimeSpan(19, 0, 0);
@@ -2554,7 +2555,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else
                     {
-                        throw new GenericException("Shipment cannot be cancelled because it has been assigned.");
+                        throw new GenericException("Shipment cannot be cancelled because it has been processed.");
                     }
                 }
                 //FOR PARTNER TRYING TO CANCEL  A SHIPMENT
@@ -2581,7 +2582,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<PreShipmentSummaryDTO> GetPartnerDetailsFromWaybill(string Waybill)
         {
             var ShipmentSummaryDetails = new PreShipmentSummaryDTO();
-            var partner = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == Waybill && (s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString()));
+            var partner = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == Waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString());
             if (partner != null)
             {
                 var Partnerdetails = await _uow.Partner.GetAsync(s => s.UserId == partner.UserId);
