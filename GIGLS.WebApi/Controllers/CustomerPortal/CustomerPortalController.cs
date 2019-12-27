@@ -1103,8 +1103,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
-
+        
         [HttpGet]
         [Route("getpreshipmentindispute")]
         public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetPreshipmentInDispute()
@@ -1193,8 +1192,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
-
+        
         [HttpPost]
         [Route("adddeliverynumber")]
         public async Task<IServiceResponse<bool>> UpdateDeliveryNumber(MobileShipmentNumberDTO detail)
@@ -1327,6 +1325,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        
         [HttpGet]
         [Route("getpreshipmentmobiledetailsfromdeliverynumber/{deliverynumber}")]
         public async Task<IServiceResponse<PreShipmentSummaryDTO>> GetPreshipmentmobiledetailsfromdeliverynumber(string deliverynumber)
@@ -1340,6 +1339,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        
         [HttpPost]
         [Route("approveshipment")]
         public async Task<IServiceResponse<bool>> Approveshipment(ApproveShipmentDTO detail)
@@ -1484,6 +1484,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        
         [AllowAnonymous]
         [HttpGet]
         [Route("getStations")]
