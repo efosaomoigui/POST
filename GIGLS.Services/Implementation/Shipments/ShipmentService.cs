@@ -26,7 +26,11 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
@@ -521,6 +525,27 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                //var hashString = await ComputeHash(shipmentDTO);
+
+                //var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
+                //if (checkForHash != null)
+                //{
+                //    DateTime dateTime = DateTime.Now.AddMinutes(30);
+
+                //    if (checkForHash.DateCreated < dateTime)
+                //    {
+                //        throw new GenericException("A similar shipment already exists on Agility, kinldy view your created shipment to confirm.");
+                //    }
+                //}
+                //else
+                //{
+                //    var hasher = new ShipmentHash()
+                //    {
+                //        HashedShipment = hashString
+                //    };
+                //    _uow.ShipmentHash.Add(hasher);
+                //}    
+
                 // create the customer, if not recorded in the system
                 var customerId = await CreateCustomer(shipmentDTO);
 
@@ -573,9 +598,73 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return newShipment;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
+            }
+        }
+
+        private async Task<string> ComputeHash(ShipmentDTO shipmentDTO)
+        {
+            //1. Departure Service centre can be zero or null
+            //2. Description should be converted to lower case and you must check for null too  -- Done
+            //3. How do you handle special shipment that might not have weight
+            //4. 
+
+            //get user Service center
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            shipmentDTO.DepartureServiceCentreId = serviceCenterIds[0];
+
+            //Create Hash Set
+            var shipmentHash = new HashSet<ShipmentHashDTO>();
+
+            var shipmentHashDto = new ShipmentHashDTO
+            {
+                DeptServId = shipmentDTO.DepartureServiceCentreId,
+                DestServId = shipmentDTO.DestinationServiceCentreId,
+                SenderPhoneNumber = shipmentDTO.Customer[0].PhoneNumber,
+                ReceiverPhoneNumber = shipmentDTO.ReceiverPhoneNumber,
+                Weight = new List<double>()
+            };
+
+            if (shipmentDTO.Description != null)
+                shipmentHashDto.Description = shipmentDTO.Description.ToLower();
+            
+
+            foreach (var item in shipmentDTO.ShipmentItems)
+            {
+                    shipmentHashDto.Weight.Add(item.Weight);
+            }
+
+            shipmentHash.Add(shipmentHashDto);
+
+            // Create a SHA256   
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                //convert the object to a byte array
+                byte[] objectToArray = ObjectToByteArray(shipmentHash);
+
+                // ComputeHash - returns byte array  
+                byte[] bytes = sha256Hash.ComputeHash(objectToArray);
+
+                // Convert byte array to a string   
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return await Task.FromResult(builder.ToString());
+            }
+        }
+
+        // Convert an object to a byte array
+        private static byte[] ObjectToByteArray(HashSet<ShipmentHashDTO> obj)
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            using (var ms = new MemoryStream())
+            {
+                bf.Serialize(ms, obj);
+                return ms.ToArray();
             }
         }
 
@@ -768,7 +857,7 @@ namespace GIGLS.Services.Implementation.Shipments
             //set before returning
             shipmentDTO.DepartureCountryId = departureCountry.CountryId;
             shipmentDTO.DestinationCountryId = destinationCountry.CountryId;
-
+            
             return shipmentDTO;
         }
 

@@ -175,6 +175,7 @@ namespace GIGLS.Core
         IWaybillPaymentLogRepository WaybillPaymentLog {get; set;}
         IBankRepository Bank { get; set; }
         IActivationCampaignEmailRepository ActivationCampaignEmail { get; set; }
+        IShipmentHashRepository ShipmentHash { get; set; }
 
         IGiglgoStationRepository GiglgoStation { get; set; }
 
