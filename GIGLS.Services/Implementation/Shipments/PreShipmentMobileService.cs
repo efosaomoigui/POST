@@ -199,8 +199,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (wallet.Balance >= Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal))
                 {
                     var price = (wallet.Balance - Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal));
-                    var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber);
+
+                    var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
+
+                    //generate waybill
+                    var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, gigGOServiceCenter.Code);
                     preShipmentDTO.Waybill = waybill;
+
+
                     if (preShipmentDTO.PreShipmentItems.Count == 0)
                     {
                         throw new GenericException("Shipment Items cannot be empty");
@@ -232,9 +238,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         WaybillNumber = newPreShipment.Waybill,
                         ShipmentScanStatus = ShipmentScanStatus.MCRT
                     });
-
-                    var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
-
+                    
                     var transaction = new WalletTransactionDTO
                     {
                         WalletId = wallet.WalletId,
