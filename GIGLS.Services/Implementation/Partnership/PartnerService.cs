@@ -76,10 +76,16 @@ namespace GIGLS.Services.Implementation.Partnership
             {
                 partnerDto = Mapper.Map<PartnerDTO>(partner);
                 var Wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partner.PartnerCode);
+                var Country = await _uow.Country.GetAsync(s => s.CountryId == partner.UserActiveCountryId);
                 if (Wallet != null)
                 {
                     partnerDto.WalletBalance = Wallet.Balance;
                     partnerDto.WalletId = Wallet.WalletId;
+                }
+                if (Country != null)
+                {
+                    partnerDto.CurrencySymbol = Country.CurrencySymbol;
+                   
                 }
             }
             return partnerDto;

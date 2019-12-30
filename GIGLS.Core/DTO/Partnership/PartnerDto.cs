@@ -39,5 +39,6 @@ namespace GIGLS.Core.DTO.Partnership
         public int UserActiveCountryId { get; set; }
         public CountryDTO Country { get; set; }
         public decimal WalletBalance { get; set; }
+        public string CurrencySymbol { get; set; }
     }
 }
