@@ -90,5 +90,30 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                 throw;
             }
         }
+
+        public Task<List<PartnerDTO>> GetExternalPartnersAsync()
+        {
+            var partners = _context.Partners.Where(s=>s.PartnerType == Core.Enums.PartnerType.DeliveryPartner);
+
+            var partnerDto = from partner in partners
+                             select new PartnerDTO
+                             {
+                                 PartnerId = partner.PartnerId,
+                                 PartnerName = partner.PartnerName,
+                                 Email = partner.Email,
+                                 Address = partner.Address,
+                                 PartnerCode = partner.PartnerCode,
+                                 PhoneNumber = partner.PhoneNumber,
+                                 OptionalPhoneNumber = partner.OptionalPhoneNumber,
+                                 PartnerType = partner.PartnerType,
+                                 FirstName = partner.FirstName,
+                                 LastName = partner.LastName,
+                                 IdentificationNumber = "",
+                                 WalletPan = "",
+                                 IsActivated = partner.IsActivated
+                             };
+
+            return Task.FromResult(partnerDto.ToList());
+        }
     }
 }

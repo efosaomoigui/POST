@@ -13,5 +13,6 @@ namespace GIGLS.Core.IServices.Partnership
         Task UpdatePartner(int partnerId, PartnerDTO partner);
         Task RemovePartner(int partnerId);
         Task<List<PartnerDTO>> GetPartnersByDate(BaseFilterCriteria filterCriteria);
+        Task<IEnumerable<PartnerDTO>> GetExternalDeliveryPartners();
     }
 }
