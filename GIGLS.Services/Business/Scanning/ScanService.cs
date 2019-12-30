@@ -550,14 +550,14 @@ namespace GIGLS.Services.Business.Scanning
                                 transitWaybillNumber.ServiceCentreId = currentUserSercentreId;
                                 transitWaybillNumber.UserId = currentUserId;
                                 transitWaybillNumber.IsGrouped = false;
-                                //_uow.Complete();
+                                _uow.Complete();
                             }
 
                             //4. Update entry in GroupWaybillMapping
                             var groupWaybillNumberMapping = await _uow.GroupWaybillNumberMapping.GetAsync(s => s.WaybillNumber == waybill);
                             //groupWaybillNumberMapping.DepartureServiceCentreId = currentUserSercentreId;
                             _uow.GroupWaybillNumberMapping.Remove(groupWaybillNumberMapping); //remove waybill from mapping 12/09/2019
-                            _uow.Complete();
+                            await _uow.CompleteAsync();
 
                             //5. Get the GroupWaybill numbers in the manifest
                             groupWaybillsInManifest.Add(groupWaybillNumberMapping.GroupWaybillNumber);
@@ -580,7 +580,7 @@ namespace GIGLS.Services.Business.Scanning
 
                             _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupWaybillNumberMapping);
                             _uow.GroupWaybillNumber.Remove(groupwaybill);
-                            _uow.Complete();
+                            await _uow.CompleteAsync();
                         }
                     }
                 }
@@ -707,8 +707,7 @@ namespace GIGLS.Services.Business.Scanning
             else
             {
                 string user = await _userService.GetCurrentUserId();
-
-                shipmentDTO.IsGrouped = false;
+                shipmentDTO.IsGrouped = true;
 
                 //create new transit waybill
                 var newTransit = new TransitWaybillNumber

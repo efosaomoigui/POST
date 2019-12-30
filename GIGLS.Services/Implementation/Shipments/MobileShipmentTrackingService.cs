@@ -139,12 +139,18 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             
             try
-            {
-                
+            {                
                 if (tracking.User == null)
                 {
                     tracking.User = await _userService.GetCurrentUserId();
                 }
+
+                if(tracking.ServiceCentreId == 0)
+                {
+                    var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
+                    tracking.ServiceCentreId = gigGOServiceCenter.ServiceCentreId;
+                }
+
                 //check if the waybill has not been scan for the status before
                 bool shipmentTracking = await _uow.MobileShipmentTracking.ExistAsync(x => x.Waybill.Equals(tracking.Waybill) && x.Status.Equals(tracking.Status));
 
