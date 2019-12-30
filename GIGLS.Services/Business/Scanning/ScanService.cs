@@ -550,7 +550,7 @@ namespace GIGLS.Services.Business.Scanning
                                 transitWaybillNumber.ServiceCentreId = currentUserSercentreId;
                                 transitWaybillNumber.UserId = currentUserId;
                                 transitWaybillNumber.IsGrouped = false;
-                                //_uow.Complete();
+                                _uow.Complete();
                             }
 
                             //4. Update entry in GroupWaybillMapping

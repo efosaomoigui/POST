@@ -24,7 +24,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                if (await _uow.TransitWaybillNumber.ExistAsync(c => c.WaybillNumber.ToLower() == transitWaybillNumberDto.WaybillNumber.Trim().ToLower()))
+                if (await _uow.TransitWaybillNumber.ExistAsync(c => c.WaybillNumber == transitWaybillNumberDto.WaybillNumber))
                 {
                     throw new GenericException("TransitWaybillNumber already Exist");
                 }
