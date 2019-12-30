@@ -108,8 +108,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                  PartnerType = partner.PartnerType,
                                  FirstName = partner.FirstName,
                                  LastName = partner.LastName,
-                                 IdentificationNumber = "",
-                                 WalletPan = "",
                                  IsActivated = partner.IsActivated
                              };
 
