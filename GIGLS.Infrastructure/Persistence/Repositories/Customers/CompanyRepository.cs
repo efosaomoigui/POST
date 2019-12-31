@@ -349,63 +349,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
             }
         }
 
-        public Task<List<CompanyDTO>> GetCompanyByCompanyCode(string customerCode)
-        {
-            try
-            {
-                var companies = _context.Company.Where(x => x.CustomerCode.ToLower() == customerCode.ToLower());
-                var companiesDto = from c in companies
-                                   join w in _context.Wallets on c.CustomerCode equals w.CustomerCode
-                                   join co in _context.Country on c.UserActiveCountryId equals co.CountryId
-                                   select new CompanyDTO
-                                   {
-                                       CompanyId = c.CompanyId,
-                                       Name = c.Name,
-                                       RcNumber = c.RcNumber,
-                                       Email = c.Email,
-                                       City = c.City,
-                                       State = c.State,
-                                       Address = c.Address,
-                                       isCodNeeded = c.isCodNeeded,
-                                       PhoneNumber = c.PhoneNumber,
-                                       Industry = c.Industry,
-                                       CompanyType = c.CompanyType,
-                                       CompanyStatus = c.CompanyStatus,
-                                       Discount = c.Discount,
-                                       SettlementPeriod = c.SettlementPeriod,
-                                       CustomerCode = c.CustomerCode,
-                                       CustomerCategory = c.CustomerCategory,
-                                       ReturnOption = c.ReturnOption,
-                                       ReturnServiceCentre = c.ReturnServiceCentre,
-                                       ReturnServiceCentreName = Context.ServiceCentre.Where(x => x.ServiceCentreId == c.ReturnServiceCentre).Select(x => x.Name).FirstOrDefault(),
-                                       ReturnAddress = c.ReturnAddress,
-                                       DateCreated = c.DateCreated,
-                                       DateModified = c.DateModified,
-                                       WalletBalance = w.Balance,
-                                       UserActiveCountryId = c.UserActiveCountryId,
-                                       Country = new CountryDTO
-                                       {
-                                           CountryId = co.CountryId,
-                                           CountryName = co.CountryName,
-                                           CurrencySymbol = co.CurrencySymbol,
-                                           CurrencyCode = co.CurrencyCode,
-                                           PhoneNumberCode = co.PhoneNumberCode
-                                       },
-                                       UserActiveCountryName = co.CountryName
-                                   };
-                return Task.FromResult(companiesDto.ToList());
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public Task<List<CompanyDTO>> GetCompanyByEmail(string email)
         {
             try
             {
-                var companies = _context.Company.Where(x => x.Email.ToLower() == email.ToLower());
+                var companies = _context.Company.Where(x => x.Email.ToLower() == email.ToLower() || x.CustomerCode.ToLower() == email.ToLower());
                 var companiesDto = from c in companies
                                    join w in _context.Wallets on c.CustomerCode equals w.CustomerCode
                                    join co in _context.Country on c.UserActiveCountryId equals co.CountryId

@@ -454,9 +454,5 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
-        public Task<List<CompanyDTO>> GetCompanyByCustomerCode(string code)
-        {
-            return _uow.Company.GetCompanyByCompanyCode(code);
-        }
     }
 }

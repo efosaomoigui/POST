@@ -23,6 +23,5 @@ namespace GIGLS.Core.IServices.Customers
         Task<EcommerceWalletDTO> GetECommerceWalletById(int companyId);
         Task<List<CompanyDTO>> GetCompanies(BaseFilterCriteria filterCriteria);
         Task<List<CompanyDTO>> GetCompanyByEmail(string email);
-        Task<List<CompanyDTO>> GetCompanyByCustomerCode(string code);
     }
 }
