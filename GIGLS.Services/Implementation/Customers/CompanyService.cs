@@ -13,6 +13,7 @@ using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.User;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -185,6 +186,11 @@ namespace GIGLS.Services.Implementation.Customers
         public Task<List<CompanyDTO>> GetCompanies()
         {
             return _uow.Company.GetCompanies();
+        }
+
+        public Task<List<CompanyDTO>> GetCompanies(BaseFilterCriteria filterCriteria)
+        {
+            return _uow.Company.GetCompanies(filterCriteria);
         }
 
         public Task<List<CompanyDTO>> GetCompaniesWithoutWallet()
@@ -434,6 +440,23 @@ namespace GIGLS.Services.Implementation.Customers
             {
                 throw;
             }
+        }
+
+        public Task<List<CompanyDTO>> GetCompanyByEmail(string email)
+        {
+            try
+            {
+                return _uow.Company.GetCompanyByEmail(email);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<CompanyDTO>> GetCompanyByCustomerCode(string code)
+        {
+            return _uow.Company.GetCompanyByCompanyCode(code);
         }
     }
 }

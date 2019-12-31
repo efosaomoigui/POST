@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.Core.Enums;
 using GIGLS.WebApi.Filters;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.Customers
 {
@@ -30,6 +31,20 @@ namespace GIGLS.WebApi.Controllers.Customers
         {
             return await HandleApiOperationAsync(async () => {
                 var companies = await _service.GetCompanies();                
+                return new ServiceResponse<IEnumerable<CompanyDTO>>
+                {
+                    Object = companies
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("search")]
+        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompanies(BaseFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () => {
+                var companies = await _service.GetCompanies(filterCriteria);
                 return new ServiceResponse<IEnumerable<CompanyDTO>>
                 {
                     Object = companies
@@ -170,6 +185,38 @@ namespace GIGLS.WebApi.Controllers.Customers
                 };
 
             });           
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("email/{email}")]
+        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompanyByEmail(string email)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var company = await _service.GetCompanyByEmail(email);
+
+                return new ServiceResponse<IEnumerable<CompanyDTO>>
+                {
+                    Object = company
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("code/{code}")]
+        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompanyByCode(string code)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var company = await _service.GetCompanyByCustomerCode(code);
+
+                return new ServiceResponse<IEnumerable<CompanyDTO>>
+                {
+                    Object = company
+                };
+            });
         }
     }
 }
