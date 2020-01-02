@@ -188,13 +188,13 @@ namespace GIGLS.WebApi.Controllers.Customers
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("email/{status}")]
-        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompanyByEmail(string status)
+        [HttpPost]
+        [Route("searchByEmailCode")]
+        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompanyByEmail(CompanySearchDTO searchDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var company = await _service.GetCompanyByEmail(status);
+                var company = await _service.GetCompanyByEmail(searchDTO.searchItem);
 
                 return new ServiceResponse<IEnumerable<CompanyDTO>>
                 {
@@ -202,6 +202,6 @@ namespace GIGLS.WebApi.Controllers.Customers
                 };
             });
         }
-        
+
     }
 }

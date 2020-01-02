@@ -301,6 +301,7 @@
     <Compile Include="DTO\CountryDTO.cs" />
     <Compile Include="DTO\Customers\CompanyContactPersonDTO.cs" />
     <Compile Include="DTO\Customers\CompanyDTO.cs" />
+    <Compile Include="DTO\Customers\CompanySearchDTO.cs" />
     <Compile Include="DTO\Customers\CustomerDTO.cs" />
     <Compile Include="DTO\Customers\CustomerSearchOption.cs" />
     <Compile Include="DTO\Customers\IndividualCustomerDTO.cs" />
