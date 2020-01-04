@@ -2606,7 +2606,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<PreShipmentSummaryDTO> GetPartnerDetailsFromWaybill(string Waybill)
         {
             var ShipmentSummaryDetails = new PreShipmentSummaryDTO();
-            var partner = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == Waybill && s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString());
+            var partner = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == Waybill && (s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString()));
             if (partner != null)
             {
                 var Partnerdetails = await _uow.Partner.GetAsync(s => s.UserId == partner.UserId);
