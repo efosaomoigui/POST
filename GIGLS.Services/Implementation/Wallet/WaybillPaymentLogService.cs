@@ -149,7 +149,7 @@ namespace GIGLS.Services.Implementation.Wallet
             };
         }
 
-        public async Task ProcessMobilePaymentForPaystack(WaybillPaymentLogDTO waybillPaymentLog)
+        public async Task<PaystackWebhookDTO> ProcessMobilePaymentForPaystack(WaybillPaymentLogDTO waybillPaymentLog)
         {
             try
             {
@@ -181,8 +181,9 @@ namespace GIGLS.Services.Implementation.Wallet
                     var data = new StringContent(json, Encoding.UTF8, "application/json");
                     var response = await client.PostAsync(payStackChargeAPI, data);
                     string result = await response.Content.ReadAsStringAsync();
-
-
+                    
+                    var jObject = JsonConvert.DeserializeObject<PaystackWebhookDTO>(result);
+                    return jObject;
                 }                
             }
             catch (Exception ex)
