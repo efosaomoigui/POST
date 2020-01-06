@@ -99,5 +99,22 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
+
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getexternaldeliverypartners")]
+        public async Task<IServiceResponse<IEnumerable<PartnerDTO>>> GetExternalDeliveryPartners()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var partners = await _partnerService.GetExternalDeliveryPartners();
+                return new ServiceResponse<IEnumerable<PartnerDTO>>
+                {
+                    Object = partners
+                };
+            });
+        }
+
     }
 }

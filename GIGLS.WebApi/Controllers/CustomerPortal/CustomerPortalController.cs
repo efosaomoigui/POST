@@ -32,6 +32,7 @@ using GIGLS.Core.DTO.Report;
 using GIGLS.Core.Enums;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Admin;
+using GIGLS.Core.Domain;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -879,6 +880,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("itemTypes")]
         public async Task<IServiceResponse<List<string>>> GetItemTypes()
@@ -922,6 +924,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("getwallettransactionandpreshipmenthistory")]
         public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactionAndPreshipmentHistory()
@@ -1102,8 +1105,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
-
+        
         [HttpGet]
         [Route("getpreshipmentindispute")]
         public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetPreshipmentInDispute()
@@ -1192,8 +1194,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
-
+        
         [HttpPost]
         [Route("adddeliverynumber")]
         public async Task<IServiceResponse<bool>> UpdateDeliveryNumber(MobileShipmentNumberDTO detail)
@@ -1326,6 +1327,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        
         [HttpGet]
         [Route("getpreshipmentmobiledetailsfromdeliverynumber/{deliverynumber}")]
         public async Task<IServiceResponse<PreShipmentSummaryDTO>> GetPreshipmentmobiledetailsfromdeliverynumber(string deliverynumber)
@@ -1339,6 +1341,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        
         [HttpPost]
         [Route("approveshipment")]
         public async Task<IServiceResponse<bool>> Approveshipment(ApproveShipmentDTO detail)
@@ -1352,6 +1355,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        
         [AllowAnonymous]
         [HttpGet]
         [Route("getcountries")]
@@ -1482,6 +1486,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+        
         [AllowAnonymous]
         [HttpGet]
         [Route("getStations")]
@@ -1494,6 +1499,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<List<GiglgoStationDTO>>
                 {
                     Object = stations
+                };
+            });
+        }
+        
+        [HttpGet]
+        [Route("getdeliverynumber/{deliverynumber}")]
+        public async Task<IServiceResponse<List<DeliveryNumberDTO>>> GetAllDeliveryNumbers(int deliverynumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preShipment = await _portalService.GetDeliveryNumbers(deliverynumber);
+                return new ServiceResponse<List<DeliveryNumberDTO>>
+                {
+                    Object = preShipment
                 };
             });
         }

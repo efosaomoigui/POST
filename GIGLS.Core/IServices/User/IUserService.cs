@@ -52,6 +52,7 @@ namespace GIGLS.Core.IServices.User
         Task<int[]> GetPriviledgeServiceCenters();
         Task<ServiceCentreDTO[]> GetCurrentServiceCenter();
         Task<ServiceCentreDTO> GetDefaultServiceCenter();
+        Task<ServiceCentreDTO> GetGIGGOServiceCentre();
         Task<bool> CheckSCA();
         Task<UserDTO> retUser();
 

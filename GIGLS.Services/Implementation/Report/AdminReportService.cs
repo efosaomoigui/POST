@@ -53,6 +53,7 @@ namespace GIGLS.Services.Implementation.Report
 
             return result;
         }
+
         //To display data for the website
         public async Task<AdminReportDTO> DisplayWebsiteData()
         {
@@ -209,6 +210,11 @@ namespace GIGLS.Services.Implementation.Report
             var ecommerceCustomerShipmentsCount = ecommerceCustomerShipments.Count();
             var corporateCustomerShipmentsCount = corporateCustomerShipments.Count();
 
+            //Number of COD Shipments
+            var isCOD = ecommerceShipments.Where(s =>  s.IsCashOnDelivery == true).Count();
+            var isNotCOD = ecommerceShipments.Where(s => s.IsCashOnDelivery == false).Count();
+            var codAmount = ecommerceShipments.Sum(x => x.CODAmount);
+
             result.Revenue = revenue;
             result.ShipmentDelivered = shipmentDeliverd;
             result.ShipmentOrdered = shipmentOrdered;
@@ -243,6 +249,10 @@ namespace GIGLS.Services.Implementation.Report
             result.IndCustomerCount = individualCustomerShipmentsCount;
             result.EcomCustomerCount = ecommerceCustomerShipmentsCount;
             result.CorpCustomerCount = corporateCustomerShipmentsCount;
+
+            result.IsCOD = isCOD;
+            result.IsNotCOD = isNotCOD;
+            result.CODAmount = codAmount;
 
             return result;
         }

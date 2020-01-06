@@ -799,6 +799,13 @@ namespace GIGLS.Services.Implementation.User
             return defaultServiceCenter;
         }
 
+        public async Task<ServiceCentreDTO> GetGIGGOServiceCentre()
+        {
+            var gigGOServiceCenter = await _serviceCentreService.GetGIGGOServiceCentre();
+            return gigGOServiceCenter;
+        }
+
+
         //change user password by Admin
         public async Task<IdentityResult> ResetPassword(string userid, string password)
         {

@@ -45,6 +45,8 @@ using GIGLS.Core.DTO.Admin;
 using GIGLS.Core.IServices.Report;
 using GIGLS.Core.IServices.Partnership;
 using System.Configuration;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -1648,6 +1650,57 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<List<GiglgoStationDTO>> GetGoStations()
         {
             return await _preShipmentMobileService.GetGoStations();
+        }
+        public async Task<List<DeliveryNumberDTO>> GetDeliveryNumbers(int count)
+        {
+            try
+            {
+               
+                var deliverynumberDto = new List<DeliveryNumberDTO>();
+                //var query = _uow.DeliveryNumber.GetAll();
+                deliverynumberDto = await GenerateDeliveryNumber(count);
+                //query = query.Where(s => s.IsUsed != true);
+                //var deliverynumbers = query.ToList();
+                //deliverynumberDto = Mapper.Map<List<DeliveryNumberDTO>>(deliverynumbers);
+                return await Task.FromResult(deliverynumberDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        private async Task<List<DeliveryNumberDTO>> GenerateDeliveryNumber(int value)
+        {
+            var deliveryNumberlist = new List<DeliveryNumberDTO>();
+            for (int i = 0; i < value; i++)
+            {
+                int maxSize = 6;
+                char[] chars = new char[62];
+                string a;
+                a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+                chars = a.ToCharArray();
+                int size = maxSize;
+                byte[] data = new byte[1];
+                RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
+                crypto.GetNonZeroBytes(data);
+                size = maxSize;
+                data = new byte[size];
+                crypto.GetNonZeroBytes(data);
+                StringBuilder result = new StringBuilder(size);
+                foreach (byte b in data)
+                { result.Append(chars[b % (chars.Length - 1)]); }
+                var strippedText = result.ToString();
+                var number = new DeliveryNumber
+                {
+                    Number = "DN" + strippedText.ToUpper(),
+                    IsUsed = false,
+                };
+                var deliverynumberDTO = Mapper.Map<DeliveryNumberDTO>(number);
+                deliveryNumberlist.Add(deliverynumberDTO);
+                _uow.DeliveryNumber.Add(number);
+                await _uow.CompleteAsync();
+            }
+            return await Task.FromResult(deliveryNumberlist);
         }
     }
 }
