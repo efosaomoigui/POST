@@ -353,7 +353,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
         {
             try
             {
-                var companies = _context.Company.Where(x => x.Email.ToLower() == email.ToLower() || x.CustomerCode.ToLower() == email.ToLower());
+                if (email != null)
+                    email = email.ToLower();
+
+                var companies = _context.Company.Where(x => x.Email.ToLower() == email || x.CustomerCode.ToLower() == email || x.Name.Contains(email) || x.PhoneNumber.Contains(email));
                 var companiesDto = from c in companies
                                    join w in _context.Wallets on c.CustomerCode equals w.CustomerCode
                                    join co in _context.Country on c.UserActiveCountryId equals co.CountryId
