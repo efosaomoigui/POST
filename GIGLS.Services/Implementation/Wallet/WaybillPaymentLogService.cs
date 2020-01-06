@@ -14,6 +14,7 @@ using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -55,8 +56,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     TransactionId = waybillPaymentLog.Reference
                 };
             }
-
-
+            
             if (waybillPaymentLog.UserId == null)
             {
                 waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
@@ -124,7 +124,8 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<PaymentInitiate> AddWaybillPaymentLogForPaystack(WaybillPaymentLogDTO waybillPaymentLog)
         {
             //1. Generate reference code
-            string reference = "wb-" + waybillPaymentLog.Waybill + "-" + await _passwordGenerator.Generate();
+            string code = await _passwordGenerator.Generate();
+            string reference = "wb-" + waybillPaymentLog.Waybill + "-" + code;
             
             //2. Log the detail            
             if (waybillPaymentLog.UserId == null)
@@ -154,15 +155,14 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 string payStackSecretGhana = ConfigurationManager.AppSettings["PayStackSecretGhana"];
                 string payStackChargeAPI = ConfigurationManager.AppSettings["PayStackChargeAPI"];
-
-
+                
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
                 using (var client =  new HttpClient())
                 {
-                    //client.BaseAddress = new Uri(payStackChargeAPI);
                     client.DefaultRequestHeaders.Accept.Clear();
-                    client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-                    client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(payStackSecretGhana);
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", payStackSecretGhana);
 
                     MobileMoneyDTO mobileMoney = new MobileMoneyDTO
                     {
@@ -179,56 +179,16 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     var json = JsonConvert.SerializeObject(mobileMoney);
                     var data = new StringContent(json, Encoding.UTF8, "application/json");
-
                     var response = await client.PostAsync(payStackChargeAPI, data);
-                }
-                
-
-                //var SecKey = string.Format("Bearer {0}", payStackSecretGhana);
-                //var http = (HttpWebRequest)WebRequest.Create(new Uri(payStackChargeAPI));
-                //http.Headers.Add("Authorization", SecKey);
-                //http.Accept = "application/json";
-                //http.ContentType = "application/json";
-                //http.Method = "POST";
-
-                //var smsURL = await ReturnValidUrl(message);
-                //var smsApiKey = ConfigurationManager.AppSettings["smsApiKey"];
-
-                ////ogosms url format
-                //var finalURL = $"{smsURL}&password={smsApiKey}&sender={message.From}&numbers={message.To}&message={message.FinalBody}&response=json&unicode=0";
-                //var httpWebRequest = (HttpWebRequest)WebRequest.Create(finalURL);
-
-                //using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
-                //{
-                //    using (var sr = new StreamReader(httpResponse.GetResponseStream()))
-                //    {
-                //        result = sr.ReadToEnd();
-                //    }
-                //}
-
-                //result = GetOGOSMSResponseMessage(result);
+                    string result = await response.Content.ReadAsStringAsync();
 
 
-                //var baseAddress = "https://api.paystack.co/transaction/verify/" + reference;
-
-                //var SecKey = string.Format("Bearer {0}", "sk_test_75eb63768f05426fa4f4c2ae68cd451dc10b4ac4");
-                //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-                //var http = (HttpWebRequest)WebRequest.Create(new Uri(baseAddress));
-                //http.Headers.Add("Authorization", SecKey);
-                //http.Accept = "application/json";
-                //http.ContentType = "application/json";
-                //http.Method = "GET";
-
-
+                }                
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-
-
-            //1. Post the request to paystack
-
         }
 
         public async Task<WaybillPaymentLogDTO> GetWaybillPaymentLogByReference(string reference)

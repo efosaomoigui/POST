@@ -791,9 +791,9 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                         //setup login data
                         var formContent = new FormUrlEncodedContent(new[]
                         {
-                        new KeyValuePair<string, string>("grant_type", "password"),
-                        new KeyValuePair<string, string>("Username", user.Username),
-                        new KeyValuePair<string, string>("Password", logindetail.Password),
+                            new KeyValuePair<string, string>("grant_type", "password"),
+                            new KeyValuePair<string, string>("Username", user.Username),
+                            new KeyValuePair<string, string>("Password", logindetail.Password),
                         });
 
                         //setup login data
