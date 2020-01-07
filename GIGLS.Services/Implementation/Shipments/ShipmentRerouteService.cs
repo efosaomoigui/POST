@@ -126,7 +126,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 ////4. update shipment collection status to RerouteStatus
                 var shipmentCollection = await _collectionService.GetShipmentCollectionById(shipmentDTO.Waybill);
                 shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.SRR;
-                await _collectionService.UpdateShipmentCollection(shipmentCollection);
+                await _collectionService.UpdateShipmentCollectionForReturn(shipmentCollection);
 
                 //complete transaction
                 await _uow.CompleteAsync();

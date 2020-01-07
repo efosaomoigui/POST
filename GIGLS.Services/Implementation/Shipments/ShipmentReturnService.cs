@@ -125,7 +125,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //update shipment collection status to Returnstatus
                 var shipmentCollection = await _collectionService.GetShipmentCollectionById(waybill);
                 shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.SSR;
-                await _collectionService.UpdateShipmentCollection(shipmentCollection);
+                await _collectionService.UpdateShipmentCollectionForReturn(shipmentCollection);
 
                 //complete transaction
                 await _uow.CompleteAsync();
@@ -142,11 +142,10 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             shipment.ReceiverName = shipment.CustomerDetails.Name;
             shipment.ReceiverPhoneNumber = shipment.CustomerDetails.PhoneNumber;
-            shipment.ReceiverAddress = shipment.CustomerDetails.ReturnAddress == null ? shipment.CustomerDetails.Address : shipment.CustomerDetails.ReturnAddress;
+            shipment.ReceiverAddress = shipment.CustomerDetails.ReturnAddress ?? shipment.CustomerDetails.Address;
             shipment.ReceiverEmail = shipment.CustomerDetails.Email;
             shipment.ReceiverCity = shipment.CustomerDetails.City;
             shipment.ReceiverState = shipment.CustomerDetails.State;
-
             return await Task.FromResult(0);
         }
 

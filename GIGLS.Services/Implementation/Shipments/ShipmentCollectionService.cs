@@ -330,7 +330,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     codStatushistory = CODStatushistory.RecievedAtServiceCenter;
                 }
-
+                
                 await _cashOnDeliveryAccountService.AddCashOnDeliveryAccount(new CashOnDeliveryAccountDTO
                 {
                     Amount = (decimal)shipmentCollectionDto.CashOnDeliveryAmount,
@@ -439,6 +439,39 @@ namespace GIGLS.Services.Implementation.Shipments
             var invoice = await _uow.Invoice.GetAsync(x => x.Waybill.Equals(shipmentCollectionDto.Waybill));
             invoice.IsShipmentCollected = true;
 
+            await _uow.CompleteAsync();
+        }
+
+        public async Task UpdateShipmentCollectionForReturn(ShipmentCollectionDTO shipmentCollectionDto)
+        {
+            var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(shipmentCollectionDto.Waybill));
+
+            if (shipmentCollection == null)
+            {
+                throw new GenericException("Shipment information does not exist");
+            }
+
+            if (shipmentCollectionDto.UserId == null)
+            {
+                shipmentCollectionDto.UserId = await _userService.GetCurrentUserId();
+            }
+
+            shipmentCollection.ShipmentScanStatus = shipmentCollectionDto.ShipmentScanStatus;
+            shipmentCollection.UserId = shipmentCollectionDto.UserId;
+            
+            //update invoice as shipment collected
+            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill.Equals(shipmentCollectionDto.Waybill));
+            invoice.IsShipmentCollected = true;
+
+            //Add Collected Scan to Scan History
+            var newShipmentTracking = await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
+            {
+                DateTime = DateTime.Now,
+                Status = shipmentCollectionDto.ShipmentScanStatus.ToString(),
+                Waybill = shipmentCollectionDto.Waybill,
+                User = shipmentCollectionDto.UserId,
+            }, shipmentCollectionDto.ShipmentScanStatus);
+            
             await _uow.CompleteAsync();
         }
 
@@ -569,8 +602,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
-
+        
         public async Task<Tuple<List<ShipmentCollectionDTO>, int>> GetEcommerceOverDueShipments(FilterOptionsDto filterOptionsDto)
         {
             try
@@ -667,8 +699,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
-
+        
         //---Added for global customer care and ecommerce
         public async Task<Tuple<List<ShipmentCollectionDTO>, int>> GetOverDueShipmentsGLOBAL(FilterOptionsDto filterOptionsDto)
         {
@@ -970,8 +1001,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
-
+        
         public async Task<IEnumerable<ShipmentCollectionDTO>> GetEcommerceOverDueShipments()
         {
             try
