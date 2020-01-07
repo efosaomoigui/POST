@@ -675,35 +675,34 @@ namespace GIGLS.Services.Implementation.Shipments
                         var s = agilityShipment.Where(x => x.Waybill == shipment.Waybill).FirstOrDefault();
                         agilityShipment.Remove(s);
                     }
-                    else
+                    
+                    var partnerId = await _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == shipment.Waybill && r.Status == MobilePickUpRequestStatus.Delivered.ToString());
+                    if (partnerId != null)
                     {
-                        var partnerId = await _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == shipment.Waybill && (r.Status == MobilePickUpRequestStatus.Delivered.ToString()));
-                        if (partnerId != null)
+                        var partneruser = await _uow.User.GetUserById(partnerId.UserId);
+                        if (partneruser != null)
                         {
-                            var partneruser = await _uow.User.GetUserById(partnerId.UserId);
-                            if (partneruser != null)
-                            {
-                                shipment.PartnerFirstName = partneruser.FirstName;
-                                shipment.PartnerLastName = partneruser.LastName;
-                                shipment.PartnerImageUrl = partneruser.PictureUrl;
-                            }
+                            shipment.PartnerFirstName = partneruser.FirstName;
+                            shipment.PartnerLastName = partneruser.LastName;
+                            shipment.PartnerImageUrl = partneruser.PictureUrl;
                         }
+                    }
 
-                        shipment.IsRated = false;
+                    shipment.IsRated = false;
 
-                        var rating = await _uow.MobileRating.GetAsync(j => j.Waybill == shipment.Waybill);
-                        if (rating != null)
-                        {
-                            shipment.IsRated = rating.IsRatedByCustomer;
-                        }
+                    var rating = await _uow.MobileRating.GetAsync(j => j.Waybill == shipment.Waybill);
+                    if (rating != null)
+                    {
+                        shipment.IsRated = rating.IsRatedByCustomer;
+                    }
 
-                        var country = await _uow.Country.GetCountryByStationId(shipment.SenderStationId);
-                        if (country != null)
-                        {
-                            shipment.CurrencyCode = country.CurrencyCode;
-                            shipment.CurrencySymbol = country.CurrencySymbol;
-                        }
-                    }                  
+                    var country = await _uow.Country.GetCountryByStationId(shipment.SenderStationId);
+                    if (country != null)
+                    {
+                        shipment.CurrencyCode = country.CurrencyCode;
+                        shipment.CurrencySymbol = country.CurrencySymbol;
+                    }
+                                   
                 }
 
                 var newlist = shipmentDto.Union(agilityShipment);
@@ -2610,13 +2609,13 @@ namespace GIGLS.Services.Implementation.Shipments
             if (partner != null)
             {
                 var Partnerdetails = await _uow.Partner.GetAsync(s => s.UserId == partner.UserId);
-                var userdetails = await _userService.GetUserById(partner.UserId);
                 if (Partnerdetails == null)
                 {
                     throw new GenericException("Partner Details does not exist!!");
                 }
                 else
                 {
+                    var userdetails = await _userService.GetUserById(partner.UserId);
                     var partnerinfo = Mapper.Map<PartnerDTO>(Partnerdetails);
                     ShipmentSummaryDetails.partnerdetails = partnerinfo;
                     ShipmentSummaryDetails.partnerdetails.PictureUrl = userdetails.PictureUrl;
