@@ -2615,10 +2615,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    var userdetails = await _userService.GetUserById(partner.UserId);
+                    var userdetails = await _uow.User.GetUserById(partner.UserId);
                     var partnerinfo = Mapper.Map<PartnerDTO>(Partnerdetails);
                     ShipmentSummaryDetails.partnerdetails = partnerinfo;
-                    ShipmentSummaryDetails.partnerdetails.PictureUrl = userdetails.PictureUrl;
+                    if (userdetails != null)
+                    {
+                      ShipmentSummaryDetails.partnerdetails.PictureUrl = userdetails.PictureUrl;
+                    }
                 }
             }
             return ShipmentSummaryDetails;
