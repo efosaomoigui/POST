@@ -183,6 +183,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         DestinationStationId = preShipmentDTO.ReceiverStationId
                     });
                     preShipmentDTO.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
+                    if (preShipmentDTO.PreShipmentItems.Count() > 0)
+                    {
+                        foreach (var shipment in preShipmentDTO.PreShipmentItems)
+                        {
+                            shipment.CalculatedPrice = PreshipmentPriceDTO.GrandTotal;
+                        }
+                    }
                 }
                 else
                 {
