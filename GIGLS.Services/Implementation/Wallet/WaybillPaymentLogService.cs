@@ -34,27 +34,18 @@ namespace GIGLS.Services.Implementation.Wallet
             MapperConfig.Initialize();
         }
 
-        public async Task<PaymentInitiate> AddWaybillPaymentLog(WaybillPaymentLogDTO waybillPaymentLog)
+        public async Task<PaystackWebhookDTO> AddWaybillPaymentLog(WaybillPaymentLogDTO waybillPaymentLog)
         {
-            var MerchantId = ConfigurationManager.AppSettings["MerchantId"];
-            var MerchantUsername = ConfigurationManager.AppSettings["MerchantUsername"];
-            var MerchantKey = ConfigurationManager.AppSettings["MerchantKey"];
-
             //check the current transaction on the waybill
             var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable()
                 .Where(x => x.Waybill == waybillPaymentLog.Waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
 
+            var response = new PaystackWebhookDTO();
+
             if (paymentLog != null)
             {
                 //think on how to solve this later but for now, return this below
-                return new PaymentInitiate
-                {
-                    IsPaymentSuccessful = false,
-                    MerchantId = MerchantId,
-                    MerchantUsername = MerchantUsername,
-                    MerchantKey = MerchantKey,
-                    TransactionId = waybillPaymentLog.Reference
-                };
+                return response;
             }
             
             if (waybillPaymentLog.UserId == null)
@@ -62,19 +53,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
             }
 
-            var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
-
-            _uow.WaybillPaymentLog.Add(newPaymentLog);
-            await _uow.CompleteAsync();
-
-            return new PaymentInitiate
+            if(waybillPaymentLog.OnlinePaymentType == Core.Enums.OnlinePaymentType.Paystack)
             {
-                IsPaymentSuccessful = false,
-                MerchantId = MerchantId,
-                MerchantUsername = MerchantUsername,
-                MerchantKey = MerchantKey,
-                TransactionId = waybillPaymentLog.Reference
-            };
+                response = await AddWaybillPaymentLogForPaystack(waybillPaymentLog);
+            }
+
+            return response;
         }
 
         public async Task<PaymentInitiate> AddWaybillPaymentLogForTheTellerNet(WaybillPaymentLogDTO waybillPaymentLog)
@@ -100,7 +84,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 };
             }
 
-
             if (waybillPaymentLog.UserId == null)
             {
                 waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
@@ -121,7 +104,7 @@ namespace GIGLS.Services.Implementation.Wallet
             };
         }
 
-        public async Task<PaymentInitiate> AddWaybillPaymentLogForPaystack(WaybillPaymentLogDTO waybillPaymentLog)
+        public async Task<PaystackWebhookDTO> AddWaybillPaymentLogForPaystack(WaybillPaymentLogDTO waybillPaymentLog)
         {
             //1. Generate reference code
             string code = await _passwordGenerator.Generate();
@@ -135,21 +118,15 @@ namespace GIGLS.Services.Implementation.Wallet
 
             waybillPaymentLog.Reference = reference;
             var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
-
             _uow.WaybillPaymentLog.Add(newPaymentLog);
             await _uow.CompleteAsync();
 
             //3. send the request to paystack gateway
-            await ProcessMobilePaymentForPaystack(waybillPaymentLog);
-            
-            return new PaymentInitiate
-            {
-                IsPaymentSuccessful = false,
-                TransactionId = reference
-            };
+            var paystackResponse =  await ProcessMobilePaymentForPaystack(waybillPaymentLog);
+            return paystackResponse;
         }
 
-        public async Task<PaystackWebhookDTO> ProcessMobilePaymentForPaystack(WaybillPaymentLogDTO waybillPaymentLog)
+        private async Task<PaystackWebhookDTO> ProcessMobilePaymentForPaystack(WaybillPaymentLogDTO waybillPaymentLog)
         {
             try
             {
@@ -182,8 +159,24 @@ namespace GIGLS.Services.Implementation.Wallet
                     var response = await client.PostAsync(payStackChargeAPI, data);
                     string result = await response.Content.ReadAsStringAsync();
                     
-                    var jObject = JsonConvert.DeserializeObject<PaystackWebhookDTO>(result);
-                    return jObject;
+                    var paystackResponse = JsonConvert.DeserializeObject<PaystackWebhookDTO>(result);
+                    
+                    //update the response from paystack
+                    var updateWaybillPaymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == waybillPaymentLog.Reference);
+                    
+                    if (paystackResponse.data != null)
+                    {
+                        updateWaybillPaymentLog.TransactionStatus = paystackResponse.data.Status;
+                        updateWaybillPaymentLog.TransactionResponse = paystackResponse.data.Display_Text + " " + paystackResponse.data.Message + " " + paystackResponse.data.Gateway_Response;
+                    }
+                    else
+                    {
+                        updateWaybillPaymentLog.TransactionResponse = paystackResponse.Message;
+                    }
+
+                    await _uow.CompleteAsync();
+
+                    return paystackResponse;
                 }                
             }
             catch (Exception ex)
