@@ -10,6 +10,9 @@ using GIGLS.Core.IServices.User;
 using GIGLS.CORE.DTO.Shipments;
 using System.Linq;
 using System;
+using System.Net;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace GIGLS.Services.Implementation.Messaging
 {
@@ -155,5 +158,32 @@ namespace GIGLS.Services.Implementation.Messaging
 
             await _uow.CompleteAsync();
         }
+
+        public async Task<SmsDeliveryDTO> SmsDeliveryLog(string phonenumber)
+        {
+            var Response = new SmsDeliveryDTO();
+            try
+            {
+                var phoneNumber = phonenumber.Substring(1);
+                
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                var httpWebRequest = (HttpWebRequest)WebRequest.Create($"https://ogosms.net/dlr.php?num=234{phoneNumber}");
+                using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
+                {
+                    Stream result = httpResponse.GetResponseStream();
+                    StreamReader reader = new StreamReader(result);
+                    string responseFromServer = reader.ReadToEnd();
+                    Response = JsonConvert.DeserializeObject<SmsDeliveryDTO>(responseFromServer);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return await Task.FromResult(Response);
+
+
+        }
+
     }
 }
