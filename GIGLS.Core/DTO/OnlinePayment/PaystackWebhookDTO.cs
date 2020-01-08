@@ -29,4 +29,10 @@
         public string GatewayResponse { get; set; }
         public string Status { get; set; }
     }
+
+    public enum WaybillWalletPaymentType
+    {
+        Waybill,
+        Wallet
+    }
 }
