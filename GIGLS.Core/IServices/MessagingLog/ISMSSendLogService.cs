@@ -15,5 +15,6 @@ namespace GIGLS.Core.IServices.MessagingLog
         Task RemoveSmsSendLog(int messageId);
         Task<List<SmsSendLogDTO>> GetSmsSendLog(string phoneNumber);
         Task<List<SmsSendLogDTO>> GetSmsSendLogs(string waybill);
+        Task<SmsDeliveryDTO> SmsDeliveryLog(string phonenumber);
     }
 }
