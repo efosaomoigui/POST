@@ -143,19 +143,6 @@ namespace GIGLS.Services.Implementation.Partnership
         public async Task<IEnumerable<PartnerDTO>> GetExternalDeliveryPartners()
         {
             var partners = await _uow.Partner.GetExternalPartnersAsync();
-            foreach(var partner in partners)
-            {
-                var Country = await _uow.Country.GetAsync(s => s.CountryId == partner.UserActiveCountryId);
-                if (Country != null)
-                {
-                    partner.CurrencySymbol = Country.CurrencySymbol;
-                }
-                var Wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partner.PartnerCode);
-                if (Wallet != null)
-                {
-                    partner.WalletBalance = Wallet.Balance;
-                }
-            }
             return partners;
         }
 
