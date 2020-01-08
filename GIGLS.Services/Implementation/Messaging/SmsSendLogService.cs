@@ -13,6 +13,7 @@ using System;
 using System.Net;
 using System.IO;
 using Newtonsoft.Json;
+using System.Configuration;
 
 namespace GIGLS.Services.Implementation.Messaging
 {
@@ -164,10 +165,9 @@ namespace GIGLS.Services.Implementation.Messaging
             var Response = new SmsDeliveryDTO();
             try
             {
-                var phoneNumber = phonenumber.Substring(1);
-                
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-                var httpWebRequest = (HttpWebRequest)WebRequest.Create($"https://ogosms.net/dlr.php?num=234{phoneNumber}");
+                var smsURL = ConfigurationManager.AppSettings["smsURLSearch"];
+                var httpWebRequest = (HttpWebRequest)WebRequest.Create($"{smsURL}{phonenumber}");
                 using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
                 {
                     Stream result = httpResponse.GetResponseStream();

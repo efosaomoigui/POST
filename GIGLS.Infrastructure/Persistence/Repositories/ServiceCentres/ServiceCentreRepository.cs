@@ -163,7 +163,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
         {
             try
             {
-                var centres = _context.ServiceCentre;
+                var centres = _context.ServiceCentre.Where(s => s.IsActive == true);
 
                 //1. countryIds not empty
                 if(countryIds.Length > 0)
