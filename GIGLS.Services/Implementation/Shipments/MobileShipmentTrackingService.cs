@@ -74,7 +74,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var trackings = new MobileShipmentTrackingHistoryDTO();
 
-                if (addresses !=null)
+                if (addresses != null)
                 {
                    trackings = new MobileShipmentTrackingHistoryDTO
                     {
