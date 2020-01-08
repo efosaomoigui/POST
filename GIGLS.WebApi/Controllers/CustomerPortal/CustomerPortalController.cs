@@ -924,7 +924,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [AllowAnonymous]
+       
         [HttpGet]
         [Route("getwallettransactionandpreshipmenthistory")]
         public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactionAndPreshipmentHistory()

@@ -96,6 +96,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
             var partners = _context.Partners.Where(s=>s.PartnerType == Core.Enums.PartnerType.DeliveryPartner);
 
             var partnerDto = from partner in partners
+                             join wallet in _context.Wallets on partner.PartnerCode equals wallet.CustomerCode
+                             join country in _context.Country on partner.UserActiveCountryId equals country.CountryId
                              select new PartnerDTO
                              {
                                  PartnerId = partner.PartnerId,
@@ -108,7 +110,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                  PartnerType = partner.PartnerType,
                                  FirstName = partner.FirstName,
                                  LastName = partner.LastName,
-                                 IsActivated = partner.IsActivated
+                                 IsActivated = partner.IsActivated,
+                                 WalletBalance = wallet.Balance,
+                                 CurrencySymbol = country.CurrencySymbol
+
                              };
 
             return Task.FromResult(partnerDto.ToList());
