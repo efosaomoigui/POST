@@ -14,6 +14,8 @@ using System.IO;
 using Newtonsoft.Json;
 using AutoMapper;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.IServices.PaymentTransactions;
+using GIGLS.Core.DTO.PaymentTransactions;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -23,16 +25,17 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IWalletService _walletService;
         private readonly IUnitOfWork _uow;
         private readonly IWalletPaymentLogService _walletPaymentLogService;
+        private readonly IPaymentTransactionService _paymentTransactionService;
 
         private string secretKey = ConfigurationManager.AppSettings["PayStackSecret"];
 
-        public PaystackPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IWalletPaymentLogService walletPaymentLogService,
-            IWalletTransactionService transactionService)
+        public PaystackPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IWalletPaymentLogService walletPaymentLogService, IPaymentTransactionService paymentTransactionService)
         {
             _userService = userService;
             _walletService = walletService;
-            _uow = uow;
             _walletPaymentLogService = walletPaymentLogService;
+            _paymentTransactionService = paymentTransactionService;
+            _uow = uow;
             MapperConfig.Initialize();
         }
 
@@ -297,20 +300,143 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
-        private Task ProcessPaymentForWallet(PaystackWebhookDTO webhook)
+        private async Task<PaystackWebhookDTO> VerifyGhanaPayment(string reference)
         {
-            throw new NotImplementedException();
+            string payStackSecretGhana = ConfigurationManager.AppSettings["PayStackSecretGhana"];
+
+            PaystackWebhookDTO result = new PaystackWebhookDTO();
+
+            await Task.Run(() =>
+            {
+                var api = new PayStackApi(payStackSecretGhana);
+
+                // Verifying a transaction
+                var verifyResponse = api.Transactions.Verify(reference);
+
+                result.Status = verifyResponse.Status;
+                result.Message = verifyResponse.Message;
+                result.data.Reference = reference;
+
+                if (verifyResponse.Status)
+                {
+                    result.data.Gateway_Response = verifyResponse.Data.GatewayResponse;
+                    result.data.Status = verifyResponse.Data.Status;
+                    result.data.Amount = verifyResponse.Data.Amount / 100;
+                }
+            });
+
+            return result;
         }
 
-        private Task ProcessPaymentForWaybill(PaystackWebhookDTO webhook)
+        private async Task<bool> ProcessPaymentForWallet(PaystackWebhookDTO webhook)
         {
-            //1. Verify payment
-            //2. Update waybill Payment log
-            //3. Process payment for the waybill if successful
+            bool result = false;
 
-            throw new NotImplementedException();
+            //1. verify the payment 
+            var verifyResult = await VerifyGhanaPayment(webhook.data.Reference);
+
+            if (verifyResult.Status)
+            {
+                //get wallet payment log by reference code
+                var paymentLog = _uow.WalletPaymentLog.SingleOrDefault(x => x.Reference == webhook.data.Reference);
+
+                if (paymentLog == null)
+                    return result;
+
+                //2. if the payment successful
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited)
+                {
+                    //a. update the wallet for the customer
+                    string customerId = null;  //set customer id to null
+
+                    //get wallet detail to get customer code
+                    var walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
+
+                    if (walletDto != null)
+                    {
+                        //use customer code to get customer id
+                        var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+
+                        if (user != null)
+                            customerId = user.Id;
+                    }
+
+                    //update the wallet
+                    await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
+                    {
+                        WalletId = paymentLog.WalletId,
+                        Amount = verifyResult.data.Amount,
+                        CreditDebitType = CreditDebitType.Credit,
+                        Description = "Funding made through online payment",
+                        PaymentType = PaymentType.Online,
+                        PaymentTypeReference = verifyResult.data.Reference,
+                        UserId = customerId
+                    }, false);
+                }
+
+                //3. update the wallet payment log
+                if (verifyResult.data.Status != null)
+                {
+                    paymentLog.IsWalletCredited = true;
+                }
+                paymentLog.TransactionStatus = verifyResult.data.Status;
+                paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
+                await _uow.CompleteAsync();
+                result = true;
+            }
+
+            return await Task.FromResult(result);
+
         }
 
+        private async Task<bool> ProcessPaymentForWaybill(PaystackWebhookDTO webhook)
+        {
+            bool result = false;
+
+            //1. verify the payment 
+            var verifyResult = await VerifyGhanaPayment(webhook.data.Reference);
+            
+            if (verifyResult.Status)
+            {
+                //get wallet payment log by reference code
+                var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == webhook.data.Reference);
+
+                if (paymentLog == null)
+                    return result;
+
+                //2. if the payment successful
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWaybillSettled)
+                {
+                    //3. Process payment for the waybill if successful
+                    PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
+                    {
+                        Waybill = paymentLog.Waybill,
+                        PaymentType  = PaymentType.Online,
+                        TransactionCode = paymentLog.Reference,
+                        UserId = paymentLog.UserId
+                    };
+
+                    var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+
+                    if (processWaybillPayment)
+                    {
+                        //2. Update waybill Payment log
+                        paymentLog.IsPaymentSuccessful = true;
+                        paymentLog.IsWaybillSettled = true;
+                        paymentLog.TransactionStatus = verifyResult.data.Status;
+                        paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
+                    }
+                }
+
+                paymentLog.TransactionStatus = verifyResult.data.Status;
+                paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
+                await _uow.CompleteAsync();
+                result = true;
+            }
+
+            return await Task.FromResult(result);
+        }
+        
         private WaybillWalletPaymentType GetPackagePaymentType(string refCode){
 
             if(refCode.StartsWith("wa"))

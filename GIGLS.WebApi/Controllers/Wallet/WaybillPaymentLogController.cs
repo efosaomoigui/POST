@@ -24,13 +24,13 @@ namespace GIGLS.WebApi.Controllers.Wallet
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]
-        public async Task<IServiceResponse<PaymentInitiate>> AddWaybillPaymentLog(WaybillPaymentLogDTO waybillPaymentLogDTO)
+        public async Task<IServiceResponse<PaystackWebhookDTO>> AddWaybillPaymentLog(WaybillPaymentLogDTO waybillPaymentLogDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var waybillPayment = await _waybillPaymentLogService.AddWaybillPaymentLog(waybillPaymentLogDTO);
 
-                return new ServiceResponse<PaymentInitiate>
+                return new ServiceResponse<PaystackWebhookDTO>
                 {
                     Object = waybillPayment
                 };
