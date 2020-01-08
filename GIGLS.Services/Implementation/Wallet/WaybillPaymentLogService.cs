@@ -106,9 +106,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<PaystackWebhookDTO> AddWaybillPaymentLogForPaystack(WaybillPaymentLogDTO waybillPaymentLog)
         {
-            //1. Generate reference code
-            string code = await _passwordGenerator.Generate();
-            string reference = "wb-" + waybillPaymentLog.Waybill + "-" + code;
+            
             
             //2. Log the detail            
             if (waybillPaymentLog.UserId == null)
@@ -116,7 +114,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
             }
 
-            waybillPaymentLog.Reference = reference;
+            waybillPaymentLog.Reference = await GenerateReferenceCode(waybillPaymentLog.Waybill);
             var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
             _uow.WaybillPaymentLog.Add(newPaymentLog);
             await _uow.CompleteAsync();
@@ -124,6 +122,14 @@ namespace GIGLS.Services.Implementation.Wallet
             //3. send the request to paystack gateway
             var paystackResponse =  await ProcessMobilePaymentForPaystack(waybillPaymentLog);
             return paystackResponse;
+        }
+
+        private async Task<string> GenerateReferenceCode(string waybill)
+        {
+            //1. Generate reference code
+            string code = await _passwordGenerator.Generate();
+            string reference = "wb-" + waybill + "-" + code;
+            return reference;
         }
 
         private async Task<PaystackWebhookDTO> ProcessMobilePaymentForPaystack(WaybillPaymentLogDTO waybillPaymentLog)
