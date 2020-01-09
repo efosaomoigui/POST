@@ -36,5 +36,36 @@ namespace GIGLS.WebApi.Controllers.Wallet
                 };
             });
         }
+
+        [HttpGet]
+        [Route("verifypayment/{waybill}")]
+        public async Task<IServiceResponse<PaystackWebhookDTO>> VerifyAndValidateWaybill([FromUri]  string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _waybillPaymentLogService.VerifyAndValidateWaybill(waybill);
+
+                return new ServiceResponse<PaystackWebhookDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        //process payment for vodafone
+        [HttpGet]
+        [Route("verifypayment/{waybill}/{pin}")]
+        public async Task<IServiceResponse<PaystackWebhookDTO>> VerifyAndValidateWaybillForVodafoneMobilePayment([FromUri]  string waybill, [FromUri]  string pin)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _waybillPaymentLogService.VerifyAndValidateWaybillForVodafoneMobilePayment(waybill);
+
+                return new ServiceResponse<PaystackWebhookDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

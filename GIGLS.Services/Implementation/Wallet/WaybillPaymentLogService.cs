@@ -25,12 +25,15 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
         private readonly IPasswordGenerator _passwordGenerator;
+        private readonly IPaystackPaymentService _paystackService;
 
-        public WaybillPaymentLogService(IUnitOfWork uow, IUserService userService, IPasswordGenerator passwordGenerator)
+        public WaybillPaymentLogService(IUnitOfWork uow, IUserService userService, IPasswordGenerator passwordGenerator,
+            IPaystackPaymentService paystackService)
         {
             _uow = uow;
             _userService = userService;
             _passwordGenerator = passwordGenerator;
+            _paystackService = paystackService;
             MapperConfig.Initialize();
         }
 
@@ -216,6 +219,53 @@ namespace GIGLS.Services.Implementation.Wallet
         public Task UpdateWaybillPaymentLog(WaybillPaymentLogDTO waybillPaymentLog)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<PaystackWebhookDTO> VerifyAndValidateWaybill(string waybill)
+        {
+            //check the current transaction on the waybill
+            var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable()
+                .Where(x => x.Waybill == waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+            
+            if (paymentLog != null)
+            {
+                var response = await _paystackService.VerifyAndValidateMobilePayment(paymentLog.Reference);
+                return response;
+            }
+                        
+            return new PaystackWebhookDTO { 
+                Status = false,
+                Message = $"No online payment process occurred for the waybill {waybill}",
+                data = new Core.DTO.OnlinePayment.Data
+                {
+                    Message = $"No online payment process occurred for the waybill {waybill}",
+                    Status = "failed"
+                }
+            };
+        }
+
+        public async Task<PaystackWebhookDTO> VerifyAndValidateWaybillForVodafoneMobilePayment(string waybill, string pin)
+        {
+            //check the current transaction on the waybill
+            var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable()
+                .Where(x => x.Waybill == waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+
+            if (paymentLog != null)
+            {
+                var response = await _paystackService.VerifyAndValidateMobilePayment(paymentLog.Reference);
+                return response;
+            }
+
+            return new PaystackWebhookDTO
+            {
+                Status = false,
+                Message = $"No online payment process occurred for the waybill {waybill}",
+                data = new Core.DTO.OnlinePayment.Data
+                {
+                    Message = $"No online payment process occurred for the waybill {waybill}",
+                    Status = "failed"
+                }
+            };
         }
     }
 }

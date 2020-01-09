@@ -16,5 +16,7 @@ namespace GIGLS.Core.IServices.Wallet
         Task<List<WaybillPaymentLogDTO>> GetWaybillPaymentLogListByWaybill(string waybill);
         Task<PaystackWebhookDTO> AddWaybillPaymentLog(WaybillPaymentLogDTO waybillPaymentLog);
         Task UpdateWaybillPaymentLog(WaybillPaymentLogDTO waybillPaymentLog);
+        Task<PaystackWebhookDTO> VerifyAndValidateWaybill(string waybill);
+        Task<PaystackWebhookDTO> VerifyAndValidateWaybillForVodafoneMobilePayment(string waybill, string pin);
     }
 }

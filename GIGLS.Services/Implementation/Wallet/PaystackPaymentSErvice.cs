@@ -24,16 +24,14 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUserService _userService;
         private readonly IWalletService _walletService;
         private readonly IUnitOfWork _uow;
-        private readonly IWalletPaymentLogService _walletPaymentLogService;
         private readonly IPaymentTransactionService _paymentTransactionService;
 
         private string secretKey = ConfigurationManager.AppSettings["PayStackSecret"];
 
-        public PaystackPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IWalletPaymentLogService walletPaymentLogService, IPaymentTransactionService paymentTransactionService)
+        public PaystackPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPaymentTransactionService paymentTransactionService)
         {
             _userService = userService;
             _walletService = walletService;
-            _walletPaymentLogService = walletPaymentLogService;
             _paymentTransactionService = paymentTransactionService;
             _uow = uow;
             MapperConfig.Initialize();
@@ -300,6 +298,25 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
+        public async Task<PaystackWebhookDTO> VerifyAndValidateMobilePayment(string reference)
+        {
+            var webhook = await VerifyGhanaPayment(reference);
+
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(reference);
+
+            if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
+            {
+               await ProcessPaymentForWaybill(webhook);
+            }
+            else
+            {
+               await ProcessPaymentForWallet(webhook);
+            }
+
+            return webhook;
+        }
+
+
         private async Task<PaystackWebhookDTO> VerifyGhanaPayment(string reference)
         {
             string payStackSecretGhana = ConfigurationManager.AppSettings["PayStackSecretGhana"];
@@ -423,8 +440,8 @@ namespace GIGLS.Services.Implementation.Wallet
                         //2. Update waybill Payment log
                         paymentLog.IsPaymentSuccessful = true;
                         paymentLog.IsWaybillSettled = true;
-                        paymentLog.TransactionStatus = verifyResult.data.Status;
-                        paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
+                        //paymentLog.TransactionStatus = verifyResult.data.Status;
+                        //paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                     }
                 }
 
@@ -439,12 +456,12 @@ namespace GIGLS.Services.Implementation.Wallet
         
         private WaybillWalletPaymentType GetPackagePaymentType(string refCode){
 
-            if(refCode.StartsWith("wa"))
+            if(refCode.StartsWith("wb"))
             {
-                return WaybillWalletPaymentType.Wallet;
+                return WaybillWalletPaymentType.Waybill;
             }
 
-            return WaybillWalletPaymentType.Waybill;
+            return WaybillWalletPaymentType.Wallet;
         }
             
     }
