@@ -593,13 +593,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //implement customer week function here
-                var result = await ProcessPaymentForCustomerWeek(newShipment);
+                //var result = await ProcessPaymentForCustomerWeek(newShipment);
 
-                if (result)
-                {
-                    newShipment.GrandTotal = 0;
-                    newShipment.SealNumber = "";
-                }
+                //if (result)
+                //{
+                //    newShipment.GrandTotal = 0;
+                //    newShipment.SealNumber = "";
+                //}
 
                 return newShipment;
             }
