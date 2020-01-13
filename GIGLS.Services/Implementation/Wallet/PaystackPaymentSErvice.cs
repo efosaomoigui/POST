@@ -16,6 +16,11 @@ using AutoMapper;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.IServices.PaymentTransactions;
 using GIGLS.Core.DTO.PaymentTransactions;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -315,8 +320,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             return webhook;
         }
-
-
+        
         private async Task<PaystackWebhookDTO> VerifyGhanaPayment(string reference)
         {
             string payStackSecretGhana = ConfigurationManager.AppSettings["PayStackSecretGhana"];
@@ -463,6 +467,88 @@ namespace GIGLS.Services.Implementation.Wallet
 
             return WaybillWalletPaymentType.Wallet;
         }
-            
+
+        public async Task<PaystackWebhookDTO> ProcessPaymentForWaybillUsingPin(WaybillPaymentLog waybillPaymentLog, string pin)
+        {
+            //1. verify the payment 
+            var verifyResult = await SubmitPinForPayment(waybillPaymentLog.Reference, pin);
+
+            if (verifyResult.Status)
+            {
+                //get wallet payment log by reference code
+                var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == waybillPaymentLog.Reference);
+
+                if (paymentLog == null)
+                {
+                    verifyResult.Message = "No payment log registered!!!";
+                    return verifyResult;
+                }
+
+                //2. if the payment successful
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWaybillSettled)
+                {
+                    //3. Process payment for the waybill if successful
+                    PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
+                    {
+                        Waybill = paymentLog.Waybill,
+                        PaymentType = PaymentType.Online,
+                        TransactionCode = paymentLog.Reference,
+                        UserId = paymentLog.UserId
+                    };
+
+                    var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+
+                    if (processWaybillPayment)
+                    {
+                        //2. Update waybill Payment log
+                        paymentLog.IsPaymentSuccessful = true;
+                        paymentLog.IsWaybillSettled = true;
+                    }
+                }
+
+                paymentLog.TransactionStatus = verifyResult.data.Status;
+                paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
+                await _uow.CompleteAsync();
+            }
+
+            return await Task.FromResult(verifyResult);
+        }
+        
+        private async Task<PaystackWebhookDTO> SubmitPinForPayment(string reference, string pin)
+        {
+            try
+            {
+                string payStackSecretGhana = ConfigurationManager.AppSettings["PayStackSecretGhana"];
+
+                string pinUrl = "/submit_pin";
+                string payStackChargeAPI = ConfigurationManager.AppSettings["PayStackChargeAPI"] + pinUrl;
+
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", payStackSecretGhana);
+                    
+                    var dic = new Dictionary<string, string>
+                    {
+                        { "pin",  pin},
+                        { "reference", reference }
+                    };
+                    
+                    var json = JsonConvert.SerializeObject(dic);
+                    var data = new StringContent(json, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(payStackChargeAPI, data);
+                    string result = await response.Content.ReadAsStringAsync();
+                    var paystackResponse = JsonConvert.DeserializeObject<PaystackWebhookDTO>(result);
+                    return paystackResponse;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

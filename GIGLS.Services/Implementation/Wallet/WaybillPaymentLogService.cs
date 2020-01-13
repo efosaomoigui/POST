@@ -252,7 +252,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (paymentLog != null)
             {
-                var response = await _paystackService.VerifyAndValidateMobilePayment(paymentLog.Reference);
+                var response = await _paystackService.ProcessPaymentForWaybillUsingPin(paymentLog, pin);
                 return response;
             }
 

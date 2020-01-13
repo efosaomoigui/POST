@@ -1,15 +1,11 @@
 ﻿using Microsoft.Owin;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace GIGLS.WebApi.Providers
 {
     //This class handles all the OwinMiddleware responses, so the name should 
     //not just focus on invalid authentication
-        public class CustomAuthenticationMiddleware : OwinMiddleware
+    public class CustomAuthenticationMiddleware : OwinMiddleware
     {
         public CustomAuthenticationMiddleware(OwinMiddleware next)
             : base(next)

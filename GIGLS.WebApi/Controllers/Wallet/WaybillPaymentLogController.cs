@@ -59,7 +59,7 @@ namespace GIGLS.WebApi.Controllers.Wallet
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _waybillPaymentLogService.VerifyAndValidateWaybillForVodafoneMobilePayment(waybill);
+                var result = await _waybillPaymentLogService.VerifyAndValidateWaybillForVodafoneMobilePayment(waybill, pin);
 
                 return new ServiceResponse<PaystackWebhookDTO>
                 {
