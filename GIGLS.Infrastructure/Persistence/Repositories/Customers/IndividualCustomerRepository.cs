@@ -57,7 +57,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
         {
             try
             {
-                var customers = _context.IndividualCustomer.Where(x => x.PhoneNumber.Contains(searchData) || x.FirstName.Contains(searchData) || x.LastName.Contains(searchData)).ToList();
+                var customers = _context.IndividualCustomer.Where(x => x.PhoneNumber.Contains(searchData) || x.FirstName.Contains(searchData) || x.LastName.Contains(searchData) || x.Email.Contains(searchData)).ToList();
                 var customersDto = Mapper.Map<List<IndividualCustomerDTO>>(customers);
                 return Task.FromResult(customersDto);
             }
