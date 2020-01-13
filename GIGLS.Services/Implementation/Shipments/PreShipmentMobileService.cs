@@ -2214,87 +2214,94 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (preshipmentmobile.ZoneMapping != 1)
                 {
-                    if (preshipmentmobile.IsApproved != true)
+                    if(preshipmentmobile.shipmentstatus != MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobile.shipmentstatus != MobilePickUpRequestStatus.OnwardProcessing.ToString())
                     {
-                        var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-
-                        int customerid = 0;
-                        if (CustomerId != null)
-                        {
-                            customerid = CustomerId.IndividualCustomerId;
-                        }
-                        else
-                        {
-                            var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                            customerid = companyid.CompanyId;
-                        }
-                        var DepartureCountryId = await GetCountryByServiceCentreId(detail.SenderServiceCentreId);
-                        var DestinationCountryId = await GetCountryByServiceCentreId(detail.ReceiverServiceCentreId);
-                        var MobileShipment = new ShipmentDTO
-                        {
-                            Waybill = preshipmentmobile.Waybill,
-                            ReceiverName = preshipmentmobile.ReceiverName,
-                            ReceiverPhoneNumber = preshipmentmobile.ReceiverPhoneNumber,
-                            ReceiverEmail = preshipmentmobile.ReceiverEmail,
-                            ReceiverAddress = preshipmentmobile.ReceiverAddress,
-                            DeliveryOptionId = 2,
-                            GrandTotal = preshipmentmobile.GrandTotal,
-                            Insurance = preshipmentmobile.InsuranceValue,
-                            Vat = preshipmentmobile.Vat,
-                            SenderAddress = preshipmentmobile.SenderAddress,
-                            IsCashOnDelivery = false,
-                            CustomerCode = preshipmentmobile.CustomerCode,
-                            DestinationServiceCentreId = detail.ReceiverServiceCentreId,
-                            DepartureServiceCentreId = detail.SenderServiceCentreId,
-                            CustomerId = customerid,
-                            UserId = user.Id,
-                            PickupOptions = PickupOptions.HOMEDELIVERY,
-                            IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
-                            ShipmentPackagePrice = preshipmentmobile.GrandTotal,
-                            ApproximateItemsWeight = 0.00,
-                            ReprintCounterStatus = false,
-                            CustomerType = preshipmentmobile.CustomerType,
-                            CompanyType = preshipmentmobile.CompanyType,
-                            Value = preshipmentmobile.Value,
-                            PaymentStatus = PaymentStatus.Paid,
-                            IsFromMobile = true,
-                            ShipmentPickupPrice = Pickupprice,
-                            DestinationCountryId = DestinationCountryId,
-                            DepartureCountryId = DepartureCountryId,
-                            ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
-                            {
-                                Description = s.Description,
-                                IsVolumetric = s.IsVolumetric,
-                                Weight = s.Weight,
-                                Nature = s.ItemType,
-                                Price = (decimal)s.CalculatedPrice,
-                                Quantity = s.Quantity
-
-                            }).ToList()
-                        };
-                        var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
-
-                        preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
-                        preshipmentmobile.IsApproved = true;
-
-                        //add scan status into Mobiletracking and Shipmenttracking
-                        await ScanMobileShipment(new ScanDTO
-                        {
-                            WaybillNumber = detail.WaybillNumber,
-                            ShipmentScanStatus = ShipmentScanStatus.MSVC
-                        });
-
-                        await _shipmentService.ScanShipment(new ScanDTO
-                        {
-                            WaybillNumber = detail.WaybillNumber,
-                            ShipmentScanStatus = ShipmentScanStatus.ARO
-                        });
-                        await _uow.CompleteAsync();
+                        throw new GenericException($"This shipment {detail.WaybillNumber} has not been marked as Picked Up. Delivery Partner should confirm pick up from his app.");
                     }
                     else
                     {
-                        throw new GenericException("Shipment has already been approved!!!");
-                    }
+                        if (preshipmentmobile.IsApproved != true)
+                        {
+                            var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+
+                            int customerid = 0;
+                            if (CustomerId != null)
+                            {
+                                customerid = CustomerId.IndividualCustomerId;
+                            }
+                            else
+                            {
+                                var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+                                customerid = companyid.CompanyId;
+                            }
+                            var DepartureCountryId = await GetCountryByServiceCentreId(detail.SenderServiceCentreId);
+                            var DestinationCountryId = await GetCountryByServiceCentreId(detail.ReceiverServiceCentreId);
+                            var MobileShipment = new ShipmentDTO
+                            {
+                                Waybill = preshipmentmobile.Waybill,
+                                ReceiverName = preshipmentmobile.ReceiverName,
+                                ReceiverPhoneNumber = preshipmentmobile.ReceiverPhoneNumber,
+                                ReceiverEmail = preshipmentmobile.ReceiverEmail,
+                                ReceiverAddress = preshipmentmobile.ReceiverAddress,
+                                DeliveryOptionId = 2,
+                                GrandTotal = preshipmentmobile.GrandTotal,
+                                Insurance = preshipmentmobile.InsuranceValue,
+                                Vat = preshipmentmobile.Vat,
+                                SenderAddress = preshipmentmobile.SenderAddress,
+                                IsCashOnDelivery = false,
+                                CustomerCode = preshipmentmobile.CustomerCode,
+                                DestinationServiceCentreId = detail.ReceiverServiceCentreId,
+                                DepartureServiceCentreId = detail.SenderServiceCentreId,
+                                CustomerId = customerid,
+                                UserId = user.Id,
+                                PickupOptions = PickupOptions.HOMEDELIVERY,
+                                IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
+                                ShipmentPackagePrice = preshipmentmobile.GrandTotal,
+                                ApproximateItemsWeight = 0.00,
+                                ReprintCounterStatus = false,
+                                CustomerType = preshipmentmobile.CustomerType,
+                                CompanyType = preshipmentmobile.CompanyType,
+                                Value = preshipmentmobile.Value,
+                                PaymentStatus = PaymentStatus.Paid,
+                                IsFromMobile = true,
+                                ShipmentPickupPrice = Pickupprice,
+                                DestinationCountryId = DestinationCountryId,
+                                DepartureCountryId = DepartureCountryId,
+                                ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
+                                {
+                                    Description = s.Description,
+                                    IsVolumetric = s.IsVolumetric,
+                                    Weight = s.Weight,
+                                    Nature = s.ItemType,
+                                    Price = (decimal)s.CalculatedPrice,
+                                    Quantity = s.Quantity
+
+                                }).ToList()
+                            };
+                            var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
+
+                            preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.OnwardProcessing.ToString();
+                            preshipmentmobile.IsApproved = true;
+
+                            //add scan status into Mobiletracking and Shipmenttracking
+                            await ScanMobileShipment(new ScanDTO
+                            {
+                                WaybillNumber = detail.WaybillNumber,
+                                ShipmentScanStatus = ShipmentScanStatus.MSVC
+                            });
+
+                            await _shipmentService.ScanShipment(new ScanDTO
+                            {
+                                WaybillNumber = detail.WaybillNumber,
+                                ShipmentScanStatus = ShipmentScanStatus.ARO
+                            });
+                            await _uow.CompleteAsync();
+                        }
+                        else
+                        {
+                            throw new GenericException("Shipment has already been approved!!!");
+                        }
+                    }                    
                 }
                 else
                 {
