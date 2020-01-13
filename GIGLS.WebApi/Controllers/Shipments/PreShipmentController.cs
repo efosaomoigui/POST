@@ -1,5 +1,4 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.DTO.ServiceCentres;
+﻿using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
@@ -13,7 +12,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
-   [Authorize(Roles = "Shipment, ViewAdmin")]
+    [Authorize(Roles = "Shipment, ViewAdmin")]
     [RoutePrefix("api/preshipment")]
     public class PreShipmentController : BaseWebApiController
     {

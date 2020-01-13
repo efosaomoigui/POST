@@ -143,7 +143,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     MobileMoneyDTO mobileMoney = new MobileMoneyDTO
                     {
-                        amount = waybillPaymentLog.Amount,
+                        amount = waybillPaymentLog.Amount * 100,
                         currency = waybillPaymentLog.Currency,
                         email = waybillPaymentLog.Email,
                         reference = waybillPaymentLog.Reference,                        

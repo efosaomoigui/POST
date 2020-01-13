@@ -54,7 +54,7 @@ namespace GIGLS.WebApi.Controllers.Wallet
 
         //process payment for vodafone
         [HttpGet]
-        [Route("verifypayment/{waybill}/{pin}")]
+        [Route("processpayment/{waybill}/{pin}")]
         public async Task<IServiceResponse<PaystackWebhookDTO>> VerifyAndValidateWaybillForVodafoneMobilePayment([FromUri]  string waybill, [FromUri]  string pin)
         {
             return await HandleApiOperationAsync(async () =>
