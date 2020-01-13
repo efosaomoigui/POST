@@ -150,7 +150,7 @@ namespace GIGLS.Services.Implementation.Wallet
                         mobile_money = new Mobile_Money
                         {
                             phone = waybillPaymentLog.PhoneNumber,
-                            provider = waybillPaymentLog.Provider
+                            provider = waybillPaymentLog.NetworkProvider
                         }
                     };
 

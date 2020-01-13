@@ -29,20 +29,23 @@ namespace GIGLS.Messaging.MessageService
         {
             var result = "";
 
-            switch (message.SMSSenderPlatform)
+            if (message.To != null)
             {
-                case SMSSenderPlatform.OGOSMS:
-                    result = await SendSMSUsingOGOSMSAsync(message);
-                    break;
+                switch (message.SMSSenderPlatform)
+                {
+                    case SMSSenderPlatform.OGOSMS:
+                        result = await SendSMSUsingOGOSMSAsync(message);
+                        break;
 
-                case SMSSenderPlatform.TWILIO:
-                    result = await SendSMSUsingTwilioAsync(message);
-                    break;
+                    case SMSSenderPlatform.TWILIO:
+                        result = await SendSMSUsingTwilioAsync(message);
+                        break;
 
-                default:
-                    break;
+                    default:
+                        break;
+                }
             }
-            
+                        
             return result;
         }
 

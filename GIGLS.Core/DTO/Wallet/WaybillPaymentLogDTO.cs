@@ -26,7 +26,7 @@ namespace GIGLS.Core.DTO.Wallet
         public bool IsPaymentSuccessful { get; set; }
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
-        public string Provider { get; set; }
+        public string NetworkProvider { get; set; }
     }
 
     //For Mobile Money

@@ -97,8 +97,14 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     //prepare message finalBody
                     await PrepareMessageFinalBody(messageDTO, obj);
+
                     result = await _emailService.SendAsync(messageDTO);
-                    await LogEmailMessage(messageDTO, result);
+
+                    //send email if there is email address
+                    if (messageDTO.ToEmail != null)
+                    {
+                        await LogEmailMessage(messageDTO, result);
+                    }
                 }
             }
             catch (Exception ex)
@@ -121,8 +127,13 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     //prepare message finalBody
                     await PrepareMessageFinalBody(messageDTO, obj);
+
                     result = await _sMSService.SendAsync(messageDTO);
-                    await LogSMSMessage(messageDTO, result);
+
+                    if (messageDTO.To != null)
+                    {
+                        await LogSMSMessage(messageDTO, result);
+                    }
                 }
             }
             catch (Exception ex)
