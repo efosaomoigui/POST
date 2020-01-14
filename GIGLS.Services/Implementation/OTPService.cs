@@ -106,10 +106,11 @@ namespace GIGLS.Services.Implementation
                 int difference = Convert.ToInt32(span.TotalMinutes);
                 if (difference < 5)
                 {
+                    //customer activated
                     var userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true);
                     if(userdto.IsActive)
                     {
-                        await CalculateReferralBonus(userdto);
+                        CalculateReferralBonus(userdto);
                     }
                     _uow.OTP.Remove(otpbody);
                     await _uow.CompleteAsync();
@@ -319,6 +320,7 @@ namespace GIGLS.Services.Implementation
             }
             return user;
         }
+
         private async Task CalculateReferralBonus(UserDTO User)
         {           
             if (User.RegistrationReferrercode != null && User.IsUniqueInstalled == true)
