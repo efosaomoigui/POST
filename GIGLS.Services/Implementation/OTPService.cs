@@ -190,7 +190,19 @@ namespace GIGLS.Services.Implementation
             }
 
         }
-
+        //Check Details for Customer Portal
+        public async Task<UserDTO> CheckDetailsForCustomerPortal(string user)
+        {
+            try
+            {
+                var registerUser = await _UserService.GetUserUsingCustomerForCustomerPortal(user);
+                return registerUser;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public async Task<double> GetAverageRating(string CustomerCode, string usertype)
         {
             if (usertype == UserChannelType.Partner.ToString())
