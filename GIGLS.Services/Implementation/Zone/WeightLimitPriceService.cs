@@ -26,7 +26,8 @@ namespace GIGLS.Services.Implementation.Zone
         {
             if (weightLimitPrice == null)
                 throw new GenericException("NULL_INPUT");
-            var weightExist = await _uow.WeightLimitPrice.ExistAsync(x => x.ZoneId == weightLimitPrice.ZoneId && x.Weight.Equals(weightLimitPrice.Weight) && x.RegularEcommerceType == weightLimitPrice.RegularEcommerceType);
+            var weightExist = await _uow.WeightLimitPrice.ExistAsync(x => x.ZoneId == weightLimitPrice.ZoneId && x.Weight.Equals(weightLimitPrice.Weight) 
+            && x.RegularEcommerceType == weightLimitPrice.RegularEcommerceType && x.CountryId == weightLimitPrice.CountryId);
 
             if (weightExist == true)
                 throw new GenericException("Weight limit Price already exist");
