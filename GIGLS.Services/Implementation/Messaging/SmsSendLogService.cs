@@ -162,7 +162,7 @@ namespace GIGLS.Services.Implementation.Messaging
 
         public async Task<SmsDeliveryDTO> SmsDeliveryLog(string phonenumber)
         {
-            var Response = new SmsDeliveryDTO();
+            var response = new SmsDeliveryDTO();
             try
             {
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
@@ -173,14 +173,18 @@ namespace GIGLS.Services.Implementation.Messaging
                     Stream result = httpResponse.GetResponseStream();
                     StreamReader reader = new StreamReader(result);
                     string responseFromServer = reader.ReadToEnd();
-                    Response = JsonConvert.DeserializeObject<SmsDeliveryDTO>(responseFromServer);
+                    response = JsonConvert.DeserializeObject<SmsDeliveryDTO>(responseFromServer);
+                    if(response != null)
+                    {
+                        response.data = response.data.OrderByDescending(x => x.Done).ToList();
+                    }
                 }
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-            return await Task.FromResult(Response);
+            return await Task.FromResult(response);
 
 
         }
