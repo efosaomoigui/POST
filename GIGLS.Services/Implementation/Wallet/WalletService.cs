@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
@@ -255,40 +257,41 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 List<WalletDTO> walletsDto = new List<WalletDTO>();
                 var walletsQueryable = _uow.Wallet.GetWalletsAsQueryable();
+                PartnerDTO partner = null;
+                List<CompanyDTO> companies = new List<CompanyDTO>();
+                //CompanyDTO company = null;
+                List<IndividualCustomerDTO> individualCustomer = new List<IndividualCustomerDTO>();
+                List<string> customerCodes = new List<string>();
 
-                //If searchOption.SearchData is not empty
                 if (!string.IsNullOrWhiteSpace(searchOption.SearchData))
                 {
-                    walletsQueryable = walletsQueryable.Where(x =>
-                        x.CustomerCode.Contains(searchOption.SearchData) || x.WalletNumber.Contains(searchOption.SearchData));
-                }
-
-                // handle Individual customers
-                if (FilterCustomerType.IndividualCustomer.Equals(searchOption.CustomerType))
-                {
-                    walletsQueryable = walletsQueryable.Where(x => x.CustomerType == CustomerType.IndividualCustomer);
-                    walletsDto = Mapper.Map<List<WalletDTO>>(walletsQueryable.ToList());
-                }
-                else if (FilterCustomerType.Partner.Equals(searchOption.CustomerType))
-                {
-                    walletsQueryable = walletsQueryable.Where(x => x.CustomerType == CustomerType.Partner);
-                    walletsDto = Mapper.Map<List<WalletDTO>>(walletsQueryable.ToList());
-                }
-                else
-                {
-                    CompanyType companyType;
-
-                    if (FilterCustomerType.Corporate.Equals(searchOption.CustomerType))
+                    if (searchOption.CustomerType == FilterCustomerType.Ecommerce || searchOption.CustomerType == FilterCustomerType.Corporate)
                     {
-                        companyType = CompanyType.Corporate;
+                        companies = await _uow.Company.GetCompanyByEmail(searchOption.SearchData);
+                        foreach(var item in companies)
+                        {
+                            customerCodes.Add(item.CustomerCode);
+                        }
+                        walletsQueryable = walletsQueryable.Where(x => customerCodes.Contains(x.CustomerCode));
+                        walletsDto = Mapper.Map<List<WalletDTO>>(walletsQueryable.ToList());
                     }
-                    else
+                    else if (searchOption.CustomerType == FilterCustomerType.Partner)
                     {
-                        companyType = CompanyType.Ecommerce;
+                        partner = await _uow.Partner.GetPartnerBySearchParameters(searchOption.SearchData);
+                        walletsQueryable = walletsQueryable.Where(x =>
+                            x.CustomerCode.Contains(partner.PartnerCode));
+                        walletsDto = Mapper.Map<List<WalletDTO>>(walletsQueryable.ToList());
                     }
-                    walletsQueryable = walletsQueryable.Where(x => x.CompanyType == companyType.ToString());
-                    var walletsResult = walletsQueryable.ToList();
-                    walletsDto = Mapper.Map<List<WalletDTO>>(walletsResult);
+                    else if (searchOption.CustomerType == FilterCustomerType.IndividualCustomer)
+                    {
+                        individualCustomer = await _uow.IndividualCustomer.GetIndividualCustomers(searchOption.SearchData);
+                        foreach (var item in individualCustomer)
+                        {
+                            customerCodes.Add(item.CustomerCode);
+                        }
+                        walletsQueryable = walletsQueryable.Where(x => customerCodes.Contains(x.CustomerCode));
+                        walletsDto = Mapper.Map<List<WalletDTO>>(walletsQueryable.ToList());
+                    }
                 }
 
                 ////set the customer name
@@ -297,29 +300,39 @@ namespace GIGLS.Services.Implementation.Wallet
                     // handle Company customers
                     if (CustomerType.Company == item.CustomerType)
                     {
-                        var companyDTO = await _uow.Company.GetCompanyByIdWithCountry(item.CustomerId);
-
-                        if (companyDTO != null)
+                        if (companies != null)
                         {
-                            item.CustomerName = companyDTO.Name;
-                            item.Country = companyDTO.Country;
-                            item.UserActiveCountryId = companyDTO.UserActiveCountryId;
+                            foreach( var company in companies)
+                            {
+                                item.CustomerName = company.Name;
+                                item.Country = company.Country;
+                                item.UserActiveCountryId = company.UserActiveCountryId;
+                            }
+                            
                         }
                     }
                     else if (CustomerType.Partner == item.CustomerType)
                     {
-                        var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(item.CustomerId);
-                        item.CustomerName = partnerDTO.PartnerName;
-                        item.UserActiveCountryId = partnerDTO.UserActiveCountryId;
-                        item.Country = partnerDTO.Country;
+                        if (partner != null)
+                        {
+                            item.CustomerName = partner.PartnerName;
+                            item.UserActiveCountryId = partner.UserActiveCountryId;
+                            item.Country = partner.Country;
+                        }
                     }
                     else
                     {
                         // handle IndividualCustomers
-                        var individualCustomerDTO = await _uow.IndividualCustomer.GetIndividualCustomerByIdWithCountry(item.CustomerId);
-                        item.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
-                        item.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
-                        item.Country = individualCustomerDTO.Country;
+                        if (individualCustomer != null)
+                        {
+                            foreach (var individual in individualCustomer)
+                            {
+                                item.CustomerName = string.Format($"{individual.FirstName} " + $"{individual.LastName}");
+                                item.UserActiveCountryId = individual.UserActiveCountryId;
+                                item.Country = individual.Country;
+                            }
+                            
+                        }
                     }
                 }
 
