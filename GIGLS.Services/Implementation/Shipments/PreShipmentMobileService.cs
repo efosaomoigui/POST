@@ -2214,11 +2214,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (preshipmentmobile.ZoneMapping != 1)
                 {
-                    if(preshipmentmobile.shipmentstatus != MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobile.shipmentstatus != MobilePickUpRequestStatus.OnwardProcessing.ToString())
-                    {
-                        throw new GenericException($"This shipment {detail.WaybillNumber} has not been marked as Picked Up. Delivery Partner should confirm pick up from his app.");
-                    }
-                    else
+                    if(preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString())
                     {
                         if (preshipmentmobile.IsApproved != true)
                         {
@@ -2301,6 +2297,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             throw new GenericException("Shipment has already been approved!!!");
                         }
+                    }
+                    else
+                    {
+                        throw new GenericException($"This shipment {detail.WaybillNumber} has not been marked as Picked Up. Delivery Partner should confirm pick up from his app.");
                     }                    
                 }
                 else
