@@ -314,6 +314,14 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             return Task.FromResult(user);
         }
 
+        //get User using Customer - For Customer Portal
+        public Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomerForCustomerPortal(string emailPhoneCode)
+        {
+            var user = _userManager.Users.Where(x => (x.Email.Equals(emailPhoneCode) ||
+            x.UserChannelCode.Equals(emailPhoneCode) || x.PhoneNumber.Contains(emailPhoneCode)) && (x.UserChannelType == UserChannelType.Ecommerce)).FirstOrDefault();
+            return Task.FromResult(user);
+        }
+
         public async Task<GIGL.GIGLS.Core.Domain.User> ActivateUserByEmail(string email, bool isActive)
         {
             var user = _userManager.Users.Where(x => x.Email.Equals(email)).FirstOrDefault();

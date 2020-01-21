@@ -118,5 +118,50 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
 
             return Task.FromResult(partnerDto.ToList());
         }
+
+        public Task<PartnerDTO> GetPartnerBySearchParameters(string parameter)
+        {
+            try
+            {
+                if (parameter != null)
+                {
+                    parameter = parameter.ToLower();
+                }
+                var partners = _context.Partners.Where(x => x.Email.ToLower() == parameter
+                || x.PartnerCode.ToLower() == parameter || x.PartnerName.ToLower() == parameter ||
+                x.PhoneNumber.Contains(parameter));
+
+                var partnersDto = from partner in partners
+                                  select new PartnerDTO
+                                  {
+                                      PartnerId = partner.PartnerId,
+                                      PartnerName = partner.PartnerName,
+                                      Email = partner.Email,
+                                      Address = partner.Address,
+                                      PartnerCode = partner.PartnerCode,
+                                      PhoneNumber = partner.PhoneNumber,
+                                      OptionalPhoneNumber = partner.OptionalPhoneNumber,
+                                      PartnerType = partner.PartnerType,
+                                      FirstName = partner.FirstName,
+                                      LastName = partner.LastName,
+                                      IdentificationNumber = "",
+                                      WalletPan = "",
+                                      UserActiveCountryId = partner.UserActiveCountryId,
+                                      Country = _context.Country.Where(x => x.CountryId == partner.UserActiveCountryId).Select(x => new CountryDTO
+                                      {
+                                          CountryId = x.CountryId,
+                                          CountryName = x.CountryName,
+                                          CurrencySymbol = x.CurrencySymbol,
+                                          CurrencyCode = x.CurrencyCode,
+                                          PhoneNumberCode = x.PhoneNumberCode
+                                      }).FirstOrDefault()
+                                  };
+                return Task.FromResult(partnersDto.FirstOrDefault());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
