@@ -39,6 +39,11 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<PaystackWebhookDTO> AddWaybillPaymentLog(WaybillPaymentLogDTO waybillPaymentLog)
         {
+            if (waybillPaymentLog.UserId == null)
+            {
+                waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
+            }
+
             //check the current transaction on the waybill
             var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable()
                 .Where(x => x.Waybill == waybillPaymentLog.Waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
@@ -48,19 +53,33 @@ namespace GIGLS.Services.Implementation.Wallet
             if (paymentLog != null)
             {
                 //think on how to solve this later but for now, return this below
+                //this process require more thinking
+
+                if (!paymentLog.IsWaybillSettled)
+                {
+                    if (waybillPaymentLog.OnlinePaymentType == Core.Enums.OnlinePaymentType.Paystack)
+                    {
+                        response = await AddWaybillPaymentLogForPaystack(waybillPaymentLog);
+                    }
+                }
+
+                //1. Validate the last transaction before allow another transaction occur
+                //var validateLastTransaction = await VerifyAndValidateWaybill(paymentLog.Reference);
+
+                //2. if successful, revalidate
+                //3. if not -- log and initiate another transcation
+                //
+
                 return response;
             }
-            
-            if (waybillPaymentLog.UserId == null)
+            else
             {
-                waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
+                if (waybillPaymentLog.OnlinePaymentType == Core.Enums.OnlinePaymentType.Paystack)
+                {
+                    response = await AddWaybillPaymentLogForPaystack(waybillPaymentLog);
+                }
             }
-
-            if(waybillPaymentLog.OnlinePaymentType == Core.Enums.OnlinePaymentType.Paystack)
-            {
-                response = await AddWaybillPaymentLogForPaystack(waybillPaymentLog);
-            }
-
+                            
             return response;
         }
 
@@ -225,7 +244,7 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             //check the current transaction on the waybill
             var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable()
-                .Where(x => x.Waybill == waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+                .Where(x => x.Waybill == waybill || x.Reference == waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
             
             if (paymentLog != null)
             {
@@ -235,10 +254,10 @@ namespace GIGLS.Services.Implementation.Wallet
                         
             return new PaystackWebhookDTO { 
                 Status = false,
-                Message = $"No online payment process occurred for the waybill {waybill}",
+                Message = $"No online payment process occurred for the waybill/reference {waybill}",
                 data = new Core.DTO.OnlinePayment.Data
                 {
-                    Message = $"No online payment process occurred for the waybill {waybill}",
+                    Message = $"No online payment process occurred for the waybill/reference {waybill}",
                     Status = "failed"
                 }
             };
