@@ -12,6 +12,6 @@ namespace GIGLS.Core.IRepositories.Partnership
         Task<Partner> GetLastValidPartnerCode();
         Task<PartnerDTO> GetPartnerByIdWithCountry(int customerId);
         Task<List<PartnerDTO>> GetExternalPartnersAsync();
-        Task<PartnerDTO> GetPartnerBySearchParameters(string parameter);
+        Task<List<PartnerDTO>> GetPartnerBySearchParameters(string parameter);
     }
 }

@@ -119,7 +119,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
             return Task.FromResult(partnerDto.ToList());
         }
 
-        public Task<PartnerDTO> GetPartnerBySearchParameters(string parameter)
+        public Task<List<PartnerDTO>> GetPartnerBySearchParameters(string parameter)
         {
             try
             {
@@ -127,9 +127,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                 {
                     parameter = parameter.ToLower();
                 }
-                var partners = _context.Partners.Where(x => x.Email.ToLower() == parameter
-                || x.PartnerCode.ToLower() == parameter || x.PartnerName.ToLower() == parameter ||
-                x.PhoneNumber.Contains(parameter));
+                var partners = _context.Partners.Where(x => x.Email.ToLower() == parameter || x.PartnerCode.ToLower() == parameter 
+                    || x.PartnerName.Contains(parameter) || x.PhoneNumber.Contains(parameter) || x.FirstName.Contains(parameter) || x.LastName.Contains(parameter));
 
                 var partnersDto = from partner in partners
                                   select new PartnerDTO
@@ -156,7 +155,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                           PhoneNumberCode = x.PhoneNumberCode
                                       }).FirstOrDefault()
                                   };
-                return Task.FromResult(partnersDto.FirstOrDefault());
+                return Task.FromResult(partnersDto.ToList());
             }
             catch (Exception)
             {
