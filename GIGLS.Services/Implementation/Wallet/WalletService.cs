@@ -308,7 +308,7 @@ namespace GIGLS.Services.Implementation.Wallet
                         {
                             foreach (var partner in partners)
                             {
-                                item.CustomerName = string.Format($"{partner.FirstName} " + $"{partner.LastName}");
+                                item.CustomerName = partner.PartnerName;
                                 item.Country = partner.Country;
                                 item.UserActiveCountryId = partner.UserActiveCountryId;
                             }
