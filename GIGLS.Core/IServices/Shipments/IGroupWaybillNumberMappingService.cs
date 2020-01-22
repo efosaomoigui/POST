@@ -11,6 +11,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<IEnumerable<GroupWaybillNumberMappingDTO>> GetAllGroupWayBillNumberMappings();
         Task<IEnumerable<GroupWaybillNumberMappingDTO>> GetAllGroupWayBillNumberMappings(DateFilterCriteria dateFilterCriteria);
         Task MappingWaybillNumberToGroup(string groupWaybillNumber, List<string> waybillNumber);
+        Task MappingWaybillNumberToGroup(List<GroupWaybillNumberMappingDTO> groupingData);
         Task<GroupWaybillNumberDTO> GetGroupForWaybillNumber(string waybillNumber);
         Task<GroupWaybillNumberDTO> GetGroupForWaybillNumberByServiceCentre(string waybillNumber);
         Task<GroupWaybillNumberMappingDTO> GetWaybillNumbersInGroup(int groupWaybillNumberId);

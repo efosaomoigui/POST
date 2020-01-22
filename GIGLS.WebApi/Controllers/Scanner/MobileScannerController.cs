@@ -211,7 +211,22 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 };
             });
         }
-               
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("mapwaybillstogroup2")]
+        public async Task<IServiceResponse<bool>> MappingWaybillNumberToGroup(List<GroupWaybillNumberMappingDTO> groupingData)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _groupMappingservice.MappingWaybillNumberToGroup(groupingData);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
         //Manifest Scan
         //---------------------
         //1. Get Service centre --> ShipmentsService --> byservicecentre(shipment/unmappedmanifestservicecentre (GET)
