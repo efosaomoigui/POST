@@ -4,6 +4,7 @@ using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Services.Implementation;
 using GIGLS.WebApi.Filters;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -19,7 +20,6 @@ namespace GIGLS.WebApi.Controllers.Wallet
         {
             _waybillPaymentLogService = waybillPaymentLogService;
         }
-
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
@@ -62,6 +62,21 @@ namespace GIGLS.WebApi.Controllers.Wallet
                 var result = await _waybillPaymentLogService.VerifyAndValidateWaybillForVodafoneMobilePayment(waybill, pin);
 
                 return new ServiceResponse<PaystackWebhookDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+        
+        [HttpGet]
+        [Route("{waybill}")]
+        public async Task<IServiceResponse<List<WaybillPaymentLogDTO>>> GetWaybillPaymentLogs([FromUri]  string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _waybillPaymentLogService.GetWaybillPaymentLogListByWaybill(waybill);
+
+                return new ServiceResponse<List<WaybillPaymentLogDTO>>
                 {
                     Object = result
                 };

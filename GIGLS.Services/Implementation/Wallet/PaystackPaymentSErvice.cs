@@ -7,7 +7,6 @@ using PayStack.Net;
 using GIGLS.Core.DTO.OnlinePayment;
 using System.Configuration;
 using GIGLS.Core.Enums;
-using GIGLS.Core.Domain;
 using System.Net;
 using System;
 using System.IO;
@@ -19,7 +18,6 @@ using GIGLS.Core.DTO.PaymentTransactions;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
 namespace GIGLS.Services.Implementation.Wallet

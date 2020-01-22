@@ -39,37 +39,24 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<PaystackWebhookDTO> AddWaybillPaymentLog(WaybillPaymentLogDTO waybillPaymentLog)
         {
+            var response = new PaystackWebhookDTO();
+
             if (waybillPaymentLog.UserId == null)
             {
                 waybillPaymentLog.UserId = await _userService.GetCurrentUserId();
             }
 
-            //check the current transaction on the waybill
+            //check if any transaction on the waybill is successful
             var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable()
-                .Where(x => x.Waybill == waybillPaymentLog.Waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
-
-            var response = new PaystackWebhookDTO();
+                .Where(x => x.Waybill == waybillPaymentLog.Waybill && x.IsPaymentSuccessful == true).OrderByDescending(x => x.DateCreated).FirstOrDefault();
 
             if (paymentLog != null)
             {
-                //think on how to solve this later but for now, return this below
-                //this process require more thinking
-
-                if (!paymentLog.IsWaybillSettled)
-                {
-                    if (waybillPaymentLog.OnlinePaymentType == Core.Enums.OnlinePaymentType.Paystack)
-                    {
-                        response = await AddWaybillPaymentLogForPaystack(waybillPaymentLog);
-                    }
-                }
-
-                //1. Validate the last transaction before allow another transaction occur
-                //var validateLastTransaction = await VerifyAndValidateWaybill(paymentLog.Reference);
-
-                //2. if successful, revalidate
-                //3. if not -- log and initiate another transcation
-                //
-
+                response.Status = false;
+                response.Message = $"There is successful transaction for the waybill {waybillPaymentLog.Waybill}";
+                response.data.Message = $"There is successful transaction for the waybill {waybillPaymentLog.Waybill}";
+                response.data.Status = "failed";
+                
                 return response;
             }
             else
@@ -219,7 +206,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<List<WaybillPaymentLogDTO>> GetWaybillPaymentLogListByWaybill(string waybill)
         {
-            var paymentLog = await _uow.WaybillPaymentLog.FindAsync(x => x.Waybill == waybill);
+            var paymentLog = await _uow.WaybillPaymentLog.FindAsync(x => x.Waybill == waybill || x.Reference == waybill);
             return Mapper.Map<List<WaybillPaymentLogDTO>>(paymentLog);
         }
 
