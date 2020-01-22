@@ -269,26 +269,17 @@ namespace GIGLS.Services.Implementation.Wallet
                     if (searchOption.CustomerType == FilterCustomerType.Ecommerce || searchOption.CustomerType == FilterCustomerType.Corporate)
                     {
                         companies = await _uow.Company.GetCompanyByEmail(searchOption.SearchData);
-                        foreach(var item in companies)
-                        {
-                            customerCodes.Add(item.CustomerCode);
-                        }
+                        customerCodes = companies.Select(x => x.CustomerCode).ToList();
                     }
                     else if (searchOption.CustomerType == FilterCustomerType.Partner)
                     {
                         partners = await _uow.Partner.GetPartnerBySearchParameters(searchOption.SearchData);
-                        foreach (var item in partners)
-                        {
-                            customerCodes.Add(item.PartnerCode);
-                        }
+                        customerCodes = partners.Select(x => x.PartnerCode).ToList();
                     }
                     else if (searchOption.CustomerType == FilterCustomerType.IndividualCustomer)
                     {
                         individualCustomer = await _uow.IndividualCustomer.GetIndividualCustomers(searchOption.SearchData);
-                        foreach (var item in individualCustomer)
-                        {
-                            customerCodes.Add(item.CustomerCode);
-                        }
+                        customerCodes = individualCustomer.Select(x => x.CustomerCode).ToList();
                     }
 
                     walletsQueryable = walletsQueryable.Where(x => customerCodes.Contains(x.CustomerCode));
