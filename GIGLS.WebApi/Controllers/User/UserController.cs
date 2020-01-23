@@ -622,7 +622,6 @@ namespace GIGLS.WebApi.Controllers.User
 
             return await HandleApiOperationAsync(async () =>
             {
-
                 using (var client = new HttpClient())
                 {
                     //setup client
@@ -639,7 +638,7 @@ namespace GIGLS.WebApi.Controllers.User
                      });
 
                     //setup login data
-                    HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
+                    HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
 
                     if (!responseMessage.IsSuccessStatusCode)
                     {
