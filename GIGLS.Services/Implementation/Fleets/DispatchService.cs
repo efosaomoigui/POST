@@ -41,6 +41,8 @@ namespace GIGLS.Services.Implementation.Fleets
         {
             //try
             {
+                var checkForOutstanding = await CheckForOutstandingDispatch(dispatchDTO);
+                
                 // get user login service centre
                 var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
                 var userServiceCentreId = serviceCenterIds[0];
@@ -416,6 +418,26 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 throw;
             }
+        }
+
+        private async Task<bool> CheckForOutstandingDispatch(DispatchDTO dispatchDTO)
+        {
+            var dispatch = await _uow.Dispatch.FindAsync(x => x.DriverDetail == dispatchDTO.DriverDetail && x.ReceivedBy == null);
+            if (dispatch != null)
+            {
+                foreach(var item in dispatch)
+                {
+                    if(item.DateModified.Date == DateTime.Now.Date)
+                    {
+                        return true;
+                    }
+                    else if(item.DateModified.Date != DateTime.Now.Date)
+                    {
+                        throw new GenericException("This Partner has Unsigned Off Delivery Manifest(s)");
+                    }
+                }
+            }
+            return true;
         }
     }
 }
