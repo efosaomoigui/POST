@@ -33,6 +33,7 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Admin;
 using GIGLS.Core.Domain;
+using EfeAuthen.Models;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -740,6 +741,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        //Login for GIGGO App
         [AllowAnonymous]
         [HttpPost]
         [Route("login")]
@@ -859,6 +861,66 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                     return new ServiceResponse<JObject>
                     {
                         ShortDescription = "User has not been verified",
+                        Object = jObject
+                    };
+                }
+            });
+        }
+
+        //Login for Customer Portal
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("customerLogin")]
+        public async Task<IServiceResponse<JObject>> CustomerLogin(UserloginDetailsModel userLoginModel)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var user = await _portalService.CheckDetailsForCustomerPortal(userLoginModel.username);
+
+                if (user.Username != null)
+                {
+                    user.Username = user.Username.Trim();
+                }
+
+                if (userLoginModel.Password != null)
+                {
+                    userLoginModel.Password = userLoginModel.Password.Trim();
+                }
+
+                string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+                string getTokenResponse;
+
+                using (var client = new HttpClient())
+                {
+                    //setup client
+                    client.BaseAddress = new Uri(apiBaseUri);
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    //setup login data
+                    var formContent = new FormUrlEncodedContent(new[]
+                    {
+                         new KeyValuePair<string, string>("grant_type", "password"),
+                         new KeyValuePair<string, string>("Username", user.Username),
+                         new KeyValuePair<string, string>("Password", userLoginModel.Password),
+                     });
+
+                    //setup login data
+                    HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
+
+                    if (!responseMessage.IsSuccessStatusCode)
+                    {
+                        throw new GenericException("Operation could not complete login successfully:");
+                    }
+
+                    //get access token from response body
+                    var responseJson = await responseMessage.Content.ReadAsStringAsync();
+                    var jObject = JObject.Parse(responseJson);
+
+                    getTokenResponse = jObject.GetValue("access_token").ToString();
+
+                    return new ServiceResponse<JObject>
+                    {
                         Object = jObject
                     };
                 }

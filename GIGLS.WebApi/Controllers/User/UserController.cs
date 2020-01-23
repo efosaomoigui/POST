@@ -601,87 +601,27 @@ namespace GIGLS.WebApi.Controllers.User
             });
         }
 
-        //[AllowAnonymous]
-        //[HttpPost]
-        //[Route("api/user/login")]
-        //public async Task<IServiceResponse<JObject>> Login(UserloginDetailsModel userLoginModel)
-        //{
-        //    //trim
-        //    if (userLoginModel.username != null)
-        //    {
-        //        userLoginModel.username = userLoginModel.username.Trim();
-        //    }
-
-        //    if (userLoginModel.Password != null)
-        //    {
-        //        userLoginModel.Password = userLoginModel.Password.Trim();
-        //    }
-
-        //    string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
-        //    string getTokenResponse;
-
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-
-        //        using (var client = new HttpClient())
-        //        {
-        //            //setup client
-        //            client.BaseAddress = new Uri(apiBaseUri);
-        //            client.DefaultRequestHeaders.Accept.Clear();
-        //            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-        //            //setup login data
-        //            var formContent = new FormUrlEncodedContent(new[]
-        //            {
-        //                 new KeyValuePair<string, string>("grant_type", "password"),
-        //                 new KeyValuePair<string, string>("Username", userLoginModel.username),
-        //                 new KeyValuePair<string, string>("Password", userLoginModel.Password),
-        //             });
-
-        //            //setup login data
-        //            HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
-
-        //            if (!responseMessage.IsSuccessStatusCode)
-        //            {
-        //                throw new GenericException("Operation could not complete login successfully:");
-        //            }
-
-        //            //get access token from response body
-        //            var responseJson = await responseMessage.Content.ReadAsStringAsync();
-        //            var jObject = JObject.Parse(responseJson);
-
-        //            getTokenResponse = jObject.GetValue("access_token").ToString();
-
-        //            return new ServiceResponse<JObject>
-        //            {
-        //                Object = jObject
-        //            };
-        //        }
-        //    });
-        //}
-
         [AllowAnonymous]
         [HttpPost]
         [Route("api/user/login")]
         public async Task<IServiceResponse<JObject>> Login(UserloginDetailsModel userLoginModel)
         {
+            //trim
+            if (userLoginModel.username != null)
+            {
+                userLoginModel.username = userLoginModel.username.Trim();
+            }
+
+            if (userLoginModel.Password != null)
+            {
+                userLoginModel.Password = userLoginModel.Password.Trim();
+            }
+
+            string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+            string getTokenResponse;
+
             return await HandleApiOperationAsync(async () =>
             {
-                var user = await _customerPortalService.CheckDetailsForCustomerPortal(userLoginModel.username);
-
-                if (user.Username != null)
-                {
-                    user.Username = user.Username.Trim();
-                }
-
-                if (userLoginModel.Password != null)
-                {
-                    userLoginModel.Password = userLoginModel.Password.Trim();
-                }
-
-                string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
-                string getTokenResponse;
-
                 using (var client = new HttpClient())
                 {
                     //setup client
@@ -693,7 +633,7 @@ namespace GIGLS.WebApi.Controllers.User
                     var formContent = new FormUrlEncodedContent(new[]
                     {
                          new KeyValuePair<string, string>("grant_type", "password"),
-                         new KeyValuePair<string, string>("Username", user.Username),
+                         new KeyValuePair<string, string>("Username", userLoginModel.username),
                          new KeyValuePair<string, string>("Password", userLoginModel.Password),
                      });
 
@@ -718,7 +658,6 @@ namespace GIGLS.WebApi.Controllers.User
                 }
             });
         }
-
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpGet]
