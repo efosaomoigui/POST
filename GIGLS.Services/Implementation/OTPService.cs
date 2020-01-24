@@ -203,6 +203,20 @@ namespace GIGLS.Services.Implementation
                 throw;
             }
         }
+
+        //Check Details for Mobile Scanner 
+        public async Task<UserDTO> CheckDetailsForMobileScanner(string user)
+        {
+            try
+            {
+                var registerUser = await _UserService.GetUserUsingCustomerForMobileScanner(user);
+                return registerUser;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public async Task<double> GetAverageRating(string CustomerCode, string usertype)
         {
             if (usertype == UserChannelType.Partner.ToString())

@@ -127,6 +127,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<GiglgoStationDTO>> GetGoStations();
         Task<List<DeliveryNumberDTO>> GetDeliveryNumbers(int count);
         Task<UserDTO> CheckDetailsForCustomerPortal(string user);
+        Task<UserDTO> CheckDetailsForMobileScanner(string user);
 
     }
 }

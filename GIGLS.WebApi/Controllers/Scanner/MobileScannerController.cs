@@ -6,6 +6,7 @@ using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Business;
+using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.CORE.DTO.Shipments;
@@ -42,12 +43,14 @@ namespace GIGLS.WebApi.Controllers.Scanner
         private readonly IShipmentCollectionService _collectionservice;
         private readonly ILogVisitReasonService _logService;
         private readonly IManifestVisitMonitoringService _visitService;
+        private readonly ICustomerPortalService _portalService;
 
         public MobileScannerController(IScanService scanService, IScanStatusService scanStatusService, IShipmentService shipmentService,
             IGroupWaybillNumberService groupService, IGroupWaybillNumberMappingService groupMappingservice,
             IManifestService manifestService, IManifestGroupWaybillNumberMappingService manifestGroupMappingService,
             IManifestWaybillMappingService manifestWaybillservice, IStateService stateService,
-            IShipmentCollectionService collectionservice, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService) : base(nameof(MobileScannerController))
+            IShipmentCollectionService collectionservice, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
+            ICustomerPortalService portalService) : base(nameof(MobileScannerController))
         {
             _scanService = scanService;
             _scanStatusService = scanStatusService;
@@ -61,6 +64,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
             _collectionservice = collectionservice;
             _logService = logService;
             _visitService = visitService;
+            _portalService = portalService;
         }
 
         [AllowAnonymous]
@@ -68,9 +72,11 @@ namespace GIGLS.WebApi.Controllers.Scanner
         [Route("login")]
         public async Task<IServiceResponse<JObject>> Login(UserloginDetailsModel userLoginModel)
         {
-            if (userLoginModel.username != null)
+            var user = await _portalService.CheckDetailsForMobileScanner(userLoginModel.username);
+
+            if (user.Username != null)
             {
-                userLoginModel.username = userLoginModel.username.Trim();
+                user.Username = user.Username.Trim();
             }
 
             if (userLoginModel.Password != null)
@@ -94,12 +100,12 @@ namespace GIGLS.WebApi.Controllers.Scanner
                     var formContent = new FormUrlEncodedContent(new[]
                     {
                          new KeyValuePair<string, string>("grant_type", "password"),
-                         new KeyValuePair<string, string>("Username", userLoginModel.username),
+                         new KeyValuePair<string, string>("Username", user.Username),
                          new KeyValuePair<string, string>("Password", userLoginModel.Password),
                      });
 
                     //setup login data
-                    HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
+                    HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
 
                     if (!responseMessage.IsSuccessStatusCode)
                     {
