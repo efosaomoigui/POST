@@ -518,7 +518,7 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 string payStackSecretGhana = ConfigurationManager.AppSettings["PayStackSecretGhana"];
 
-                string pinUrl = "/submit_pin";
+                string pinUrl = "/submit_otp";
                 string payStackChargeAPI = ConfigurationManager.AppSettings["PayStackChargeAPI"] + pinUrl;
 
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
