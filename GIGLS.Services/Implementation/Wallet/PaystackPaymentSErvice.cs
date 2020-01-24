@@ -531,7 +531,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     
                     var dic = new Dictionary<string, string>
                     {
-                        { "pin",  pin},
+                        { "otp",  pin},
                         { "reference", reference }
                     };
                     
