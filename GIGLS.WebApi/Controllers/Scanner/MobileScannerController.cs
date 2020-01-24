@@ -99,7 +99,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
                      });
 
                     //setup login data
-                    HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
+                    HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
 
                     if (!responseMessage.IsSuccessStatusCode)
                     {
