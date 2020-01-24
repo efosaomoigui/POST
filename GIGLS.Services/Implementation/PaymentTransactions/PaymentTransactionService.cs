@@ -119,6 +119,11 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             // get the current user info
             var currentUserId = await _userService.GetCurrentUserId();
 
+            if (!string.IsNullOrEmpty(paymentTransaction.UserId))
+            {
+                currentUserId = paymentTransaction.UserId;
+            }
+
             //get Ledger, Invoice, shipment
             var generalLedgerEntity = await _uow.GeneralLedger.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
             var invoiceEntity = await _uow.Invoice.GetAsync(s => s.Waybill == paymentTransaction.Waybill);

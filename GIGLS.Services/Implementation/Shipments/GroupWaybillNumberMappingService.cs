@@ -423,7 +423,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipmentDTO.IsGrouped = true;
 
                         //check if waybill is a transitWaybill then update entry
-                        var transitWaybill = _uow.TransitWaybillNumber.SingleOrDefault(s => s.WaybillNumber == waybillNumber);
+                        var transitWaybill = _uow.TransitWaybillNumber.GetAllAsQueryable().Where(s => s.WaybillNumber == waybillNumber).FirstOrDefault();
                         if (transitWaybill != null)
                         {
                             transitWaybill.IsGrouped = true;
