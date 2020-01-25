@@ -1377,6 +1377,31 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return await _otpService.CheckDetailsForCustomerPortal(emailPhone);
         }
+        public async Task<UserDTO> CheckDetailsForMobileScanner(string user)
+        {
+            string emailPhone = "";
+
+            bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            if (isEmail)
+            {
+                emailPhone = user;
+            }
+            else
+            {
+                bool IsPhone = Regex.IsMatch(user, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
+                if (IsPhone)
+                {
+                    user = user.Remove(0, 1);
+                    emailPhone = user;
+                }
+                else
+                {
+                    emailPhone = user;
+                }
+            }
+
+            return await _otpService.CheckDetailsForMobileScanner(emailPhone);
+        }
         public async Task<bool> CreateCustomer(string CustomerCode)
         {
             return await _preShipmentMobileService.CreateCustomer(CustomerCode);
