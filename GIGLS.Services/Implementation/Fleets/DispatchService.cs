@@ -39,9 +39,7 @@ namespace GIGLS.Services.Implementation.Fleets
         /// <returns></returns>
         public async Task<object> AddDispatch(DispatchDTO dispatchDTO)
         {
-            //try
             {
-                var checkForOutstanding = await CheckForOutstandingDispatch(dispatchDTO);
                 
                 // get user login service centre
                 var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
@@ -54,6 +52,8 @@ namespace GIGLS.Services.Implementation.Fleets
                 //check for the type of delivery manifest to know which type of process to do
                 if (dispatchDTO.ManifestType == ManifestType.Delivery)
                 {
+                    var checkForOutstanding = await CheckForOutstandingDispatch(dispatchDTO);
+
                     //filter all the ways in the delivery manifest for scanning processing
                     var ret = await FilterWaybillsInDeliveryManifest(dispatchDTO, currentUserId, userServiceCentreId);
                 }
