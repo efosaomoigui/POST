@@ -8,7 +8,7 @@ namespace GIGLS.WebApi.App_Start
     using Ninject;
     using Ninject.Web.Common;
     using Ninject.Extensions.Conventions;
-    using System.Web.Http;
+    //using System.Web.Http;
     using Ninject.Web.WebApi;
     using Core.IServices.Customers;
     using Services.Implementation.Customers;
@@ -18,8 +18,8 @@ namespace GIGLS.WebApi.App_Start
     using GIGL.GIGLS.Core.Repositories;
     using Core.IServices;
     using INFRASTRUCTURE.Persistence.Repositories.User;
-    using Hangfire;
-    using GlobalConfiguration = Hangfire.GlobalConfiguration;
+    //using Hangfire;
+    //using GlobalConfiguration = Hangfire.GlobalConfiguration;
 
     public static class NinjectWebCommon 
     {
@@ -61,7 +61,7 @@ namespace GIGLS.WebApi.App_Start
                 RegisterRepositoriesByConvention(kernel);
                 RegisterAuthRepositoriesByConvention(kernel);
                 RegisterServicesByConvention(kernel);
-                GlobalConfiguration.Configuration.UseNinjectActivator(kernel);
+                //GlobalConfiguration.Configuration.UseNinjectActivator(kernel);
                 System.Web.Http.GlobalConfiguration.Configuration.DependencyResolver = new NinjectDependencyResolver(kernel);
                
                 return kernel;
