@@ -423,6 +423,7 @@ namespace GIGLS.Services.Implementation.Fleets
         private async Task<bool> CheckForOutstandingDispatch(DispatchDTO dispatchDTO)
         {
             var dispatch = await _uow.Dispatch.FindAsync(x => x.DriverDetail == dispatchDTO.DriverDetail && x.ReceivedBy == null);
+            DateTime saturday = new DateTime(2020, 01, 25);
             if (dispatch != null)
             {
                 foreach(var item in dispatch)
@@ -431,7 +432,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     {
                         return true;
                     }
-                    else if(item.DateModified.Date != DateTime.Now.Date)
+                    else if((item.DateModified.Date != DateTime.Now.Date) && (item.DateModified.Date > saturday))
                     {
                         throw new GenericException("This Partner has Unsigned Off Delivery Manifest(s)");
                     }
