@@ -509,9 +509,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         ungroupedWaybillsList.Add(item.Waybill);
                     }
                 }
-
-                List<GroupWaybillNumberMapping> groupWaybillNumberMapping = new List<GroupWaybillNumberMapping>();
-
+                
                 //convert the list to HashSet to remove duplicate                
                 //var newWaybillNumberList = new HashSet<string>(waybillNumberList);
                 var newWaybillNumberList = new HashSet<GroupWaybillNumberMappingDTO>();
@@ -534,6 +532,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
+                    List<GroupWaybillNumberMapping> groupWaybillNumberMapping = new List<GroupWaybillNumberMapping>();
+
                     foreach (var item in newWaybillNumberList)
                     {
                         var shipmentDTO = await _uow.Shipment.GetAsync(x => x.Waybill == item.WaybillNumber);
@@ -569,9 +569,10 @@ namespace GIGLS.Services.Implementation.Shipments
                             transitWaybill.IsGrouped = true;
                         }
                     }
+
+                    _uow.GroupWaybillNumberMapping.AddRange(groupWaybillNumberMapping);
                 }
 
-                _uow.GroupWaybillNumberMapping.AddRange(groupWaybillNumberMapping);
                 _uow.Complete();
             }
             catch (Exception)
