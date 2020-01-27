@@ -108,12 +108,14 @@ namespace GIGLS.Services.Implementation
                 {
                     //customer activated
                     var userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true);
-                    if(userdto.IsActive)
+                    _uow.OTP.Remove(otpbody);
+                    await _uow.CompleteAsync();
+
+                    if (userdto.IsActive)
                     {
                         CalculateReferralBonus(userdto);
                     }
-                    _uow.OTP.Remove(otpbody);
-                    await _uow.CompleteAsync();
+
                     return userdto;
                 }
                 else
