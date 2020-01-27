@@ -422,8 +422,8 @@ namespace GIGLS.Services.Implementation.Fleets
 
         private async Task<bool> CheckForOutstandingDispatch(DispatchDTO dispatchDTO)
         {
-            DateTime saturday = new DateTime(2020, 01, 25);
-            var dispatch = await _uow.Dispatch.FindAsync(x => x.DriverDetail == dispatchDTO.DriverDetail && x.ReceivedBy == null && x.DateCreated > saturday);
+            var dispatch = await _uow.Dispatch.CheckForOutstandingDispatch(dispatchDTO.DriverDetail);
+            
             if (dispatch != null)
             {
                 foreach(var item in dispatch)

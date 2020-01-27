@@ -73,6 +73,28 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Fleets
                 throw;
             }
         }
+
+        public Task<List<DispatchDTO>> CheckForOutstandingDispatch(string driverId)
+        {
+            try
+            {
+                DateTime saturday = new DateTime(2020, 01, 25);
+                var dispatch = _context.Dispatch;
+                var dispatchs = from s in dispatch
+                                join sc in _context.Manifest on s.ManifestNumber equals sc.ManifestCode
+                                where s.DriverDetail == driverId && s.ReceivedBy == null && s.DateCreated > saturday
+                                && sc.ManifestType == Core.Enums.ManifestType.Delivery
+                                select new DispatchDTO
+                                {
+                                    DateModified = s.DateModified
+                                };
+                return Task.FromResult(dispatchs.ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 
 }
