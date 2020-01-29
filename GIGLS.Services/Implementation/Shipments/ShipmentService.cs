@@ -1088,7 +1088,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 //1. get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
-                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false && s.IsGrouped == false);
+                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments()
+                    .Where(s => s.IsShipmentCollected == false && s.IsGrouped == false && (s.PaymentStatus == PaymentStatus.Paid || s.CompanyType == CompanyType.Corporate.ToString()));
 
                 //apply filters for Service Centre
                 if (serviceCenters.Length > 0)
@@ -1120,15 +1121,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 //2. get only paid shipments from Invoice for Individuals
                 // and allow Ecommerce and Corporate customers to be grouped
                 //var ungroupedWaybills = new HashSet<InvoiceView>();
-                var finalUngroupedList = new List<InvoiceView>();
+                //var finalUngroupedList = new List<InvoiceView>();
 
-                foreach (var shipmentItem in shipmentsBySC)
-                {
-                    if (shipmentItem.PaymentStatus == PaymentStatus.Paid || shipmentItem.CompanyType == CompanyType.Corporate.ToString())
-                    {
-                        finalUngroupedList.Add(shipmentItem);
-                    }
-                }
+                //foreach (var shipmentItem in shipmentsBySC)
+                //{
+                //    if (shipmentItem.PaymentStatus == PaymentStatus.Paid || shipmentItem.CompanyType == CompanyType.Corporate.ToString())
+                //    {
+                //        finalUngroupedList.Add(shipmentItem);
+                //    }
+                //}
 
                 //var ungroupedWaybills = paidShipments;
 
@@ -1142,22 +1143,34 @@ namespace GIGLS.Services.Implementation.Shipments
                 //    finalUngroupedList.Add(item);
                 //}
 
-                int currentServiceCentre = serviceCenters[0];
+                //int currentServiceCentre = serviceCenters[0];
 
                 var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable()
-                    .Where(x => x.ServiceCentreId == currentServiceCentre && x.IsGrouped == false && x.IsTransitCompleted == false).ToList();
+                    .Where(x => serviceCenters.Contains(x.ServiceCentreId) && x.IsGrouped == false && x.IsTransitCompleted == false).ToList();
 
-                foreach (var item in allTransitWaybillNumberList)
+                List<string> transitWaybills = allTransitWaybillNumberList.Select(x => x.WaybillNumber).ToList();
+
+                if(allTransitWaybillNumberList.Count > 0)
                 {
-                    var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().FirstOrDefault(s => s.IsShipmentCollected == false && s.Waybill == item.WaybillNumber);
+                    var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false && transitWaybills.Contains(s.Waybill)).ToList();
 
-                    if (shipment != null)
+                    if(shipment.Count > 0)
                     {
-                        finalUngroupedList.Add(shipment);
+                        shipmentsBySC.AddRange(shipment);
                     }
                 }
 
-                return finalUngroupedList;
+                //foreach (var item in allTransitWaybillNumberList)
+                //{
+                //    var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().FirstOrDefault(s => s.IsShipmentCollected == false && s.Waybill == item.WaybillNumber);
+
+                //    if (shipment != null)
+                //    {
+                //        shipmentsBySC.Add(shipment);
+                //    }
+                //}
+
+                return shipmentsBySC;
             }
             catch (Exception)
             {
