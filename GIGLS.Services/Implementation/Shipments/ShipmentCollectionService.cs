@@ -203,33 +203,25 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //filter the data by using count which serve as the number of days to display
             DateTime backwardDatebyNumberofDays = DateTime.Today.AddDays(-30);
-            var hubManifestDaysCountObj = _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HUBManifestDaysToDisplay, userActiveCountryId).Result;
+            var hubManifestDaysCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.HUBManifestDaysToDisplay, userActiveCountryId);
             if (hubManifestDaysCountObj != null)
             {
-                int globalProp = 0;
                 var hubManifestDaysCount = hubManifestDaysCountObj.Value;
-                int.TryParse(hubManifestDaysCount, out globalProp);
+                int.TryParse(hubManifestDaysCount, out int globalProp);
                 if (globalProp > 0)
                 {
                     backwardDatebyNumberofDays = DateTime.Today.AddDays(-1 * (globalProp));
                 }
             }
-
-            List<string> shipmentsWaybills = _uow.Shipment.GetAllAsQueryable()
-                .Where(s => s.IsCancelled == false && serviceCenters.Contains(s.DestinationServiceCentreId) &&
-                s.DateCreated >= backwardDatebyNumberofDays).Select(x => x.Waybill).Distinct().ToList();
-
+            
             var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().
-                Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).
-                Where(x => shipmentsWaybills.Contains(x.Waybill));
-
+                Where(x => serviceCenters.Contains(x.DestinationServiceCentreId) && x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.DateCreated >= backwardDatebyNumberofDays);
+            
             //add WaybillFilter
             if (filterOptionsDto.WaybillFilter != null && filterOptionsDto.WaybillFilter.Length > 0)
             {
                 shipmentCollection = shipmentCollection.Where(s => s.Waybill.Contains(filterOptionsDto.WaybillFilter));
             }
-
-            shipmentCollection = shipmentCollection.Where(x => x.DateCreated >= backwardDatebyNumberofDays);
 
             //get total count
             var shipmentCollectionTotalCount = shipmentCollection.Count();

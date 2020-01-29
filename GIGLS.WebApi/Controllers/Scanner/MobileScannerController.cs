@@ -7,6 +7,7 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Business;
 using GIGLS.Core.IServices.CustomerPortal;
+using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.CORE.DTO.Shipments;
@@ -44,13 +45,14 @@ namespace GIGLS.WebApi.Controllers.Scanner
         private readonly ILogVisitReasonService _logService;
         private readonly IManifestVisitMonitoringService _visitService;
         private readonly ICustomerPortalService _portalService;
+        private readonly IServiceCentreService _serviceCentre;
+        private readonly IHUBManifestWaybillMappingService _hubService;
 
         public MobileScannerController(IScanService scanService, IScanStatusService scanStatusService, IShipmentService shipmentService,
-            IGroupWaybillNumberService groupService, IGroupWaybillNumberMappingService groupMappingservice,
-            IManifestService manifestService, IManifestGroupWaybillNumberMappingService manifestGroupMappingService,
-            IManifestWaybillMappingService manifestWaybillservice, IStateService stateService,
-            IShipmentCollectionService collectionservice, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
-            ICustomerPortalService portalService) : base(nameof(MobileScannerController))
+            IGroupWaybillNumberService groupService, IGroupWaybillNumberMappingService groupMappingservice, IManifestService manifestService,
+            IManifestGroupWaybillNumberMappingService manifestGroupMappingService, IManifestWaybillMappingService manifestWaybillservice, 
+            IStateService stateService, IShipmentCollectionService collectionservice, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
+            ICustomerPortalService portalService, IServiceCentreService serviceCentre, IHUBManifestWaybillMappingService hubService) : base(nameof(MobileScannerController))
         {
             _scanService = scanService;
             _scanStatusService = scanStatusService;
@@ -65,6 +67,8 @@ namespace GIGLS.WebApi.Controllers.Scanner
             _logService = logService;
             _visitService = visitService;
             _portalService = portalService;
+            _serviceCentre = serviceCentre;
+            _hubService = hubService;
         }
 
         [AllowAnonymous]
@@ -203,24 +207,24 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
         //3. Save --> ShipmentsService --> groupwaybillnumbermapping/mapmultiple(POST)
-        [GIGLSActivityAuthorize(Activity = "Create")]
-        [HttpPost]
-        [Route("mapwaybillstogroup")]
-        public async Task<IServiceResponse<bool>> MappingWaybillNumberToGroup(GroupWaybillNumberMappingDTO data)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _groupMappingservice.MappingWaybillNumberToGroup(data.GroupWaybillNumber, data.WaybillNumbers);
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
+        //[GIGLSActivityAuthorize(Activity = "Create")]
+        //[HttpPost]
+        //[Route("mapwaybillstogroup")]
+        //public async Task<IServiceResponse<bool>> MappingWaybillNumberToGroup(GroupWaybillNumberMappingDTO data)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        await _groupMappingservice.MappingWaybillNumberToGroup(data.GroupWaybillNumber, data.WaybillNumbers);
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Object = true
+        //        };
+        //    });
+        //}
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
-        [Route("mapwaybillstogroup2")]
+        [Route("mapwaybillstogroup")]
         public async Task<IServiceResponse<bool>> MappingWaybillNumberToGroup(List<GroupWaybillNumberMappingDTO> groupingData)
         {
             return await HandleApiOperationAsync(async () =>
@@ -493,14 +497,29 @@ namespace GIGLS.WebApi.Controllers.Scanner
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("hubservicecentres")]
-        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetHUBServiceCenters()
+        public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetHUBServiceCenters()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var centres = await _shipmentService.GetAllWarehouseServiceCenters();
-                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                var centres = await _serviceCentre.GetHUBServiceCentres();
+                return new ServiceResponse<List<ServiceCentreDTO>>
                 {
                     Object = centres
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("mapmultipleHubManifest")]
+        public async Task<IServiceResponse<bool>> MappingHUBManifestToWaybills(HUBManifestWaybillMappingDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _hubService.MappingHUBManifestToWaybillsForScanner(data.ManifestCode, data.Waybills, data.DepartureServiceCentreId, data.DestinationServiceCentreId);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
                 };
             });
         }

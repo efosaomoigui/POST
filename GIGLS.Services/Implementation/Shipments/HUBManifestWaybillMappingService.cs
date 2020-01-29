@@ -87,27 +87,38 @@ namespace GIGLS.Services.Implementation.Shipments
             return result.OrderByDescending(x => x.DateCreated).ToList();
         }
 
-        //map waybills to Manifest
+        //map waybills to Manifest        
         public async Task MappingManifestToWaybills(string manifest, List<string> waybills)
         {
             try
             {
                 var serviceIds = await _userService.GetPriviledgeServiceCenters();
 
+                //Extract hub manifest for all input waybills into the memory
+                var hubManifestMapping= _uow.HUBManifestWaybillMapping.GetAllAsQueryable().Where(x => waybills.Contains(x.Waybill));
+                var hubManifestMappingResult = hubManifestMapping.ToList();
+                
                 //1. check if any of the waybills has not been mapped to a manifest 
                 // and has not been process for return in case it was not delivered (i.e still active) that day
-                var isWaybillMappedActive = _uow.HUBManifestWaybillMapping.GetAllAsQueryable();
-                isWaybillMappedActive = isWaybillMappedActive.Where(x => x.IsActive == true && waybills.Contains(x.Waybill));
+                var isWaybillMappedActive = hubManifestMappingResult.Where(x => x.IsActive == true).Select(x => x.Waybill).Distinct().ToList();
 
-                var isWaybillsMappedActiveResult = isWaybillMappedActive.Select(x => x.Waybill).Distinct().ToList();
-
-                if (isWaybillsMappedActiveResult.Count() > 0)
+                if (isWaybillMappedActive.Count() > 0)
                 {
                     throw new GenericException($"Error: Delivery Manifest cannot be created. " +
-                               $"The following waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
+                               $"The following waybills [{string.Join(", ", isWaybillMappedActive.ToList())}] already been manifested");
                 }
-
-
+                
+                //check if any Waybill has been added to input manifest, silently remove the waybill from the waybills list 
+                var isWaybillMappedAlready = hubManifestMappingResult.Where(x => x.ManifestCode == manifest).Select(x => x.Waybill).Distinct().ToList();
+                
+                if (isWaybillMappedAlready.Count() > 0)
+                {
+                    foreach (string item in isWaybillMappedAlready)
+                    {
+                        waybills.Remove(item);
+                    }
+                }
+                               
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
 
                 //create the manifest if manifest does not exist
@@ -122,17 +133,19 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.Manifest.Add(newManifest);
                 }
 
+                List<HUBManifestWaybillMapping> hubMapping = new List<HUBManifestWaybillMapping>();
+
                 foreach (var waybill in waybills)
                 {
-                    //check if the waybill exist
-                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
-                    if (shipment == null)
+                    //check if the waybill available for collection
+                    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill);
+                    if (shipmentCollection == null)
                     {
-                        throw new GenericException($"No Waybill exists for this number: {waybill}");
+                        throw new GenericException($"Waybill {waybill} is not available for collection");
                     }
 
                     //check if the user is at the final destination centre of the shipment
-                    if (serviceIds.Length == 1 && serviceIds[0] == shipment.DestinationServiceCentreId)
+                    if (serviceIds.Length == 1 && serviceIds[0] == shipmentCollection.DestinationServiceCentreId)
                     {
                     }
                     else
@@ -140,9 +153,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException("Error processing request. The login user is not at the final Destination nor has the right privilege");
                     }
 
-                    //check if the shipment is at the final destination with a scan of ARF (WHEN SHIPMENT ARRIVED FINAL DESTINATION)
-                    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.Waybill == waybill);
-                    if (shipmentCollection == null)
+                    //check if the shipment is at the final destination with a scan of ARF (WHEN SHIPMENT ARRIVED FINAL DESTINATION)                    
+                    if (shipmentCollection.ShipmentScanStatus != ShipmentScanStatus.ARF)
                     {
                         throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
                     }
@@ -152,34 +164,19 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.WC;
                     }
 
-                    //check if the waybill has been mapped to a manifest 
-                    //and it has not been process for return in case it was not delivered (i.e still active) that day
-                    //var isWaybillMappedActive = await _uow.HUBManifestWaybillMapping.ExistAsync(x => x.Waybill == waybill && x.IsActive == true);
-                    //if (isWaybillMappedActive)
-                    //{
-                    //    throw new GenericException($"Waybill {waybill} has already been manifested");
-                    //}
-
-                    //check if Waybill has not been added to this manifest 
-                    var isWaybillMapped = await _uow.HUBManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
-
-                    //if the waybill has not been added to this manifest, add it
-                    if (!isWaybillMapped)
+                    //Add new Mapping
+                    var newMapping = new HUBManifestWaybillMapping
                     {
-                        //Add new Mapping
-                        var newMapping = new HUBManifestWaybillMapping
-                        {
-                            ManifestCode = manifest,
-                            Waybill = waybill,
-                            IsActive = true,
-                            ServiceCentreId = shipment.DestinationServiceCentreId
-                        };
-                        _uow.HUBManifestWaybillMapping.Add(newMapping);
-                    }
+                        ManifestCode = manifest,
+                        Waybill = waybill,
+                        IsActive = true,
+                        ServiceCentreId = shipmentCollection.DestinationServiceCentreId
+                    };
 
-                    //automatic scan all the way also
+                    hubMapping.Add(newMapping);
                 }
 
+                _uow.HUBManifestWaybillMapping.AddRange(hubMapping);
                 _uow.Complete();
             }
             catch (Exception)
@@ -188,12 +185,120 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-
         //map waybills to HUBManifest
         public async Task MappingHUBManifestToWaybills(string manifest, List<string> waybills, int DepartureServiceCentreId, int DestinationServiceCentreId)
         {
             try
             {
+                //Extract hub manifest for all input waybills into the memory
+                var hubManifestMapping = _uow.HUBManifestWaybillMapping.GetAllAsQueryable().Where(x => waybills.Contains(x.Waybill));
+                var hubManifestMappingResult = hubManifestMapping.ToList();
+                
+                //check if any Waybill has been added to input manifest, silently remove the waybill from the waybills list 
+                var isWaybillMappedAlready = hubManifestMappingResult.Where(x => x.ManifestCode == manifest).Select(x => x.Waybill).Distinct().ToList();
+
+                if (isWaybillMappedAlready.Count() > 0)
+                {
+                    foreach (string item in isWaybillMappedAlready)
+                    {
+                        waybills.Remove(item);
+                    }
+                }
+
+                var serviceCenter = await _uow.ServiceCentre.GetAsync(DepartureServiceCentreId);
+                string user = await _userService.GetCurrentUserId();
+                var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
+
+                //1. create the manifest if manifest does not exist
+                if (manifestObj == null)
+                {
+                    var newManifest = new Manifest
+                    {
+                        DateTime = DateTime.Now,
+                        ManifestCode = manifest,
+                        ManifestType = ManifestType.HUB,
+                        DepartureServiceCentreId = DepartureServiceCentreId,
+                        DestinationServiceCentreId = DestinationServiceCentreId
+                    };
+                    _uow.Manifest.Add(newManifest);
+                }
+                
+                List<HUBManifestWaybillMapping> hubMapping = new List<HUBManifestWaybillMapping>();
+                List<ShipmentTracking> shipmentTrackingList = new List<ShipmentTracking>();
+
+                foreach (var waybill in waybills)
+                {
+                    //check if the waybill available for collection
+                    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill);
+                    if (shipmentCollection == null)
+                    {
+                        throw new GenericException($"Waybill {waybill} is not available for collection");
+                    }
+
+                    //check if the shipment is at the final destination with a scan of ARF (WHEN SHIPMENT ARRIVED FINAL DESTINATION)                    
+                    if (shipmentCollection.ShipmentScanStatus != ShipmentScanStatus.ARF)
+                    {
+                        throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
+                    }
+                    else
+                    {
+                        //Add new Mapping
+                        var newMapping = new HUBManifestWaybillMapping
+                        {
+                            ManifestCode = manifest,
+                            Waybill = waybill,
+                            IsActive = true,
+                            ServiceCentreId = shipmentCollection.DestinationServiceCentreId
+                        };
+                        
+                        //DPC -- //SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO HUB
+                        shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.DPC;
+
+                        //Add scan status to  the tracking page
+                        var newShipmentTracking = new ShipmentTracking
+                        {
+                            Waybill = waybill,
+                            Location = serviceCenter.Name,
+                            Status = ShipmentScanStatus.DPC.ToString(),
+                            DateTime = DateTime.Now,
+                            UserId = user,
+                            ServiceCentreId = serviceCenter.ServiceCentreId
+                        };
+                        
+                        hubMapping.Add(newMapping);
+                        shipmentTrackingList.Add(newShipmentTracking);
+                    }
+                }
+
+                _uow.HUBManifestWaybillMapping.AddRange(hubMapping);
+                _uow.ShipmentTracking.AddRange(shipmentTrackingList);
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task MappingHUBManifestToWaybillsForScanner(string manifest, List<string> waybills, int DepartureServiceCentreId, int DestinationServiceCentreId)
+        {
+            try
+            {
+                //Extract hub manifest for all input waybills into the memory
+                var hubManifestMapping = _uow.HUBManifestWaybillMapping.GetAllAsQueryable().Where(x => waybills.Contains(x.Waybill));
+                var hubManifestMappingResult = hubManifestMapping.ToList();
+
+                //check if any Waybill has been added to input manifest, silently remove the waybill from the waybills list 
+                var isWaybillMappedAlready = hubManifestMappingResult.Where(x => x.ManifestCode == manifest).Select(x => x.Waybill).Distinct().ToList();
+
+                if (isWaybillMappedAlready.Count() > 0)
+                {
+                    foreach (string item in isWaybillMappedAlready)
+                    {
+                        waybills.Remove(item);
+                    }
+                }
+
                 var serviceCenter = await _uow.ServiceCentre.GetAsync(DepartureServiceCentreId);
                 string user = await _userService.GetCurrentUserId();
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
@@ -212,23 +317,34 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.Manifest.Add(newManifest);
                 }
 
+                List<HUBManifestWaybillMapping> hubMapping = new List<HUBManifestWaybillMapping>();
+                List<ShipmentTracking> shipmentTrackingList = new List<ShipmentTracking>();
+
                 foreach (var waybill in waybills)
                 {
-                    //check if the waybill exist
-                    var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
-                    if (shipment == null)
-                    {
-                        throw new GenericException($"No Waybill exists for this number: {waybill}");
-                    }
-
-                    //check if the shipment is at the DepartureServiceCentre with a scan of ARF (WHEN SHIPMENT ARRIVED FINAL DESTINATION)
-                    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && x.Waybill == waybill);
+                    //check if the waybill available for collection
+                    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill);
                     if (shipmentCollection == null)
                     {
-                        throw new GenericException($"Shipment with waybill: {waybill} is not at the Departure Service Centre.");
+                        throw new GenericException($"Waybill {waybill} is not available for collection");
+                    }
+
+                    //check if the shipment is at the final destination with a scan of ARF (WHEN SHIPMENT ARRIVED FINAL DESTINATION)                    
+                    if (shipmentCollection.ShipmentScanStatus != ShipmentScanStatus.ARF)
+                    {
+                        throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
                     }
                     else
                     {
+                        //Add new Mapping
+                        var newMapping = new HUBManifestWaybillMapping
+                        {
+                            ManifestCode = manifest,
+                            Waybill = waybill,
+                            IsActive = true,
+                            ServiceCentreId = shipmentCollection.DestinationServiceCentreId
+                        };
+
                         //DPC -- //SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO HUB
                         shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.DPC;
 
@@ -242,28 +358,14 @@ namespace GIGLS.Services.Implementation.Shipments
                             UserId = user,
                             ServiceCentreId = serviceCenter.ServiceCentreId
                         };
-                        _uow.ShipmentTracking.Add(newShipmentTracking);
 
-                    }
-
-                    //check if Waybill has not been added to this manifest 
-                    var isWaybillMapped = await _uow.HUBManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
-
-                    //if the waybill has not been added to this manifest, add it
-                    if (!isWaybillMapped)
-                    {
-                        //Add new Mapping
-                        var newMapping = new HUBManifestWaybillMapping
-                        {
-                            ManifestCode = manifest,
-                            Waybill = waybill,
-                            IsActive = true,
-                            ServiceCentreId = shipment.DestinationServiceCentreId
-                        };
-                        _uow.HUBManifestWaybillMapping.Add(newMapping);
+                        hubMapping.Add(newMapping);
+                        shipmentTrackingList.Add(newShipmentTracking);
                     }
                 }
 
+                _uow.HUBManifestWaybillMapping.AddRange(hubMapping);
+                _uow.ShipmentTracking.AddRange(shipmentTrackingList);
                 _uow.Complete();
             }
             catch (Exception)

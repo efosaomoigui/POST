@@ -22,5 +22,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<HUBManifestWaybillMappingDTO>> GetManifestHistoryForWaybill(string waybill);
 
         Task MappingHUBManifestToWaybills(string manifest, List<string> Waybills, int DepartureServiceCentreId, int DestinationServiceCentreId);
+        Task MappingHUBManifestToWaybillsForScanner(string manifest, List<string> waybills, int DepartureServiceCentreId, int DestinationServiceCentreId);
     }
 }

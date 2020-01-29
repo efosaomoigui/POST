@@ -48,8 +48,8 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var centres = await _service.GetServiceCentres();
-                centres = centres.Where(s => s.IsHUB == true);
+                var centres = await _service.GetHUBServiceCentres();
+                //centres = centres.Where(s => s.IsHUB == true);
 
                 return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
                 {
