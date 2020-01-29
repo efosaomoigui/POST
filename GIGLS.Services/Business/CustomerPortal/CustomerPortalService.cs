@@ -1768,6 +1768,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         throw new GenericException($"You can not change this shipment status to {mobilePickUpRequestsDTO.Status}");
                     }
+                    else if (preShipmentMobile.ZoneMapping == 1 && mobilePickUpRequestsDTO.Status == MobilePickUpRequestStatus.OnwardProcessing.ToString())
+                    {
+                        throw new GenericException("This is not an Inter-State Shipment");
+                    }
                     else
                     {
                         preShipmentMobile.shipmentstatus = mobilePickUpRequestsDTO.Status;
