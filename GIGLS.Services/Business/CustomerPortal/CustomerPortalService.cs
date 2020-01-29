@@ -1752,5 +1752,36 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             return await Task.FromResult(deliveryNumberlist);
         }
+        public async Task<bool> UpdateGIGGoShipmentStaus(MobilePickUpRequestsDTO mobilePickUpRequestsDTO)
+        {
+            try
+            {
+                var preShipmentMobile = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == mobilePickUpRequestsDTO.Waybill);
+                if (preShipmentMobile == null)
+                {
+                    throw new GenericException("This is not a GIGGo Shipment.It can not be updated");
+                }
+                else
+                {
+                    if((preShipmentMobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString() || preShipmentMobile.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString())
+                        && mobilePickUpRequestsDTO.Status == "Shipment created")
+                    {
+                        throw new GenericException($"You can not change this shipment status to {mobilePickUpRequestsDTO.Status}");
+                    }
+                    else
+                    {
+                        preShipmentMobile.shipmentstatus = mobilePickUpRequestsDTO.Status;
+                        await _uow.CompleteAsync();
+                    }
+                    
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
+        }
     }
 }
