@@ -488,5 +488,22 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 };
             });
         }
+
+        //HUb Manifest
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("hubservicecentres")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetHUBServiceCenters()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _shipmentService.GetAllWarehouseServiceCenters();
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
     }
 }

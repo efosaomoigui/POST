@@ -348,5 +348,19 @@ namespace GIGLS.Services.IServices.ServiceCentres
             int[] countryIds = new int[] { countryId };
             return await _uow.ServiceCentre.GetLocalServiceCentres(countryIds);
         }
+
+        public async Task<List<ServiceCentreDTO>> GetHUBServiceCentres()
+        {
+            try
+            {
+                var services = await _uow.ServiceCentre.FindAsync(x => x.IsHUB == true);
+                var servicesDTO = Mapper.Map<List<ServiceCentreDTO>>(services);
+                return servicesDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
