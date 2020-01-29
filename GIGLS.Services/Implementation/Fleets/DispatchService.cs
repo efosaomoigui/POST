@@ -434,7 +434,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     }
                     else if(item.DateModified.Date != DateTime.Now.Date)
                     {
-                        throw new GenericException("This Partner has Unsigned Off Delivery Manifest(s)");
+                        throw new GenericException("The Dispatch Partner has some unsign Off Delivery Manifest(s)");
                     }
                 }
             }
