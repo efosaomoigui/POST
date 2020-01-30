@@ -560,12 +560,6 @@ namespace GIGLS.Services.Implementation.Shipments
                         };
 
                         groupWaybillNumberMapping.Add(newMapping);
-
-                        //if the groupwaybill service centre is not the same as the waybill destination
-                        if (shipmentDTO.DestinationServiceCentreId != serviceCentre.ServiceCentreId)
-                        {
-                            throw new GenericException($"Waybill {item.WaybillNumber} cannot be added to the group {groupWaybillNumber}. Remove it from the list to proceed");
-                        }
                     }
                     
                     //update all shipment as grouped
