@@ -206,22 +206,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //3. Save --> ShipmentsService --> groupwaybillnumbermapping/mapmultiple(POST)
-        //[GIGLSActivityAuthorize(Activity = "Create")]
-        //[HttpPost]
-        //[Route("mapwaybillstogroup")]
-        //public async Task<IServiceResponse<bool>> MappingWaybillNumberToGroup(GroupWaybillNumberMappingDTO data)
-        //{
-        //    return await HandleApiOperationAsync(async () =>
-        //    {
-        //        await _groupMappingservice.MappingWaybillNumberToGroup(data.GroupWaybillNumber, data.WaybillNumbers);
-        //        return new ServiceResponse<bool>
-        //        {
-        //            Object = true
-        //        };
-        //    });
-        //}
-
+        //3. Save --> ShipmentsService --> groupwaybillnumbermapping/mapmultiple(POST)        
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapwaybillstogroup")]
