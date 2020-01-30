@@ -284,7 +284,8 @@ namespace GIGLS.WebApi.Controllers.Scanner
             {
                 FilterOptionsDto filterOptionsDto = new FilterOptionsDto
                 {
-                    filterValue = serviceCentreId.ToString()
+                    filterValue = serviceCentreId.ToString(),
+                    filter = "DestinationServiceCentreId"
                 };
 
                 var unmappedGroupWaybills = await _shipmentService.GetUnmappedGroupedWaybillsForServiceCentre(filterOptionsDto);
