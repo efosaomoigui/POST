@@ -351,9 +351,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else
                     {
-                        //Update status to DPC -- //SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO HUB
-                        //shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.DPC;
-
                         //Add new Mapping
                         var newMapping = new HUBManifestWaybillMapping
                         {
