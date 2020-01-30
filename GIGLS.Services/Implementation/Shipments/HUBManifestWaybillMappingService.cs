@@ -229,10 +229,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 List<HUBManifestWaybillMapping> hubMapping = new List<HUBManifestWaybillMapping>();
                 List<ShipmentTracking> shipmentTrackingList = new List<ShipmentTracking>();
 
+                //Get all shipment collection into the memory
+                var shipmentCollectionList = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => waybills.Contains(x.Waybill)).ToList();
+
                 foreach (var waybill in waybills)
                 {
                     //check if the waybill available for collection
-                    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill);
+                    var shipmentCollection = shipmentCollectionList.Where(x => x.Waybill == waybill).FirstOrDefault();
+
                     if (shipmentCollection == null)
                     {
                         throw new GenericException($"Waybill {waybill} is not available for collection");
@@ -255,7 +259,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         };
                         
                         //DPC -- //SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO HUB
-                        shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.DPC;
+                        //shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.DPC;
 
                         //Add scan status to  the tracking page
                         var newShipmentTracking = new ShipmentTracking
@@ -272,6 +276,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipmentTrackingList.Add(newShipmentTracking);
                     }
                 }
+
+                //update all shipment as grouped
+                shipmentCollectionList.ForEach(x => x.ShipmentScanStatus = ShipmentScanStatus.DPC);
 
                 _uow.HUBManifestWaybillMapping.AddRange(hubMapping);
                 _uow.ShipmentTracking.AddRange(shipmentTrackingList);
@@ -330,10 +337,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 List<HUBManifestWaybillMapping> hubMapping = new List<HUBManifestWaybillMapping>();
                 List<ShipmentTracking> shipmentTrackingList = new List<ShipmentTracking>();
 
+                //Get all shipment collection into the memory
+                var shipmentCollectionList = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => waybills.Contains(x.Waybill)).ToList();
+
                 foreach (var waybill in waybills)
                 {
                     //check if the waybill available for collection
-                    var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.ARF);
+                    var shipmentCollection = shipmentCollectionList.Where(x => x.Waybill == waybill && x.ShipmentScanStatus == ShipmentScanStatus.ARF).FirstOrDefault();
+
                     if (shipmentCollection == null)
                     {
                         throw new GenericException($"Shipment with waybill: {waybill} is not available for Processing");
@@ -341,7 +352,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     else
                     {
                         //Update status to DPC -- //SCAN BEFORE SHIPMENT IS TAKEN OUT FOR DELIVERY TO HUB
-                        shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.DPC;
+                        //shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.DPC;
 
                         //Add new Mapping
                         var newMapping = new HUBManifestWaybillMapping
@@ -367,6 +378,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipmentTrackingList.Add(newShipmentTracking);
                     }
                 }
+
+                //update all shipment as grouped
+                shipmentCollectionList.ForEach(x => x.ShipmentScanStatus = ShipmentScanStatus.DPC);
 
                 _uow.HUBManifestWaybillMapping.AddRange(hubMapping);
                 _uow.ShipmentTracking.AddRange(shipmentTrackingList);
