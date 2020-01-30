@@ -512,17 +512,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 
                 //convert the list to HashSet to remove duplicate                
                 var newWaybillNumberList = new HashSet<GroupWaybillNumberMappingDTO>();
+                var newWaybillNumberArray = new HashSet<string>();
 
                 foreach (var item in groupingData)
                 {
                     if (item?.WaybillNumber != null)
                     {
                         newWaybillNumberList.Add(item);
+                        newWaybillNumberArray.Add(item.WaybillNumber);
                     }
                 }
 
                 //check if the waybill that need to be grouped are in ungroupedWaybills above
-                var getWaybillNotAvailableForGrouping = newWaybillNumberList.Select(x => x.WaybillNumber).Where(x => !ungroupedWaybillsList.Contains(x));
+                var getWaybillNotAvailableForGrouping = newWaybillNumberArray.Where(x => !ungroupedWaybillsList.Contains(x));
 
                 if (getWaybillNotAvailableForGrouping.Count() > 0)
                 {
@@ -532,9 +534,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 else
                 {
                     List<GroupWaybillNumberMapping> groupWaybillNumberMapping = new List<GroupWaybillNumberMapping>();
-                    
+                                        
                     //Get All the shipment at once into memory
-                    var shipmentList = _uow.Shipment.GetAllAsQueryable().Where(x => newWaybillNumberList.Select(w => w.WaybillNumber).Contains(x.Waybill)).ToList();
+                    var shipmentList = _uow.Shipment.GetAllAsQueryable().Where(x => newWaybillNumberArray.Contains(x.Waybill)).ToList();
 
                     foreach (var item in newWaybillNumberList)
                     {
@@ -566,7 +568,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentList.ForEach(x => x.IsGrouped = true);
 
                     //update all entry for waybills if any exist in transitwaybill
-                    var updateTransitWaybill = _uow.TransitWaybillNumber.GetAllAsQueryable().Where(s => newWaybillNumberList.Select(w => w.WaybillNumber).Contains(s.WaybillNumber)).ToList();
+                    var updateTransitWaybill = _uow.TransitWaybillNumber.GetAllAsQueryable().Where(s => newWaybillNumberArray.Contains(s.WaybillNumber)).ToList();
                     updateTransitWaybill.ForEach(u => u.IsGrouped = true);
 
                     _uow.GroupWaybillNumberMapping.AddRange(groupWaybillNumberMapping);
