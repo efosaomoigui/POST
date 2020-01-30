@@ -799,7 +799,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                         });
 
                         //setup login data
-                        HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
+                        HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
 
                         if (!responseMessage.IsSuccessStatusCode)
                         {
@@ -1575,6 +1575,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<List<DeliveryNumberDTO>>
                 {
                     Object = preShipment
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("updateGoShipmentStatus")]
+        public async Task<IServiceResponse<bool>> UpdateGIGGoShipmentStatus(MobilePickUpRequestsDTO mobilePickUpRequestsDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var status = await _portalService.UpdateGIGGoShipmentStaus(mobilePickUpRequestsDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = status
                 };
             });
         }
