@@ -283,7 +283,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task MappingHUBManifestToWaybillsForScanner(string manifest, List<string> waybills, int DepartureServiceCentreId, int DestinationServiceCentreId)
+        public async Task MappingHUBManifestToWaybillsForScanner(string manifest, List<string> waybills, int DestinationServiceCentreId)
         {
             try
             {
@@ -305,8 +305,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException($"Error: The following waybills [{string.Join(", ", isWaybillAvailableForMapping.ToList())}]" +
                            $" can not be added to the manifest because they are not available for processing. Remove them from the list to proceed");
                 }
-                
-                var serviceCenter = await _uow.ServiceCentre.GetAsync(DepartureServiceCentreId);
+
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                int departureServiceCentreId = serviceCenters[0];
+
+                var serviceCenter = await _uow.ServiceCentre.GetAsync(departureServiceCentreId);
                 string user = await _userService.GetCurrentUserId();
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
 
@@ -318,7 +321,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         DateTime = DateTime.Now,
                         ManifestCode = manifest,
                         ManifestType = ManifestType.HUB,
-                        DepartureServiceCentreId = DepartureServiceCentreId,
+                        DepartureServiceCentreId = departureServiceCentreId,
                         DestinationServiceCentreId = DestinationServiceCentreId
                     };
                     _uow.Manifest.Add(newManifest);

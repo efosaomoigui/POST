@@ -1117,34 +1117,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 var shipmentsBySC = shipmentsQueryable.ToList();
-
-                //2. get only paid shipments from Invoice for Individuals
-                // and allow Ecommerce and Corporate customers to be grouped
-                //var ungroupedWaybills = new HashSet<InvoiceView>();
-                //var finalUngroupedList = new List<InvoiceView>();
-
-                //foreach (var shipmentItem in shipmentsBySC)
-                //{
-                //    if (shipmentItem.PaymentStatus == PaymentStatus.Paid || shipmentItem.CompanyType == CompanyType.Corporate.ToString())
-                //    {
-                //        finalUngroupedList.Add(shipmentItem);
-                //    }
-                //}
-
-                //var ungroupedWaybills = paidShipments;
-
-                //new solution
-                //1. Get Transit Waybill that is not completed, not group and service centre belong to login user
-                //2. Loop through output of 1 and get the shipment details, then add it to the ungrouped
-                //var finalUngroupedList = new List<InvoiceView>();
-
-                //foreach (var item in ungroupedWaybills)
-                //{
-                //    finalUngroupedList.Add(item);
-                //}
-
-                //int currentServiceCentre = serviceCenters[0];
-
+                
                 var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable()
                     .Where(x => serviceCenters.Contains(x.ServiceCentreId) && x.IsGrouped == false && x.IsTransitCompleted == false).ToList();
 
@@ -1159,17 +1132,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipmentsBySC.AddRange(shipment);
                     }
                 }
-
-                //foreach (var item in allTransitWaybillNumberList)
-                //{
-                //    var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().FirstOrDefault(s => s.IsShipmentCollected == false && s.Waybill == item.WaybillNumber);
-
-                //    if (shipment != null)
-                //    {
-                //        shipmentsBySC.Add(shipment);
-                //    }
-                //}
-
+                
                 return shipmentsBySC;
             }
             catch (Exception)

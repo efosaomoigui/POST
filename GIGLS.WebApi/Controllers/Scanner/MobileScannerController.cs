@@ -333,7 +333,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
         //3.Save-- > ShipmentsService-- > groupwaybillnumbermappingForOverdue(groupwaybillnumbermapping / mapmultipleForOverdue)(POST)
-
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapwaybillstogroupforoverdue")]
@@ -501,7 +500,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                await _hubService.MappingHUBManifestToWaybillsForScanner(data.ManifestCode, data.Waybills, data.DepartureServiceCentreId, data.DestinationServiceCentreId);
+                await _hubService.MappingHUBManifestToWaybillsForScanner(data.ManifestCode, data.Waybills, data.DestinationServiceCentreId);
                 return new ServiceResponse<bool>
                 {
                     Object = true
