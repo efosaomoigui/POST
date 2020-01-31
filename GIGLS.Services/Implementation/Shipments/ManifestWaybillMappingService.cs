@@ -904,15 +904,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
                 //1. get all shipments at colletion centre for the service centre which status is ARF
-                //var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF);
                 var shipmentCollection = _uow.ShipmentCollection.GetAll()
-                    .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).Select(x => x.Waybill);
+                    .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId)).Select(x => x.Waybill);
 
                 //2. Get shipment details for the service centre that are at the collection centre using the waybill and service centre
                 var InvoicesBySC = _uow.Invoice.GetAllInvoiceShipments();
 
                 //filter by destination service center that is not cancelled and it is home delivery
-                InvoicesBySC = InvoicesBySC.Where(x => x.PickupOptions == PickupOptions.HOMEDELIVERY);
+                InvoicesBySC = InvoicesBySC.Where(x => x.PickupOptions == PickupOptions.HOMEDELIVERY && x.IsShipmentCollected == false);
 
                 if (serviceCenters.Length > 0)
                 {
