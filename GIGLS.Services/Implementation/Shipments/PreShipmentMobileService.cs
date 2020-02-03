@@ -274,6 +274,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+                
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
@@ -294,7 +295,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 var Country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
                 preShipment.CountryId = Country.CountryId;
                 
-                //undo comment when App is updated
                 if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
                 {
                     var ShipmentCount = preShipment.PreShipmentItems.Count();
@@ -408,12 +408,22 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
 
+                decimal grandTotal = (decimal)preShipment.CalculatedTotal + PickupValue;
+
+                //GIG Go Promo Price
+                var gigGoPromo = await CalculatePromoPrice(preShipment, zoneid.ZoneId, PickupValue);
+                if(gigGoPromo.GrandTotal > 0)
+                {
+                    grandTotal = (decimal)gigGoPromo.GrandTotal;
+                    discount = (decimal)gigGoPromo.Discount;
+                }
+
                 var returnprice = new MobilePriceDTO()
                 {
                     MainCharge = (decimal)preShipment.CalculatedTotal,
                     PickUpCharge = PickupValue,
                     InsuranceValue = preShipment.InsuranceValue,
-                    GrandTotal = ((decimal)preShipment.CalculatedTotal + PickupValue),
+                    GrandTotal = grandTotal,
                     PreshipmentMobile = preShipment,
                     CurrencySymbol = Country.CurrencySymbol,
                     CurrencyCode = Country.CurrencyCode,
@@ -426,6 +436,35 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+        //promote for GIG Go Feb 2020
+        private async Task<MobilePriceDTO> CalculatePromoPrice(PreShipmentMobileDTO preShipmentDTO, int zoneId, decimal pickupValue)
+        {
+            var result = new MobilePriceDTO
+            {
+                GrandTotal = 0,
+                Discount = 0
+            };
+             
+            //1.if the shipment Vehicle Type is Bike and the zone is lagos, Calculate the Promo price
+            if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && zoneId == 1)
+            {
+                //1. Get the Promo price 999
+                var gigGoPromo = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGGOPromo, preShipmentDTO.CountryId);
+                decimal promoPrice = decimal.Parse(gigGoPromo.Value);
+
+                if (promoPrice > 0)
+                {
+                    //3. Make the Promo Price to be GrandTotal 
+                    result.GrandTotal = promoPrice;
+                    
+                    //2. Substract the Promo price from GrandTotal and bind the different to Discount
+                    result.Discount = Math.Round((decimal)preShipmentDTO.DeliveryPrice + pickupValue - promoPrice);
+                }
+            }
+
+            return result;
         }
 
         public async Task<List<PreShipmentMobileDTO>> GetShipments(BaseFilterCriteria filterOptionsDto)
