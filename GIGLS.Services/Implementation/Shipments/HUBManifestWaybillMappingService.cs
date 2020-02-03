@@ -303,7 +303,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Get all shipment available for hub manifest in the service centre
                 var _shipmentWaitingForCollectionForHub = await _collectionService.GetShipmentWaitingForCollectionForHub(filterOptionsDto);
-                var _shipmentWaitingForCollectionForHubResult = _shipmentWaitingForCollectionForHub.Item1.Select(x => x.WalletNumber).ToList();
+                var _shipmentWaitingForCollectionForHubResult = _shipmentWaitingForCollectionForHub.Item1.Select(x => x.Waybill).ToList();
                 
                 var isWaybillAvailableForMapping = waybills.Where(x => !_shipmentWaitingForCollectionForHubResult.Contains(x));
 
