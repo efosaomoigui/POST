@@ -416,6 +416,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     grandTotal = (decimal)gigGoPromo.GrandTotal;
                     discount = (decimal)gigGoPromo.Discount;
+                    preShipment.DiscountValue = discount;
+                    preShipment.GrandTotal = grandTotal;
                 }
 
                 var returnprice = new MobilePriceDTO()
@@ -448,10 +450,10 @@ namespace GIGLS.Services.Implementation.Shipments
             };
             
             //GIG Go Promo Price
-            decimal totalWeight = await GetTotalWeight(preShipmentDTO);
+            bool totalWeight = await GetTotalWeight(preShipmentDTO);
 
             //1.if the shipment Vehicle Type is Bike and the zone is lagos, Calculate the Promo price
-            if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && zoneId == 1 && totalWeight <= 3)
+            if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && zoneId == 1 && totalWeight)
             {
                 //1. Get the Promo price 999
                 var gigGoPromo = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGGOPromo, preShipmentDTO.CountryId);
@@ -463,34 +465,34 @@ namespace GIGLS.Services.Implementation.Shipments
                     result.GrandTotal = promoPrice;
                     
                     //2. Substract the Promo price from GrandTotal and bind the different to Discount
-                    result.Discount = preShipmentDTO.DeliveryPrice + pickupValue - promoPrice;
+                    result.Discount = (decimal)preShipmentDTO.CalculatedTotal + pickupValue - promoPrice;
                 }
             }
 
             return result;
         }
 
-        public async Task<decimal> GetTotalWeight(PreShipmentMobileDTO preShipmentDTO)
+        public async Task<bool> GetTotalWeight(PreShipmentMobileDTO preShipmentDTO)
         {
-            //GIG Go Promo Price
-            decimal totalWeight = 0;
-
             foreach (var preShipmentItem in preShipmentDTO.PreShipmentItems)
             {
                 if (preShipmentItem.ShipmentType == ShipmentType.Special)
                 {
                     var getPackageWeight = await _uow.SpecialDomesticPackage.GetAsync(x => x.SpecialDomesticPackageId == preShipmentItem.SpecialPackageId);
-                    if(getPackageWeight != null)
+                    if(getPackageWeight != null && getPackageWeight.Weight > 3)
                     {
-                        totalWeight = totalWeight + getPackageWeight.Weight;
+                        return false;
                     }
                 }
                 else if (preShipmentItem.ShipmentType == ShipmentType.Regular)
                 {
-                    totalWeight = totalWeight + preShipmentItem.Weight;
+                    if(preShipmentItem.Weight > 3)
+                    {
+                        return false;
+                    }
                 }
             };
-            return totalWeight;
+            return true;
         }
 
         public async Task<List<PreShipmentMobileDTO>> GetShipments(BaseFilterCriteria filterOptionsDto)
