@@ -593,7 +593,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               IsGrouped = s.IsGrouped,
                               DepartureCountryId = s.DepartureCountryId,
                               DestinationCountryId = s.DestinationCountryId,
-                              IsFromMobile = s.IsFromMobile
+                              IsFromMobile = s.IsFromMobile,
+                              PickupOptions = s.PickupOptions,
+                              ReceiverAddress = s.ReceiverAddress
                           });
             return result;
         }

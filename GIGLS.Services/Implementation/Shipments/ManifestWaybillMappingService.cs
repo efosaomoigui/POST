@@ -905,22 +905,20 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //1. get all shipments at colletion centre for the service centre which status is ARF
                 var shipmentCollection = _uow.ShipmentCollection.GetAll()
-                    .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId)).Select(x => x.Waybill);
+                    .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId)).Select(x => x.Waybill).ToList();
 
                 //2. Get shipment details for the service centre that are at the collection centre using the waybill and service centre
-                var InvoicesBySC = _uow.Invoice.GetAllInvoiceShipments();
+                //var InvoicesBySC = _uow.Invoice.GetAllInvoiceShipments();
+                var InvoicesBySC = _uow.Invoice.GetAllFromInvoiceAndShipments();
 
                 //filter by destination service center that is not cancelled and it is home delivery
                 InvoicesBySC = InvoicesBySC.Where(x => x.PickupOptions == PickupOptions.HOMEDELIVERY && x.IsShipmentCollected == false);
-
-                if (serviceCenters.Length > 0)
-                {
-                    InvoicesBySC = InvoicesBySC.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId));
-                }
+                InvoicesBySC = InvoicesBySC.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId));
 
                 ////final list
-                InvoicesBySC = InvoicesBySC.Where(s => shipmentCollection.Contains(s.Waybill));
-                var InvoicesBySCList = InvoicesBySC.ToList();
+                //InvoicesBySC = InvoicesBySC.Where(s => shipmentCollection.Contains(s.Waybill));
+                var InvoicesBySCResult = InvoicesBySC.ToList();
+                var InvoicesBySCList = InvoicesBySC.Where(s => shipmentCollection.Contains(s.Waybill)).ToList();
 
                 shipmentsBySC = (from r in InvoicesBySCList
                                  select new ShipmentDTO()
