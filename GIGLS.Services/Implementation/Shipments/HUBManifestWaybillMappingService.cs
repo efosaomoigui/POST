@@ -298,7 +298,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     count = 1000000,
                     page = 1,
-                    sortorder = "0"
+                    sortorder = "0",
+                    PageIndex = 1,
+                    PageSize = 1000000
                 };
 
                 //Get all shipment available for hub manifest in the service centre
