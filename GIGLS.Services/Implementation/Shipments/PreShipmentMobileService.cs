@@ -1113,7 +1113,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "SenderLocation,ReceiverLocation");
+                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
                 if (preshipmentmobile == null)
                 {
                     throw new GenericException("Shipment item does not exist");
