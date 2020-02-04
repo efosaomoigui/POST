@@ -113,7 +113,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
 
                     if (!responseMessage.IsSuccessStatusCode)
                     {
-                        throw new GenericException("Operation could not complete login successfully:");
+                        throw new GenericException("Incorrect Login Details");
                     }
 
                     //get access token from response body

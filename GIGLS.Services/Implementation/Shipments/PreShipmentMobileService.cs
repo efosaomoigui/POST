@@ -439,62 +439,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-
-        //promote for GIG Go Feb 2020
-        private async Task<MobilePriceDTO> CalculatePromoPrice(PreShipmentMobileDTO preShipmentDTO, int zoneId, decimal pickupValue)
-        {
-            var result = new MobilePriceDTO
-            {
-                GrandTotal = 0,
-                Discount = 0
-            };
-            
-            //GIG Go Promo Price
-            bool totalWeight = await GetTotalWeight(preShipmentDTO);
-
-            //1.if the shipment Vehicle Type is Bike and the zone is lagos, Calculate the Promo price
-            if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && zoneId == 1 && totalWeight)
-            {
-                //1. Get the Promo price 999
-                var gigGoPromo = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGGOPromo, preShipmentDTO.CountryId);
-                decimal promoPrice = decimal.Parse(gigGoPromo.Value);
-
-                if (promoPrice > 0)
-                {
-                    //3. Make the Promo Price to be GrandTotal 
-                    result.GrandTotal = promoPrice;
-                    
-                    //2. Substract the Promo price from GrandTotal and bind the different to Discount
-                    result.Discount = (decimal)preShipmentDTO.CalculatedTotal + pickupValue - promoPrice;
-                }
-            }
-
-            return result;
-        }
-
-        public async Task<bool> GetTotalWeight(PreShipmentMobileDTO preShipmentDTO)
-        {
-            foreach (var preShipmentItem in preShipmentDTO.PreShipmentItems)
-            {
-                if (preShipmentItem.ShipmentType == ShipmentType.Special)
-                {
-                    var getPackageWeight = await _uow.SpecialDomesticPackage.GetAsync(x => x.SpecialDomesticPackageId == preShipmentItem.SpecialPackageId);
-                    if(getPackageWeight != null && getPackageWeight.Weight > 3)
-                    {
-                        return false;
-                    }
-                }
-                else if (preShipmentItem.ShipmentType == ShipmentType.Regular)
-                {
-                    if(preShipmentItem.Weight > 3)
-                    {
-                        return false;
-                    }
-                }
-            };
-            return true;
-        }
-
+        
         public async Task<List<PreShipmentMobileDTO>> GetShipments(BaseFilterCriteria filterOptionsDto)
         {
             try
@@ -1178,9 +1123,17 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (preshipmentmobile.ZoneMapping == 1)
                 {
+                    decimal shipmentPrice = preshipmentmobile.GrandTotal;
+
+                    var gigGoPromoPrice = await CalculatePromoPriceForDipatchRider(preshipmentmobile);
+                    if(gigGoPromoPrice > 0)
+                    {
+                        shipmentPrice = gigGoPromoPrice;
+                    }
+
                     var Partnerpaymentfordelivery = new PartnerPayDTO
                     {
-                        ShipmentPrice = preshipmentmobile.GrandTotal,
+                        ShipmentPrice = shipmentPrice,
                         ZoneMapping = (int)preshipmentmobile.ZoneMapping
                     };
 
@@ -1288,7 +1241,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw ex;
             }
         }
-
+        
         public async Task LogVisitMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest, string userId)
         {
             try
@@ -2901,6 +2854,111 @@ namespace GIGLS.Services.Implementation.Shipments
             return stations;
 
         }
+        
+        //promote for GIG Go Feb 2020
+        private async Task<MobilePriceDTO> CalculatePromoPrice(PreShipmentMobileDTO preShipmentDTO, int zoneId, decimal pickupValue)
+        {
+            var result = new MobilePriceDTO
+            {
+                GrandTotal = 0,
+                Discount = 0
+            };
 
+            //1.if the shipment Vehicle Type is Bike and the zone is lagos, Calculate the Promo price
+            if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && zoneId == 1)
+            {
+                //GIG Go Promo Price
+                bool totalWeight = await GetTotalWeight(preShipmentDTO);
+
+                if (totalWeight)
+                {
+                    //1. Get the Promo price 999
+                    var gigGoPromo = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGGOPromo, preShipmentDTO.CountryId);
+                    decimal promoPrice = decimal.Parse(gigGoPromo.Value);
+
+                    if (promoPrice > 0)
+                    {
+                        //3. Make the Promo Price to be GrandTotal 
+                        result.GrandTotal = promoPrice;
+
+                        //2. Substract the Promo price from GrandTotal and bind the different to Discount
+                        result.Discount = (decimal)preShipmentDTO.CalculatedTotal + pickupValue - promoPrice;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private async Task<bool> GetTotalWeight(PreShipmentMobileDTO preShipmentDTO)
+        {
+            foreach (var preShipmentItem in preShipmentDTO.PreShipmentItems)
+            {
+                if (preShipmentItem.ShipmentType == ShipmentType.Special)
+                {
+                    var getPackageWeight = await _uow.SpecialDomesticPackage.GetAsync(x => x.SpecialDomesticPackageId == preShipmentItem.SpecialPackageId);
+                    if (getPackageWeight != null && getPackageWeight.Weight > 3)
+                    {
+                        return false;
+                    }
+                }
+                else if (preShipmentItem.ShipmentType == ShipmentType.Regular)
+                {
+                    if (preShipmentItem.Weight > 3)
+                    {
+                        return false;
+                    }
+                }
+            };
+            return true;
+        }
+        
+        private async Task<decimal> CalculatePromoPriceForDipatchRider(PreShipmentMobile preshipmentMobile)
+        {
+            decimal result = 0;
+            
+            //1.if the shipment Vehicle Type is Bike and the zone is lagos, Calculate the Promo price
+            if (preshipmentMobile.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preshipmentMobile.ZoneMapping == 1)
+            {
+                bool totalweight = await GetTotalWeight(preshipmentMobile);
+
+                if (totalweight)
+                {
+                    //1. Get the Promo price 999
+                    var gigGoPromo = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGGOPromo, preshipmentMobile.CountryId);
+                    decimal promoPrice = decimal.Parse(gigGoPromo.Value);
+
+                    if (promoPrice > 0)
+                    {
+                        result = preshipmentMobile.GrandTotal + (decimal)preshipmentMobile.DiscountValue;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private async Task<bool> GetTotalWeight(PreShipmentMobile preShipmentDTO)
+        {
+            foreach (var preShipmentItem in preShipmentDTO.PreShipmentItems)
+            {
+                if (preShipmentItem.ShipmentType == ShipmentType.Special)
+                {
+                    var getPackageWeight = await _uow.SpecialDomesticPackage.GetAsync(x => x.SpecialDomesticPackageId == preShipmentItem.SpecialPackageId);
+                    if (getPackageWeight != null && getPackageWeight.Weight > 3)
+                    {
+                        return false;
+                    }
+                }
+                else if (preShipmentItem.ShipmentType == ShipmentType.Regular)
+                {
+                    if (preShipmentItem.Weight > 3)
+                    {
+                        return false;
+                    }
+                }
+            };
+            return true;
+        }
     }
 }
