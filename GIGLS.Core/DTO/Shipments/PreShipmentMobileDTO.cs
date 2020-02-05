@@ -2,9 +2,6 @@
 using GIGLS.CORE.DTO;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -37,13 +34,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverCity { get; set; }
         public string ReceiverState { get; set; }
         public string ReceiverCountry { get; set; }
-
-
-
         
-        public LocationDTO SenderLocation { get; set; }
-
-        
+        public LocationDTO SenderLocation { get; set; }      
 
         public  LocationDTO ReceiverLocation { get; set; }
         //Delivery Options
@@ -141,4 +133,95 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal CurrentWalletAmount { get; set; }
 
     }
+    public class NewPreShipmentMobileDTO : BaseDomainDTO
+    {
+        public int PreShipmentMobileId { get; set; }
+
+        //Senders' Information
+        public string SenderName { get; set; }
+        public string SenderPhoneNumber { get; set; }
+        public int SenderStationId { get; set; }
+        public string CustomerType { get; set; }
+        public string CompanyType { get; set; }
+        public string CustomerCode { get; set; }
+        public string SenderAddress { get; set; }
+        public LocationDTO SenderLocation { get; set; }
+
+        //General Details comes with role user
+        public string UserId { get; set; }
+
+        //public string PartnerFirstName { get; set; }
+        //public string PartnerLastName { get; set; }
+        //public string PartnerImageUrl { get; set; }
+
+        public decimal CurrentWalletAmount { get; set; } //by agility
+
+        public string CountryName { get; set; }  //by agility
+        public int CountryId { get; set; } //by agility
+
+        public string CurrencySymbol { get; set; } //by agility
+
+        public string CurrencyCode { get; set; } //by agility
+        public bool? IsEligible { get; set; } //by agility
+        public bool IsCodNeeded { get; set; } //by agility
+        public ShipmentType Shipmentype { get; set; } //by agility
+        public bool? IsFromShipment { get; set; } //by agility
+        public string VehicleType { get; set; }
+        public bool? IsBalanceSufficient { get; set; }  //by agility
+        public int? Haulageid { get; set; }
+        public decimal PickupPrice { get; set; } //by agility
+
+        //List of Receivers
+        public List<ReceiverPreShipmentMobileDTO> receiverPreShipmentMobileDTOs { get; set; }
+    }
+
+    public class ReceiverPreShipmentMobileDTO : BaseDomainDTO
+    {
+        //Receivers Information
+        public string ReceiverName { get; set; }
+        public string ReceiverPhoneNumber { get; set; }
+        public string ReceiverEmail { get; set; }
+        public string ReceiverAddress { get; set; }
+        public string ReceiverCity { get; set; }
+        public string ReceiverState { get; set; }
+        public string ReceiverCountry { get; set; }
+        public int ReceiverStationId { get; set; }
+        public LocationDTO ReceiverLocation { get; set; }
+
+        public string Waybill { get; set; } //by agility
+        //Delivery Options
+        public bool IsHomeDelivery { get; set; }
+
+        
+        public int? ZoneMapping { get; set; } // by agility
+        
+        public decimal GrandTotal { get; set; } // by agility
+        public bool IsdeclaredVal { get; set; }  // by agility
+        public decimal? DeliveryPrice { get; set; }  // by agility
+        public decimal? InsuranceValue { get; set; } //by agility
+        public double? CalculatedTotal { get; set; } = 0; //by agility
+        public decimal Value { get; set; } //by agility
+        public bool IsConfirmed { get; set; } //by agility
+        public bool IsDelivered { get; set; }  //by agility
+        public string shipmentstatus { get; set; } //by agility
+        public decimal ReceiverPickupPrice { get; set; }
+
+        //discount information
+        public decimal? DiscountValue { get; set; }
+
+        //List of Waybills
+        //public List<WaybillsPreShipmentMobileDTO> waybillsPreShipmentMobileDTOs { get; set; }
+
+        //Shipment Items
+        //public List<NewPreShipmentItemMobileDTO> PreShipmentItems { get; set; }
+        public List<PreShipmentItemMobileDTO> preShipmentItems { get; set; }
+
+        //Invoice parameters: Helps generate invoice for ecomnerce customers  by customerType
+        //public bool IsCashOnDelivery { get; set; }
+        //public decimal? CashOnDeliveryAmount { get; set; }
+        //public decimal? ExpectedAmountToCollect { get; set; }
+        //public decimal? ActualAmountCollected { get; set; }
+
+    }
+    
 }
