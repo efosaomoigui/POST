@@ -141,12 +141,8 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var scanStatus = await _scanStatusService.GetScanStatus();
-
-                //filter only the status for display
-                scanStatus = scanStatus.Where(s => s.HiddenFlag == false);
-                scanStatus = scanStatus.OrderBy(s => s.Reason);
-
+                var scanStatus = await _scanStatusService.GetNonHiddenScanStatus();
+                
                 return new ServiceResponse<IEnumerable<ScanStatusDTO>>
                 {
                     Object = scanStatus

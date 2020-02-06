@@ -12,5 +12,6 @@ namespace GIGLS.Core.IServices.ShipmentScan
         Task<object> AddScanStatus(ScanStatusDTO scanStatus);
         Task UpdateScanStatus(int ScanStatusId, ScanStatusDTO scanStatus);
         Task DeleteScanStatus(int ScanStatusId);
+        Task<IEnumerable<ScanStatusDTO>> GetNonHiddenScanStatus();
     }
 }
