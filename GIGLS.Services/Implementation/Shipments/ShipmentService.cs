@@ -1864,23 +1864,23 @@ namespace GIGLS.Services.Implementation.Shipments
                     "green"
                 },
                 new object[] {
-                    "Shipments Created over 24hrs within 48hrs",
+                    "Shipments created between 24 - 48 hrs",
                     totalyellow,
                     "yellow"
                 },
 
                 new object[] {
-                    "Shipments Created Over 48hrs - 72hrs plus",
+                    "Shipments created between 48 - 72 hrs",
                     totalred,
                     "red"
                 },
                 new object[] {
-                    "Terminal Delivery Shipments Over 48hrs plus",
+                    "Terminal Delivery Shipments Over 48 hrs",
                     terminal,
                     "purple"
                 },
                 new object[] {
-                    "Home Delivery Shipments Over 48hrs plus",
+                    "Home Delivery Shipments Over 48 hrs",
                     homeDelivery,
                     "brown"
                 }
