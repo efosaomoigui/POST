@@ -147,11 +147,12 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Multiple Shipment New Flow NEW
-        public async Task<NewPreShipmentMobileDTO> CreateMobileShipment(NewPreShipmentMobileDTO newPreShipment)
+        public async Task<List<string>> CreateMobileShipmentOld(NewPreShipmentMobileDTO newPreShipment)
         {
             var listOfWaybills = new List<PreShipmentMobileDTO>();
 
             decimal shipmentTotal = 0;
+            var waybillList = new List<string>();
 
             //check for sender information for validation
             if (newPreShipment.VehicleType == null || newPreShipment.VehicleType == "")
@@ -201,21 +202,21 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //Get Pick UP price
-                var Pickuprice = await GetPickUpPrice(newPreShipment.VehicleType, newPreShipment.CountryId, newPreShipment.UserId);
+                var Pickuprice = await GetPickUpPriceForMultipleShipment(newPreShipment.CustomerType,newPreShipment.VehicleType, newPreShipment.CountryId);
+
                 var PickupValue = Convert.ToDecimal(Pickuprice);
 
                 shipmentTotal = shipmentTotal + PickupValue;
 
                 //Get the customer wallet balance
                 decimal walletBalance = 0;
-                //var wallet = await _walletService.GetWalletBalance(newPreShipment.userChannelCode);
-                var wallet = await _walletService.GetWalletBalance();
+                var wallet = await _walletService.GetWalletBalance(newPreShipment.CustomerCode);
+                
                 walletBalance = wallet.Balance;
 
                 if (walletBalance > shipmentTotal)
                 {
-            
-        var waybillGeneration = await GenerateWaybill(listOfWaybills, PickupValue);
+                    waybillList = await GenerateWaybill(listOfWaybills, PickupValue);
                 }
                 else
                 {
@@ -228,7 +229,121 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException("This user is not Eligible");
             }
-            return newPreShipment;
+            return waybillList;
+        }
+
+        public async Task<List<string>> CreateMobileShipment(NewPreShipmentMobileDTO newPreShipment)
+        {
+            var listOfPreShipment = await GroupMobileShipmentByReceiver(newPreShipment);
+
+            var waybillList = new List<string>();            
+
+            if (listOfPreShipment[0].IsEligible == true)
+            {
+                //to check if the customer have enough money in his/her wallet
+                decimal shipmentTotal = 0;
+                foreach (var item in listOfPreShipment)
+                {
+                    shipmentTotal = shipmentTotal + (decimal)item.CalculatedTotal;
+                }
+
+                //Get Pick UP price
+                var Pickuprice = await GetPickUpPriceForMultipleShipment(listOfPreShipment[0].CustomerType, listOfPreShipment[0].VehicleType, listOfPreShipment[0].CountryId);
+                var PickupValue = Convert.ToDecimal(Pickuprice);
+
+                shipmentTotal = shipmentTotal + PickupValue;
+
+                //Get the customer wallet balance
+                decimal walletBalance = 0;
+                var wallet = await _walletService.GetWalletBalance(listOfPreShipment[0].CustomerCode);
+
+                walletBalance = wallet.Balance;
+
+                if (walletBalance > shipmentTotal)
+                {
+                    waybillList = await GenerateWaybill(listOfPreShipment, PickupValue);
+                }
+                else
+                {
+                    throw new GenericException("Insufficient Balance");
+                }
+            }
+            else
+            {
+                throw new GenericException("This user is not Eligible");
+            }
+            return waybillList;
+        }
+
+        //Also for Get Price
+        public async Task<List<PreShipmentMobileDTO>> GroupMobileShipmentByReceiver(NewPreShipmentMobileDTO newPreShipment)
+        {
+            var listOfPreShipment = new List<PreShipmentMobileDTO>();
+            
+            //check for sender information for validation
+            if (newPreShipment.VehicleType == null || newPreShipment.VehicleType == "")
+            {
+                throw new GenericException("Please select a vehicle type");
+            }
+            if (newPreShipment.receiverPreShipmentMobileDTOs.Count() == 0)
+            {
+                throw new GenericException("No Receiver was added");
+            }
+            newPreShipment = await ExtractSenderInfo(newPreShipment);
+
+            foreach (var item in newPreShipment.receiverPreShipmentMobileDTOs)
+            {
+                if (item.preShipmentItems.Count() == 0)
+                {
+                    throw new GenericException("No shipment was added");
+                }
+                
+                var newShipment = new PreShipmentMobileDTO
+                {
+                    SenderName = newPreShipment.SenderName,
+                    SenderPhoneNumber = newPreShipment.SenderPhoneNumber,
+                    SenderLocation = newPreShipment.SenderLocation,
+                    SenderAddress = newPreShipment.SenderAddress,
+                    SenderStationId = newPreShipment.SenderStationId,
+                    CustomerCode = newPreShipment.CustomerCode,
+                    UserId = newPreShipment.UserId,
+                    VehicleType = newPreShipment.VehicleType,
+                    CountryName = newPreShipment.CountryName,
+                    Haulageid = newPreShipment.Haulageid,
+                    CustomerType = newPreShipment.CustomerType,
+                    CountryId = newPreShipment.CountryId,
+                    ReceiverAddress = item.ReceiverAddress,
+                    ReceiverStationId = item.ReceiverStationId,
+                    ReceiverLocation = item.ReceiverLocation,
+                    ReceiverName = item.ReceiverName,
+                    ReceiverPhoneNumber = item.ReceiverPhoneNumber,
+                    PreShipmentItems = item.preShipmentItems
+                };
+                
+                newShipment.SenderName = newPreShipment.SenderName;
+                newShipment.SenderPhoneNumber = newPreShipment.SenderPhoneNumber;
+                newShipment.SenderLocation = newPreShipment.SenderLocation;
+                newShipment.SenderAddress = newPreShipment.SenderAddress;
+                newShipment.SenderStationId = newPreShipment.SenderStationId;
+                newShipment.CustomerCode = newPreShipment.CustomerCode;
+                newShipment.UserId = newPreShipment.UserId;
+                newShipment.VehicleType = newPreShipment.VehicleType;
+                newShipment.CountryName = newPreShipment.CountryName;
+                newShipment.Haulageid = newPreShipment.Haulageid;
+                newShipment.CustomerType = newPreShipment.CustomerType;
+                newShipment.CountryId = newPreShipment.CountryId;
+                newShipment.ReceiverAddress = item.ReceiverAddress;
+                newShipment.ReceiverStationId = item.ReceiverStationId;
+                newShipment.ReceiverLocation = item.ReceiverLocation;
+                newShipment.ReceiverName = item.ReceiverName;
+                newShipment.ReceiverPhoneNumber = item.ReceiverPhoneNumber;
+                newShipment.PreShipmentItems = item.preShipmentItems;
+
+                //Get Prices
+                var getPriceAndAll = await GetPriceFromList(newShipment);
+                listOfPreShipment.Add(getPriceAndAll);
+            }
+            return listOfPreShipment;
         }
 
         //Get the prices and others for each of them
@@ -391,6 +506,7 @@ namespace GIGLS.Services.Implementation.Shipments
             if (customer != null)
             {
                 preShipmentMobileDTO.CustomerType = user.UserChannelType.ToString();
+                preShipmentMobileDTO.CustomerCode = user.UserChannelCode;
                 if (customer.IsEligible != true)
                 {
                     preShipmentMobileDTO.IsEligible = false;
@@ -423,6 +539,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipmentDTO.IsFromShipment = true;
                     PreshipmentPriceDTO = await GetPriceForNonHaulage(preShipmentDTO);
                     preShipmentDTO.CalculatedTotal = (double)PreshipmentPriceDTO.GrandTotal;
+                    preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
                     
                 }
                 return preShipmentDTO;
@@ -455,12 +572,13 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Generate Waybill for Multiple ShipmentsFlow NEW
-        private async Task<bool> GenerateWaybill(List<PreShipmentMobileDTO> preShipmentDTO, decimal pickupValue)
+        private async Task<List<string>> GenerateWaybill(List<PreShipmentMobileDTO> preShipmentDTO, decimal pickupValue)
         {
             var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
             var numberOfReceiver = preShipmentDTO.Count();
             var individualPickupPrice = pickupValue / numberOfReceiver;
             var wallet = await _walletService.GetWalletBalance();
+            var listOfWaybills = new List<string>();
             foreach (var receiver in preShipmentDTO)
             {
                 receiver.GrandTotal += individualPickupPrice;
@@ -469,18 +587,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 //generate waybill
                 var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, gigGOServiceCenter.Code);
                 receiver.Waybill = waybill;
-                var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
+                var newPreShipment = Mapper.Map<PreShipmentMobile>(receiver);
 
-                if (receiver.CompanyType == UserChannelType.Ecommerce.ToString())
-                {
-                    newPreShipment.CustomerType = CustomerType.Company.ToString();
-                    newPreShipment.CompanyType = CompanyType.Ecommerce.ToString();
-                }
-                else
-                {
-                    newPreShipment.CustomerType = "Individual";
-                    newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
-                }
+                //if (receiver.CompanyType == UserChannelType.Ecommerce.ToString())
+                //{
+                //    newPreShipment.CustomerType = CustomerType.Company.ToString();
+                //    newPreShipment.CompanyType = CompanyType.Ecommerce.ToString();
+                //}
+                //else
+                //{
+                //    newPreShipment.CustomerType = "Individual";
+                //    newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
+                //}
                 
                 newPreShipment.IsConfirmed = false;
                 newPreShipment.IsDelivered = false;
@@ -488,7 +606,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 newPreShipment.DateCreated = DateTime.Now;
                 newPreShipment.GrandTotal = (decimal)receiver.GrandTotal;
                 receiver.IsBalanceSufficient = true;
-                //receiver.DiscountValue = PreshipmentPriceDTO.Discount;        SORT OUT DISCOUNT
+                newPreShipment.DiscountValue = receiver.DiscountValue;        
                 _uow.PreShipmentMobile.Add(newPreShipment);                
                 var transaction = new WalletTransactionDTO
                 {
@@ -511,8 +629,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     WaybillNumber = newPreShipment.Waybill,
                     ShipmentScanStatus = ShipmentScanStatus.MCRT
                 });
+                listOfWaybills.Add(receiver.Waybill);
             }
-            return true;
+            return listOfWaybills;
         }
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
@@ -2507,6 +2626,29 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
 
                 }
+                return PickUpPrice;
+            }
+            catch
+            {
+                throw new GenericException("Please an error occurred while getting PickupPrice!!");
+            }
+        }
+
+        //Get PickUpPrice For Multiple Shipments Flow
+        public async Task<decimal> GetPickUpPriceForMultipleShipment(string customerType, string vehicleType, int CountryId)
+        {
+            try
+            {
+                var PickUpPrice = 0.0M;
+                if (customerType == UserChannelType.Ecommerce.ToString())
+                {
+                    PickUpPrice = await GetPickUpPriceForEcommerce(vehicleType, CountryId);
+                }
+                else
+                {
+                    PickUpPrice = await GetPickUpPriceForIndividual(vehicleType, CountryId);
+                }
+
                 return PickUpPrice;
             }
             catch

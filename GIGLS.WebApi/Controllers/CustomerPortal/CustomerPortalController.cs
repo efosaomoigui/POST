@@ -972,6 +972,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpPost]
+        [Route("createShipmentMultiple")]
+        public async Task<IServiceResponse<object>> CreateShipmentMultiple(NewPreShipmentMobileDTO PreshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var PreshipMentMobile = await _portalService.AddPreShipmentMobileMultiple(PreshipmentMobile);
+
+                return new ServiceResponse<object>
+                {
+                    Object = PreshipMentMobile
+                };
+            });
+        }
+
         [HttpGet]
         [Route("getStation_s")]
         public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetStations()
