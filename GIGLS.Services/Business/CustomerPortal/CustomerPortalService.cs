@@ -734,12 +734,54 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         return false;
                     }
+                    else
+                    {
+                        var num = ComparePhoneNumber(user.PhoneNumber, u.PhoneNumber);
+                        if (num)
+                        {
+                            return true;
+                        }
+                    }
                 }
             }
 
             return true;
         }
-        
+
+        private bool ComparePhoneNumber(string customerPhoneNumber, string existingPhoneCode)
+        {
+            //1
+            if (existingPhoneCode.StartsWith("0")) //07011111111
+            {
+                existingPhoneCode = existingPhoneCode.Substring(1, existingPhoneCode.Length - 1);
+                customerPhoneNumber = customerPhoneNumber.Remove(0, 4);
+                if (existingPhoneCode == customerPhoneNumber)
+                {
+                    return true;
+                }
+            }
+            //2
+            else if (existingPhoneCode.StartsWith("+"))  //+2347011111111
+            {
+                if (existingPhoneCode == customerPhoneNumber)
+                {
+                    return true;
+                }
+            }
+            else //2347011111111
+            {
+                existingPhoneCode = existingPhoneCode.Remove(0, 3);
+                customerPhoneNumber = customerPhoneNumber.Remove(0, 4);
+                if (existingPhoneCode == customerPhoneNumber)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
         private async Task<SignResponseDTO> PartnerRegistration(UserDTO user)
         {
             var result = new SignResponseDTO();
@@ -913,6 +955,11 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             var PhoneNumber = user.PhoneNumber.Remove(0, 4);
             var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
+
+            if(EmailUser != null)
+            {
+
+            }
 
             if (EmailUser != null)
             {
