@@ -715,8 +715,12 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         private async Task<bool> CheckRegistrationAccess(UserDTO user)
         {
-            var PhoneNumber = user.PhoneNumber.Remove(0, 4);
-            var emailUsers = await _uow.User.GetUserListByEmailorPhoneNumber(user.Email, PhoneNumber);
+            if (user.PhoneNumber.StartsWith("0"))
+            {
+                user.PhoneNumber.Substring(1, user.PhoneNumber.Length - 1);
+            }
+            //var PhoneNumber = user.PhoneNumber.Remove(0, 4);
+            var emailUsers = await _uow.User.GetUserListByEmailorPhoneNumber(user.Email, user.PhoneNumber);
             
             foreach(var u in emailUsers)
             {
@@ -733,14 +737,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     if(u.UserChannelType == UserChannelType.IndividualCustomer && u.IsRegisteredFromMobile == true)
                     {
                         return false;
-                    }
-                    else
-                    {
-                        var num = ComparePhoneNumber(user.PhoneNumber, u.PhoneNumber);
-                        if (num)
-                        {
-                            return true;
-                        }
                     }
                 }
             }
@@ -786,7 +782,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var result = new SignResponseDTO();
 
-            var PhoneNumber = user.PhoneNumber.Remove(0, 4);
+            var PhoneNumber = user.PhoneNumber; //.Remove(0, 4);
             var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
 
             if (EmailUser != null)
@@ -953,7 +949,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var result = new SignResponseDTO();
 
-            var PhoneNumber = user.PhoneNumber.Remove(0, 4);
+            var PhoneNumber = user.PhoneNumber; //.Remove(0, 4);
             var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
 
             if(EmailUser != null)
@@ -1078,7 +1074,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 user.Organisation = user.FirstName + " " + user.LastName;
             }
 
-            var PhoneNumber = user.PhoneNumber.Remove(0, 4);
+            var PhoneNumber = user.PhoneNumber; //.Remove(0, 4);
             var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
             if (EmailUser != null)
             {

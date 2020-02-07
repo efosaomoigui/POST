@@ -24,6 +24,19 @@ namespace GIGLS.Services.Implementation.Customers
             _companyService = companyService;
             MapperConfig.Initialize();
         }
+        
+        private async Task<string> AddCountryCodeToPhoneNumber(string phoneNumber, int countryId)
+        {
+            var country = await _uow.Country.GetAsync(x => x.CountryId == countryId);
+            if (country != null)
+            {
+                phoneNumber = phoneNumber.Substring(1, phoneNumber.Length - 1);
+                string phone = $"{country.PhoneNumberCode}{phoneNumber}";
+                phoneNumber = phone;
+
+            }
+            return phoneNumber;
+        }
 
         public async Task<CustomerDTO> CreateCustomer(CustomerDTO customerDTO)
         {
@@ -50,6 +63,11 @@ namespace GIGLS.Services.Implementation.Customers
                     }
                     else
                     {
+                        if (customerDTO.PhoneNumber.StartsWith("0"))
+                        {
+                            customerDTO.PhoneNumber = await AddCountryCodeToPhoneNumber(customerDTO.PhoneNumber, customerDTO.UserActiveCountryId);
+                        }
+
                         // create new
                         var companyDTO = Mapper.Map<CompanyDTO>(customerDTO);
                         var createdCustomer = await _companyService.AddCompany(companyDTO);
@@ -78,6 +96,11 @@ namespace GIGLS.Services.Implementation.Customers
                     }
                     else
                     {
+                        if (customerDTO.PhoneNumber.StartsWith("0"))
+                        {
+                            customerDTO.PhoneNumber = await AddCountryCodeToPhoneNumber(customerDTO.PhoneNumber, customerDTO.UserActiveCountryId);
+                        }
+
                         // create new
                         var individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(customerDTO);
                         var createdCustomer = await _individualCustomerService.AddCustomer(individualCustomerDTO);
@@ -188,6 +211,10 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
+                if (phoneNumber.StartsWith("0"))
+                {
+                    phoneNumber = phoneNumber.Substring(1, phoneNumber.Length - 1);
+                }
                 // handle IndividualCustomers
                 var individualCustomerDTO = await _individualCustomerService.GetCustomerByPhoneNumber(phoneNumber);
                 return individualCustomerDTO;

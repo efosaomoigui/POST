@@ -617,11 +617,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                          });
 
                         //setup login data
-                        HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
+                        HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
 
                         if (!responseMessage.IsSuccessStatusCode)
                         {
-                            throw new GenericException("Operation could not complete login successfully:");
+                            throw new GenericException("Incorrect Login Details");
                         }
                         else
                         {
@@ -690,7 +690,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                         if (!responseMessage.IsSuccessStatusCode)
                         {
-                            throw new GenericException("Operation could not complete login successfully:");
+                            throw new GenericException("Incorrect Login Details");
                         }
                         else
                         {

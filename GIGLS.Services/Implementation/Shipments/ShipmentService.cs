@@ -696,7 +696,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 // individualCustomer
                 customerDTO.CustomerType = CustomerType.IndividualCustomer;
             }
-
+            
             var createdObject = await _customerService.CreateCustomer(customerDTO);
 
             // set the customerId
@@ -736,7 +736,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             return createdObject;
         }
-
+        
         private async Task<ShipmentDTO> CreateShipment(ShipmentDTO shipmentDTO)
         {
             await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
