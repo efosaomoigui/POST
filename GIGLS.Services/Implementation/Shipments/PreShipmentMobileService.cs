@@ -302,7 +302,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     amount = await CalculateGeoDetailsBasedonLocation(preShipment);
                     IndividualPrice = (amount / ShipmentCount);
                 }
-                
+
                 //Get the customer Type
                 var userChannelCode = await _userService.GetUserChannelCode();
                 var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == userChannelCode);
@@ -2863,26 +2863,28 @@ namespace GIGLS.Services.Implementation.Shipments
                 GrandTotal = 0,
                 Discount = 0
             };
-
-            //1.if the shipment Vehicle Type is Bike and the zone is lagos, Calculate the Promo price
-            if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && zoneId == 1)
+            if(preShipmentDTO.VehicleType != null)
             {
-                //GIG Go Promo Price
-                bool totalWeight = await GetTotalWeight(preShipmentDTO);
-
-                if (totalWeight)
+                //1.if the shipment Vehicle Type is Bike and the zone is lagos, Calculate the Promo price
+                if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && zoneId == 1)
                 {
-                    //1. Get the Promo price 999
-                    var gigGoPromo = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGGOPromo, preShipmentDTO.CountryId);
-                    decimal promoPrice = decimal.Parse(gigGoPromo.Value);
+                    //GIG Go Promo Price
+                    bool totalWeight = await GetTotalWeight(preShipmentDTO);
 
-                    if (promoPrice > 0)
+                    if (totalWeight)
                     {
-                        //3. Make the Promo Price to be GrandTotal 
-                        result.GrandTotal = promoPrice;
+                        //1. Get the Promo price 999
+                        var gigGoPromo = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGGOPromo, preShipmentDTO.CountryId);
+                        decimal promoPrice = decimal.Parse(gigGoPromo.Value);
 
-                        //2. Substract the Promo price from GrandTotal and bind the different to Discount
-                        result.Discount = (decimal)preShipmentDTO.CalculatedTotal + pickupValue - promoPrice;
+                        if (promoPrice > 0)
+                        {
+                            //3. Make the Promo Price to be GrandTotal 
+                            result.GrandTotal = promoPrice;
+
+                            //2. Substract the Promo price from GrandTotal and bind the different to Discount
+                            result.Discount = (decimal)preShipmentDTO.CalculatedTotal + pickupValue - promoPrice;
+                        }
                     }
                 }
             }
