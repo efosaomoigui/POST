@@ -246,10 +246,13 @@ namespace GIGLS.Services.Business.Pricing
                        
             decimal PackagePrice = 0;
 
+            //update to accomodate for over 100 KG item
             //This is our limit weight.
             if (pricingDto.Weight > 100)
             {
-                throw new GenericException("WEIGHT EXIST INTERNATIONAL WEIGHT LIMIT");
+                decimal activeWeightLimit = 100.0M;
+                PackagePrice = await GetRegularPriceOverflow(pricingDto.Weight, activeWeightLimit, zone.ZoneId, departureCountry.CountryId);
+                //throw new GenericException("WEIGHT EXIST INTERNATIONAL WEIGHT LIMIT");
             }
             else
             {
@@ -530,7 +533,9 @@ namespace GIGLS.Services.Business.Pricing
             //This is our limit weight.
             if (pricingDto.Weight > 100)
             {
-                throw new GenericException("WEIGHT EXIST INTERNATIONAL WEIGHT LIMIT");
+                decimal activeWeightLimit = 100.0M;
+                PackagePrice = await GetEcommercePriceOverflow(pricingDto.Weight, activeWeightLimit, zone.ZoneId, departureCountry.CountryId);
+                //throw new GenericException("WEIGHT EXIST INTERNATIONAL WEIGHT LIMIT");
             }
             else
             {

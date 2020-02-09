@@ -592,7 +592,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               ShipmentScanStatus = s.ShipmentScanStatus,
                               IsGrouped = s.IsGrouped,
                               DepartureCountryId = s.DepartureCountryId,
-                              DestinationCountryId = s.DestinationCountryId
+                              DestinationCountryId = s.DestinationCountryId,
+                              IsFromMobile = s.IsFromMobile,
+                              PickupOptions = s.PickupOptions,
+                              ReceiverAddress = s.ReceiverAddress
                           });
             return result;
         }

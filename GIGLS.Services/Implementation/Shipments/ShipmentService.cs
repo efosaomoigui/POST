@@ -593,13 +593,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //implement customer week function here
-                var result = await ProcessPaymentForCustomerWeek(newShipment);
+                //var result = await ProcessPaymentForCustomerWeek(newShipment);
 
-                if (result)
-                {
-                    newShipment.GrandTotal = 0;
-                    newShipment.SealNumber = "";
-                }
+                //if (result)
+                //{
+                //    newShipment.GrandTotal = 0;
+                //    newShipment.SealNumber = "";
+                //}
 
                 return newShipment;
             }
@@ -1088,7 +1088,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 //1. get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
-                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false && s.IsGrouped == false);
+                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments()
+                    .Where(s => s.IsShipmentCollected == false && s.IsGrouped == false && (s.PaymentStatus == PaymentStatus.Paid || s.CompanyType == CompanyType.Corporate.ToString()));
 
                 //apply filters for Service Centre
                 if (serviceCenters.Length > 0)
@@ -1116,48 +1117,23 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 var shipmentsBySC = shipmentsQueryable.ToList();
-
-                //2. get only paid shipments from Invoice for Individuals
-                // and allow Ecommerce and Corporate customers to be grouped
-                //var ungroupedWaybills = new HashSet<InvoiceView>();
-                var finalUngroupedList = new List<InvoiceView>();
-
-                foreach (var shipmentItem in shipmentsBySC)
-                {
-                    if (shipmentItem.PaymentStatus == PaymentStatus.Paid || shipmentItem.CompanyType == CompanyType.Corporate.ToString())
-                    {
-                        finalUngroupedList.Add(shipmentItem);
-                    }
-                }
-
-                //var ungroupedWaybills = paidShipments;
-
-                //new solution
-                //1. Get Transit Waybill that is not completed, not group and service centre belong to login user
-                //2. Loop through output of 1 and get the shipment details, then add it to the ungrouped
-                //var finalUngroupedList = new List<InvoiceView>();
-
-                //foreach (var item in ungroupedWaybills)
-                //{
-                //    finalUngroupedList.Add(item);
-                //}
-
-                int currentServiceCentre = serviceCenters[0];
-
+                
                 var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable()
-                    .Where(x => x.ServiceCentreId == currentServiceCentre && x.IsGrouped == false && x.IsTransitCompleted == false).ToList();
+                    .Where(x => serviceCenters.Contains(x.ServiceCentreId) && x.IsGrouped == false && x.IsTransitCompleted == false).ToList();
 
-                foreach (var item in allTransitWaybillNumberList)
+                List<string> transitWaybills = allTransitWaybillNumberList.Select(x => x.WaybillNumber).ToList();
+
+                if(allTransitWaybillNumberList.Count > 0)
                 {
-                    var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().FirstOrDefault(s => s.IsShipmentCollected == false && s.Waybill == item.WaybillNumber);
+                    var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false && transitWaybills.Contains(s.Waybill)).ToList();
 
-                    if (shipment != null)
+                    if(shipment.Count > 0)
                     {
-                        finalUngroupedList.Add(shipment);
+                        shipmentsBySC.AddRange(shipment);
                     }
                 }
-
-                return finalUngroupedList;
+                
+                return shipmentsBySC;
             }
             catch (Exception)
             {
@@ -1888,23 +1864,23 @@ namespace GIGLS.Services.Implementation.Shipments
                     "green"
                 },
                 new object[] {
-                    "Shipments Created over 24hrs within 48hrs",
+                    "Shipments created between 24 - 48 hrs",
                     totalyellow,
                     "yellow"
                 },
 
                 new object[] {
-                    "Shipments Created Over 48hrs - 72hrs plus",
+                    "Shipments created between 48 - 72 hrs",
                     totalred,
                     "red"
                 },
                 new object[] {
-                    "Terminal Delivery Shipments Over 48hrs plus",
+                    "Terminal Delivery Shipments Over 48 hrs",
                     terminal,
                     "purple"
                 },
                 new object[] {
-                    "Home Delivery Shipments Over 48hrs plus",
+                    "Home Delivery Shipments Over 48 hrs",
                     homeDelivery,
                     "brown"
                 }

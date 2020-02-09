@@ -39,8 +39,8 @@ namespace GIGLS.Services.Implementation.Fleets
         /// <returns></returns>
         public async Task<object> AddDispatch(DispatchDTO dispatchDTO)
         {
-            //try
             {
+                
                 // get user login service centre
                 var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
                 var userServiceCentreId = serviceCenterIds[0];
@@ -52,6 +52,8 @@ namespace GIGLS.Services.Implementation.Fleets
                 //check for the type of delivery manifest to know which type of process to do
                 if (dispatchDTO.ManifestType == ManifestType.Delivery)
                 {
+                    var checkForOutstanding = await CheckForOutstandingDispatch(dispatchDTO);
+
                     //filter all the ways in the delivery manifest for scanning processing
                     var ret = await FilterWaybillsInDeliveryManifest(dispatchDTO, currentUserId, userServiceCentreId);
                 }
@@ -416,6 +418,27 @@ namespace GIGLS.Services.Implementation.Fleets
             {
                 throw;
             }
+        }
+
+        private async Task<bool> CheckForOutstandingDispatch(DispatchDTO dispatchDTO)
+        {
+            var dispatch = await _uow.Dispatch.CheckForOutstandingDispatch(dispatchDTO.DriverDetail);
+            
+            if (dispatch != null)
+            {
+                foreach(var item in dispatch)
+                {
+                    if(item.DateModified.Date == DateTime.Now.Date)
+                    {
+                        return true;
+                    }
+                    else if(item.DateModified.Date != DateTime.Now.Date)
+                    {
+                        throw new GenericException("The Dispatch Partner has some unsign Off Delivery Manifest(s)");
+                    }
+                }
+            }
+            return true;
         }
     }
 }

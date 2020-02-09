@@ -1420,6 +1420,31 @@ namespace GIGLS.Services.Implementation.User
             return Mapper.Map<UserDTO>(user);
         }
 
+        //used for Customer Portal
+        public async Task<UserDTO> GetUserUsingCustomerForCustomerPortal(string emailPhoneCode)
+        {
+            var user = await _unitOfWork.User.GetUserUsingCustomerForCustomerPortal(emailPhoneCode);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist");
+            }
+            return Mapper.Map<UserDTO>(user);
+        }
+
+        //used for Mobile Scanner
+        public async Task<UserDTO> GetUserUsingCustomerForMobileScanner(string emailPhoneCode)
+        {
+            var user = await _unitOfWork.User.GetUserUsingCustomerForMobileScanner(emailPhoneCode);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist");
+            }
+            return Mapper.Map<UserDTO>(user);
+        }
+
+
         public async Task<UserDTO> GetActivatedUserByEmail(string email, bool isActive)
         {
             var user = await _unitOfWork.User.ActivateUserByEmail(email, isActive);

@@ -1352,6 +1352,56 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return await _otpService.CheckDetails(emailPhone, userchanneltype);
         }
+        public async Task<UserDTO> CheckDetailsForCustomerPortal(string user)
+        {
+            string emailPhone = "";
+
+            bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            if (isEmail)
+            {
+                emailPhone = user;
+            }
+            else
+            {
+                bool IsPhone = Regex.IsMatch(user, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
+                if (IsPhone)
+                {
+                    user = user.Remove(0, 1);
+                    emailPhone = user;
+                }
+                else
+                {
+                    emailPhone = user;
+                }
+            }
+
+            return await _otpService.CheckDetailsForCustomerPortal(emailPhone);
+        }
+        public async Task<UserDTO> CheckDetailsForMobileScanner(string user)
+        {
+            string emailPhone = "";
+
+            bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            if (isEmail)
+            {
+                emailPhone = user;
+            }
+            else
+            {
+                bool IsPhone = Regex.IsMatch(user, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
+                if (IsPhone)
+                {
+                    user = user.Remove(0, 1);
+                    emailPhone = user;
+                }
+                else
+                {
+                    emailPhone = user;
+                }
+            }
+
+            return await _otpService.CheckDetailsForMobileScanner(emailPhone);
+        }
         public async Task<bool> CreateCustomer(string CustomerCode)
         {
             return await _preShipmentMobileService.CreateCustomer(CustomerCode);
@@ -1701,6 +1751,41 @@ namespace GIGLS.Services.Business.CustomerPortal
                 await _uow.CompleteAsync();
             }
             return await Task.FromResult(deliveryNumberlist);
+        }
+        public async Task<bool> UpdateGIGGoShipmentStaus(MobilePickUpRequestsDTO mobilePickUpRequestsDTO)
+        {
+            try
+            {
+                var preShipmentMobile = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == mobilePickUpRequestsDTO.Waybill);
+                if (preShipmentMobile == null)
+                {
+                    throw new GenericException("This is not a GIGGo Shipment.It can not be updated");
+                }
+                else
+                {
+                    if((preShipmentMobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString() || preShipmentMobile.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString())
+                        && mobilePickUpRequestsDTO.Status == "Shipment created")
+                    {
+                        throw new GenericException($"You can not change this shipment status to {mobilePickUpRequestsDTO.Status}");
+                    }
+                    else if (preShipmentMobile.ZoneMapping == 1 && mobilePickUpRequestsDTO.Status == MobilePickUpRequestStatus.OnwardProcessing.ToString())
+                    {
+                        throw new GenericException("This is not an Inter-State Shipment");
+                    }
+                    else
+                    {
+                        preShipmentMobile.shipmentstatus = mobilePickUpRequestsDTO.Status;
+                        await _uow.CompleteAsync();
+                    }
+                    
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
         }
     }
 }

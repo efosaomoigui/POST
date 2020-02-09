@@ -106,13 +106,16 @@ namespace GIGLS.Services.Implementation
                 int difference = Convert.ToInt32(span.TotalMinutes);
                 if (difference < 5)
                 {
+                    //customer activated
                     var userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true);
-                    if(userdto.IsActive)
-                    {
-                        await CalculateReferralBonus(userdto);
-                    }
                     _uow.OTP.Remove(otpbody);
                     await _uow.CompleteAsync();
+
+                    if (userdto.IsActive)
+                    {
+                        CalculateReferralBonus(userdto);
+                    }
+
                     return userdto;
                 }
                 else
@@ -189,7 +192,33 @@ namespace GIGLS.Services.Implementation
             }
 
         }
+        //Check Details for Customer Portal
+        public async Task<UserDTO> CheckDetailsForCustomerPortal(string user)
+        {
+            try
+            {
+                var registerUser = await _UserService.GetUserUsingCustomerForCustomerPortal(user);
+                return registerUser;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
+        //Check Details for Mobile Scanner 
+        public async Task<UserDTO> CheckDetailsForMobileScanner(string user)
+        {
+            try
+            {
+                var registerUser = await _UserService.GetUserUsingCustomerForMobileScanner(user);
+                return registerUser;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public async Task<double> GetAverageRating(string CustomerCode, string usertype)
         {
             if (usertype == UserChannelType.Partner.ToString())
@@ -319,6 +348,7 @@ namespace GIGLS.Services.Implementation
             }
             return user;
         }
+
         private async Task CalculateReferralBonus(UserDTO User)
         {           
             if (User.RegistrationReferrercode != null && User.IsUniqueInstalled == true)
