@@ -1,6 +1,4 @@
-﻿using GIGL.GIGLS.Core.Domain;
-
-namespace GIGLS.Core.Domain
+﻿namespace GIGLS.Core.Domain
 {
     public class LogEntry
     {

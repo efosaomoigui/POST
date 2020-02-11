@@ -50,6 +50,7 @@
         EcommerceCarPickupPrice,
         EcommerceVanPickupPrice,
         EcommerceCodAmount,
-        EcommerceNoCodAmount
+        EcommerceNoCodAmount,
+        GIGGOPromo
     }
 }

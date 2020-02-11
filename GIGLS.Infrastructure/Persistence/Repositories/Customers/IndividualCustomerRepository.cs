@@ -63,6 +63,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 var individualDto = from s in customers
                                    select new IndividualCustomerDTO
                                    {
+                                       IndividualCustomerId = s.IndividualCustomerId,
                                        FirstName = s.FirstName,
                                        LastName = s.LastName,
                                        Email = s.Email,
