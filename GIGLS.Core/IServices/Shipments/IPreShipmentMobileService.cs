@@ -59,6 +59,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<GiglgoStationDTO>> GetGoStations();
         Task<decimal> GetPickUpPriceForMultipleShipment(string customerType, string vehicleType, int CountryId);
         Task<List<string>> CreateMobileShipment(NewPreShipmentMobileDTO newPreShipment);
+        Task<decimal> NewGetPriceForMultiple(NewPreShipmentMobileDTO preShipmentItemMobileDTO);
 
     }
 }

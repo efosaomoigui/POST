@@ -47,7 +47,7 @@ namespace GIGLS.Core.DTO.Shipments
         public DateTime? ActualDateOfArrival { get; set; }
 
         //Shipment Items
-        public List<PreShipmentItemMobileDTO> PreShipmentItems { get; set; }
+        public List<PreShipmentItemMobileDTO> PreShipmentItems { get; set; } = null;
 
         public decimal GrandTotal { get; set; }
 
@@ -154,22 +154,22 @@ namespace GIGLS.Core.DTO.Shipments
         //public string PartnerLastName { get; set; }
         //public string PartnerImageUrl { get; set; }
 
-        public decimal CurrentWalletAmount { get; set; } //by agility
+        public decimal CurrentWalletAmount { get; set; } 
 
-        public string CountryName { get; set; }  //by agility
-        public int CountryId { get; set; } //by agility
+        public string CountryName { get; set; }  
+        public int CountryId { get; set; } 
 
-        public string CurrencySymbol { get; set; } //by agility
+        public string CurrencySymbol { get; set; } 
 
-        public string CurrencyCode { get; set; } //by agility
-        public bool? IsEligible { get; set; } //by agility
-        public bool IsCodNeeded { get; set; } //by agility
-        public ShipmentType Shipmentype { get; set; } //by agility
-        public bool? IsFromShipment { get; set; } //by agility
+        public string CurrencyCode { get; set; } 
+        public bool? IsEligible { get; set; } 
+        public bool IsCodNeeded { get; set; } 
+        public ShipmentType Shipmentype { get; set; } 
+        public bool? IsFromShipment { get; set; } 
         public string VehicleType { get; set; }
-        public bool? IsBalanceSufficient { get; set; }  //by agility
+        public bool? IsBalanceSufficient { get; set; }  
         public int? Haulageid { get; set; }
-        public decimal PickupPrice { get; set; } //by agility
+        public decimal PickupPrice { get; set; } 
 
         //List of Receivers
         public List<ReceiverPreShipmentMobileDTO> receiverPreShipmentMobileDTOs { get; set; }
@@ -188,30 +188,23 @@ namespace GIGLS.Core.DTO.Shipments
         public int ReceiverStationId { get; set; }
         public LocationDTO ReceiverLocation { get; set; }
 
-        public string Waybill { get; set; } //by agility
+        public string Waybill { get; set; } 
         //Delivery Options
         public bool IsHomeDelivery { get; set; }
-
-        
-        public int? ZoneMapping { get; set; } // by agility
-        
-        public decimal GrandTotal { get; set; } // by agility
-        public bool IsdeclaredVal { get; set; }  // by agility
-        public decimal? DeliveryPrice { get; set; }  // by agility
-        public decimal? InsuranceValue { get; set; } //by agility
-        public double? CalculatedTotal { get; set; } = 0; //by agility
-        public decimal Value { get; set; } //by agility
-        public bool IsConfirmed { get; set; } //by agility
-        public bool IsDelivered { get; set; }  //by agility
-        public string shipmentstatus { get; set; } //by agility
+        public int? ZoneMapping { get; set; } 
+        public decimal GrandTotal { get; set; } 
+        public bool IsdeclaredVal { get; set; }  
+        public decimal? DeliveryPrice { get; set; }  
+        public decimal? InsuranceValue { get; set; } 
+        public double? CalculatedTotal { get; set; } = 0; 
+        public decimal Value { get; set; } 
+        public bool IsConfirmed { get; set; } 
+        public bool IsDelivered { get; set; }  
+        public string shipmentstatus { get; set; } 
         public decimal ReceiverPickupPrice { get; set; }
 
         //discount information
         public decimal? DiscountValue { get; set; }
-
-        //List of Waybills
-        //public List<WaybillsPreShipmentMobileDTO> waybillsPreShipmentMobileDTOs { get; set; }
-
         //Shipment Items
         //public List<NewPreShipmentItemMobileDTO> PreShipmentItems { get; set; }
         public List<PreShipmentItemMobileDTO> preShipmentItems { get; set; }

@@ -1439,6 +1439,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.GetPrice(preShipment);
         }
+        public async Task<decimal> GetPriceMultiple(NewPreShipmentMobileDTO preShipment)
+        {
+            return await _preShipmentMobileService.NewGetPriceForMultiple(preShipment);
+        }
         public async Task<WalletDTO> GetWalletBalance()
         {
             return await _walletService.GetWalletBalance();
