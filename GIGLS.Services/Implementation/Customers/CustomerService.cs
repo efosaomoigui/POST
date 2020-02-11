@@ -46,7 +46,8 @@ namespace GIGLS.Services.Implementation.Customers
                 if (CustomerType.Company.Equals(customerDTO.CustomerType))
                 {
                     var companyId = 0;
-                    var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.Trim().ToLower() || c.PhoneNumber == customerDTO.PhoneNumber);
+                    var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.ToLower() 
+                    || c.PhoneNumber == customerDTO.PhoneNumber || c.Email == customerDTO.Email || c.CustomerCode == customerDTO.CustomerCode);
 
                     foreach (var item in CompanyByName)
                     {
@@ -55,8 +56,6 @@ namespace GIGLS.Services.Implementation.Customers
 
                     if (companyId > 0)
                     {
-                        // update
-                        
                         customerDTO.CompanyId = companyId;
                         var companyDTO = Mapper.Map<CompanyDTO>(customerDTO);
                         //await _companyService.UpdateCompany(companyId, companyDTO);
@@ -80,7 +79,7 @@ namespace GIGLS.Services.Implementation.Customers
                 if (CustomerType.IndividualCustomer.Equals(customerDTO.CustomerType))
                 {
                     var individualCustomerId = 0;
-                    var individualCustomerByPhone = await _uow.IndividualCustomer.GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber.Trim());
+                    var individualCustomerByPhone = await _uow.IndividualCustomer.GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber || c.CustomerCode == customerDTO.CustomerCode);
 
                     if(individualCustomerByPhone != null)
                     {
@@ -229,6 +228,11 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
+                if (searchOption.SearchData.StartsWith("0"))
+                {
+                    searchOption.SearchData = searchOption.SearchData.Substring(1, searchOption.SearchData.Length - 1);
+                }
+
                 // handle Company customers
                 if (FilterCustomerType.IndividualCustomer.Equals(searchOption.CustomerType))
                 {

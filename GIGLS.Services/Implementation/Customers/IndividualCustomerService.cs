@@ -199,17 +199,14 @@ namespace GIGLS.Services.Implementation.Customers
             try
             {
                 var customer = await _uow.IndividualCustomer.GetAsync(x => x.PhoneNumber.Contains(phoneNumber));
-
-                //if (customer == null)
-                //{
-                //    throw new GenericException("Individual Customer information does not exist");
-                //}
-
                 IndividualCustomerDTO individual = Mapper.Map<IndividualCustomerDTO>(customer);
 
-                //get all countries and set the country name
-                var userCountry = await _uow.Country.GetAsync(individual.UserActiveCountryId);
-                individual.UserActiveCountryName = userCountry?.CountryName;
+                if(individual != null)
+                {
+                    //get all countries and set the country name
+                    var userCountry = await _uow.Country.GetAsync(individual.UserActiveCountryId);
+                    individual.UserActiveCountryName = userCountry?.CountryName;
+                }
 
                 return individual;
             }

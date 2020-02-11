@@ -951,12 +951,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             var PhoneNumber = user.PhoneNumber; //.Remove(0, 4);
             var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
-
-            if(EmailUser != null)
-            {
-
-            }
-
+            
             if (EmailUser != null)
             {
                 if (EmailUser.Email != null)

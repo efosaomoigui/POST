@@ -113,7 +113,7 @@ namespace GIGLS.Services.Implementation
 
                     if (userdto.IsActive)
                     {
-                        CalculateReferralBonus(userdto);
+                        await CalculateReferralBonus(userdto);
                     }
 
                     return userdto;

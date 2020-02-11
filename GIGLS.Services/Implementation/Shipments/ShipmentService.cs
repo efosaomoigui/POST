@@ -551,7 +551,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.ShipmentHash.Add(hasher);
                 }
 
-                // create the customer, if not recorded in the system
+                // create the customer, if information does not exist in our record
                 var customerId = await CreateCustomer(shipmentDTO);
 
                 // create the shipment and shipmentItems
