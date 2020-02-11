@@ -234,7 +234,6 @@ namespace GIGLS.Services.Implementation.User
 
         public async Task<IdentityResult> UpdateUser(string userid, UserDTO userDto)
         {
-
             var user = await _unitOfWork.User.GetUserById(userid);
 
             if (user == null)

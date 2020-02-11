@@ -818,6 +818,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             EmailUser.UserActiveCountryId = user.UserActiveCountryId;
                             EmailUser.AppType = user.AppType;
                             EmailUser.UserName = user.Email;
+                            EmailUser.UserChannelPassword = user.Password;
                             var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
                             var u = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
 
@@ -1022,6 +1023,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     EmailUser.DateModified = DateTime.Now;
                     EmailUser.AppType = user.AppType;
                     EmailUser.UserName = user.Email;
+                    EmailUser.UserChannelPassword = user.Password;
                     var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
                     var update = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
                     var resetPassword = await _userService.ResetPassword(EmailUser.Id, user.Password);
@@ -1149,7 +1151,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     EmailUser.UserActiveCountryId = user.UserActiveCountryId;
                     EmailUser.AppType = user.AppType;
                     EmailUser.UserName = user.Email;
-
+                    EmailUser.UserChannelPassword = user.Password;
                     var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
                     var update = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
                     var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
