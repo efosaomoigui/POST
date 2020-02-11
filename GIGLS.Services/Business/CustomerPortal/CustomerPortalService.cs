@@ -653,6 +653,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (user.IsEligible == null)
                 user.IsEligible = false;
+
             if (user.Referrercode != null)
                 user.RegistrationReferrercode = user.Referrercode;
 
@@ -674,18 +675,13 @@ namespace GIGLS.Services.Business.CustomerPortal
                 user.Email = user.Email.ToLower();
             }
 
-            if ((user.UserActiveCountryId).ToString() == null || user.UserActiveCountryId == 0)
-            {
-                var CountryId = await _preShipmentMobileService.GetCountryId();
-                user.UserActiveCountryId = CountryId;
-            }
-            //to be used when we start getting the country name of the user!!!
-            else if (user.MobileCountryName != null)
-            {
-                var countryid = await _uow.Country.GetAsync(s => s.CountryName.ToLower().Equals(user.MobileCountryName.ToLower()));
-                user.UserActiveCountryId = countryid.CountryId;
-            }
+            //if ((user.UserActiveCountryId).ToString() == null || user.UserActiveCountryId == 0)
+            //{
+            //    var CountryId = await _preShipmentMobileService.GetCountryId();
+            //    user.UserActiveCountryId = CountryId;
+            //}
 
+            user = await GetCustomerCountryUsingPhoneCode(user);
 
             bool checkRegistrationAccess = await CheckRegistrationAccess(user);
 
@@ -708,10 +704,34 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException("Customer already exists!!!");
             }
-            //}
             
             return result;
         }
+
+        public async Task<UserDTO> GetCustomerCountryUsingPhoneCode(UserDTO userDTO)
+        {
+            if(userDTO.CountryPhoneNumberCode != null)
+            {
+                var countryid = await _uow.Country.GetAsync(s => s.PhoneNumberCode.Equals(userDTO.CountryPhoneNumberCode));                
+                userDTO.UserActiveCountryId = countryid.CountryId;
+            }
+            else
+            {
+                var country = await _uow.Country.FindAsync(x => x.PhoneNumberCode != null);
+
+                foreach(var c in country)
+                {
+                    if (userDTO.PhoneNumber.Contains(c.PhoneNumberCode))
+                    {
+                        userDTO.UserActiveCountryId = c.CountryId;
+                        return userDTO;
+                    }
+                }
+            }
+
+            return userDTO;
+        }
+
 
         private async Task<bool> CheckRegistrationAccess(UserDTO user)
         {
@@ -719,7 +739,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 user.PhoneNumber.Substring(1, user.PhoneNumber.Length - 1);
             }
-            //var PhoneNumber = user.PhoneNumber.Remove(0, 4);
+
             var emailUsers = await _uow.User.GetUserListByEmailorPhoneNumber(user.Email, user.PhoneNumber);
             
             foreach(var u in emailUsers)
@@ -743,46 +763,12 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return true;
         }
-
-        private bool ComparePhoneNumber(string customerPhoneNumber, string existingPhoneCode)
-        {
-            //1
-            if (existingPhoneCode.StartsWith("0")) //07011111111
-            {
-                existingPhoneCode = existingPhoneCode.Substring(1, existingPhoneCode.Length - 1);
-                customerPhoneNumber = customerPhoneNumber.Remove(0, 4);
-                if (existingPhoneCode == customerPhoneNumber)
-                {
-                    return true;
-                }
-            }
-            //2
-            else if (existingPhoneCode.StartsWith("+"))  //+2347011111111
-            {
-                if (existingPhoneCode == customerPhoneNumber)
-                {
-                    return true;
-                }
-            }
-            else //2347011111111
-            {
-                existingPhoneCode = existingPhoneCode.Remove(0, 3);
-                customerPhoneNumber = customerPhoneNumber.Remove(0, 4);
-                if (existingPhoneCode == customerPhoneNumber)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-
+        
         private async Task<SignResponseDTO> PartnerRegistration(UserDTO user)
         {
             var result = new SignResponseDTO();
 
-            var PhoneNumber = user.PhoneNumber; //.Remove(0, 4);
+            var PhoneNumber = user.PhoneNumber;
             var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
 
             if (EmailUser != null)
@@ -831,6 +817,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             EmailUser.IsRegisteredFromMobile = true;
                             EmailUser.UserActiveCountryId = user.UserActiveCountryId;
                             EmailUser.AppType = user.AppType;
+                            EmailUser.UserName = user.Email;
                             var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
                             var u = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
 
@@ -949,7 +936,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var result = new SignResponseDTO();
 
-            var PhoneNumber = user.PhoneNumber; //.Remove(0, 4);
+            var PhoneNumber = user.PhoneNumber;
             var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
             
             if (EmailUser != null)
@@ -988,7 +975,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                             emailcustomerdetails.Password = user.Password;
                             emailcustomerdetails.PhoneNumber = user.PhoneNumber;
                             emailcustomerdetails.FirstName = user.FirstName;
-                            emailcustomerdetails.LastName = user.LastName;                                                       
+                            emailcustomerdetails.LastName = user.LastName;
+                            emailcustomerdetails.UserActiveCountryId = user.UserActiveCountryId;
                         }
                     }
                     else
@@ -1033,6 +1021,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     EmailUser.UserActiveCountryId = user.UserActiveCountryId;
                     EmailUser.DateModified = DateTime.Now;
                     EmailUser.AppType = user.AppType;
+                    EmailUser.UserName = user.Email;
                     var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
                     var update = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
                     var resetPassword = await _userService.ResetPassword(EmailUser.Id, user.Password);
@@ -1069,7 +1058,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 user.Organisation = user.FirstName + " " + user.LastName;
             }
 
-            var PhoneNumber = user.PhoneNumber; //.Remove(0, 4);
+            var PhoneNumber = user.PhoneNumber;
             var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
             if (EmailUser != null)
             {
@@ -1109,7 +1098,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                             emailcompanydetails.PhoneNumber = user.PhoneNumber;
                             emailcompanydetails.FirstName = user.FirstName;
                             emailcompanydetails.LastName = user.LastName;
-                            emailcompanydetails.Name = user.Organisation;                            
+                            emailcompanydetails.Name = user.Organisation;
+                            emailcompanydetails.UserActiveCountryId = user.UserActiveCountryId;
                         }
                     }
                     else
@@ -1126,8 +1116,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             return result;
                         }
                         else
-                        {                           
-
+                        {     
                             var customer = new Company
                             {
                                 Email = user.Email,
@@ -1159,6 +1148,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     EmailUser.IsRegisteredFromMobile = true;
                     EmailUser.UserActiveCountryId = user.UserActiveCountryId;
                     EmailUser.AppType = user.AppType;
+                    EmailUser.UserName = user.Email;
 
                     var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
                     var update = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
@@ -1171,7 +1161,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     await GenerateReferrerCode(user);
                     return result;
                 }
-
             }
             else if (EmailUser == null)
             {
