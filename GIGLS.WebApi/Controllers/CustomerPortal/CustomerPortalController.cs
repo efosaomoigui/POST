@@ -811,6 +811,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             {
                                 var response = await _portalService.CreateCustomer(user.UserChannelCode);
                             }
+                            
                             if (logindetail.UserChannelType == UserChannelType.Partner.ToString())
                             {
                                 var partner = await _portalService.CreatePartner(user.UserChannelCode);
@@ -825,14 +826,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                                         CustomerCode = user.UserChannelCode,
                                         CompanyType = CustomerType.Partner.ToString()
                                     });
-
                                 }
                                 if (logindetail.UserChannelType == UserChannelType.Ecommerce.ToString())
                                 {
                                     var response = await _portalService.CreateCompany(user.UserChannelCode);
                                 }
-
                             }
+
                             //get access token from response body
                             var responseJson = await responseMessage.Content.ReadAsStringAsync();
                             var jObject = JObject.Parse(responseJson);
@@ -853,9 +853,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 }
                 else
                 {
-
                     var data = new { IsActive = false };
-
                     var jObject = JObject.FromObject(data);
 
                     return new ServiceResponse<JObject>

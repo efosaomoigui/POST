@@ -1784,30 +1784,30 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var user = await _userService.GetUserByChannelCode(CustomerCode);
-                if (user.UserChannelType == UserChannelType.Ecommerce)
+                if (user.UserChannelType != UserChannelType.Ecommerce)
                 {
-                    return true;
-                }
-                var customer = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == CustomerCode);
-                if (customer == null)
-                {
-                    var customerDTO = new IndividualCustomerDTO
+                    var customer = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == CustomerCode);
+                    if (customer == null)
                     {
-                        Email = user.Email,
-                        PhoneNumber = user.PhoneNumber,
-                        FirstName = user.FirstName,
-                        LastName = user.LastName,
-                        Password = user.Password,
-                        CustomerCode = user.UserChannelCode,
-                        PictureUrl = user.PictureUrl,
-                        userId = user.Id,
-                        IsRegisteredFromMobile = true
-                        //added this to pass channelcode };
-                    };
-                    var individualCustomer = Mapper.Map<IndividualCustomer>(customerDTO);
-                    _uow.IndividualCustomer.Add(individualCustomer);
-                    await _uow.CompleteAsync();
+                        var customerDTO = new IndividualCustomerDTO
+                        {
+                            Email = user.Email,
+                            PhoneNumber = user.PhoneNumber,
+                            FirstName = user.FirstName,
+                            LastName = user.LastName,
+                            Password = user.Password,
+                            CustomerCode = user.UserChannelCode,
+                            PictureUrl = user.PictureUrl,
+                            userId = user.Id,
+                            IsRegisteredFromMobile = true,
+                            UserActiveCountryId = user.UserActiveCountryId
+                        };
+                        var individualCustomer = Mapper.Map<IndividualCustomer>(customerDTO);
+                        _uow.IndividualCustomer.Add(individualCustomer);
+                        await _uow.CompleteAsync();
+                    }
                 }
+                
                 return true; ;
             }
             catch
@@ -1837,8 +1837,6 @@ namespace GIGLS.Services.Implementation.Shipments
                         partnerDTO.UserId = user.Id;
                         partnerDTO.IsActivated = true;
                         partnerDTO.UserActiveCountryId = user.UserActiveCountryId;
-
-
                     }
                     else
                     {
@@ -1855,25 +1853,26 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     var FinalPartner = Mapper.Map<Partner>(partnerDTO);
                     _uow.Partner.Add(FinalPartner);
-                }
-                else
-                {
-                    if (user.SystemUserRole == "Dispatch Rider")
-                    {
-                        partner.PartnerType = PartnerType.InternalDeliveryPartner;
-                        partner.IsActivated = true;
-                        partner.UserActiveCountryId = user.UserActiveCountryId;
-                    }
-                    else
-                    {
-                        partner.PartnerType = PartnerType.DeliveryPartner;
-                        partner.UserActiveCountryId = user.UserActiveCountryId;
-                    }
+                    await _uow.CompleteAsync();
 
+                    return partnerDTO;
                 }
-                await _uow.CompleteAsync();
-                var latestpartner = await _uow.Partner.GetAsync(s => s.PartnerCode == CustomerCode);
-                var finalPartner = Mapper.Map<PartnerDTO>(latestpartner);
+                //else
+                //{
+                //    if (user.SystemUserRole == "Dispatch Rider")
+                //    {
+                //        partner.PartnerType = PartnerType.InternalDeliveryPartner;
+                //        partner.IsActivated = true;
+                //        partner.UserActiveCountryId = user.UserActiveCountryId;
+                //    }
+                //    else
+                //    {
+                //        partner.PartnerType = PartnerType.DeliveryPartner;
+                //        partner.UserActiveCountryId = user.UserActiveCountryId;
+                //    }
+                //}
+                //var latestpartner = await _uow.Partner.GetAsync(s => s.PartnerCode == CustomerCode);
+                var finalPartner = Mapper.Map<PartnerDTO>(partner);
                 return finalPartner;
             }
             catch
@@ -2355,6 +2354,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         Password = user.Password,
                         CustomerCode = user.UserChannelCode,
                         IsRegisteredFromMobile = true,
+                        UserActiveCountryId = user.UserActiveCountryId
                     };
                     var Company = Mapper.Map<Company>(companydto);
                     _uow.Company.Add(Company);

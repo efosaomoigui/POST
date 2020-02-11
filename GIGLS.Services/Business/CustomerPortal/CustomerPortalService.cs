@@ -1372,7 +1372,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                 bool IsPhone = Regex.IsMatch(user, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
                 if (IsPhone)
                 {
-                    user = user.Remove(0, 1);
+                    if (user.StartsWith("0"))
+                    {
+                        user = user.Remove(0, 1);
+                    }
                     emailPhone = user;
                 }
             }
@@ -1441,6 +1444,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.CreateCompany(CustomerCode);
         }
+
         public async Task<bool> EditProfile(UserDTO user)
         {
             return await _preShipmentMobileService.EditProfile(user);
@@ -1600,16 +1604,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                         CompanyType = CompanyType.Ecommerce,
                         Name = user.Organisation,
                         isCodNeeded = (bool) user.RequiresCod
-
-                        //added this to pass channelcode 
                     };
 
-                    //var company = Mapper.Map<Company>(companydto);
                     _uow.Company.Add(companydto);
 
                     // add customer to user's table.
                     User = await CreateNewuser(user);
-
                     await _uow.CompleteAsync();
 
                     // add customer to a wallet
@@ -1630,9 +1630,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw;
             }
-        }
-
-       
+        }        
 
         private async Task<UserDTO> CreateNewuser (UserDTO user)
         {

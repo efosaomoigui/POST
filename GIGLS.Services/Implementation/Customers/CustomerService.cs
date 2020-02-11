@@ -212,7 +212,7 @@ namespace GIGLS.Services.Implementation.Customers
             {
                 if (phoneNumber.StartsWith("0"))
                 {
-                    phoneNumber = phoneNumber.Substring(1, phoneNumber.Length - 1);
+                    phoneNumber = phoneNumber.Remove(0, 1);
                 }
                 // handle IndividualCustomers
                 var individualCustomerDTO = await _individualCustomerService.GetCustomerByPhoneNumber(phoneNumber);

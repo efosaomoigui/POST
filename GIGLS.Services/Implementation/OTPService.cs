@@ -247,8 +247,6 @@ namespace GIGLS.Services.Implementation
                 var rating = (double)averageratings;
                 return rating;
             }
-
-
         }
 
         public async Task<bool> IsPartnerActivated(string CustomerCode)
