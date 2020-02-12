@@ -580,12 +580,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (newShipment.DepartureServiceCentreId == 309)
                 {
-                    await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, shipmentDTO);
-                    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, shipmentDTO);
+                    await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
+                    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, smsData);
                 }
                 else
                 {
-                    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, shipmentDTO);
+                    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
                 }
 
                 //For Corporate Customers, Pay for their shipments through wallet immediately
