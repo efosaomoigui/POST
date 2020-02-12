@@ -286,37 +286,40 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException("Please select a vehicle type");
             }
+
             if (newPreShipment.receiverPreShipmentMobileDTOs.Count() == 0)
             {
                 throw new GenericException("No Receiver was added");
             }
+
             newPreShipment = await ExtractSenderInfo(newPreShipment);
-            var vPreShipmentItems = new List<PreShipmentItemMobileDTO>();
-            var numOfItems = 0;
+            
+            int numOfItems = 0;
             var maxNumOfShipment = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GiglgoMaxNumShipment, newPreShipment.CountryId);
+            int maximumShipmentItemsAllow = Convert.ToInt32(maxNumOfShipment.Value);
 
-            //var item = new ReceiverPreShipmentMobileDTO();
-            //var i = 0;
-
+            
             foreach (var item in newPreShipment.receiverPreShipmentMobileDTOs)
             {
-
-                if (item.preShipmentItems.Count() == 0)
+                if (!item.preShipmentItems.Any())
                 {
                     throw new GenericException("No shipment was added");
                 }
 
-                var newShipment = new PreShipmentMobileDTO();
-                newShipment.PreShipmentItems = new List<PreShipmentItemMobileDTO>();
+                var newShipment = new PreShipmentMobileDTO
+                {
+                    PreShipmentItems = new List<PreShipmentItemMobileDTO>()
+                };
 
                 for (var i = 0; i < item.preShipmentItems.Count; i++)
                 {
                     newShipment.PreShipmentItems.Add(item.preShipmentItems[i]);
                     numOfItems++;
                 }
-                if(numOfItems > Convert.ToInt32(maxNumOfShipment.Value))
+
+                if(numOfItems > maximumShipmentItemsAllow)
                 {
-                    throw new GenericException($"Total number of Shipments can not exceed {maxNumOfShipment.Value}");
+                    throw new GenericException($"Total number of Shipment items can not exceed {maxNumOfShipment.Value}");
                 }
 
                 newShipment.ReceiverAddress = item.ReceiverAddress;
@@ -501,6 +504,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var currentUserId = await _userService.GetCurrentUserId();
             preShipmentMobileDTO.UserId = currentUserId;
             var user = await _userService.GetUserById(currentUserId);
+
             var Country = await _uow.Country.GetCountryByStationId(preShipmentMobileDTO.SenderStationId);
             preShipmentMobileDTO.CountryId = Country.CountryId;
 
@@ -516,7 +520,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipmentMobileDTO.IsCodNeeded = customer.isCodNeeded;
                     preShipmentMobileDTO.CurrencySymbol = Country.CurrencySymbol;
                     preShipmentMobileDTO.CurrentWalletAmount = Convert.ToDecimal(customer.WalletAmount);
-                    //return preShipmentMobileDTO;  //do something here to leave the loop
                 }
             }
             return preShipmentMobileDTO;
@@ -558,13 +561,16 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<PreShipmentMobileDTO> GetHaulagePrice(PreShipmentMobileDTO preShipmentDTO)
         {
             var PreshipmentPriceDTO = new MobilePriceDTO();
+
             PreshipmentPriceDTO = await GetHaulagePrice(new HaulagePriceDTO
             {
                 Haulageid = (int)preShipmentDTO.Haulageid,
                 DepartureStationId = preShipmentDTO.SenderStationId,
                 DestinationStationId = preShipmentDTO.ReceiverStationId
             });
+
             preShipmentDTO.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
+
             if (preShipmentDTO.PreShipmentItems.Count() > 0)
             {
                 foreach (var shipment in preShipmentDTO.PreShipmentItems)

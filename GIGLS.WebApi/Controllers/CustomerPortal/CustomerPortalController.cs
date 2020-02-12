@@ -973,12 +973,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpPost]
-        [Route("createShipmentMultiple")]
-        public async Task<IServiceResponse<object>> CreateShipmentMultiple(NewPreShipmentMobileDTO PreshipmentMobile)
+        [Route("createMultipleShipments")]
+        public async Task<IServiceResponse<object>> CreateMultipleShipments(NewPreShipmentMobileDTO PreshipmentMobile)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var PreshipMentMobile = await _portalService.AddPreShipmentMobileMultiple(PreshipmentMobile);
+                var PreshipMentMobile = await _portalService.AddMultiplePreShipmentMobile(PreshipmentMobile);
 
                 return new ServiceResponse<object>
                 {
