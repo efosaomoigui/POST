@@ -573,7 +573,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 });
 
                 //send message
-                await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All, shipmentDTO);
+                var smsData = new ShipmentTrackingDTO
+                {
+                    Waybill = newShipment.Waybill
+                };
+
+                if (newShipment.DepartureServiceCentreId == 309)
+                {
+                    await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
+                    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, smsData);
+                }
+                else
+                {
+                    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
+                }
 
                 //For Corporate Customers, Pay for their shipments through wallet immediately
                 if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType)
@@ -1864,23 +1877,23 @@ namespace GIGLS.Services.Implementation.Shipments
                     "green"
                 },
                 new object[] {
-                    "Shipments Created over 24hrs within 48hrs",
+                    "Shipments created between 24 - 48 hrs",
                     totalyellow,
                     "yellow"
                 },
 
                 new object[] {
-                    "Shipments Created Over 48hrs - 72hrs plus",
+                    "Shipments created between 48 - 72 hrs",
                     totalred,
                     "red"
                 },
                 new object[] {
-                    "Terminal Delivery Shipments Over 48hrs plus",
+                    "Terminal Delivery Shipments Over 48 hrs",
                     terminal,
                     "purple"
                 },
                 new object[] {
-                    "Home Delivery Shipments Over 48hrs plus",
+                    "Home Delivery Shipments Over 48 hrs",
                     homeDelivery,
                     "brown"
                 }
