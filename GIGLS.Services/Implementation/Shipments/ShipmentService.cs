@@ -573,7 +573,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 });
 
                 //send message
-                await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All, shipmentDTO);
+                var smsData = new ShipmentTrackingDTO
+                {
+                    Waybill = newShipment.Waybill
+                };
+
+                if (newShipment.DepartureServiceCentreId == 309)
+                {
+                    await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, shipmentDTO);
+                    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, shipmentDTO);
+                }
+                else
+                {
+                    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, shipmentDTO);
+                }
 
                 //For Corporate Customers, Pay for their shipments through wallet immediately
                 if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType)
