@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -14,6 +10,7 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal? GrandTotal { get; set; }
         public decimal? Discount { get; set; }
         public PreShipmentMobileDTO PreshipmentMobile { get; set; }
+        public NewPreShipmentMobileDTO NewPreshipmentMobile { get; set; }              
 
         public decimal? MainCharge { get; set; }
 

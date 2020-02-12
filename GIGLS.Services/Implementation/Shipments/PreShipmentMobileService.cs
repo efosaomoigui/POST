@@ -817,15 +817,18 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Get Price API that is called just before create shipment
-        public async Task<decimal> NewGetPriceForMultiple (NewPreShipmentMobileDTO preShipmentItemMobileDTO)
+        public async Task<decimal> GetPriceForMultipleShipments (NewPreShipmentMobileDTO preShipmentItemMobileDTO)
         {
             try
             {
-                var listOfPreShipment = await GroupMobileShipmentByReceiver(preShipmentItemMobileDTO);
                 decimal shipmentTotal = 0;
+
+                var listOfPreShipment = await GroupMobileShipmentByReceiver(preShipmentItemMobileDTO);
+                
                 foreach (var item in listOfPreShipment)
                 {
                     shipmentTotal = shipmentTotal + (decimal)item.CalculatedTotal;
+                    
                 }
 
                 //Get Pick UP price

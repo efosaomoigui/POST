@@ -130,7 +130,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<UserDTO> CheckDetailsForMobileScanner(string user);
         Task<bool> UpdateGIGGoShipmentStaus(MobilePickUpRequestsDTO mobilePickUpRequestsDTO);
         Task<List<string>> AddMultiplePreShipmentMobile(NewPreShipmentMobileDTO preShipment);
-        Task<decimal> GetPriceMultiple(NewPreShipmentMobileDTO preShipment);
+        Task<decimal> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipment);
 
     }
 }
