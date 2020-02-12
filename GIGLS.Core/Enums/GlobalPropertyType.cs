@@ -51,6 +51,7 @@
         EcommerceVanPickupPrice,
         EcommerceCodAmount,
         EcommerceNoCodAmount,
-        GIGGOPromo
+        GIGGOPromo,
+        GiglgoMaxNumShipment
     }
 }

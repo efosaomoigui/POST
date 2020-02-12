@@ -292,6 +292,8 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             newPreShipment = await ExtractSenderInfo(newPreShipment);
             var vPreShipmentItems = new List<PreShipmentItemMobileDTO>();
+            var numOfItems = 0;
+            var maxNumOfShipment = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GiglgoMaxNumShipment, newPreShipment.CountryId);
 
             //var item = new ReceiverPreShipmentMobileDTO();
             //var i = 0;
@@ -310,6 +312,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 for (var i = 0; i < item.preShipmentItems.Count; i++)
                 {
                     newShipment.PreShipmentItems.Add(item.preShipmentItems[i]);
+                    numOfItems++;
+                }
+                if(numOfItems > Convert.ToInt32(maxNumOfShipment.Value))
+                {
+                    throw new GenericException($"Total number of Shipments can not exceed {maxNumOfShipment.Value}");
                 }
 
                 newShipment.ReceiverAddress = item.ReceiverAddress;
@@ -337,6 +344,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 listOfPreShipment.Add(getPriceAndAll);
 
             }
+            
             return listOfPreShipment;
         }
 
