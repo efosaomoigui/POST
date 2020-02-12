@@ -255,12 +255,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentTotal = shipmentTotal + PickupValue;
 
                 //Get the customer wallet balance
-                decimal walletBalance = 0;
                 var wallet = await _walletService.GetWalletBalance(listOfPreShipment[0].CustomerCode);
 
-                walletBalance = wallet.Balance;
-
-                if (walletBalance > shipmentTotal)
+                if (wallet.Balance > shipmentTotal)
                 {
                     waybillList = await GenerateWaybill(listOfPreShipment, PickupValue);
                 }
@@ -271,8 +268,9 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             else
             {
-                throw new GenericException("This user is not Eligible");
+                throw new GenericException("You are not eligible to create shipment.");
             }
+
             return waybillList;
         }
 
@@ -297,8 +295,7 @@ namespace GIGLS.Services.Implementation.Shipments
             int numOfItems = 0;
             var maxNumOfShipment = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GiglgoMaxNumShipment, newPreShipment.CountryId);
             int maximumShipmentItemsAllow = Convert.ToInt32(maxNumOfShipment.Value);
-
-            
+                        
             foreach (var item in newPreShipment.receiverPreShipmentMobileDTOs)
             {
                 if (!item.preShipmentItems.Any())
@@ -310,10 +307,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     PreShipmentItems = new List<PreShipmentItemMobileDTO>()
                 };
-
-                for (var i = 0; i < item.preShipmentItems.Count; i++)
+                
+                foreach(var i in item.preShipmentItems)
                 {
-                    newShipment.PreShipmentItems.Add(item.preShipmentItems[i]);
+                    if (i.Quantity == 0)
+                    {
+                        throw new GenericException($"Quantity cannot be zero for {i.ItemName}");
+                    }
+                    newShipment.PreShipmentItems.Add(i);
+
                     numOfItems++;
                 }
 
@@ -345,7 +347,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 //Get Prices
                 var getPriceAndAll = await GetPriceFromList(newShipment);
                 listOfPreShipment.Add(getPriceAndAll);
-
             }
             
             return listOfPreShipment;
@@ -544,6 +545,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     preShipmentDTO.IsFromShipment = true;
                     PreshipmentPriceDTO = await GetPriceForNonHaulage(preShipmentDTO);
+
                     //preShipmentDTO.CalculatedTotal = (double)PreshipmentPriceDTO.GrandTotal;
                     preShipmentDTO.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
                     preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
@@ -587,14 +589,14 @@ namespace GIGLS.Services.Implementation.Shipments
             var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
             var numberOfReceiver = preShipmentDTO.Count();
             var individualPickupPrice = pickupValue / numberOfReceiver;
-            //var wallet = await _walletService.GetWalletBalance();
+
             var listOfWaybills = new List<string>();
+
             foreach (var receiver in preShipmentDTO)
             {
                 var wallet = await _walletService.GetWalletBalance(receiver.CustomerCode);
-                //receiver.GrandTotal = (decimal)receiver.CalculatedTotal + individualPickupPrice;
-                receiver.GrandTotal += individualPickupPrice;
-                //receiver.CalculatedTotal += (double)individualPickupPrice;
+
+                receiver.GrandTotal = receiver.GrandTotal + individualPickupPrice;
 
                 var price = (wallet.Balance - Convert.ToDecimal(receiver.GrandTotal)); 
 
@@ -618,8 +620,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 newPreShipment.IsDelivered = false;
                 newPreShipment.shipmentstatus = "Shipment created";
                 newPreShipment.DateCreated = DateTime.Now;
-                newPreShipment.GrandTotal = (decimal)receiver.GrandTotal;
-                //newPreShipment.CalculatedTotal = receiver.CalculatedTotal;
+                newPreShipment.GrandTotal = receiver.GrandTotal;
+                newPreShipment.CalculatedTotal = receiver.CalculatedTotal;
                 receiver.IsBalanceSufficient = true;
                 newPreShipment.DiscountValue = receiver.DiscountValue;        
                 _uow.PreShipmentMobile.Add(newPreShipment);                
@@ -857,16 +859,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     amount = await CalculateGeoDetailsBasedonLocation(preShipment);
                     IndividualPrice = (amount / ShipmentCount);
                 }
-
-                //Get the customer Type
-                //var userChannelCode = await _userService.GetUserChannelCode();
-                //var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == userChannelCode);
-
-                //if (userChannel != null)
-                //{
-                    //preShipment.Shipmentype = ShipmentType.Ecommerce;
-                //}
-
+                
                 foreach (var preShipmentItem in preShipment.PreShipmentItems)
                 {
                     if (preShipmentItem.Quantity == 0)
@@ -914,7 +907,6 @@ namespace GIGLS.Services.Implementation.Shipments
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                         }
-                        //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     }
 
                     var vatForPreshipment = (preShipmentItem.CalculatedPrice * 0.05M);
@@ -957,18 +949,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 preShipment.Value = DeclaredValue;
                 var discount = Math.Round(Price - (decimal)preShipment.CalculatedTotal);
                 preShipment.DiscountValue = discount;
-
-                //var Pickuprice = await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId, preShipment.UserId);
-                //var PickupValue = Convert.ToDecimal(Pickuprice);
-
+                
                 var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
 
                 var returnprice = new MobilePriceDTO()
                 {
                     MainCharge = (decimal)preShipment.CalculatedTotal,
-                    //PickUpCharge = PickupValue,
                     InsuranceValue = preShipment.InsuranceValue,
-                    //GrandTotal = ((decimal)preShipment.CalculatedTotal + PickupValue),
                     GrandTotal = ((decimal)preShipment.CalculatedTotal),
                     PreshipmentMobile = preShipment,
                     CurrencySymbol = preShipment.CurrencySymbol,
@@ -2713,7 +2700,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw new GenericException("Please an error occurred while getting PickupPrice!!");
+                throw new GenericException("An error occurred while getting Pickup Price!!!");
             }
         }
 
@@ -3081,15 +3068,13 @@ namespace GIGLS.Services.Implementation.Shipments
             var Startime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpStartTime, CountryId);
             var Endtime = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.PickUpEndTime, CountryId);
             TimeSpan start = new TimeSpan(Convert.ToInt32(Startime.Value), 0, 0);
-            TimeSpan end = new TimeSpan(Convert.ToInt32(Endtime.Value), 0, 0);
-            //TimeSpan now = new TimeSpan(19, 0, 0);
+            TimeSpan end = new TimeSpan(Convert.ToInt32(Endtime.Value), 0, 0);            
             TimeSpan now = DateTime.Now.TimeOfDay;
             if (now > start && now < end)
             {
                 IsWithinTime = true;
             }
             return IsWithinTime;
-
         }
         private async Task<int> CalculateTimeBasedonLocation(PreShipmentMobileDTO item)
         {
@@ -3394,6 +3379,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             return PickUpPrice;
         }
+
         private async Task<decimal> GetPickUpPriceForEcommerce(string vehicleType, int CountryId)
         {
             var PickUpPrice = 0.0M;
