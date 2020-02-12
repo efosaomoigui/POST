@@ -343,6 +343,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 newShipment.CustomerType = newPreShipment.CustomerType;
                 newShipment.CountryId = newPreShipment.CountryId;
                 newShipment.IsEligible = newPreShipment.IsEligible;
+                newShipment.CurrencyCode = newPreShipment.CurrencyCode;
+                newShipment.CurrencySymbol = newPreShipment.CurrencySymbol;
 
                 //Get Prices
                 var getPriceAndAll = await GetPriceFromList(newShipment);
@@ -508,6 +510,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var Country = await _uow.Country.GetCountryByStationId(preShipmentMobileDTO.SenderStationId);
             preShipmentMobileDTO.CountryId = Country.CountryId;
+            preShipmentMobileDTO.CurrencyCode = Country.CurrencyCode;
+            preShipmentMobileDTO.CurrencySymbol = Country.CurrencySymbol;
 
             var customer = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
             if (customer != null)
@@ -546,9 +550,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipmentDTO.IsFromShipment = true;
                     PreshipmentPriceDTO = await GetPriceForNonHaulage(preShipmentDTO);
 
-                    //preShipmentDTO.CalculatedTotal = (double)PreshipmentPriceDTO.GrandTotal;
+                    preShipmentDTO.CalculatedTotal = (double)PreshipmentPriceDTO.MainCharge;
                     preShipmentDTO.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
                     preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
+                    preShipmentDTO.InsuranceValue = PreshipmentPriceDTO.InsuranceValue;
                     
                 }
                 return preShipmentDTO;
@@ -817,17 +822,27 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Get Price API that is called just before create shipment
-        public async Task<decimal> GetPriceForMultipleShipments (NewPreShipmentMobileDTO preShipmentItemMobileDTO)
+        public async Task<MobilePriceDTO> GetPriceForMultipleShipments (NewPreShipmentMobileDTO preShipmentItemMobileDTO)
         {
             try
             {
                 decimal shipmentTotal = 0;
+                decimal totalInsurance = 0;
+                decimal totalDiscount = 0;
 
                 var listOfPreShipment = await GroupMobileShipmentByReceiver(preShipmentItemMobileDTO);
+                var returnPrice = new MobilePriceDTO
+                {
+                    PreshipmentMobileList = new List<PreShipmentMobileDTO>()
+                };
+
                 
                 foreach (var item in listOfPreShipment)
                 {
                     shipmentTotal = shipmentTotal + (decimal)item.CalculatedTotal;
+                    totalInsurance = totalInsurance + (decimal)item.InsuranceValue;
+                    totalDiscount = totalDiscount + (decimal)item.DiscountValue;
+                    returnPrice.PreshipmentMobileList.Add(item);
                     
                 }
 
@@ -835,8 +850,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 var Pickuprice = await GetPickUpPriceForMultipleShipment(listOfPreShipment[0].CustomerType, listOfPreShipment[0].VehicleType, listOfPreShipment[0].CountryId);
                 var PickupValue = Convert.ToDecimal(Pickuprice);
 
-                shipmentTotal = shipmentTotal + PickupValue;
-                return shipmentTotal;
+                returnPrice.MainCharge = shipmentTotal;
+                returnPrice.PickUpCharge = PickupValue;
+                returnPrice.InsuranceValue = totalInsurance;
+                returnPrice.GrandTotal = shipmentTotal + PickupValue;
+                returnPrice.CurrencySymbol = listOfPreShipment[0].CurrencySymbol;
+                returnPrice.CurrencyCode = listOfPreShipment[0].CurrencyCode;
+                returnPrice.Discount = totalDiscount;
+
+                return returnPrice;
             }
             catch (Exception)
             {

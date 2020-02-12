@@ -1035,13 +1035,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("getPriceforMultipleShipments")]
-        public async Task<IServiceResponse<decimal>> GetPriceForMultipleShipments(NewPreShipmentMobileDTO PreshipmentMobile)
+        public async Task<IServiceResponse<MobilePriceDTO>> GetPriceForMultipleShipments(NewPreShipmentMobileDTO PreshipmentMobile)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var Price = await _portalService.GetPriceForMultipleShipments(PreshipmentMobile);
 
-                return new ServiceResponse<decimal>
+                return new ServiceResponse<MobilePriceDTO>
                 {
                     Object = Price,
                 };

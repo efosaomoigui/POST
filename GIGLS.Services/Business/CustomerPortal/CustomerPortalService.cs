@@ -1439,7 +1439,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.GetPrice(preShipment);
         }
-        public async Task<decimal> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipment)
+        public async Task<MobilePriceDTO> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipment)
         {
             return await _preShipmentMobileService.GetPriceForMultipleShipments(preShipment);
         }
