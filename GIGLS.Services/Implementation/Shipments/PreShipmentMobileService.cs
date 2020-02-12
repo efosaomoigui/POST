@@ -849,11 +849,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 //Get Pick UP price
                 var Pickuprice = await GetPickUpPriceForMultipleShipment(listOfPreShipment[0].CustomerType, listOfPreShipment[0].VehicleType, listOfPreShipment[0].CountryId);
                 var PickupValue = Convert.ToDecimal(Pickuprice);
+                var grandTotal = shipmentTotal + PickupValue;
 
                 returnPrice.MainCharge = shipmentTotal;
                 returnPrice.PickUpCharge = PickupValue;
                 returnPrice.InsuranceValue = totalInsurance;
-                returnPrice.GrandTotal = shipmentTotal + PickupValue;
+                returnPrice.GrandTotal = grandTotal;
                 returnPrice.CurrencySymbol = listOfPreShipment[0].CurrencySymbol;
                 returnPrice.CurrencyCode = listOfPreShipment[0].CurrencyCode;
                 returnPrice.Discount = totalDiscount;
