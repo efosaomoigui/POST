@@ -674,13 +674,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 user.Email = user.Email.Trim();
                 user.Email = user.Email.ToLower();
             }
-
-            //if ((user.UserActiveCountryId).ToString() == null || user.UserActiveCountryId == 0)
-            //{
-            //    var CountryId = await _preShipmentMobileService.GetCountryId();
-            //    user.UserActiveCountryId = CountryId;
-            //}
-
+            
             user = await GetCustomerCountryUsingPhoneCode(user);
 
             bool checkRegistrationAccess = await CheckRegistrationAccess(user);
@@ -844,7 +838,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                             };
                             _uow.VehicleType.Add(vehicletypeDTO);
 
-                            EmailUser.UserChannelPassword = user.Password;
                             user.UserChannelCode = EmailUser.UserChannelCode;
                             user.Id = EmailUser.Id;
                             await _uow.CompleteAsync();
