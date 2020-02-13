@@ -763,6 +763,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                 var vehicle = user.VehicleType;
                 var partnerType = "";
+                var vehicleDetails = new List<Core.DTO.Partnership.VehicleTypeDTO>();
+                var bankName = "";
+                var accountName = "";
+                var accountNumber = "";
 
                 if (user.Username != null)
                 {
@@ -816,6 +820,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             {
                                 var partner = await _portalService.CreatePartner(user.UserChannelCode);
                                 partnerType = partner.PartnerType.ToString();
+                                foreach (var vehicleInfo in partner.VehicleTypeDetails)
+                                {
+                                    vehicleDetails.Add(vehicleInfo);
+                                }
+                                bankName = partner.BankName;
+                                accountName = partner.AccountName;
+                                accountNumber = partner.AccountNumber;
                                 if (partnerType == PartnerType.InternalDeliveryPartner.ToString())
                                 {
                                     user.IsVerified = true;
@@ -846,7 +857,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                                 AverageRatings = user.AverageRatings,
                                 IsVerified = user.IsVerified,
                                 PartnerType = partnerType,
-                                IsEligible = (bool) user.IsEligible
+                                IsEligible = (bool) user.IsEligible,
+                                VehicleInfo = vehicleDetails,
+                                BankName = bankName,
+                                AccountName = accountName,
+                                AccountNumber = accountNumber
                             };
                         }
                     }

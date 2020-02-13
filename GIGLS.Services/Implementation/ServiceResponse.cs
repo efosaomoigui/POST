@@ -39,5 +39,9 @@ namespace GIGLS.Services.Implementation
         public bool IsVerified { get; set; }
         public string PartnerType { get; set; }
         public bool IsEligible { get; set; }
+        public List<GIGLS.Core.DTO.Partnership.VehicleTypeDTO> VehicleInfo { get; set; }
+        public string BankName { get; set; }
+        public string AccountName { get; set; }
+        public string AccountNumber { get; set; }
     }
 }
