@@ -551,7 +551,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.ShipmentHash.Add(hasher);
                 }
 
-                // create the customer, if not recorded in the system
+                // create the customer, if information does not exist in our record
                 var customerId = await CreateCustomer(shipmentDTO);
 
                 // create the shipment and shipmentItems
@@ -573,7 +573,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 });
 
                 //send message
-                await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All, shipmentDTO);
+                var smsData = new ShipmentTrackingDTO
+                {
+                    Waybill = newShipment.Waybill
+                };
+
+                if (newShipment.DepartureServiceCentreId == 309)
+                {
+                    await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
+                    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, smsData);
+                }
+                else
+                {
+                    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
+                }
 
                 //For Corporate Customers, Pay for their shipments through wallet immediately
                 if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType)
@@ -696,7 +709,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 // individualCustomer
                 customerDTO.CustomerType = CustomerType.IndividualCustomer;
             }
-
+            
             var createdObject = await _customerService.CreateCustomer(customerDTO);
 
             // set the customerId
@@ -736,7 +749,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             return createdObject;
         }
-
+        
         private async Task<ShipmentDTO> CreateShipment(ShipmentDTO shipmentDTO)
         {
             await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);

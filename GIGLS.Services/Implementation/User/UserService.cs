@@ -234,7 +234,6 @@ namespace GIGLS.Services.Implementation.User
 
         public async Task<IdentityResult> UpdateUser(string userid, UserDTO userDto)
         {
-
             var user = await _unitOfWork.User.GetUserById(userid);
 
             if (user == null)
@@ -253,11 +252,13 @@ namespace GIGLS.Services.Implementation.User
             user.PhoneNumber = userDto.PhoneNumber;
             user.SystemUserId = userDto.SystemUserId;
             user.SystemUserRole = userDto.SystemUserRole;
+            user.UserName = userDto.Username;
 
             user.UserChannelCode = userDto.UserChannelCode;
             user.UserChannelPassword = userDto.UserChannelPassword;
             user.UserChannelType = userDto.UserChannelType;
             user.PictureUrl = userDto.PictureUrl;
+            user.UserActiveCountryId = userDto.UserActiveCountryId;
 
             return await _unitOfWork.User.UpdateUser(userid, user);
 

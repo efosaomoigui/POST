@@ -14,8 +14,12 @@ namespace GIGL.GIGLS.Core.Domain
             CompanyContactPersons = new HashSet<CompanyContactPerson>();
         }
         public int CompanyId { get; set; }
+
+        [MaxLength(500)]
         public string Name { get; set; }
         public string RcNumber { get; set; }
+
+        [MaxLength(500)]
         public string Email { get; set; }
         public string City { get; set; }
         public string State { get; set; }

@@ -96,9 +96,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.ShipmentTracking.Add(newShipmentTracking);
 
                     Id = newShipmentTracking.ShipmentTrackingId;
-
+                    
                     //send sms and email
-                    await sendSMSEmail(tracking, scanStatus);
+                    if (!scanStatus.Equals(ShipmentScanStatus.CRT))
+                    {
+                        await sendSMSEmail(tracking, scanStatus);
+                    }
                 }
 
                 //use to optimise shipment progress for shipment that has depart service centre
