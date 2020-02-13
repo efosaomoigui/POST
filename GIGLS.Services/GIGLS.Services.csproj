@@ -299,7 +299,6 @@
     <Compile Include="Implementation\Utility\GlobalPropertyService.cs" />
     <Compile Include="Implementation\Utility\NumberGeneratorMonitorService.cs" />
     <Compile Include="Implementation\Utility\PasswordGenerator.cs" />
-    <Compile Include="Implementation\VehicleTypeDTO.cs" />
     <Compile Include="Implementation\Vendors\VendorService.cs" />
     <Compile Include="Implementation\Wallet\CashOnDeliveryAccountService.cs" />
     <Compile Include="Implementation\Wallet\CashOnDeliveryBalanceService.cs" />
