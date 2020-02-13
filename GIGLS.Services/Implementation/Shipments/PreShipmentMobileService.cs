@@ -822,7 +822,7 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Get Price API that is called just before create shipment
-        public async Task<MobilePriceDTO> GetPriceForMultipleShipments (NewPreShipmentMobileDTO preShipmentItemMobileDTO)
+        public async Task<MultipleMobilePriceDTO> GetPriceForMultipleShipments (NewPreShipmentMobileDTO preShipmentItemMobileDTO)
         {
             try
             {
@@ -831,19 +831,37 @@ namespace GIGLS.Services.Implementation.Shipments
                 decimal totalDiscount = 0;
 
                 var listOfPreShipment = await GroupMobileShipmentByReceiver(preShipmentItemMobileDTO);
-                var returnPrice = new MobilePriceDTO
-                {
-                    PreshipmentMobileList = new List<PreShipmentMobileDTO>()
+                
+                var price = new MultipleMobilePriceDTO {
+                    receiversPriceDetails = new List<MobilePricePerReceiverDTO>()
                 };
 
                 
                 foreach (var item in listOfPreShipment)
                 {
+                    var newPrice = new MobilePricePerReceiverDTO {
+                        ReceiverItemPrices = new List<ReceiverMobilePriceItemsDTO>()
+                    };
+
+                    newPrice.ReceiverMainCharge = (decimal)item.CalculatedTotal;
+                    newPrice.ReceiverDiscount = (decimal)item.DiscountValue;
+                    newPrice.ReceiverInsuranceValue = (decimal)item.InsuranceValue;
+
+                    foreach(var pricesPerItem in item.PreShipmentItems)
+                    {
+                        var itemPrices = new ReceiverMobilePriceItemsDTO();
+                        itemPrices.Description = pricesPerItem.Description;
+                        itemPrices.ItemCalculatedPrice = pricesPerItem.CalculatedPrice;
+                        itemPrices.ShipmentType = pricesPerItem.ShipmentType;
+                        itemPrices.Weight = pricesPerItem.Weight.ToString();
+                        itemPrices.Value = pricesPerItem.Value;
+                        newPrice.ReceiverItemPrices.Add(itemPrices);
+                    }
+
+                    price.receiversPriceDetails.Add(newPrice);
                     shipmentTotal = shipmentTotal + (decimal)item.CalculatedTotal;
                     totalInsurance = totalInsurance + (decimal)item.InsuranceValue;
                     totalDiscount = totalDiscount + (decimal)item.DiscountValue;
-                    returnPrice.PreshipmentMobileList.Add(item);
-                    
                 }
 
                 //Get Pick UP price
@@ -851,15 +869,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 var PickupValue = Convert.ToDecimal(Pickuprice);
                 var grandTotal = shipmentTotal + PickupValue;
 
-                returnPrice.MainCharge = shipmentTotal;
-                returnPrice.PickUpCharge = PickupValue;
-                returnPrice.InsuranceValue = totalInsurance;
-                returnPrice.GrandTotal = grandTotal;
-                returnPrice.CurrencySymbol = listOfPreShipment[0].CurrencySymbol;
-                returnPrice.CurrencyCode = listOfPreShipment[0].CurrencyCode;
-                returnPrice.Discount = totalDiscount;
+                price.MainCharge = shipmentTotal;
+                price.PickUpCharge = PickupValue;
+                price.InsuranceValue = totalInsurance;
+                price.GrandTotal = grandTotal;
+                price.CurrencySymbol = listOfPreShipment[0].CurrencySymbol;
+                price.CurrencyCode = listOfPreShipment[0].CurrencyCode;
+                price.Discount = totalDiscount;
 
-                return returnPrice;
+                return price;
             }
             catch (Exception)
             {

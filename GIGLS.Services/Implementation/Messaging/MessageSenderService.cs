@@ -437,7 +437,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     "UserPhoneNumber",
                     "ScreenshotOne",
                     "ScreenshotTwo",
-                    "ScreenshotThree"
+                    "ScreenshotThree",
+                    "UserEmail"
                 };
 
                 var messageObj = (AppMessageDTO)obj;
@@ -452,6 +453,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[6] = messageObj.ScreenShots1;
                 strArray[7] = messageObj.ScreenShots2;
                 strArray[8] = messageObj.ScreenShots3;
+                strArray[9] = messageObj.UserDetails.Email;
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
