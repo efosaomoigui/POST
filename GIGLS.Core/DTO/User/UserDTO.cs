@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GIGLS.Core.Enums;
 using System;
+using GIGLS.Core.DTO.Partnership;
 
 namespace GIGLS.Core.DTO.User
 {
@@ -68,6 +69,7 @@ namespace GIGLS.Core.DTO.User
         public int UserActiveCountryId { get; set; }
         public CountryDTO UserActiveCountry { get; set; }
         public List<string> VehicleType { get; set; }
+        public List<VehicleTypeDTO> VehicleDetails { get; set; }
         public bool IsFromMobile { get; set; }
 
         public string Referrercode { get; set; }

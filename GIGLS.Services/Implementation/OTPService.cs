@@ -280,7 +280,7 @@ namespace GIGLS.Services.Implementation
                         var vehicletypeDTO = new VehicleTypeDTO
                         {
                             Partnercode = registerUser.UserChannelCode,
-                            Vehicletype = VehicleType.VehicleType
+                            Vehicletype = VehicleType.VehicleType,
                         };
                         var vehicletype = Mapper.Map<VehicleType>(vehicletypeDTO);
                         _uow.VehicleType.Add(vehicletype);
@@ -291,10 +291,13 @@ namespace GIGLS.Services.Implementation
                     var vehicle = await _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode);
                     if (vehicle.Count() > 0)
                     {
+                        registerUser.VehicleDetails = new List<VehicleTypeDTO>();
                         registerUser.VehicleType = new List<string>();
-                        foreach (var item in vehicle)
+                        var vehicles = Mapper.Map <List<VehicleTypeDTO>>(vehicle);
+                        foreach (var item in vehicles)
                         {
                             registerUser.VehicleType.Add(item.Vehicletype);
+                            registerUser.VehicleDetails.Add(item);
                         }
                     }
 
