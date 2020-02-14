@@ -554,7 +554,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipmentDTO.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
                     preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
                     preShipmentDTO.InsuranceValue = PreshipmentPriceDTO.InsuranceValue;
-                    
                 }
                 return preShipmentDTO;
             }
@@ -831,7 +830,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 decimal totalDiscount = 0;
 
                 var listOfPreShipment = await GroupMobileShipmentByReceiver(preShipmentItemMobileDTO);
-                
+
+                var IsWithinProcessingTime = await WithinProcessingTime(listOfPreShipment[0].CountryId);
+
                 var price = new MultipleMobilePriceDTO {
                     receiversPriceDetails = new List<MobilePricePerReceiverDTO>()
                 };
@@ -876,6 +877,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 price.CurrencySymbol = listOfPreShipment[0].CurrencySymbol;
                 price.CurrencyCode = listOfPreShipment[0].CurrencyCode;
                 price.Discount = totalDiscount;
+                price.IsWithinProcessingTime = IsWithinProcessingTime;
 
                 return price;
             }
@@ -994,7 +996,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var discount = Math.Round(Price - (decimal)preShipment.CalculatedTotal);
                 preShipment.DiscountValue = discount;
                 
-                var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
+                //var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
 
                 var returnprice = new MobilePriceDTO()
                 {
@@ -1004,7 +1006,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     PreshipmentMobile = preShipment,
                     CurrencySymbol = preShipment.CurrencySymbol,
                     CurrencyCode = preShipment.CurrencyCode,
-                    IsWithinProcessingTime = IsWithinProcessingTime,
+                    //IsWithinProcessingTime = IsWithinProcessingTime,
                     Discount = discount
                 };
                 return returnprice;

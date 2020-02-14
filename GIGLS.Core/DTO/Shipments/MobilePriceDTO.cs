@@ -35,6 +35,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string CurrencySymbol { get; set; }
         public string CurrencyCode { get; set; }
         public List<MobilePricePerReceiverDTO> receiversPriceDetails { get; set; }
+        public bool IsWithinProcessingTime { get; set; }
     }
     public class MobilePricePerReceiverDTO
     {
