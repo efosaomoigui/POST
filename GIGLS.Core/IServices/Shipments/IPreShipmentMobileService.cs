@@ -58,7 +58,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<object> CancelShipmentWithNoCharge(string Waybill, string Userchanneltype);
         Task<List<GiglgoStationDTO>> GetGoStations();
         Task<decimal> GetPickUpPriceForMultipleShipment(string customerType, string vehicleType, int CountryId);
-        Task<List<string>> CreateMobileShipment(NewPreShipmentMobileDTO newPreShipment);
+        Task<List<object>> CreateMobileShipment(NewPreShipmentMobileDTO newPreShipment);
         Task<MultipleMobilePriceDTO> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipmentItemMobileDTO);
 
     }

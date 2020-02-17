@@ -147,12 +147,12 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Multiple Shipment New Flow NEW
-        public async Task<List<string>> CreateMobileShipmentOld(NewPreShipmentMobileDTO newPreShipment)
+        public async Task<List<object>> CreateMobileShipmentOld(NewPreShipmentMobileDTO newPreShipment)
         {
             var listOfWaybills = new List<PreShipmentMobileDTO>();
 
             decimal shipmentTotal = 0;
-            var waybillList = new List<string>();
+            var waybillList = new List<object>();
 
             //check for sender information for validation
             if (newPreShipment.VehicleType == null || newPreShipment.VehicleType == "")
@@ -233,11 +233,11 @@ namespace GIGLS.Services.Implementation.Shipments
             return waybillList;
         }
 
-        public async Task<List<string>> CreateMobileShipment(NewPreShipmentMobileDTO newPreShipment)
+        public async Task<List<object>> CreateMobileShipment(NewPreShipmentMobileDTO newPreShipment)
         {
             var listOfPreShipment = await GroupMobileShipmentByReceiver(newPreShipment);
 
-            var waybillList = new List<string>();            
+            List<object> waybillList = new List<object>();            
 
             if (listOfPreShipment[0].IsEligible == true)
             {
@@ -589,13 +589,13 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Generate Waybill for Multiple Shipments Flow NEW
-        private async Task<List<string>> GenerateWaybill(List<PreShipmentMobileDTO> preShipmentDTO, decimal pickupValue)
+        private async Task<List<object>> GenerateWaybill(List<PreShipmentMobileDTO> preShipmentDTO, decimal pickupValue)
         {
             var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
             var numberOfReceiver = preShipmentDTO.Count();
             var individualPickupPrice = pickupValue / numberOfReceiver;
 
-            var listOfWaybills = new List<string>();
+            var listOfWaybills = new List<object>();
 
             foreach (var receiver in preShipmentDTO)
             {
@@ -651,7 +651,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     WaybillNumber = newPreShipment.Waybill,
                     ShipmentScanStatus = ShipmentScanStatus.MCRT
                 });
-                listOfWaybills.Add(receiver.Waybill);
+
+                var result = new { waybill = newPreShipment.Waybill, Zone = newPreShipment.ZoneMapping };
+
+                listOfWaybills.Add(result);
             }
             return listOfWaybills;
         }

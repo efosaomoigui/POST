@@ -1449,7 +1449,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _preShipmentMobileService.AddPreShipmentMobile(preShipment);
         }
 
-        public async Task<List<string>> AddMultiplePreShipmentMobile(NewPreShipmentMobileDTO preShipment)
+        public async Task<List<object>> AddMultiplePreShipmentMobile(NewPreShipmentMobileDTO preShipment)
         {
             return await _preShipmentMobileService.CreateMobileShipment(preShipment);
         }
