@@ -512,13 +512,13 @@ namespace GIGLS.Services.Implementation.Shipments
             preShipmentMobileDTO.CountryId = Country.CountryId;
             preShipmentMobileDTO.CurrencyCode = Country.CurrencyCode;
             preShipmentMobileDTO.CurrencySymbol = Country.CurrencySymbol;
+            preShipmentMobileDTO.CustomerType = user.UserChannelType.ToString();
+            preShipmentMobileDTO.CustomerCode = user.UserChannelCode;
+            preShipmentMobileDTO.IsEligible = true;
 
             var customer = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
             if (customer != null)
             {
-                preShipmentMobileDTO.CustomerType = user.UserChannelType.ToString();
-                preShipmentMobileDTO.CustomerCode = user.UserChannelCode;
-                preShipmentMobileDTO.IsEligible = customer.IsEligible;
                 if (customer.IsEligible != true)
                 {
                     preShipmentMobileDTO.IsEligible = false;
@@ -527,6 +527,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipmentMobileDTO.CurrentWalletAmount = Convert.ToDecimal(customer.WalletAmount);
                 }
             }
+
             return preShipmentMobileDTO;
         }
 
