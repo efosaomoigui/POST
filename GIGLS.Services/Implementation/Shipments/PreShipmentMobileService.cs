@@ -159,7 +159,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException("Please select a vehicle type");
             }
-            if (newPreShipment.receiverPreShipmentMobileDTOs.Count() == 0)
+            if (newPreShipment.Receivers.Count() == 0)
             {
                 throw new GenericException("No Receiver was added");
             }
@@ -167,7 +167,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if(newPreShipment.IsEligible == true)
             {
-                foreach (var item in newPreShipment.receiverPreShipmentMobileDTOs)
+                foreach (var item in newPreShipment.Receivers)
                 {
                     if (item.preShipmentItems.Count() == 0)
                     {
@@ -285,7 +285,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException("Please select a vehicle type");
             }
 
-            if (newPreShipment.receiverPreShipmentMobileDTOs.Count() == 0)
+            if (newPreShipment.Receivers.Count() == 0)
             {
                 throw new GenericException("No Receiver was added");
             }
@@ -296,7 +296,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var maxNumOfShipment = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GiglgoMaxNumShipment, newPreShipment.CountryId);
             int maximumShipmentItemsAllow = Convert.ToInt32(maxNumOfShipment.Value);
                         
-            foreach (var item in newPreShipment.receiverPreShipmentMobileDTOs)
+            foreach (var item in newPreShipment.Receivers)
             {
                 if (!item.preShipmentItems.Any())
                 {

@@ -172,7 +172,7 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal PickupPrice { get; set; } 
 
         //List of Receivers
-        public List<ReceiverPreShipmentMobileDTO> receiverPreShipmentMobileDTOs { get; set; }
+        public List<ReceiverPreShipmentMobileDTO> Receivers { get; set; }
     }
 
     public class ReceiverPreShipmentMobileDTO : BaseDomainDTO
