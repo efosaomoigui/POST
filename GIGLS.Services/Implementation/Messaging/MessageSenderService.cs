@@ -97,8 +97,14 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     //prepare message finalBody
                     await PrepareMessageFinalBody(messageDTO, obj);
+
                     result = await _emailService.SendAsync(messageDTO);
-                    await LogEmailMessage(messageDTO, result);
+
+                    //send email if there is email address
+                    if (messageDTO.ToEmail != null)
+                    {
+                        await LogEmailMessage(messageDTO, result);
+                    }
                 }
             }
             catch (Exception ex)
@@ -121,8 +127,13 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     //prepare message finalBody
                     await PrepareMessageFinalBody(messageDTO, obj);
+
                     result = await _sMSService.SendAsync(messageDTO);
-                    await LogSMSMessage(messageDTO, result);
+
+                    if (messageDTO.To != null)
+                    {
+                        await LogSMSMessage(messageDTO, result);
+                    }
                 }
             }
             catch (Exception ex)
@@ -158,13 +169,24 @@ namespace GIGLS.Services.Implementation.Messaging
                 };
 
                 var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
-                
+
                 var invoice = _uow.Invoice.GetAllInvoiceShipments().Where(s => s.Waybill == shipmentTrackingDTO.Waybill).FirstOrDefault();
 
                 if (invoice != null)
                 {
-                    //Get Country Currency Symbol
-                    var country = _uow.Country.Find(s => s.CountryId == invoice.DepartureCountryId).FirstOrDefault();
+                    var country = new Country();
+
+                    //C. PICK THE RIGHT DESTINATION COUNTRY PHONE NUMBER
+                    if (messageDTO.MessageType == MessageType.ARF || messageDTO.MessageType == MessageType.AD || messageDTO.MessageType == MessageType.OKT || messageDTO.MessageType == MessageType.AHD)
+                    {
+                        //use the destination country details 
+                        country = _uow.Country.Find(s => s.CountryId == invoice.DestinationCountryId).FirstOrDefault();
+                    }
+                    else
+                    {
+                        //Get Country Currency Symbol
+                        country = _uow.Country.Find(s => s.CountryId == invoice.DepartureCountryId).FirstOrDefault();
+                    }
 
                     //get CustomerDetails
                     if (invoice.CustomerType.Contains("Individual"))
@@ -174,12 +196,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), invoice.CustomerType);
                     var customerObj = await _customerService.GetCustomer(invoice.CustomerId, customerType);
 
-                    var userActiveCountryId = 1;
-                    try
-                    {
-                        userActiveCountryId = await _userService.GetUserActiveCountryId();
-                    }
-                    catch (Exception ex) { }
+                    var userActiveCountryId = await _userService.GetUserActiveCountryId();
 
                     //Get DemurrageDayCount from GlobalProperty
                     var demurrageDayCountObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DemurrageDayCount, userActiveCountryId);
@@ -192,7 +209,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     //
                     var customerName = customerObj.CustomerName;
                     var demurrageAmount = demurragePrice;
-                    
+
                     //map the array
                     strArray[0] = customerName;
                     strArray[1] = invoice.Waybill;
@@ -214,8 +231,7 @@ namespace GIGLS.Services.Implementation.Messaging
 
 
                     //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
-                    if (messageDTO.MessageType == MessageType.ARF &&
-                        invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
+                    if (messageDTO.MessageType == MessageType.ARF &&  invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
                     {
                         MessageDTO homeDeliveryMessageDTO = null;
                         if (messageDTO.EmailSmsType == EmailSmsType.SMS)
@@ -238,8 +254,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     }
 
                     //B. added for HomeDelivery email, when scan is created at Service Centre
-                    if (messageDTO.MessageType == MessageType.CRT &&
-                        invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
+                    if (messageDTO.MessageType == MessageType.CRT && invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
                     {
                         MessageDTO homeDeliveryMessageDTO = null;
                         if (messageDTO.EmailSmsType == EmailSmsType.SMS)
@@ -267,14 +282,14 @@ namespace GIGLS.Services.Implementation.Messaging
                     //C. populate the message subject
                     messageDTO.Subject =
                         string.Format(messageDTO.Subject, strArray);
-                    
+
                     //populate the message template
                     messageDTO.FinalBody =
                         string.Format(messageDTO.Body, strArray);
 
                     //populate the waybill
                     messageDTO.Waybill = invoice.Waybill;
-                    
+
                     if ("CUSTOMER" == messageDTO.To.Trim())
                     {
                         messageDTO.To = customerObj.PhoneNumber;
@@ -335,31 +350,122 @@ namespace GIGLS.Services.Implementation.Messaging
                 //prepare message format base on country code
                 messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
 
+                //use to determine sms sender service to use
+                messageDTO.SMSSenderPlatform = mobileMessageDTO.SMSSenderPlatform;
             }
+            if (obj is WebsiteMessageDTO)
+            {
+                var strArray = new string[]
+                {
+                    "SenderFullName",
+                    "SenderMail",
+                    "SenderPhone",
+                    "ReceiverFullName",
+                    "ReceiverMail",
+                    "ReceiverPhone",
+                    "PickupAddress",
+                    "DestAddress",
+                    "PickupCity",
+                    "PickupState",
+                    "PickupZip",
+                    "DestZip",
+                    "DestState",
+                    "DestCity",
+                    "NumberofPieces",
+                    "Weight",
+                    "Dimension",
+                    "PackageInfo",
+                    "SpeciaInstruct",
+                    "gig mail",
+                    "contactFullName",
+                    "contactMail",
+                    "contactPhone"
+                };
 
-            ////resolve phone numbers to +2347011111111
-            //var toPhoneNumber = messageDTO.To;
-            ////1
-            //if (toPhoneNumber.Trim().StartsWith("0"))   //07011111111
-            //{
-            //    toPhoneNumber = toPhoneNumber.Substring(1, toPhoneNumber.Length - 1);
-            //    toPhoneNumber = $"+234{toPhoneNumber}";
-            //}
-            ////2
-            //if (!toPhoneNumber.Trim().StartsWith("+"))  //2347011111111
-            //{
-            //    toPhoneNumber = $"+{toPhoneNumber}";
-            //}
-            ////3
-            //if (!toPhoneNumber.Trim().StartsWith("2340"))  //23407011111111
-            //{
-            //    toPhoneNumber = toPhoneNumber.Remove(0, 4);
-            //    toPhoneNumber = $"+234{toPhoneNumber}";
-            //}
+                var messageObj = (WebsiteMessageDTO)obj;
 
-            //prepare phone number base on country code
-            //messageDTO.To = toPhoneNumber;
-            //messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To);
+                //map the array
+                strArray[0] = messageObj.senderFullName;
+                strArray[1] = messageObj.senderMail;
+                strArray[2] = messageObj.senderPhone;
+                strArray[3] = messageObj.receiverFullName;
+                strArray[4] = messageObj.receiverMail;
+                strArray[5] = messageObj.receiverPhone;
+                strArray[6] = messageObj.pickupAddress;
+                strArray[7] = messageObj.destAddress;
+                strArray[8] = messageObj.pickupCity;
+                strArray[9] = messageObj.pickupState;
+                strArray[10] = messageObj.pickupZip;
+                strArray[11] = messageObj.DestZip;
+                strArray[12] = messageObj.DestState;
+                strArray[13] = messageObj.DestCity;
+                strArray[14] = messageObj.numberofPieces;
+                strArray[15] = messageObj.weight;
+                strArray[16] = messageObj.dimension;
+                strArray[17] = messageObj.packageInfo;
+                strArray[18] = messageObj.speciaInstruct;
+                strArray[19] = messageObj.gigMail;
+                strArray[20] = messageObj.contactFullName;
+                strArray[21] = messageObj.contactMail;
+                strArray[22] = messageObj.contactPhone;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject =
+                    string.Format(messageDTO.Subject, strArray);
+
+                //populate the message template
+                messageDTO.FinalBody =
+                    string.Format(messageDTO.Body, strArray);
+
+
+
+                messageDTO.ToEmail = messageObj.gigMail;
+
+            }
+            if (obj is AppMessageDTO)
+            {
+                var strArray = new string[]
+                {
+                    "AppType",
+                    "Body",
+                    "Recipient",
+                    "UserFirstName",
+                    "UserLastName",
+                    "UserPhoneNumber",
+                    "ScreenshotOne",
+                    "ScreenshotTwo",
+                    "ScreenshotThree"
+                };
+
+                var messageObj = (AppMessageDTO)obj;
+
+                //map the array
+                strArray[0] = messageObj.AppType;
+                strArray[1] = messageObj.Body;
+                strArray[2] = messageObj.Recipient;
+                strArray[3] = messageObj.UserDetails.FirstName;
+                strArray[4] = messageObj.UserDetails.LastName;
+                strArray[5] = messageObj.UserDetails.PhoneNumber;
+                strArray[6] = messageObj.ScreenShots1;
+                strArray[7] = messageObj.ScreenShots2;
+                strArray[8] = messageObj.ScreenShots3;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject =
+                    string.Format(messageDTO.Subject, strArray);
+
+                //populate the message template
+                messageDTO.FinalBody =
+                    string.Format(messageDTO.Body, strArray);
+
+                messageDTO.ToEmail = messageObj.Recipient;
+            }
 
             return await Task.FromResult(true);
         }
@@ -381,7 +487,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     ResultDescription = exceptionMessage
                 });
             }
-            catch (Exception ) { }
+            catch (Exception) { }
 
             return true;
         }
@@ -402,7 +508,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     ResultDescription = exceptiomMessage
                 });
             }
-            catch (Exception){   }
+            catch (Exception) { }
 
             return true;
         }
@@ -554,7 +660,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[6] = messageExtensionDTO.CancelledOrCollected;
                 strArray[7] = messageExtensionDTO.GroupWaybill;
                 strArray[8] = messageExtensionDTO.Manifest;
-                
+
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
 
@@ -566,7 +672,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 //populate the message template
                 messageDTO.FinalBody =
                     string.Format(messageDTO.Body, strArray);
-                
+
                 messageDTO.ToEmail = messageExtensionDTO.RegionalManagerEmail;
             }
 
@@ -623,19 +729,13 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.ToEmail = passwordMessageDTO.UserEmail;
             }
 
-            
+
             return await Task.FromResult(verifySendEmail);
         }
 
         private async Task<bool> VerifyUserLoginIsWithinTheEmailInterval(string email)
         {
-            var userActiveCountryId = 1;
-            try
-            {
-                userActiveCountryId = await _userService.GetUserActiveCountryId();
-            }
-            catch (Exception ex) { }
-
+            var userActiveCountryId = await _userService.GetUserActiveCountryId();
             bool verifySendEmail = true;
 
             //1. check interval from global property
@@ -715,6 +815,17 @@ namespace GIGLS.Services.Implementation.Messaging
             }
 
             return phone;
+        }
+
+        public async Task SendVoiceMessageAsync(string userId)
+        {
+            var user = await _userService.GetUserById(userId);
+
+            var country = await _uow.Country.GetAsync(x => x.CountryId == user.UserActiveCountryId);
+
+            string phoneNumber = ReturnPhoneNumberBaseOnCountry(user.PhoneNumber, country.PhoneNumberCode);
+
+            await _sMSService.SendVoiceMessageAsync(phoneNumber);
         }
     }
 }

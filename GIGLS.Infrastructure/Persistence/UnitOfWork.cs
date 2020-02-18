@@ -24,15 +24,11 @@ using GIGLS.CORE.IRepositories.Nav;
 using GIGLS.Core.IRepositories.Haulage;
 using GIGLS.Core.IRepositories.MessagingLog;
 using GIGLS.Core.IRepositories.ShipmentScan;
-using System;
 using GIGLS.Core.IRepositories.Devices;
 using GIGLS.Core.IRepositories.BankSettlement;
-using GIGLS.Infrastructure.Persistence.Repositories.InternationalRequest;
 using GIGLS.Core.IRepositories.InternationalRequest;
 using GIGLS.Core.IRepositories.Sla;
 using GIGLS.Core.IRepositories.Expenses;
-using GIGLS.Core.Domain.Wallet;
-using GIGLS.Infrastructure.Persistence.Repositories.Wallet;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -439,6 +435,21 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public ILGARepository LGA { get; set; }
+
+        [Inject]
+        public IWaybillPaymentLogRepository WaybillPaymentLog { get; set; }
+
+        [Inject]
+        public IBankRepository Bank { get; set; }
+
+        [Inject]
+        public IActivationCampaignEmailRepository ActivationCampaignEmail { get; set; }
+
+        [Inject]
+        public IGiglgoStationRepository GiglgoStation { get; set; }
+
+        [Inject]
+        public IShipmentHashRepository ShipmentHash { get; set; }
 
         public int Complete()
         {

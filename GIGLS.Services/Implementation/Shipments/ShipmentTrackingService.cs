@@ -62,6 +62,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     //Get shipment Details
                     var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(tracking.Waybill));
+                    shipment.ShipmentScanStatus = ShipmentScanStatus.ARF;
 
                     //add service centre
                     var newShipmentCollection = new ShipmentCollection
@@ -95,9 +96,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.ShipmentTracking.Add(newShipmentTracking);
 
                     Id = newShipmentTracking.ShipmentTrackingId;
-
+                    
                     //send sms and email
-                    await sendSMSEmail(tracking, scanStatus);
+                    if (!scanStatus.Equals(ShipmentScanStatus.CRT))
+                    {
+                        await sendSMSEmail(tracking, scanStatus);
+                    }
                 }
 
                 //use to optimise shipment progress for shipment that has depart service centre
@@ -107,11 +111,15 @@ namespace GIGLS.Services.Implementation.Shipments
                     //Get shipment Details
                     var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(tracking.Waybill));
 
-                    //update shipment if the user belong to original departure service centre
-                    if (shipment.DepartureServiceCentreId == tracking.ServiceCentreId && shipment.ShipmentScanStatus != scanStatus)
+                    //dont allow shipmet scan status to be update once ARF has been done on the shipment
+                    if(shipment.ShipmentScanStatus != ShipmentScanStatus.ARF)
                     {
-                        shipment.ShipmentScanStatus = scanStatus;
-                    }
+                        //update shipment if the user belong to original departure service centre
+                        if (shipment.DepartureServiceCentreId == tracking.ServiceCentreId && shipment.ShipmentScanStatus != scanStatus)
+                        {
+                            shipment.ShipmentScanStatus = scanStatus;
+                        }
+                    }                    
                 }
                 
                 await _uow.CompleteAsync();
@@ -246,6 +254,73 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 return shipmentTracking.ToList().OrderByDescending(x => x.DateTime).ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<ShipmentTrackingDTO>> GetShipmentTrackingsForMobile(string waybill)
+        {
+            try
+            {
+                var shipmentTracking = await _uow.ShipmentTracking.GetShipmentTrackingsForMobileAsync(waybill);
+
+                if (shipmentTracking.Count > 0)
+                {
+                    //1. check if waybill is a returned waybill
+                    {
+                        var shipmentReturn = await _uow.ShipmentReturn.GetAsync(s => s.WaybillNew == waybill || s.WaybillOld == waybill);
+                        if (shipmentReturn != null)
+                        {
+                            if (shipmentReturn.WaybillNew == waybill)
+                            {
+                                //get shipmentTracking for old waybill
+                                var shipmentTrackingOldWaybill = await _uow.ShipmentTracking.GetShipmentTrackingsForMobileAsync(shipmentReturn.WaybillOld);
+
+                                //add to original list
+                                shipmentTracking.AddRange(shipmentTrackingOldWaybill);
+                            }
+
+                            if (shipmentReturn.WaybillOld == waybill)
+                            {
+                                //get shipmentTracking for new waybill
+                                var shipmentTrackingNewWaybill = await _uow.ShipmentTracking.GetShipmentTrackingsForMobileAsync(shipmentReturn.WaybillNew);
+
+                                //add to original list
+                                shipmentTracking.AddRange(shipmentTrackingNewWaybill);
+                            }
+                        }
+                    }
+
+                    //2. check if waybill is a rerouted waybill
+                    {
+                        var shipmentReroute = await _uow.ShipmentReroute.GetAsync(s => s.WaybillNew == waybill || s.WaybillOld == waybill);
+                        if (shipmentReroute != null)
+                        {
+                            if (shipmentReroute.WaybillNew == waybill)
+                            {
+                                //get shipmentTracking for old waybill
+                                var shipmentTrackingOldWaybill = await _uow.ShipmentTracking.GetShipmentTrackingsForMobileAsync(shipmentReroute.WaybillOld);
+
+                                //add to original list
+                                shipmentTracking.AddRange(shipmentTrackingOldWaybill);
+                            }
+
+                            if (shipmentReroute.WaybillOld == waybill)
+                            {
+                                //get shipmentTracking for new waybill
+                                var shipmentTrackingNewWaybill = await _uow.ShipmentTracking.GetShipmentTrackingsForMobileAsync(shipmentReroute.WaybillNew);
+
+                                //add to original list
+                                shipmentTracking.AddRange(shipmentTrackingNewWaybill);
+                            }
+                        }
+                    }
+                }
+
+                return shipmentTracking;
             }
             catch (Exception)
             {

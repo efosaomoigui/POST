@@ -33,5 +33,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        //Ghana Paystack call
+        [HttpPost]
+        [Route("processmobilepayment")]
+        public async Task<IServiceResponse<bool>> VerifyAndValidateMobilePayment(PaystackWebhookDTO webhookData)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.VerifyAndValidateMobilePayment(webhookData);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
     }
 }

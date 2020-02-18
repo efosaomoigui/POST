@@ -10,6 +10,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ShipmentTrackingDTO>> GetShipmentTrackings();
         //Task<IEnumerable<ShipmentTrackingDTO>> GetShipmentWaitingForCollection();
         Task<IEnumerable<ShipmentTrackingDTO>> GetShipmentTrackings(string waybill);
+        Task<IEnumerable<ShipmentTrackingDTO>> GetShipmentTrackingsForMobile(string waybill);
         Task<ShipmentTrackingDTO> GetShipmentTrackingById(int trackingId);
         Task<object> AddShipmentTracking(ShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus);
         Task UpdateShipmentTracking(int trackingId, ShipmentTrackingDTO tracking);

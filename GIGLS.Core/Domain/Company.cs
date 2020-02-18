@@ -14,8 +14,12 @@ namespace GIGL.GIGLS.Core.Domain
             CompanyContactPersons = new HashSet<CompanyContactPerson>();
         }
         public int CompanyId { get; set; }
+
+        [MaxLength(500)]
         public string Name { get; set; }
         public string RcNumber { get; set; }
+
+        [MaxLength(500)]
         public string Email { get; set; }
         public string City { get; set; }
         public string State { get; set; }
@@ -46,5 +50,9 @@ namespace GIGL.GIGLS.Core.Domain
         public string LastName { get; set; }
         public bool IsRegisteredFromMobile { get; set; }
         public bool isCodNeeded { get; set; }
+
+        //added this for Giglgo customers
+        public decimal? WalletAmount { get; set; }
+        public bool? IsEligible { get; set; }
     }
 }

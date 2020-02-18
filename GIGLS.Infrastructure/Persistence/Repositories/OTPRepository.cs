@@ -4,7 +4,6 @@ using GIGLS.Core.IRepositories;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System.Linq;
 using System.Threading.Tasks;
-using GIGLS.Core.DTO;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories
 {
@@ -21,7 +20,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
             DateTime LatestTime = DateTime.Now;
             try
             {
-                message = Context.OTP.Where(x => x.Otp == OTP).FirstOrDefault();
+                message = Context.OTP.Where(x => x.Otp == OTP && x.IsValid==false).FirstOrDefault();
                 if (message == null)
                 {
                     throw new GenericException("Invalid OTP");
@@ -31,10 +30,12 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                     TimeSpan span = LatestTime.Subtract(message.DateCreated);
                     int difference = Convert.ToInt32(span.TotalMinutes);
                     if (difference < 5)
+                    {
                         message.IsValid = true;
+                    }
                     else
                     {
-                        throw new GenericException("OTP has expired!!!");
+                        throw new GenericException("OTP has expired!.Kindly click on Resendotp.");
                     }
                     return await Task.FromResult(message);
                 }

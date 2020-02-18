@@ -104,5 +104,8 @@ namespace GIGLS.Core.View
         //Country info
         public int DepartureCountryId { get; set; }
         public int DestinationCountryId { get; set; }
+        public bool IsCashOnDelivery { get; set; }
+        public decimal? CODAmount { get; set; }
+        public bool IsFromMobile { get; set; }
     }
 }

@@ -28,7 +28,7 @@ namespace GIGLS.Core.DTO.Partnership
 
         public string PictureUrl { get; set; }
         public string BankName { get; set; }
-        public long? AccountNumber { get; set; }
+        public string AccountNumber { get; set; }
 
         public string AccountName { get; set; }
         public string VehicleLicenseNumber { get; set; }
@@ -36,5 +36,9 @@ namespace GIGLS.Core.DTO.Partnership
 
         public string VehicleLicenseImageDetails { get; set; }
 
+        public int UserActiveCountryId { get; set; }
+        public CountryDTO Country { get; set; }
+        public decimal WalletBalance { get; set; }
+        public string CurrencySymbol { get; set; }
     }
 }

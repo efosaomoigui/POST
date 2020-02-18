@@ -102,6 +102,7 @@ namespace GIGLS.WebApi.Controllers
                 apiResponse.AverageRatings = methodResponse.AverageRatings;
                 apiResponse.IsVerified = methodResponse.IsVerified;
                 apiResponse.PartnerType = methodResponse.PartnerType;
+                apiResponse.IsEligible = methodResponse.IsEligible;
                 apiResponse.ShortDescription = string.IsNullOrEmpty(methodResponse.ShortDescription)
                     ? apiResponse.ShortDescription
                     : methodResponse.ShortDescription;

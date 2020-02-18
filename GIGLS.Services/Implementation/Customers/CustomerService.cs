@@ -24,6 +24,19 @@ namespace GIGLS.Services.Implementation.Customers
             _companyService = companyService;
             MapperConfig.Initialize();
         }
+        
+        private async Task<string> AddCountryCodeToPhoneNumber(string phoneNumber, int countryId)
+        {
+            var country = await _uow.Country.GetAsync(x => x.CountryId == countryId);
+            if (country != null)
+            {
+                phoneNumber = phoneNumber.Substring(1, phoneNumber.Length - 1);
+                string phone = $"{country.PhoneNumberCode}{phoneNumber}";
+                phoneNumber = phone;
+
+            }
+            return phoneNumber;
+        }
 
         public async Task<CustomerDTO> CreateCustomer(CustomerDTO customerDTO)
         {
@@ -33,7 +46,8 @@ namespace GIGLS.Services.Implementation.Customers
                 if (CustomerType.Company.Equals(customerDTO.CustomerType))
                 {
                     var companyId = 0;
-                    var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.Trim().ToLower() || c.PhoneNumber == customerDTO.PhoneNumber);
+                    var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.ToLower() 
+                    || c.PhoneNumber == customerDTO.PhoneNumber || c.Email == customerDTO.Email || c.CustomerCode == customerDTO.CustomerCode);
 
                     foreach (var item in CompanyByName)
                     {
@@ -42,14 +56,17 @@ namespace GIGLS.Services.Implementation.Customers
 
                     if (companyId > 0)
                     {
-                        // update
-                        
                         customerDTO.CompanyId = companyId;
                         var companyDTO = Mapper.Map<CompanyDTO>(customerDTO);
                         //await _companyService.UpdateCompany(companyId, companyDTO);
                     }
                     else
                     {
+                        if (customerDTO.PhoneNumber.StartsWith("0"))
+                        {
+                            customerDTO.PhoneNumber = await AddCountryCodeToPhoneNumber(customerDTO.PhoneNumber, customerDTO.UserActiveCountryId);
+                        }
+
                         // create new
                         var companyDTO = Mapper.Map<CompanyDTO>(customerDTO);
                         var createdCustomer = await _companyService.AddCompany(companyDTO);
@@ -62,7 +79,7 @@ namespace GIGLS.Services.Implementation.Customers
                 if (CustomerType.IndividualCustomer.Equals(customerDTO.CustomerType))
                 {
                     var individualCustomerId = 0;
-                    var individualCustomerByPhone = await _uow.IndividualCustomer.GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber.Trim());
+                    var individualCustomerByPhone = await _uow.IndividualCustomer.GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber || c.CustomerCode == customerDTO.CustomerCode);
 
                     if(individualCustomerByPhone != null)
                     {
@@ -78,6 +95,11 @@ namespace GIGLS.Services.Implementation.Customers
                     }
                     else
                     {
+                        if (customerDTO.PhoneNumber.StartsWith("0"))
+                        {
+                            customerDTO.PhoneNumber = await AddCountryCodeToPhoneNumber(customerDTO.PhoneNumber, customerDTO.UserActiveCountryId);
+                        }
+
                         // create new
                         var individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(customerDTO);
                         var createdCustomer = await _individualCustomerService.AddCustomer(individualCustomerDTO);
@@ -90,7 +112,7 @@ namespace GIGLS.Services.Implementation.Customers
             }
             catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 
@@ -188,6 +210,10 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
+                if (phoneNumber.StartsWith("0"))
+                {
+                    phoneNumber = phoneNumber.Remove(0, 1);
+                }
                 // handle IndividualCustomers
                 var individualCustomerDTO = await _individualCustomerService.GetCustomerByPhoneNumber(phoneNumber);
                 return individualCustomerDTO;
@@ -202,6 +228,11 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
+                if (searchOption.SearchData.StartsWith("0"))
+                {
+                    searchOption.SearchData = searchOption.SearchData.Substring(1, searchOption.SearchData.Length - 1);
+                }
+
                 // handle Company customers
                 if (FilterCustomerType.IndividualCustomer.Equals(searchOption.CustomerType))
                 {

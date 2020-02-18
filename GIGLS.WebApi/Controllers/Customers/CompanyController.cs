@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.Core.Enums;
 using GIGLS.WebApi.Filters;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.Customers
 {
@@ -33,6 +34,76 @@ namespace GIGLS.WebApi.Controllers.Customers
                 return new ServiceResponse<IEnumerable<CompanyDTO>>
                 {
                     Object = companies
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("search")]
+        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompanies(BaseFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () => {
+                var companies = await _service.GetCompanies(filterCriteria);
+                return new ServiceResponse<IEnumerable<CompanyDTO>>
+                {
+                    Object = companies
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("withoutwallet")]
+        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompaniesWithoutWallet()
+        {
+            return await HandleApiOperationAsync(async () => {
+                var companies = await _service.GetCompaniesWithoutWallet();
+                return new ServiceResponse<IEnumerable<CompanyDTO>>
+                {
+                    Object = companies
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("ecommerce")]
+        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetEcommerceWithoutWallet()
+        {
+            return await HandleApiOperationAsync(async () => {
+                var companies = await _service.GetEcommerceWithoutWallet();
+                return new ServiceResponse<IEnumerable<CompanyDTO>>
+                {
+                    Object = companies
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("corporate")]
+        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCorporateWithoutWallet()
+        {
+            return await HandleApiOperationAsync(async () => {
+                var companies = await _service.GetCorporateWithoutWallet();
+                return new ServiceResponse<IEnumerable<CompanyDTO>>
+                {
+                    Object = companies
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{companyId:int}/getwallet")]
+        public async Task<IServiceResponse<EcommerceWalletDTO>> GettWalletDetailsForCompany(int companyId)
+        {
+            return await HandleApiOperationAsync(async () => {
+                var company = await _service.GetECommerceWalletById(companyId);
+                return new ServiceResponse<EcommerceWalletDTO>
+                {
+                    Object = company
                 };
             });
         }
@@ -115,5 +186,22 @@ namespace GIGLS.WebApi.Controllers.Customers
 
             });           
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("searchByEmailCode")]
+        public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompanyByEmail(CompanySearchDTO searchDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var company = await _service.GetCompanyByEmail(searchDTO.searchItem);
+
+                return new ServiceResponse<IEnumerable<CompanyDTO>>
+                {
+                    Object = company
+                };
+            });
+        }
+
     }
 }

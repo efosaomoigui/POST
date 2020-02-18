@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
@@ -20,12 +22,14 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly IUserService _userService;
         private readonly IUnitOfWork _uow;
+        private readonly IGlobalPropertyService _globalPropertyService;
 
-        public WalletService(IUserService userService, INumberGeneratorMonitorService numberGeneratorMonitorService, IUnitOfWork uow)
+        public WalletService(IUserService userService, INumberGeneratorMonitorService numberGeneratorMonitorService, IUnitOfWork uow, IGlobalPropertyService globalPropertyService)
         {
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _userService = userService;
             _uow = uow;
+            _globalPropertyService = globalPropertyService;
             MapperConfig.Initialize();
         }
 
@@ -39,16 +43,29 @@ namespace GIGLS.Services.Implementation.Wallet
                 // handle Company customers
                 if (CustomerType.Company.Equals(item.CustomerType))
                 {
-                    var companyDTO = await _uow.Company.GetAsync(s => s.CompanyId == item.CustomerId);
-                    item.CustomerName = companyDTO.Name;
+                    var companyDTO = await _uow.Company.GetCompanyByIdWithCountry(item.CustomerId);
+
+                    if (companyDTO != null)
+                    {
+                        item.CustomerName = companyDTO.Name;
+                        item.Country = companyDTO.Country;
+                        item.UserActiveCountryId = companyDTO.UserActiveCountryId;
+                    }
+                }
+                if (CustomerType.Partner.Equals(item.CustomerType))
+                {
+                    var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(item.CustomerId);
+                    item.CustomerName = partnerDTO.PartnerName;
+                    item.UserActiveCountryId = partnerDTO.UserActiveCountryId;
+                    item.Country = partnerDTO.Country;
                 }
                 else
                 {
                     // handle IndividualCustomers
-                    var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
-                        s => s.IndividualCustomerId == item.CustomerId);
-                    item.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " +
-                        $"{individualCustomerDTO.LastName}");
+                    var individualCustomerDTO = await _uow.IndividualCustomer.GetIndividualCustomerByIdWithCountry(item.CustomerId);
+                    item.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
+                    item.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
+                    item.Country = individualCustomerDTO.Country;
                 }
             }
 
@@ -70,16 +87,29 @@ namespace GIGLS.Services.Implementation.Wallet
             // handle Company customers
             if (CustomerType.Company.Equals(wallet.CustomerType))
             {
-                var companyDTO = await _uow.Company.GetAsync(s => s.CompanyId == walletDTO.CustomerId);
-                walletDTO.CustomerName = companyDTO.Name;
+                var companyDTO = await _uow.Company.GetCompanyByIdWithCountry(walletDTO.CustomerId);
+
+                if (companyDTO != null)
+                {
+                    walletDTO.CustomerName = companyDTO.Name;
+                    walletDTO.Country = companyDTO.Country;
+                    walletDTO.UserActiveCountryId = companyDTO.UserActiveCountryId;
+                }
+            }
+            else if (CustomerType.Partner.Equals(wallet.CustomerType))
+            {
+                var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(walletDTO.CustomerId);
+                walletDTO.CustomerName = partnerDTO.PartnerName;
+                walletDTO.UserActiveCountryId = partnerDTO.UserActiveCountryId;
+                walletDTO.Country = partnerDTO.Country;
             }
             else
             {
                 // handle IndividualCustomers
-                var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
-                    s => s.IndividualCustomerId == walletDTO.CustomerId);
-                walletDTO.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " +
-                    $"{individualCustomerDTO.LastName}");
+                var individualCustomerDTO = await _uow.IndividualCustomer.GetIndividualCustomerByIdWithCountry(walletDTO.CustomerId);
+                walletDTO.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
+                walletDTO.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
+                walletDTO.Country = individualCustomerDTO.Country;
             }
 
             return walletDTO;
@@ -136,6 +166,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Wallet does not exists");
             }
 
+            await CheckIfEcommerceIsEligible(wallet, walletTransactionDTO.Amount);
+
             if (walletTransactionDTO.UserId == null)
             {
                 walletTransactionDTO.UserId = await _userService.GetCurrentUserId();
@@ -154,9 +186,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 serviceCenterIds = new int[] { 0 };
                 var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
                 serviceCenterIds[0] = defaultServiceCenter.ServiceCentreId;
-
-                //var currentUser = await _userService.GetUserById(walletTransactionDTO.UserId);
-                //throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
             }
 
             var newWalletTransaction = Mapper.Map<WalletTransaction>(walletTransactionDTO);
@@ -227,37 +256,34 @@ namespace GIGLS.Services.Implementation.Wallet
             try
             {
                 List<WalletDTO> walletsDto = new List<WalletDTO>();
+                List<PartnerDTO> partners = new List<PartnerDTO>();
+                List<CompanyDTO> companies = new List<CompanyDTO>();
+                List<IndividualCustomerDTO> individualCustomer = new List<IndividualCustomerDTO>();
+
                 var walletsQueryable = _uow.Wallet.GetWalletsAsQueryable();
 
-                //If searchOption.SearchData is not empty
                 if (!string.IsNullOrWhiteSpace(searchOption.SearchData))
                 {
-                    walletsQueryable = walletsQueryable.Where(x =>
-                        x.CustomerCode.Contains(searchOption.SearchData) ||
-                        x.WalletNumber.Contains(searchOption.SearchData));
-                }
+                    List<string> customerCodes = new List<string>();
 
-                // handle Individual customers
-                if (FilterCustomerType.IndividualCustomer.Equals(searchOption.CustomerType))
-                {
-                    walletsQueryable = walletsQueryable.Where(x => x.CustomerType == CustomerType.IndividualCustomer);
+                    if (searchOption.CustomerType == FilterCustomerType.Ecommerce || searchOption.CustomerType == FilterCustomerType.Corporate)
+                    {
+                        companies = await _uow.Company.GetCompanyByEmail(searchOption.SearchData);
+                        customerCodes = companies.Select(x => x.CustomerCode).ToList();
+                    }
+                    else if (searchOption.CustomerType == FilterCustomerType.Partner)
+                    {
+                        partners = await _uow.Partner.GetPartnerBySearchParameters(searchOption.SearchData);
+                        customerCodes = partners.Select(x => x.PartnerCode).ToList();
+                    }
+                    else if (searchOption.CustomerType == FilterCustomerType.IndividualCustomer)
+                    {
+                        individualCustomer = await _uow.IndividualCustomer.GetIndividualCustomers(searchOption.SearchData);
+                        customerCodes = individualCustomer.Select(x => x.CustomerCode).ToList();
+                    }
+
+                    walletsQueryable = walletsQueryable.Where(x => customerCodes.Contains(x.CustomerCode));
                     walletsDto = Mapper.Map<List<WalletDTO>>(walletsQueryable.ToList());
-                }
-                else
-                {
-                    CompanyType companyType;
-
-                    if (FilterCustomerType.Corporate.Equals(searchOption.CustomerType))
-                    {
-                        companyType = CompanyType.Corporate;
-                    }
-                    else
-                    {
-                        companyType = CompanyType.Ecommerce;
-                    }
-                    walletsQueryable = walletsQueryable.Where(x => x.CompanyType == companyType.ToString());
-                    var walletsResult = walletsQueryable.ToList();
-                    walletsDto = Mapper.Map<List<WalletDTO>>(walletsResult);
                 }
 
                 ////set the customer name
@@ -266,19 +292,40 @@ namespace GIGLS.Services.Implementation.Wallet
                     // handle Company customers
                     if (CustomerType.Company == item.CustomerType)
                     {
-                        var companyDTO = await _uow.Company.GetAsync(s => s.CompanyId == item.CustomerId);
-                        if(companyDTO != null)
+                        if (companies.Count > 0)
                         {
-                            item.CustomerName = companyDTO.Name;
+                            foreach( var company in companies)
+                            {
+                                item.CustomerName = company.Name;
+                                item.Country = company.Country;
+                                item.UserActiveCountryId = company.UserActiveCountryId;
+                            }                            
+                        }
+                    }
+                    else if (CustomerType.Partner == item.CustomerType)
+                    {
+                        if (partners.Count > 0)
+                        {
+                            foreach (var partner in partners)
+                            {
+                                item.CustomerName = partner.PartnerName;
+                                item.Country = partner.Country;
+                                item.UserActiveCountryId = partner.UserActiveCountryId;
+                            }
                         }
                     }
                     else
                     {
                         // handle IndividualCustomers
-                        var individualCustomerDTO = await _uow.IndividualCustomer.GetAsync(
-                            s => s.IndividualCustomerId == item.CustomerId);
-                        item.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " +
-                            $"{individualCustomerDTO.LastName}");
+                        if (individualCustomer.Count > 0)
+                        {
+                            foreach (var individual in individualCustomer)
+                            {
+                                item.CustomerName = string.Format($"{individual.FirstName} " + $"{individual.LastName}");
+                                item.UserActiveCountryId = individual.UserActiveCountryId;
+                                item.Country = individual.Country;
+                            }                            
+                        }
                     }
                 }
 
@@ -309,6 +356,41 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var wallet = _uow.Wallet.GetAllAsQueryable();
             return wallet;
+        }
+
+        private async Task CheckIfEcommerceIsEligible (Core.Domain.Wallet.Wallet wallet, decimal amount)
+        {
+            var company = await _uow.Company.GetAsync(s => s.CustomerCode == wallet.CustomerCode);
+            
+            if(company != null)
+            {
+                if (company.IsEligible == true)
+                    return;
+                
+                decimal codAmountValue;
+
+                if (company.isCodNeeded)
+                {
+                    var codAmount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceCodAmount, company.UserActiveCountryId);
+                    codAmountValue = Convert.ToDecimal(codAmount.Value);
+                }
+                else
+                {
+                    var noCoDAmount = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceNoCodAmount, company.UserActiveCountryId);
+                    codAmountValue = Convert.ToDecimal(noCoDAmount.Value);
+                }
+
+                company.WalletAmount = Convert.ToDecimal(company.WalletAmount) + amount;
+
+                if (company.WalletAmount >= codAmountValue)
+                {
+                    company.IsEligible = true;
+                }
+                else
+                {
+                    company.IsEligible = false;
+                }                
+            }            
         }
     }
 }

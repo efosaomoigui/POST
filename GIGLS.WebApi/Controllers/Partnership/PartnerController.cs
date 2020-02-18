@@ -9,7 +9,7 @@ using GIGLS.WebApi.Filters;
 
 namespace GIGLS.WebApi.Controllers.Partnership
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin, ViewAdmin")]
     [RoutePrefix("api/partner")]
     public class PartnerController : BaseWebApiController
     {
@@ -95,6 +95,23 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 return new ServiceResponse<bool>
                 {
                     Object = true
+                };
+            });
+        }
+
+
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getexternaldeliverypartners")]
+        public async Task<IServiceResponse<IEnumerable<PartnerDTO>>> GetExternalDeliveryPartners()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var partners = await _partnerService.GetExternalDeliveryPartners();
+                return new ServiceResponse<IEnumerable<PartnerDTO>>
+                {
+                    Object = partners
                 };
             });
         }

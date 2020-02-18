@@ -9,5 +9,6 @@ namespace GIGLS.Core.IRepositories.Fleets
     public interface IDispatchRepository : IRepository<Dispatch>
     {
         Task<List<DispatchDTO>> GetDispatchAsync(int[] serviceCentreIds);
+        Task<List<DispatchDTO>> CheckForOutstandingDispatch(string driverId);
     }
 }

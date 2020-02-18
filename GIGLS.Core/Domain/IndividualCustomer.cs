@@ -1,7 +1,6 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -15,9 +14,15 @@ namespace GIGL.GIGLS.Core.Domain
             Shipments = new HashSet<Shipment>();
         }
         public int IndividualCustomerId { get; set; }
+
+        [MaxLength(500)]
         public string FirstName { get; set; }
+
+        [MaxLength(500)]
         public string LastName { get; set; }
         public Gender Gender { get; set; }
+
+        [MaxLength(500)]
         public string Email { get; set; }
         public string City { get; set; }
         public string State { get; set; }
@@ -30,6 +35,8 @@ namespace GIGL.GIGLS.Core.Domain
         [Index(IsUnique = true)]
         public string PhoneNumber { get; set; }
         public string PictureUrl { get; set; }
+
+        [MaxLength(100)]
         public string CustomerCode { get; set; }
         public string Password { get; set; }
 

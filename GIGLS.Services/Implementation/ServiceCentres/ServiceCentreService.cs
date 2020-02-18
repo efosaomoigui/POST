@@ -182,6 +182,27 @@ namespace GIGLS.Services.IServices.ServiceCentres
             }
         }
 
+        public async Task<ServiceCentreDTO> GetGIGGOServiceCentre()
+        {
+            try
+            {
+                var centre = await _uow.ServiceCentre.GetAsync(s => s.Code.ToLower() == "giggo", "Station");
+                if (centre == null)
+                {
+                    throw new GenericException("Error: A GIGGO Service Center has not been configured on this system. Please see the administrator.");
+                }
+
+                var centreDto = Mapper.Map<ServiceCentreDTO>(centre);
+                centreDto.StationName = centre.Station.StationName;
+                centreDto.StationCode = centre.Station.StationCode;
+                return centreDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
         public async Task<List<ServiceCentreDTO>> GetLocalServiceCentres()
         {
@@ -326,6 +347,20 @@ namespace GIGLS.Services.IServices.ServiceCentres
         {
             int[] countryIds = new int[] { countryId };
             return await _uow.ServiceCentre.GetLocalServiceCentres(countryIds);
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetHUBServiceCentres()
+        {
+            try
+            {
+                var services = await _uow.ServiceCentre.FindAsync(x => x.IsHUB == true);
+                var servicesDTO = Mapper.Map<List<ServiceCentreDTO>>(services);
+                return servicesDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

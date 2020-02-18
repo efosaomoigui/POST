@@ -121,6 +121,8 @@
     <Compile Include="Persistence\Repositories\Account\InvoiceRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\InvoiceShipmentRepository.cs" />
     <Compile Include="Persistence\Repositories\Account\VATRepository.cs" />
+    <Compile Include="Persistence\Repositories\ActivationCampaignEmailRepository.cs" />
+    <Compile Include="Persistence\Repositories\BankSettlement\BankRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\CodPayOutListRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\BankProcessingOrderCodesRepository.cs" />
     <Compile Include="Persistence\Repositories\BankSettlement\BankProcessingOrderForShipmentAndCODRepository.cs" />
@@ -146,6 +148,7 @@
     <Compile Include="Persistence\Repositories\Fleets\FleetPartRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\FleetRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\FleetTripRepository.cs" />
+    <Compile Include="Persistence\Repositories\GiglgoStationRepository.cs" />
     <Compile Include="Persistence\Repositories\Haulage\HaulageDistanceMappingPriceRepository.cs" />
     <Compile Include="Persistence\Repositories\Haulage\HaulageDistanceMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Haulage\HaulageRepository.cs" />
@@ -202,6 +205,7 @@
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCancelRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCollectionRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\PreShipmentItemRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\ShipmentHashRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentItemRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentPackagePriceRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\PreShipmentRepository.cs" />
@@ -226,10 +230,12 @@
     <Compile Include="Persistence\Repositories\Vendors\VendorRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\CashOnDeliveryAccountRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\CashOnDeliveryBalanceRepository.cs" />
+    <Compile Include="Persistence\Repositories\Wallet\IWaybillPaymentLogRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\WalletNumberRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\WalletPaymentLogRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\WalletRepository.cs" />
     <Compile Include="Persistence\Repositories\Wallet\WalletTransactionRepository.cs" />
+    <Compile Include="Persistence\Repositories\Wallet\WaybillPaymentLogRepository.cs" />
     <Compile Include="Persistence\Repositories\Workshops\WorkshopRepository.cs" />
     <Compile Include="Persistence\Repositories\Zone\DeliveryOptionPriceRepository.cs" />
     <Compile Include="Persistence\Repositories\Zone\DeliveryOptionRepository.cs" />

@@ -13,6 +13,7 @@ using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.User;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -40,19 +41,25 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
-                if (await _uow.Company.ExistAsync(c => c.Name.ToLower() == company.Name.Trim().ToLower() || c.PhoneNumber == company.PhoneNumber))
+                if (await _uow.Company.ExistAsync(c => c.Name.ToLower() == company.Name.Trim().ToLower() || c.PhoneNumber == company.PhoneNumber || c.Email == company.Email))
                 {
-                    throw new GenericException($"{company.Name} or phone number already exist");
+                    throw new GenericException($"{company.Name}, phone number or email detail already exist");
                 }
 
                 //check if registration is from Giglgo
-                if(company.IsFromMobile==true)
+                if(company.IsFromMobile == true)
                 {
                     company.IsRegisteredFromMobile = true;
                 }
 
+                //update the customer update to have country code added to it
+                if (company.PhoneNumber.StartsWith("0"))
+                {
+                    company.PhoneNumber = await AddCountryCodeToPhoneNumber(company.PhoneNumber, company.UserActiveCountryId);
+                }
+
                 var newCompany = Mapper.Map<Company>(company);
-                newCompany.CompanyStatus = CompanyStatus.Pending;
+                newCompany.CompanyStatus = CompanyStatus.Active;
 
                 //get the CompanyType
                 var companyType = "";
@@ -125,7 +132,8 @@ namespace GIGLS.Services.Implementation.Customers
                     UserChannelPassword = password,
                     UserChannelType = userChannelType,
                     PasswordExpireDate = DateTime.Now,
-                    UserActiveCountryId = newCompany.UserActiveCountryId
+                    UserActiveCountryId = newCompany.UserActiveCountryId,
+                    IsActive = true
                 });
 
                 //complete
@@ -146,6 +154,25 @@ namespace GIGLS.Services.Implementation.Customers
             {
                 throw;
             }
+        }
+
+        private async Task<string> AddCountryCodeToPhoneNumber(string phoneNumber, int countryId)
+        {
+            if(countryId < 1)
+            {
+                int getUserActiveCountry = await _userService.GetUserActiveCountryId();
+                countryId = getUserActiveCountry;
+            }
+
+            var country = await _uow.Country.GetAsync(x => x.CountryId == countryId);
+            if (country != null)
+            {
+                phoneNumber = phoneNumber.Substring(1, phoneNumber.Length - 1);
+                string phone = $"{country.PhoneNumberCode}{phoneNumber}";
+                phoneNumber = phone;
+
+            }
+            return phoneNumber;
         }
 
         public async Task DeleteCompany(int companyId)
@@ -184,6 +211,29 @@ namespace GIGLS.Services.Implementation.Customers
         public Task<List<CompanyDTO>> GetCompanies()
         {
             return _uow.Company.GetCompanies();
+        }
+
+        public Task<List<CompanyDTO>> GetCompanies(BaseFilterCriteria filterCriteria)
+        {
+            return _uow.Company.GetCompanies(filterCriteria);
+        }
+
+        public Task<List<CompanyDTO>> GetCompaniesWithoutWallet()
+        {
+            var companies = _uow.Company.GetAll().ToList();
+            return Task.FromResult(Mapper.Map<List<CompanyDTO>>(companies));
+        }
+
+        public async Task<List<CompanyDTO>> GetEcommerceWithoutWallet()
+        {
+            var companies = await _uow.Company.FindAsync(x => x.CompanyType == CompanyType.Ecommerce);
+            return Mapper.Map<List<CompanyDTO>>(companies);
+        }
+
+        public async Task<List<CompanyDTO>> GetCorporateWithoutWallet()
+        {
+            var companies = await _uow.Company.FindAsync(x => x.CompanyType == CompanyType.Corporate);
+            return Mapper.Map<List<CompanyDTO>>(companies);
         }
 
         public async Task<CompanyDTO> GetCompanyById(int companyId)
@@ -233,7 +283,7 @@ namespace GIGLS.Services.Implementation.Customers
                 company.ReturnServiceCentre = companyDto.ReturnServiceCentre;
                 company.ReturnAddress = companyDto.ReturnAddress;
                 company.RcNumber = companyDto.RcNumber;
-                company.UserActiveCountryId = companyDto.UserActiveCountryId;
+                //company.UserActiveCountryId = companyDto.UserActiveCountryId;
                 company.isCodNeeded = companyDto.isCodNeeded;
 
                 if (companyDto.ContactPersons.Any())
@@ -256,7 +306,7 @@ namespace GIGLS.Services.Implementation.Customers
                 user.LastName = companyDto.Name;
                 user.FirstName = companyDto.Name;
                 user.Email = companyDto.Email;
-                user.UserActiveCountryId = companyDto.UserActiveCountryId;
+                //user.UserActiveCountryId = companyDto.UserActiveCountryId;
 
                 await _userService.UpdateUser(user.Id, user);
 
@@ -397,5 +447,37 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
+        public async Task<EcommerceWalletDTO> GetECommerceWalletById(int companyId)
+        {
+            try
+            {
+                var company = await _uow.Company.GetWalletDetailsForCompany(companyId);
+
+                if (company == null)
+                {
+                    throw new GenericException("Wallet information does not exist");
+                }
+
+                return company;
+                
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<List<CompanyDTO>> GetCompanyByEmail(string email)
+        {
+            try
+            {
+                return _uow.Company.GetCompanyByEmail(email);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

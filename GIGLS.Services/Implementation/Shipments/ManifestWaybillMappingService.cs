@@ -346,6 +346,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+        
         //map waybill to Manifest (Pickup)
         public async Task MappingManifestToWaybillsPickup(string manifest, List<string> waybills)
         {
@@ -380,7 +381,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.PickupManifest.Add(newManifest);
                 }
 
-                foreach (var waybill in waybills)
+                var newWaybillList = new HashSet<string>(waybills);
+
+                var newMappingList = new List<PickupManifestWaybillMapping>();
+
+                foreach (var waybill in newWaybillList)
                 {
                     //check if the waybill exist
                     var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
@@ -402,10 +407,15 @@ namespace GIGLS.Services.Implementation.Shipments
                             IsActive = true,
                             ServiceCentreId = serviceIds[0]
                         };
-                        _uow.PickupManifestWaybillMapping.Add(newMapping);
+
+                        newMappingList.Add(newMapping);
+
+                        //_uow.PickupManifestWaybillMapping.Add(newMapping);
+
                         shipment.shipmentstatus = "Assigned for Pickup";
                     }
                 }
+                _uow.PickupManifestWaybillMapping.AddRange(newMappingList);
                 _uow.Complete();
             }
             catch (Exception) { }
@@ -894,24 +904,21 @@ namespace GIGLS.Services.Implementation.Shipments
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
                 //1. get all shipments at colletion centre for the service centre which status is ARF
-                //var shipmentCollection = await _uow.ShipmentCollection.FindAsync(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF);
                 var shipmentCollection = _uow.ShipmentCollection.GetAll()
-                    .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF).Select(x => x.Waybill);
+                    .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId)).Select(x => x.Waybill).ToList();
 
                 //2. Get shipment details for the service centre that are at the collection centre using the waybill and service centre
-                var InvoicesBySC = _uow.Invoice.GetAllInvoiceShipments();
+                //var InvoicesBySC = _uow.Invoice.GetAllInvoiceShipments();
+                var InvoicesBySC = _uow.Invoice.GetAllFromInvoiceAndShipments();
 
                 //filter by destination service center that is not cancelled and it is home delivery
-                InvoicesBySC = InvoicesBySC.Where(x => x.PickupOptions == PickupOptions.HOMEDELIVERY);
-
-                if (serviceCenters.Length > 0)
-                {
-                    InvoicesBySC = InvoicesBySC.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId));
-                }
+                InvoicesBySC = InvoicesBySC.Where(x => x.PickupOptions == PickupOptions.HOMEDELIVERY && x.IsShipmentCollected == false);
+                InvoicesBySC = InvoicesBySC.Where(s => serviceCenters.Contains(s.DestinationServiceCentreId));
 
                 ////final list
-                InvoicesBySC = InvoicesBySC.Where(s => shipmentCollection.Contains(s.Waybill));
-                var InvoicesBySCList = InvoicesBySC.ToList();
+                //InvoicesBySC = InvoicesBySC.Where(s => shipmentCollection.Contains(s.Waybill));
+                var InvoicesBySCResult = InvoicesBySC.ToList();
+                var InvoicesBySCList = InvoicesBySC.Where(s => shipmentCollection.Contains(s.Waybill)).ToList();
 
                 shipmentsBySC = (from r in InvoicesBySCList
                                  select new ShipmentDTO()

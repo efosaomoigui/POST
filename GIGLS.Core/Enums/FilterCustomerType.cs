@@ -4,6 +4,7 @@
     {
         IndividualCustomer,
         Corporate,
-        Ecommerce
+        Ecommerce,
+        Partner
     }
 }

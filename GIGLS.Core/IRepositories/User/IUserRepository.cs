@@ -47,5 +47,12 @@ namespace GIGLS.Core.IRepositories.User
         Task<GIGL.GIGLS.Core.Domain.User> GetUserByPhoneNumber(string PhoneNumber);
         IQueryable<GIGL.GIGLS.Core.Domain.User> GetCorporateCustomerUsersAsQueryable();
 
+        Task<bool> IsUserHasAdminRole(string userId);
+        Task<GIGL.GIGLS.Core.Domain.User> GetUserByEmailorPhoneNumber(string email, string PhoneNumber);
+        Task<List<GIGL.GIGLS.Core.Domain.User>> GetUserListByEmailorPhoneNumber(string email, string PhoneNumber);
+        Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomer(string emailPhoneCode);
+        Task<GIGL.GIGLS.Core.Domain.User> ActivateUserByEmail(string email, bool isActive);
+        Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomerForCustomerPortal(string emailPhoneCode);
+        Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomerForMobileScanner(string emailPhoneCode);
     }
 }

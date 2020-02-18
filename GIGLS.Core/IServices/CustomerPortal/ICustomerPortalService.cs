@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.Domain.BankSettlement;
+﻿using GIGLS.Core.Domain;
+using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Admin;
@@ -69,14 +70,14 @@ namespace GIGLS.Core.IServices.CustomerPortal
         //Payment Log
         Task<Tuple<Task<List<WalletPaymentLogDTO>>, int>> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto);
 
-        List<string> GetItemTypes();
+        Task<List<string>> GetItemTypes();
 
         Task<List<StationDTO>> GetLocalStations();
 
         Task<Dictionary<string, List<StationDTO>>> GetAllStations();
         Task<MobilePriceDTO> GetHaulagePrice(HaulagePriceDTO haulagePricingDto);
         Task<IEnumerable<NewCountryDTO>> GetUpdatedCountries();
-        Task<bool> ApproveShipment(string waybillNumber);
+        Task<bool> ApproveShipment(ApproveShipmentDTO detail);
         Task<PreShipmentSummaryDTO> GetShipmentDetailsFromDeliveryNumber(string DeliveryNumber);
 
         Task<bool> UpdateReceiverDetails(PreShipmentMobileDTO receiver);
@@ -93,9 +94,10 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> AddRatings(MobileRatingDTO rating);
         Task<object> CancelShipment(string Waybill);
         Task<UserDTO> IsOTPValid(int OTP);
+        Task<UserDTO> ValidateOTP(OTPDTO otp);
         Task<UserDTO> CheckDetails(string user, string userchanneltype);
         Task<bool> CreateCustomer(string CustomerCode);
-        Task<string> CreatePartner(string CustomerCode);
+        Task<PartnerDTO> CreatePartner(string CustomerCode);
         Task<bool> CreateCompany(string CustomerCode);
         Task<bool> EditProfile(UserDTO user);
         Task<object> AddPreShipmentMobile(PreShipmentMobileDTO preShipment);
@@ -116,8 +118,17 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> UpdateVehicleProfile(UserDTO user);
         Task<IEnumerable<LGADTO>> GetActiveLGAs();
         Task<AdminReportDTO> WebsiteData();
+        Task AddWallet(WalletDTO wallet);
+        Task<UserDTO> GenerateReferrerCode(UserDTO user);
+        Task<string> Decrypt();
+        Task<object> CancelShipmentWithNoCharge(CancelShipmentDTO shipment);
 
-
+        Task SendPickUpRequestMessage(string userId);
+        Task<List<GiglgoStationDTO>> GetGoStations();
+        Task<List<DeliveryNumberDTO>> GetDeliveryNumbers(int count);
+        Task<UserDTO> CheckDetailsForCustomerPortal(string user);
+        Task<UserDTO> CheckDetailsForMobileScanner(string user);
+        Task<bool> UpdateGIGGoShipmentStaus(MobilePickUpRequestsDTO mobilePickUpRequestsDTO);
 
     }
 }

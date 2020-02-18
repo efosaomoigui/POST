@@ -7,8 +7,13 @@ namespace GIGLS.Core.Domain.Partnership
     {
         public int PartnerApplicationId { get; set; }
 
+        [MaxLength(500)]
         public string FirstName { get; set; }
+
+        [MaxLength(500)]
         public string LastName { get; set; }
+
+        [MaxLength(500)]
         public string CompanyName { get; set; }
         public string Email { get; set; }
 

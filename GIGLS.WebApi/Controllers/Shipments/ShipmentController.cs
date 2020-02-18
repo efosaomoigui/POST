@@ -14,6 +14,10 @@ using System.Web.Http;
 using GIGLS.CORE.IServices.Report;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
+using System;
+using System.Web.Http.Results;
+using System.Configuration;
+using System.Linq;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -328,7 +332,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
 
-               // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
+                // string path = "http:/localhost/GIGLS/uploads/giglsdoc.json";
 
                 var dailySales = await _service.GetDailySales(accountFilterCriteria);
 
@@ -358,7 +362,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 var dailySales = await _service.GetSalesForServiceCentre(accountFilterCriteria);
-                
+
                 return new ServiceResponse<DailySalesDTO>
                 {
                     Object = dailySales
@@ -409,6 +413,192 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
                 {
                     Object = centres
+                };
+            });
+        }
+
+        // Shipment delivery monitor
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("GetShipmentCreatedSummaryMonitor")]
+        public async Task<IServiceResponse<System.Web.Mvc.JsonResult>> GetShipmentCreatedSummaryMonitor()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                var today = DateTime.Now.Date;
+                var firstDayOfMonth = today.AddDays(-7);
+
+                var accountFilterCriteria = new AccountFilterCriteria
+                {
+                    StartDate = firstDayOfMonth,
+                    EndDate = today.AddDays(1)
+                };
+
+                var results = await _service.GetShipmentMonitor(accountFilterCriteria);
+
+                return new ServiceResponse<System.Web.Mvc.JsonResult>()
+                {
+                    Object = new System.Web.Mvc.JsonResult { Data = results.totalZones, JsonRequestBehavior = System.Web.Mvc.JsonRequestBehavior.AllowGet }
+                };
+            });
+        }
+
+        // Shipment monitor
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("GetShipmentCreatedByDateMonitor")]
+        public async Task<IServiceResponse<System.Web.Mvc.JsonResult>> GetShipmentCreatedByDateMonitor(int limitStart, int limitEnd)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                var today = DateTime.Now.Date; 
+                var firstDayOfMonth = today.AddDays(-7);
+
+                var accountFilterCriteria = new AccountFilterCriteria
+                {
+                    StartDate = firstDayOfMonth,
+                    EndDate = today.AddDays(1)
+                };
+
+                var limitdates = new LimitDates
+                {
+                    StartLimit = limitStart,
+                    EndLimit = limitEnd
+                };
+                
+                var chartData = await _service.GetShipmentCreatedByDateMonitor(accountFilterCriteria, limitdates);
+
+                return new ServiceResponse<System.Web.Mvc.JsonResult>()
+                {
+                    Object = new System.Web.Mvc.JsonResult { Data = chartData, JsonRequestBehavior = System.Web.Mvc.JsonRequestBehavior.AllowGet }
+                };
+            });
+        }
+
+        // Shipment monitor
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("GetShipmentWaybillsByDateMonitor")]
+        public async Task<IServiceResponse<System.Web.Mvc.JsonResult>> GetShipmentWaybillsByDateMonitor(int limitStart, int limitEnd, string scname)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var today = DateTime.Now.Date; 
+                var firstDayOfMonth = today.AddDays(-7);
+
+                var accountFilterCriteria = new AccountFilterCriteria
+                {
+                    StartDate = firstDayOfMonth,
+                    EndDate = today.AddDays(1)
+                };
+
+                var limitdates = new LimitDates
+                {
+                    StartLimit = limitStart,
+                    EndLimit = limitEnd,
+                    ScName = scname
+                };
+
+                var chartData = await _service.GetShipmentWaybillsByDateMonitor(accountFilterCriteria, limitdates);
+
+                return new ServiceResponse<System.Web.Mvc.JsonResult>()
+                {
+                    Object = new System.Web.Mvc.JsonResult { Data = chartData, JsonRequestBehavior = System.Web.Mvc.JsonRequestBehavior.AllowGet }
+                };
+            });
+        }
+
+
+        // Shipment delivery monitor
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("GetShipmentCreatedSummaryMonitorx")]
+        public async Task<IServiceResponse<System.Web.Mvc.JsonResult>> GetShipmentCreatedSummaryMonitorx()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                var today = DateTime.Now.Date; 
+                var firstDayOfMonth = today.AddDays(-7);
+
+                var accountFilterCriteria = new AccountFilterCriteria
+                {
+                    StartDate = firstDayOfMonth,
+                    EndDate = today.AddDays(1)
+                };
+
+                var results = await _service.GetShipmentMonitorx(accountFilterCriteria);
+
+                return new ServiceResponse<System.Web.Mvc.JsonResult>()
+                {
+                    Object = new System.Web.Mvc.JsonResult { Data = results.totalZones, JsonRequestBehavior = System.Web.Mvc.JsonRequestBehavior.AllowGet }
+                };
+            });
+        }
+
+        // Shipment monitor
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("GetShipmentCreatedByDateMonitorx")]
+        public async Task<IServiceResponse<System.Web.Mvc.JsonResult>> GetShipmentCreatedByDateMonitorx(int limitStart, int limitEnd)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var today = DateTime.Now.Date;
+                var firstDayOfMonth = today.AddDays(-7);
+
+                var accountFilterCriteria = new AccountFilterCriteria
+                {
+                    StartDate = firstDayOfMonth,
+                    EndDate = today.AddDays(1)
+                };
+
+                var limitdates = new LimitDates
+                {
+                    StartLimit = limitStart,
+                    EndLimit = limitEnd
+                };
+
+                var chartData = await _service.GetShipmentCreatedByDateMonitorx(accountFilterCriteria, limitdates);
+
+                return new ServiceResponse<System.Web.Mvc.JsonResult>()
+                {
+                    Object = new System.Web.Mvc.JsonResult { Data = chartData, JsonRequestBehavior = System.Web.Mvc.JsonRequestBehavior.AllowGet }
+                };
+            });
+        }
+
+        // Shipment monitor
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("GetShipmentWaybillsByDateMonitorx")]
+        public async Task<IServiceResponse<System.Web.Mvc.JsonResult>> GetShipmentWaybillsByDateMonitorx(int limitStart, int limitEnd, string scname = null)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var today = DateTime.Now.Date; 
+                var firstDayOfMonth = today.AddDays(-7);
+
+                var accountFilterCriteria = new AccountFilterCriteria
+                {
+                    StartDate = firstDayOfMonth,
+                    EndDate = today.AddDays(1)
+                };
+
+                var limitdates = new LimitDates
+                {
+                    StartLimit = limitStart,
+                    EndLimit = limitEnd,
+                    ScName = scname
+                };
+
+                var chartData = await _service.GetShipmentWaybillsByDateMonitorx(accountFilterCriteria, limitdates);
+
+                return new ServiceResponse<System.Web.Mvc.JsonResult>()
+                {
+                    Object = new System.Web.Mvc.JsonResult { Data = chartData, JsonRequestBehavior = System.Web.Mvc.JsonRequestBehavior.AllowGet }
                 };
             });
         }

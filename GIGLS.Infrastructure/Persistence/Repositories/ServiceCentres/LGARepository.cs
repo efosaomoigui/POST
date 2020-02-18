@@ -2,7 +2,6 @@
 using GIGLS.Infrastructure.Persistence;
 using GIGLS.Infrastructure.Persistence.Repository;
 using GIGLS.Core.Domain;
-using System.Collections;
 using GIGLS.Core.DTO.ServiceCentres;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -26,7 +25,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
             try
             {
                 var lgas = Context.LGA.Where(x => x.Status == true).ToList();
-
                 var lgasDto = Mapper.Map<IEnumerable<LGADTO>>(lgas);
                 return Task.FromResult(lgasDto);
             }

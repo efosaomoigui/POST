@@ -1,19 +1,15 @@
 ﻿using AutoMapper;
-using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.DTO;
-using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
-using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.CORE.Domain;
 using GIGLS.Infrastructure;
-using GIGLS.Services.Implementation.Utility;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
@@ -238,7 +234,6 @@ namespace GIGLS.Services.Implementation.User
 
         public async Task<IdentityResult> UpdateUser(string userid, UserDTO userDto)
         {
-
             var user = await _unitOfWork.User.GetUserById(userid);
 
             if (user == null)
@@ -257,11 +252,13 @@ namespace GIGLS.Services.Implementation.User
             user.PhoneNumber = userDto.PhoneNumber;
             user.SystemUserId = userDto.SystemUserId;
             user.SystemUserRole = userDto.SystemUserRole;
+            user.UserName = userDto.Username;
 
             user.UserChannelCode = userDto.UserChannelCode;
             user.UserChannelPassword = userDto.UserChannelPassword;
             user.UserChannelType = userDto.UserChannelType;
             user.PictureUrl = userDto.PictureUrl;
+            user.UserActiveCountryId = userDto.UserActiveCountryId;
 
             return await _unitOfWork.User.UpdateUser(userid, user);
 
@@ -803,6 +800,13 @@ namespace GIGLS.Services.Implementation.User
             return defaultServiceCenter;
         }
 
+        public async Task<ServiceCentreDTO> GetGIGGOServiceCentre()
+        {
+            var gigGOServiceCenter = await _serviceCentreService.GetGIGGOServiceCentre();
+            return gigGOServiceCenter;
+        }
+
+
         //change user password by Admin
         public async Task<IdentityResult> ResetPassword(string userid, string password)
         {
@@ -1323,10 +1327,10 @@ namespace GIGLS.Services.Implementation.User
 
         public async Task<int> GetUserActiveCountryId()
         {
-            int UserCountryId = 0;
 
             //1. Get the user active country
             var countries = await GetPriviledgeCountrys();
+            int UserCountryId;
             if (countries.Count == 1)
             {
                 var userActiveCountry = countries[0];
@@ -1396,6 +1400,62 @@ namespace GIGLS.Services.Implementation.User
             }
 
             return serviceCenterIds;
+        }
+
+        public async Task<bool> IsUserHasAdminRole(string userId)
+        {
+            return await _unitOfWork.User.IsUserHasAdminRole(userId);
+        }
+
+
+        //use for mobile request
+        public async Task<UserDTO> GetUserUsingCustomer(string emailPhoneCode)
+        {
+            var user = await _unitOfWork.User.GetUserUsingCustomer(emailPhoneCode);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!");
+            }
+
+            return Mapper.Map<UserDTO>(user);
+        }
+
+        //used for Customer Portal
+        public async Task<UserDTO> GetUserUsingCustomerForCustomerPortal(string emailPhoneCode)
+        {
+            var user = await _unitOfWork.User.GetUserUsingCustomerForCustomerPortal(emailPhoneCode);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist");
+            }
+            return Mapper.Map<UserDTO>(user);
+        }
+
+        //used for Mobile Scanner
+        public async Task<UserDTO> GetUserUsingCustomerForMobileScanner(string emailPhoneCode)
+        {
+            var user = await _unitOfWork.User.GetUserUsingCustomerForMobileScanner(emailPhoneCode);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist");
+            }
+            return Mapper.Map<UserDTO>(user);
+        }
+
+
+        public async Task<UserDTO> GetActivatedUserByEmail(string email, bool isActive)
+        {
+            var user = await _unitOfWork.User.ActivateUserByEmail(email, isActive);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!");
+            }
+
+            return Mapper.Map<UserDTO>(user);
         }
     }
 }

@@ -52,6 +52,7 @@ namespace GIGLS.Core.IServices.User
         Task<int[]> GetPriviledgeServiceCenters();
         Task<ServiceCentreDTO[]> GetCurrentServiceCenter();
         Task<ServiceCentreDTO> GetDefaultServiceCenter();
+        Task<ServiceCentreDTO> GetGIGGOServiceCentre();
         Task<bool> CheckSCA();
         Task<UserDTO> retUser();
 
@@ -77,5 +78,11 @@ namespace GIGLS.Core.IServices.User
         Task<CountryDTO> GetUserActiveCountry();
         Task<int> GetUserActiveCountryId();
         Task<int[]> GetRegionServiceCenters(string currentUserId);
+
+        Task<bool> IsUserHasAdminRole(string userId);
+        Task<UserDTO> GetUserUsingCustomer(string emailPhoneCode);
+        Task<UserDTO> GetActivatedUserByEmail(string email, bool isActive);
+        Task<UserDTO> GetUserUsingCustomerForCustomerPortal(string emailPhoneCode);
+        Task<UserDTO> GetUserUsingCustomerForMobileScanner(string emailPhoneCode);
     }
 }

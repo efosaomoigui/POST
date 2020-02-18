@@ -963,7 +963,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             for (int month = 1; month <= 12; month++)
             {
                 var thisMonthShipments = shipmentsOrderedByServiceCenter.Where(
-                    s => s.DateCreated.Month == month);
+                    s => s.DateCreated.Month == month && s.IsFromMobile == false);
 
                 var firstDataToGetYear = thisMonthShipments.FirstOrDefault();
                 if (firstDataToGetYear != null)

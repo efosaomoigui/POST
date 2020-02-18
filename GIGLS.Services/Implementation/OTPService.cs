@@ -9,13 +9,15 @@ using GIGLS.Core.IMessage;
 using AutoMapper;
 using GIGLS.Core.IServices.User;
 using System.Text.RegularExpressions;
-using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.Utility;
 using System.Collections.Generic;
 using System.Linq;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
+using GIGLS.Infrastructure;
+using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.IServices.Wallet;
 
 namespace GIGLS.Services.Implementation
 {
@@ -27,9 +29,12 @@ namespace GIGLS.Services.Implementation
         private readonly IUserService _UserService;
         private readonly IPasswordGenerator _codegenerator;
         private readonly IMessageSenderService _messageSenderService;
+        private readonly IGlobalPropertyService _globalPropertyService;
+        private readonly IWalletTransactionService _iWalletTransactionService;
 
         public OTPService(IUnitOfWork uow, ISMSService MessageService, IEmailService EmailService, IUserService UserService,
-            IPasswordGenerator codegenerator, IMessageSenderService messageSenderService )
+            IPasswordGenerator codegenerator, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService,
+            IWalletTransactionService iWalletTransactionService)
         {
             _uow = uow;
             _SmsService = MessageService;
@@ -37,186 +42,184 @@ namespace GIGLS.Services.Implementation
             _UserService = UserService;
             _codegenerator = codegenerator;
             _messageSenderService = messageSenderService;
+            _globalPropertyService = globalPropertyService;
+            _iWalletTransactionService = iWalletTransactionService;
             MapperConfig.Initialize();
         }
         public async Task<UserDTO> IsOTPValid(int OTP)
         {
             var otpbody = await _uow.OTP.IsOTPValid(OTP);
-            var result = Mapper.Map<OTPDTO>(otpbody);
-            var userdto = await _UserService.GetUserByEmail(result.EmailAddress);
-            if(result.IsValid ==true)
+            var userdto = new UserDTO();
+
+            if (otpbody.IsValid == true)
             {
-                userdto.IsActive=true;
-                var user = await _UserService.UpdateUser(userdto.Id, userdto);
+                userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true);
+                _uow.OTP.Remove(otpbody);
+                await _uow.CompleteAsync();
             }
             return userdto;
         }
-               
-        public  async Task<OTPDTO> GenerateOTP(UserDTO user)
-        {
-               int id = GeneratePassword();
-                var otp = new OTPDTO
-                {
-                    EmailAddress = user.Email,
-                    PhoneNumber = user.PhoneNumber,
-                    CustomerId = user.UserChannelCode,
-                    Otp = id
-                };
 
-                var result = Mapper.Map<OTP>(otp);
-                _uow.OTP.Add(result);
-                await _uow.CompleteAsync();
-                return otp;
-            
- }
+        private string ExtractPhoneNumber(string phoneNumber)
+        {
+            phoneNumber = phoneNumber.Trim();
+
+            bool IsPhone = Regex.IsMatch(phoneNumber, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
+
+            if (IsPhone)
+            {
+                if (!(phoneNumber.StartsWith("0") || phoneNumber.StartsWith("+")))
+                {
+                    phoneNumber = phoneNumber.Remove(0, 4);
+                }
+
+                if (phoneNumber.StartsWith("+"))
+                {
+                    phoneNumber = phoneNumber.Remove(0, 4);
+                }
+
+                if (phoneNumber.StartsWith("0"))
+                {
+                    phoneNumber = phoneNumber.Remove(0, 1);
+                }
+            }
+
+            return phoneNumber;
+        }
+
+        public async Task<UserDTO> ValidateOTP(OTPDTO otp)
+        {
+            otp.EmailAddress = ExtractPhoneNumber(otp.EmailAddress);
+
+            //get the otp details using the email 
+            var result = _uow.OTP.GetAllAsQueryable().Where(x => x.Otp == otp.Otp && (x.EmailAddress.ToLower() == otp.EmailAddress.ToLower() || x.PhoneNumber.Contains(otp.EmailAddress))).ToList();
+            var otpbody = result.LastOrDefault();
+
+            if (otpbody == null)
+            {
+                throw new GenericException("Invalid OTP");
+            }
+            else
+            {
+                DateTime LatestTime = DateTime.Now;
+                TimeSpan span = LatestTime.Subtract(otpbody.DateCreated);
+                int difference = Convert.ToInt32(span.TotalMinutes);
+                if (difference < 5)
+                {
+                    //customer activated
+                    var userdto = await _UserService.GetActivatedUserByEmail(otpbody.EmailAddress, true);
+                    _uow.OTP.Remove(otpbody);
+                    await _uow.CompleteAsync();
+
+                    if (userdto.IsActive)
+                    {
+                        await CalculateReferralBonus(userdto);
+                    }
+
+                    return userdto;
+                }
+                else
+                {
+                    _uow.OTP.Remove(otpbody);
+                    await _uow.CompleteAsync();
+                    throw new GenericException("OTP has expired!.Kindly Resend OTP.");
+                }
+            }
+        }
+
+        public async Task<OTPDTO> GenerateOTP(UserDTO user)
+        {
+            int id = GeneratePassword();
+            var otp = new OTPDTO
+            {
+                EmailAddress = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                CustomerId = user.UserChannelCode,
+                Otp = id
+            };
+
+            var result = Mapper.Map<OTP>(otp);
+            _uow.OTP.Add(result);
+            await _uow.CompleteAsync();
+            return otp;
+        }
 
         private static int GeneratePassword()
-         {
+        {
             int min = 1000;
             int max = 9999;
             Random rdm = new Random();
             return rdm.Next(min, max);
-          }
-        public  async Task<bool> SendOTP(OTPDTO user)
-        {
+        }
 
+        public async Task<bool> SendOTP(OTPDTO user)
+        {
             var message = new MobileMessageDTO
             {
                 SenderEmail = user.EmailAddress,
                 SenderPhoneNumber = user.PhoneNumber,
-                OTP = user.Otp
+                OTP = user.Otp,
+                SMSSenderPlatform = SMSSenderPlatform.TWILIO
             };
+
             var response = await _messageSenderService.SendMessage(MessageType.OTP, EmailSmsType.All, message);
             return response;
         }
+
         public async Task<UserDTO> CheckDetails(string user, string userchanneltype)
         {
-            UserDTO registerUser = new UserDTO();
-            bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
-            if (isEmail)
+            try
             {
-                user.Trim();
-                registerUser = await _UserService.GetUserByEmail(user);
-                var VehicleType = await _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode);
-                if (VehicleType != null)
+                var registerUser = await _UserService.GetUserUsingCustomer(user);
+                
+                if (registerUser != null)
                 {
-                    if (VehicleType.VehicleType != null)
+                    var company = await _uow.Company.GetAsync(s => s.CustomerCode == registerUser.UserChannelCode);
+                    if(company != null)
                     {
-                        var vehicletypeDTO = new VehicleTypeDTO
-                        {
-                            Partnercode = registerUser.UserChannelCode,
-                            Vehicletype = VehicleType.VehicleType
-                        };
-                        var vehicletype = Mapper.Map<VehicleType>(vehicletypeDTO);
-                        _uow.VehicleType.Add(vehicletype);
-                        VehicleType.VehicleType = null;
-                        await _uow.CompleteAsync();
+                        registerUser.IsEligible = Convert.ToBoolean(company.IsEligible);
                     }
                 }
-                var vehicle = _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode).Result.ToList();
-                if(vehicle.Count() != 0)
-                {
-                    registerUser.VehicleType = new List<string>();
-                    foreach (var item in vehicle)
-                    {
-                       registerUser.VehicleType.Add(item.Vehicletype);
-                    }
-                }
-                var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.UserCode == registerUser.UserChannelCode);
-                if (referrerCode != null)
-                {
-                    registerUser.Referrercode = referrerCode.Referrercode;
-                }
-                else
-                {
-                    var code = await _codegenerator.Generate(5);
-                    var referrerCodeDTO = new ReferrerCodeDTO
-                    {
-                        Referrercode = code,
-                        UserId = registerUser.Id,
-                        UserCode = registerUser.UserChannelCode
 
-                    };
-                    var referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
-                    _uow.ReferrerCode.Add(referrercode);
-                    await _uow.CompleteAsync();
-                    registerUser.Referrercode = referrercode.Referrercode;
-                }
-                var averageratings = await GetAverageRating(registerUser.UserChannelCode, userchanneltype);
-                var IsVerified = await IsPartnerActivated(registerUser.UserChannelCode);
-                registerUser.IsVerified = IsVerified;
-                registerUser.AverageRatings = averageratings;
+                UserDTO registerUserDTo = new UserDTO();
+                registerUserDTo = await CheckVehicleInformation(registerUser, userchanneltype);
+
+                return registerUserDTo;
             }
-            else
+            catch (Exception)
             {
-                bool IsPhone = Regex.IsMatch(user, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
-                if (IsPhone)
-                {
-                    if (!user.Contains("+234"))
-                    {
-                        user = "+234" + user.Remove(0, 1);
-                    };
-                    registerUser = await _UserService.GetUserByPhone(user);
-                    var VehicleType = await _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode);
-                    if (VehicleType != null)
-                    {
-                        if (VehicleType.VehicleType != null)
-                        {
-                            var vehicletypeDTO = new VehicleTypeDTO
-                            {
-                                Partnercode = registerUser.UserChannelCode,
-                                Vehicletype = VehicleType.VehicleType
-                            };
-                            var vehicletype = Mapper.Map<VehicleType>(vehicletypeDTO);
-                            _uow.VehicleType.Add(vehicletype);
-                            VehicleType.VehicleType = null;
-                            await _uow.CompleteAsync();
-                        }
-                    }
-                    var vehicle = _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode).Result.ToList();
-                    if (vehicle.Count() != 0)
-                    {
-                        registerUser.VehicleType = new List<string>();
-                        foreach (var item in vehicle)
-                        {
-                            registerUser.VehicleType.Add(item.Vehicletype);
-                        }
-                    }
-                    var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.UserCode == registerUser.UserChannelCode);
-                    if (referrerCode != null)
-                    {
-                        registerUser.Referrercode = referrerCode.Referrercode;
-                    }
-                    else
-                    {
-                        var code = await _codegenerator.Generate(5);
-                        var referrerCodeDTO = new ReferrerCodeDTO
-                        {
-                            Referrercode = code,
-                            UserId = registerUser.Id,
-                            UserCode = registerUser.UserChannelCode
-
-                        };
-                        var referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
-                        _uow.ReferrerCode.Add(referrercode);
-                        await _uow.CompleteAsync();
-                        registerUser.Referrercode = referrercode.Referrercode;
-                    }
-                    var averageratings = await GetAverageRating(registerUser.UserChannelCode, userchanneltype);
-                    var IsVerified = await IsPartnerActivated(registerUser.UserChannelCode);
-                    registerUser.AverageRatings = averageratings;
-                    registerUser.IsVerified = IsVerified;
-                }
-                else
-                {
-                    throw new GenericException("Invalid Details");
-                }
+                throw;
             }
-            return registerUser;
 
         }
+        //Check Details for Customer Portal
+        public async Task<UserDTO> CheckDetailsForCustomerPortal(string user)
+        {
+            try
+            {
+                var registerUser = await _UserService.GetUserUsingCustomerForCustomerPortal(user);
+                return registerUser;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
-        public async Task<double> GetAverageRating(string CustomerCode,string usertype)
+        //Check Details for Mobile Scanner 
+        public async Task<UserDTO> CheckDetailsForMobileScanner(string user)
+        {
+            try
+            {
+                var registerUser = await _UserService.GetUserUsingCustomerForMobileScanner(user);
+                return registerUser;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<double> GetAverageRating(string CustomerCode, string usertype)
         {
             if (usertype == UserChannelType.Partner.ToString())
             {
@@ -233,7 +236,7 @@ namespace GIGLS.Services.Implementation
             }
             else
             {
-                var ratings = await _uow.MobileRating.FindAsync(s =>s.CustomerCode == CustomerCode);
+                var ratings = await _uow.MobileRating.FindAsync(s => s.CustomerCode == CustomerCode);
                 var count = ratings.Count();
                 var averageratings = ratings.Sum(x => x.PartnerRating);
                 averageratings = (averageratings / count);
@@ -244,9 +247,8 @@ namespace GIGLS.Services.Implementation
                 var rating = (double)averageratings;
                 return rating;
             }
-           
-           
         }
+
         public async Task<bool> IsPartnerActivated(string CustomerCode)
         {
             try
@@ -263,6 +265,125 @@ namespace GIGLS.Services.Implementation
             {
                 throw;
             }
+        }
+
+        private async Task<UserDTO> CheckVehicleInformation(UserDTO registerUser, string userchanneltype)
+        {
+            try
+            {
+                var VehicleType = await _uow.Partner.GetAsync(s => s.PartnerCode == registerUser.UserChannelCode);
+                if (VehicleType != null)
+                {
+                    registerUser.VehicleLicenseExpiryDate = VehicleType.VehicleLicenseExpiryDate;
+                    if (VehicleType.VehicleType != null)
+                    {
+                        var vehicletypeDTO = new VehicleTypeDTO
+                        {
+                            Partnercode = registerUser.UserChannelCode,
+                            Vehicletype = VehicleType.VehicleType
+                        };
+                        var vehicletype = Mapper.Map<VehicleType>(vehicletypeDTO);
+                        _uow.VehicleType.Add(vehicletype);
+                        VehicleType.VehicleType = null;
+                        await _uow.CompleteAsync();
+                    }
+
+                    var vehicle = await _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode);
+                    if (vehicle.Count() > 0)
+                    {
+                        registerUser.VehicleType = new List<string>();
+                        foreach (var item in vehicle)
+                        {
+                            registerUser.VehicleType.Add(item.Vehicletype);
+                        }
+                    }
+
+                    registerUser.IsVerified = VehicleType.IsActivated;
+                }
+
+                var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.UserCode == registerUser.UserChannelCode);
+                if (referrerCode != null)
+                {
+                    registerUser.Referrercode = referrerCode.Referrercode;
+                }
+                else
+                {
+                    registerUser = await GenerateReferrerCode(registerUser);
+                }
+
+                var averageratings = await GetAverageRating(registerUser.UserChannelCode, userchanneltype);
+
+                registerUser.AverageRatings = averageratings;
+                return registerUser;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<UserDTO> GenerateReferrerCode(UserDTO user)
+        {
+
+            var code = await _codegenerator.Generate(5);
+            var ReferrerCodeExists = await _uow.ReferrerCode.GetAsync(s => s.UserCode == user.UserChannelCode);
+            if (ReferrerCodeExists == null)
+            {
+                var referrerCodeDTO = new ReferrerCodeDTO
+                {
+                    Referrercode = code,
+                    UserId = user.Id,
+                    UserCode = user.UserChannelCode
+                };
+                var referrercode = Mapper.Map<ReferrerCode>(referrerCodeDTO);
+                _uow.ReferrerCode.Add(referrercode);
+                await _uow.CompleteAsync();
+                user.Referrercode = referrercode.Referrercode;
+            }
+            else
+            {
+                user.Referrercode = ReferrerCodeExists.Referrercode;
+            }
+            return user;
+        }
+
+        private async Task CalculateReferralBonus(UserDTO User)
+        {           
+            if (User.RegistrationReferrercode != null && User.IsUniqueInstalled == true)
+            {
+                var referrercode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == User.RegistrationReferrercode);
+                if (referrercode != null)
+                {
+                    var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, User.UserActiveCountryId);
+                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrercode.UserCode);
+                    var ReferrerUser = await _UserService.GetUserByChannelCode(referrercode.UserCode);
+                    if (wallet != null)
+                    {
+                        wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
+                    }
+                    var transaction = new WalletTransactionDTO
+                    {
+                        WalletId = wallet.WalletId,
+                        CreditDebitType = CreditDebitType.Credit,
+                        Amount = Convert.ToDecimal(bonus.Value),
+                        ServiceCentreId = 296,
+                        Waybill = "",
+                        Description = "Referral Bonus",
+                        PaymentType = PaymentType.Online,
+                        UserId = ReferrerUser.Id
+                    };
+                    var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
+                    await _uow.CompleteAsync();
+                    var messageExtensionDTO = new MobileMessageDTO()
+                    {
+                        SenderName = ReferrerUser.FirstName + " " + ReferrerUser.LastName,
+                        SenderEmail = ReferrerUser.Email
+
+                    };
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
+                }
+            }
+
         }
 
     }

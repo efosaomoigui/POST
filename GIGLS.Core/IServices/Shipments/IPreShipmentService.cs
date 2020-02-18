@@ -32,7 +32,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> CreateShipmentFromPreShipment(string waybill);
         Task<List<StationDTO>> GetUnmappedManifestStations();
         Task<List<PreShipmentDTO>> GetUnmappedPreShipmentsInStation(int stationId);
-        Task<List<DeliveryNumberDTO>> GetDeliveryNumbers(FilterOptionsDto filterOptionsDto);
+        Task<List<DeliveryNumberDTO>> GetDeliveryNumbers(string count);
         
     }
 }

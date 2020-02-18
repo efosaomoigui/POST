@@ -16,4 +16,11 @@
         PaidOut,
         NotPaidOut 
     }
+
+    public enum OnlinePaymentType
+    {
+        Paystack,
+        TheTeller,
+        Flutterwave
+    }
 }

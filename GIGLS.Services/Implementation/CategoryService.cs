@@ -6,8 +6,6 @@ using GIGLS.Core.IServices;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation
@@ -63,7 +61,6 @@ namespace GIGLS.Services.Implementation
         {
             var categories = _uow.Category.GetAll();
             return Task.FromResult(Mapper.Map<List<CategoryDTO>>(categories));
-
         }
 
         public async Task<CategoryDTO> GetCategoryById(int categoryId)

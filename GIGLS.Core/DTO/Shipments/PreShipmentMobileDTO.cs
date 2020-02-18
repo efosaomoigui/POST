@@ -1,4 +1,5 @@
-﻿using GIGLS.CORE.DTO;
+﻿using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,13 +37,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverCity { get; set; }
         public string ReceiverState { get; set; }
         public string ReceiverCountry { get; set; }
-
-
-
-        
-        public LocationDTO SenderLocation { get; set; }
-
-        
+                             
+        public LocationDTO SenderLocation { get; set; }       
 
         public  LocationDTO ReceiverLocation { get; set; }
         //Delivery Options
@@ -64,15 +60,12 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal? ExpectedAmountToCollect { get; set; }
         public decimal? ActualAmountCollected { get; set; }
 
-
         //General Details comes with role user
         public string UserId { get; set; }
 
         public bool IsdeclaredVal { get; set; }
 
-
-        //discount information
-      
+        //discount information     
 
         public decimal? DiscountValue { get; set; }
 
@@ -126,6 +119,17 @@ namespace GIGLS.Core.DTO.Shipments
         public string CurrencyCode { get; set; }
 
         public int? Haulageid { get; set; }
+        public ShipmentType Shipmentype { get; set; }
+        public string ServiceCentreAddress { get; set; }
+        public LocationDTO serviceCentreLocation { get; set; }
+        public bool? IsApproved { get; set; }
 
+        public bool? IsFromShipment { get; set; }
+        public int DepartureServiceCentreId { get; set; }
+        public int CustomerId { get; set; }
+        
+       public bool? IsEligible { get; set; }
+        public bool IsCodNeeded { get; set; }
+        public decimal CurrentWalletAmount { get; set; }
     }
 }

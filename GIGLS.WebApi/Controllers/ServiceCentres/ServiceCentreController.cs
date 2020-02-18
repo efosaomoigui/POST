@@ -48,8 +48,8 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var centres = await _service.GetServiceCentres();
-                centres = centres.Where(s => s.IsHUB == true);
+                var centres = await _service.GetHUBServiceCentres();
+                //centres = centres.Where(s => s.IsHUB == true);
 
                 return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
                 {
@@ -233,6 +233,22 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             return await HandleApiOperationAsync(async () =>
             {
                 var servicecentres = await _service.GetServiceCentresByCountryId(countryDTO.CountryId);
+
+                return new ServiceResponse<List<ServiceCentreDTO>>
+                {
+                    Object = servicecentres
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("ServiceCentresByCountryId/{countryId:int}")]
+        public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetServiceCentresByCountryId(int countryId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var servicecentres = await _service.GetServiceCentresByCountryId(countryId);
 
                 return new ServiceResponse<List<ServiceCentreDTO>>
                 {

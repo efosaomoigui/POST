@@ -263,6 +263,41 @@ namespace GIGLS.Services.Business.Tracking
 
             return await Task.FromResult(shipmentTrackings.ToList().OrderByDescending(x => x.DateTime).ToList());
         }
+        
+        public async Task<IEnumerable<ShipmentTrackingDTO>> TrackShipmentForMobile(string waybillNumber)
+        {
+            var result = await _shipmentTrackingService.GetShipmentTrackingsForMobile(waybillNumber);
+
+            if (result.Count() > 0)
+            {
+                //get shipment Details
+                var shipment = await _shipmentService.GetBasicShipmentDetail(waybillNumber);                               
+
+                ////check for international
+                if (shipment != null && shipment.IsInternational)
+                {
+                    var internationResult = await TrackShipmentForInternational(waybillNumber);
+                    result.ToList().AddRange(internationResult);
+                }
+
+                foreach (var track in result)
+                {
+                    track.DepartureServiceCentreId = shipment.DepartureServiceCentreId;
+                    track.DepartureServiceCentre = shipment.DepartureServiceCentre;
+                    track.DestinationServiceCentreId = shipment.DestinationServiceCentreId;
+                    track.DestinationServiceCentre = shipment.DestinationServiceCentre;
+
+                    track.Amount = shipment.GrandTotal;
+                    track.PickupOptions = shipment.PickupOptions.ToString();
+                    track.DeliveryOptions = shipment.DeliveryOption.Description;
+                }
+            }
+
+            //Replace the placeholders in Scan Status
+            await ResolveScanStatusPlaceholders(result);
+
+            return result;
+        }
 
     }
 }

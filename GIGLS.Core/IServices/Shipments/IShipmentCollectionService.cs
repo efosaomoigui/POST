@@ -11,12 +11,13 @@ namespace GIGLS.CORE.IServices.Shipments
     {
         Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentCollections();
         Task<List<ShipmentCollectionDTO>> GetShipmentCollections(ShipmentCollectionFilterCriteria collectionFilterCriteria);
-        System.Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentCollections(FilterOptionsDto filterOptionsDto);
+        Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentCollections(FilterOptionsDto filterOptionsDto);
         Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentWaitingForCollection();
-        System.Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollection(FilterOptionsDto filterOptionsDto);
+        Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollection(FilterOptionsDto filterOptionsDto);
         Task<ShipmentCollectionDTO> GetShipmentCollectionById(string waybill);
         Task AddShipmentCollection(ShipmentCollectionDTO shipmentCollection);
         Task UpdateShipmentCollection(ShipmentCollectionDTO shipmentCollection);
+        Task UpdateShipmentCollectionForReturn(ShipmentCollectionDTO shipmentCollection);
         Task ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection);        
         Task RemoveShipmentCollection(string waybill);
         Task CheckShipmentCollection(string waybill);
@@ -32,6 +33,7 @@ namespace GIGLS.CORE.IServices.Shipments
         Task<Tuple<List<ShipmentCollectionDTO>, int>> GetShipmentWaitingForCollectionForHub(FilterOptionsDto filterOptionsDto);
 
         Task AddRiderToDeliveryTable(ShipmentCollectionDTO shipmentCollection);
+        Task<IEnumerable<ShipmentCollectionDTO>> GetEcommerceOverDueShipmentsGLOBAL(ShipmentCollectionFilterCriteria filterCriteria);
 
     }
 }

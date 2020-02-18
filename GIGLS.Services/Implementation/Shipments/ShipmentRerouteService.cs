@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.IServices.Shipments;
+using GIGLS.Core.IServices.Business;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -20,14 +21,16 @@ namespace GIGLS.Services.Implementation.Shipments
         private IUserService _userService;
         private readonly IShipmentService _shipmentService;
         private readonly IShipmentCollectionService _collectionService;
+        private readonly IShipmentTrackService _shipmentTrackService;
 
         public ShipmentRerouteService(IUnitOfWork uow, IUserService userService,
-            IShipmentService shipmentService, IShipmentCollectionService collectionService)
+            IShipmentService shipmentService, IShipmentCollectionService collectionService, IShipmentTrackService shipmentTrackService)
         {
             _uow = uow;
             _userService = userService;
             _shipmentService = shipmentService;
             _collectionService = collectionService;
+            _shipmentTrackService = shipmentTrackService;
             MapperConfig.Initialize();
         }
 
@@ -67,7 +70,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 var originalShipment = await _shipmentService.GetShipment(shipmentDTO.Waybill);
                 int originalDestinationId = originalShipment.DestinationServiceCentreId;
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                if (serviceCenters.Length == 1 && serviceCenters[0] == originalDestinationId)
+
+                var trackInfo = await _shipmentTrackService.TrackShipment(originalShipment.Waybill);
+
+                if (serviceCenters.Length == 1 && (serviceCenters[0] == originalDestinationId || 
+                    (trackInfo.FirstOrDefault().ScanStatus.Code == ShipmentScanStatus.AST.ToString() || 
+                    trackInfo.FirstOrDefault().ScanStatus.Code == ShipmentScanStatus.ARP.ToString() ||
+                    trackInfo.FirstOrDefault().ScanStatus.Code == ShipmentScanStatus.APT.ToString()) ))
                 {
                     //do nothing
                 }
@@ -117,7 +126,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 ////4. update shipment collection status to RerouteStatus
                 var shipmentCollection = await _collectionService.GetShipmentCollectionById(shipmentDTO.Waybill);
                 shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.SRR;
-                await _collectionService.UpdateShipmentCollection(shipmentCollection);
+                await _collectionService.UpdateShipmentCollectionForReturn(shipmentCollection);
 
                 //complete transaction
                 await _uow.CompleteAsync();
@@ -125,9 +134,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 ////7. return new shipment 
                 return newShipment;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
 
         }

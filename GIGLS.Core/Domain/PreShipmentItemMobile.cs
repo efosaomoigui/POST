@@ -1,10 +1,5 @@
-﻿using GIGL.GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
+﻿using GIGLS.Core.Enums;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GIGLS.Core.Domain
 {
@@ -44,5 +39,6 @@ namespace GIGLS.Core.Domain
         public string PictureName { get; set; }
 
         public DateTime? PictureDate { get; set; }
+        public string WeightRange { get; set; }
     }
 }

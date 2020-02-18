@@ -7,13 +7,18 @@ using PayStack.Net;
 using GIGLS.Core.DTO.OnlinePayment;
 using System.Configuration;
 using GIGLS.Core.Enums;
-using GIGLS.Core.Domain;
 using System.Net;
 using System;
 using System.IO;
 using Newtonsoft.Json;
 using AutoMapper;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.IServices.PaymentTransactions;
+using GIGLS.Core.DTO.PaymentTransactions;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Collections.Generic;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -22,17 +27,16 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUserService _userService;
         private readonly IWalletService _walletService;
         private readonly IUnitOfWork _uow;
-        private readonly IWalletPaymentLogService _walletPaymentLogService;
+        private readonly IPaymentTransactionService _paymentTransactionService;
 
         private string secretKey = ConfigurationManager.AppSettings["PayStackSecret"];
 
-        public PaystackPaymentService(IUserService userService,IWalletService walletService, IUnitOfWork uow, IWalletPaymentLogService walletPaymentLogService,
-            IWalletTransactionService transactionService)
+        public PaystackPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPaymentTransactionService paymentTransactionService)
         {
             _userService = userService;
             _walletService = walletService;
+            _paymentTransactionService = paymentTransactionService;
             _uow = uow;
-            _walletPaymentLogService = walletPaymentLogService;
             MapperConfig.Initialize();
         }
 
@@ -43,7 +47,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             // Initializing a transaction
             var response = api.Transactions.Initialize(wpd.Email, wpd.PaystackAmount);
-           
+
             //return response.Status;
             return response.Status;
 
@@ -67,7 +71,6 @@ namespace GIGLS.Services.Implementation.Wallet
             await Task.Run(() =>
             {
                 var api = new PayStackApi(secretKey);
-                
 
                 // Verifying a transaction
                 var verifyResponse = api.Transactions.Verify(reference);
@@ -83,7 +86,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     result.data.Amount = verifyResponse.Data.Amount / 100;
                 }
             });
-            
+
             return result;
         }
 
@@ -101,7 +104,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 if (paymentLog == null)
                     return result;
-                
+
                 //2. if the payment successful
                 if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited)
                 {
@@ -111,7 +114,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     //get wallet detail to get customer code
                     var walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
 
-                    if(walletDto != null)
+                    if (walletDto != null)
                     {
                         //use customer code to get customer id
                         var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
@@ -133,12 +136,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
 
                 //3. update the wallet payment log
-                if(verifyResult.data.Status != null)
+                if (verifyResult.data.Status != null)
                 {
                     paymentLog.IsWalletCredited = true;
                 }
                 paymentLog.TransactionStatus = verifyResult.data.Status;
-                paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;                
+                paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                 await _uow.CompleteAsync();
 
                 result = true;
@@ -148,7 +151,7 @@ namespace GIGLS.Services.Implementation.Wallet
         }
 
         public async Task<PaymentResponse> VerifyAndValidateWallet(string referenceCode)
-        {                       
+        {
             //1. verify the payment 
             var verifyResult = await VerifyPayment(referenceCode);
 
@@ -197,7 +200,7 @@ namespace GIGLS.Services.Implementation.Wallet
                         PaymentType = PaymentType.Online,
                         PaymentTypeReference = verifyResult.data.Reference,
                         UserId = customerId
-                    }, false);                    
+                    }, false);
                 }
 
                 //3. update the wallet payment log
@@ -216,13 +219,13 @@ namespace GIGLS.Services.Implementation.Wallet
             return await Task.FromResult(result);
         }
 
-        public async Task<PaystackWebhookDTO> VerifyPaymentMobile(string reference,string UserId)
+        public async Task<PaystackWebhookDTO> VerifyPaymentMobile(string reference, string UserId)
         {
             PaystackWebhookDTO result = new PaystackWebhookDTO();
             WalletPaymentLogDTO paymentLog = new WalletPaymentLogDTO();
             WalletTransactionDTO transaction = new WalletTransactionDTO();
 
-           
+
             var baseAddress = "https://api.paystack.co/transaction/verify/" + reference;
 
             var SecKey = string.Format("Bearer {0}", "sk_test_75eb63768f05426fa4f4c2ae68cd451dc10b4ac4");
@@ -247,7 +250,7 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 var user = await _userService.GetUserById(UserId);
                 var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
-                    
+
                 result.data.Gateway_Response = ResponseModel.data.Gateway_Response;
                 result.data.Status = ResponseModel.data.Status;
                 result.data.Amount = ResponseModel.data.Amount / 100;
@@ -277,10 +280,273 @@ namespace GIGLS.Services.Implementation.Wallet
                 _uow.WalletPaymentLog.Add(newPaymentLog);
                 wallet.Balance = (wallet.Balance + result.data.Amount);
                 await _uow.CompleteAsync();
-                }
-           
+            }
+
 
             return result;
+        }
+
+        //Ghana Paystack 
+        public async Task VerifyAndValidateMobilePayment(PaystackWebhookDTO webhook)
+        {
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(webhook.data.Reference);
+
+            if(waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
+            {
+                await ProcessPaymentForWaybill(webhook);
+            }
+            else
+            {
+                await ProcessPaymentForWallet(webhook);
+            }
+        }
+
+        public async Task<PaystackWebhookDTO> VerifyAndValidateMobilePayment(string reference)
+        {
+            var webhook = await VerifyGhanaPayment(reference);
+
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(reference);
+
+            if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
+            {
+               await ProcessPaymentForWaybill(webhook);
+            }
+            else
+            {
+               await ProcessPaymentForWallet(webhook);
+            }
+
+            return webhook;
+        }
+        
+        private async Task<PaystackWebhookDTO> VerifyGhanaPayment(string reference)
+        {
+            string payStackSecretGhana = ConfigurationManager.AppSettings["PayStackSecretGhana"];
+
+            PaystackWebhookDTO result = new PaystackWebhookDTO();
+
+            await Task.Run(() =>
+            {
+                var api = new PayStackApi(payStackSecretGhana);
+
+                // Verifying a transaction
+                var verifyResponse = api.Transactions.Verify(reference);
+
+                result.Status = verifyResponse.Status;
+                result.Message = verifyResponse.Message;
+                result.data.Reference = reference;
+
+                if (verifyResponse.Status)
+                {
+                    result.data.Gateway_Response = verifyResponse.Data.GatewayResponse;
+                    result.data.Status = verifyResponse.Data.Status;
+                    result.data.Amount = verifyResponse.Data.Amount / 100;
+                }
+            });
+
+            return result;
+        }
+
+        private async Task<bool> ProcessPaymentForWallet(PaystackWebhookDTO webhook)
+        {
+            bool result = false;
+
+            //1. verify the payment 
+            var verifyResult = await VerifyGhanaPayment(webhook.data.Reference);
+
+            if (verifyResult.Status)
+            {
+                //get wallet payment log by reference code
+                var paymentLog = _uow.WalletPaymentLog.SingleOrDefault(x => x.Reference == webhook.data.Reference);
+
+                if (paymentLog == null)
+                    return result;
+
+                //2. if the payment successful
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited)
+                {
+                    //a. update the wallet for the customer
+                    string customerId = null;  //set customer id to null
+
+                    //get wallet detail to get customer code
+                    var walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
+
+                    if (walletDto != null)
+                    {
+                        //use customer code to get customer id
+                        var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+
+                        if (user != null)
+                            customerId = user.Id;
+                    }
+
+                    //update the wallet
+                    await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
+                    {
+                        WalletId = paymentLog.WalletId,
+                        Amount = verifyResult.data.Amount,
+                        CreditDebitType = CreditDebitType.Credit,
+                        Description = "Funding made through online payment",
+                        PaymentType = PaymentType.Online,
+                        PaymentTypeReference = verifyResult.data.Reference,
+                        UserId = customerId
+                    }, false);
+                }
+
+                //3. update the wallet payment log
+                if (verifyResult.data.Status != null)
+                {
+                    paymentLog.IsWalletCredited = true;
+                }
+                paymentLog.TransactionStatus = verifyResult.data.Status;
+                paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
+                await _uow.CompleteAsync();
+                result = true;
+            }
+
+            return await Task.FromResult(result);
+
+        }
+
+        private async Task<bool> ProcessPaymentForWaybill(PaystackWebhookDTO webhook)
+        {
+            bool result = false;
+
+            //1. verify the payment 
+            var verifyResult = await VerifyGhanaPayment(webhook.data.Reference);
+            
+            if (verifyResult.Status)
+            {
+                //get wallet payment log by reference code
+                var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == webhook.data.Reference);
+
+                if (paymentLog == null)
+                    return result;
+
+                //2. if the payment successful
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWaybillSettled)
+                {
+                    //3. Process payment for the waybill if successful
+                    PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
+                    {
+                        Waybill = paymentLog.Waybill,
+                        PaymentType  = PaymentType.Online,
+                        TransactionCode = paymentLog.Reference,
+                        UserId = paymentLog.UserId
+                    };
+
+                    var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+
+                    if (processWaybillPayment)
+                    {
+                        //2. Update waybill Payment log
+                        paymentLog.IsPaymentSuccessful = true;
+                        paymentLog.IsWaybillSettled = true;
+                        //paymentLog.TransactionStatus = verifyResult.data.Status;
+                        //paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
+                    }
+                }
+
+                paymentLog.TransactionStatus = verifyResult.data.Status;
+                paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
+                await _uow.CompleteAsync();
+                result = true;
+            }
+
+            return await Task.FromResult(result);
+        }
+        
+        private WaybillWalletPaymentType GetPackagePaymentType(string refCode){
+
+            if(refCode.StartsWith("wb"))
+            {
+                return WaybillWalletPaymentType.Waybill;
+            }
+
+            return WaybillWalletPaymentType.Wallet;
+        }
+
+        public async Task<PaystackWebhookDTO> ProcessPaymentForWaybillUsingPin(WaybillPaymentLog waybillPaymentLog, string pin)
+        {
+            //1. verify the payment 
+            var verifyResult = await SubmitPinForPayment(waybillPaymentLog.Reference, pin);
+
+            if (verifyResult.Status)
+            {
+                //get wallet payment log by reference code
+                var paymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == waybillPaymentLog.Reference);
+
+                if (paymentLog == null)
+                {
+                    verifyResult.Message = "No payment log registered!!!";
+                    return verifyResult;
+                }
+
+                //2. if the payment successful
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWaybillSettled)
+                {
+                    //3. Process payment for the waybill if successful
+                    PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
+                    {
+                        Waybill = paymentLog.Waybill,
+                        PaymentType = PaymentType.Online,
+                        TransactionCode = paymentLog.Reference,
+                        UserId = paymentLog.UserId
+                    };
+
+                    var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+
+                    if (processWaybillPayment)
+                    {
+                        //2. Update waybill Payment log
+                        paymentLog.IsPaymentSuccessful = true;
+                        paymentLog.IsWaybillSettled = true;
+                    }
+                }
+
+                paymentLog.TransactionStatus = verifyResult.data.Status;
+                paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
+                await _uow.CompleteAsync();
+            }
+
+            return await Task.FromResult(verifyResult);
+        }
+        
+        private async Task<PaystackWebhookDTO> SubmitPinForPayment(string reference, string pin)
+        {
+            try
+            {
+                string payStackSecretGhana = ConfigurationManager.AppSettings["PayStackSecretGhana"];
+
+                string pinUrl = "/submit_otp";
+                string payStackChargeAPI = ConfigurationManager.AppSettings["PayStackChargeAPI"] + pinUrl;
+
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", payStackSecretGhana);
+                    
+                    var dic = new Dictionary<string, string>
+                    {
+                        { "otp",  pin},
+                        { "reference", reference }
+                    };
+                    
+                    var json = JsonConvert.SerializeObject(dic);
+                    var data = new StringContent(json, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(payStackChargeAPI, data);
+                    string result = await response.Content.ReadAsStringAsync();
+                    var paystackResponse = JsonConvert.DeserializeObject<PaystackWebhookDTO>(result);
+                    return paystackResponse;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }

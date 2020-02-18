@@ -13,5 +13,8 @@ namespace GIGLS.Core.DTO
         public int TotalDelivery { get; set; }
 
         public decimal MonthlyTransactions { get; set; }
+
+        public string CurrencySymbol { get; set; }
+        public string CurrencyCode { get; set; }
     }
 }

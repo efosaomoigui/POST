@@ -12,7 +12,11 @@ namespace GIGLS.Messaging.MessageService
     {
         public async Task<string> SendAsync(MessageDTO message)
         {
-            var result = await ConfigSendGridasync(message);
+            string result = "";
+            if(message.ToEmail != null)
+            {
+                result = await ConfigSendGridasync(message);
+            }
             return result;
         }
                
@@ -24,7 +28,7 @@ namespace GIGLS.Messaging.MessageService
             var fromName = ConfigurationManager.AppSettings["emailService:FromName"];
 
             myMessage.AddTo(message.ToEmail);
-            myMessage.From = new SendGrid.Helpers.Mail.EmailAddress(fromEmail, fromName);
+            myMessage.From = new EmailAddress(fromEmail, fromName);
             myMessage.Subject = message.Subject;
             myMessage.PlainTextContent = message.FinalBody;
             myMessage.HtmlContent = message.FinalBody;

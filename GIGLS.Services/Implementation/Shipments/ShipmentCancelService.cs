@@ -8,6 +8,7 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.DTO.Report;
 using System;
+using GIGL.GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -32,6 +33,22 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"Shipment with waybill {waybill} already cancelled");
             }
 
+            if(await _uow.ShipmentReroute.ExistAsync(x => x.WaybillNew == waybill || x.WaybillOld == waybill))
+            {
+                throw new GenericException($"Shipment with waybill {waybill} has been initiated for reroute, it can not be cancel");
+            }
+            
+            if (await _uow.ShipmentReturn.ExistAsync(x => x.WaybillNew == waybill || x.WaybillOld == waybill))
+            {
+                throw new GenericException($"Shipment with waybill {waybill} has been initiated for return, it can not be cancel");
+            }
+
+            if (await _uow.Invoice.ExistAsync(x => x.Waybill == waybill && x.IsShipmentCollected == true))
+            {
+                throw new GenericException($"Shipment with waybill {waybill} has been collected, it can not be cancel");
+            }
+
+
             var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
 
             if (shipment == null)
@@ -41,6 +58,15 @@ namespace GIGLS.Services.Implementation.Shipments
             
             //shipment should only be cancel by regional manager or admin
             var user = await _userService.GetCurrentUserId();
+
+            //Allow Chairman, Director and Administrator to cancelled waybill
+            bool hasAdminRole = await _userService.IsUserHasAdminRole(user);
+
+            if (hasAdminRole)
+            {
+                return await ProcessShipmentCancel(shipment, user, shipmentCancelDTO.CancelReason);
+            }
+
             var region = await _userService.GetRegionServiceCenters(user);
 
             if (region.Length > 0)
@@ -49,32 +75,37 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (result)
                 {
-                    var newCancel = new ShipmentCancel
-                    {
-                        Waybill = shipment.Waybill,
-                        CreatedBy = shipment.UserId,
-                        ShipmentCreatedDate = shipment.DateCreated,
-                        CancelledBy = user,
-                        CancelReason = shipmentCancelDTO.CancelReason
-                    };
-
-                    _uow.ShipmentCancel.Add(newCancel);
-
-                    //cancel shipment from the shipment service
-                    var boolResult = await _shipmentService.CancelShipment(waybill);
-
-                    await _uow.CompleteAsync();
-                    return new { waybill = newCancel.Waybill };
+                    return await ProcessShipmentCancel(shipment, user, shipmentCancelDTO.CancelReason);
                 }
                 else
                 {
                     throw new GenericException($"Waybill {waybill} was not created at your region.");
                 }
             }
+
             return null;
         }
 
-       
+        public async Task<object> ProcessShipmentCancel(Shipment shipment, string userId, string cancelReason)
+        {
+            var newCancel = new ShipmentCancel
+            {
+                Waybill = shipment.Waybill,
+                CreatedBy = shipment.UserId,
+                ShipmentCreatedDate = shipment.DateCreated,
+                CancelledBy = userId,
+                CancelReason = cancelReason
+            };
+
+            _uow.ShipmentCancel.Add(newCancel);
+
+            //cancel shipment from the shipment service
+            var boolResult = await _shipmentService.CancelShipment(shipment.Waybill);
+
+            await _uow.CompleteAsync();
+            return new { waybill = newCancel.Waybill };
+        }
+
         public async Task<ShipmentCancelDTO> GetShipmentCancelById(string waybill)
         {
             return await _uow.ShipmentCancel.GetShipmentCancels(waybill);

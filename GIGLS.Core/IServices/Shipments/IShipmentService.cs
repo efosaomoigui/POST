@@ -37,15 +37,33 @@ namespace GIGLS.Core.IServices.Shipments
         Task<DomesticRouteZoneMapDTO> GetZone(int destinationServiceCentre);
         Task<CountryRouteZoneMapDTO> GetCountryZone(int destinationCountry);
         Task<DailySalesDTO> GetDailySales(AccountFilterCriteria accountFilterCriteria);
-        Task<DailySalesDTO> GetDailySalesByServiceCentre(AccountFilterCriteria accountFilterCriteria);
+        Task<DailySalesDTO> GetDailySalesByServiceCentre(AccountFilterCriteria accountFilterCriteria); 
 
+        Task<Object[]> GetShipmentCreatedByDateMonitor(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates);
+        Task<Object[]> GetShipmentCreatedByDateMonitorx(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates);
+        Task<List<InvoiceViewDTOUNGROUPED2>> GetShipmentWaybillsByDateMonitor(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates);
+        Task<List<InvoiceViewDTOUNGROUPED2>> GetShipmentWaybillsByDateMonitorx(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates);
         Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType);
         Task<bool> CancelShipment(string waybill);
 
         Task<List<ServiceCentreDTO>> GetAllWarehouseServiceCenters();
         Task<DailySalesDTO> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria);
 
+        Task<ColoredInvoiceMonitorDTO> GetShipmentMonitor(AccountFilterCriteria accountFilterCriteria);
+        Task<ColoredInvoiceMonitorDTO> GetShipmentMonitorx(AccountFilterCriteria accountFilterCriteria);
+        Task<ColoredInvoiceMonitorDTO> GetShipmentMonitorEXpected(AccountFilterCriteria accountFilterCriteria);
+
         Task<bool> RePrintCountUpdater();
         Task<bool> AddShipmentFromMobile(ShipmentDTO shipment);
+        Task<bool> ScanShipment(ScanDTO scan);
+        Task RemoveWaybillNumberFromGroupForCancelledShipment(string groupWaybillNumber, string waybillNumber);
+    }
+
+    public interface IMagayaService : IServiceDependencyMarker
+    {
+        Task<bool> OpenConnection();
+        Task<string> CloseConnection(int access_key);
+        Task<string> SetTransactions(int access_key, string type, int flags, string trans_xml);
+
     }
 }
