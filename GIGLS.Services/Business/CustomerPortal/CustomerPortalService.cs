@@ -646,35 +646,38 @@ namespace GIGLS.Services.Business.CustomerPortal
             var result = new SignResponseDTO();
 
             if (user.RequiresCod == null)
+            {
                 user.RequiresCod = false;
-
-            if (user.IsUniqueInstalled == null)
+            }
+            else if (user.IsUniqueInstalled == null)
+            {
                 user.IsUniqueInstalled = false;
-
-            if (user.IsEligible == null)
+            }
+            else if (user.IsEligible == null)
+            {
                 user.IsEligible = false;
-
-            if (user.Referrercode != null)
+            }
+            else if (user.Referrercode != null)
+            {
                 user.RegistrationReferrercode = user.Referrercode;
-
-            if (user.UserChannelType != UserChannelType.Ecommerce && user.UserChannelType != UserChannelType.IndividualCustomer 
-                && user.UserChannelType != UserChannelType.Partner)
+            }
+            else if (user.UserChannelType != UserChannelType.Ecommerce && user.UserChannelType != UserChannelType.IndividualCustomer && user.UserChannelType != UserChannelType.Partner)
             {
                 throw new GenericException($"Kindly supply valid customer channel ");
             }
-
-            if (user.UserChannelType == UserChannelType.Ecommerce)
+            else if (user.UserChannelType == UserChannelType.Ecommerce)
             {
                 var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
                 throw new GenericException($"{ecommerceEmail.Value}");
             }
-
-            if (user.Email != null)
+            else if (user.Email != null)
             {
-                user.Email = user.Email.Trim();
-                user.Email = user.Email.ToLower();
+                user.Email = user.Email.Trim().ToLower();
             }
-            
+
+            //use to handle multiple this kind of value +234+2349022736119
+            user.PhoneNumber = "+" + user.PhoneNumber.Split('+').Last();
+
             user = await GetCustomerCountryUsingPhoneCode(user);
 
             bool checkRegistrationAccess = await CheckRegistrationAccess(user);
@@ -704,16 +707,12 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<UserDTO> GetCustomerCountryUsingPhoneCode(UserDTO userDTO)
         {
-            if(userDTO.CountryPhoneNumberCode != null)
+            if (userDTO.CountryPhoneNumberCode == null)
             {
-                var countryid = await _uow.Country.GetAsync(s => s.PhoneNumberCode.Equals(userDTO.CountryPhoneNumberCode));                
-                userDTO.UserActiveCountryId = countryid.CountryId;
-            }
-            else
-            {
+                //Get all countries
                 var country = await _uow.Country.FindAsync(x => x.PhoneNumberCode != null);
 
-                foreach(var c in country)
+                foreach (var c in country)
                 {
                     if (userDTO.PhoneNumber.Contains(c.PhoneNumberCode))
                     {
@@ -721,6 +720,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                         return userDTO;
                     }
                 }
+            }
+            else
+            {
+                var countryid = await _uow.Country.GetAsync(s => s.PhoneNumberCode.Equals(userDTO.CountryPhoneNumberCode));
+                userDTO.UserActiveCountryId = countryid.CountryId;
             }
 
             return userDTO;
@@ -731,7 +735,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             if (user.PhoneNumber.StartsWith("0"))
             {
-                user.PhoneNumber.Substring(1, user.PhoneNumber.Length - 1);
+                user.PhoneNumber = user.PhoneNumber.Substring(1, user.PhoneNumber.Length - 1);
             }
 
             var emailUsers = await _uow.User.GetUserListByEmailorPhoneNumber(user.Email, user.PhoneNumber);
@@ -937,8 +941,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 if (EmailUser.Email != null)
                 {
-                    EmailUser.Email = EmailUser.Email.Trim();
-                    EmailUser.Email = EmailUser.Email.ToLower();
+                    EmailUser.Email = EmailUser.Email.Trim().ToLower();
                 }
 
                 if (EmailUser.UserChannelType == UserChannelType.Employee && EmailUser.Email == user.Email)
