@@ -3220,14 +3220,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 //FOR PARTNER TRYING TO CANCEL  A SHIPMENT
                 else
                 {
-                    var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.Status == MobilePickUpRequestStatus.Accepted.ToString());
+                    //Get user
+                    var user = await _userService.GetCurrentUserId();
+
+                    //var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.Status == MobilePickUpRequestStatus.Accepted.ToString());
+                    var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.UserId == user);
 
                     if (pickuprequests != null)
                     {
-                        pickuprequests.Status = MobilePickUpRequestStatus.Processing.ToString();
+                        pickuprequests.Status = MobilePickUpRequestStatus.Cancelled.ToString();
                     }
 
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
+
                 }
                 await _uow.CompleteAsync();
                 return new { IsCancelled = true };
