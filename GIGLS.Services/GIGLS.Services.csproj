@@ -175,9 +175,6 @@
     <Compile Include="Business\Magaya\Serializer.cs" />
     <Compile Include="Business\Magaya\ShipmentData.cs" />
     <Compile Include="Business\Magaya\WarehouseReceiptClass.cs" />
-    <Compile Include="Business\Magaya\xsd\warehouse.cs">
-      <DependentUpon>warehouse.xsd</DependentUpon>
-    </Compile>
     <Compile Include="Business\PackagingAndShipment\ShipmentPackaging.cs" />
     <Compile Include="Business\Payment\PaymentService.cs" />
     <Compile Include="Business\Pricing\PricingService.cs" />
