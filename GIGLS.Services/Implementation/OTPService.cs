@@ -113,7 +113,7 @@ namespace GIGLS.Services.Implementation
 
                     if (userdto.IsActive)
                     {
-                        CalculateReferralBonus(userdto);
+                        await CalculateReferralBonus(userdto);
                     }
 
                     return userdto;
@@ -247,8 +247,6 @@ namespace GIGLS.Services.Implementation
                 var rating = (double)averageratings;
                 return rating;
             }
-
-
         }
 
         public async Task<bool> IsPartnerActivated(string CustomerCode)

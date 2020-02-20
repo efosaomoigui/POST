@@ -41,15 +41,21 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
-                if (await _uow.Company.ExistAsync(c => c.Name.ToLower() == company.Name.Trim().ToLower() || c.PhoneNumber == company.PhoneNumber))
+                if (await _uow.Company.ExistAsync(c => c.Name.ToLower() == company.Name.Trim().ToLower() || c.PhoneNumber == company.PhoneNumber || c.Email == company.Email))
                 {
-                    throw new GenericException($"{company.Name} or phone number already exist");
+                    throw new GenericException($"{company.Name}, phone number or email detail already exist");
                 }
 
                 //check if registration is from Giglgo
-                if(company.IsFromMobile==true)
+                if(company.IsFromMobile == true)
                 {
                     company.IsRegisteredFromMobile = true;
+                }
+
+                //update the customer update to have country code added to it
+                if (company.PhoneNumber.StartsWith("0"))
+                {
+                    company.PhoneNumber = await AddCountryCodeToPhoneNumber(company.PhoneNumber, company.UserActiveCountryId);
                 }
 
                 var newCompany = Mapper.Map<Company>(company);
@@ -148,6 +154,25 @@ namespace GIGLS.Services.Implementation.Customers
             {
                 throw;
             }
+        }
+
+        private async Task<string> AddCountryCodeToPhoneNumber(string phoneNumber, int countryId)
+        {
+            if(countryId < 1)
+            {
+                int getUserActiveCountry = await _userService.GetUserActiveCountryId();
+                countryId = getUserActiveCountry;
+            }
+
+            var country = await _uow.Country.GetAsync(x => x.CountryId == countryId);
+            if (country != null)
+            {
+                phoneNumber = phoneNumber.Substring(1, phoneNumber.Length - 1);
+                string phone = $"{country.PhoneNumberCode}{phoneNumber}";
+                phoneNumber = phone;
+
+            }
+            return phoneNumber;
         }
 
         public async Task DeleteCompany(int companyId)
