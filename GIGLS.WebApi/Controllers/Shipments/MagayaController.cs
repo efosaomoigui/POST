@@ -37,69 +37,69 @@ namespace GIGLS.WebApi.Controllers.Shipments
             _userService = userService;
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("")]
-        public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> GetShipments([FromUri]FilterOptionsDto filterOptionsDto)
-        {
-            //filter by User Active Country
-            var userActiveCountry = await _userService.GetUserActiveCountry();
-            filterOptionsDto.CountryId = userActiveCountry?.CountryId;
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("")]
+        //public async Task<IServiceResponse<IEnumerable<ShipmentDTO>>> GetShipments([FromUri]FilterOptionsDto filterOptionsDto)
+        //{
+        //    //filter by User Active Country
+        //    var userActiveCountry = await _userService.GetUserActiveCountry();
+        //    filterOptionsDto.CountryId = userActiveCountry?.CountryId;
 
 
-            return await HandleApiOperationAsync(async () =>
-            {
-                var shipments = _service.GetShipments(filterOptionsDto);
-                return new ServiceResponse<IEnumerable<ShipmentDTO>>
-                {
-                    Object = await shipments.Item1,
-                    Total = shipments.Item2
-                };
-            });
-        }
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var shipments = _service.GetShipments(filterOptionsDto);
+        //        return new ServiceResponse<IEnumerable<ShipmentDTO>>
+        //        {
+        //            Object = await shipments.Item1,
+        //            Total = shipments.Item2
+        //        };
+        //    });
+        //}
 
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("incomingshipments")]
-        public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetIncomingShipments([FromUri]FilterOptionsDto filterOptionsDto)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var shipments = await _service.GetIncomingShipments(filterOptionsDto);
-                return new ServiceResponse<IEnumerable<InvoiceViewDTO>>
-                {
-                    Object = shipments,
-                    Total = shipments.Count
-                };
-            });
-        }
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("incomingshipments")]
+        //public async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetIncomingShipments([FromUri]FilterOptionsDto filterOptionsDto)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var shipments = await _service.GetIncomingShipments(filterOptionsDto);
+        //        return new ServiceResponse<IEnumerable<InvoiceViewDTO>>
+        //        {
+        //            Object = shipments,
+        //            Total = shipments.Count
+        //        };
+        //    });
+        //}
 
-        [GIGLSActivityAuthorize(Activity = "Create")]
-        [HttpPost]
-        [Route("")]
-        public async Task<IServiceResponse<string>> AddShipment(MagayaShipmentDTO MagayaShipmentDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
+        //[GIGLSActivityAuthorize(Activity = "Create")]
+        //[HttpPost]
+        //[Route("")]
+        //public async Task<IServiceResponse<string>> AddShipment(MagayaShipmentDTO MagayaShipmentDTO)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
 
-                //1. Get the XML from XSD on Local file and fill in the object
-                //String path = HttpContext.Current.Server.MapPath("~/GIGLS.Services/Business/Magaya/shipment.cs");
-                HostingEnvironment.MapPath("~/GIGLS.Services/Business/Magaya/shipment.cs");
-
-
-                //2. Call the Magaya SetTransaction Method from MagayaService
+        //        //1. Get the XML from XSD on Local file and fill in the object
+        //        //String path = HttpContext.Current.Server.MapPath("~/GIGLS.Services/Business/Magaya/shipment.cs");
+        //        HostingEnvironment.MapPath("~/GIGLS.Services/Business/Magaya/shipment.cs");
 
 
-                //3. Pass the return to the view or caller
+        //        //2. Call the Magaya SetTransaction Method from MagayaService
 
 
-                //Update SenderAddress for corporate customers
-                return new ServiceResponse<ShipmentDTO>
-                {
-                    Object = shipment
-                };
-            });
-        }
+        //        //3. Pass the return to the view or caller
+
+
+        //        //Update SenderAddress for corporate customers
+        //        return new ServiceResponse<ShipmentDTO>
+        //        {
+        //            Object = shipment
+        //        };
+        //    });
+        //}
 
     }
 }

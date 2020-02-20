@@ -57,13 +57,14 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> AddShipmentFromMobile(ShipmentDTO shipment);
         Task<bool> ScanShipment(ScanDTO scan);
         Task RemoveWaybillNumberFromGroupForCancelledShipment(string groupWaybillNumber, string waybillNumber);
+
     }
 
     public interface IMagayaService : IServiceDependencyMarker
     {
         Task<bool> OpenConnection();
         Task<string> CloseConnection(int access_key);
-        Task<string> SetTransactions(int access_key, string type, int flags, string trans_xml);
+        Task<string> SetTransactions(int access_key);
 
     }
 }

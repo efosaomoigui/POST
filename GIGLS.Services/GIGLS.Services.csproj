@@ -171,10 +171,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Business\CustomerPortal\CustomerPortalService.cs" />
-    <Compile Include="Business\Magaya\AirBooking.cs" />
+    <Compile Include="Business\Magaya\MagayaService.cs" />
     <Compile Include="Business\Magaya\Serializer.cs" />
-    <Compile Include="Business\Magaya\shipment.cs" />
     <Compile Include="Business\Magaya\ShipmentData.cs" />
+    <Compile Include="Business\Magaya\WarehouseReceiptClass.cs" />
+    <Compile Include="Business\Magaya\xsd\warehouse.cs">
+      <DependentUpon>warehouse.xsd</DependentUpon>
+    </Compile>
     <Compile Include="Business\PackagingAndShipment\ShipmentPackaging.cs" />
     <Compile Include="Business\Payment\PaymentService.cs" />
     <Compile Include="Business\Pricing\PricingService.cs" />
@@ -328,6 +331,9 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Business\Magaya\xsd\shipment.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Business\Magaya\xsd\warehouse.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Include="Connected Services\Magaya.Impl\CSSoapService.wsdl" />
@@ -532,7 +538,6 @@
   <ItemGroup>
     <Folder Include="Business\AdminConsole\" />
     <Folder Include="Business\Finance\" />
-    <Folder Include="Business\Magaya\xml\" />
     <Folder Include="Business\OrderManagement\" />
   </ItemGroup>
   <ItemGroup>
@@ -563,6 +568,10 @@
     <Analyzer Include="..\packages\Microsoft.NetCore.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.NetCore.CSharp.Analyzers.dll" />
     <Analyzer Include="..\packages\Microsoft.NetFramework.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.NetFramework.Analyzers.dll" />
     <Analyzer Include="..\packages\Microsoft.NetFramework.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.NetFramework.CSharp.Analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Business\Magaya\xml\WarehouseReceipt.xml" />
+    <Content Include="Business\Magaya\xsd\xsd.exe" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
