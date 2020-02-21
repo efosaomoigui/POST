@@ -115,6 +115,7 @@ namespace GIGLS.Core.Domain
         public string ServiceCentreAddress { get; set; }
         public virtual Location serviceCentreLocation {get;set;}
         public bool? IsApproved { get; set; }
+        public decimal ShipmentPickupPrice { get; set; }
 
 
 

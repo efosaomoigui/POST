@@ -128,9 +128,10 @@ namespace GIGLS.Core.DTO.Shipments
         public int DepartureServiceCentreId { get; set; }
         public int CustomerId { get; set; }
         
-       public bool? IsEligible { get; set; }
+        public bool? IsEligible { get; set; }
         public bool IsCodNeeded { get; set; }
         public decimal CurrentWalletAmount { get; set; }
+        public decimal ShipmentPickupPrice { get; set; }
 
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO

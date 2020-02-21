@@ -463,6 +463,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     newPreShipment.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
                     preShipmentDTO.IsBalanceSufficient = true;
                     preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
+                    newPreShipment.ShipmentPickupPrice = (decimal)PreshipmentPriceDTO.PickUpCharge;
                     _uow.PreShipmentMobile.Add(newPreShipment);
                     await _uow.CompleteAsync();
                     await ScanMobileShipment(new ScanDTO
@@ -628,7 +629,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 newPreShipment.GrandTotal = receiver.GrandTotal;
                 newPreShipment.CalculatedTotal = receiver.CalculatedTotal;
                 receiver.IsBalanceSufficient = true;
-                newPreShipment.DiscountValue = receiver.DiscountValue;        
+                newPreShipment.DiscountValue = receiver.DiscountValue;
+                newPreShipment.ShipmentPickupPrice = individualPickupPrice;
                 _uow.PreShipmentMobile.Add(newPreShipment);                
                 var transaction = new WalletTransactionDTO
                 {
@@ -808,6 +810,172 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     MainCharge = (decimal)preShipment.CalculatedTotal,
                     PickUpCharge = PickupValue,
+                    InsuranceValue = preShipment.InsuranceValue,
+                    GrandTotal = grandTotal,
+                    PreshipmentMobile = preShipment,
+                    CurrencySymbol = Country.CurrencySymbol,
+                    CurrencyCode = Country.CurrencyCode,
+                    IsWithinProcessingTime = IsWithinProcessingTime,
+                    Discount = discount
+                };
+                return returnprice;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task<MobilePriceDTO> GetPriceForResolveDispute(PreShipmentMobileDTO preShipment, decimal pickupPrice)
+        {
+            try
+            {
+                if (preShipment.PreShipmentItems.Count() == 0)
+                {
+                    throw new GenericException("No Preshipitem was added");
+                }
+
+                var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
+
+                var Price = 0.0M;
+                var amount = 0.0M;
+                var IndividualPrice = 0.0M;
+                decimal DeclaredValue = 0.0M;
+
+                var Country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
+                preShipment.CountryId = Country.CountryId;
+
+                //undo comment when App is updated
+                if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
+                {
+                    var ShipmentCount = preShipment.PreShipmentItems.Count();
+
+                    amount = await CalculateGeoDetailsBasedonLocation(preShipment);
+                    IndividualPrice = (amount / ShipmentCount);
+                }
+
+                //Get the customer Type
+                var userChannelCode = await _userService.GetUserChannelCode();
+                var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == userChannelCode);
+
+                if (userChannel != null)
+                {
+                    preShipment.Shipmentype = ShipmentType.Ecommerce;
+                }
+
+                foreach (var preShipmentItem in preShipment.PreShipmentItems)
+                {
+                    if (preShipmentItem.Quantity == 0)
+                    {
+                        throw new GenericException("Quantity cannot be zero");
+                    }
+
+                    var PriceDTO = new PricingDTO
+                    {
+                        DepartureStationId = preShipment.SenderStationId,
+                        DestinationStationId = preShipment.ReceiverStationId,
+                        Weight = preShipmentItem.Weight,
+                        SpecialPackageId = (int)preShipmentItem.SpecialPackageId,
+                        ShipmentType = preShipmentItem.ShipmentType,
+                        CountryId = preShipment.CountryId  //Nigeria
+                    };
+
+                    if (preShipmentItem.ShipmentType == ShipmentType.Special)
+                    {
+                        if (preShipment.Shipmentype == ShipmentType.Ecommerce)
+                        {
+                            PriceDTO.DeliveryOptionId = 4;
+                        }
+
+                        preShipmentItem.CalculatedPrice = await _pricingService.GetMobileSpecialPrice(PriceDTO);
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                        preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+                    }
+                    else if (preShipmentItem.ShipmentType == ShipmentType.Regular)
+                    {
+                        if (preShipmentItem.Weight == 0)
+                        {
+                            throw new GenericException("Item weight cannot be zero");
+                        }
+
+                        if (preShipment.Shipmentype == ShipmentType.Ecommerce)
+                        {
+                            preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
+                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+                        }
+                        else
+                        {
+                            preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
+                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
+                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+                        }
+                        //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
+                    }
+
+                    var vatForPreshipment = (preShipmentItem.CalculatedPrice * 0.05M);
+
+                    if (!string.IsNullOrEmpty(preShipmentItem.Value))
+                    {
+                        DeclaredValue += Convert.ToDecimal(preShipmentItem.Value);
+                        var DeclaredValueForPreShipment = Convert.ToDecimal(preShipmentItem.Value);
+                        if (preShipment.Shipmentype == ShipmentType.Ecommerce)
+                        {
+                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M);
+                        }
+                        else
+                        {
+                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + (DeclaredValueForPreShipment * 0.01M) + vatForPreshipment;
+                        }
+                        preShipment.IsdeclaredVal = true;
+                    }
+                    else
+                    {
+                        if (preShipment.Shipmentype != ShipmentType.Ecommerce)
+                        {
+                            preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + vatForPreshipment;
+                        }
+                    }
+
+                    preShipmentItem.CalculatedPrice = (decimal)Math.Round((double)preShipmentItem.CalculatedPrice);
+                    Price += (decimal)preShipmentItem.CalculatedPrice;
+                };
+
+                var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
+                var Percentage = (Convert.ToDecimal(DiscountPercent.Value));
+                var PercentageTobeUsed = ((100M - Percentage) / 100M);
+
+                decimal EstimatedDeclaredPrice = Convert.ToDecimal(DeclaredValue);
+                preShipment.DeliveryPrice = Price * PercentageTobeUsed;
+                preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
+                preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice);
+                preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal);
+                preShipment.Value = DeclaredValue;
+                var discount = Math.Round(Price - (decimal)preShipment.CalculatedTotal);
+                preShipment.DiscountValue = discount;
+
+                //var Pickuprice = await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId, preShipment.UserId);
+                //var PickupValue = Convert.ToDecimal(Pickuprice);
+
+                var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
+
+                //decimal grandTotal = (decimal)preShipment.CalculatedTotal + PickupValue;
+                decimal grandTotal = (decimal)preShipment.CalculatedTotal + pickupPrice;
+
+                //GIG Go Promo Price
+                var gigGoPromo = await CalculatePromoPrice(preShipment, zoneid.ZoneId, pickupPrice);
+                if (gigGoPromo.GrandTotal > 0)
+                {
+                    grandTotal = (decimal)gigGoPromo.GrandTotal;
+                    discount = (decimal)gigGoPromo.Discount;
+                    preShipment.DiscountValue = discount;
+                    preShipment.GrandTotal = grandTotal;
+                }
+
+                var returnprice = new MobilePriceDTO()
+                {
+                    MainCharge = (decimal)preShipment.CalculatedTotal,
+                    PickUpCharge = pickupPrice,
                     InsuranceValue = preShipment.InsuranceValue,
                     GrandTotal = grandTotal,
                     PreshipmentMobile = preShipment,
@@ -2176,6 +2344,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var preshipmentmobilegrandtotal = await _uow.PreShipmentMobile.GetAsync(s => s.PreShipmentMobileId == preShipment.PreShipmentMobileId);
+                //var pickupPrice = preshipmentmobilegrandtotal.p
 
                 if (preshipmentmobilegrandtotal.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobilegrandtotal.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString())
                 {
@@ -2203,6 +2372,69 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 var PreshipmentPriceDTO = await GetPrice(preShipment);
+                preshipmentmobilegrandtotal.shipmentstatus = MobilePickUpRequestStatus.Resolved.ToString();
+                var difference = (preshipmentmobilegrandtotal.GrandTotal - PreshipmentPriceDTO.GrandTotal);
+
+                var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preShipment.CustomerCode);
+
+                if (difference < 0.00M)
+                {
+                    var newdiff = Math.Abs((decimal)difference);
+                    if (newdiff > updatedwallet.Balance)
+                    {
+                        throw new GenericException("Insufficient Wallet Balance");
+                    }
+                }
+
+                updatedwallet.Balance = updatedwallet.Balance + (decimal)difference;
+
+                var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobilegrandtotal.Waybill && s.Status == MobilePickUpRequestStatus.Dispute.ToString());
+                if (pickuprequests != null)
+                {
+                    pickuprequests.Status = MobilePickUpRequestStatus.Resolved.ToString();
+                }
+                await _uow.CompleteAsync();
+                return new { IsResolved = true };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<object> ResolveDisputeForMultipleShipments(PreShipmentMobileDTO preShipment)
+        {
+            try
+            {
+                var preshipmentmobilegrandtotal = await _uow.PreShipmentMobile.GetAsync(s => s.PreShipmentMobileId == preShipment.PreShipmentMobileId);
+                var pickupPrice = preshipmentmobilegrandtotal.ShipmentPickupPrice;
+
+                if (preshipmentmobilegrandtotal.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobilegrandtotal.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString())
+                {
+                    throw new GenericException("This Shipment cannot be placed in Dispute, because it has been" + " " + preshipmentmobilegrandtotal.shipmentstatus);
+                }
+
+                foreach (var id in preShipment.DeletedItems)
+                {
+                    var preshipmentitemmobile = await _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentItemMobileId == id && s.PreShipmentMobileId == preShipment.PreShipmentMobileId);
+                    preshipmentitemmobile.IsCancelled = true;
+                    _uow.PreShipmentItemMobile.Remove(preshipmentitemmobile);
+                }
+
+                foreach (var item in preShipment.PreShipmentItems)
+                {
+                    var preshipmentitemmobile = await _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentItemMobileId == item.PreShipmentItemMobileId && s.PreShipmentMobileId == preShipment.PreShipmentMobileId);
+                    preshipmentitemmobile.Quantity = item.Quantity;
+                    preshipmentitemmobile.Value = item.Value;
+                    preshipmentitemmobile.Weight = (double)item.Weight;
+                    preshipmentitemmobile.Description = item.Description;
+                    preshipmentitemmobile.Height = item.Height;
+                    preshipmentitemmobile.ImageUrl = item.ImageUrl;
+                    preshipmentitemmobile.ItemName = item.ItemName;
+                    preshipmentitemmobile.Length = item.Length;
+                }
+
+                var PreshipmentPriceDTO = await GetPriceForResolveDispute(preShipment, pickupPrice);
                 preshipmentmobilegrandtotal.shipmentstatus = MobilePickUpRequestStatus.Resolved.ToString();
                 var difference = (preshipmentmobilegrandtotal.GrandTotal - PreshipmentPriceDTO.GrandTotal);
 

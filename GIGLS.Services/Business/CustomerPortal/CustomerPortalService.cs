@@ -1500,6 +1500,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.ResolveDisputeForMobile(preShipment);
         }
+        public async Task<object> ResolveDisputeForMultipleShipment(PreShipmentMobileDTO preShipment)
+        {
+            return await _preShipmentMobileService.ResolveDisputeForMultipleShipments(preShipment);
+        }
         public async Task<PreShipmentMobileDTO> GetPreShipmentDetail(string waybill)
         {
             return await _preShipmentMobileService.GetPreShipmentDetail(waybill);

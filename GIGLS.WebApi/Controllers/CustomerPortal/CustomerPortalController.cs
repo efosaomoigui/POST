@@ -1236,14 +1236,29 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
         [HttpPost]
         [Route("resolvedispute")]
         public async Task<object> ResolveDispute(PreShipmentMobileDTO shipment)
-
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var flag = await _portalService.ResolveDisputeForMobile(shipment);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("multipleshipmentresolvedispute")]
+        public async Task<object> ResolveDisputeForMultipleShipment(PreShipmentMobileDTO shipment)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _portalService.ResolveDisputeForMultipleShipment(shipment);
 
                 return new ServiceResponse<object>
                 {
