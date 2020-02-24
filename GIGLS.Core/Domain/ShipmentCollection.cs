@@ -16,7 +16,7 @@ namespace GIGLS.CORE.Domain
         [MaxLength(200)]
         public string Name { get; set; }
 
-        [MaxLength(50)]
+        [MaxLength(100)]
         public string PhoneNumber { get; set; }
 
         [MaxLength(100)]
