@@ -649,28 +649,34 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 user.RequiresCod = false;
             }
-            else if (user.IsUniqueInstalled == null)
+            
+            if (user.IsUniqueInstalled == null)
             {
                 user.IsUniqueInstalled = false;
             }
-            else if (user.IsEligible == null)
+            
+            if (user.IsEligible == null)
             {
                 user.IsEligible = false;
             }
-            else if (user.Referrercode != null)
+            
+            if (user.Referrercode != null)
             {
                 user.RegistrationReferrercode = user.Referrercode;
             }
-            else if (user.UserChannelType != UserChannelType.Ecommerce && user.UserChannelType != UserChannelType.IndividualCustomer && user.UserChannelType != UserChannelType.Partner)
+            
+            if (user.UserChannelType != UserChannelType.Ecommerce && user.UserChannelType != UserChannelType.IndividualCustomer && user.UserChannelType != UserChannelType.Partner)
             {
                 throw new GenericException($"Kindly supply valid customer channel ");
             }
-            else if (user.UserChannelType == UserChannelType.Ecommerce)
+            
+            if (user.UserChannelType == UserChannelType.Ecommerce)
             {
                 var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
                 throw new GenericException($"{ecommerceEmail.Value}");
             }
-            else if (user.Email != null)
+            
+            if (user.Email != null)
             {
                 user.Email = user.Email.Trim().ToLower();
             }
