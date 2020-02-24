@@ -359,6 +359,8 @@
     <Compile Include="Controllers\Shipments\GroupWaybillNumberMappingController.cs" />
     <Compile Include="Controllers\Shipments\HUBManifestWaybillMappingController.cs" />
     <Compile Include="Controllers\Shipments\LogVisitReasonController.cs" />
+    <Compile Include="Controllers\Shipments\MagayaController.cs" />
+    <Compile Include="Controllers\Shipments\MagayaShipmentDTO.cs" />
     <Compile Include="Controllers\Shipments\ManifestController.cs" />
     <Compile Include="Controllers\Shipments\ManifestGroupWaybillNumberMappingController.cs" />
     <Compile Include="Controllers\Shipments\ManifestVisitMonitoringController.cs" />

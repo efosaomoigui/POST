@@ -27,5 +27,19 @@ namespace GIGLS.Services.Business.Magaya
                 return textWriter.ToString();
             }
         }
+
+        //Convert object to xml2
+        static string ConvertObjectToXMLString(object ObjectToSerialize) 
+        {
+            string xmlString = null;
+            XmlSerializer xmlSerializer = new XmlSerializer(ObjectToSerialize.GetType());
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                xmlSerializer.Serialize(memoryStream, ObjectToSerialize);
+                memoryStream.Position = 0;
+                xmlString = new StreamReader(memoryStream).ReadToEnd();
+            }
+            return xmlString;
+        }
     }
 }
