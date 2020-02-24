@@ -17,7 +17,7 @@ namespace GIGL.GIGLS.Core.Domain
         [Index(IsUnique = true)]
         public string Code { get; set; }
 
-        [MaxLength(100)]
+        [MaxLength(500)]
         public string Address { get; set; }
 
         [MaxLength(100)]
