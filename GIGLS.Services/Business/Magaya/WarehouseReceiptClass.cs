@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Xml.Serialization;
 using System.Collections.Generic;
+
 namespace GIGLS.Services.Business.Magaya.Shipment
 {
 	[XmlRoot(ElementName = "ModeOfTransportation", Namespace = "http://www.magaya.com/XMLSchema/V1")]
@@ -149,7 +150,7 @@ namespace GIGLS.Services.Business.Magaya.Shipment
 		[XmlElement(ElementName = "NetDueDays", Namespace = "http://www.magaya.com/XMLSchema/V1")]
 		public string NetDueDays { get; set; }
 	}
-
+	  
 	[XmlRoot(ElementName = "Division", Namespace = "http://www.magaya.com/XMLSchema/V1")]
 	public class Division
 	{

@@ -62,9 +62,9 @@ namespace GIGLS.Core.IServices.Shipments
 
     public interface IMagayaService : IServiceDependencyMarker
     {
-        Task<bool> OpenConnection();
-        Task<string> CloseConnection(int access_key);
-        Task<string> SetTransactions(int access_key);
+        bool OpenConnection(out int access_key);
+        string CloseConnection(int access_key);
+        string SetTransactions(int access_key);
 
     }
 }

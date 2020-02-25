@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Created with Liquid Technologies Online Tools 1.0 (https://www.liquid-technologies.com) -->
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="WarehouseReceipt">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="CreatedOn" type="xs:dateTime" />
+        <xs:element name="Number" type="xs:string" />
+        <xs:element name="CreatedByName" type="xs:string" />
+        <xs:element name="Version" type="xs:unsignedByte" />
+        <xs:element name="IssuedByName" type="xs:string" />
+        <xs:element name="IssuedBy">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Type" type="xs:string" />
+              <xs:element name="Name" type="xs:string" />
+              <xs:element name="CreatedOn" type="xs:dateTime" />
+              <xs:element name="Address">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Street" type="xs:string" />
+                    <xs:element name="City" type="xs:string" />
+                    <xs:element name="State" type="xs:string" />
+                    <xs:element name="ZipCode" type="xs:unsignedInt" />
+                    <xs:element name="Description" type="xs:string" />
+                    <xs:element name="ContactPhone" type="xs:unsignedInt" />
+                    <xs:element name="ContactEmail" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="BillingAddress">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Street" type="xs:string" />
+                    <xs:element name="City" type="xs:string" />
+                    <xs:element name="State" type="xs:string" />
+                    <xs:element name="ZipCode" type="xs:unsignedInt" />
+                    <xs:element name="ContactPhone" type="xs:unsignedInt" />
+                    <xs:element name="ContactEmail" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Email" type="xs:string" />
+              <xs:element name="Phone" type="xs:unsignedInt" />
+              <xs:element name="AccountNumber" type="xs:string" />
+              <xs:element name="NetworkID" type="xs:unsignedShort" />
+              <xs:element name="IsKnownShipper" type="xs:boolean" />
+              <xs:element name="IsPrepaid" type="xs:boolean" />
+            </xs:sequence>
+            <xs:attribute name="GUID" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="IssuedByAddress">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Street" type="xs:string" />
+              <xs:element name="City" type="xs:string" />
+              <xs:element name="State" type="xs:string" />
+              <xs:element name="ZipCode" type="xs:unsignedInt" />
+              <xs:element name="Description" type="xs:string" />
+              <xs:element name="ContactPhone" type="xs:unsignedInt" />
+              <xs:element name="ContactEmail" type="xs:string" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ShipperName" type="xs:string" />
+        <xs:element name="Shipper">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Type" type="xs:string" />
+              <xs:element name="Name" type="xs:string" />
+              <xs:element name="CreatedOn" type="xs:dateTime" />
+              <xs:element name="Address">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element maxOccurs="unbounded" name="Street" type="xs:string" />
+                    <xs:element name="City" type="xs:string" />
+                    <xs:element name="Country">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="Code" type="xs:string" use="required" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Description" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="BillingAddress">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element maxOccurs="unbounded" name="Street" type="xs:string" />
+                    <xs:element name="City" type="xs:string" />
+                    <xs:element name="Country">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="Code" type="xs:string" use="required" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Description" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Phone" type="xs:long" />
+              <xs:element name="PaymentTerms">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Description" type="xs:string" />
+                    <xs:element name="NetDueDays" type="xs:unsignedByte" />
+                    <xs:element name="DiscountPercentage" type="xs:decimal" />
+                    <xs:element name="DiscountPaidDays" type="xs:unsignedByte" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="OtherAddresses">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Address">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Street" type="xs:string" />
+                          <xs:element name="City" type="xs:string" />
+                          <xs:element name="State" type="xs:string" />
+                          <xs:element name="ZipCode" type="xs:unsignedInt" />
+                          <xs:element name="Description" type="xs:string" />
+                          <xs:element name="ContactName" type="xs:string" />
+                          <xs:element name="ContactPhone" type="xs:unsignedLong" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="IsPrepaid" type="xs:boolean" />
+            </xs:sequence>
+            <xs:attribute name="GUID" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ShipperAddress">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Street" type="xs:string" />
+              <xs:element name="City" type="xs:string" />
+              <xs:element name="State" type="xs:string" />
+              <xs:element name="ZipCode" type="xs:unsignedInt" />
+              <xs:element name="Description" type="xs:string" />
+              <xs:element name="ContactName" type="xs:string" />
+              <xs:element name="ContactPhone" type="xs:unsignedLong" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ConsigneeName" type="xs:string" />
+        <xs:element name="Consignee">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Type" type="xs:string" />
+              <xs:element name="Name" type="xs:string" />
+              <xs:element name="CreatedOn" type="xs:dateTime" />
+              <xs:element name="Address">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element maxOccurs="unbounded" name="Street" type="xs:string" />
+                    <xs:element name="City" type="xs:string" />
+                    <xs:element name="Country">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="Code" type="xs:string" use="required" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Description" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="BillingAddress">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element maxOccurs="unbounded" name="Street" type="xs:string" />
+                    <xs:element name="City" type="xs:string" />
+                    <xs:element name="Country">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="Code" type="xs:string" use="required" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Description" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Phone" type="xs:long" />
+              <xs:element name="PaymentTerms">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Description" type="xs:string" />
+                    <xs:element name="NetDueDays" type="xs:unsignedByte" />
+                    <xs:element name="DiscountPercentage" type="xs:decimal" />
+                    <xs:element name="DiscountPaidDays" type="xs:unsignedByte" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="OtherAddresses">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Address">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Street" type="xs:string" />
+                          <xs:element name="City" type="xs:string" />
+                          <xs:element name="State" type="xs:string" />
+                          <xs:element name="ZipCode" type="xs:unsignedInt" />
+                          <xs:element name="Description" type="xs:string" />
+                          <xs:element name="ContactName" type="xs:string" />
+                          <xs:element name="ContactPhone" type="xs:unsignedLong" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="IsPrepaid" type="xs:boolean" />
+            </xs:sequence>
+            <xs:attribute name="GUID" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ConsigneeAddress">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" name="Street" type="xs:string" />
+              <xs:element name="City" type="xs:string" />
+              <xs:element name="Country">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="Code" type="xs:string" use="required" />
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Description" type="xs:string" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="CarrierName" type="xs:string" />
+        <xs:element name="Carrier">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Type" type="xs:string" />
+              <xs:element name="Name" type="xs:string" />
+              <xs:element name="CreatedOn" type="xs:dateTime" />
+              <xs:element name="IsPrepaid" type="xs:boolean" />
+              <xs:element name="CarrierInfo">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="CarrierTypeCode" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="GUID" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Notes" type="xs:string" />
+        <xs:element name="Items">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Item">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Version" type="xs:unsignedByte" />
+                    <xs:element name="Status" type="xs:string" />
+                    <xs:element name="Pieces" type="xs:unsignedByte" />
+                    <xs:element name="Description" type="xs:string" />
+                    <xs:element name="PieceQuantity" type="xs:decimal" />
+                    <xs:element name="IsSummarized" type="xs:boolean" />
+                    <xs:element name="WarehouseReceiptGUID" type="xs:string" />
+                    <xs:element name="PickupOrderGUID" type="xs:string" />
+                    <xs:element name="PackageName" type="xs:string" />
+                    <xs:element name="WHRItemID" type="xs:unsignedByte" />
+                    <xs:element name="Length">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:decimal">
+                            <xs:attribute name="Unit" type="xs:string" use="required" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Height">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:decimal">
+                            <xs:attribute name="Unit" type="xs:string" use="required" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Width">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:decimal">
+                            <xs:attribute name="Unit" type="xs:string" use="required" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Weight">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:decimal">
+                            <xs:attribute name="Unit" type="xs:string" use="required" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="ContainedPiecesWeightIncluded" type="xs:boolean" />
+                    <xs:element name="Volume">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:decimal">
+                            <xs:attribute name="Unit" type="xs:string" use="required" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="VolumeWeight">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:decimal">
+                            <xs:attribute name="Unit" type="xs:string" use="required" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="PieceWeight">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:decimal">
+                            <xs:attribute name="Unit" type="xs:string" use="required" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="PieceVolume">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:decimal">
+                            <xs:attribute name="Unit" type="xs:string" use="required" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Package">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Type" type="xs:string" />
+                          <xs:element name="Code" type="xs:string" />
+                          <xs:element name="Name" type="xs:string" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="OutShipmentGUID" type="xs:string" />
+                    <xs:element name="IncludeInSED" type="xs:boolean" />
+                    <xs:element name="IsContainer" type="xs:boolean" />
+                    <xs:element name="OutHouseWayBillNumber" type="xs:string" />
+                    <xs:element name="LastReceptionNetworkID" type="xs:unsignedByte" />
+                    <xs:element name="ShipmentType" type="xs:string" />
+                    <xs:element name="OutDate" type="xs:dateTime" />
+                    <xs:element name="WarehouseReceiptNumber" type="xs:string" />
+                    <xs:element name="PickupOrderNumber" type="xs:string" />
+                    <xs:element name="OrderIndex" type="xs:unsignedByte" />
+                    <xs:element name="IsPallet" type="xs:boolean" />
+                    <xs:element name="IsOverstock" type="xs:boolean" />
+                    <xs:element name="NotLoaded" type="xs:boolean" />
+                    <xs:element name="InTask" type="xs:boolean" />
+                    <xs:element name="PreviousLocation">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Description" type="xs:string" />
+                          <xs:element name="Type" type="xs:string" />
+                          <xs:element name="NetworkID" type="xs:unsignedShort" />
+                          <xs:element name="WarehouseZoneName" type="xs:string" />
+                          <xs:element name="IsDisabled" type="xs:boolean" />
+                        </xs:sequence>
+                        <xs:attribute name="Code" type="xs:string" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="EntryDate" type="xs:dateTime" />
+                  </xs:sequence>
+                  <xs:attribute name="GUID" type="xs:string" use="required" />
+                  <xs:attribute name="Type" type="xs:string" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="MeasurementUnits">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="LengthUnit" type="xs:string" />
+              <xs:element name="VolumeUnit" type="xs:string" />
+              <xs:element name="WeightUnit" type="xs:string" />
+              <xs:element name="VolumeWeightUnit" type="xs:string" />
+              <xs:element name="AreaUnit" type="xs:string" />
+              <xs:element name="LengthPrecision" type="xs:unsignedByte" />
+              <xs:element name="VolumePrecision" type="xs:unsignedByte" />
+              <xs:element name="WeightPrecision" type="xs:unsignedByte" />
+              <xs:element name="VolumeWeightPrecision" type="xs:unsignedByte" />
+              <xs:element name="AreaPrecision" type="xs:unsignedByte" />
+              <xs:element name="VolumeWeightFactor" type="xs:decimal" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="CreatorNetworkID" type="xs:unsignedShort" />
+        <xs:element name="Events">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" name="Event">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Date" type="xs:dateTime" />
+                    <xs:element name="EventDefinition">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Name" type="xs:string" />
+                          <xs:element name="IncludeInTracking" type="xs:boolean" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="IncludeInTracking" type="xs:boolean" />
+                    <xs:element name="OwnerType" type="xs:string" />
+                    <xs:element minOccurs="0" name="OwnerNumber" type="xs:string" />
+                    <xs:element name="OwnerGUID" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="TotalPieces" type="xs:unsignedByte" />
+        <xs:element name="TotalWeight">
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base="xs:decimal">
+                <xs:attribute name="Unit" type="xs:string" use="required" />
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="TotalVolume">
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base="xs:decimal">
+                <xs:attribute name="Unit" type="xs:string" use="required" />
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="TotalVolumeWeight">
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base="xs:decimal">
+                <xs:attribute name="Unit" type="xs:string" use="required" />
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ChargeableWeight">
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base="xs:decimal">
+                <xs:attribute name="Unit" type="xs:string" use="required" />
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="TotalValue">
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base="xs:decimal">
+                <xs:attribute name="Currency" type="xs:string" use="required" />
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="CarrierTrackingNumber" type="xs:unsignedInt" />
+        <xs:element name="Status" type="xs:string" />
+        <xs:element name="HasAttachments" type="xs:boolean" />
+        <xs:element name="BillingClient">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Type" type="xs:string" />
+              <xs:element name="Name" type="xs:string" />
+              <xs:element name="CreatedOn" type="xs:dateTime" />
+              <xs:element name="Address">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element maxOccurs="unbounded" name="Street" type="xs:string" />
+                    <xs:element name="City" type="xs:string" />
+                    <xs:element name="Country">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="Code" type="xs:string" use="required" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Description" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="BillingAddress">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element maxOccurs="unbounded" name="Street" type="xs:string" />
+                    <xs:element name="City" type="xs:string" />
+                    <xs:element name="Country">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="Code" type="xs:string" use="required" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Description" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Phone" type="xs:long" />
+              <xs:element name="PaymentTerms">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Description" type="xs:string" />
+                    <xs:element name="NetDueDays" type="xs:unsignedByte" />
+                    <xs:element name="DiscountPercentage" type="xs:decimal" />
+                    <xs:element name="DiscountPaidDays" type="xs:unsignedByte" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="OtherAddresses">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Address">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Street" type="xs:string" />
+                          <xs:element name="City" type="xs:string" />
+                          <xs:element name="State" type="xs:string" />
+                          <xs:element name="ZipCode" type="xs:unsignedInt" />
+                          <xs:element name="Description" type="xs:string" />
+                          <xs:element name="ContactName" type="xs:string" />
+                          <xs:element name="ContactPhone" type="xs:unsignedLong" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="IsPrepaid" type="xs:boolean" />
+            </xs:sequence>
+            <xs:attribute name="GUID" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="LastItemID" type="xs:unsignedByte" />
+        <xs:element name="IsOnline" type="xs:boolean" />
+        <xs:element name="IsLiquidated" type="xs:boolean" />
+      </xs:sequence>
+      <xs:attribute name="GUID" type="xs:string" use="required" />
+      <xs:attribute name="Type" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
