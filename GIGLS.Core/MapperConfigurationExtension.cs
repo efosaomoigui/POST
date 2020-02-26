@@ -401,6 +401,9 @@ namespace GIGLS.Core
                 config.CreateMap<GiglgoStation, GiglgoStationDTO>();
                 config.CreateMap<GiglgoStationDTO, GiglgoStation>();
 
+                config.CreateMap<FleetPartner, FleetPartnerDTO>();
+                config.CreateMap<FleetPartnerDTO, FleetPartner>();
+
             });
 
             isInit = true;
