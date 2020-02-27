@@ -40,17 +40,24 @@ namespace GIGLS.Core.DTO.Shipments
     public class MobilePricePerReceiverDTO
     {
         //public decimal? DeliveryPrice { get; set; }
-        public decimal? ReceiverInsuranceValue { get; set; }
-        public decimal? ReceiverVat { get; set; }
-        public decimal? ReceiverDiscount { get; set; }
-        public decimal? ReceiverMainCharge { get; set; }
-        public List<ReceiverMobilePriceItemsDTO> ReceiverItemPrices { get; set; }
+        public decimal ItemWeight { get; set; }
+        //public decimal ItemValue { get; set; }
+        public string ItemName { get; set; }
+        public string ItemDescription { get; set; }
+        public int ItemQuantity { get; set; }
+        public ShipmentType ItemShipmentType { get; set; }
+        public decimal? ItemCalculatedPrice { get; set; }
+        public string ItemRecever { get; set; }
+        //public decimal? ReceiverVat { get; set; }
+        //public decimal? ReceiverDiscount { get; set; }
+        //public decimal? ReceiverMainCharge { get; set; }
+        //public List<ReceiverMobilePriceItemsDTO> ReceiverItemPrices { get; set; }
     }
     public class ReceiverMobilePriceItemsDTO
     {
-        public string Description { get; set; }
-        public string Weight { get; set; }
-        public string Value { get; set; }
+        //public string Description { get; set; }
+        //public string Weight { get; set; }
+        //public string Value { get; set; }
         public decimal? ItemCalculatedPrice { get; set; }
         public ShipmentType ShipmentType { get; set; }
     }
