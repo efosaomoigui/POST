@@ -1006,7 +1006,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var IsWithinProcessingTime = await WithinProcessingTime(listOfPreShipment[0].CountryId);
 
                 var price = new MultipleMobilePriceDTO {
-                    receiversPriceDetails = new List<MobilePricePerReceiverDTO>()
+                    itemPriceDetails = new List<MobilePricePerItemDTO>()
                 };
 
                 
@@ -1014,7 +1014,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     foreach(var pricePerItem in item.PreShipmentItems)
                     {
-                        var newPrice = new MobilePricePerReceiverDTO();
+                        var newPrice = new MobilePricePerItemDTO();
                         newPrice.ItemDescription = pricePerItem.Description;
                         newPrice.ItemShipmentType = pricePerItem.ShipmentType;
                         newPrice.ItemWeight = pricePerItem.Weight;
@@ -1022,27 +1022,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         newPrice.ItemName = pricePerItem.ItemName;
                         newPrice.ItemCalculatedPrice = pricePerItem.CalculatedPrice;
                         newPrice.ItemRecever = item.ReceiverName;
-                        //newPrice.ItemValue = pricePerItem.Value;
-                        price.receiversPriceDetails.Add(newPrice);
+                      
+                        price.itemPriceDetails.Add(newPrice);
                     }
-                    //var newPrice = new MobilePricePerReceiverDTO {
-                    //    ReceiverItemPrices = new List<ReceiverMobilePriceItemsDTO>()
-                    //};
-
-                    //newPrice.ReceiverMainCharge = (decimal)item.CalculatedTotal;
-                    //newPrice.ReceiverDiscount = (decimal)item.DiscountValue;
-                    //newPrice.ReceiverInsuranceValue = (decimal)item.InsuranceValue;
-
-                    //foreach(var pricesPerItem in item.PreShipmentItems)
-                    //{
-                    //    //var itemPrices = new ReceiverMobilePriceItemsDTO();
-                    //    itemPrices.Description = pricesPerItem.Description;
-                    //    itemPrices.ItemCalculatedPrice = pricesPerItem.CalculatedPrice;
-                    //    itemPrices.ShipmentType = pricesPerItem.ShipmentType;
-                    //    itemPrices.Weight = pricesPerItem.Weight.ToString();
-                    //    itemPrices.Value = pricesPerItem.Value;
-                    //    newPrice.ReceiverItemPrices.Add(itemPrices);
-                    //}
+                    
                     shipmentTotal = shipmentTotal + (decimal)item.CalculatedTotal;
                     totalInsurance = totalInsurance + (decimal)item.InsuranceValue;
                     totalDiscount = totalDiscount + (decimal)item.DiscountValue;
