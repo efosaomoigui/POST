@@ -172,10 +172,6 @@
   <ItemGroup>
     <Compile Include="Business\CustomerPortal\CustomerPortalService.cs" />
     <Compile Include="Business\Magaya\MagayaService.cs" />
-    <Compile Include="Business\Magaya\Serializer.cs" />
-    <Compile Include="Business\Magaya\ShipmentData.cs" />
-    <Compile Include="Business\Magaya\warehouseclass1.cs" />
-    <Compile Include="Business\Magaya\WarehouseReceiptClass.cs" />
     <Compile Include="Business\PackagingAndShipment\ShipmentPackaging.cs" />
     <Compile Include="Business\Payment\PaymentService.cs" />
     <Compile Include="Business\Pricing\PricingService.cs" />
@@ -325,19 +321,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Business\Magaya\combinedwarehouse.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Business\Magaya\combinedwarehousexsd" />
-    <None Include="Business\Magaya\xsd\common.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Business\Magaya\xsd\shipment.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Business\Magaya\xsd\warehouse.xsd">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="bin\Release\GIGLS.Core.dll.config" />
+    <None Include="bin\Release\GIGLS.Infrastructure.dll.config" />
+    <None Include="bin\Release\GIGLS.Messaging.dll.config" />
+    <None Include="bin\Release\GIGLS.Services.dll.config" />
     <None Include="Connected Services\Magaya.Service\CSSoapService.wsdl" />
     <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.AnswerInvitation2Response.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
@@ -536,8 +523,17 @@
       <Project>{f5d1aa8b-bb98-43e6-a758-cbfa7563f4a7}</Project>
       <Name>GIGLS.Messaging</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThirdParty.WebServices\ThirdParty.WebServices.csproj">
+      <Project>{03529607-e784-45a7-b684-158ea13fb5e0}</Project>
+      <Name>ThirdParty.WebServices</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="bin\Debug\es\" />
+    <Folder Include="bin\Debug\nl\" />
+    <Folder Include="bin\Debug\pt-BR\" />
+    <Folder Include="bin\Debug\zh-TW\" />
+    <Folder Include="bin\Debug\zh\" />
     <Folder Include="Business\AdminConsole\" />
     <Folder Include="Business\Finance\" />
     <Folder Include="Business\OrderManagement\" />
@@ -557,8 +553,6 @@
     <Analyzer Include="..\packages\Microsoft.NetFramework.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.NetFramework.CSharp.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Business\Magaya\xml\WarehouseReceipt.xml" />
-    <Content Include="Business\Magaya\xsd\xsd.exe" />
     <None Include="Connected Services\Magaya.Service\Reference.svcmap">
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
@@ -568,6 +562,85 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadataStorage Include="Connected Services\Magaya.Service\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="bin\Release\Aftership-API.exe" />
+    <Content Include="bin\Release\Audit.EntityFramework.dll" />
+    <Content Include="bin\Release\Audit.EntityFramework.xml" />
+    <Content Include="bin\Release\Audit.NET.dll" />
+    <Content Include="bin\Release\Audit.NET.xml" />
+    <Content Include="bin\Release\Audit.WebApi.dll" />
+    <Content Include="bin\Release\Audit.WebApi.xml" />
+    <Content Include="bin\Release\AutoMapper.dll" />
+    <Content Include="bin\Release\AutoMapper.xml" />
+    <Content Include="bin\Release\DocumentFormat.OpenXml.dll" />
+    <Content Include="bin\Release\EntityFramework.dll" />
+    <Content Include="bin\Release\EntityFramework.SqlServer.dll" />
+    <Content Include="bin\Release\EntityFramework.SqlServer.xml" />
+    <Content Include="bin\Release\EntityFramework.xml" />
+    <Content Include="bin\Release\es\Hangfire.Core.resources.dll" />
+    <Content Include="bin\Release\GIGLS.Core.dll" />
+    <Content Include="bin\Release\GIGLS.Core.pdb" />
+    <Content Include="bin\Release\GIGLS.Infrastructure.dll" />
+    <Content Include="bin\Release\GIGLS.Infrastructure.pdb" />
+    <Content Include="bin\Release\GIGLS.Messaging.dll" />
+    <Content Include="bin\Release\GIGLS.Messaging.pdb" />
+    <Content Include="bin\Release\GIGLS.Services.dll" />
+    <Content Include="bin\Release\GIGLS.Services.pdb" />
+    <Content Include="bin\Release\Hangfire.Core.dll" />
+    <Content Include="bin\Release\Hangfire.Core.xml" />
+    <Content Include="bin\Release\Microsoft.AspNet.Identity.Core.dll" />
+    <Content Include="bin\Release\Microsoft.AspNet.Identity.Core.xml" />
+    <Content Include="bin\Release\Microsoft.AspNet.Identity.EntityFramework.dll" />
+    <Content Include="bin\Release\Microsoft.AspNet.Identity.EntityFramework.xml" />
+    <Content Include="bin\Release\Microsoft.Azure.KeyVault.Core.dll" />
+    <Content Include="bin\Release\Microsoft.Azure.KeyVault.Core.xml" />
+    <Content Include="bin\Release\Microsoft.IdentityModel.Logging.dll" />
+    <Content Include="bin\Release\Microsoft.IdentityModel.Tokens.dll" />
+    <Content Include="bin\Release\Microsoft.IdentityModel.Tokens.xml" />
+    <Content Include="bin\Release\Microsoft.Owin.dll" />
+    <Content Include="bin\Release\Microsoft.Owin.Host.SystemWeb.dll" />
+    <Content Include="bin\Release\Microsoft.Owin.Host.SystemWeb.xml" />
+    <Content Include="bin\Release\Microsoft.Owin.xml" />
+    <Content Include="bin\Release\Microsoft.Threading.Tasks.dll" />
+    <Content Include="bin\Release\Microsoft.Threading.Tasks.Extensions.dll" />
+    <Content Include="bin\Release\Microsoft.Threading.Tasks.Extensions.xml" />
+    <Content Include="bin\Release\Microsoft.Threading.Tasks.xml" />
+    <Content Include="bin\Release\Microsoft.WindowsAzure.Storage.dll" />
+    <Content Include="bin\Release\Microsoft.WindowsAzure.Storage.pdb" />
+    <Content Include="bin\Release\Microsoft.WindowsAzure.Storage.xml" />
+    <Content Include="bin\Release\Newtonsoft.Json.dll" />
+    <Content Include="bin\Release\Newtonsoft.Json.xml" />
+    <Content Include="bin\Release\Ninject.dll" />
+    <Content Include="bin\Release\Ninject.xml" />
+    <Content Include="bin\Release\nl\Hangfire.Core.resources.dll" />
+    <Content Include="bin\Release\Owin.dll" />
+    <Content Include="bin\Release\PayStack.Net.dll" />
+    <Content Include="bin\Release\pt-BR\Hangfire.Core.resources.dll" />
+    <Content Include="bin\Release\SendGrid.dll" />
+    <Content Include="bin\Release\SendGrid.pdb" />
+    <Content Include="bin\Release\SendGrid.SmtpApi.dll" />
+    <Content Include="bin\Release\SendGrid.xml" />
+    <Content Include="bin\Release\SendGridMail.dll" />
+    <Content Include="bin\Release\SpreadsheetLight.dll" />
+    <Content Include="bin\Release\SpreadsheetLight.xml" />
+    <Content Include="bin\Release\System.IdentityModel.Tokens.Jwt.dll" />
+    <Content Include="bin\Release\System.IdentityModel.Tokens.Jwt.xml" />
+    <Content Include="bin\Release\System.Net.Http.Extensions.dll" />
+    <Content Include="bin\Release\System.Net.Http.Extensions.xml" />
+    <Content Include="bin\Release\System.Net.Http.Formatting.dll" />
+    <Content Include="bin\Release\System.Net.Http.Formatting.xml" />
+    <Content Include="bin\Release\System.Net.Http.Primitives.dll" />
+    <Content Include="bin\Release\System.Net.Http.Primitives.xml" />
+    <Content Include="bin\Release\System.Web.Http.dll" />
+    <Content Include="bin\Release\System.Web.Http.Owin.dll" />
+    <Content Include="bin\Release\System.Web.Http.Owin.xml" />
+    <Content Include="bin\Release\System.Web.Http.xml" />
+    <Content Include="bin\Release\Twilio.dll" />
+    <Content Include="bin\Release\Twilio.xml" />
+    <Content Include="bin\Release\XtremeIT.Library.Pins.dll" />
+    <Content Include="bin\Release\zh-TW\Hangfire.Core.resources.dll" />
+    <Content Include="bin\Release\zh\Hangfire.Core.resources.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />

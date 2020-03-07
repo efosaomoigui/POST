@@ -360,7 +360,6 @@
     <Compile Include="Controllers\Shipments\HUBManifestWaybillMappingController.cs" />
     <Compile Include="Controllers\Shipments\LogVisitReasonController.cs" />
     <Compile Include="Controllers\Shipments\MagayaController.cs" />
-    <Compile Include="Controllers\Shipments\MagayaShipmentDTO.cs" />
     <Compile Include="Controllers\Shipments\ManifestController.cs" />
     <Compile Include="Controllers\Shipments\ManifestGroupWaybillNumberMappingController.cs" />
     <Compile Include="Controllers\Shipments\ManifestVisitMonitoringController.cs" />
@@ -528,6 +527,10 @@
     <ProjectReference Include="..\GIGLS.Services\GIGLS.Services.csproj">
       <Project>{3e97ded8-8a27-4b97-b8a9-fc3511550d91}</Project>
       <Name>GIGLS.Services</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThirdParty.WebServices\ThirdParty.WebServices.csproj">
+      <Project>{03529607-e784-45a7-b684-158ea13fb5e0}</Project>
+      <Name>ThirdParty.WebServices</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

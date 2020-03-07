@@ -35,6 +35,9 @@ using GIGLS.Core.DTO.SLA;
 using GIGLS.Core.Domain.SLA;
 using GIGLS.Core.DTO.Expenses;
 using GIGLS.Core.Domain.Expenses;
+using ThirdParty.WebServices.Magaya.DTO;
+using ThirdParty.WebServices.Magaya.Business;
+using ThirdParty.WebServices;
 
 namespace GIGLS.Core
 {
@@ -239,8 +242,8 @@ namespace GIGLS.Core
                 config.CreateMap<ShipmentCancel, ShipmentCancelDTO>();
                 config.CreateMap<ShipmentCancelDTO, ShipmentCancel>();
 
-                config.CreateMap<Country, CountryDTO>();
-                config.CreateMap<CountryDTO, Country>();
+                config.CreateMap<GIGLS.Core.Domain.Country, CountryDTO>();
+                config.CreateMap<CountryDTO, GIGLS.Core.Domain.Country>();
 
                 config.CreateMap<ShipmentReroute, ShipmentRerouteDTO>();
                 config.CreateMap<ShipmentRerouteDTO, ShipmentReroute>();
@@ -400,6 +403,12 @@ namespace GIGLS.Core
 
                 config.CreateMap<GiglgoStation, GiglgoStationDTO>();
                 config.CreateMap<GiglgoStationDTO, GiglgoStation>();
+
+                config.CreateMap<WarehouseReceipt, MagayaShipmentDto>();
+                config.CreateMap<MagayaShipmentDto, WarehouseReceipt>();
+
+                config.CreateMap<Entity, EntityDto>();
+                config.CreateMap<EntityDto, Entity>();
 
             });
 

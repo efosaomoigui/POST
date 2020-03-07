@@ -20,6 +20,9 @@ using System.Configuration;
 using System.Linq;
 using System.Web;
 using System.Web.Hosting;
+using GIGLS.Core.DTO.Shipments;
+using ThirdParty.WebServices.Magaya.DTO;
+using ThirdParty.WebServices;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -41,7 +44,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         //[GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("AddShipment")]
-        public async Task<IServiceResponse<string>> AddShipment(MagayaShipmentDTO MagayaShipmentDTO)
+        public async Task<IServiceResponse<string>> AddShipment(MagayaShipmentDto MagayaShipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -53,7 +56,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var openconn = _service.OpenConnection(out access_key);
 
                 //3. Call the Magaya SetTransaction Method from MagayaService
-                var result = _service.SetTransactions(access_key);
+                var result = _service.SetTransactions(access_key, MagayaShipmentDTO);
                 
                 //3. Pass the return to the view or caller
                 return new ServiceResponse<string>()
@@ -62,6 +65,103 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+
+        [HttpPost]
+        [Route("AddEntity")]
+        public async Task<IServiceResponse<string>> AddEntity(EntityDto entitydto) 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+
+                //1. initialize the access key variable
+                int access_key = 0;
+
+                //2. Call the open connection to get the session key
+                var openconn = _service.OpenConnection(out access_key);
+
+                //3. Call the Magaya SetTransaction Method from MagayaService
+                var result = _service.SetEntity(access_key, entitydto);
+
+                //3. Pass the return to the view or caller
+                return new ServiceResponse<string>()
+                {
+                    Object = result
+                };
+            });
+        }
+
+
+        [HttpGet]
+        [Route("GetEntity")]
+        public async Task<IServiceResponse<Entities>> GetEntities(string startwithstring) 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //1. initialize the access key variable
+                int access_key = 0;
+
+                //2. Call the open connection to get the session key
+                var openconn = _service.OpenConnection(out access_key);
+
+                //3. Call the Magaya SetTransaction Method from MagayaService
+                var result = _service.GetEntities(access_key, startwithstring);
+
+                //3. Pass the return to the view or caller
+                return new ServiceResponse<Entities>()
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("GetEmployees")]
+        public async Task<IServiceResponse<Employees>> GetEmployees(string startwithstring)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //1. initialize the access key variable
+                int access_key = 0;
+
+                //2. Call the open connection to get the session key
+                var openconn = _service.OpenConnection(out access_key);
+
+                //3. Call the Magaya SetTransaction Method from MagayaService
+                var result = _service.GetEmployees(access_key, startwithstring);
+
+                //3. Pass the return to the view or caller
+                return new ServiceResponse<Employees>()
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("GetVendors")]
+        public async Task<IServiceResponse<Employees>> GetVendors(string startwithstring)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //1. initialize the access key variable
+                int access_key = 0;
+
+                //2. Call the open connection to get the session key
+                var openconn = _service.OpenConnection(out access_key);
+
+                //3. Call the Magaya SetTransaction Method from MagayaService
+                var result = _service.GetVendors(access_key, startwithstring);
+
+                //3. Pass the return to the view or caller
+                return new ServiceResponse<Employees>()
+                {
+                    Object = result
+                };
+            });
+        }
+
+
 
     }
 }

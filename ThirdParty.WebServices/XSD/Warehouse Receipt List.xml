@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<WarehouseReceipt xmlns="http://www.magaya.com/XMLSchema/V1" GUID="921e4eca-6565-46a3-bc5c-55d1da095a1e" Type="WH">
+		<CreatedOn>2020-02-26T19:13:52-05:00</CreatedOn>
+		<Number>WR-7664</Number>
+		<CreatedByName>Yetunde Martins</CreatedByName>
+		<Version>104</Version>
+		<ModeOfTransportation Code="40">
+			<Description>Air</Description>
+			<Method>Air</Method>
+		</ModeOfTransportation>
+		<ModeOfTransportCode>40</ModeOfTransportCode>
+		<IssuedByName>GIG Logistics US LLC</IssuedByName>
+		<IssuedBy GUID="aa4a552c-8903-4144-a89b-a9e3505a632c">
+			<Type>ForwardingAgent</Type>
+			<Name>GIG Logistics US LLC</Name>
+			<CreatedOn>2017-11-26T22:26:41-05:00</CreatedOn>
+			<Address>
+				<Street>6806 HWY 6 South STE B</Street>
+				<City>Houston</City>
+				<State>TX</State>
+				<ZipCode>77083</ZipCode>
+				<Country Code="US">USA</Country>
+				<Description>Default Shipping Address</Description>
+				<ContactName>ISRAEL AKINPELU</ContactName>
+				<ContactPhone>2817411784</ContactPhone>
+				<ContactEmail>giglhouston@giglogistics.ng</ContactEmail>
+			</Address>
+			<BillingAddress>
+				<Street>6806 HWY 6 South STE B</Street>
+				<City>Houston</City>
+				<State>TX</State>
+				<ZipCode>77083</ZipCode>
+				<Country Code="US">USA</Country>
+				<ContactName>ISRAEL AKINPELU</ContactName>
+				<ContactPhone>2817411784</ContactPhone>
+				<ContactEmail>giglhouston@giglogistics.ng</ContactEmail>
+			</BillingAddress>
+			<Email>giglhouston@giglogistics.ng</Email>
+			<Phone>2817411784</Phone>
+			<AccountNumber>S158HOU</AccountNumber>
+			<ContactFirstName>ISRAEL</ContactFirstName>
+			<ContactLastName>AKINPELU</ContactLastName>
+			<ExporterID>822913932</ExporterID>
+			<ExporterIDType>EIN</ExporterIDType>
+			<NetworkID>35652</NetworkID>
+			<IsKnownShipper>true</IsKnownShipper>
+			<IsPrepaid>true</IsPrepaid>
+			<AgentInfo>
+				<TSANumber>SC1801002</TSANumber>
+			</AgentInfo>
+		</IssuedBy>
+		<IssuedByAddress>
+			<Street>6806 HWY 6 South STE B</Street>
+			<City>Houston</City>
+			<State>TX</State>
+			<ZipCode>77083</ZipCode>
+			<Country Code="US">USA</Country>
+			<Description>Default Shipping Address</Description>
+			<ContactName>ISRAEL AKINPELU</ContactName>
+			<ContactPhone>2817411784</ContactPhone>
+			<ContactEmail>giglhouston@giglogistics.ng</ContactEmail>
+		</IssuedByAddress>
+		<ShipperName>BIGSHIPMENT GLOBAL LIMITED</ShipperName>
+		<Shipper GUID="40121715-73eb-4315-a0a8-ca930be0653d">
+			<Type>Client</Type>
+			<Name>BIGSHIPMENT GLOBAL LIMITED</Name>
+			<CreatedOn>2019-05-01T18:15:56-04:00</CreatedOn>
+			<Address>
+				<Street>19221 BEECHNUT STREET #820 RICHMOND</Street>
+				<City>HOUSTON</City>
+				<State>TX</State>
+				<ZipCode>77407</ZipCode>
+				<Country Code="NG">Nigeria</Country>
+				<Description>Default Shipping Address</Description>
+				<ContactPhone>8327594811</ContactPhone>
+				<ContactEmail>info@bigshipmentglobal.com</ContactEmail>
+			</Address>
+			<BillingAddress>
+				<Street>19221 BEECHNUT STREET #820 RICHMOND</Street>
+				<City>HOUSTON</City>
+				<State>TX</State>
+				<ZipCode>77407</ZipCode>
+				<Country Code="NG">Nigeria</Country>
+				<Description>Default Billing Address</Description>
+				<ContactPhone>8327594811</ContactPhone>
+				<ContactEmail>info@bigshipmentglobal.com</ContactEmail>
+			</BillingAddress>
+			<Email>info@bigshipmentglobal.com</Email>
+			<Phone>8327594811</Phone>
+			<PaymentTerms>
+				<Description>Due on receipt</Description>
+				<NetDueDays>0</NetDueDays>
+				<DiscountPercentage>0.00</DiscountPercentage>
+				<DiscountPaidDays>0</DiscountPaidDays>
+			</PaymentTerms>
+			<IsPrepaid>true</IsPrepaid>
+		</Shipper>
+		<ShipperAddress>
+			<Street>19221 BEECHNUT STREET #820 RICHMOND</Street>
+			<City>HOUSTON</City>
+			<State>TX</State>
+			<ZipCode>77407</ZipCode>
+			<Country Code="NG">Nigeria</Country>
+			<Description>Default Shipping Address</Description>
+			<ContactPhone>8327594811</ContactPhone>
+			<ContactEmail>info@bigshipmentglobal.com</ContactEmail>
+		</ShipperAddress>
+		<ConsigneeName>VICTOR EKPE</ConsigneeName>
+		<Consignee GUID="f5382092-d01b-45f1-bc03-50f4871e30dc">
+			<Type>Client</Type>
+			<Name>VICTOR EKPE</Name>
+			<CreatedOn>2019-04-25T18:12:08-04:00</CreatedOn>
+			<Address>
+				<Street>CLOSE 25, HOUSE 4</Street>
+				<City>SATTELITE TOWN</City>
+				<State>LAGOS</State>
+				<Country Code="NG">Nigeria</Country>
+				<Description>Default Shipping Address</Description>
+				<ContactPhone>08097810767</ContactPhone>
+			</Address>
+			<BillingAddress>
+				<Street>CLOSE 25, HOUSE 4</Street>
+				<City>SATTELITE TOWN</City>
+				<State>LAGOS</State>
+				<Country Code="NG">Nigeria</Country>
+				<Description>Default Billing Address</Description>
+				<ContactPhone>08097810767</ContactPhone>
+			</BillingAddress>
+			<Phone>08097810767</Phone>
+			<PaymentTerms>
+				<Description>Due on receipt</Description>
+				<NetDueDays>0</NetDueDays>
+				<DiscountPercentage>0.00</DiscountPercentage>
+				<DiscountPaidDays>0</DiscountPaidDays>
+			</PaymentTerms>
+			<IsPrepaid>true</IsPrepaid>
+		</Consignee>
+		<ConsigneeAddress>
+			<Street>CLOSE 25, HOUSE 4</Street>
+			<City>SATTELITE TOWN</City>
+			<State>LAGOS</State>
+			<Country Code="NG">Nigeria</Country>
+			<Description>Default Shipping Address</Description>
+			<ContactPhone>08097810767</ContactPhone>
+		</ConsigneeAddress>
+		<Items>
+			<Item GUID="7dcb121e-da47-4623-95fb-a4695d745982" Type="WI">
+				<Version>105</Version>
+				<Status>OnHand</Status>
+				<Pieces>1</Pieces>
+				<Description>PERSONAL EFFECTS</Description>
+				<PieceQuantity>0.00</PieceQuantity>
+				<IsSummarized>false</IsSummarized>
+				<WarehouseReceiptGUID>921e4eca-6565-46a3-bc5c-55d1da095a1e</WarehouseReceiptGUID>
+				<TrackingNumber>8B44-WR-7664-1</TrackingNumber>
+				<PackageName>Box</PackageName>
+				<WHRItemID>1</WHRItemID>
+				<LocationCode>WH</LocationCode>
+				<Length Unit="in">24.00</Length>
+				<Height Unit="in">24.00</Height>
+				<Width Unit="in">24.00</Width>
+				<Weight Unit="lb">82.00</Weight>
+				<ContainedPiecesWeightIncluded>true</ContainedPiecesWeightIncluded>
+				<Volume Unit="ft3">8.00</Volume>
+				<VolumeWeight Unit="vlb">83.277108433734895</VolumeWeight>
+				<PieceWeight Unit="lb">82.00</PieceWeight>
+				<PieceVolume Unit="ft3">8.00</PieceVolume>
+				<Package>
+					<Type>Box</Type>
+					<Code>BOX</Code>
+					<Name>Box</Name>
+				</Package>
+				<Location Code="WH">
+					<Description>WAREHOUSE</Description>
+					<Type>Storage</Type>
+					<NetworkID>35652</NetworkID>
+					<WarehouseZoneName>Default Zone</WarehouseZoneName>
+					<IsDisabled>false</IsDisabled>
+				</Location>
+				<IncludeInSED>false</IncludeInSED>
+				<IsContainer>false</IsContainer>
+				<WarehouseReceiptNumber>WR-7664</WarehouseReceiptNumber>
+				<IsPallet>false</IsPallet>
+				<IsOverstock>false</IsOverstock>
+				<NotLoaded>false</NotLoaded>
+				<InTask>false</InTask>
+				<EntryDate>2020-02-26T19:13:52-05:00</EntryDate>
+			</Item>
+			<Item GUID="d8fb445b-7cc5-4feb-b53d-d0d3608a0124" Type="WI">
+				<Version>105</Version>
+				<Status>OnHand</Status>
+				<Pieces>1</Pieces>
+				<Description>PERSONAL EFFECTS</Description>
+				<PieceQuantity>0.00</PieceQuantity>
+				<IsSummarized>false</IsSummarized>
+				<WarehouseReceiptGUID>921e4eca-6565-46a3-bc5c-55d1da095a1e</WarehouseReceiptGUID>
+				<TrackingNumber>8B44-WR-7664-7</TrackingNumber>
+				<PackageName>Box</PackageName>
+				<WHRItemID>7</WHRItemID>
+				<LocationCode>WH</LocationCode>
+				<Length Unit="in">22.00</Length>
+				<Height Unit="in">21.00</Height>
+				<Width Unit="in">14.999999999999998</Width>
+				<Weight Unit="lb">23.00</Weight>
+				<ContainedPiecesWeightIncluded>true</ContainedPiecesWeightIncluded>
+				<Volume Unit="ft3">4.0099999999999998</Volume>
+				<VolumeWeight Unit="vlb">41.742650602409611</VolumeWeight>
+				<PieceWeight Unit="lb">23.00</PieceWeight>
+				<PieceVolume Unit="ft3">8.00</PieceVolume>
+				<Package>
+					<Type>Box</Type>
+					<Code>BOX</Code>
+					<Name>Box</Name>
+				</Package>
+				<Location Code="WH">
+					<Description>WAREHOUSE</Description>
+					<Type>Storage</Type>
+					<NetworkID>35652</NetworkID>
+					<WarehouseZoneName>Default Zone</WarehouseZoneName>
+					<IsDisabled>false</IsDisabled>
+				</Location>
+				<IncludeInSED>false</IncludeInSED>
+				<IsContainer>false</IsContainer>
+				<WarehouseReceiptNumber>WR-7664</WarehouseReceiptNumber>
+				<IsPallet>false</IsPallet>
+				<IsOverstock>false</IsOverstock>
+				<NotLoaded>false</NotLoaded>
+				<InTask>false</InTask>
+				<EntryDate>2020-02-26T19:13:52-05:00</EntryDate>
+			</Item>
+			<Item GUID="17805680-5651-4fa1-b5e0-1c652212bd91" Type="WI">
+				<Version>105</Version>
+				<Status>OnHand</Status>
+				<Pieces>1</Pieces>
+				<Description>PERSONAL EFFECTS</Description>
+				<PieceQuantity>0.00</PieceQuantity>
+				<IsSummarized>false</IsSummarized>
+				<WarehouseReceiptGUID>921e4eca-6565-46a3-bc5c-55d1da095a1e</WarehouseReceiptGUID>
+				<TrackingNumber>8B44-WR-7664-4</TrackingNumber>
+				<PackageName>Box</PackageName>
+				<WHRItemID>4</WHRItemID>
+				<LocationCode>WH</LocationCode>
+				<Length Unit="in">42.00</Length>
+				<Height Unit="in">26.00</Height>
+				<Width Unit="in">29.00</Width>
+				<Weight Unit="lb">215.00</Weight>
+				<ContainedPiecesWeightIncluded>true</ContainedPiecesWeightIncluded>
+				<Volume Unit="ft3">18.329999999999998</Volume>
+				<VolumeWeight Unit="vlb">190.80867469879504</VolumeWeight>
+				<PieceWeight Unit="lb">215.00</PieceWeight>
+				<PieceVolume Unit="ft3">8.00</PieceVolume>
+				<Package>
+					<Type>Box</Type>
+					<Code>BOX</Code>
+					<Name>Box</Name>
+				</Package>
+				<Location Code="WH">
+					<Description>WAREHOUSE</Description>
+					<Type>Storage</Type>
+					<NetworkID>35652</NetworkID>
+					<WarehouseZoneName>Default Zone</WarehouseZoneName>
+					<IsDisabled>false</IsDisabled>
+				</Location>
+				<IncludeInSED>false</IncludeInSED>
+				<IsContainer>false</IsContainer>
+				<WarehouseReceiptNumber>WR-7664</WarehouseReceiptNumber>
+				<IsPallet>false</IsPallet>
+				<IsOverstock>false</IsOverstock>
+				<NotLoaded>false</NotLoaded>
+				<InTask>false</InTask>
+				<EntryDate>2020-02-26T19:13:52-05:00</EntryDate>
+			</Item>
+			<Item GUID="8db23283-e1ef-4cae-9485-8f94fa522960" Type="WI">
+				<Version>105</Version>
+				<Status>OnHand</Status>
+				<Pieces>1</Pieces>
+				<Description>PERSONAL EFFECTS</Description>
+				<PieceQuantity>0.00</PieceQuantity>
+				<IsSummarized>false</IsSummarized>
+				<WarehouseReceiptGUID>921e4eca-6565-46a3-bc5c-55d1da095a1e</WarehouseReceiptGUID>
+				<TrackingNumber>8B44-WR-7664-3</TrackingNumber>
+				<PackageName>Box</PackageName>
+				<WHRItemID>3</WHRItemID>
+				<LocationCode>WH</LocationCode>
+				<Length Unit="in">21.00</Length>
+				<Height Unit="in">16.00</Height>
+				<Width Unit="in">16.00</Width>
+				<Weight Unit="lb">24.000000000000004</Weight>
+				<ContainedPiecesWeightIncluded>true</ContainedPiecesWeightIncluded>
+				<Volume Unit="ft3">3.1099999999999999</Volume>
+				<VolumeWeight Unit="vlb">32.373975903614436</VolumeWeight>
+				<PieceWeight Unit="lb">24.000000000000004</PieceWeight>
+				<PieceVolume Unit="ft3">8.00</PieceVolume>
+				<Package>
+					<Type>Box</Type>
+					<Code>BOX</Code>
+					<Name>Box</Name>
+				</Package>
+				<Location Code="WH">
+					<Description>WAREHOUSE</Description>
+					<Type>Storage</Type>
+					<NetworkID>35652</NetworkID>
+					<WarehouseZoneName>Default Zone</WarehouseZoneName>
+					<IsDisabled>false</IsDisabled>
+				</Location>
+				<IncludeInSED>false</IncludeInSED>
+				<IsContainer>false</IsContainer>
+				<WarehouseReceiptNumber>WR-7664</WarehouseReceiptNumber>
+				<IsPallet>false</IsPallet>
+				<IsOverstock>false</IsOverstock>
+				<NotLoaded>false</NotLoaded>
+				<InTask>false</InTask>
+				<EntryDate>2020-02-26T19:13:52-05:00</EntryDate>
+			</Item>
+			<Item GUID="66aa759e-35b5-4fb6-a41e-3911fa5b2b0d" Type="WI">
+				<Version>105</Version>
+				<Status>OnHand</Status>
+				<Pieces>1</Pieces>
+				<Description>PERSONAL EFFECTS</Description>
+				<PieceQuantity>0.00</PieceQuantity>
+				<IsSummarized>false</IsSummarized>
+				<WarehouseReceiptGUID>921e4eca-6565-46a3-bc5c-55d1da095a1e</WarehouseReceiptGUID>
+				<TrackingNumber>8B44-WR-7664-5</TrackingNumber>
+				<PackageName>Box</PackageName>
+				<WHRItemID>5</WHRItemID>
+				<LocationCode>WH</LocationCode>
+				<Length Unit="in">42.00</Length>
+				<Height Unit="in">26.00</Height>
+				<Width Unit="in">29.00</Width>
+				<Weight Unit="lb">179.00</Weight>
+				<ContainedPiecesWeightIncluded>true</ContainedPiecesWeightIncluded>
+				<Volume Unit="ft3">18.329999999999998</Volume>
+				<VolumeWeight Unit="vlb">190.80867469879504</VolumeWeight>
+				<PieceWeight Unit="lb">179.00</PieceWeight>
+				<PieceVolume Unit="ft3">8.00</PieceVolume>
+				<Package>
+					<Type>Box</Type>
+					<Code>BOX</Code>
+					<Name>Box</Name>
+				</Package>
+				<Location Code="WH">
+					<Description>WAREHOUSE</Description>
+					<Type>Storage</Type>
+					<NetworkID>35652</NetworkID>
+					<WarehouseZoneName>Default Zone</WarehouseZoneName>
+					<IsDisabled>false</IsDisabled>
+				</Location>
+				<IncludeInSED>false</IncludeInSED>
+				<IsContainer>false</IsContainer>
+				<WarehouseReceiptNumber>WR-7664</WarehouseReceiptNumber>
+				<IsPallet>false</IsPallet>
+				<IsOverstock>false</IsOverstock>
+				<NotLoaded>false</NotLoaded>
+				<InTask>false</InTask>
+				<EntryDate>2020-02-26T19:13:52-05:00</EntryDate>
+			</Item>
+			<Item GUID="7374c6de-b029-456d-8954-68d761478f66" Type="WI">
+				<Version>105</Version>
+				<Status>OnHand</Status>
+				<Pieces>1</Pieces>
+				<Description>PERSONAL EFFECTS</Description>
+				<PieceQuantity>0.00</PieceQuantity>
+				<IsSummarized>false</IsSummarized>
+				<WarehouseReceiptGUID>921e4eca-6565-46a3-bc5c-55d1da095a1e</WarehouseReceiptGUID>
+				<TrackingNumber>8B44-WR-7664-8</TrackingNumber>
+				<PackageName>Box</PackageName>
+				<WHRItemID>8</WHRItemID>
+				<LocationCode>WH</LocationCode>
+				<Length Unit="in">22.00</Length>
+				<Height Unit="in">21.00</Height>
+				<Width Unit="in">14.999999999999998</Width>
+				<Weight Unit="lb">23.00</Weight>
+				<ContainedPiecesWeightIncluded>true</ContainedPiecesWeightIncluded>
+				<Volume Unit="ft3">4.0099999999999998</Volume>
+				<VolumeWeight Unit="vlb">41.742650602409611</VolumeWeight>
+				<PieceWeight Unit="lb">23.00</PieceWeight>
+				<PieceVolume Unit="ft3">8.00</PieceVolume>
+				<Package>
+					<Type>Box</Type>
+					<Code>BOX</Code>
+					<Name>Box</Name>
+				</Package>
+				<Location Code="WH">
+					<Description>WAREHOUSE</Description>
+					<Type>Storage</Type>
+					<NetworkID>35652</NetworkID>
+					<WarehouseZoneName>Default Zone</WarehouseZoneName>
+					<IsDisabled>false</IsDisabled>
+				</Location>
+				<IncludeInSED>false</IncludeInSED>
+				<IsContainer>false</IsContainer>
+				<WarehouseReceiptNumber>WR-7664</WarehouseReceiptNumber>
+				<IsPallet>false</IsPallet>
+				<IsOverstock>false</IsOverstock>
+				<NotLoaded>false</NotLoaded>
+				<InTask>false</InTask>
+				<EntryDate>2020-02-26T19:13:52-05:00</EntryDate>
+			</Item>
+			<Item GUID="2a3fa1f4-9f40-46f5-a311-555d0031d2d2" Type="WI">
+				<Version>105</Version>
+				<Status>OnHand</Status>
+				<Pieces>1</Pieces>
+				<Description>PERSONAL EFFECTS</Description>
+				<PieceQuantity>0.00</PieceQuantity>
+				<IsSummarized>false</IsSummarized>
+				<WarehouseReceiptGUID>921e4eca-6565-46a3-bc5c-55d1da095a1e</WarehouseReceiptGUID>
+				<TrackingNumber>8B44-WR-7664-2</TrackingNumber>
+				<PackageName>Box</PackageName>
+				<WHRItemID>2</WHRItemID>
+				<LocationCode>WH</LocationCode>
+				<Length Unit="in">24.00</Length>
+				<Height Unit="in">24.00</Height>
+				<Width Unit="in">24.00</Width>
+				<Weight Unit="lb">91.00</Weight>
+				<ContainedPiecesWeightIncluded>true</ContainedPiecesWeightIncluded>
+				<Volume Unit="ft3">8.00</Volume>
+				<VolumeWeight Unit="vlb">83.277108433734895</VolumeWeight>
+				<PieceWeight Unit="lb">91.00</PieceWeight>
+				<PieceVolume Unit="ft3">8.00</PieceVolume>
+				<Package>
+					<Type>Box</Type>
+					<Code>BOX</Code>
+					<Name>Box</Name>
+				</Package>
+				<Location Code="WH">
+					<Description>WAREHOUSE</Description>
+					<Type>Storage</Type>
+					<NetworkID>35652</NetworkID>
+					<WarehouseZoneName>Default Zone</WarehouseZoneName>
+					<IsDisabled>false</IsDisabled>
+				</Location>
+				<IncludeInSED>false</IncludeInSED>
+				<IsContainer>false</IsContainer>
+				<WarehouseReceiptNumber>WR-7664</WarehouseReceiptNumber>
+				<IsPallet>false</IsPallet>
+				<IsOverstock>false</IsOverstock>
+				<NotLoaded>false</NotLoaded>
+				<InTask>false</InTask>
+				<EntryDate>2020-02-26T19:13:52-05:00</EntryDate>
+			</Item>
+			<Item GUID="18f952fd-fcb0-4d7e-b0b8-67aef73e3b22" Type="WI">
+				<Version>105</Version>
+				<Status>OnHand</Status>
+				<Pieces>1</Pieces>
+				<Description>PERSONAL EFFECTS</Description>
+				<PieceQuantity>0.00</PieceQuantity>
+				<IsSummarized>false</IsSummarized>
+				<WarehouseReceiptGUID>921e4eca-6565-46a3-bc5c-55d1da095a1e</WarehouseReceiptGUID>
+				<TrackingNumber>8B44-WR-7664-6</TrackingNumber>
+				<PackageName>Box</PackageName>
+				<WHRItemID>6</WHRItemID>
+				<LocationCode>WH</LocationCode>
+				<Length Unit="in">22.00</Length>
+				<Height Unit="in">21.00</Height>
+				<Width Unit="in">14.999999999999998</Width>
+				<Weight Unit="lb">22.000000000000004</Weight>
+				<ContainedPiecesWeightIncluded>true</ContainedPiecesWeightIncluded>
+				<Volume Unit="ft3">4.0099999999999998</Volume>
+				<VolumeWeight Unit="vlb">41.742650602409611</VolumeWeight>
+				<PieceWeight Unit="lb">22.000000000000004</PieceWeight>
+				<PieceVolume Unit="ft3">8.00</PieceVolume>
+				<Package>
+					<Type>Box</Type>
+					<Code>BOX</Code>
+					<Name>Box</Name>
+				</Package>
+				<Location Code="WH">
+					<Description>WAREHOUSE</Description>
+					<Type>Storage</Type>
+					<NetworkID>35652</NetworkID>
+					<WarehouseZoneName>Default Zone</WarehouseZoneName>
+					<IsDisabled>false</IsDisabled>
+				</Location>
+				<IncludeInSED>false</IncludeInSED>
+				<IsContainer>false</IsContainer>
+				<WarehouseReceiptNumber>WR-7664</WarehouseReceiptNumber>
+				<IsPallet>false</IsPallet>
+				<IsOverstock>false</IsOverstock>
+				<NotLoaded>false</NotLoaded>
+				<InTask>false</InTask>
+				<EntryDate>2020-02-26T19:13:52-05:00</EntryDate>
+			</Item>
+		</Items>
+		<MeasurementUnits>
+			<LengthUnit>in</LengthUnit>
+			<VolumeUnit>ft3</VolumeUnit>
+			<WeightUnit>lb</WeightUnit>
+			<VolumeWeightUnit>vlb</VolumeWeightUnit>
+			<AreaUnit>ft2</AreaUnit>
+			<LengthPrecision>2</LengthPrecision>
+			<VolumePrecision>2</VolumePrecision>
+			<WeightPrecision>2</WeightPrecision>
+			<VolumeWeightPrecision>2</VolumeWeightPrecision>
+			<AreaPrecision>2</AreaPrecision>
+			<VolumeWeightFactor>166.00</VolumeWeightFactor>
+		</MeasurementUnits>
+		<CreatorNetworkID>35652</CreatorNetworkID>
+		<Events>
+			<Event>
+				<Date>2020-02-26T19:17:44-05:00</Date>
+				<EventDefinition>
+					<Name>Arrived at warehouse</Name>
+					<IncludeInTracking>true</IncludeInTracking>
+				</EventDefinition>
+				<IncludeInTracking>true</IncludeInTracking>
+				<OwnerType>WH</OwnerType>
+				<OwnerNumber>WR-7664</OwnerNumber>
+				<OwnerGUID>921e4eca-6565-46a3-bc5c-55d1da095a1e</OwnerGUID>
+			</Event>
+		</Events>
+		<TotalPieces>8</TotalPieces>
+		<TotalWeight Unit="lb">659.00</TotalWeight>
+		<TotalVolume Unit="ft3">67.799999999999997</TotalVolume>
+		<TotalVolumeWeight Unit="vlb">705.77349397590319</TotalVolumeWeight>
+		<ChargeableWeight Unit="lb">705.77349397590308</ChargeableWeight>
+		<TotalValue Currency="USD">0.00</TotalValue>
+		<OriginPort Code="IA9">
+			<Country Code="US">USA</Country>
+			<Method>Air</Method>
+			<Name>George Bush Intercontinental Apt/Houston</Name>
+			<Subdivision>TX</Subdivision>
+		</OriginPort>
+		<DestinationPort Code="LOA">
+			<Country Code="NG">Nigeria</Country>
+			<Method>Air</Method>
+			<Method>Ground</Method>
+			<Name>Lagos Murtala Muhammed Apt</Name>
+			<Subdivision>LA</Subdivision>
+		</DestinationPort>
+		<Status>OnHand</Status>
+		<HasAttachments>false</HasAttachments>
+		<BillingClient GUID="40121715-73eb-4315-a0a8-ca930be0653d">
+			<Type>Client</Type>
+			<Name>BIGSHIPMENT GLOBAL LIMITED</Name>
+			<CreatedOn>2019-05-01T18:15:56-04:00</CreatedOn>
+			<Address>
+				<Street>19221 BEECHNUT STREET #820 RICHMOND</Street>
+				<City>HOUSTON</City>
+				<State>TX</State>
+				<ZipCode>77407</ZipCode>
+				<Country Code="NG">Nigeria</Country>
+				<Description>Default Shipping Address</Description>
+				<ContactPhone>8327594811</ContactPhone>
+				<ContactEmail>info@bigshipmentglobal.com</ContactEmail>
+			</Address>
+			<BillingAddress>
+				<Street>19221 BEECHNUT STREET #820 RICHMOND</Street>
+				<City>HOUSTON</City>
+				<State>TX</State>
+				<ZipCode>77407</ZipCode>
+				<Country Code="NG">Nigeria</Country>
+				<Description>Default Billing Address</Description>
+				<ContactPhone>8327594811</ContactPhone>
+				<ContactEmail>info@bigshipmentglobal.com</ContactEmail>
+			</BillingAddress>
+			<Email>info@bigshipmentglobal.com</Email>
+			<Phone>8327594811</Phone>
+			<PaymentTerms>
+				<Description>Due on receipt</Description>
+				<NetDueDays>0</NetDueDays>
+				<DiscountPercentage>0.00</DiscountPercentage>
+				<DiscountPaidDays>0</DiscountPaidDays>
+			</PaymentTerms>
+			<IsPrepaid>true</IsPrepaid>
+		</BillingClient>
+		<LastItemID>8</LastItemID>
+		<IsOnline>false</IsOnline>
+		<IsLiquidated>false</IsLiquidated>
+	</WarehouseReceipt>
