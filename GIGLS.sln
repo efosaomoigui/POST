@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.757
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GIGLS.WebApi", "GIGLS.WebApi\GIGLS.WebApi.csproj", "{34F0A9AD-90CD-4E09-9034-10A5F730F85A}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvoiceReminderJob", "InvoiceReminderJob\InvoiceReminderJob.csproj", "{DD4DC220-45D5-476F-BDB7-2AFD10D1EAE9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WalletReminderJobs", "WalletReminderJobs\WalletReminderJobs.csproj", "{BFEF64E0-9061-4865-87B2-A41F33383695}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThirdParty.WebServices", "ThirdParty.WebServices\ThirdParty.WebServices.csproj", "{03529607-E784-45A7-B684-158EA13FB5E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{BFEF64E0-9061-4865-87B2-A41F33383695}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BFEF64E0-9061-4865-87B2-A41F33383695}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BFEF64E0-9061-4865-87B2-A41F33383695}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03529607-E784-45A7-B684-158EA13FB5E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03529607-E784-45A7-B684-158EA13FB5E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03529607-E784-45A7-B684-158EA13FB5E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03529607-E784-45A7-B684-158EA13FB5E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

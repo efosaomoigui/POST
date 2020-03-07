@@ -1,6 +1,6 @@
-﻿using GIGLS.Core.IServices.Shipments;
-using GIGLS.Services.Business.Magaya.Shipment;
-using GIGLS.Services.Magaya.Impl;
+﻿using AutoMapper;
+using GIGLS.Core.IServices.Shipments;
+using GIGLS.Services.Magaya.Service;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -8,42 +8,54 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThirdParty.WebServices;
+using ThirdParty.WebServices.Magaya.Business;
+using ThirdParty.WebServices.Magaya.DTO;
 
 namespace GIGLS.Services.Business.Magaya.Shipment
-{
-    class MagayaService : IMagayaService
+{       
+    public class MagayaService : IMagayaService 
     {
 
         int key = -1;
         int myAccessKey = -1;
 
+        public MagayaService()
+        {
+
+        }
+
         //Open Connections
-        public async Task<bool> OpenConnection()
+        public bool OpenConnection(out int access_key)
         {
             var magayausername = ConfigurationManager.AppSettings["MagayaUsername"];
             var magayapassword = ConfigurationManager.AppSettings["MagayaPassword"];
 
-            CSSoapServiceSoapClient cs = new CSSoapServiceSoapClient();
+            var _webServiceUrl = "http://35652.magayacloud.com:3691/Invoke?Handler=CSSoapService";
+            var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
+
+            CSSoapServiceSoapClient cs = new CSSoapServiceSoapClient(new System.ServiceModel.BasicHttpBinding(), remoteAddress); 
             api_session_error result = api_session_error.no_error;
             try
             {
                 result = cs.StartSession(magayausername, magayapassword, out key);
-                //this = cs;
-                this.myAccessKey = key;
-                var resValue = await Task.FromResult(api_session_error.no_error);
-                return result == resValue;
+                access_key = key;
+                return result == api_session_error.no_error;
             }
             catch
             {
+                access_key = 0;
                 return false;
             }
-
         }
 
         //Close Connections
-        public async Task<string> CloseConnection(int access_key)
+        public string CloseConnection(int access_key)
         {
-            CSSoapServiceSoapClient cs = new CSSoapServiceSoapClient();
+            var _webServiceUrl = "http://35652.magayacloud.com:3691/Invoke?Handler=CSSoapService";
+            var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
+
+            CSSoapServiceSoapClient cs = new CSSoapServiceSoapClient(new System.ServiceModel.BasicHttpBinding(), remoteAddress);
             try
             {
                 var result = cs.EndSession(access_key);
@@ -57,48 +69,46 @@ namespace GIGLS.Services.Business.Magaya.Shipment
         }
 
         //For creating shipment in Magaya
-        public async Task<string> SetTransactions(int access_key)
+        public string SetTransactions(int access_key, MagayaShipmentDto magayaShipmentDTO)
         {
-            //get the magaya user name and password from the config file
-            var magayausername = ConfigurationManager.AppSettings["MagayaUsername"];
-            var magayapassword = ConfigurationManager.AppSettings["MagayaPassword"];
 
-            //initialize the magaya web service object
-            CSSoapServiceSoapClient cs = new CSSoapServiceSoapClient();
+            //1. initialize the magaya web service object
+            var _webServiceUrl = "http://35652.magayacloud.com:3691/Invoke?Handler=CSSoapService";
+            var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
+            CSSoapServiceSoapClient cs = new CSSoapServiceSoapClient(new System.ServiceModel.BasicHttpBinding(), remoteAddress);
 
-            //initialize type of shipment and flag
+            //2. initialize type of shipment and flag
             string type = "SH";
             int flags = 0x00000800;
 
-            //initilize the variables to hold some parameters and return values
-            string path = string.Empty;
-            string xmlInputData = string.Empty;
-            string xmlOutputData = string.Empty;
+            //3. initilize the variables to hold some parameters and return values
             string trans_xml = string.Empty;
+            var errval = string.Empty;
 
             //initialize the serializer object
             Serializer sr = new Serializer();
 
-            //get the xml for shipment from file directory
-            //path = Directory.GetCurrentDirectory() + @"\GIGLS.Services\Business\Magaya\xml\AirBooking.xml";
-            //xmlInputData = File.ReadAllText(path);
+            //serialize object to xml from class warehousereceipt
+            WarehouseReceipt shipmentdata = new WarehouseReceipt();
+            var xmlobject = Mapper.Map<WarehouseReceipt>(magayaShipmentDTO); 
 
-            //deserialize from file to object
-            //ShipmentData shipmentdata = sr.Deserialize<ShipmentData>(xmlInputData);
-
-            //deserialize xml to object from class warehousereceipt
-            WarehouseReceipt shipmentdata = new WarehouseReceipt() {
-                CreatedOn = "2020-19-02",
+            var obWh = new WarehouseReceipt()
+            {
+                CreatedOn = "2018-05-17T17:40:55-04:00",
                 Number = "WEARR",
                 CreatedByName = "Administrator",
                 Version = "Version1",
-                ModeOfTransportation = null,
-                ModeOfTransportCode = "Air",
+                ModeOfTransportation = new ModeOfTransportation() {
+                    Code = "123",
+                    Method = "Air", 
+                    Description = "Air Method"
+                },
+                ModeOfTransportCode = null,
                 IssuedBy = null,
                 IssuedByAddress = null,
                 IssuedByName = "",
                 ShipperName = "Efe",
-                ShipperAddress = null, 
+                ShipperAddress = null,
                 Shipper = null,
                 ConsigneeName = "",
                 ConsigneeAddress = null,
@@ -106,7 +116,7 @@ namespace GIGLS.Services.Business.Magaya.Shipment
                 DestinationAgentName = "",
                 DestinationAgent = null,
                 Carrier = null,
-                CarrierName= "",
+                CarrierName = "",
                 CarrierTrackingNumber = "",
                 CarrierPRONumber = "",
                 DriverName = "",
@@ -114,11 +124,11 @@ namespace GIGLS.Services.Business.Magaya.Shipment
                 Notes = "",
                 Items = null,
                 MeasurementUnits = null,
-                CreatorNetworkID = "", 
+                CreatorNetworkID = "",
                 Charges = null,
                 Events = null,
                 Division = null,
-                TotalPieces = "", 
+                TotalPieces = "",
                 TotalWeight = null,
                 TotalVolume = null,
                 TotalValue = null,
@@ -133,49 +143,236 @@ namespace GIGLS.Services.Business.Magaya.Shipment
                 SupplierPONumber = "",
                 FromQuoteNumber = "",
                 HasAttachments = "",
-                Attachments = "",
+                Attachments = null,
                 BondedEntry = "",
                 BondedEntryNumber = "",
-                BondedEntryDate = "", 
+                BondedEntryDate = "",
                 CarrierBookingNumber = "",
                 FromBookingNumber = "",
                 MainCarrier = null,
                 BillingClient = null,
                 LastItemID = "",
-                URL = "", 
+                URL = "",
                 CustomFields = null,
                 IsOnline = "",
-                HoldStatus = new HoldStatus(){ IsOnHold = "true"},
+                HoldStatus = new HoldStatus() { IsOnHold = "true" },
                 IsLiquidated = "",
-                Xmlns = "", 
-                SchemaLocation = "",
-                GUID = "", 
-                Type = "",
-                Xsi = ""
-
+                Xmlns = "http://www.magaya.com/XMLSchema/V1",
+                SchemaLocation = "http://www.magaya.com/XMLSchema/V1",
+                GUID = "",
+                Type = ""
             };
+            //};
 
-            //serialize to xml for the magaya request
-            trans_xml = sr.Serialize<WarehouseReceipt>(shipmentdata);
             api_session_error result = api_session_error.no_error;
 
             try
             {
+                //serialize to xml for the magaya request
+                trans_xml = sr.Serialize<WarehouseReceipt>(xmlobject);
+
+                //trans_xml = sr.ConvertObjectToXMLString(shipmentdata);
                 string error_code = "";
                 result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
-                return error_code;
+                errval =  error_code;
             }
-            catch
+            catch (Exception ex)
             {
-                return "";
+                errval = ex.Message;
             }
 
+            return errval;
+
         }
 
-        public Task<string> SetTransactions(int access_key, string type, int flags, string trans_xml)
+        //For creating shipment in Magaya
+        public string SetEntity(int access_key, EntityDto entitydto) 
         {
-            throw new NotImplementedException();
+
+            //1. initialize the magaya web service object
+            var _webServiceUrl = "http://35652.magayacloud.com:3691/Invoke?Handler=CSSoapService";
+            var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
+            CSSoapServiceSoapClient cs = new CSSoapServiceSoapClient(new System.ServiceModel.BasicHttpBinding(), remoteAddress);
+
+            //2. initialize type of shipment and flag
+            int flags = 0x00000800;
+
+            //3. initilize the variables to hold some parameters and return values
+            string entity_xml = string.Empty;
+            var errval = string.Empty;
+
+            //initialize the serializer object
+            Serializer sr = new Serializer();
+
+            //serialize object to xml from class warehousereceipt
+            var entitydata = new Entity();
+            var xmlobject = Mapper.Map<Entity>(entitydto);
+
+            api_session_error result = api_session_error.no_error;
+
+            try
+            {
+                //serialize to xml for the magaya request
+                entity_xml = sr.Serialize<Entity>(xmlobject);
+
+                //trans_xml = sr.ConvertObjectToXMLString(shipmentdata);
+                string error_code = "";
+                result = cs.SetEntity(access_key,flags, entity_xml, out error_code); 
+                errval = error_code;
+            }
+            catch (Exception ex)
+            {
+                errval = ex.Message;
+            }
+
+            return errval;
+
         }
+
+        public string GetTransactions(int access_key, MagayaShipmentDto magayaShipmentDTO) 
+        {
+            //1. initialize the magaya web service object
+            var _webServiceUrl = "http://35652.magayacloud.com:3691/Invoke?Handler=CSSoapService";
+            var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
+            CSSoapServiceSoapClient cs = new CSSoapServiceSoapClient(new System.ServiceModel.BasicHttpBinding(), remoteAddress);
+
+            //2. initialize type of shipment and flag
+            int flags = 0x00000800;
+
+            //3. initilize the variables to hold some parameters and return values
+            string entity_xml = string.Empty;
+            var errval = string.Empty;
+
+            //4.initialize the serializer object
+            Serializer sr = new Serializer();
+
+            //serialize object to xml from class warehousereceipt
+            WarehouseReceipt shipmentdata = new WarehouseReceipt();
+            var xmlobject = Mapper.Map<WarehouseReceipt>(magayaShipmentDTO);
+
+            api_session_error result = api_session_error.no_error;
+
+            try
+            {
+                //serialize to xml for the magaya request
+                entity_xml = sr.Serialize<WarehouseReceipt>(xmlobject);
+
+                string error_code = "";
+                result = cs.SetEntity(access_key, flags, entity_xml, out error_code);
+                errval = error_code;
+            }
+            catch (Exception ex)
+            {
+                errval = ex.Message;
+            }
+
+            return errval;
+        }
+
+        //Get customers, forwarding agents etc
+        public Entities GetEntities(int access_key, string startwithstring)  
+        {
+
+            //1. initialize the magaya web service object
+            var _webServiceUrl = "http://35652.magayacloud.com:3691/Invoke?Handler=CSSoapService";
+            var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
+            CSSoapServiceSoapClient cs = new CSSoapServiceSoapClient(new System.ServiceModel.BasicHttpBinding(), remoteAddress);
+
+            //2. initialize type of entity and flag
+            int flags = 0x00000800;
+
+            //3. initilize the variables to hold some parameters and return values
+            string entity_xml = string.Empty;
+            Entities errval = null;
+
+            //initialize the serializer object
+            Serializer sr = new Serializer();
+            api_session_error result = api_session_error.no_error;
+
+            try
+            {
+                //trans_xml = sr.ConvertObjectToXMLString(shipmentdata);
+                string error_code = "";
+                result = cs.GetEntities(access_key, flags, startwithstring, out error_code);
+                var objectOfXml  = sr.Deserialize<Entities>(error_code); 
+                errval = objectOfXml;
+            }
+            catch (Exception ex) 
+            {
+            }
+
+            return errval;
+        }
+
+
+        //Get Magaya employees
+        public Employees GetEmployees(int access_key, string startwithstring)
+        {
+            //1. initialize the magaya web service object
+            var _webServiceUrl = "http://35652.magayacloud.com:3691/Invoke?Handler=CSSoapService";
+            var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
+            CSSoapServiceSoapClient cs = new CSSoapServiceSoapClient(new System.ServiceModel.BasicHttpBinding(), remoteAddress);
+
+            //2. initialize type of entity and flag
+            int flags = 0x00000800;
+
+            //3. initilize the variables to hold some parameters and return values
+            string entity_xml = string.Empty;
+            Employees errval = null;
+
+            //initialize the serializer object
+            Serializer sr = new Serializer();
+            api_session_error result = api_session_error.no_error;
+
+            try
+            {
+                //trans_xml = sr.ConvertObjectToXMLString(shipmentdata);
+                string error_code = "";
+                result = cs.GetEntities(access_key, flags, startwithstring, out error_code);
+                var objectOfXml = sr.Deserialize<Employees>(error_code);
+                errval = objectOfXml;
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return errval;
+        }
+
+        //Get Magaya Vendors
+        public Employees GetVendors(int access_key, string startwithstring) 
+        {
+            //1. initialize the magaya web service object
+            var _webServiceUrl = "http://35652.magayacloud.com:3691/Invoke?Handler=CSSoapService";
+            var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
+            CSSoapServiceSoapClient cs = new CSSoapServiceSoapClient(new System.ServiceModel.BasicHttpBinding(), remoteAddress);
+
+            //2. initialize type of entity and flag
+            int flags = 0x00000800;
+
+            //3. initilize the variables to hold some parameters and return values
+            string entity_xml = string.Empty;
+            Employees errval = null;
+
+            //initialize the serializer object
+            Serializer sr = new Serializer();
+            api_session_error result = api_session_error.no_error;
+
+            try
+            {
+                //trans_xml = sr.ConvertObjectToXMLString(shipmentdata);
+                string error_code = "";
+                result = cs.GetEntities(access_key, flags, startwithstring, out error_code);
+                var objectOfXml = sr.Deserialize<Employees>(error_code);
+                errval = objectOfXml;
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return errval;
+        }
+
     }
 
 }
