@@ -15,7 +15,7 @@ namespace GIGLS.Core.Domain.Partnership
         public string PartnerName { get; set; }
 
         [MaxLength(100)]
-        public string PartnerCode { get; set; }
+        public string FleetPartnerCode { get; set; }
 
         [MaxLength(100)]
         public string FirstName { get; set; }

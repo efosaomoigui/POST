@@ -238,6 +238,7 @@
     <Compile Include="Implementation\Nav\SubNavService.cs" />
     <Compile Include="Implementation\Nav\SubSubNavService.cs" />
     <Compile Include="Implementation\OTPService.cs" />
+    <Compile Include="Implementation\Partnership\FleetPartnerService.cs" />
     <Compile Include="Implementation\Partnership\PartnerApplicationService.cs" />
     <Compile Include="Implementation\Partnership\PartnerService.cs" />
     <Compile Include="Implementation\Partnership\PartnerTransactionsService.cs" />
