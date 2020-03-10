@@ -60,7 +60,7 @@ namespace GIGLS.Core.Domain.Partnership
 
         public int UserActiveCountryId { get; set; }
 
-        //Fleet Partner
+        [MaxLength(100)]
         public string FleetPartnerCode { get; set; }
 
     }
