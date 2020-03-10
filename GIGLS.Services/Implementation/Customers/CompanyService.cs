@@ -156,7 +156,7 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
-        private async Task<string> AddCountryCodeToPhoneNumber(string phoneNumber, int countryId)
+        public async Task<string> AddCountryCodeToPhoneNumber(string phoneNumber, int countryId)
         {
             if(countryId < 1)
             {

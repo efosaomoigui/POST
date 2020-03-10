@@ -15,8 +15,8 @@ namespace GIGLS.Core.IServices.Partnership
         Task RemoveFleetPartner(int partnerId);
         Task<IEnumerable<FleetPartnerDTO>> GetFleetPartners();
         Task<FleetPartnerDTO> GetFleetPartnerById(int partnerId);
-        Task<int> CountOfPartnersUnderFleet(string fleetCode);
-        Task<List<VehicleTypeDTO>> GetVehiclesAttachedToFleetPartner(string fleetCode);
+        Task<int> CountOfPartnersUnderFleet();
+        Task<List<VehicleTypeDTO>> GetVehiclesAttachedToFleetPartner();
         Task<List<PartnerTransactionsDTO>> GetFleetTransaction(ShipmentCollectionFilterCriteria filterCriteria);
     }
 }

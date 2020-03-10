@@ -6,6 +6,7 @@
         Corporate,
         Ecommerce,
         IndividualCustomer,
-        Partner
+        Partner,
+        FleetPartner
     }
 }

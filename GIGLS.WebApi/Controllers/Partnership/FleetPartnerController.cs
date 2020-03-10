@@ -104,11 +104,11 @@ namespace GIGLS.WebApi.Controllers.Partnership
         
         [HttpGet]
         [Route("getcountofpartnersattachedtofleet")]
-        public async Task<IServiceResponse<int>> GetCountOfPartnersUnderFleet(string fleetCode)
+        public async Task<IServiceResponse<int>> GetCountOfPartnersUnderFleet()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var partners = await _fleetPartnerService.CountOfPartnersUnderFleet(fleetCode);
+                var partners = await _fleetPartnerService.CountOfPartnersUnderFleet();
 
                 return new ServiceResponse<int>
                 {
@@ -120,11 +120,11 @@ namespace GIGLS.WebApi.Controllers.Partnership
         
         [HttpGet]
         [Route("getvehiclesinfleet")]
-        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetVehiclesAttachedToFleetPartner(string fleetCode)
+        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetVehiclesAttachedToFleetPartner()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var partners = await _fleetPartnerService.GetVehiclesAttachedToFleetPartner(fleetCode);
+                var partners = await _fleetPartnerService.GetVehiclesAttachedToFleetPartner();
                 return new ServiceResponse<IEnumerable<VehicleTypeDTO>>
                 {
                     Object = partners

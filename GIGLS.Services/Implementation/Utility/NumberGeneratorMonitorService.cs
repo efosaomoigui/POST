@@ -186,6 +186,10 @@ namespace GIGLS.Services.Implementation.Utility
                     {
                         return "P";
                     }
+                case NumberGeneratorType.FleetPartner:
+                    {
+                        return "EP";
+                    }
                 case NumberGeneratorType.Employee:
                     {
                         return "EMP";
