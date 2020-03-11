@@ -74,33 +74,37 @@ namespace GIGLS.Services.Implementation.Partnership
             var fleetPartnerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.FleetPartner);
             var fleetPartner = Mapper.Map<FleetPartner>(fleetPartnerDTO);
             fleetPartner.FleetPartnerCode = fleetPartnerCode;
-            _uow.FleetPartner.Add(fleetPartner);
-
-            //-- add to user table for login
-
-            var userChannelType = UserChannelType.FleetPartner;
+            
             string password = await _passwordGenerator.Generate();
 
-            var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
+            var user = new GIGL.GIGLS.Core.Domain.User
             {
-                ConfirmPassword = password,
-                DateCreated = DateTime.Now,
                 Email = fleetPartner.Email,
                 FirstName = fleetPartner.FirstName,
                 LastName = fleetPartner.LastName,
-                Password = password,
                 PhoneNumber = fleetPartner.PhoneNumber,
                 UserType = UserType.Regular,
-                Username = fleetPartner.FleetPartnerCode,
+                UserName = fleetPartner.Email,
                 UserChannelCode = fleetPartner.FleetPartnerCode,
                 UserChannelPassword = password,
-                UserChannelType = userChannelType,
-                PasswordExpireDate = DateTime.Now,
+                UserChannelType = UserChannelType.FleetPartner,
                 UserActiveCountryId = fleetPartner.UserActiveCountryId,
-                IsActive = true
-            });
+                IsActive = true,
+                DateCreated = DateTime.Now.Date,
+                DateModified = DateTime.Now.Date,
+                PasswordExpireDate = DateTime.Now                
+            };
 
-            await _uow.CompleteAsync();
+            user.Id = Guid.NewGuid().ToString();
+            
+            var u = await _uow.User.RegisterUser(user, password);
+
+            if (u.Succeeded)
+            {
+                fleetPartner.UserId = user.Id;
+                _uow.FleetPartner.Add(fleetPartner);
+                await _uow.CompleteAsync();
+            }
 
             var passwordMessage = new PasswordMessageDTO()
             {

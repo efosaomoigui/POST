@@ -47,11 +47,9 @@ namespace GIGLS.Services.Implementation.User
             {
                 throw new GenericException($"User with email: {userDto.Email} already exist");
             }
-            var usertemp = new GIGL.GIGLS.Core.Domain.User() { };
 
             var user = Mapper.Map<GIGL.GIGLS.Core.Domain.User>(userDto);
 
-            ///user.Id = usertemp.Id;
             user.Id = Guid.NewGuid().ToString();
             user.DateCreated = DateTime.Now.Date;
             user.DateModified = DateTime.Now.Date;
