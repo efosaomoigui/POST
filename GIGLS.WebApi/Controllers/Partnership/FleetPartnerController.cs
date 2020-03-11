@@ -5,20 +5,18 @@ using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Partnership;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
-using GIGLS.WebApi.Filters;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Partnership
 {
+    //[Authorize]
     [RoutePrefix("api/fleetpartner")]
     public class FleetPartnerController : BaseWebApiController
     {
@@ -28,7 +26,6 @@ namespace GIGLS.WebApi.Controllers.Partnership
             _fleetPartnerService = fleetPartnerService;
         }
 
-        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]
         public async Task<IServiceResponse<object>> AddFleetPartner(FleetPartnerDTO fleetPartnerDTO)
@@ -44,7 +41,6 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{partnerId:int}")]
         public async Task<IServiceResponse<FleetPartnerDTO>> GetFleetPartner(int fleetPartnerId)
@@ -60,7 +56,6 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("{partnerId:int}")]
         public async Task<IServiceResponse<bool>> DeleteFleetPartner(int fleetPartnerId)
@@ -76,7 +71,6 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("{partnerId:int}")]
         public async Task<IServiceResponse<bool>> UpdateFleetPartner(int fleetPartnerId, FleetPartnerDTO fleetPartnerDTO)
@@ -91,8 +85,7 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 };
             });
         }
-
-       
+               
         [HttpGet]
         [Route("getallfleetpartners")]
         public async Task<IServiceResponse<IEnumerable<FleetPartnerDTO>>> GetAllFleetPartners()
@@ -106,8 +99,7 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 };
             });
         }
-
-        
+                
         [HttpGet]
         [Route("getcountofpartnersattachedtofleet")]
         public async Task<IServiceResponse<int>> GetCountOfPartnersUnderFleet()
@@ -122,8 +114,7 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 };
             });
         }
-
-        
+                
         [HttpGet]
         [Route("getvehiclesinfleet")]
         public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetVehiclesAttachedToFleetPartner()
