@@ -27,7 +27,7 @@ namespace GIGLS.Services.Implementation.Partnership
         private readonly IMessageSenderService _messageSenderService;
 
         public FleetPartnerService(IUnitOfWork uow, INumberGeneratorMonitorService numberGeneratorMonitorService,
-            IUserService userService, ICompanyService companyService, IPasswordGenerator passwordGenerator,IMessageSenderService messageSenderService)
+            IUserService userService, ICompanyService companyService, IPasswordGenerator passwordGenerator, IMessageSenderService messageSenderService)
         {
             _uow = uow;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
@@ -41,73 +41,75 @@ namespace GIGLS.Services.Implementation.Partnership
 
         public async Task<object> AddFleetPartner(FleetPartnerDTO fleetPartnerDTO)
         {
-            fleetPartnerDTO.PartnerName = fleetPartnerDTO.PartnerName.Trim();
-
-            if (await _uow.FleetPartner.ExistAsync(v => v.PartnerName.ToLower() == fleetPartnerDTO.PartnerName.ToLower() 
-                ||v.PhoneNumber == fleetPartnerDTO.PhoneNumber || v.Email == fleetPartnerDTO.Email))
+            if (fleetPartnerDTO.PartnerName != null)
             {
-                throw new GenericException("Fleet Partner Already Exists");
+                fleetPartnerDTO.PartnerName.Trim();
             }
 
-            //update the customer update to have country code added to it
-            if (fleetPartnerDTO.PhoneNumber.StartsWith("0"))
-            {
-                fleetPartnerDTO.PhoneNumber = await _companyService.AddCountryCodeToPhoneNumber(fleetPartnerDTO.PhoneNumber, fleetPartnerDTO.UserActiveCountryId);
-            }
-
-            var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(fleetPartnerDTO.Email, fleetPartnerDTO.PhoneNumber);
-           
             if (fleetPartnerDTO.Email != null)
             {
                 fleetPartnerDTO.Email = fleetPartnerDTO.Email.Trim().ToLower();
             }
 
+
+            //Pending
+            ////update the customer update to have country code added to it
+            //if (fleetPartnerDTO.PhoneNumber.StartsWith("0"))
+            //{
+            //    fleetPartnerDTO.PhoneNumber = await _companyService.AddCountryCodeToPhoneNumber(fleetPartnerDTO.PhoneNumber, fleetPartnerDTO.UserActiveCountryId);
+            //}
+
+            if (await _uow.FleetPartner.ExistAsync(v => v.PhoneNumber == fleetPartnerDTO.PhoneNumber || v.Email == fleetPartnerDTO.Email))
+            {
+                throw new GenericException("Fleet Partner Already Exists");
+            }
+
+            var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(fleetPartnerDTO.Email, fleetPartnerDTO.PhoneNumber);
+
             if (EmailUser != null)
             {
                 throw new GenericException("Customer already exists");
             }
-            
-                var fleetPartnerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.FleetPartner);
-                var fleetPartner = Mapper.Map<FleetPartner>(fleetPartnerDTO);
-                fleetPartner.FleetPartnerCode = fleetPartnerCode;
 
-                _uow.FleetPartner.Add(fleetPartner);
+            var fleetPartnerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.FleetPartner);
+            var fleetPartner = Mapper.Map<FleetPartner>(fleetPartnerDTO);
+            fleetPartner.FleetPartnerCode = fleetPartnerCode;
+            _uow.FleetPartner.Add(fleetPartner);
 
-                //-- add to user table for login
+            //-- add to user table for login
 
-                var userChannelType = UserChannelType.FleetPartner;
-                var password = "";
-                password = await _passwordGenerator.Generate();
+            var userChannelType = UserChannelType.FleetPartner;
+            string password = await _passwordGenerator.Generate();
 
-                var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
-                {
-                    ConfirmPassword = password,
-                    DateCreated = DateTime.Now,
-                    Email = fleetPartner.Email,
-                    FirstName = fleetPartner.FirstName,
-                    LastName = fleetPartner.LastName,
-                    Password = password,
-                    PhoneNumber = fleetPartner.PhoneNumber,
-                    UserType = UserType.Regular,
-                    Username = fleetPartner.FleetPartnerCode,
-                    UserChannelCode = fleetPartner.FleetPartnerCode,
-                    UserChannelPassword = password,
-                    UserChannelType = userChannelType,
-                    PasswordExpireDate = DateTime.Now,
-                    UserActiveCountryId = fleetPartner.UserActiveCountryId,
-                    IsActive = true
-                });
+            var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
+            {
+                ConfirmPassword = password,
+                DateCreated = DateTime.Now,
+                Email = fleetPartner.Email,
+                FirstName = fleetPartner.FirstName,
+                LastName = fleetPartner.LastName,
+                Password = password,
+                PhoneNumber = fleetPartner.PhoneNumber,
+                UserType = UserType.Regular,
+                Username = fleetPartner.FleetPartnerCode,
+                UserChannelCode = fleetPartner.FleetPartnerCode,
+                UserChannelPassword = password,
+                UserChannelType = userChannelType,
+                PasswordExpireDate = DateTime.Now,
+                UserActiveCountryId = fleetPartner.UserActiveCountryId,
+                IsActive = true
+            });
 
-                await _uow.CompleteAsync();
+            await _uow.CompleteAsync();
 
-                var passwordMessage = new PasswordMessageDTO()
-                {
-                    Password = password,
-                    UserEmail = fleetPartner.Email
-                };
+            var passwordMessage = new PasswordMessageDTO()
+            {
+                Password = password,
+                UserEmail = fleetPartner.Email
+            };
 
-                await _messageSenderService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
-                return new { id = fleetPartner.FleetPartnerId };
+            await _messageSenderService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
+            return new { id = fleetPartner.FleetPartnerId };
         }
 
         public async Task UpdateFleetPartner(int partnerId, FleetPartnerDTO fleetPartnerDTO)
@@ -160,7 +162,7 @@ namespace GIGLS.Services.Implementation.Partnership
             {
                 partnerDto = Mapper.Map<FleetPartnerDTO>(partner);
                 var Country = await _uow.Country.GetAsync(s => s.CountryId == partner.UserActiveCountryId);
-                
+
             }
             return partnerDto;
         }
