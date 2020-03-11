@@ -13,6 +13,7 @@ using GIGLS.Core.IServices.Utility;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Partnership
@@ -106,13 +107,16 @@ namespace GIGLS.Services.Implementation.Partnership
                 await _uow.CompleteAsync();
             }
 
+            var loginURL = ConfigurationManager.AppSettings["FleetPartnersUrl"];
+
             var passwordMessage = new PasswordMessageDTO()
             {
                 Password = password,
-                UserEmail = fleetPartner.Email
+                UserEmail = fleetPartner.Email,
+                URL = loginURL
             };
 
-            await _messageSenderService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
+            await _messageSenderService.SendGenericEmailMessage(MessageType.FPEmail, passwordMessage);
             return new { id = fleetPartner.FleetPartnerId };
         }
 
