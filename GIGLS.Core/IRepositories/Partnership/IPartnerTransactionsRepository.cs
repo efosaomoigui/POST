@@ -16,5 +16,6 @@ namespace GIGLS.Core.IRepositories
         Task<List<PartnerTransactionsDTO>> GetPartnerTransactionByDate(BaseFilterCriteria filterCriteria);
         Task<List<PartnerTransactionsDTO>> GetRecentFivePartnerTransactionsForFleet(string fleetPartnerCode);
         Task<List<PartnerTransactionsDTO>> GetPartnerTransactionsForFleet(ShipmentCollectionFilterCriteria filterCriteria, string fleetPartnerCode);
+        Task<List<object>> GetPartnerEarningsForFleet(ShipmentCollectionFilterCriteria filterCriteria, string fleetPartnerCode);
     }
 }

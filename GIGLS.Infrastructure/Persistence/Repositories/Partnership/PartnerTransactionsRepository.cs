@@ -112,5 +112,30 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
             return await Task.FromResult(partnersTrans);
         }
 
+        //Earnings, query by date
+        public async Task<List<object>> GetPartnerEarningsForFleet(ShipmentCollectionFilterCriteria filterCriteria, string fleetPartnerCode)
+        {
+            var queryDate = filterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var partners = _context.Partners.Where(s => s.FleetPartnerCode == fleetPartnerCode);
+
+            IEnumerable<object> earningsDto = (from partner in partners
+                                                join transaction in _context.PartnerTransactions on partner.UserId equals transaction.UserId
+                                                join country in _context.Country on partner.UserActiveCountryId equals country.CountryId
+                                                where transaction.DateCreated >= startDate && transaction.DateCreated < endDate
+                                                group transaction by partner.PartnerName into g
+                                                select new 
+                                                {
+                                                    PartnerName = g.Key,
+                                                    Earnings = g.Sum(a => a.AmountReceived),
+                                                    Trips = g.Count(),
+                                                }).OrderByDescending(i => i.Earnings).ToList();
+
+            var earnings = earningsDto.ToList();
+            return await Task.FromResult(earnings);
+        }
+
     }
 }

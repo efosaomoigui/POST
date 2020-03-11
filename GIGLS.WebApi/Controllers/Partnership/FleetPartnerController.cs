@@ -26,80 +26,6 @@ namespace GIGLS.WebApi.Controllers.Partnership
             _fleetPartnerService = fleetPartnerService;
         }
 
-        [HttpPost]
-        [Route("")]
-        public async Task<IServiceResponse<object>> AddFleetPartner(FleetPartnerDTO fleetPartnerDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var partner = await _fleetPartnerService.AddFleetPartner(fleetPartnerDTO);
-
-                return new ServiceResponse<object>
-                {
-                    Object = partner
-                };
-            });
-        }
-
-        [HttpGet]
-        [Route("{partnerId:int}")]
-        public async Task<IServiceResponse<FleetPartnerDTO>> GetFleetPartner(int fleetPartnerId)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var partner = await _fleetPartnerService.GetFleetPartnerById(fleetPartnerId);
-
-                return new ServiceResponse<FleetPartnerDTO>
-                {
-                    Object = partner
-                };
-            });
-        }
-
-        [HttpDelete]
-        [Route("{partnerId:int}")]
-        public async Task<IServiceResponse<bool>> DeleteFleetPartner(int fleetPartnerId)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _fleetPartnerService.RemoveFleetPartner(fleetPartnerId);
-
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
-
-        [HttpPut]
-        [Route("{partnerId:int}")]
-        public async Task<IServiceResponse<bool>> UpdateFleetPartner(int fleetPartnerId, FleetPartnerDTO fleetPartnerDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _fleetPartnerService.UpdateFleetPartner(fleetPartnerId, fleetPartnerDTO);
-
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
-               
-        [HttpGet]
-        [Route("getallfleetpartners")]
-        public async Task<IServiceResponse<IEnumerable<FleetPartnerDTO>>> GetAllFleetPartners()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var partners = await _fleetPartnerService.GetFleetPartners();
-                return new ServiceResponse<IEnumerable<FleetPartnerDTO>>
-                {
-                    Object = partners
-                };
-            });
-        }
-                
         [HttpGet]
         [Route("getcountofpartnersattachedtofleet")]
         public async Task<IServiceResponse<int>> GetCountOfPartnersUnderFleet()
@@ -146,7 +72,7 @@ namespace GIGLS.WebApi.Controllers.Partnership
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("fleetLogin")]
+        [Route("fleetlogin")]
         public async Task<IServiceResponse<JObject>> FleetLogin(UserloginDetailsModel userLoginModel)
         {
             return await HandleApiOperationAsync(async () =>
@@ -201,6 +127,21 @@ namespace GIGLS.WebApi.Controllers.Partnership
                         Object = jObject
                     };
                 }
+            });
+        }
+
+        [HttpPost]
+        [Route("earnings")]
+        public async Task<IServiceResponse<List<object>>> GetFleetEarnings(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var earnings = await _fleetPartnerService.GetEarningsOfPartnersAttachedToFleet(filterCriteria);
+
+                return new ServiceResponse<List<object>>
+                {
+                    Object = earnings
+                };
             });
         }
 

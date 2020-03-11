@@ -18,5 +18,6 @@ namespace GIGLS.Core.IServices.Partnership
         Task<int> CountOfPartnersUnderFleet();
         Task<List<VehicleTypeDTO>> GetVehiclesAttachedToFleetPartner();
         Task<List<PartnerTransactionsDTO>> GetFleetTransaction(ShipmentCollectionFilterCriteria filterCriteria);
+        Task<List<object>> GetEarningsOfPartnersAttachedToFleet(ShipmentCollectionFilterCriteria filterCriteria);
     }
 }
