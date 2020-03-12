@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Partnership;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
 using System;
 using System.Collections.Generic;
@@ -19,5 +20,6 @@ namespace GIGLS.Core.IServices.Partnership
         Task<List<VehicleTypeDTO>> GetVehiclesAttachedToFleetPartner();
         Task<List<PartnerTransactionsDTO>> GetFleetTransaction(ShipmentCollectionFilterCriteria filterCriteria);
         Task<List<object>> GetEarningsOfPartnersAttachedToFleet(ShipmentCollectionFilterCriteria filterCriteria);
+        Task<List<FleetMobilePickUpRequestsDTO>> GetPartnerResponseAttachedToFleet(ShipmentCollectionFilterCriteria filterCriteria);
     }
 }
