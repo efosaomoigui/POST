@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IRepositories.Shipments;
 using GIGLS.Infrastructure.Persistence.Repository;
@@ -111,6 +112,37 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                           Latitude = x.SenderLocation.Latitude
                                                       }
                                                   }).FirstOrDefault()
+                                              };
+
+                return Task.FromResult(MobilePickUpRequestsDto.ToList().OrderByDescending(x => x.DateCreated).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+        }
+
+        public Task<List<FleetMobilePickUpRequestsDTO>> GetPartnerMobilePickUpRequestsForFleetPartner(ShipmentCollectionFilterCriteria filterCriteria, string fleetPartnerCode)
+        {
+            try
+            {
+                var queryDate = filterCriteria.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+
+                var partners = _context.Partners.Where(s => s.FleetPartnerCode == fleetPartnerCode);
+
+                var MobilePickUpRequestsDto = from partner in partners
+                                              join mobilepickuprequest in _context.MobilePickUpRequests on partner.UserId equals mobilepickuprequest.UserId
+                                              where mobilepickuprequest.DateCreated >= startDate && mobilepickuprequest.DateCreated < endDate
+                                              select new FleetMobilePickUpRequestsDTO
+                                              {
+                                                  DateCreated = mobilepickuprequest.DateCreated,
+                                                  Waybill = mobilepickuprequest.Waybill,
+                                                  Status = mobilepickuprequest.Status,
+                                                  PartnerName = partner.FirstName + " " + partner.LastName,
+                                                  PhoneNumber = partner.PhoneNumber,
                                               };
 
                 return Task.FromResult(MobilePickUpRequestsDto.ToList().OrderByDescending(x => x.DateCreated).ToList());

@@ -1,4 +1,5 @@
 ﻿using EfeAuthen.Models;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.IServices;
@@ -139,6 +140,21 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 var earnings = await _fleetPartnerService.GetEarningsOfPartnersAttachedToFleet(filterCriteria);
 
                 return new ServiceResponse<List<object>>
+                {
+                    Object = earnings
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("partnerresponse")]
+        public async Task<IServiceResponse<List<FleetMobilePickUpRequestsDTO>>> GetPartnersResponses(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var earnings = await _fleetPartnerService.GetPartnerResponseAttachedToFleet(filterCriteria);
+
+                return new ServiceResponse<List<FleetMobilePickUpRequestsDTO>>
                 {
                     Object = earnings
                 };

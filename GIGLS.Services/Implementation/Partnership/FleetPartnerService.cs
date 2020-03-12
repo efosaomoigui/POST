@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain.Partnership;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
@@ -222,5 +223,17 @@ namespace GIGLS.Services.Implementation.Partnership
             var earnings = await _uow.PartnerTransactions.GetPartnerEarningsForFleet(filterCriteria, currentUser.UserChannelCode);
             return await Task.FromResult(earnings);
         }
+
+        public async Task<List<FleetMobilePickUpRequestsDTO>> GetPartnerResponseAttachedToFleet(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            var response = await _uow.MobilePickUpRequests.GetPartnerMobilePickUpRequestsForFleetPartner(filterCriteria, currentUser.UserChannelCode);
+            return await Task.FromResult(response);
+        }
+
+
     }
 }
