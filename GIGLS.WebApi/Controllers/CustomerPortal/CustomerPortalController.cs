@@ -65,7 +65,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        //[Authorize]
         [HttpPut]
         [Route("wallet/{walletId:int}")]
         public async Task<IServiceResponse<object>> UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
@@ -498,7 +497,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
         
-        [AllowAnonymous]
+       // [AllowAnonymous]
         [HttpPost]
         [Route("register")]
         public async Task<IServiceResponse<UserDTO>> Register(UserDTO user)
@@ -1195,6 +1194,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+       
         [HttpPost]
         [Route("resolvedispute")]
         public async Task<object> ResolveDispute(PreShipmentMobileDTO shipment)
