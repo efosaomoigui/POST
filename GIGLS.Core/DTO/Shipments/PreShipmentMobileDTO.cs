@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.Enums;
+﻿using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
 using System.Collections.Generic;
@@ -129,7 +130,8 @@ namespace GIGLS.Core.DTO.Shipments
         public int CustomerId { get; set; }
         
        public bool? IsEligible { get; set; }
-        public bool IsCodNeeded { get; set; }
-        public decimal CurrentWalletAmount { get; set; }
+       public bool IsCodNeeded { get; set; }
+       public decimal CurrentWalletAmount { get; set; }
+        public PartnerDTO partnerDTO { get; set; }
     }
 }

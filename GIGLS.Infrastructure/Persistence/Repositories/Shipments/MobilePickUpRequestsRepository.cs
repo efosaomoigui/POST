@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IRepositories.Shipments;
@@ -151,7 +152,30 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             {
                 throw;
             }
+        }
 
+        public Task<PartnerDTO> GetPartnerDetailsForAWaybill(string waybill)
+        {
+            try
+            {
+                var mobileRequests = _context.MobilePickUpRequests.Where(x => x.Waybill == waybill);
+
+                var partnerDTO =              (from n in mobileRequests
+                                              join partner in _context.Partners on n.UserId equals partner.UserId
+                                              select new PartnerDTO
+                                              {
+                                                  PartnerName = partner.FirstName + " " + partner.LastName,
+                                                  PhoneNumber = partner.PhoneNumber,
+                                                  PartnerCode = partner.PartnerCode,
+                                                  PartnerType = partner.PartnerType
+                                              }).FirstOrDefault();
+
+                return Task.FromResult(partnerDTO);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

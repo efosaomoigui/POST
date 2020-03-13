@@ -1,4 +1,5 @@
-﻿using GIGLS.CORE.DTO;
+﻿using GIGLS.Core.DTO.Shipments;
+using GIGLS.CORE.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,13 +16,26 @@ namespace GIGLS.Core.DTO.Partnership
         public string Departure { get; set; }
         public decimal AmountReceived { get; set; }
         public string Waybill { get; set; }
-        //public PartnerDTO Partner { get; set; }
-
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string PhoneNumber { get; set; }
         public string CurrencySymbol { get; set; }
 
         public bool IsFromServiceCentre { get; set; }
+    }
+    public class FleetPartnerTransactionsDTO : BaseDomainDTO
+    {
+        public int PartnerTransactionsID { get; set; }
+        public string UserId { get; set; }
+        public string Destination { get; set; }
+        public string Departure { get; set; }
+        public decimal AmountReceived { get; set; }
+        public string Waybill { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string PhoneNumber { get; set; }
+        public string CurrencySymbol { get; set; }
+
+        public PreShipmentMobileDTO PreShipment { get; set; }
     }
 }
