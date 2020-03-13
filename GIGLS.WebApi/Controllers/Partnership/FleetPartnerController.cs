@@ -17,7 +17,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Partnership
 {
-    //[Authorize]
+    [Authorize]
     [RoutePrefix("api/fleetpartner")]
     public class FleetPartnerController : BaseWebApiController
     {

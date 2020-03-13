@@ -76,6 +76,7 @@ namespace GIGLS.Services.Implementation.Partnership
             var fleetPartnerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.FleetPartner);
             var fleetPartner = Mapper.Map<FleetPartner>(fleetPartnerDTO);
             fleetPartner.FleetPartnerCode = fleetPartnerCode;
+            fleetPartner.PartnerName = fleetPartnerDTO.FirstName + " " + fleetPartnerDTO.LastName;
             
             string password = await _passwordGenerator.Generate();
 
