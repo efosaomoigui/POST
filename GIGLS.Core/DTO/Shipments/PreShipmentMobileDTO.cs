@@ -3,14 +3,20 @@ using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GIGLS.Core.DTO.Shipments
 {
     public class PreShipmentMobileDTO : BaseDomainDTO
     {
+        public PreShipmentMobileDTO()
+        {
+            SenderLocation = new LocationDTO();
+            ReceiverLocation = new LocationDTO();
+            PreShipmentItems = new List<PreShipmentItemMobileDTO>();
+            serviceCentreLocation = new LocationDTO();
+            partnerDTO = new PartnerDTO();
+        }
+
         public int PreShipmentMobileId { get; set; }
         public new DateTime? DateCreated { get; set; }
         public string Waybill { get; set; }
