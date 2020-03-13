@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.Domain.Partnership;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IRepositories;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure.Persistence.Repository;
@@ -49,14 +50,14 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
         }
         
         //Five Recent Transactions
-        public async Task<List<PartnerTransactionsDTO>> GetRecentFivePartnerTransactionsForFleet(string fleetPartnerCode)
+        public async Task<List<FleetPartnerTransactionsDTO>> GetRecentFivePartnerTransactionsForFleet(string fleetPartnerCode)
         {
             var partners = _context.Partners.Where(s => s.FleetPartnerCode == fleetPartnerCode);
 
             var partnerDto = (from partner in partners
                               join transaction in _context.PartnerTransactions on partner.UserId equals transaction.UserId
                               join country in _context.Country on partner.UserActiveCountryId equals country.CountryId
-                              select new PartnerTransactionsDTO
+                              select new FleetPartnerTransactionsDTO
                               {
                                   AmountReceived = transaction.AmountReceived,
                                   Departure = transaction.Departure,
@@ -66,14 +67,23 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                   FirstName = partner.FirstName,
                                   LastName = partner.LastName,
                                   PhoneNumber = partner.PhoneNumber,
-                                  CurrencySymbol = country.CurrencySymbol
+                                  CurrencySymbol = country.CurrencySymbol,
+                                  PreShipment = _context.PresShipmentMobile.Where(c => c.Waybill == transaction.Waybill)
+                                  .Select(x => new PreShipmentMobileDTO
+                                  {
+                                      PreShipmentItems = _context.PresShipmentItemMobile.Where(d => d.PreShipmentMobileId == x.PreShipmentMobileId)
+                                      .Select(y => new PreShipmentItemMobileDTO
+                                      {
+                                          ItemName = y.ItemName
+                                      }).ToList()
+                                  }).FirstOrDefault()
                               }).OrderByDescending(s => s.DateCreated).Take(5);
                              
             return await Task.FromResult(partnerDto.ToList());
         }
 
         //All Transactions, query by date
-        public async Task<List<PartnerTransactionsDTO>> GetPartnerTransactionsForFleet(ShipmentCollectionFilterCriteria filterCriteria, string fleetPartnerCode)
+        public async Task<List<FleetPartnerTransactionsDTO>> GetPartnerTransactionsForFleet(ShipmentCollectionFilterCriteria filterCriteria, string fleetPartnerCode)
         {
             var queryDate = filterCriteria.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
@@ -85,7 +95,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                               join transaction in _context.PartnerTransactions on partner.UserId equals transaction.UserId
                               join country in _context.Country on partner.UserActiveCountryId equals country.CountryId
                               where transaction.DateCreated >= startDate && transaction.DateCreated < endDate
-                              select new PartnerTransactionsDTO
+                              select new FleetPartnerTransactionsDTO
                               {
                                   AmountReceived = transaction.AmountReceived,
                                   Departure = transaction.Departure,
@@ -95,7 +105,16 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                   FirstName = partner.FirstName,
                                   LastName = partner.LastName,
                                   PhoneNumber = partner.PhoneNumber,
-                                  CurrencySymbol = country.CurrencySymbol
+                                  CurrencySymbol = country.CurrencySymbol,
+                                  PreShipment = _context.PresShipmentMobile.Where(c => c.Waybill == transaction.Waybill)
+                                  .Select(x => new PreShipmentMobileDTO
+                                  {
+                                      PreShipmentItems = _context.PresShipmentItemMobile.Where(y => y.PreShipmentMobileId == x.PreShipmentMobileId)
+                                                            .Select(d => new PreShipmentItemMobileDTO
+                                                            {
+                                                                ItemName = d.ItemName
+                                                            }).ToList()
+                                  }).FirstOrDefault()
                               };
 
 

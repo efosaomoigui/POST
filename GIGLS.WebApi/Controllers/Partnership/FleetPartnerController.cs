@@ -58,13 +58,13 @@ namespace GIGLS.WebApi.Controllers.Partnership
 
         [HttpPost]
         [Route("transaction")]
-        public async Task<IServiceResponse<List<PartnerTransactionsDTO>>> GetFleetTransactions(ShipmentCollectionFilterCriteria filterCriteria)
+        public async Task<IServiceResponse<List<FleetPartnerTransactionsDTO>>> GetFleetTransactions(ShipmentCollectionFilterCriteria filterCriteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var transactions = await _fleetPartnerService.GetFleetTransaction(filterCriteria);
 
-                return new ServiceResponse<List<PartnerTransactionsDTO>>
+                return new ServiceResponse<List<FleetPartnerTransactionsDTO>>
                 {
                     Object = transactions
                 };

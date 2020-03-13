@@ -589,6 +589,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         Shipmentdto.CurrencyCode = country.CurrencyCode;
                         Shipmentdto.CurrencySymbol = country.CurrencySymbol;
                     }
+                    var partner = await _uow.MobilePickUpRequests.GetPartnerDetailsForAWaybill(waybill);
+                    Shipmentdto.partnerDTO = partner;
                 }
                 else
                 {
