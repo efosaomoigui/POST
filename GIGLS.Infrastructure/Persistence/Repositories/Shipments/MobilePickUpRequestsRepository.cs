@@ -77,9 +77,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
         {
             try
             {
-                var MobilePickUpRequests = _context.MobilePickUpRequests.Where(x => x.UserId == userId).ToList();
+                var MobilePickUpRequests = _context.MobilePickUpRequests.AsQueryable().Where(x => x.UserId == userId).ToList();
 
-                var MobilePickUpRequestsDto = from mobilepickuprequest in MobilePickUpRequests
+                var MobilePickUpRequestsDto = (from mobilepickuprequest in MobilePickUpRequests
                                               where mobilepickuprequest.DateCreated.Month == DateTime.Now.Month && mobilepickuprequest.DateCreated.Year== DateTime.Now.Year
                                               select new MobilePickUpRequestsDTO
                                               {
@@ -113,9 +113,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                           Latitude = x.SenderLocation.Latitude
                                                       }
                                                   }).FirstOrDefault()
-                                              };
+                                              }).ToList();
 
-                return Task.FromResult(MobilePickUpRequestsDto.ToList().OrderByDescending(x => x.DateCreated).ToList());
+                return Task.FromResult(MobilePickUpRequestsDto.OrderByDescending(x => x.DateCreated).ToList());
             }
             catch (Exception)
             {
@@ -132,9 +132,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                 var startDate = queryDate.Item1;
                 var endDate = queryDate.Item2;
 
-                var partners = _context.Partners.Where(s => s.FleetPartnerCode == fleetPartnerCode);
+                var partners = _context.Partners.AsQueryable().Where(s => s.FleetPartnerCode == fleetPartnerCode);
 
-                var MobilePickUpRequestsDto = from partner in partners
+                var MobilePickUpRequestsDto = (from partner in partners
                                               join mobilepickuprequest in _context.MobilePickUpRequests on partner.UserId equals mobilepickuprequest.UserId
                                               where mobilepickuprequest.DateCreated >= startDate && mobilepickuprequest.DateCreated < endDate
                                               select new FleetMobilePickUpRequestsDTO
@@ -144,9 +144,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                   Status = mobilepickuprequest.Status,
                                                   PartnerName = partner.FirstName + " " + partner.LastName,
                                                   PhoneNumber = partner.PhoneNumber,
-                                              };
+                                              }).ToList();
 
-                return Task.FromResult(MobilePickUpRequestsDto.ToList().OrderByDescending(x => x.DateCreated).ToList());
+                return Task.FromResult(MobilePickUpRequestsDto.OrderByDescending(x => x.DateCreated).ToList());
             }
             catch (Exception)
             {
@@ -158,9 +158,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
         {
             try
             {
-                var mobileRequests = _context.MobilePickUpRequests.Where(x => x.Waybill == waybill);
+                var mobileRequests = _context.MobilePickUpRequests.AsQueryable().Where(x => x.Waybill == waybill);
 
-                var partnerDTO =              (from n in mobileRequests
+                var partnerDTO =   (from n in mobileRequests
                                               join partner in _context.Partners on n.UserId equals partner.UserId
                                               select new PartnerDTO
                                               {
