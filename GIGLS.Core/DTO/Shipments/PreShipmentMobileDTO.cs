@@ -142,6 +142,7 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsCodNeeded { get; set; }
         public decimal CurrentWalletAmount { get; set; }
         public decimal ShipmentPickupPrice { get; set; }
+        public PartnerDTO partnerDTO { get; set; }
 
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
@@ -184,9 +185,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         //List of Receivers
         public List<ReceiverPreShipmentMobileDTO> Receivers { get; set; }
-       public bool? IsEligible { get; set; }
-       public bool IsCodNeeded { get; set; }
-       public decimal CurrentWalletAmount { get; set; }
+     
         public PartnerDTO partnerDTO { get; set; }
     }
 
