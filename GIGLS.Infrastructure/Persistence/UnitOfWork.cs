@@ -451,6 +451,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IShipmentHashRepository ShipmentHash { get; set; }
 
+        [Inject]
+        public IFleetPartnerRepository FleetPartner { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

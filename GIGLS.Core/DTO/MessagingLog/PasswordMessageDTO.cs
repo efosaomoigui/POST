@@ -5,6 +5,7 @@ namespace GIGLS.Core.DTO.MessagingLog
     {
         public string Password { get; set; }
         public string UserEmail { get; set; }
+        public string URL { get; set; }
 
     }
 

@@ -719,11 +719,16 @@ namespace GIGLS.Services.Implementation.Messaging
             {
                 var strArray = new string[]
                 {
-                    "Password"
+                    "Password",
+                    "UserEmail",
+                    "URL"
                 };
                 var passwordMessageDTO = (PasswordMessageDTO)obj;
 
                 strArray[0] = passwordMessageDTO.Password;
+                strArray[1] = passwordMessageDTO.UserEmail;
+                strArray[2] = passwordMessageDTO.URL;
+
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
                 messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
                 messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);

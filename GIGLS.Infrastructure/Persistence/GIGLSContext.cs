@@ -121,6 +121,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         //Partner
         public DbSet<Partner> Partners { get; set; }
+        public DbSet<FleetPartner> FleetPartner { get; set; }
 
         //These entities below are not used for now
         //store

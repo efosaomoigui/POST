@@ -410,6 +410,9 @@ namespace GIGLS.Core
                 config.CreateMap<Entity, EntityDto>();
                 config.CreateMap<EntityDto, Entity>();
 
+                config.CreateMap<FleetPartner, FleetPartnerDTO>();
+                config.CreateMap<FleetPartnerDTO, FleetPartner>();
+
             });
 
             isInit = true;

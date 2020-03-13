@@ -1,5 +1,7 @@
 ﻿using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IRepositories.Shipments;
 using GIGLS.Infrastructure.Persistence.Repository;
@@ -75,9 +77,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
         {
             try
             {
-                var MobilePickUpRequests = _context.MobilePickUpRequests.Where(x => x.UserId == userId).ToList();
+                var MobilePickUpRequests = _context.MobilePickUpRequests.AsQueryable().Where(x => x.UserId == userId).ToList();
 
-                var MobilePickUpRequestsDto = from mobilepickuprequest in MobilePickUpRequests
+                var MobilePickUpRequestsDto = (from mobilepickuprequest in MobilePickUpRequests
                                               where mobilepickuprequest.DateCreated.Month == DateTime.Now.Month && mobilepickuprequest.DateCreated.Year== DateTime.Now.Year
                                               select new MobilePickUpRequestsDTO
                                               {
@@ -111,15 +113,69 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                           Latitude = x.SenderLocation.Latitude
                                                       }
                                                   }).FirstOrDefault()
-                                              };
+                                              }).ToList();
 
-                return Task.FromResult(MobilePickUpRequestsDto.ToList().OrderByDescending(x => x.DateCreated).ToList());
+                return Task.FromResult(MobilePickUpRequestsDto.OrderByDescending(x => x.DateCreated).ToList());
             }
             catch (Exception)
             {
                 throw;
             }
 
+        }
+
+        public Task<List<FleetMobilePickUpRequestsDTO>> GetPartnerMobilePickUpRequestsForFleetPartner(ShipmentCollectionFilterCriteria filterCriteria, string fleetPartnerCode)
+        {
+            try
+            {
+                var queryDate = filterCriteria.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+
+                var partners = _context.Partners.AsQueryable().Where(s => s.FleetPartnerCode == fleetPartnerCode);
+
+                var MobilePickUpRequestsDto = (from partner in partners
+                                              join mobilepickuprequest in _context.MobilePickUpRequests on partner.UserId equals mobilepickuprequest.UserId
+                                              where mobilepickuprequest.DateCreated >= startDate && mobilepickuprequest.DateCreated < endDate
+                                              select new FleetMobilePickUpRequestsDTO
+                                              {
+                                                  DateCreated = mobilepickuprequest.DateCreated,
+                                                  Waybill = mobilepickuprequest.Waybill,
+                                                  Status = mobilepickuprequest.Status,
+                                                  PartnerName = partner.FirstName + " " + partner.LastName,
+                                                  PhoneNumber = partner.PhoneNumber,
+                                              }).ToList();
+
+                return Task.FromResult(MobilePickUpRequestsDto.OrderByDescending(x => x.DateCreated).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task<PartnerDTO> GetPartnerDetailsForAWaybill(string waybill)
+        {
+            try
+            {
+                var mobileRequests = _context.MobilePickUpRequests.AsQueryable().Where(x => x.Waybill == waybill);
+
+                var partnerDTO =   (from n in mobileRequests
+                                              join partner in _context.Partners on n.UserId equals partner.UserId
+                                              select new PartnerDTO
+                                              {
+                                                  PartnerName = partner.FirstName + " " + partner.LastName,
+                                                  PhoneNumber = partner.PhoneNumber,
+                                                  PartnerCode = partner.PartnerCode,
+                                                  PartnerType = partner.PartnerType
+                                              }).FirstOrDefault();
+
+                return Task.FromResult(partnerDTO);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

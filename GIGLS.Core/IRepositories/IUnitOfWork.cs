@@ -178,6 +178,7 @@ namespace GIGLS.Core
         IShipmentHashRepository ShipmentHash { get; set; }
 
         IGiglgoStationRepository GiglgoStation { get; set; }
+        IFleetPartnerRepository FleetPartner { get; set; }
 
 
         int Complete();
