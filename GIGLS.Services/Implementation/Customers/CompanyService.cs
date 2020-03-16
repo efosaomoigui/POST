@@ -162,7 +162,7 @@ namespace GIGLS.Services.Implementation.Customers
                     URL = loginURL
                 };
 
-                await _messageSenderService.Value.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
+                //await _messageSenderService.Value.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
 
                 return Mapper.Map<CompanyDTO>(newCompany);
             }
