@@ -14,6 +14,9 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.User;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.IMessageService;
+using System.Configuration;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -23,17 +26,19 @@ namespace GIGLS.Services.Implementation.Customers
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly IPasswordGenerator _passwordGenerator;
         private readonly IUserService _userService;
+        private readonly Lazy<IMessageSenderService> _messageSenderService;
 
         private readonly IUnitOfWork _uow;
 
         public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService,
-            IWalletService walletService, IPasswordGenerator passwordGenerator, IUserService userService, IUnitOfWork uow)
+            IWalletService walletService, IPasswordGenerator passwordGenerator, IUserService userService, IUnitOfWork uow, Lazy<IMessageSenderService> messageSenderService)
         {
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _passwordGenerator = passwordGenerator;
             _userService = userService;
             _uow = uow;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
 
@@ -147,7 +152,19 @@ namespace GIGLS.Services.Implementation.Customers
                     CustomerCode = newCompany.CustomerCode,
                     CompanyType = companyType
                 });
-                
+
+                //send login detail to the email 
+                var loginURL = ConfigurationManager.AppSettings["FleetPartnersUrl"];
+                var passwordMessage = new PasswordMessageDTO()
+                {
+                    Password = password,
+                    UserEmail = newCompany.Email,
+                    URL = loginURL
+                };
+
+                await _messageSenderService.Value.SendGenericEmailMessage(MessageType.FPEmail, passwordMessage);
+                //await _messageSenderService.SendGenericEmailMessage(MessageType.FPEmail, passwordMessage);
+
                 return Mapper.Map<CompanyDTO>(newCompany);
             }
             catch (Exception)
