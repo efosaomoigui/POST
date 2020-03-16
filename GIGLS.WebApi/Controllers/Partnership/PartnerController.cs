@@ -194,5 +194,20 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getallpartnerswithoutenterprise")]
+        public async Task<IServiceResponse<IEnumerable<PartnerDTO>>> GetExternalPartnersNotAttachedToAnyFleetPartner()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var partners = await _fleetPartnerService.GetExternalPartnersNotAttachedToAnyFleetPartner();
+                return new ServiceResponse<IEnumerable<PartnerDTO>>
+                {
+                    Object = partners
+                };
+            });
+        }
     }
 }

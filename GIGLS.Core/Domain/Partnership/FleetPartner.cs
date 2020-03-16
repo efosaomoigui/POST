@@ -12,9 +12,6 @@ namespace GIGLS.Core.Domain.Partnership
         public int FleetPartnerId { get; set; }
 
         [MaxLength(100)]
-        public string PartnerName { get; set; }
-
-        [MaxLength(100)]
         public string FleetPartnerCode { get; set; }
 
         [MaxLength(100)]
@@ -28,9 +25,6 @@ namespace GIGLS.Core.Domain.Partnership
 
         [MaxLength(100)]
         public string PhoneNumber { get; set; }
-
-        [MaxLength(100)]
-        public string OptionalPhoneNumber { get; set; }
 
         public string Address { get; set; }       
 

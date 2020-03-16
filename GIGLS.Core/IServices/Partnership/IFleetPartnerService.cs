@@ -21,5 +21,6 @@ namespace GIGLS.Core.IServices.Partnership
         Task<List<FleetPartnerTransactionsDTO>> GetFleetTransaction(ShipmentCollectionFilterCriteria filterCriteria);
         Task<List<object>> GetEarningsOfPartnersAttachedToFleet(ShipmentCollectionFilterCriteria filterCriteria);
         Task<List<FleetMobilePickUpRequestsDTO>> GetPartnerResponseAttachedToFleet(ShipmentCollectionFilterCriteria filterCriteria);
+        Task<List<PartnerDTO>> GetExternalPartnersNotAttachedToAnyFleetPartner();
     }
 }

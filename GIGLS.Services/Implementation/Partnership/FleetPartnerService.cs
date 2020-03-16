@@ -43,9 +43,13 @@ namespace GIGLS.Services.Implementation.Partnership
 
         public async Task<object> AddFleetPartner(FleetPartnerDTO fleetPartnerDTO)
         {
-            if (fleetPartnerDTO.PartnerName != null)
+            if (fleetPartnerDTO.LastName != null)
             {
-                fleetPartnerDTO.PartnerName.Trim();
+                fleetPartnerDTO.LastName.Trim();
+            }
+            if (fleetPartnerDTO.FirstName != null)
+            {
+                fleetPartnerDTO.FirstName.Trim();
             }
 
             if (fleetPartnerDTO.Email != null)
@@ -76,7 +80,6 @@ namespace GIGLS.Services.Implementation.Partnership
             var fleetPartnerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.FleetPartner);
             var fleetPartner = Mapper.Map<FleetPartner>(fleetPartnerDTO);
             fleetPartner.FleetPartnerCode = fleetPartnerCode;
-            fleetPartner.PartnerName = fleetPartnerDTO.FirstName + " " + fleetPartnerDTO.LastName;
             
             string password = await _passwordGenerator.Generate();
 
@@ -106,6 +109,7 @@ namespace GIGLS.Services.Implementation.Partnership
             {
                 fleetPartner.UserId = user.Id;
                 _uow.FleetPartner.Add(fleetPartner);
+                await AssignPartnersToFleetPartner(fleetPartnerCode, fleetPartnerDTO.PartnerCodes);
                 await _uow.CompleteAsync();
             }
 
@@ -134,9 +138,7 @@ namespace GIGLS.Services.Implementation.Partnership
             existingParntner.FirstName = fleetPartnerDTO.FirstName.Trim();
             existingParntner.LastName = fleetPartnerDTO.LastName.Trim();
             existingParntner.Email = fleetPartnerDTO.Email.Trim();
-            existingParntner.PartnerName = fleetPartnerDTO.PartnerName.Trim();
             existingParntner.Address = fleetPartnerDTO.Address;
-            existingParntner.OptionalPhoneNumber = fleetPartnerDTO.OptionalPhoneNumber;
             existingParntner.PhoneNumber = fleetPartnerDTO.PhoneNumber;
             await _uow.CompleteAsync();
         }
@@ -235,6 +237,26 @@ namespace GIGLS.Services.Implementation.Partnership
             return await Task.FromResult(response);
         }
 
+        public async Task<List<PartnerDTO>> GetExternalPartnersNotAttachedToAnyFleetPartner()
+        {
+
+            var partners = await _uow.FleetPartner.GetExternalPartnersNotAttachedToAnyFleetPartner();
+            return partners;
+        }
+
+        private async Task AssignPartnersToFleetPartner(string fleetCode,List<string> partnerCodes)
+        {
+            foreach (var partnerCode in partnerCodes)
+            {
+                var partner = await _uow.Partner.GetAsync(x => x.PartnerCode == partnerCode);
+                if (partner != null)
+                {
+                    partner.FleetPartnerCode = fleetCode;
+                }
+            }
+            await _uow.CompleteAsync();
+            
+        }
 
     }
 }

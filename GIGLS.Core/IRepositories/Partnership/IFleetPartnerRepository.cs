@@ -11,5 +11,6 @@ namespace GIGLS.Core.IRepositories.Partnership
         Task<List<FleetPartnerDTO>> GetFleetPartnersAsync();
         Task<int> FleetCount(string fleetCode);
         Task<List<VehicleTypeDTO>> GetVehiclesAttachedToFleetPartner(string fleetPartnerCode);
+        Task<List<PartnerDTO>> GetExternalPartnersNotAttachedToAnyFleetPartner();
     }
 }

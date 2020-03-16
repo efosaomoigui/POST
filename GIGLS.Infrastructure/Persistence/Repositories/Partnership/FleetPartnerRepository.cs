@@ -24,12 +24,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                              select new FleetPartnerDTO
                              {
                                  FleetPartnerId = partner.FleetPartnerId,
-                                 PartnerName = partner.PartnerName,
                                  Email = partner.Email,
                                  Address = partner.Address,
-                                 PartnerCode = partner.FleetPartnerCode,
+                                 FleetPartnerCode = partner.FleetPartnerCode,
                                  PhoneNumber = partner.PhoneNumber,
-                                 OptionalPhoneNumber = partner.OptionalPhoneNumber,
                                  FirstName = partner.FirstName,
                                  LastName = partner.LastName,
                              };
@@ -62,6 +60,23 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
         {
             var fleetCount = _context.Partners.Where(x => x.FleetPartnerCode == fleetCode).Count();
             return fleetCount;
+        }
+
+       
+        public Task<List<PartnerDTO>> GetExternalPartnersNotAttachedToAnyFleetPartner()
+        {
+            var partners = _context.Partners.AsQueryable().Where(s => s.FleetPartnerCode == null && s.PartnerType == Core.Enums.PartnerType.DeliveryPartner && s.IsActivated == true);
+
+            var partnerDto = from partner in partners
+                             select new PartnerDTO
+                             {
+                                PartnerName = partner.PartnerName,
+                                FirstName = partner.FirstName,
+                                LastName = partner.LastName,
+                                PartnerCode = partner.PartnerCode
+                             };
+
+            return Task.FromResult(partnerDto.ToList());
         }
     }
 }
