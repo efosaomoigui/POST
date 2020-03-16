@@ -158,7 +158,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
         {
             try
             {
-                var mobileRequests = _context.MobilePickUpRequests.AsQueryable().Where(x => x.Waybill == waybill);
+                var mobileRequests = _context.MobilePickUpRequests.AsQueryable().Where(x => x.Waybill == waybill && x.Status != "TimedOut");
 
                 var partnerDTO =   (from n in mobileRequests
                                               join partner in _context.Partners on n.UserId equals partner.UserId
