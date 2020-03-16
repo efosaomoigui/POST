@@ -54,7 +54,7 @@ namespace GIGLS.Services.Implementation.User
             user.DateCreated = DateTime.Now.Date;
             user.DateModified = DateTime.Now.Date;
             user.PasswordExpireDate = DateTime.Now;
-            user.UserName = (user.UserChannelType == UserChannelType.Employee) ? user.Email : user.UserChannelCode;
+            user.UserName = (user.UserChannelType == UserChannelType.Employee) ? user.Email : user.UserChannelCode;            
 
             //UserChannelCode for employee
             if (user.UserChannelType == UserChannelType.Employee)
@@ -62,8 +62,8 @@ namespace GIGLS.Services.Implementation.User
                 var employeeCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Employee);
                 user.UserChannelCode = employeeCode;
                 user.UserChannelPassword = GeneratePassword();
+                user.IsActive = true;
             }
-
 
             var u = await _unitOfWork.User.RegisterUser(user, userDto.Password);
             return u;
