@@ -1614,10 +1614,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString())
+                    if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() 
+                        || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.Missed)
                     {
-                        var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.UserId == pickuprequest.UserId
-                        && (s.Status == MobilePickUpRequestStatus.Rejected.ToString() || s.Status == MobilePickUpRequestStatus.TimedOut.ToString()));
+                        var request = await _uow.MobilePickUpRequests.GetAsync(s => 
+                            s.Waybill == pickuprequest.Waybill && s.UserId == pickuprequest.UserId
+                            && (s.Status == MobilePickUpRequestStatus.Rejected.ToString() || s.Status == MobilePickUpRequestStatus.TimedOut.ToString() 
+                            || s.Status == MobilePickUpRequestStatus.Missed.ToString()));
 
                         if (request == null)
                         {
@@ -1660,14 +1663,8 @@ namespace GIGLS.Services.Implementation.Shipments
                             WaybillNumber = pickuprequest.Waybill,
                             ShipmentScanStatus = ShipmentScanStatus.MAPT
                         });
-
                     }
-
-                    //if (pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString())
-                    //{
-                    //    preshipmentmobile.shipmentstatus = "Shipment created";
-                    //}
-
+                    
                     newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
 
                     if (pickuprequest.ServiceCentreId != null)

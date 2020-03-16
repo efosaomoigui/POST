@@ -17,6 +17,7 @@
         PickedUp,
         OnwardProcessing,
         Processing,
-        TimedOut
+        TimedOut,
+        Missed
     }
 }
