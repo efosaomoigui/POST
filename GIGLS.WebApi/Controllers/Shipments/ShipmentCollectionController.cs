@@ -44,10 +44,10 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipmentCollectionTuple = _service.GetShipmentCollections(filterOptionsDto);
+                var shipmentCollectionTuple = await _service.GetShipmentCollections(filterOptionsDto);
                 return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
                 {
-                    Object = await shipmentCollectionTuple.Item1,
+                    Object =  shipmentCollectionTuple.Item1,
                     Total = shipmentCollectionTuple.Item2
                 };
             });
@@ -170,10 +170,10 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipmentCollectionTuple = _service.GetShipmentWaitingForCollection(filterOptionsDto);
+                var shipmentCollectionTuple = await _service.GetShipmentWaitingForCollection(filterOptionsDto);
                 return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
                 {
-                    Object = await shipmentCollectionTuple.Item1,
+                    Object = shipmentCollectionTuple.Item1,
                     Total = shipmentCollectionTuple.Item2
                 };
             });

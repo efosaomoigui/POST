@@ -100,12 +100,12 @@ namespace GIGLS.Services.Implementation.Shipments
             return await Task.FromResult(shipmentCollectionDto.OrderByDescending(x => x.DateModified));
         }
 
-        public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentCollections(FilterOptionsDto filterOptionsDto)
+        public async Task<Tuple<List<ShipmentCollectionDTO>, int>> GetShipmentCollections(FilterOptionsDto filterOptionsDto)
         {
             try
             {
                 //get all shipments by servicecentre
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
                 var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable().Where(x => (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC) && serviceCenters.Contains(x.DestinationServiceCentreId)).ToList();
 
@@ -145,7 +145,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentCollectionDto = shipmentCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
-                return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), count);
+                return new Tuple<List<ShipmentCollectionDTO>, int>(shipmentCollectionDto, count);
             }
             catch (Exception)
             {
@@ -232,12 +232,12 @@ namespace GIGLS.Services.Implementation.Shipments
             return new Tuple<List<ShipmentCollectionDTO>, int>(shipmentCollectionListDto, shipmentCollectionTotalCount);
         }
 
-        public Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollection(FilterOptionsDto filterOptionsDto)
+        public async Task<Tuple<List<ShipmentCollectionDTO>, int>> GetShipmentWaitingForCollection(FilterOptionsDto filterOptionsDto)
         {
             try
             {
                 //get all shipments by servicecentre
-                var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 
                 var shipmentCollection = _uow.ShipmentCollection.GetAllAsQueryable()
                 .Where(x => x.ShipmentScanStatus == ShipmentScanStatus.ARF && serviceCenters.Contains(x.DestinationServiceCentreId));
@@ -252,8 +252,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var shipmentCollectionDto = Mapper.Map<List<ShipmentCollectionDTO>>(shipmentCollectionResult.OrderByDescending(x => x.DateCreated));
 
-                return new Tuple<Task<List<ShipmentCollectionDTO>>, int>(Task.FromResult(shipmentCollectionDto), shipmentCollectionCount);
-
+                return new Tuple<List<ShipmentCollectionDTO>, int>(shipmentCollectionDto, shipmentCollectionCount);
             }
             catch (Exception)
             {

@@ -54,15 +54,15 @@ namespace GIGLS.Services.Implementation.Messaging
             return messages;
         }
 
-        public Tuple<Task<List<SmsSendLogDTO>>, int> GetSmsSendLogAsync_OLD(FilterOptionsDto filterOptionsDto)
+        public async Task<Tuple<List<SmsSendLogDTO>, int>> GetSmsSendLogAsync_OLD(FilterOptionsDto filterOptionsDto)
         {
             try
             {
-                var smsCollection = _uow.SmsSendLog.FindAsync(s => s.IsDeleted == false).Result;
+                var smsCollection =  await _uow.SmsSendLog.FindAsync(s => s.IsDeleted == false);
                 var smsCollectionDto = Mapper.Map<IEnumerable<SmsSendLogDTO>>(smsCollection);
                 smsCollectionDto = smsCollectionDto.OrderByDescending(x => x.DateCreated);
 
-                var count = smsCollectionDto.ToList().Count();
+                var count = smsCollectionDto.Count();
 
                 if (filterOptionsDto != null)
                 {
@@ -96,7 +96,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     smsCollectionDto = smsCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
-                return new Tuple<Task<List<SmsSendLogDTO>>, int>(Task.FromResult(smsCollectionDto.ToList()), count);
+                return new Tuple<List<SmsSendLogDTO>, int>(smsCollectionDto.ToList(), count);
 
             }
             catch (Exception)
@@ -185,9 +185,6 @@ namespace GIGLS.Services.Implementation.Messaging
                 throw ex;
             }
             return await Task.FromResult(response);
-
-
         }
-
     }
 }
