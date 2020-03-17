@@ -123,15 +123,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 {
                     shipment = _context.Shipment.Where(s => serviceCentreIds.Contains(s.DepartureServiceCentreId));
                 }
-                ////
-
 
                 //filter by country Id
                 if (filterOptionsDto.CountryId > 0)
                 {
                     shipment = shipment.Where(s => s.DepartureCountryId == filterOptionsDto.CountryId);
                 }
-
 
                 //filter by cancelled shipments
                 shipment = shipment.Where(s => s.IsCancelled == false);
@@ -143,10 +140,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 }
 
                 var count = 0;
-                //shipment = shipment.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count);
-
 
                 List<ShipmentDTO> shipmentDto = new List<ShipmentDTO>();
+
                 //filter
                 var filter = filterOptionsDto.filter;
                 var filterValue = filterOptionsDto.filterValue;
@@ -160,9 +156,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        CustomerId = r.CustomerId,
                                        CustomerType = r.CustomerType,
                                        ActualDateOfArrival = r.ActualDateOfArrival,
-                                       //ActualReceiverName = r.ActualReceiverName,
-                                       //ActualreceiverPhone = r.ActualreceiverPhone,
-                                       //Comments = r.Comments,
                                        DateCreated = r.DateCreated,
                                        DateModified = r.DateModified,
                                        DeliveryOptionId = r.DeliveryOptionId,
@@ -185,10 +178,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            Name = x.Name
                                        }).FirstOrDefault(),
                                        ExpectedDateOfArrival = r.ExpectedDateOfArrival,
-                                       //GroupWaybill = r.GroupWaybill,
-                                       //IdentificationType = r.IdentificationType,
-                                       //IndentificationUrl = r.IndentificationUrl,
-                                       //IsDomestic = r.IsDomestic,
                                        PaymentStatus = r.PaymentStatus,
                                        ReceiverAddress = r.ReceiverAddress,
                                        ReceiverCity = r.ReceiverCity,
@@ -231,10 +220,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                            DueDate = x.DueDate,
                                            IsInternational = x.IsInternational
                                        }).FirstOrDefault()
-                                       //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
                                    }).OrderByDescending(x => x.DateCreated).Take(10).ToList();
 
-                    //var count = shipment.Count();
                     count = shipmentDto.Count();
 
                     return new Tuple<Task<List<ShipmentDTO>>, int>(Task.FromResult(shipmentDto), count);
@@ -248,9 +235,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                    CustomerId = r.CustomerId,
                                    CustomerType = r.CustomerType,
                                    ActualDateOfArrival = r.ActualDateOfArrival,
-                                   //ActualReceiverName = r.ActualReceiverName,
-                                   //ActualreceiverPhone = r.ActualreceiverPhone,
-                                   //Comments = r.Comments,
                                    DateCreated = r.DateCreated,
                                    DateModified = r.DateModified,
                                    DeliveryOptionId = r.DeliveryOptionId,
@@ -273,10 +257,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        Name = x.Name
                                    }).FirstOrDefault(),
                                    ExpectedDateOfArrival = r.ExpectedDateOfArrival,
-                                   //GroupWaybill = r.GroupWaybill,
-                                   //IdentificationType = r.IdentificationType,
-                                   //IndentificationUrl = r.IndentificationUrl,
-                                   //IsDomestic = r.IsDomestic,
                                    PaymentStatus = r.PaymentStatus,
                                    ReceiverAddress = r.ReceiverAddress,
                                    ReceiverCity = r.ReceiverCity,
@@ -318,10 +298,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                        DueDate = x.DueDate,
                                        IsInternational = x.IsInternational
                                    }).FirstOrDefault()
-                                   //ShipmentItems = Context.ShipmentItem.Where(s => s.ShipmentId == r.ShipmentId).ToList()
                                }).Where(s => (s.Waybill == filterValue || s.GrandTotal.ToString() == filterValue || s.DateCreated.ToString() == filterValue)).ToList();
-
-
+                
                 //filter
                 if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
                 {
@@ -339,14 +317,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                     if (sortorder == "0")
                     {
                         shipmentDto = shipmentDto.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
-                        //shipment = shipment.OrderBy(x => prop.Name); ;
                     }
                     else
                     {
                         shipmentDto = shipmentDto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
-                        //shipment = shipment.OrderByDescending(x => prop.Name); 
                     }
-
                 }
 
                 shipmentDto = shipmentDto.OrderByDescending(x => x.DateCreated).Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
@@ -375,8 +350,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 {
                     shipment = shipment.Where(s => s.IsInternational == filterOptionsDto.IsInternational);
                 }
-
-
+                
                 var count = shipment.ToList().Count();
 
                 List<ShipmentDTO> shipmentDto = (from r in shipment
@@ -472,8 +446,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 throw;
             }
         }
-
-
+        
         //Get Shipment Detail for list of waybills and filter it by service centre
         public Tuple<Task<List<ShipmentDTO>>, int> GetShipmentDetailByWaybills(FilterOptionsDto filterOptionsDto, int[] serviceCentreIds, List<string> waybills)
         {
@@ -593,20 +566,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                 throw;
             }
         }
-
-
-        //public int GetShipmentTotal()
-        //{
-        //    var count = Context.State.ToList().Count();
-        //    return count;
-        //}
-
-        //public int GetStatesTotal()
-        //{
-        //    var count = Context.State.ToList().Count();
-        //    return count;
-        //}
-
+                
         public Task<List<ShipmentDTO>> GetShipments(ShipmentFilterCriteria f_Criteria, int[] serviceCentreIds)
         {
             DateTime StartDate = f_Criteria.StartDate.GetValueOrDefault().Date;
@@ -738,8 +698,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
         }
-
-
+        
         public Task<List<ShipmentDTO>> GetCustomerShipments(ShipmentFilterCriteria f_Criteria)
         {
             DateTime StartDate = f_Criteria.StartDate.GetValueOrDefault().Date;
@@ -963,8 +922,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
             return Task.FromResult(shipmentDto);
         }
-
-
+        
         //Get Shipment sales
         public Task<List<InvoiceViewDTO>> GetSalesForServiceCentre(AccountFilterCriteria accountFilterCriteria, int[] serviceCentreIds)
         {

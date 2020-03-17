@@ -218,10 +218,10 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipmentCollectionTuple = _service.GetEcommerceOverDueShipments();
+                var shipmentCollectionTuple = await _service.GetEcommerceOverDueShipments();
                 return new ServiceResponse<IEnumerable<ShipmentCollectionDTO>>
                 {
-                    Object = await shipmentCollectionTuple
+                    Object = shipmentCollectionTuple
                     
                 };
             });
