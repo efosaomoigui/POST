@@ -16,7 +16,6 @@ using GIGLS.Core.IServices.User;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.IMessageService;
-using System.Configuration;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -26,12 +25,12 @@ namespace GIGLS.Services.Implementation.Customers
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly IPasswordGenerator _passwordGenerator;
         private readonly IUserService _userService;
-        private readonly Lazy<IMessageSenderService> _messageSenderService;
+        private readonly IMessageSenderService _messageSenderService;
 
         private readonly IUnitOfWork _uow;
 
         public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService,
-            IWalletService walletService, IPasswordGenerator passwordGenerator, IUserService userService, IUnitOfWork uow, Lazy<IMessageSenderService> messageSenderService)
+            IWalletService walletService, IPasswordGenerator passwordGenerator, IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService)
         {
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
@@ -154,15 +153,13 @@ namespace GIGLS.Services.Implementation.Customers
                 });
 
                 //send login detail to the email 
-                var loginURL = ConfigurationManager.AppSettings["FleetPartnersUrl"];
                 var passwordMessage = new PasswordMessageDTO()
                 {
                     Password = password,
                     UserEmail = newCompany.Email,
-                    URL = loginURL
+                    CustomerCode = newCompany.CustomerCode
                 };
-
-                //await _messageSenderService.Value.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
+                await _messageSenderService.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
 
                 return Mapper.Map<CompanyDTO>(newCompany);
             }
@@ -299,7 +296,6 @@ namespace GIGLS.Services.Implementation.Customers
                 company.ReturnServiceCentre = companyDto.ReturnServiceCentre;
                 company.ReturnAddress = companyDto.ReturnAddress;
                 company.RcNumber = companyDto.RcNumber;
-                //company.UserActiveCountryId = companyDto.UserActiveCountryId;
                 company.isCodNeeded = companyDto.isCodNeeded;
 
                 if (companyDto.ContactPersons.Any())
@@ -322,10 +318,8 @@ namespace GIGLS.Services.Implementation.Customers
                 user.LastName = companyDto.Name;
                 user.FirstName = companyDto.Name;
                 user.Email = companyDto.Email;
-                //user.UserActiveCountryId = companyDto.UserActiveCountryId;
 
                 await _userService.UpdateUser(user.Id, user);
-
                 _uow.Complete();
             }
             catch (Exception)
@@ -463,6 +457,7 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
+        
         public async Task<EcommerceWalletDTO> GetECommerceWalletById(int companyId)
         {
             try
@@ -473,9 +468,7 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     throw new GenericException("Wallet information does not exist");
                 }
-
-                return company;
-                
+                return company;                
             }
             catch (Exception)
             {
@@ -494,6 +487,5 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
-
     }
 }
