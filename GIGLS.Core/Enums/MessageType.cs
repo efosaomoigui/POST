@@ -43,6 +43,7 @@
         WEBQUOTE, //Message for website mail for Request Quote
         APPREPORT, //Mail sent containing Issues reported by GIGGo Users
         HOUSTON,   //Create Message to handle CRT for Hoston Shipment
-        FPEmail //Message Type for Fleet Partner Login Access
+        FPEmail, //Message Type for Fleet Partner Login Access
+        CEMAIL // Account creation mail
     } 
 }
