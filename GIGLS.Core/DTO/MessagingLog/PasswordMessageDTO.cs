@@ -1,12 +1,10 @@
-﻿
-namespace GIGLS.Core.DTO.MessagingLog
+﻿namespace GIGLS.Core.DTO.MessagingLog
 {
     public class PasswordMessageDTO
     {
         public string Password { get; set; }
         public string UserEmail { get; set; }
-        public string URL { get; set; }
-
+        public string CustomerCode { get; set; }
     }
 
 }

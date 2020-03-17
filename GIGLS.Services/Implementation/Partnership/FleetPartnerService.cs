@@ -112,14 +112,11 @@ namespace GIGLS.Services.Implementation.Partnership
                 await AssignPartnersToFleetPartner(fleetPartnerCode, fleetPartnerDTO.PartnerCodes);
                 await _uow.CompleteAsync();
             }
-
-            var loginURL = ConfigurationManager.AppSettings["FleetPartnersUrl"];
-
+            
             var passwordMessage = new PasswordMessageDTO()
             {
                 Password = password,
-                UserEmail = fleetPartner.Email,
-                URL = loginURL
+                UserEmail = fleetPartner.Email
             };
 
             await _messageSenderService.SendGenericEmailMessage(MessageType.FPEmail, passwordMessage);
