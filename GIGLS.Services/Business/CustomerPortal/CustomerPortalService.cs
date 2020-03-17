@@ -1313,9 +1313,9 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.LoadImage(images);
         }
-        public async Task<bool> VerifyPartnerDetails(PartnerDTO partner)
+        public async Task<bool> VerifyPartnerDetails(PartnerDTO partnerDto)
         {
-            return await _preShipmentMobileService.VerifyPartnerDetails(partner);
+            return await _preShipmentMobileService.VerifyPartnerDetails(partnerDto);
         }
         public Task<string> Generate(int length)
         {

@@ -2788,46 +2788,46 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<bool> VerifyPartnerDetails(PartnerDTO partner)
+        public async Task<bool> VerifyPartnerDetails(PartnerDTO partnerDto)
         {
             try
             {
                 //to get images information
                 var images = new ImageDTO();
-                var Partner = await _uow.Partner.GetAsync(s => s.Email == partner.Email);
+                var Partner = await _uow.Partner.GetAsync(s => s.Email == partnerDto.Email);
                 if (Partner != null)
                 {
-                    Partner.Address = partner.Address;
-                    Partner.Email = partner.Email;
-                    Partner.FirstName = partner.FirstName;
+                    Partner.Address = partnerDto.Address;
+                    Partner.Email = partnerDto.Email;
+                    Partner.FirstName = partnerDto.FirstName;
                     Partner.IsActivated = true;
-                    Partner.LastName = partner.LastName;
-                    Partner.OptionalPhoneNumber = partner.OptionalPhoneNumber;
-                    Partner.PartnerName = partner.PartnerName;
-                    Partner.PhoneNumber = partner.PhoneNumber;
-                    Partner.PictureUrl = partner.PictureUrl;
-                    Partner.AccountName = partner.AccountName;
-                    Partner.AccountNumber = partner.AccountNumber;
-                    Partner.BankName = partner.BankName;
-                    Partner.VehicleLicenseExpiryDate = partner.VehicleLicenseExpiryDate;
-                    images.PartnerFullName = partner.FirstName + partner.LastName;
-                    if(partner.FleetPartnerCode != null)
+                    Partner.LastName = partnerDto.LastName;
+                    Partner.OptionalPhoneNumber = partnerDto.OptionalPhoneNumber;
+                    Partner.PartnerName = partnerDto.PartnerName;
+                    Partner.PhoneNumber = partnerDto.PhoneNumber;
+                    Partner.PictureUrl = partnerDto.PictureUrl;
+                    Partner.AccountName = partnerDto.AccountName;
+                    Partner.AccountNumber = partnerDto.AccountNumber;
+                    Partner.BankName = partnerDto.BankName;
+                    Partner.VehicleLicenseExpiryDate = partnerDto.VehicleLicenseExpiryDate;
+                    images.PartnerFullName = partnerDto.FirstName + partnerDto.LastName;
+                    if(partnerDto.FleetPartnerCode != null)
                     {
-                        Partner.FleetPartnerCode = partner.FleetPartnerCode;
+                        Partner.FleetPartnerCode = partnerDto.FleetPartnerCode;
                     }
-                    if (partner.VehicleLicenseImageDetails != null && !partner.VehicleLicenseImageDetails.Contains("agilityblob"))
+                    if (partnerDto.VehicleLicenseImageDetails != null && !partnerDto.VehicleLicenseImageDetails.Contains("agilityblob"))
                     {
                         images.FileType = ImageFileType.VehicleLicense;
-                        images.ImageString = partner.VehicleLicenseImageDetails;
-                        partner.VehicleLicenseImageDetails = await LoadImage(images);
+                        images.ImageString = partnerDto.VehicleLicenseImageDetails;
+                        partnerDto.VehicleLicenseImageDetails = await LoadImage(images);
                     }
-                    Partner.VehicleLicenseImageDetails = partner.VehicleLicenseImageDetails;
-                    Partner.VehicleLicenseNumber = partner.VehicleLicenseNumber;
-                    if (partner.VehicleTypeDetails.Count() == 0)
+                    Partner.VehicleLicenseImageDetails = partnerDto.VehicleLicenseImageDetails;
+                    Partner.VehicleLicenseNumber = partnerDto.VehicleLicenseNumber;
+                    if (partnerDto.VehicleTypeDetails.Count() == 0)
                     {
                         throw new GenericException("Partner does not any Vehicle attached. Kindly review!!");
                     }
-                    foreach (var vehicle in partner.VehicleTypeDetails)
+                    foreach (var vehicle in partnerDto.VehicleTypeDetails)
                     {
                         if (vehicle.VehicleInsurancePolicyDetails != null && !vehicle.VehicleInsurancePolicyDetails.Contains("agilityblob"))
                         {
@@ -2849,7 +2849,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             images.ImageString = vehicle.VehicleParticularsDetails;
                             vehicle.VehicleParticularsDetails = await LoadImage(images);
                         }
-                        var VehicleDetails = await _uow.VehicleType.GetAsync(s => s.VehicleTypeId == vehicle.VehicleTypeId && s.Partnercode == partner.PartnerCode);
+                        var VehicleDetails = await _uow.VehicleType.GetAsync(s => s.VehicleTypeId == vehicle.VehicleTypeId && s.Partnercode == partnerDto.PartnerCode);
                         if (VehicleDetails != null)
                         {
                             VehicleDetails.VehicleInsurancePolicyDetails = vehicle.VehicleInsurancePolicyDetails;
