@@ -2814,6 +2814,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     Partner.BankName = partner.BankName;
                     Partner.VehicleLicenseExpiryDate = partner.VehicleLicenseExpiryDate;
                     images.PartnerFullName = partner.FirstName + partner.LastName;
+                    if(partner.FleetPartnerCode != null)
+                    {
+                        Partner.FleetPartnerCode = partner.FleetPartnerCode;
+                    }
                     if (partner.VehicleLicenseImageDetails != null && !partner.VehicleLicenseImageDetails.Contains("agilityblob"))
                     {
                         images.FileType = ImageFileType.VehicleLicense;
