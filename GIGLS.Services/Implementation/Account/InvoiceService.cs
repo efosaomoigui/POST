@@ -4,11 +4,9 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.PaymentTransactions;
-using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Account;
-using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
@@ -26,25 +24,19 @@ namespace GIGLS.Services.Implementation.Account
     public class InvoiceService : IInvoiceService
     {
         private readonly IUnitOfWork _uow;
-        private INumberGeneratorMonitorService _service { get; set; }
-        private IShipmentService _shipmentService { get; set; }
-        private ICustomerService _customerService { get; set; }
+        private INumberGeneratorMonitorService _service;
+        private IShipmentService _shipmentService;
         private readonly IUserService _userService;
         private readonly IWalletService _walletService;
         private readonly IMessageSenderService _messageSenderService;
         private readonly IGlobalPropertyService _globalPropertyService;
 
-        public InvoiceService(IUnitOfWork uow, INumberGeneratorMonitorService service,
-            IShipmentService shipmentService, ICustomerService customerService,
-            IMessageSenderService messageSenderService,
-            IUserService userService,
-            IWalletService walletService,
-            IGlobalPropertyService globalPropertyService)
+        public InvoiceService(IUnitOfWork uow, INumberGeneratorMonitorService service,  IShipmentService shipmentService,    IMessageSenderService messageSenderService,
+            IUserService userService, IWalletService walletService,  IGlobalPropertyService globalPropertyService)
         {
             _uow = uow;
             _service = service;
             _shipmentService = shipmentService;
-            _customerService = customerService;
             _userService = userService;
             _walletService = walletService;
             _messageSenderService = messageSenderService;
@@ -165,16 +157,16 @@ namespace GIGLS.Services.Implementation.Account
             return message+" Count:"+count;
         }
 
-        public Tuple<Task<List<InvoiceDTO>>, int> GetInvoices(FilterOptionsDto filterOptionsDto)
+        public async Task<Tuple<List<InvoiceDTO>, int>> GetInvoices(FilterOptionsDto filterOptionsDto)
         {
             try
             {
                 //get all invoices by servicecentre
-                var serviceCenterIds = _userService.GetPriviledgeServiceCenters().Result;
-                var invoicesDto = _uow.Invoice.GetInvoicesAsync(serviceCenterIds).Result;
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                var invoicesDto = await _uow.Invoice.GetInvoicesAsync(serviceCenterIds);
                 invoicesDto = invoicesDto.OrderByDescending(x => x.DateCreated);
 
-                var count = invoicesDto.ToList().Count();
+                var count = invoicesDto.Count();
 
                 if (filterOptionsDto != null)
                 {
@@ -208,8 +200,7 @@ namespace GIGLS.Services.Implementation.Account
                     invoicesDto = invoicesDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
-                return new Tuple<Task<List<InvoiceDTO>>, int>(Task.FromResult(invoicesDto.ToList()), count);
-
+                return new Tuple<List<InvoiceDTO>, int>(invoicesDto.ToList(), count);
             }
             catch (Exception)
             {
