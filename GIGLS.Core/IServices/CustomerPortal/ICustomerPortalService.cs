@@ -84,7 +84,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<PartnerDTO> GetPartnerDetails(string Email);
         Task<List<Uri>> DisplayImages();
         Task<string> LoadImage(ImageDTO images);
-        Task<bool> VerifyPartnerDetails(PartnerDTO partner);
+        Task<bool> VerifyPartnerDetails(PartnerDTO partnerDto);
         Task<string> Generate(int length);
         Task<IdentityResult> ForgotPassword(string email, string password);
         Task SendGenericEmailMessage(MessageType messageType, object obj);

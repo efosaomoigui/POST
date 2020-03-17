@@ -1373,11 +1373,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("verifypartnerdetails")]
-        public async Task<IServiceResponse<bool>> VerifyPartnerDetails(PartnerDTO partner)
+        public async Task<IServiceResponse<bool>> VerifyPartnerDetails(PartnerDTO partnerDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var response = await _portalService.VerifyPartnerDetails(partner);
+                var response = await _portalService.VerifyPartnerDetails(partnerDto);
                 return new ServiceResponse<bool>
                 {
                     Object = response
