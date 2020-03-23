@@ -12,6 +12,8 @@ namespace GIGLS.Core.DTO.Partnership
         public string Partnercode { get; set; }
 
         public string Vehicletype { get; set; }
+        public string PartnerName { get; set; }
+        public string PartnerPhoneNumber { get; set; }
 
         public string VehiclePlateNumber { get; set; }
         public string VehicleInsurancePolicyDetails { get; set; }

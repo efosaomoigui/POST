@@ -11,6 +11,8 @@ using GIGLS.CORE.DTO.Shipments;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ThirdParty.WebServices;
+using ThirdParty.WebServices.Magaya.DTO;
 
 namespace GIGLS.Core.IServices.Shipments
 {
@@ -57,13 +59,19 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> AddShipmentFromMobile(ShipmentDTO shipment);
         Task<bool> ScanShipment(ScanDTO scan);
         Task RemoveWaybillNumberFromGroupForCancelledShipment(string groupWaybillNumber, string waybillNumber);
+
     }
 
     public interface IMagayaService : IServiceDependencyMarker
     {
-        Task<bool> OpenConnection();
-        Task<string> CloseConnection(int access_key);
-        Task<string> SetTransactions(int access_key, string type, int flags, string trans_xml);
-
+        bool OpenConnection(out int access_key); 
+        string CloseConnection(int access_key);
+        string SetTransactions(int access_key, MagayaShipmentDto magayaShipmentDTO);
+        string GetTransactions(int access_key, MagayaShipmentDto magayaShipmentDTO);
+        string SetEntity(int access_key, EntityDto entitydto);
+        Entities GetEntities(int access_key, string startwithstring);
+        Employees GetEmployees(int access_key, string startwithstring);
+        Employees GetVendors(int access_key, string startwithstring);
     }
+
 }

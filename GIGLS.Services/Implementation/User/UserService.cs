@@ -47,16 +47,14 @@ namespace GIGLS.Services.Implementation.User
             {
                 throw new GenericException($"User with email: {userDto.Email} already exist");
             }
-            var usertemp = new GIGL.GIGLS.Core.Domain.User() { };
 
             var user = Mapper.Map<GIGL.GIGLS.Core.Domain.User>(userDto);
 
-            ///user.Id = usertemp.Id;
             user.Id = Guid.NewGuid().ToString();
             user.DateCreated = DateTime.Now.Date;
             user.DateModified = DateTime.Now.Date;
             user.PasswordExpireDate = DateTime.Now;
-            user.UserName = (user.UserChannelType == UserChannelType.Employee) ? user.Email : user.UserChannelCode;
+            user.UserName = (user.UserChannelType == UserChannelType.Employee) ? user.Email : user.UserChannelCode;            
 
             //UserChannelCode for employee
             if (user.UserChannelType == UserChannelType.Employee)
@@ -64,8 +62,8 @@ namespace GIGLS.Services.Implementation.User
                 var employeeCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Employee);
                 user.UserChannelCode = employeeCode;
                 user.UserChannelPassword = GeneratePassword();
+                user.IsActive = true;
             }
-
 
             var u = await _unitOfWork.User.RegisterUser(user, userDto.Password);
             return u;

@@ -155,7 +155,6 @@ namespace GIGLS.WebApi.Controllers.User
 
             return await HandleApiOperationAsync(async () =>
             {
-
                 var result = await _userService.AddUser(userdto);
                 if (!result.Succeeded)
                 {
@@ -169,7 +168,6 @@ namespace GIGLS.WebApi.Controllers.User
                 {
                     Object = user
                 };
-
             });
         }
 

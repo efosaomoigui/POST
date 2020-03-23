@@ -352,6 +352,18 @@ namespace GIGLS.Services.Implementation.Wallet
             return walletDTO;
         }
 
+        public async Task<WalletDTO> GetWalletBalance(string userChannelCode)
+        {
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(userChannelCode));
+            var walletDTO = Mapper.Map<WalletDTO>(wallet);
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exist");
+            }
+
+            return walletDTO;
+        }
+
         public IQueryable<Core.Domain.Wallet.Wallet> GetWalletAsQueryableService()
         {
             var wallet = _uow.Wallet.GetAllAsQueryable();

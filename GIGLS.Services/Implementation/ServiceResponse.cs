@@ -5,6 +5,7 @@ using GIGLS.Core.IServices;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using System.Collections.Generic;
+using GIGLS.Core.DTO.Partnership;
 
 namespace GIGLS.Services.Implementation
 {
@@ -39,5 +40,9 @@ namespace GIGLS.Services.Implementation
         public bool IsVerified { get; set; }
         public string PartnerType { get; set; }
         public bool IsEligible { get; set; }
+        public List<VehicleTypeDTO> VehicleDetails { get; set; }
+        public string BankName { get; set; }
+        public string AccountName { get; set; }
+        public string AccountNumber { get; set; }
     }
 }

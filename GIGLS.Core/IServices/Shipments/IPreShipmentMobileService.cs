@@ -36,14 +36,13 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> UpdateDeliveryNumber(MobileShipmentNumberDTO detail);
         Task<PartnerDTO> CreatePartner(string CustomerCode);
         Task<bool> deleterecord(string detail);
-        Task<bool> VerifyPartnerDetails(PartnerDTO partner);
+        Task<bool> VerifyPartnerDetails(PartnerDTO partnerDto);
 
         Task<PartnerDTO> GetPartnerDetails(string EmailId);
 
         Task<bool> UpdateReceiverDetails(PreShipmentMobileDTO receiver);
 
         Task<int> GetCountryId();
-
         
         Task<string> LoadImage(ImageDTO images);
 
@@ -58,6 +57,10 @@ namespace GIGLS.Core.IServices.Shipments
         Task<GIGGoDashboardDTO> GetDashboardInfo(BaseFilterCriteria filterCriteria);
         Task<object> CancelShipmentWithNoCharge(string Waybill, string Userchanneltype);
         Task<List<GiglgoStationDTO>> GetGoStations();
+        Task<decimal> GetPickUpPriceForMultipleShipment(string customerType, string vehicleType, int CountryId);
+        Task<List<object>> CreateMobileShipment(NewPreShipmentMobileDTO newPreShipment);
+        Task<MultipleMobilePriceDTO> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipmentItemMobileDTO);
+        Task<object> ResolveDisputeForMultipleShipments(PreShipmentMobileDTO preShipment);
 
     }
 }

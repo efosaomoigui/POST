@@ -20,8 +20,8 @@ namespace GIGLS.Services.IServices.ServiceCentres
 
         public ServiceCentreService(IGlobalPropertyService globalPropertyService, IUnitOfWork uow)
         {
-            _uow = uow;
             _globalPropertyService = globalPropertyService;
+            _uow = uow;
             MapperConfig.Initialize();
         }
 
@@ -356,6 +356,29 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 var services = await _uow.ServiceCentre.FindAsync(x => x.IsHUB == true);
                 var servicesDTO = Mapper.Map<List<ServiceCentreDTO>>(services);
                 return servicesDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<ServiceCentreDTO>> GetServiceCentresWithoutHUBForNonLagosStation(int usersServiceCentresId, int countryId)
+        {
+            try
+            {
+                var serviceCenterIds = await _uow.ServiceCentre.GetAsync(usersServiceCentresId);
+
+                //Get all service centre
+                int[] countryIds = new int[] { countryId };
+                bool excludehub = true;
+                
+                if (serviceCenterIds.StationId == 4)
+                {
+                    excludehub = false;
+                }
+
+                return await _uow.ServiceCentre.GetServiceCentres(countryIds, excludehub);
             }
             catch (Exception)
             {

@@ -17,10 +17,18 @@ namespace GIGL.GIGLS.Core.Domain
         [Index(IsUnique = true)]
         public string Code { get; set; }
 
+        [MaxLength(500)]
         public string Address { get; set; }
+
+        [MaxLength(100)]
         public string City { get; set; }
+
+        [MaxLength(100)]
         public string PhoneNumber { get; set; }
+
+        [MaxLength(100)]
         public string Email { get; set; }
+
         public bool IsActive { get; set; }
         public int StationId { get; set; }
         public virtual Station Station { get; set; }

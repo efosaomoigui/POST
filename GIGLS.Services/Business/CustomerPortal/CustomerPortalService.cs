@@ -1313,9 +1313,9 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.LoadImage(images);
         }
-        public async Task<bool> VerifyPartnerDetails(PartnerDTO partner)
+        public async Task<bool> VerifyPartnerDetails(PartnerDTO partnerDto)
         {
-            return await _preShipmentMobileService.VerifyPartnerDetails(partner);
+            return await _preShipmentMobileService.VerifyPartnerDetails(partnerDto);
         }
         public Task<string> Generate(int length)
         {
@@ -1457,6 +1457,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.AddPreShipmentMobile(preShipment);
         }
+
+        public async Task<List<object>> AddMultiplePreShipmentMobile(NewPreShipmentMobileDTO preShipment)
+        {
+            return await _preShipmentMobileService.CreateMobileShipment(preShipment);
+        }
         public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser()
         {
             return await _preShipmentMobileService.GetPreShipmentForUser();
@@ -1468,6 +1473,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
             return await _preShipmentMobileService.GetPrice(preShipment);
+        }
+        public async Task<MultipleMobilePriceDTO> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipment)
+        {
+            return await _preShipmentMobileService.GetPriceForMultipleShipments(preShipment);
         }
         public async Task<WalletDTO> GetWalletBalance()
         {
@@ -1496,6 +1505,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<object> ResolveDisputeForMobile(PreShipmentMobileDTO preShipment)
         {
             return await _preShipmentMobileService.ResolveDisputeForMobile(preShipment);
+        }
+        public async Task<object> ResolveDisputeForMultipleShipment(PreShipmentMobileDTO preShipment)
+        {
+            return await _preShipmentMobileService.ResolveDisputeForMultipleShipments(preShipment);
         }
         public async Task<PreShipmentMobileDTO> GetPreShipmentDetail(string waybill)
         {

@@ -18,6 +18,9 @@ namespace GIGLS.WebApi.App_Start
     using GIGL.GIGLS.Core.Repositories;
     using Core.IServices;
     using INFRASTRUCTURE.Persistence.Repositories.User;
+    using GIGLS.Core.IServices.Shipments;
+    using GIGLS.Services.Business.Magaya.Shipment;
+
     //using Hangfire;
     //using GlobalConfiguration = Hangfire.GlobalConfiguration;
 
@@ -80,9 +83,11 @@ namespace GIGLS.WebApi.App_Start
         private static void RegisterServices(IKernel kernel)
         {
             kernel.Bind<ICompanyService>().To<CompanyService>();
+            kernel.Bind<IMagayaService>().To<MagayaService>(); 
             kernel.Bind<IUnitOfWork>().To<UnitOfWork<GIGLSContext>>().InRequestScope();
             kernel.Bind<GIGLSContext>().ToSelf().InRequestScope();
             kernel.Bind<UserRepository>().ToSelf().InRequestScope();
+            //kernel.Bind<IMagayaService>().ToSelf().InRequestScope();
             //kernel.Bind<AuthRepository>().ToSelf().InRequestScope();
         }
 

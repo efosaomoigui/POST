@@ -1,4 +1,5 @@
 ﻿using GIGLS.CORE.DTO;
+using System.Xml.Serialization;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -7,4 +8,5 @@ namespace GIGLS.Core.DTO.Shipments
         public int LogVisitReasonId { get; set; }
         public string Message { get; set; }
     }
+
 }

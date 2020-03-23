@@ -54,12 +54,10 @@ namespace GIGLS.Services.Implementation.Utility
                 //Add the numberCode with the serviceCenterCode and numberGeneratorType
                 numberGenerated = ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + codeStr + numberStr;
 
-                if (numberGeneratorType == NumberGeneratorType.CustomerCodeIndividual ||
-                   numberGeneratorType == NumberGeneratorType.CustomerCodeCorporate ||
-                   numberGeneratorType == NumberGeneratorType.CustomerCodeEcommerce ||
-                   numberGeneratorType == NumberGeneratorType.Wallet ||
-                   numberGeneratorType == NumberGeneratorType.Partner ||
-                   numberGeneratorType == NumberGeneratorType.Employee
+                if (numberGeneratorType == NumberGeneratorType.CustomerCodeIndividual || numberGeneratorType == NumberGeneratorType.CustomerCodeCorporate ||
+                    numberGeneratorType == NumberGeneratorType.CustomerCodeEcommerce   ||  numberGeneratorType == NumberGeneratorType.Wallet ||
+                    numberGeneratorType == NumberGeneratorType.Partner || numberGeneratorType == NumberGeneratorType.Employee || 
+                    numberGeneratorType == NumberGeneratorType.FleetPartner
                    )
                 {
                     numberGenerated = ResolvePrefixFromNumberGeneratorTypeForCustomers(numberGeneratorType) + numberStr;
@@ -185,6 +183,10 @@ namespace GIGLS.Services.Implementation.Utility
                 case NumberGeneratorType.Partner:
                     {
                         return "P";
+                    }
+                case NumberGeneratorType.FleetPartner:
+                    {
+                        return "EP";
                     }
                 case NumberGeneratorType.Employee:
                     {

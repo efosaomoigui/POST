@@ -65,7 +65,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        //[Authorize]
         [HttpPut]
         [Route("wallet/{walletId:int}")]
         public async Task<IServiceResponse<object>> UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
@@ -498,7 +497,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
         
-        [AllowAnonymous]
+       // [AllowAnonymous]
         [HttpPost]
         [Route("register")]
         public async Task<IServiceResponse<UserDTO>> Register(UserDTO user)
@@ -762,6 +761,10 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
 
                 var vehicle = user.VehicleType;
+                var vehicleDetails = user.VehicleDetails;
+                var bankName = "";
+                var accountName = "";
+                var accountNumber = "";
                 var partnerType = "";
 
                 if (user.Username != null)
@@ -816,6 +819,9 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             {
                                 var partner = await _portalService.CreatePartner(user.UserChannelCode);
                                 partnerType = partner.PartnerType.ToString();
+                                bankName = partner.BankName;
+                                accountName = partner.AccountName;
+                                accountNumber = partner.AccountNumber;
                                 if (partnerType == PartnerType.InternalDeliveryPartner.ToString())
                                 {
                                     user.IsVerified = true;
@@ -841,12 +847,16 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             return new ServiceResponse<JObject>
                             {
                                 VehicleType = vehicle,
+                                VehicleDetails = vehicleDetails,
                                 Object = jObject,
                                 ReferrerCode = user.Referrercode,
                                 AverageRatings = user.AverageRatings,
                                 IsVerified = user.IsVerified,
                                 PartnerType = partnerType,
-                                IsEligible = (bool) user.IsEligible
+                                IsEligible = (bool) user.IsEligible,
+                                BankName = bankName,
+                                AccountName = accountName,
+                                AccountNumber = accountNumber
                             };
                         }
                     }
@@ -970,6 +980,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpPost]
+        [Route("createMultipleShipments")]
+        public async Task<IServiceResponse<object>> CreateMultipleShipments(NewPreShipmentMobileDTO PreshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var PreshipMentMobile = await _portalService.AddMultiplePreShipmentMobile(PreshipmentMobile);
+
+                return new ServiceResponse<object>
+                {
+                    Object = PreshipMentMobile
+                };
+            });
+        }
+
         [HttpGet]
         [Route("getStation_s")]
         public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetStations()
@@ -1010,6 +1035,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 var Price = await _portalService.GetPrice(PreshipmentMobile);
 
                 return new ServiceResponse<MobilePriceDTO>
+                {
+                    Object = Price,
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("getPriceforMultipleShipments")]
+        public async Task<IServiceResponse<MultipleMobilePriceDTO>> GetPriceForMultipleShipments(NewPreShipmentMobileDTO PreshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var Price = await _portalService.GetPriceForMultipleShipments(PreshipmentMobile);
+
+                return new ServiceResponse<MultipleMobilePriceDTO>
                 {
                     Object = Price,
                 };
@@ -1195,14 +1235,29 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
         [HttpPost]
         [Route("resolvedispute")]
         public async Task<object> ResolveDispute(PreShipmentMobileDTO shipment)
-
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var flag = await _portalService.ResolveDisputeForMobile(shipment);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("multipleshipmentresolvedispute")]
+        public async Task<object> ResolveDisputeForMultipleShipment(PreShipmentMobileDTO shipment)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _portalService.ResolveDisputeForMultipleShipment(shipment);
 
                 return new ServiceResponse<object>
                 {
@@ -1318,11 +1373,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("verifypartnerdetails")]
-        public async Task<IServiceResponse<bool>> VerifyPartnerDetails(PartnerDTO partner)
+        public async Task<IServiceResponse<bool>> VerifyPartnerDetails(PartnerDTO partnerDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var response = await _portalService.VerifyPartnerDetails(partner);
+                var response = await _portalService.VerifyPartnerDetails(partnerDto);
                 return new ServiceResponse<bool>
                 {
                     Object = response
