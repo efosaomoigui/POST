@@ -1419,12 +1419,16 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               ReceiverLocation = new LocationDTO
                                                               {
                                                                   Longitude = r.ReceiverLocation.Longitude,
-                                                                  Latitude = r.ReceiverLocation.Latitude
+                                                                  Latitude = r.ReceiverLocation.Latitude,
+                                                                  Name = r.ReceiverLocation.Name,
+                                                                  FormattedAddress = r.ReceiverLocation.FormattedAddress
                                                               },
                                                               SenderLocation = new LocationDTO
                                                               {
                                                                   Longitude = r.SenderLocation.Longitude,
-                                                                  Latitude = r.SenderLocation.Latitude
+                                                                  Latitude = r.SenderLocation.Latitude,
+                                                                  Name = r.ReceiverLocation.Name,
+                                                                  FormattedAddress = r.ReceiverLocation.FormattedAddress
                                                               }
                                                           }).OrderByDescending(x => x.DateCreated).Take(20).ToList();
 
