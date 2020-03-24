@@ -173,7 +173,6 @@
     <Compile Include="Domain\GeneralLedger.cs" />
     <Compile Include="Domain\GiglgoStation.cs" />
     <Compile Include="Domain\GIGLSContext.cs" />
-    <Compile Include="Domain\GroupCodeNumber.cs" />
     <Compile Include="Domain\GroupCodeWaybillMapping.cs" />
     <Compile Include="Domain\GroupWaybillNumber.cs" />
     <Compile Include="Domain\GroupWaybillNumberMapping.cs" />
@@ -395,7 +394,6 @@
     <Compile Include="DTO\Shipments\DemurrageDTO.cs" />
     <Compile Include="DTO\Shipments\FilterOptionsDto.cs" />
     <Compile Include="DTO\Shipments\GIGGoDashboardDTO.cs" />
-    <Compile Include="DTO\Shipments\GroupCodeNumberDTO.cs" />
     <Compile Include="DTO\Shipments\GroupCodeWaybillMappingDTO.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberDTO.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberMappingDTO.cs" />
@@ -611,7 +609,6 @@
     <Compile Include="IRepositories\ShipmentScan\IMobileScanStatusRepository.cs" />
     <Compile Include="IRepositories\ShipmentScan\IScanStatusRepository.cs" />
     <Compile Include="IRepositories\Shipments\IDemurrageRepository.cs" />
-    <Compile Include="IRepositories\Shipments\IGroupCodeNumberRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupCodeWaybillMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberRepository.cs" />
@@ -755,7 +752,6 @@
     <Compile Include="IServices\ServiceCentres\IUserServiceCentreMappingService.cs" />
     <Compile Include="IServices\ShipmentScan\IMobileScanStatusService.cs" />
     <Compile Include="IServices\ShipmentScan\IScanStatusService.cs" />
-    <Compile Include="IServices\Shipments\IGroupCodeNumberService.cs" />
     <Compile Include="IServices\Shipments\IGroupCodeWaybillMappingService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberMappingService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberService.cs" />

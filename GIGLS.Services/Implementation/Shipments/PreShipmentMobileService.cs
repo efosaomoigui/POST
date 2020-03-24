@@ -666,8 +666,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var groupCode = await GenerateGroupCode(gigGOServiceCenter.Code);
             await MappingWaybillNumbersToGroupCode(groupCode, waybillList);
-            var ad = new { groupCodeNumber = groupCode };
-            listOfWaybills.Add(ad);
+
+            var deliveryCode = new { groupCodeNumber = groupCode };
+
+            listOfWaybills.Add(deliveryCode);
             return listOfWaybills;
         }
 
@@ -685,23 +687,6 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //Get GroupCode Details
-                var groupCodeObj = await _uow.GroupCodeNumber.GetAsync(x => x.GroupCode.Equals(groupCode));
-
-                if (groupCodeObj == null)
-                {
-                    var newGroupCode = new GroupCodeNumber
-                    {
-                        GroupCode = groupCode,
-                        IsActive = true,
-                    };
-                    _uow.GroupCodeNumber.Add(newGroupCode);
-                }
-                else
-                {
-                    throw new GenericException("Error: The Group Code already exists.");
-                }
-
                 List<GroupCodeWaybillMapping> groupCodeNumberMapping = new List<GroupCodeWaybillMapping>();
 
                 //convert the list to HashSet to remove duplicate

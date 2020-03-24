@@ -179,7 +179,6 @@ namespace GIGLS.Core
 
         IGiglgoStationRepository GiglgoStation { get; set; }
         IFleetPartnerRepository FleetPartner { get; set; }
-        IGroupCodeNumberRepository GroupCodeNumber { get; set; }
         IGroupCodeWaybillMappingRepository GroupCodeWaybillMapping { get; set; }
 
         int Complete();

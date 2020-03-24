@@ -275,7 +275,6 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<ShipmentHash> ShipmentHash { get; set; }
         public DbSet<GiglgoStation> GiglgoStation { get; set; }
 
-        public DbSet<GroupCodeNumber> GroupCodeNumber { get; set; }
         public DbSet<GroupCodeWaybillMapping> GroupCodeWaybillMapping { get; set; }
 
 
