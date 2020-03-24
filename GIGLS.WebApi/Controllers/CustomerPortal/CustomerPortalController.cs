@@ -1361,7 +1361,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 }
                 else
                 {
-                    throw new GenericException("Operation could not be completed");
+                    throw new GenericException("Information does not exist, kindly provide correct email");
                 }
 
                 return new ServiceResponse<bool>
