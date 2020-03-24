@@ -18,5 +18,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             _context = context;
         }
 
+        public async Task<string> GetGroupCode(string waybill)
+        {
+            var groupwaybillMapping = _context.GroupCodeWaybillMapping.Where(x => x.WaybillNumber == waybill).FirstOrDefault();
+            var groupCode = groupwaybillMapping.GroupCodeNumber;
+
+            return groupCode;
+        }
+
     }
 }

@@ -10,6 +10,6 @@ namespace GIGLS.Core.IRepositories.Shipments
 {
     public interface IGroupCodeWaybillMappingRepository : IRepository<GroupCodeWaybillMapping>
     {
-        
+        Task<string> GetGroupCode(string waybill);
     }
 }
