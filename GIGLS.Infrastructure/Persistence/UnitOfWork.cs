@@ -454,6 +454,12 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IFleetPartnerRepository FleetPartner { get; set; }
 
+        [Inject]
+        public IGroupCodeNumberRepository GroupCodeNumber { get; set; }
+
+        [Inject]
+        public IGroupCodeWaybillMappingRepository GroupCodeWaybillMapping { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

@@ -62,6 +62,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IPartnerService _partnerService;
         private readonly ICustomerService _customerService;
         private readonly IGiglgoStationService _giglgoStationService;
+        private readonly IGroupWaybillNumberService _groupWaybillNumberService;
 
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, IDeliveryOptionService deliveryService,
@@ -70,7 +71,8 @@ namespace GIGLS.Services.Implementation.Shipments
             IUserService userService, ISpecialDomesticPackageService specialdomesticpackageservice, IMobileShipmentTrackingService mobiletrackingservice,
             IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice,
             IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMobileRatingService mobileratingService, IMessageSenderService messageSenderService,
-            IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService, IGiglgoStationService giglgoStationService)
+            IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService,
+            IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -97,7 +99,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _partnerService = partnerService;
             _customerService = customerService;
             _giglgoStationService = giglgoStationService;
-
+            _groupWaybillNumberService = groupWaybillNumberService;
 
 
             MapperConfig.Initialize();
@@ -597,6 +599,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var individualPickupPrice = pickupValue / numberOfReceiver;
 
             var listOfWaybills = new List<object>();
+            var waybillList = new List<string>();
 
             foreach (var receiver in preShipmentDTO)
             {
@@ -654,11 +657,76 @@ namespace GIGLS.Services.Implementation.Shipments
                     ShipmentScanStatus = ShipmentScanStatus.MCRT
                 });
 
+                waybillList.Add(newPreShipment.Waybill);
+                
                 var result = new { waybill = newPreShipment.Waybill, Zone = newPreShipment.ZoneMapping };
 
                 listOfWaybills.Add(result);
             }
+
+            var groupCode = await GenerateGroupCode(gigGOServiceCenter.Code);
+            await MappingWaybillNumbersToGroupCode(groupCode, waybillList);
+            var ad = new { groupCodeNumber = groupCode };
+            listOfWaybills.Add(ad);
             return listOfWaybills;
+        }
+
+        //Generate GroupCode
+        private async Task<string> GenerateGroupCode(string serviceCenterCode)
+        {
+            var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
+            var groupCode = await _groupWaybillNumberService.GenerateGroupWaybillNumber(serviceCenterCode);
+
+            return groupCode;
+        }
+
+        //map waybillNumber to groupCode
+        private async Task MappingWaybillNumbersToGroupCode(string groupCode, List<string> waybillNumberList)
+        {
+            try
+            {
+                //Get GroupCode Details
+                var groupCodeObj = await _uow.GroupCodeNumber.GetAsync(x => x.GroupCode.Equals(groupCode));
+
+                if (groupCodeObj == null)
+                {
+                    var newGroupCode = new GroupCodeNumber
+                    {
+                        GroupCode = groupCode,
+                        IsActive = true,
+                    };
+                    _uow.GroupCodeNumber.Add(newGroupCode);
+                }
+                else
+                {
+                    throw new GenericException("Error: The Group Code already exists.");
+                }
+
+                List<GroupCodeWaybillMapping> groupCodeNumberMapping = new List<GroupCodeWaybillMapping>();
+
+                //convert the list to HashSet to remove duplicate
+                var newWaybillNumberList = new HashSet<string>(waybillNumberList);
+
+                //Get All Waybills that need to be grouped
+                foreach (var waybill in newWaybillNumberList)
+                {
+                    //Add new Mapping
+                    var newMapping = new GroupCodeWaybillMapping
+                    {
+                        GroupCodeNumber = groupCode,
+                        WaybillNumber = waybill,
+                        IsActive = true,
+                        DateMapped = DateTime.Now,
+                    };
+                    groupCodeNumberMapping.Add(newMapping);
+                }
+                _uow.GroupCodeWaybillMapping.AddRange(groupCodeNumberMapping);
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
