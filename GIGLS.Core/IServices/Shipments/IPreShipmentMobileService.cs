@@ -61,6 +61,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<object>> CreateMobileShipment(NewPreShipmentMobileDTO newPreShipment);
         Task<MultipleMobilePriceDTO> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipmentItemMobileDTO);
         Task<object> ResolveDisputeForMultipleShipments(PreShipmentMobileDTO preShipment);
-
+        Task<GroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCodeNumber);
     }
 }

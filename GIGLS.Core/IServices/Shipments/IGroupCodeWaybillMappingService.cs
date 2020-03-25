@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GIGLS.Core.DTO.Shipments;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,6 @@ namespace GIGLS.Core.IServices.Shipments
 {
     public interface IGroupCodeWaybillMappingService : IServiceDependencyMarker
     {
+        Task<GroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCodeNumber);
     }
 }

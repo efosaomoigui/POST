@@ -63,6 +63,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly ICustomerService _customerService;
         private readonly IGiglgoStationService _giglgoStationService;
         private readonly IGroupWaybillNumberService _groupWaybillNumberService;
+        private readonly IGroupCodeWaybillMappingService _groupCodeWaybillMappingService;
 
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, IDeliveryOptionService deliveryService,
@@ -72,7 +73,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice,
             IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMobileRatingService mobileratingService, IMessageSenderService messageSenderService,
             IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService,
-            IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService)
+            IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService, IGroupCodeWaybillMappingService groupCodeWaybillMappingService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -100,7 +101,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _customerService = customerService;
             _giglgoStationService = giglgoStationService;
             _groupWaybillNumberService = groupWaybillNumberService;
-
+            _groupCodeWaybillMappingService = groupCodeWaybillMappingService;
 
             MapperConfig.Initialize();
         }
@@ -664,8 +665,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 listOfWaybills.Add(result);
             }
 
-            var groupCode = await GenerateGroupCode(gigGOServiceCenter.Code);
-            await MappingWaybillNumbersToGroupCode(groupCode, waybillList);
+            var groupCode = await MappingWaybillNumbersToGroupCode(gigGOServiceCenter.Code, waybillList);
 
             var deliveryCode = new { groupCodeNumber = groupCode };
 
@@ -673,20 +673,13 @@ namespace GIGLS.Services.Implementation.Shipments
             return listOfWaybills;
         }
 
-        //Generate GroupCode
-        private async Task<string> GenerateGroupCode(string serviceCenterCode)
-        {
-            var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
-            var groupCode = await _groupWaybillNumberService.GenerateGroupWaybillNumber(serviceCenterCode);
-
-            return groupCode;
-        }
-
         //map waybillNumber to groupCode
-        private async Task MappingWaybillNumbersToGroupCode(string groupCode, List<string> waybillNumberList)
+        private async Task<string> MappingWaybillNumbersToGroupCode(string serviceCenterCode, List<string> waybillNumberList)
         {
             try
             {
+                var groupCode = await _groupWaybillNumberService.GenerateGroupWaybillNumber(serviceCenterCode);
+
                 List<GroupCodeWaybillMapping> groupCodeNumberMapping = new List<GroupCodeWaybillMapping>();
 
                 //convert the list to HashSet to remove duplicate
@@ -707,11 +700,21 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 _uow.GroupCodeWaybillMapping.AddRange(groupCodeNumberMapping);
                 _uow.Complete();
+
+                return groupCode;
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        //Get Waybill and Details of A GroupCode
+        public async Task<GroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCodeNumber)
+        {
+            var groupCodeWaybillMapping = await _groupCodeWaybillMappingService.GetWaybillNumbersInGroup(groupCodeNumber);
+
+            return groupCodeWaybillMapping;
         }
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)

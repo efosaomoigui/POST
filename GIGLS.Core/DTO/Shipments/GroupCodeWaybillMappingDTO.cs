@@ -15,7 +15,9 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsActive { get; set; }
 
         public string GroupCodeNumber { get; set; }
-
         public string WaybillNumber { get; set; }
+
+        public List<string> WaybillNumbers { get; set; }
+        public List<PreShipmentMobileDTO> PreShipmentMobile { get; set; }
     }
 }

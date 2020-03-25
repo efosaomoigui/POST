@@ -76,6 +76,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IAdminReportService _adminReportService;
         public readonly IIndividualCustomerService _individualCustomerService;
         public readonly IPartnerTransactionsService _partnertransactionservice;
+        private readonly IGroupCodeWaybillMappingService _groupCodeWaybillMappingService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
@@ -84,7 +85,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService, 
-            ICountryService countryService, IAdminReportService adminReportService, IIndividualCustomerService individualCustomerService, IPartnerTransactionsService partnertransactionservice)
+            ICountryService countryService, IAdminReportService adminReportService, IIndividualCustomerService individualCustomerService, 
+            IPartnerTransactionsService partnertransactionservice, IGroupCodeWaybillMappingService groupCodeWaybillMappingService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -110,6 +112,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _adminReportService = adminReportService;
             _individualCustomerService = individualCustomerService;
             _partnertransactionservice = partnertransactionservice;
+            _groupCodeWaybillMappingService = groupCodeWaybillMappingService;
             MapperConfig.Initialize();
         }
 
@@ -1477,6 +1480,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<MultipleMobilePriceDTO> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipment)
         {
             return await _preShipmentMobileService.GetPriceForMultipleShipments(preShipment);
+        }
+        public async Task<GroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCode)
+        {
+            return await _groupCodeWaybillMappingService.GetWaybillNumbersInGroup(groupCode);
         }
         public async Task<WalletDTO> GetWalletBalance()
         {

@@ -1190,6 +1190,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpGet]
+        [Route("getgroupcodedetails/{groupCode}")]
+        public async Task<IServiceResponse<GroupCodeWaybillMappingDTO>> GetWaybillDetailsInGroup(string groupCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var details = await _portalService.GetWaybillNumbersInGroup(groupCode);
+
+                return new ServiceResponse<GroupCodeWaybillMappingDTO>
+                {
+                    Object = details
+                };
+            });
+        }
+
 
         [HttpPost]
         [Route("updatepreshipmentmobile")]
