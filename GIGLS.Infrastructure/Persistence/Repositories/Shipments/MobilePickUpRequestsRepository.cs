@@ -85,7 +85,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                               {
                                                   DateCreated = mobilepickuprequest.DateCreated,
                                                   Waybill = mobilepickuprequest.Waybill,
-                                                  GroupCodeNumber = _context.GroupCodeWaybillMapping.Where(x => x.WaybillNumber == mobilepickuprequest.Waybill)
+                                                  GroupCodeNumber = _context.MobileGroupCodeWaybillMapping.Where(x => x.WaybillNumber == mobilepickuprequest.Waybill)
                                                                 .Select(x => x.GroupCodeNumber).FirstOrDefault(),
                                                   Status = mobilepickuprequest.Status,
                                                   PreShipment = _context.PresShipmentMobile.Where(c => c.Waybill == mobilepickuprequest.Waybill).Select(x => new PreShipmentMobileDTO

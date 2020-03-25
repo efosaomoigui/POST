@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
-    public class GroupCodeWaybillMappingService : IGroupCodeWaybillMappingService
+    public class MobileGroupCodeWaybillMappingService : IMobileGroupCodeWaybillMappingService
     {
         private readonly IUnitOfWork _uow;
         private readonly IPreShipmentMobileService _preShipmentMobileService;
 
-        public GroupCodeWaybillMappingService(IUnitOfWork uow, IPreShipmentMobileService preShipmentMobileService)
+        public MobileGroupCodeWaybillMappingService(IUnitOfWork uow, IPreShipmentMobileService preShipmentMobileService)
         {
             _uow = uow;
             _preShipmentMobileService = preShipmentMobileService;
@@ -23,11 +23,11 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Get WayBillNumbers In Group
-        public async Task<GroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup (string groupCodeNumber)
+        public async Task<MobileGroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup (string groupCodeNumber)
         {
             try
             {
-                var groupList = await _uow.GroupCodeWaybillMapping.FindAsync(x => x.GroupCodeNumber == groupCodeNumber);
+                var groupList = await _uow.MobileGroupCodeWaybillMapping.FindAsync(x => x.GroupCodeNumber == groupCodeNumber);
                 var preShipmentList = new List<PreShipmentMobileDTO>();
                 var waybillList = new List<string>();
                 if(groupList != null)
@@ -38,9 +38,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         preShipmentList.Add(preShipmentDTO);
                         waybillList.Add(preShipmentDTO.Waybill);
                     }
-                    var groupCodeWaybillMappingDTO = new GroupCodeWaybillMappingDTO
+                    var groupCodeWaybillMappingDTO = new MobileGroupCodeWaybillMappingDTO
                     {
                         GroupCodeNumber = groupCodeNumber,
+                        DateMapped = groupList.Select(x => x.DateMapped).FirstOrDefault(),
                         PreShipmentMobile = preShipmentList,
                         WaybillNumbers = waybillList
                     };

@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.IServices.Shipments
 {
-    public interface IGroupCodeWaybillMappingService : IServiceDependencyMarker
+    public interface IMobileGroupCodeWaybillMappingService : IServiceDependencyMarker
     {
-        Task<GroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCodeNumber);
+        Task<MobileGroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCodeNumber);
     }
 }

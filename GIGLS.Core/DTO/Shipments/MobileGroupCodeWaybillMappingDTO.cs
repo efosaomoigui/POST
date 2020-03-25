@@ -8,11 +8,10 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Core.DTO.Shipments
 {
-    public class GroupCodeWaybillMappingDTO : BaseDomainDTO
+    public class MobileGroupCodeWaybillMappingDTO : BaseDomainDTO
     {
-        public int GroupCodeWaybillMappingId { get; set; }
+        public int MobileGroupCodeWaybillMappingId { get; set; }
         public DateTime DateMapped { get; set; }
-        public bool IsActive { get; set; }
 
         public string GroupCodeNumber { get; set; }
         public string WaybillNumber { get; set; }

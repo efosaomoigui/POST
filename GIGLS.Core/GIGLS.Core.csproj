@@ -173,7 +173,7 @@
     <Compile Include="Domain\GeneralLedger.cs" />
     <Compile Include="Domain\GiglgoStation.cs" />
     <Compile Include="Domain\GIGLSContext.cs" />
-    <Compile Include="Domain\GroupCodeWaybillMapping.cs" />
+    <Compile Include="Domain\MobileGroupCodeWaybillMapping.cs" />
     <Compile Include="Domain\GroupWaybillNumber.cs" />
     <Compile Include="Domain\GroupWaybillNumberMapping.cs" />
     <Compile Include="Domain\Haulage.cs" />
@@ -394,7 +394,7 @@
     <Compile Include="DTO\Shipments\DemurrageDTO.cs" />
     <Compile Include="DTO\Shipments\FilterOptionsDto.cs" />
     <Compile Include="DTO\Shipments\GIGGoDashboardDTO.cs" />
-    <Compile Include="DTO\Shipments\GroupCodeWaybillMappingDTO.cs" />
+    <Compile Include="DTO\Shipments\MobileGroupCodeWaybillMappingDTO.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberDTO.cs" />
     <Compile Include="DTO\Shipments\GroupWaybillNumberMappingDTO.cs" />
     <Compile Include="DTO\Shipments\HUBManifestWaybillMappingDTO.cs" />
@@ -609,7 +609,7 @@
     <Compile Include="IRepositories\ShipmentScan\IMobileScanStatusRepository.cs" />
     <Compile Include="IRepositories\ShipmentScan\IScanStatusRepository.cs" />
     <Compile Include="IRepositories\Shipments\IDemurrageRepository.cs" />
-    <Compile Include="IRepositories\Shipments\IGroupCodeWaybillMappingRepository.cs" />
+    <Compile Include="IRepositories\Shipments\IMobileGroupCodeWaybillMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberMappingRepository.cs" />
     <Compile Include="IRepositories\Shipments\IGroupWaybillNumberRepository.cs" />
     <Compile Include="IRepositories\Shipments\IHUBManifestWaybillMappingRepository.cs" />
@@ -752,7 +752,7 @@
     <Compile Include="IServices\ServiceCentres\IUserServiceCentreMappingService.cs" />
     <Compile Include="IServices\ShipmentScan\IMobileScanStatusService.cs" />
     <Compile Include="IServices\ShipmentScan\IScanStatusService.cs" />
-    <Compile Include="IServices\Shipments\IGroupCodeWaybillMappingService.cs" />
+    <Compile Include="IServices\Shipments\IMobileGroupCodeWaybillMappingService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberMappingService.cs" />
     <Compile Include="IServices\Shipments\IGroupWaybillNumberService.cs" />
     <Compile Include="IServices\Shipments\IHUBManifestWaybillMappingService.cs" />

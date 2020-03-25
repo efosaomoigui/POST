@@ -132,6 +132,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<object>> AddMultiplePreShipmentMobile(NewPreShipmentMobileDTO preShipment);
         Task<MultipleMobilePriceDTO> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipment);
         Task<object> ResolveDisputeForMultipleShipment(PreShipmentMobileDTO preShipment);
-        Task<GroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCode);
+        Task<MobileGroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCode);
     }
 }

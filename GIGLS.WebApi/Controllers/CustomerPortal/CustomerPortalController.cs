@@ -1192,13 +1192,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("getgroupcodedetails/{groupCode}")]
-        public async Task<IServiceResponse<GroupCodeWaybillMappingDTO>> GetWaybillDetailsInGroup(string groupCode)
+        public async Task<IServiceResponse<MobileGroupCodeWaybillMappingDTO>> GetWaybillDetailsInGroup(string groupCode)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var details = await _portalService.GetWaybillNumbersInGroup(groupCode);
 
-                return new ServiceResponse<GroupCodeWaybillMappingDTO>
+                return new ServiceResponse<MobileGroupCodeWaybillMappingDTO>
                 {
                     Object = details
                 };

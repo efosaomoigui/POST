@@ -4,11 +4,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GIGL.GIGLS.Core.Domain
 {
-    public class GroupCodeWaybillMapping : BaseDomain
+    public class MobileGroupCodeWaybillMapping : BaseDomain
     {
-        public int GroupCodeWaybillMappingId { get; set; }
+        public int MobileGroupCodeWaybillMappingId { get; set; }
         public DateTime DateMapped { get; set; }
-        public bool IsActive { get; set; }
 
         [MaxLength(100), MinLength(5)]
         public string GroupCodeNumber { get; set; }

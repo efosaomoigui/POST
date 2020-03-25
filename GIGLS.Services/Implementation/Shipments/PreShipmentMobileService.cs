@@ -678,7 +678,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var groupCode = await _groupWaybillNumberService.GenerateGroupWaybillNumber(serviceCenterCode);
 
-                List<GroupCodeWaybillMapping> groupCodeNumberMapping = new List<GroupCodeWaybillMapping>();
+                var groupCodeNumberMapping = new List<MobileGroupCodeWaybillMapping>();
 
                 //convert the list to HashSet to remove duplicate
                 var newWaybillNumberList = new HashSet<string>(waybillNumberList);
@@ -687,16 +687,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 foreach (var waybill in newWaybillNumberList)
                 {
                     //Add new Mapping
-                    var newMapping = new GroupCodeWaybillMapping
+                    var newMapping = new MobileGroupCodeWaybillMapping
                     {
                         GroupCodeNumber = groupCode,
                         WaybillNumber = waybill,
-                        IsActive = true,
                         DateMapped = DateTime.Now,
                     };
                     groupCodeNumberMapping.Add(newMapping);
                 }
-                _uow.GroupCodeWaybillMapping.AddRange(groupCodeNumberMapping);
+                _uow.MobileGroupCodeWaybillMapping.AddRange(groupCodeNumberMapping);
                 _uow.Complete();
 
                 return groupCode;
@@ -1418,7 +1417,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                var groupCode = await _uow.GroupCodeWaybillMapping.GetGroupCode(waybill);
+                var groupCode = await _uow.MobileGroupCodeWaybillMapping.GetGroupCode(waybill);
                 if (groupCode != null)
                 {
                     Shipmentdto.GroupCodeNumber = groupCode;
