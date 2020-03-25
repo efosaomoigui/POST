@@ -1192,8 +1192,23 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpGet]
-        [Route("getgroupcodedetails/{groupCode}")]
+        [Route("getgroupcodewaybilldetails/{groupCode}")]
         public async Task<IServiceResponse<MobileGroupCodeWaybillMappingDTO>> GetWaybillDetailsInGroup(string groupCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var details = await _portalService.GetWaybillDetailsInGroup(groupCode);
+
+                return new ServiceResponse<MobileGroupCodeWaybillMappingDTO>
+                {
+                    Object = details
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getwaybillsingroupcode/{groupCode}")]
+        public async Task<IServiceResponse<MobileGroupCodeWaybillMappingDTO>> GetWaybillsInGroup(string groupCode)
         {
             return await HandleApiOperationAsync(async () =>
             {

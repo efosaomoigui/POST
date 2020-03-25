@@ -9,6 +9,7 @@ namespace GIGLS.Core.IServices.Shipments
 {
     public interface IMobileGroupCodeWaybillMappingService : IServiceDependencyMarker
     {
+        Task<MobileGroupCodeWaybillMappingDTO> GetWaybillDetailsInGroup(string groupCodeNumber);
         Task<MobileGroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCodeNumber);
     }
 }

@@ -22,27 +22,60 @@ namespace GIGLS.Services.Implementation.Shipments
             MapperConfig.Initialize();
         }
 
-        //Get WayBillNumbers In Group
-        public async Task<MobileGroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup (string groupCodeNumber)
+        //Get WayBillDetails In Group
+        public async Task<MobileGroupCodeWaybillMappingDTO> GetWaybillDetailsInGroup (string groupCodeNumber)
         {
             try
             {
                 var groupList = await _uow.MobileGroupCodeWaybillMapping.FindAsync(x => x.GroupCodeNumber == groupCodeNumber);
                 var preShipmentList = new List<PreShipmentMobileDTO>();
-                var waybillList = new List<string>();
+               
                 if(groupList != null)
                 {
                     foreach(var item in groupList)
                     {
                         var preShipmentDTO = await _preShipmentMobileService.GetPreShipmentDetail(item.WaybillNumber);
                         preShipmentList.Add(preShipmentDTO);
-                        waybillList.Add(preShipmentDTO.Waybill);
                     }
+
                     var groupCodeWaybillMappingDTO = new MobileGroupCodeWaybillMappingDTO
                     {
                         GroupCodeNumber = groupCodeNumber,
                         DateMapped = groupList.Select(x => x.DateMapped).FirstOrDefault(),
                         PreShipmentMobile = preShipmentList,
+                    };
+
+                    return groupCodeWaybillMappingDTO;
+                }
+                else
+                {
+                    throw new GenericException($"No GroupCode exists for this : {groupCodeNumber}");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //Get Only WayBillNumbers In Group
+        public async Task<MobileGroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCodeNumber)
+        {
+            try
+            {
+                var groupList = await _uow.MobileGroupCodeWaybillMapping.FindAsync(x => x.GroupCodeNumber == groupCodeNumber);
+                var waybillList = new List<string>();
+
+                if (groupList != null)
+                {
+                    foreach (var item in groupList)
+                    {
+                        waybillList.Add(item.WaybillNumber);
+                    }
+                    var groupCodeWaybillMappingDTO = new MobileGroupCodeWaybillMappingDTO
+                    {
+                        GroupCodeNumber = groupCodeNumber,
+                        DateMapped = groupList.Select(x => x.DateMapped).FirstOrDefault(),
                         WaybillNumbers = waybillList
                     };
                     return groupCodeWaybillMappingDTO;

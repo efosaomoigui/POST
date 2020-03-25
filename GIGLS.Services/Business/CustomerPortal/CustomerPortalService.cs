@@ -1482,6 +1482,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.GetPriceForMultipleShipments(preShipment);
         }
+        public async Task<MobileGroupCodeWaybillMappingDTO> GetWaybillDetailsInGroup(string groupCode)
+        {
+            return await _groupCodeWaybillMappingService.GetWaybillDetailsInGroup(groupCode);
+        }
         public async Task<MobileGroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCode)
         {
             return await _groupCodeWaybillMappingService.GetWaybillNumbersInGroup(groupCode);
