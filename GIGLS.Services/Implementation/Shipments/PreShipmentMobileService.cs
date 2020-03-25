@@ -63,8 +63,6 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly ICustomerService _customerService;
         private readonly IGiglgoStationService _giglgoStationService;
         private readonly IGroupWaybillNumberService _groupWaybillNumberService;
-        private readonly IGroupCodeWaybillMappingService _groupCodeWaybillMappingService;
-
 
         public PreShipmentMobileService(IUnitOfWork uow, IShipmentService shipmentService, IDeliveryOptionService deliveryService,
             IServiceCentreService centreService, IUserServiceCentreMappingService userServiceCentre, INumberGeneratorMonitorService numberGeneratorMonitorService,
@@ -73,7 +71,7 @@ namespace GIGLS.Services.Implementation.Shipments
             IMobilePickUpRequestsService mobilepickuprequestservice, IDomesticRouteZoneMapService domesticroutezonemapservice, ICategoryService categoryservice, ISubCategoryService subcategoryservice,
             IPartnerTransactionsService partnertransactionservice, IGlobalPropertyService globalPropertyService, IMobileRatingService mobileratingService, IMessageSenderService messageSenderService,
             IHaulageService haulageService, IHaulageDistanceMappingService haulageDistanceMappingService, IPartnerService partnerService, ICustomerService customerService,
-            IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService, IGroupCodeWaybillMappingService groupCodeWaybillMappingService)
+            IGiglgoStationService giglgoStationService, IGroupWaybillNumberService groupWaybillNumberService)
         {
             _uow = uow;
             _shipmentService = shipmentService;
@@ -101,7 +99,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _customerService = customerService;
             _giglgoStationService = giglgoStationService;
             _groupWaybillNumberService = groupWaybillNumberService;
-            _groupCodeWaybillMappingService = groupCodeWaybillMappingService;
+            //_groupCodeWaybillMappingService = groupCodeWaybillMappingService;
 
             MapperConfig.Initialize();
         }
@@ -707,14 +705,6 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
-        }
-
-        //Get Waybill and Details of A GroupCode
-        public async Task<GroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCodeNumber)
-        {
-            var groupCodeWaybillMapping = await _groupCodeWaybillMappingService.GetWaybillNumbersInGroup(groupCodeNumber);
-
-            return groupCodeWaybillMapping;
         }
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
