@@ -47,6 +47,7 @@ using GIGLS.Core.IServices.Partnership;
 using System.Configuration;
 using System.Security.Cryptography;
 using System.Text;
+using GIGLS.Core.DTO.Utility;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -1461,7 +1462,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _preShipmentMobileService.AddPreShipmentMobile(preShipment);
         }
 
-        public async Task<List<object>> AddMultiplePreShipmentMobile(NewPreShipmentMobileDTO preShipment)
+        public async Task<MultipleShipmentOutput> AddMultiplePreShipmentMobile(NewPreShipmentMobileDTO preShipment)
         {
             return await _preShipmentMobileService.CreateMobileShipment(preShipment);
         }

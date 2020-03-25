@@ -1,10 +1,7 @@
 ﻿using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.IRepositories.Shipments;
 using GIGLS.Infrastructure.Persistence.Repository;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
@@ -20,11 +17,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 
         public async Task<string> GetGroupCode(string waybill)
         {
+            string groupCode =  null;
             var groupwaybillMapping = _context.MobileGroupCodeWaybillMapping.Where(x => x.WaybillNumber == waybill).FirstOrDefault();
-            var groupCode = groupwaybillMapping.GroupCodeNumber;
-
-            return groupCode;
+            if(groupwaybillMapping != null)
+            {
+                groupCode = groupwaybillMapping.GroupCodeNumber;
+            }
+            return await Task.FromResult(groupCode);
         }
-
     }
 }

@@ -13,6 +13,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.SLA;
 using GIGLS.Core.DTO.User;
+using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
@@ -129,7 +130,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<UserDTO> CheckDetailsForCustomerPortal(string user);
         Task<UserDTO> CheckDetailsForMobileScanner(string user);
         Task<bool> UpdateGIGGoShipmentStaus(MobilePickUpRequestsDTO mobilePickUpRequestsDTO);
-        Task<List<object>> AddMultiplePreShipmentMobile(NewPreShipmentMobileDTO preShipment);
+        Task<MultipleShipmentOutput> AddMultiplePreShipmentMobile(NewPreShipmentMobileDTO preShipment);
         Task<MultipleMobilePriceDTO> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipment);
         Task<object> ResolveDisputeForMultipleShipment(PreShipmentMobileDTO preShipment);
         Task<MobileGroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCode);

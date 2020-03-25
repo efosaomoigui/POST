@@ -34,6 +34,7 @@ using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Admin;
 using GIGLS.Core.Domain;
 using EfeAuthen.Models;
+using GIGLS.Core.DTO.Utility;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -982,15 +983,15 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("createMultipleShipments")]
-        public async Task<IServiceResponse<object>> CreateMultipleShipments(NewPreShipmentMobileDTO PreshipmentMobile)
+        public async Task<IServiceResponse<MultipleShipmentOutput>> CreateMultipleShipments(NewPreShipmentMobileDTO PreshipmentMobile)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var PreshipMentMobile = await _portalService.AddMultiplePreShipmentMobile(PreshipmentMobile);
+                var preshipMentMobile = await _portalService.AddMultiplePreShipmentMobile(PreshipmentMobile);
 
-                return new ServiceResponse<object>
+                return new ServiceResponse<MultipleShipmentOutput>
                 {
-                    Object = PreshipMentMobile
+                    Object = preshipMentMobile
                 };
             });
         }
