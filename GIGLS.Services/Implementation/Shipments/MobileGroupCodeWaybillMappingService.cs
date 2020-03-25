@@ -28,11 +28,12 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var groupList = await _uow.MobileGroupCodeWaybillMapping.FindAsync(x => x.GroupCodeNumber == groupCodeNumber);
-                var preShipmentList = new List<PreShipmentMobileDTO>();
-               
+                
                 if(groupList != null)
                 {
-                    foreach(var item in groupList)
+                    var preShipmentList = new List<PreShipmentMobileDTO>();
+
+                    foreach (var item in groupList)
                     {
                         var preShipmentDTO = await _preShipmentMobileService.GetPreShipmentDetail(item.WaybillNumber);
                         preShipmentList.Add(preShipmentDTO);
@@ -64,10 +65,11 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var groupList = await _uow.MobileGroupCodeWaybillMapping.FindAsync(x => x.GroupCodeNumber == groupCodeNumber);
-                var waybillList = new List<string>();
-
+                
                 if (groupList != null)
                 {
+                    var waybillList = new List<string>();
+
                     foreach (var item in groupList)
                     {
                         waybillList.Add(item.WaybillNumber);
