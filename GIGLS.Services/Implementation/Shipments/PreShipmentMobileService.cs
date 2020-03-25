@@ -1380,9 +1380,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     var partner = await _uow.MobilePickUpRequests.GetPartnerDetailsForAWaybill(waybill);
                     Shipmentdto.partnerDTO = partner;
-
-                    var groupCode = await _uow.GroupCodeWaybillMapping.GetGroupCode(waybill);
-                    Shipmentdto.GroupCodeNumber = groupCode;
                 }
                 else
                 {
@@ -1414,13 +1411,17 @@ namespace GIGLS.Services.Implementation.Shipments
                             Shipmentdto.CurrencyCode = country.CurrencyCode;
                             Shipmentdto.CurrencySymbol = country.CurrencySymbol;
                         }
-                        var groupCode = await _uow.GroupCodeWaybillMapping.GetGroupCode(waybill);
-                        Shipmentdto.GroupCodeNumber = groupCode;
                     }
                     else
                     {
                         throw new GenericException($"Shipment with waybill: {waybill} does not exist");
                     }
+                }
+
+                var groupCode = await _uow.GroupCodeWaybillMapping.GetGroupCode(waybill);
+                if (groupCode != null)
+                {
+                    Shipmentdto.GroupCodeNumber = groupCode;
                 }
 
                 return await Task.FromResult(Shipmentdto);
