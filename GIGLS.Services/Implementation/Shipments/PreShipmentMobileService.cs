@@ -2265,29 +2265,27 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //remove Commented code if nothing breaks
-                var CurrencyCode = "";
-                var CurrencySymbol = "";
+                string currencyCode = "";
+                string currencySymbol = "";
                 var user = await _userService.GetCurrentUserId();
-                //var transactions = await _uow.PartnerTransactions.FindAsync(s => s.UserId == user);
                 var transactions = await _uow.PartnerTransactions.GetPartnerTransactionByUser(user);
                 var partneruser = await _userService.GetUserById(user);
-                var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode);
-                //transactions = transactions.OrderByDescending(s => s.DateCreated);
-                //var TotalTransactions = Mapper.Map<List<PartnerTransactionsDTO>>(transactions);
-                var Country = await _uow.Country.GetAsync(s => s.CountryId == partneruser.UserActiveCountryId);
-                if (Country != null)
+                var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode);                
+                var country = await _uow.Country.GetAsync(s => s.CountryId == partneruser.UserActiveCountryId);
+                if (country != null)
                 {
-                    CurrencyCode = Country.CurrencyCode;
-                    CurrencySymbol = Country.CurrencySymbol;
+                    currencyCode = country.CurrencyCode;
+                    currencySymbol = country.CurrencySymbol;
                 }
+
                 var summary = new SummaryTransactionsDTO
                 {
-                    CurrencySymbol = CurrencySymbol,
-                    CurrencyCode = CurrencyCode,
+                    CurrencySymbol = currencySymbol,
+                    CurrencyCode = currencyCode,
                     WalletBalance = wallet.Balance,
                     Transactions = transactions
                 };
+
                 return summary;
             }
             catch (Exception)
@@ -2301,8 +2299,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var preshipmentmobilegrandtotal = await _uow.PreShipmentMobile.GetAsync(s => s.PreShipmentMobileId == preShipment.PreShipmentMobileId);
-                //var pickupPrice = preshipmentmobilegrandtotal.p
-
+                
                 if (preshipmentmobilegrandtotal.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobilegrandtotal.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString())
                 {
                     throw new GenericException("This Shipment cannot be placed in Dispute, because it has been" + " " + preshipmentmobilegrandtotal.shipmentstatus);
