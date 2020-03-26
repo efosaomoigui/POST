@@ -35,8 +35,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
             //Excluding It Test
             string[] testUserId = { "2932eb15-aa30-462c-89f0-7247670f504b", "ab3722d7-57f3-4e6e-a32d-1580315b7da6", "e67d50c2-953a-44b2-bbcd-c38fadef237f" };
            
-            var partnersTrans = Context.PartnerTransactions.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate
-                                && !testUserId.Contains(s.UserId)).AsQueryable();
+            var partnersTrans = Context.PartnerTransactions.AsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate
+                                && !testUserId.Contains(s.UserId));
 
             List<PartnerTransactionsDTO> partnerTransDTO = (from r in partnersTrans
                                                             select new PartnerTransactionsDTO()
@@ -51,7 +51,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
 
         public async Task<List<PartnerTransactionsDTO>> GetPartnerTransactionByUser(string userId)
         {
-            var partnersTrans = Context.PartnerTransactions.Where(s => s.UserId == userId).AsQueryable();
+            var partnersTrans = Context.PartnerTransactions.AsQueryable().Where(s => s.UserId == userId);
 
             List<PartnerTransactionsDTO> partnerTransDTO = (from r in partnersTrans
                                                             select new PartnerTransactionsDTO()
