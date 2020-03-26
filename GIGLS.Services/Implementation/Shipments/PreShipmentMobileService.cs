@@ -2265,14 +2265,16 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                //remove Commented code if nothing breaks
                 var CurrencyCode = "";
                 var CurrencySymbol = "";
                 var user = await _userService.GetCurrentUserId();
-                var transactions = await _uow.PartnerTransactions.FindAsync(s => s.UserId == user);
+                //var transactions = await _uow.PartnerTransactions.FindAsync(s => s.UserId == user);
+                var transactions = await _uow.PartnerTransactions.GetPartnerTransactionByUser(user);
                 var partneruser = await _userService.GetUserById(user);
                 var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partneruser.UserChannelCode);
-                transactions = transactions.OrderByDescending(s => s.DateCreated);
-                var TotalTransactions = Mapper.Map<List<PartnerTransactionsDTO>>(transactions);
+                //transactions = transactions.OrderByDescending(s => s.DateCreated);
+                //var TotalTransactions = Mapper.Map<List<PartnerTransactionsDTO>>(transactions);
                 var Country = await _uow.Country.GetAsync(s => s.CountryId == partneruser.UserActiveCountryId);
                 if (Country != null)
                 {
@@ -2284,7 +2286,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     CurrencySymbol = CurrencySymbol,
                     CurrencyCode = CurrencyCode,
                     WalletBalance = wallet.Balance,
-                    Transactions = TotalTransactions
+                    Transactions = transactions
                 };
                 return summary;
             }

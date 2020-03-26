@@ -48,7 +48,27 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
 
             return await Task.FromResult(partnerTransDTO.OrderByDescending(x => x.DateCreated).ToList());
         }
-        
+
+        public async Task<List<PartnerTransactionsDTO>> GetPartnerTransactionByUser(string userId)
+        {
+            var partnersTrans = Context.PartnerTransactions.Where(s => s.UserId == userId).AsQueryable();
+
+            List<PartnerTransactionsDTO> partnerTransDTO = (from r in partnersTrans
+                                                            select new PartnerTransactionsDTO()
+                                                            {
+                                                                Waybill = r.Waybill,
+                                                                AmountReceived = r.AmountReceived,
+                                                                Destination = r.Destination,
+                                                                Departure = r.Departure,
+                                                                DateCreated = r.DateCreated,
+                                                                DateModified = r.DateModified,
+                                                                MobileGroupCode = _context.MobileGroupCodeWaybillMapping.Where(x => x.WaybillNumber == r.Waybill).
+                                                                                    Select(d => d.GroupCodeNumber).FirstOrDefault()
+                                                            }).ToList();
+
+            return await Task.FromResult(partnerTransDTO.OrderByDescending(x => x.DateCreated).ToList());
+        }
+
         //Five Recent Transactions
         public async Task<List<FleetPartnerTransactionsDTO>> GetRecentFivePartnerTransactionsForFleet(string fleetPartnerCode)
         {
