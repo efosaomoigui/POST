@@ -39,4 +39,21 @@ namespace GIGLS.Core.DTO.Partnership
 
         public PreShipmentMobileDTO PreShipment { get; set; }
     }
+
+    public class ExternalPartnerTransactionsPaymentDTO : BaseDomainDTO
+    {
+        public int PartnerTransactionsID { get; set; }
+        public decimal Amount { get; set; }
+        public string Waybill { get; set; }
+
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Code { get; set; }
+        public string Email { get; set; }
+
+        public string CurrencySymbol { get; set; }
+        public string EnterprisePartner { get; set; }
+        public int Trips { get; set; }
+
+    }
 }
