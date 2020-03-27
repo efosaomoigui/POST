@@ -199,7 +199,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                  CurrencySymbol = country.CurrencySymbol,
                                  Email = partner.Email,
                                  AmountReceived = transaction.AmountReceived,
-                                 Trips = transaction.PartnerTransactionsID
+                                 Trips = transaction.PartnerTransactionsID,
+                                 BankName = partner.BankName,
+                                 AccountName = partner.AccountName,
+                                 AccountNumber = partner.AccountNumber
                              };
 
             return Task.FromResult(partnerDto.AsQueryable().AsNoTracking());
@@ -220,41 +223,14 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                  Trips = p.Count(),
                                  EnterprisePartner = p.FirstOrDefault().EnterprisePartner,
                                  FirstName = p.FirstOrDefault().FirstName,
-                                 LastName = p.FirstOrDefault().LastName
+                                 LastName = p.FirstOrDefault().LastName,
+                                 BankName = p.FirstOrDefault().BankName,
+                                 AccountName = p.FirstOrDefault().AccountName,
+                                 AccountNumber = p.FirstOrDefault().AccountNumber
                              };            
             return await partnerDto.OrderByDescending(s => s.Amount).AsNoTracking().ToListAsync();
         }
 
-
-        //public async Task<List<ExternalPartnerTransactionsPaymentDTO>> GetExternalPartnerTransactionsForPayment(ShipmentCollectionFilterCriteria filterCriteria)
-        //{
-        //    var queryDate = filterCriteria.getStartDateAndEndDate();
-        //    var startDate = queryDate.Item1;
-        //    var endDate = queryDate.Item2;
-
-        //    var partners = _context.Partners.AsQueryable().Where(s => s.PartnerType == Core.Enums.PartnerType.DeliveryPartner && s.IsActivated == true);
-
-        //    var partnerDto = from partner in partners
-        //                     join transaction in _context.PartnerTransactions on partner.UserId equals transaction.UserId
-        //                     join country in _context.Country on partner.UserActiveCountryId equals country.CountryId
-        //                     where transaction.DateCreated >= startDate && transaction.DateCreated < endDate && transaction.IsProcessed == false
-        //                     group transaction by partner.Email into x
-        //                     select new ExternalPartnerTransactionsPaymentDTO
-        //                     {
-        //                         //Waybill = transaction.Waybill,
-        //                         //DateCreated = transaction.DateCreated,
-        //                         //FirstName = partner.FirstName,
-        //                         //LastName = partner.LastName,
-        //                         //Code = partner.PartnerCode,
-        //                         Email = x.Key,
-        //                         Amount = x.Sum(a => a.AmountReceived),
-        //                         Trips = x.Count()
-        //                         //EnterprisePartner = _context.FleetPartner.Where(x => x.FleetPartnerCode == partner.FleetPartnerCode)
-        //                         //                   .Select(d => d.FirstName + " " + d.LastName).FirstOrDefault(),
-        //                         //CurrencySymbol = country.CurrencySymbol,
-        //                     };
-
-        //    return await Task.FromResult(partnerDto.OrderByDescending(s => s.Amount).ToList());
-        //}
+        
     }
 }

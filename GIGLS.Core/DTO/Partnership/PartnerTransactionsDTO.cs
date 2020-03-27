@@ -54,6 +54,9 @@ namespace GIGLS.Core.DTO.Partnership
         public string CurrencySymbol { get; set; }
         public string EnterprisePartner { get; set; }
         public int Trips { get; set; }
+        public string BankName { get; set; }
+        public string AccountName { get; set; }
+        public string AccountNumber { get; set; }
 
     }
 
@@ -69,6 +72,9 @@ namespace GIGLS.Core.DTO.Partnership
         public decimal AmountReceived { get; set; }
 
         public string EnterprisePartner { get; set; }
+        public string BankName { get; set; }
+        public string AccountName { get; set; }
+        public string AccountNumber { get; set; }
 
     }
 }
