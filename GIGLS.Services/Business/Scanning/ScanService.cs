@@ -821,7 +821,7 @@ namespace GIGLS.Services.Business.Scanning
                 scan.CancelledOrCollected = "Collected";
                 bool emailSentResult = await SendEmailOnAttemptedScanOfCancelledShipment(scan);
 
-                throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already collected, no further scan is required!");
+                throw new GenericException($"Shipment with waybill: {waybill} already collected, no further scan is required!");
             }
         }
     }
