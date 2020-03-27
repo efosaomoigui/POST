@@ -56,4 +56,19 @@ namespace GIGLS.Core.DTO.Partnership
         public int Trips { get; set; }
 
     }
+
+    public class ExternalPartnerTransactionsPaymentCacheDTO : BaseDomainDTO
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string PartnerCode { get; set; }
+        public string Email { get; set; }
+        public int Trips { get; set; }
+
+        public string CurrencySymbol { get; set; }
+        public decimal AmountReceived { get; set; }
+
+        public string EnterprisePartner { get; set; }
+
+    }
 }
