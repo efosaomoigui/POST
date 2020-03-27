@@ -7,6 +7,7 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -175,8 +176,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
             var earnings = earningsDto.ToList();
             return await Task.FromResult(earnings);
         }
-
-        public async Task<List<ExternalPartnerTransactionsPaymentDTO>> GetExternalPartnerTransactionsForPayment(ShipmentCollectionFilterCriteria filterCriteria)
+        
+        private Task<IQueryable<ExternalPartnerTransactionsPaymentDTO>> GetExternalPartnerTransactions(ShipmentCollectionFilterCriteria filterCriteria)
         {
             var queryDate = filterCriteria.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
@@ -188,24 +189,74 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                              join transaction in _context.PartnerTransactions on partner.UserId equals transaction.UserId
                              join country in _context.Country on partner.UserActiveCountryId equals country.CountryId
                              where transaction.DateCreated >= startDate && transaction.DateCreated < endDate && transaction.IsProcessed == false
-                             group transaction by partner.Email into x
                              select new ExternalPartnerTransactionsPaymentDTO
                              {
-                                 //Waybill = transaction.Waybill,
-                                 //DateCreated = transaction.DateCreated,
-                                 //FirstName = partner.FirstName,
-                                 //LastName = partner.LastName,
-                                 //Code = partner.PartnerCode,
-                                 Email = x.Key,
-                                 Amount = x.Sum(a => a.AmountReceived),
-                                 Trips = x.Count()
-                                 //EnterprisePartner = _context.FleetPartner.Where(x => x.FleetPartnerCode == partner.FleetPartnerCode)
-                                 //                   .Select(d => d.FirstName + " " + d.LastName).FirstOrDefault(),
-                                 //CurrencySymbol = country.CurrencySymbol,
+                                 Waybill = transaction.Waybill,
+                                 DateCreated = transaction.DateCreated,
+                                 FirstName = partner.FirstName,
+                                 LastName = partner.LastName,
+                                 Code = partner.PartnerCode,
+                                 EnterprisePartner = _context.FleetPartner.Where(x => x.FleetPartnerCode == partner.FleetPartnerCode)
+                                                    .Select(d => d.FirstName + " " + d.LastName).FirstOrDefault(),
+                                 CurrencySymbol = country.CurrencySymbol,
+                                 Email = partner.Email,
+                                 Amount = transaction.AmountReceived,
+                                 Trips = transaction.PartnerTransactionsID
                              };
 
-            return await Task.FromResult(partnerDto.OrderByDescending(s =>s.Amount).ToList());
+            return Task.FromResult(partnerDto.AsQueryable().AsNoTracking());
         }
 
+        public async Task<List<ExternalPartnerTransactionsPaymentDTO>> GetExternalPartnerTransactionsForPayment(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            var partners = await GetExternalPartnerTransactions(filterCriteria);
+
+            var partnerDto = from partner in partners
+                             group partner by partner.Code into p
+                             select new ExternalPartnerTransactionsPaymentDTO
+                             {
+                                 Code = p.Key,
+                                 CurrencySymbol = p.FirstOrDefault().CurrencySymbol,
+                                 Email = p.FirstOrDefault().Email,
+                                 Amount = p.Sum(a => a.Amount),
+                                 Trips = p.Count(),
+                                 EnterprisePartner = p.FirstOrDefault().EnterprisePartner,
+                                 FirstName = p.FirstOrDefault().FirstName,
+                                 LastName = p.FirstOrDefault().LastName                                 
+                             };            
+            return await partnerDto.OrderByDescending(s => s.Amount).AsNoTracking().ToListAsync();
+        }
+
+
+        //public async Task<List<ExternalPartnerTransactionsPaymentDTO>> GetExternalPartnerTransactionsForPayment(ShipmentCollectionFilterCriteria filterCriteria)
+        //{
+        //    var queryDate = filterCriteria.getStartDateAndEndDate();
+        //    var startDate = queryDate.Item1;
+        //    var endDate = queryDate.Item2;
+
+        //    var partners = _context.Partners.AsQueryable().Where(s => s.PartnerType == Core.Enums.PartnerType.DeliveryPartner && s.IsActivated == true);
+
+        //    var partnerDto = from partner in partners
+        //                     join transaction in _context.PartnerTransactions on partner.UserId equals transaction.UserId
+        //                     join country in _context.Country on partner.UserActiveCountryId equals country.CountryId
+        //                     where transaction.DateCreated >= startDate && transaction.DateCreated < endDate && transaction.IsProcessed == false
+        //                     group transaction by partner.Email into x
+        //                     select new ExternalPartnerTransactionsPaymentDTO
+        //                     {
+        //                         //Waybill = transaction.Waybill,
+        //                         //DateCreated = transaction.DateCreated,
+        //                         //FirstName = partner.FirstName,
+        //                         //LastName = partner.LastName,
+        //                         //Code = partner.PartnerCode,
+        //                         Email = x.Key,
+        //                         Amount = x.Sum(a => a.AmountReceived),
+        //                         Trips = x.Count()
+        //                         //EnterprisePartner = _context.FleetPartner.Where(x => x.FleetPartnerCode == partner.FleetPartnerCode)
+        //                         //                   .Select(d => d.FirstName + " " + d.LastName).FirstOrDefault(),
+        //                         //CurrencySymbol = country.CurrencySymbol,
+        //                     };
+
+        //    return await Task.FromResult(partnerDto.OrderByDescending(s => s.Amount).ToList());
+        //}
     }
 }
