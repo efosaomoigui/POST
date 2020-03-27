@@ -817,11 +817,14 @@ namespace GIGLS.Services.Business.Scanning
 
             if (checkShipmentCollected != null)
             {
+                var newScan = scan;
+                newScan.WaybillNumber = waybill;
+
                 //Send Email to Regional Managers whenever this occurs
                 scan.CancelledOrCollected = "Collected";
-                bool emailSentResult = await SendEmailOnAttemptedScanOfCancelledShipment(scan);
+                bool emailSentResult = await SendEmailOnAttemptedScanOfCancelledShipment(newScan);
 
-                throw new GenericException($"Shipment with waybill: {waybill} already collected, no further scan is required!");
+                throw new GenericException($"Shipment with waybill: {newScan.WaybillNumber} already collected, no further scan is required!");
             }
         }
     }
