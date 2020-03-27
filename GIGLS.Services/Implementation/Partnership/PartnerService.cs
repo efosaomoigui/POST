@@ -12,6 +12,7 @@ using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO.Report;
 using System;
 using System.Linq;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Partnership
 {
@@ -144,6 +145,13 @@ namespace GIGLS.Services.Implementation.Partnership
         {
             var partners = await _uow.Partner.GetExternalPartnersAsync();
             return partners;
+        }
+
+        public async Task<List<ExternalPartnerTransactionsPaymentDTO>> GetExternalPartnerTransactionsForPayment(ShipmentCollectionFilterCriteria shipmentCollectionFilterCriteria)
+        {
+            var partnersTransaction = await _uow.PartnerTransactions.GetExternalPartnerTransactionsForPayment(shipmentCollectionFilterCriteria);
+
+            return partnersTransaction;
         }
 
     }

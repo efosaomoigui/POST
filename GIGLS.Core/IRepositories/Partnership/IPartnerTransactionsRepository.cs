@@ -18,5 +18,6 @@ namespace GIGLS.Core.IRepositories
         Task<List<FleetPartnerTransactionsDTO>> GetPartnerTransactionsForFleet(ShipmentCollectionFilterCriteria filterCriteria, string fleetPartnerCode);
         Task<List<object>> GetPartnerEarningsForFleet(ShipmentCollectionFilterCriteria filterCriteria, string fleetPartnerCode);
         Task<List<PartnerTransactionsDTO>> GetPartnerTransactionByUser(string userId);
+        Task<List<ExternalPartnerTransactionsPaymentDTO>> GetExternalPartnerTransactionsForPayment(ShipmentCollectionFilterCriteria filterCriteria);
     }
 }

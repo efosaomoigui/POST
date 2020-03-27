@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.Partnership
 {
@@ -204,6 +205,21 @@ namespace GIGLS.WebApi.Controllers.Partnership
             {
                 var partners = await _fleetPartnerService.GetExternalPartnersNotAttachedToAnyFleetPartner();
                 return new ServiceResponse<IEnumerable<PartnerDTO>>
+                {
+                    Object = partners
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("externalpartnerstransactions")]
+        public async Task<IServiceResponse<IEnumerable<ExternalPartnerTransactionsPaymentDTO>>> GetExternalPartnerTransactionsForPayment(ShipmentCollectionFilterCriteria shipmentCollectionFilter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var partners = await _partnerService.GetExternalPartnerTransactionsForPayment(shipmentCollectionFilter);
+                return new ServiceResponse<IEnumerable<ExternalPartnerTransactionsPaymentDTO>>
                 {
                     Object = partners
                 };
