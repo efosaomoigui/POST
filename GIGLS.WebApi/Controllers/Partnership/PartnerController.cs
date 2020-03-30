@@ -242,5 +242,20 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getpartnerpayouts")]
+        public async Task<IServiceResponse<IEnumerable<PartnerPayoutDTO>>> GetPartnerPayouts(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var payout = await _partnerTransactionsService.GetPartnersPayout(filterCriteria);
+                return new ServiceResponse<IEnumerable<PartnerPayoutDTO>>
+                {
+                    Object = payout
+                };
+            });
+        }
     }
 }
