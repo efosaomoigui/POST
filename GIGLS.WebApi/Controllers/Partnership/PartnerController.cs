@@ -16,11 +16,13 @@ namespace GIGLS.WebApi.Controllers.Partnership
     {
         private readonly IPartnerService _partnerService;
         private readonly IFleetPartnerService _fleetPartnerService;
+        private readonly IPartnerTransactionsService _partnerTransactionsService;
 
-        public PartnerController(IPartnerService partnerService, IFleetPartnerService fleetPartnerService) :base(nameof(PartnerController))
+        public PartnerController(IPartnerService partnerService, IFleetPartnerService fleetPartnerService, IPartnerTransactionsService partnerTransactionsService) :base(nameof(PartnerController))
         {
             _partnerService = partnerService;
             _fleetPartnerService = fleetPartnerService;
+            _partnerTransactionsService = partnerTransactionsService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -222,6 +224,21 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 return new ServiceResponse<IEnumerable<ExternalPartnerTransactionsPaymentDTO>>
                 {
                     Object = partners
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("processpartnertransactions")]
+        public async Task<IServiceResponse<bool>> ProcessPartnerTransactions(List<ExternalPartnerTransactionsPaymentDTO> externalPartnerTransactionsDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _partnerTransactionsService.ProcessPartnerTransactions(externalPartnerTransactionsDTO);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
                 };
             });
         }

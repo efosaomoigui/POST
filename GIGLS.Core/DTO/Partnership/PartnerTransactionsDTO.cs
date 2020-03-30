@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO;
 
 namespace GIGLS.Core.DTO.Partnership
@@ -48,6 +49,7 @@ namespace GIGLS.Core.DTO.Partnership
 
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string PartnerName { get; set; }
         public string Code { get; set; }
         public string Email { get; set; }
 
@@ -57,7 +59,10 @@ namespace GIGLS.Core.DTO.Partnership
         public string BankName { get; set; }
         public string AccountName { get; set; }
         public string AccountNumber { get; set; }
-
+        public int GIGGOServiceCenter { get; set; }
+        public string UserId { get; set; }
+        public string ProcessedBy { get; set; }
+        public ShipmentCollectionFilterCriteria filterCriteria { get; set; }
     }
 
     public class ExternalPartnerTransactionsPaymentCacheDTO : BaseDomainDTO

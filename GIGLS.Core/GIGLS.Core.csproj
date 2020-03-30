@@ -192,6 +192,7 @@
     <Compile Include="Domain\OTP.cs" />
     <Compile Include="Domain\OverdueShipment.cs" />
     <Compile Include="Domain\Partnership\FleetPartner.cs" />
+    <Compile Include="Domain\Partnership\PartnerPayout.cs" />
     <Compile Include="Domain\Partnership\PartnerTransactions.cs" />
     <Compile Include="Domain\PickupManifest.cs" />
     <Compile Include="Domain\PickupManifestWaybillMapping.cs" />
@@ -356,6 +357,7 @@
     <Compile Include="DTO\OTPDTO.cs" />
     <Compile Include="DTO\PartnerMonthlyTransactionsDTO.cs" />
     <Compile Include="DTO\Partnership\FleetPartnerDTO.cs" />
+    <Compile Include="DTO\Partnership\PartnerPayoutDTO.cs" />
     <Compile Include="DTO\Partnership\RootObject.cs" />
     <Compile Include="DTO\Partnership\PartnerApplicationDto.cs" />
     <Compile Include="DTO\Partnership\PartnerDto.cs" />
@@ -583,6 +585,7 @@
     <Compile Include="IRepositories\IReferrerCodeRepository.cs" />
     <Compile Include="IRepositories\IRiderDeliveryRepository.cs" />
     <Compile Include="IRepositories\Partnership\IFleetPartnerRepository.cs" />
+    <Compile Include="IRepositories\Partnership\IPartnerPayoutRepository.cs" />
     <Compile Include="IRepositories\Partnership\IPartnerTransactionsRepository.cs" />
     <Compile Include="IRepositories\IRepository.cs" />
     <Compile Include="IRepositories\IStateRepository.cs" />
@@ -738,6 +741,7 @@
     <Compile Include="IServices\Nav\ISubSubNavService.cs" />
     <Compile Include="IServices\Partnership\IFleetPartnerService.cs" />
     <Compile Include="IServices\Partnership\IPartnerApplicationService.cs" />
+    <Compile Include="IServices\Partnership\IPartnerPayoutService.cs" />
     <Compile Include="IServices\Partnership\IPartnerService.cs" />
     <Compile Include="IServices\Partnership\IPartnerTransactionsService.cs" />
     <Compile Include="IServices\Partnership\IVehicleTypeService.cs" />

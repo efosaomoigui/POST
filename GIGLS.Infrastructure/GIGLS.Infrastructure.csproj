@@ -168,6 +168,7 @@
     <Compile Include="Persistence\Repositories\OTPRepository.cs" />
     <Compile Include="Persistence\Repositories\Partnership\FleetPartnerRepository.cs" />
     <Compile Include="Persistence\Repositories\Partnership\PartnerApplicationRepository.cs" />
+    <Compile Include="Persistence\Repositories\Partnership\PartnerPayoutRepository.cs" />
     <Compile Include="Persistence\Repositories\Partnership\PartnerRepository.cs" />
     <Compile Include="Persistence\Repositories\Partnership\PartnerTransactionsRepository.cs" />
     <Compile Include="Persistence\Repositories\Partnership\VehicleTypeRepository.cs" />
