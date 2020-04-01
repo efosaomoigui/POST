@@ -16,5 +16,8 @@ namespace GIGLS.Core.Domain.Partnership
 
         [MaxLength(100)]
         public string PartnerName { get; set; }
+
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
     }
 }

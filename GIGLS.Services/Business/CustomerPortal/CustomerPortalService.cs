@@ -1459,6 +1459,15 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
         public async Task<object> AddPreShipmentMobile(PreShipmentMobileDTO preShipment)
         {
+            var isDisable =  ConfigurationManager.AppSettings["DisableShipmentCreation"];
+            bool disableShipmentCreation = bool.Parse(isDisable);
+
+            if (disableShipmentCreation) {
+                string message = "Pick up service is currently not available due to movement restriction. " +
+                    "This service will be fully restored tomorrow. Thank you for your patience and understanding.";
+
+                throw new GenericException(message);
+            }
             return await _preShipmentMobileService.AddPreShipmentMobile(preShipment);
         }
 

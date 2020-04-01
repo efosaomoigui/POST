@@ -166,9 +166,17 @@ namespace GIGLS.Services.Implementation.Partnership
             foreach (var partner in paymentLogDto)
             {
                 var existingParntner = await _uow.Partner.GetAsync(s => s.PartnerCode == partner.Code);
-
+                
                 if (existingParntner != null)
                 {
+                    // Get Date Info
+                    var queryDate = partner.filterCriteria.getStartDateAndEndDate();
+                    var startDate = queryDate.Item1;
+                    var endDate = queryDate.Item2;
+
+                    partner.filterCriteria.StartDate = startDate;
+                    partner.filterCriteria.EndDate = endDate;
+
                     partner.GIGGOServiceCenter = gigGOServiceCenter.ServiceCentreId;
                     partner.ProcessedBy = processedBy;
                     partner.UserId = existingParntner.UserId;
@@ -229,9 +237,18 @@ namespace GIGLS.Services.Implementation.Partnership
             {
                 Amount = partner.Amount,
                 ProcessedBy = partner.ProcessedBy,
-                PartnerName = partner.PartnerName
+                PartnerName = partner.PartnerName,
+                StartDate = partner.filterCriteria.StartDate,
+                EndDate = partner.filterCriteria.EndDate
             };
             var addPartnerPayout = await _partnerPayoutService.AddPartnerPayout(processedByData);
+        }
+
+        public async Task<List<PartnerPayoutDTO>> GetPartnersPayout(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            var partnersPayout = await _uow.PartnerPayout.GetPartnerPayoutByDate(filterCriteria);
+
+            return partnersPayout;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -12,5 +13,6 @@ namespace GIGLS.Core.IServices.Partnership
         Task<object> AddPartnerPaymentLog(PartnerTransactionsDTO walletPaymentLogDto);
         Task<string> Decrypt(string cipherText);
         Task ProcessPartnerTransactions(List<ExternalPartnerTransactionsPaymentDTO> paymentLogDto);
+        Task<List<PartnerPayoutDTO>> GetPartnersPayout(ShipmentCollectionFilterCriteria filterCriteria);
     }
 }
