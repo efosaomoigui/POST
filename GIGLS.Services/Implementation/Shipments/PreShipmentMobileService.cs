@@ -1576,7 +1576,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 else
                 {
                     if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() 
-                        || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.Missed.ToString())
+                        || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString()
+                        || pickuprequest.Status == MobilePickUpRequestStatus.Missed.ToString())
                     {
                         var request = await _uow.MobilePickUpRequests.GetAsync(s => 
                             s.Waybill == pickuprequest.Waybill && s.UserId == pickuprequest.UserId
@@ -1586,6 +1587,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         if (request == null)
                         {
                             await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
+                        }
+                        else if (request.Status == MobilePickUpRequestStatus.Missed.ToString()) {
+                            request.Status = pickuprequest.Status;
                         }
                         else
                         {
