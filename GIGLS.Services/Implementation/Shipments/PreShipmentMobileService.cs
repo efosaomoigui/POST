@@ -624,6 +624,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
 
+                //change the quantity of the preshipmentItem if it fall into promo category
+                preShipment = await ChangePreshipmentItemQuantity(preShipment, zoneid.ZoneId);
+
                 var Price = 0.0M;
                 var amount = 0.0M;
                 var IndividualPrice = 0.0M;
@@ -788,6 +791,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
+
+                //change the quantity of the preshipmentItem if it fall into promo category
+                preShipment = await ChangePreshipmentItemQuantity(preShipment, zoneid.ZoneId);
 
                 var Price = 0.0M;
                 var amount = 0.0M;
@@ -3775,6 +3781,38 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
             };
             return true;
+        }
+
+        //Change
+        private async Task<PreShipmentMobileDTO> ChangePreshipmentItemQuantity(PreShipmentMobileDTO preShipmentDTO, int zoneId)
+        {
+            if (preShipmentDTO.VehicleType != null)
+            {
+                //1.if the shipment Vehicle Type is Bike and the zone is lagos, Calculate the Promo price
+                if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && zoneId == 1)
+                {
+                    //GIG Go Promo Price
+                    bool totalWeight = await GetTotalWeight(preShipmentDTO);
+
+                    if (totalWeight)
+                    {
+                        //1. Get the Promo price 900
+                        var gigGoPromo = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGGOPromo, preShipmentDTO.CountryId);
+                        decimal promoPrice = decimal.Parse(gigGoPromo.Value);
+
+                        //if there is promo then change the quantity to 1
+                        if (promoPrice > 0)
+                        {
+                            foreach (var preShipmentItem in preShipmentDTO.PreShipmentItems)
+                            {
+                                preShipmentItem.Quantity = 1;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return preShipmentDTO;
         }
     }
 }
