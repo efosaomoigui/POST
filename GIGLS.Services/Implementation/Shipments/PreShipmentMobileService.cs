@@ -624,6 +624,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
 
+                var Country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
+                preShipment.CountryId = Country.CountryId;
+
                 //change the quantity of the preshipmentItem if it fall into promo category
                 preShipment = await ChangePreshipmentItemQuantity(preShipment, zoneid.ZoneId);
 
@@ -631,10 +634,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var amount = 0.0M;
                 var IndividualPrice = 0.0M;
                 decimal DeclaredValue = 0.0M;
-
-                var Country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
-                preShipment.CountryId = Country.CountryId;
-                
+                                
                 //undo comment when App is updated
                 if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
                 {
