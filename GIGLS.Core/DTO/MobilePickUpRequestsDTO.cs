@@ -15,6 +15,7 @@ namespace GIGLS.Core.DTO
         public int MobilePickUpRequestsId { get; set; }
         public string Status { get; set; }
         public string Waybill { get; set; }
+        public string GroupCodeNumber { get; set; }
         public string UserId { get; set; }
         public PreShipmentMobileDTO PreShipment { get; set; }
         public string ServiceCentreId { get; set; }

@@ -65,6 +65,11 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     response = await AddWaybillPaymentLogForPaystack(waybillPaymentLog);
                 }
+
+                if(waybillPaymentLog.OnlinePaymentType == Core.Enums.OnlinePaymentType.Flutterwave)
+                {
+                    //Process Payment for FlutterWave;
+                }
             }
                             
             return response;
