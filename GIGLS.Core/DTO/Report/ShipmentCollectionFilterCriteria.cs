@@ -9,6 +9,7 @@ namespace GIGLS.Core.DTO.Report
         public bool IsDashboard { get; set; }
         public int ServiceCentreId { get; set; }
         public int CountryId { get; set; }
+        public int StationId { get; set; }
 
         /// <summary>
         /// Get the Start Date and End Date for query to the database

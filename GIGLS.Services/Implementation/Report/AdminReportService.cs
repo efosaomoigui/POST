@@ -111,6 +111,23 @@ namespace GIGLS.Services.Implementation.Report
                 avgDestShipmentCostPerSC = (destInvoices.Sum(p => p.GrandTotal) / destInvoices.Count());
                                 
             }
+            //Filter by Station
+            else if (filterCriteria.StationId > 0)
+            {
+                // get the service centre
+                var serviceCentresInStation = await _serviceCenterService.GetServiceCentresByStationId(filterCriteria.StationId);
+                int[] serviceCenterInStationIds = serviceCentresInStation.Select(s => s.ServiceCentreId).ToArray();
+                
+                //For the Departure Station Data Only
+                invoices = invoice.Where(s => serviceCenterInStationIds.Contains(s.DepartureServiceCentreId)).ToList();
+
+                //For the Destination station  Data Only, so as to calaulate the average coming in
+                destInvoices = invoice.Where(s => serviceCenterInStationIds.Contains(s.DestinationServiceCentreId)).ToList();
+
+                //Average Price Of Shipments coming to that station Center
+                avgDestShipmentCostPerSC = (destInvoices.Sum(p => p.GrandTotal) / destInvoices.Count());
+
+            }
             else
             {
                 invoices = invoice;
@@ -164,6 +181,10 @@ namespace GIGLS.Services.Implementation.Report
             if(filterCriteria.ServiceCentreId > 0)
             {
                 //Average Price of shipments leaving that service center
+                avgOriginShipmentCostPerSC = revenue / shipmentOrdered;
+            }
+            else if(filterCriteria.StationId > 0)
+            {
                 avgOriginShipmentCostPerSC = revenue / shipmentOrdered;
             }
 
