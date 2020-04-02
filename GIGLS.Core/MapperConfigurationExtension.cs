@@ -413,6 +413,12 @@ namespace GIGLS.Core
                 config.CreateMap<FleetPartner, FleetPartnerDTO>();
                 config.CreateMap<FleetPartnerDTO, FleetPartner>();
 
+                config.CreateMap<MobileGroupCodeWaybillMapping, MobileGroupCodeWaybillMappingDTO>();
+                config.CreateMap<MobileGroupCodeWaybillMappingDTO, MobileGroupCodeWaybillMapping>();
+
+                config.CreateMap<PartnerPayout, PartnerPayoutDTO>();
+                config.CreateMap<PartnerPayoutDTO, PartnerPayout>();
+
             });
 
             isInit = true;

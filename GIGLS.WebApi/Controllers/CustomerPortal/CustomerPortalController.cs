@@ -34,6 +34,7 @@ using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Admin;
 using GIGLS.Core.Domain;
 using EfeAuthen.Models;
+using GIGLS.Core.DTO.Utility;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -982,15 +983,15 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("createMultipleShipments")]
-        public async Task<IServiceResponse<object>> CreateMultipleShipments(NewPreShipmentMobileDTO PreshipmentMobile)
+        public async Task<IServiceResponse<MultipleShipmentOutput>> CreateMultipleShipments(NewPreShipmentMobileDTO PreshipmentMobile)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var PreshipMentMobile = await _portalService.AddMultiplePreShipmentMobile(PreshipmentMobile);
+                var preshipMentMobile = await _portalService.AddMultiplePreShipmentMobile(PreshipmentMobile);
 
-                return new ServiceResponse<object>
+                return new ServiceResponse<MultipleShipmentOutput>
                 {
-                    Object = PreshipMentMobile
+                    Object = preshipMentMobile
                 };
             });
         }
@@ -1190,6 +1191,36 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpGet]
+        [Route("getgroupcodewaybilldetails/{groupCode}")]
+        public async Task<IServiceResponse<MobileGroupCodeWaybillMappingDTO>> GetWaybillDetailsInGroup(string groupCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var details = await _portalService.GetWaybillDetailsInGroup(groupCode);
+
+                return new ServiceResponse<MobileGroupCodeWaybillMappingDTO>
+                {
+                    Object = details
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getwaybillsingroupcode/{groupCode}")]
+        public async Task<IServiceResponse<MobileGroupCodeWaybillMappingDTO>> GetWaybillsInGroup(string groupCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var details = await _portalService.GetWaybillNumbersInGroup(groupCode);
+
+                return new ServiceResponse<MobileGroupCodeWaybillMappingDTO>
+                {
+                    Object = details
+                };
+            });
+        }
+
 
         [HttpPost]
         [Route("updatepreshipmentmobile")]
@@ -1361,7 +1392,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 }
                 else
                 {
-                    throw new GenericException("Operation could not be completed");
+                    throw new GenericException("Information does not exist, kindly provide correct email");
                 }
 
                 return new ServiceResponse<bool>

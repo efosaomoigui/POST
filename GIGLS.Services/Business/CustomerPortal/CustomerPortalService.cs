@@ -47,6 +47,7 @@ using GIGLS.Core.IServices.Partnership;
 using System.Configuration;
 using System.Security.Cryptography;
 using System.Text;
+using GIGLS.Core.DTO.Utility;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -76,6 +77,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IAdminReportService _adminReportService;
         public readonly IIndividualCustomerService _individualCustomerService;
         public readonly IPartnerTransactionsService _partnertransactionservice;
+        private readonly IMobileGroupCodeWaybillMappingService _groupCodeWaybillMappingService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
@@ -84,7 +86,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService, 
-            ICountryService countryService, IAdminReportService adminReportService, IIndividualCustomerService individualCustomerService, IPartnerTransactionsService partnertransactionservice)
+            ICountryService countryService, IAdminReportService adminReportService, IIndividualCustomerService individualCustomerService, 
+            IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -110,6 +113,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _adminReportService = adminReportService;
             _individualCustomerService = individualCustomerService;
             _partnertransactionservice = partnertransactionservice;
+            _groupCodeWaybillMappingService = groupCodeWaybillMappingService;
             MapperConfig.Initialize();
         }
 
@@ -1455,10 +1459,19 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
         public async Task<object> AddPreShipmentMobile(PreShipmentMobileDTO preShipment)
         {
+            var isDisable =  ConfigurationManager.AppSettings["DisableShipmentCreation"];
+            bool disableShipmentCreation = bool.Parse(isDisable);
+
+            if (disableShipmentCreation) {
+                string message = "Pick up service is currently not available due to movement restriction. " +
+                    "This service will be fully restored tomorrow. Thank you for your patience and understanding.";
+
+                throw new GenericException(message);
+            }
             return await _preShipmentMobileService.AddPreShipmentMobile(preShipment);
         }
 
-        public async Task<List<object>> AddMultiplePreShipmentMobile(NewPreShipmentMobileDTO preShipment)
+        public async Task<MultipleShipmentOutput> AddMultiplePreShipmentMobile(NewPreShipmentMobileDTO preShipment)
         {
             return await _preShipmentMobileService.CreateMobileShipment(preShipment);
         }
@@ -1477,6 +1490,14 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<MultipleMobilePriceDTO> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipment)
         {
             return await _preShipmentMobileService.GetPriceForMultipleShipments(preShipment);
+        }
+        public async Task<MobileGroupCodeWaybillMappingDTO> GetWaybillDetailsInGroup(string groupCode)
+        {
+            return await _groupCodeWaybillMappingService.GetWaybillDetailsInGroup(groupCode);
+        }
+        public async Task<MobileGroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCode)
+        {
+            return await _groupCodeWaybillMappingService.GetWaybillNumbersInGroup(groupCode);
         }
         public async Task<WalletDTO> GetWalletBalance()
         {

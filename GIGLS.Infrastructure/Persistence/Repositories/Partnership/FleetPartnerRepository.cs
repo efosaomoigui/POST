@@ -61,7 +61,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
         public async Task<int> FleetCount(string fleetCode)
         {
             var fleetCount = _context.Partners.Where(x => x.FleetPartnerCode == fleetCode).Count();
-            return fleetCount;
+            return await Task.FromResult(fleetCount);
         }
 
        

@@ -13,5 +13,8 @@ namespace GIGLS.Core.DTO
 
         public double DestinationLatitude { get; set; }
         public double DestinationLongitude { get; set; }
+
+        public string Name { get; set; }
+        public string FormattedAddress { get; set; }
     }
 }
