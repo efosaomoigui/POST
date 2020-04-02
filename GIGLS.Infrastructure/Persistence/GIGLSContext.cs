@@ -275,6 +275,10 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<ShipmentHash> ShipmentHash { get; set; }
         public DbSet<GiglgoStation> GiglgoStation { get; set; }
 
+        public DbSet<MobileGroupCodeWaybillMapping> MobileGroupCodeWaybillMapping { get; set; }
+        public DbSet<PartnerPayout> PartnerPayout { get; set; }
+
+
         #endregion
 
 

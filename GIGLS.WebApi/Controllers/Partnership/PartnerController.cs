@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.WebApi.Controllers.Partnership
 {
@@ -15,11 +16,13 @@ namespace GIGLS.WebApi.Controllers.Partnership
     {
         private readonly IPartnerService _partnerService;
         private readonly IFleetPartnerService _fleetPartnerService;
+        private readonly IPartnerTransactionsService _partnerTransactionsService;
 
-        public PartnerController(IPartnerService partnerService, IFleetPartnerService fleetPartnerService) :base(nameof(PartnerController))
+        public PartnerController(IPartnerService partnerService, IFleetPartnerService fleetPartnerService, IPartnerTransactionsService partnerTransactionsService) :base(nameof(PartnerController))
         {
             _partnerService = partnerService;
             _fleetPartnerService = fleetPartnerService;
+            _partnerTransactionsService = partnerTransactionsService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -221,6 +224,51 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 return new ServiceResponse<IEnumerable<PartnerDTO>>
                 {
                     Object = partners
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("externalpartnerstransactions")]
+        public async Task<IServiceResponse<IEnumerable<ExternalPartnerTransactionsPaymentDTO>>> GetExternalPartnerTransactionsForPayment(ShipmentCollectionFilterCriteria shipmentCollectionFilter)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var partners = await _partnerService.GetExternalPartnerTransactionsForPayment(shipmentCollectionFilter);
+                return new ServiceResponse<IEnumerable<ExternalPartnerTransactionsPaymentDTO>>
+                {
+                    Object = partners
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("processpartnertransactions")]
+        public async Task<IServiceResponse<bool>> ProcessPartnerTransactions(List<ExternalPartnerTransactionsPaymentDTO> externalPartnerTransactionsDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _partnerTransactionsService.ProcessPartnerTransactions(externalPartnerTransactionsDTO);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getpartnerpayouts")]
+        public async Task<IServiceResponse<IEnumerable<PartnerPayoutDTO>>> GetPartnerPayouts(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var payout = await _partnerTransactionsService.GetPartnersPayout(filterCriteria);
+                return new ServiceResponse<IEnumerable<PartnerPayoutDTO>>
+                {
+                    Object = payout
                 };
             });
         }

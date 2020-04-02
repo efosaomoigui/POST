@@ -20,6 +20,7 @@ namespace GIGLS.Core.DTO.Shipments
         public int PreShipmentMobileId { get; set; }
         public new DateTime? DateCreated { get; set; }
         public string Waybill { get; set; }
+        public string GroupCodeNumber { get; set; }
 
         //Senders' Information
         public string SenderName { get; set; }
