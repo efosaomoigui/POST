@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GIGLS.Core.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,10 @@ namespace GIGLS.Core.DTO.Partnership
         public string Vehicletype { get; set; }
         public string PartnerName { get; set; }
         public string PartnerPhoneNumber { get; set; }
+        public string PartnerFirstName { get; set; }
+        public string PartnerLastName { get; set; }
+        public PartnerType PartnerType { get; set; }
+        public FleetPartnerDTO EnterprisePartner { get; set; }
 
         public string VehiclePlateNumber { get; set; }
         public string VehicleInsurancePolicyDetails { get; set; }

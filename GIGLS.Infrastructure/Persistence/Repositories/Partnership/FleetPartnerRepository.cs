@@ -49,7 +49,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                  Partnercode = vehicle.Partnercode,
                                  IsVerified = vehicle.IsVerified,
                                  PartnerName = partner.FirstName + " " + partner.LastName,
-                                 PartnerPhoneNumber = partner.PhoneNumber
+                                 PartnerPhoneNumber = partner.PhoneNumber,
+                                 PartnerFirstName =  partner.FirstName,
+                                 PartnerLastName = partner.LastName
                              };
 
             return Task.FromResult(partnerDto.ToList());
