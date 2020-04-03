@@ -97,6 +97,9 @@ namespace GIGLS.Services.Implementation.Report
             decimal avgOriginShipmentCostPerSC = 0;
             var createdShipments = 0;
             var departedShipments = 0;
+            int[] serviceCenterInStationIds = null;
+            decimal avgStationShipments = 0;
+            decimal avgOutStationShipments = 0;
 
             //Filter by Service Center
             if (filterCriteria.ServiceCentreId > 0)
@@ -108,15 +111,15 @@ namespace GIGLS.Services.Implementation.Report
                 destInvoices = invoice.Where(s => s.DestinationServiceCentreId == filterCriteria.ServiceCentreId).ToList();
 
                 //Average Price Of Shipments coming to that service Center
-                avgDestShipmentCostPerSC = (destInvoices.Sum(p => p.GrandTotal) / destInvoices.Count());
-                                
+                avgDestShipmentCostPerSC = (destInvoices.Sum(p => p.GrandTotal) / ((destInvoices.Count() == 0) ? 1 : destInvoices.Count()));
+                
             }
             //Filter by Station
             else if (filterCriteria.StationId > 0)
             {
                 // get the service centre
                 var serviceCentresInStation = await _serviceCenterService.GetServiceCentresByStationId(filterCriteria.StationId);
-                int[] serviceCenterInStationIds = serviceCentresInStation.Select(s => s.ServiceCentreId).ToArray();
+                serviceCenterInStationIds = serviceCentresInStation.Select(s => s.ServiceCentreId).ToArray();
                 
                 //For the Departure Station Data Only
                 invoices = invoice.Where(s => serviceCenterInStationIds.Contains(s.DepartureServiceCentreId)).ToList();
@@ -125,7 +128,7 @@ namespace GIGLS.Services.Implementation.Report
                 destInvoices = invoice.Where(s => serviceCenterInStationIds.Contains(s.DestinationServiceCentreId)).ToList();
 
                 //Average Price Of Shipments coming to that station Center
-                avgDestShipmentCostPerSC = (destInvoices.Sum(p => p.GrandTotal) / destInvoices.Count());
+                avgDestShipmentCostPerSC = (destInvoices.Sum(p => p.GrandTotal) / ((destInvoices.Count() == 0) ? 1 : destInvoices.Count()));
 
             }
             else
@@ -181,11 +184,23 @@ namespace GIGLS.Services.Implementation.Report
             if(filterCriteria.ServiceCentreId > 0)
             {
                 //Average Price of shipments leaving that service center
-                avgOriginShipmentCostPerSC = revenue / shipmentOrdered;
+                avgOriginShipmentCostPerSC = revenue / ((shipmentOrdered == 0) ? 1 : shipmentOrdered);
             }
             else if(filterCriteria.StationId > 0)
             {
-                avgOriginShipmentCostPerSC = revenue / shipmentOrdered;
+                avgOriginShipmentCostPerSC = revenue / ((shipmentOrdered == 0) ? 1 : shipmentOrdered);
+
+                //Shipments within Station
+                var stationShipments = invoice.Where(s => serviceCenterInStationIds.Contains(s.DepartureServiceCentreId) && serviceCenterInStationIds.Contains(s.DestinationServiceCentreId));
+                var sumStationShipments = stationShipments.Sum(x => x.GrandTotal);
+                var countStationShipments = stationShipments.Count();
+                avgStationShipments = sumStationShipments / ((countStationShipments == 0 ? 1 : countStationShipments));
+
+                //Shipments Leaving Station
+                var outStationShipments = invoice.Where(s => serviceCenterInStationIds.Contains(s.DepartureServiceCentreId) && !serviceCenterInStationIds.Contains(s.DestinationServiceCentreId));
+                var sumOutStationShipments = outStationShipments.Sum(x => x.GrandTotal);
+                var countOutStationShipments = outStationShipments.Count();
+                avgOutStationShipments = sumOutStationShipments / ((countOutStationShipments == 0 ? 1 : countOutStationShipments));
             }
 
             //Shipments Created
@@ -202,25 +217,6 @@ namespace GIGLS.Services.Implementation.Report
 
             //Most Shipped Items By Weight
             var weight = await MostShippedItemByWeight(invoices);
-
-            //Average Shipment Cost for only Shipments within Lagos
-            int lagosStationId = 4;
-
-            // get the service centre
-            var serviceCentres = await _serviceCenterService.GetServiceCentresByStationId(lagosStationId);
-            int[] serviceCenterIds = serviceCentres.Select(s => s.ServiceCentreId).ToArray();
-            
-            //Shipments within Lagos
-            var lagosShipments = invoice.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId) && serviceCenterIds.Contains(s.DestinationServiceCentreId));
-            var sumlagosShipments = lagosShipments.Sum(x => x.GrandTotal);
-            var countLagosShipments = lagosShipments.Count();
-            var avgLagosShipments = sumlagosShipments / ((countLagosShipments == 0 ? 1 : countLagosShipments));
-
-            //Shipments Leaving Lagos
-            var OutlagosShipments = invoice.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId) && !serviceCenterIds.Contains(s.DestinationServiceCentreId));
-            var sumOutlagosShipments = OutlagosShipments.Sum(x => x.GrandTotal);
-            var countOutLagosShipments = OutlagosShipments.Count();
-            var avgOutLagosShipments = sumOutlagosShipments / ((countOutLagosShipments == 0 ? 1 : countOutLagosShipments));
 
             //get the distinct count of customers
             var individualCustomerShipments = await CountCustomers(individualShipments.ToList());
@@ -264,8 +260,8 @@ namespace GIGLS.Services.Implementation.Report
             result.TotalWeight = totalWeight;
             result.TotalShipmentAvg = avgTotalShipments;
             result.WeightData = weight;
-            result.AvgLagosShipment = avgLagosShipments;
-            result.AvgOutLagosShipment = avgOutLagosShipments;
+            result.AvgStationShipment = avgStationShipments;
+            result.AvgOutStationShipment = avgOutStationShipments;
 
             result.IndCustomerCount = individualCustomerShipmentsCount;
             result.EcomCustomerCount = ecommerceCustomerShipmentsCount;
