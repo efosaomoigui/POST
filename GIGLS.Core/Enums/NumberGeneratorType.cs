@@ -16,8 +16,7 @@
         BankProcessingOrderForCOD = 12, 
         BankProcessingOrderForDemurrage = 13,
         PayOutOrder = 14,
-        FleetPartner = 15
-        PayOutOrder = 14,
+        FleetPartner = 15,
         MagayaWb = 16
     }
 }
