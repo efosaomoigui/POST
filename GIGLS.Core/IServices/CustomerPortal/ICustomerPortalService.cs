@@ -13,6 +13,7 @@ using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.SLA;
 using GIGLS.Core.DTO.User;
+using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
@@ -84,7 +85,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<PartnerDTO> GetPartnerDetails(string Email);
         Task<List<Uri>> DisplayImages();
         Task<string> LoadImage(ImageDTO images);
-        Task<bool> VerifyPartnerDetails(PartnerDTO partner);
+        Task<bool> VerifyPartnerDetails(PartnerDTO partnerDto);
         Task<string> Generate(int length);
         Task<IdentityResult> ForgotPassword(string email, string password);
         Task SendGenericEmailMessage(MessageType messageType, object obj);
@@ -129,8 +130,10 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<UserDTO> CheckDetailsForCustomerPortal(string user);
         Task<UserDTO> CheckDetailsForMobileScanner(string user);
         Task<bool> UpdateGIGGoShipmentStaus(MobilePickUpRequestsDTO mobilePickUpRequestsDTO);
-        Task<List<object>> AddMultiplePreShipmentMobile(NewPreShipmentMobileDTO preShipment);
+        Task<MultipleShipmentOutput> AddMultiplePreShipmentMobile(NewPreShipmentMobileDTO preShipment);
         Task<MultipleMobilePriceDTO> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipment);
         Task<object> ResolveDisputeForMultipleShipment(PreShipmentMobileDTO preShipment);
+        Task<MobileGroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCode);
+        Task<MobileGroupCodeWaybillMappingDTO> GetWaybillDetailsInGroup(string groupCode);
     }
 }

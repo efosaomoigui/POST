@@ -16,7 +16,7 @@ namespace GIGLS.WebApi.Controllers.Customers
     public class CompanyController : BaseWebApiController
     {
         private readonly ICompanyService _service;
-        private ICountryService _countryService;
+        private readonly ICountryService _countryService;
 
         public CompanyController(ICompanyService service, ICountryService countryService) : base(nameof(CompanyController))
         {

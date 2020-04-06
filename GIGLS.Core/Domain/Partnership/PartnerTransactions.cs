@@ -14,5 +14,6 @@ namespace GIGLS.Core.Domain.Partnership
 
         [MaxLength(100)]
         public string Waybill { get; set; }
+        public bool IsProcessed { get; set; }
     }
 }

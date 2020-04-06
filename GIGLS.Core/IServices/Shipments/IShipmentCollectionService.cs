@@ -11,9 +11,9 @@ namespace GIGLS.CORE.IServices.Shipments
     {
         Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentCollections();
         Task<List<ShipmentCollectionDTO>> GetShipmentCollections(ShipmentCollectionFilterCriteria collectionFilterCriteria);
-        Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentCollections(FilterOptionsDto filterOptionsDto);
+        Task<Tuple<List<ShipmentCollectionDTO>, int>> GetShipmentCollections(FilterOptionsDto filterOptionsDto);
         Task<IEnumerable<ShipmentCollectionDTO>> GetShipmentWaitingForCollection();
-        Tuple<Task<List<ShipmentCollectionDTO>>, int> GetShipmentWaitingForCollection(FilterOptionsDto filterOptionsDto);
+        Task<Tuple<List<ShipmentCollectionDTO>, int>> GetShipmentWaitingForCollection(FilterOptionsDto filterOptionsDto);
         Task<ShipmentCollectionDTO> GetShipmentCollectionById(string waybill);
         Task AddShipmentCollection(ShipmentCollectionDTO shipmentCollection);
         Task UpdateShipmentCollection(ShipmentCollectionDTO shipmentCollection);

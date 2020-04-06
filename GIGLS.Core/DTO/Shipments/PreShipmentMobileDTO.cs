@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.Enums;
+﻿using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
 using System.Collections.Generic;
@@ -7,9 +8,19 @@ namespace GIGLS.Core.DTO.Shipments
 {
     public class PreShipmentMobileDTO : BaseDomainDTO
     {
+        public PreShipmentMobileDTO()
+        {
+            SenderLocation = new LocationDTO();
+            ReceiverLocation = new LocationDTO();
+            PreShipmentItems = new List<PreShipmentItemMobileDTO>();
+            serviceCentreLocation = new LocationDTO();
+            partnerDTO = new PartnerDTO();
+        }
+
         public int PreShipmentMobileId { get; set; }
         public new DateTime? DateCreated { get; set; }
         public string Waybill { get; set; }
+        public string GroupCodeNumber { get; set; }
 
         //Senders' Information
         public string SenderName { get; set; }
@@ -132,6 +143,7 @@ namespace GIGLS.Core.DTO.Shipments
         public bool IsCodNeeded { get; set; }
         public decimal CurrentWalletAmount { get; set; }
         public decimal ShipmentPickupPrice { get; set; }
+        public PartnerDTO partnerDTO { get; set; }
 
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
@@ -174,6 +186,8 @@ namespace GIGLS.Core.DTO.Shipments
 
         //List of Receivers
         public List<ReceiverPreShipmentMobileDTO> Receivers { get; set; }
+     
+        public PartnerDTO partnerDTO { get; set; }
     }
 
     public class ReceiverPreShipmentMobileDTO : BaseDomainDTO
