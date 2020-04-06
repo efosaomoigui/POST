@@ -230,7 +230,9 @@
     <Compile Include="Implementation\Nav\SubNavService.cs" />
     <Compile Include="Implementation\Nav\SubSubNavService.cs" />
     <Compile Include="Implementation\OTPService.cs" />
+    <Compile Include="Implementation\Partnership\FleetPartnerService.cs" />
     <Compile Include="Implementation\Partnership\PartnerApplicationService.cs" />
+    <Compile Include="Implementation\Partnership\PartnerPayoutService.cs" />
     <Compile Include="Implementation\Partnership\PartnerService.cs" />
     <Compile Include="Implementation\Partnership\PartnerTransactionsService.cs" />
     <Compile Include="Implementation\Partnership\VehicleTypeService.cs" />
@@ -250,6 +252,7 @@
     <Compile Include="Implementation\ShipmentScan\MobileScanStatusService.cs" />
     <Compile Include="Implementation\ShipmentScan\ScanStatusService.cs" />
     <Compile Include="Implementation\Shipments\AzureBlobServiceUtil.cs" />
+    <Compile Include="Implementation\Shipments\MobileGroupCodeWaybillMappingService.cs" />
     <Compile Include="Implementation\Shipments\GroupWaybillNumberMappingService.cs" />
     <Compile Include="Implementation\Shipments\GroupWaybillNumberService.cs" />
     <Compile Include="Implementation\Shipments\HUBManifestWaybillMappingService.cs" />
@@ -316,6 +319,187 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Connected Services\Magaya.Service\CSSoapService.wsdl" />
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.AnswerInvitation2Response.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.AnswerInvitationResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.api_session_error.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.BookingRequestResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.CancelSalesOrderResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.contact_info.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.contact_info2.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.ExistsTransactionResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetAccountDefinitionsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetAccountingTransactionsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetActiveCurrenciesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetAllAttachmentsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetCarrierRatesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetChargeDefinitionsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetClientChargeDefinitionsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetClientRatesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetCustomFieldDefinitionsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetEntitiesOfTypeResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetEntitiesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetEntityContactsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetEntityTransactionsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetEventDefinitionsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetFirstTransbyDateJSResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetFirstTransbyDateResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetInventoryItemsByItemDefinitionResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetItemDefinitionsByCustomerResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetItemFromVINResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetMagayaDocumentResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetNextTransbyDateResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetPackageTypesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetRelatedTransactionsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetSecureTrackingTransactionResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetStandardRatesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetTransactionResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetTransactionsByBillingClientResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetTransactionStatusResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetTransRangeByDateJSResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetTransRangeByDateResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetTripScheduleResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetWebDocumentResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.GetWorkingPortsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.InvokeResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.QueryLogJSResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.QueryLogResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.SetAttachmentResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.SetEntityResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.SetRateResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.SetTransactionChargesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.SetTransactionEventsResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.SetTransactionResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.StartSessionResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.StartTracking2Response.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.StartTrackingResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.SubmitCargoReleaseResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.SubmitPickupOrderResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.SubmitSalesOrderResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.SubmitShipmentResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.UpdateOrderResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.UpdatePODResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\Magaya.Service\GIGLS.Services.Magaya.Service.ValidateSalesOrderResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
     <None Include="bin\Release\GIGLS.Core.dll.config" />
     <None Include="bin\Release\GIGLS.Infrastructure.dll.config" />
     <None Include="bin\Release\GIGLS.Messaging.dll.config" />
@@ -343,11 +527,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="bin\Debug\es\" />
-    <Folder Include="bin\Debug\nl\" />
-    <Folder Include="bin\Debug\pt-BR\" />
-    <Folder Include="bin\Debug\zh-TW\" />
-    <Folder Include="bin\Debug\zh\" />
     <Folder Include="Business\AdminConsole\" />
     <Folder Include="Business\Finance\" />
     <Folder Include="Business\OrderManagement\" />

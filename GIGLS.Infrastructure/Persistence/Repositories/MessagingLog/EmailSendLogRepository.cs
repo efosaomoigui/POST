@@ -25,7 +25,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.MessagingLog
                 var startDate = queryDate.Item1;
                 var endDate = queryDate.Item2;
 
-                var messages = Context.EmailSendLog.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).AsQueryable();
+                var messages = Context.EmailSendLog.AsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
 
                 if (filter.Status.HasValue)
                 {

@@ -77,7 +77,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                 if (!string.IsNullOrWhiteSpace(filter) && !string.IsNullOrWhiteSpace(filterValue))
                 {
                     var caseObject = new WalletPaymentLogView();
-                    //var myPropInfo = typeof(WalletPaymentLogView).GetProperty(filter);
                     switch (filter)
                     {
                         case nameof(caseObject.WalletNumber):

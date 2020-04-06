@@ -28,9 +28,7 @@ namespace GIGLS.WebApi.Controllers.Account
         {
             return await HandleApiOperationAsync(async () =>
             {
-
                 var invoice = await _invoiceService.GetInvoices();
-
                 return new ServiceResponse<IEnumerable<InvoiceDTO>>
                 {
                     Object = invoice
@@ -45,10 +43,10 @@ namespace GIGLS.WebApi.Controllers.Account
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var invoiceTuple = _invoiceService.GetInvoices(filterOptionsDto);
+                var invoiceTuple = await _invoiceService.GetInvoices(filterOptionsDto);
                 return new ServiceResponse<IEnumerable<InvoiceDTO>>
                 {
-                    Object = await invoiceTuple.Item1,
+                    Object = invoiceTuple.Item1,
                     Total = invoiceTuple.Item2
                 };
             });

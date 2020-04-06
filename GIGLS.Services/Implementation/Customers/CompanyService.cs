@@ -14,6 +14,8 @@ using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.User;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.IMessageService;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -23,17 +25,19 @@ namespace GIGLS.Services.Implementation.Customers
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly IPasswordGenerator _passwordGenerator;
         private readonly IUserService _userService;
+        private readonly IMessageSenderService _messageSenderService;
 
         private readonly IUnitOfWork _uow;
 
         public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService,
-            IWalletService walletService, IPasswordGenerator passwordGenerator, IUserService userService, IUnitOfWork uow)
+            IWalletService walletService, IPasswordGenerator passwordGenerator, IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService)
         {
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _passwordGenerator = passwordGenerator;
             _userService = userService;
             _uow = uow;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
 
@@ -147,7 +151,16 @@ namespace GIGLS.Services.Implementation.Customers
                     CustomerCode = newCompany.CustomerCode,
                     CompanyType = companyType
                 });
-                
+
+                //send login detail to the email 
+                var passwordMessage = new PasswordMessageDTO()
+                {
+                    Password = password,
+                    UserEmail = newCompany.Email,
+                    CustomerCode = newCompany.CustomerCode
+                };
+                await _messageSenderService.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
+
                 return Mapper.Map<CompanyDTO>(newCompany);
             }
             catch (Exception)
@@ -156,7 +169,7 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
-        private async Task<string> AddCountryCodeToPhoneNumber(string phoneNumber, int countryId)
+        public async Task<string> AddCountryCodeToPhoneNumber(string phoneNumber, int countryId)
         {
             if(countryId < 1)
             {
@@ -283,7 +296,6 @@ namespace GIGLS.Services.Implementation.Customers
                 company.ReturnServiceCentre = companyDto.ReturnServiceCentre;
                 company.ReturnAddress = companyDto.ReturnAddress;
                 company.RcNumber = companyDto.RcNumber;
-                //company.UserActiveCountryId = companyDto.UserActiveCountryId;
                 company.isCodNeeded = companyDto.isCodNeeded;
 
                 if (companyDto.ContactPersons.Any())
@@ -306,10 +318,8 @@ namespace GIGLS.Services.Implementation.Customers
                 user.LastName = companyDto.Name;
                 user.FirstName = companyDto.Name;
                 user.Email = companyDto.Email;
-                //user.UserActiveCountryId = companyDto.UserActiveCountryId;
 
                 await _userService.UpdateUser(user.Id, user);
-
                 _uow.Complete();
             }
             catch (Exception)
@@ -447,6 +457,7 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
+        
         public async Task<EcommerceWalletDTO> GetECommerceWalletById(int companyId)
         {
             try
@@ -457,9 +468,7 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     throw new GenericException("Wallet information does not exist");
                 }
-
-                return company;
-                
+                return company;                
             }
             catch (Exception)
             {
@@ -478,6 +487,5 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
-
     }
 }

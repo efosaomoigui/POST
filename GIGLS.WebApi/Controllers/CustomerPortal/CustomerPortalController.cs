@@ -34,6 +34,7 @@ using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Admin;
 using GIGLS.Core.Domain;
 using EfeAuthen.Models;
+using GIGLS.Core.DTO.Utility;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -65,7 +66,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        //[Authorize]
         [HttpPut]
         [Route("wallet/{walletId:int}")]
         public async Task<IServiceResponse<object>> UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
@@ -498,7 +498,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
         
-        [AllowAnonymous]
+       // [AllowAnonymous]
         [HttpPost]
         [Route("register")]
         public async Task<IServiceResponse<UserDTO>> Register(UserDTO user)
@@ -983,15 +983,15 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("createMultipleShipments")]
-        public async Task<IServiceResponse<object>> CreateMultipleShipments(NewPreShipmentMobileDTO PreshipmentMobile)
+        public async Task<IServiceResponse<MultipleShipmentOutput>> CreateMultipleShipments(NewPreShipmentMobileDTO PreshipmentMobile)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var PreshipMentMobile = await _portalService.AddMultiplePreShipmentMobile(PreshipmentMobile);
+                var preshipMentMobile = await _portalService.AddMultiplePreShipmentMobile(PreshipmentMobile);
 
-                return new ServiceResponse<object>
+                return new ServiceResponse<MultipleShipmentOutput>
                 {
-                    Object = PreshipMentMobile
+                    Object = preshipMentMobile
                 };
             });
         }
@@ -1191,6 +1191,36 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpGet]
+        [Route("getgroupcodewaybilldetails/{groupCode}")]
+        public async Task<IServiceResponse<MobileGroupCodeWaybillMappingDTO>> GetWaybillDetailsInGroup(string groupCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var details = await _portalService.GetWaybillDetailsInGroup(groupCode);
+
+                return new ServiceResponse<MobileGroupCodeWaybillMappingDTO>
+                {
+                    Object = details
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getwaybillsingroupcode/{groupCode}")]
+        public async Task<IServiceResponse<MobileGroupCodeWaybillMappingDTO>> GetWaybillsInGroup(string groupCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var details = await _portalService.GetWaybillNumbersInGroup(groupCode);
+
+                return new ServiceResponse<MobileGroupCodeWaybillMappingDTO>
+                {
+                    Object = details
+                };
+            });
+        }
+
 
         [HttpPost]
         [Route("updatepreshipmentmobile")]
@@ -1362,7 +1392,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 }
                 else
                 {
-                    throw new GenericException("Operation could not be completed");
+                    throw new GenericException("Information does not exist, kindly provide correct email");
                 }
 
                 return new ServiceResponse<bool>
@@ -1374,11 +1404,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("verifypartnerdetails")]
-        public async Task<IServiceResponse<bool>> VerifyPartnerDetails(PartnerDTO partner)
+        public async Task<IServiceResponse<bool>> VerifyPartnerDetails(PartnerDTO partnerDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var response = await _portalService.VerifyPartnerDetails(partner);
+                var response = await _portalService.VerifyPartnerDetails(partnerDto);
                 return new ServiceResponse<bool>
                 {
                     Object = response

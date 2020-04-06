@@ -14,6 +14,11 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 using System.Text;
+using System.Collections.Generic;
+using GIGLS.Core.DTO.Report;
+using GIGLS.Infrastructure;
+using GIGLS.Core.IServices.Wallet;
+using GIGLS.Core.DTO.Wallet;
 
 namespace GIGLS.Services.Implementation.Partnership
 {
@@ -21,11 +26,18 @@ namespace GIGLS.Services.Implementation.Partnership
     {
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
+        private readonly IWalletService _walletService;
+        private readonly IWalletTransactionService _walletTransactionService;
+        private readonly IPartnerPayoutService _partnerPayoutService;
 
-        public PartnerTransactionsService(IUnitOfWork uow, IUserService userService)
+        public PartnerTransactionsService(IUnitOfWork uow, IUserService userService, IWalletService walletService,
+                                        IWalletTransactionService walletTransactionService, IPartnerPayoutService partnerPayoutService)
         {
             _userService = userService;
             _uow = uow;
+            _walletService = walletService;
+            _walletTransactionService = walletTransactionService;
+            _partnerPayoutService = partnerPayoutService;
             MapperConfig.Initialize();
         }
 
@@ -87,14 +99,14 @@ namespace GIGLS.Services.Implementation.Partnership
         }
 
         public async Task<object> AddPartnerPaymentLog(PartnerTransactionsDTO walletPaymentLogDto)
-        {
-            
+        {            
             walletPaymentLogDto.UserId = await _userService.GetCurrentUserId();
             var walletPaymentLog = Mapper.Map<PartnerTransactions>(walletPaymentLogDto);
             _uow.PartnerTransactions.Add(walletPaymentLog);
             await _uow.CompleteAsync();
             return new { id = walletPaymentLog.PartnerTransactionsID };
         }
+        
         public string Encrypt(string clearText)
             {
                 string EncryptionKey = "abc123";
@@ -116,6 +128,7 @@ namespace GIGLS.Services.Implementation.Partnership
                 }
                 return clearText;
             }
+        
         public async Task<string> Decrypt(string cipherText)
             {
                 string EncryptionKey = "abc123";
@@ -138,5 +151,104 @@ namespace GIGLS.Services.Implementation.Partnership
                 }
                 return cipherText;
             }
+
+        public async Task ProcessPartnerTransactions(List<ExternalPartnerTransactionsPaymentDTO> paymentLogDto)
+        {
+            var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
+
+            //Get current User
+            var currentUserId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(currentUserId);
+            var processedBy = user.Email;
+
+            List<ExternalPartnerTransactionsPaymentDTO> newPaymentLogDto = new List<ExternalPartnerTransactionsPaymentDTO>();
+
+            foreach (var partner in paymentLogDto)
+            {
+                var existingParntner = await _uow.Partner.GetAsync(s => s.PartnerCode == partner.Code);
+                
+                if (existingParntner != null)
+                {
+                    // Get Date Info
+                    var queryDate = partner.filterCriteria.getStartDateAndEndDate();
+                    var startDate = queryDate.Item1;
+                    var endDate = queryDate.Item2;
+
+                    partner.filterCriteria.StartDate = startDate;
+                    partner.filterCriteria.EndDate = endDate;
+
+                    partner.GIGGOServiceCenter = gigGOServiceCenter.ServiceCentreId;
+                    partner.ProcessedBy = processedBy;
+                    partner.UserId = existingParntner.UserId;
+
+                    newPaymentLogDto.Add(partner);
+                }
+            }
+
+            foreach (var partner in newPaymentLogDto)
+            {
+                await UpdatePartnerTransactionPayment(partner);
+            }
+        }
+
+        private async Task UpdatePartnerTransactionPayment(ExternalPartnerTransactionsPaymentDTO partner)
+        {
+            var transactions = await _uow.PartnerTransactions.FindAsync(x => x.UserId == partner.UserId 
+                                            && x.DateCreated >= partner.filterCriteria.StartDate 
+                                            && x.DateCreated <= partner.filterCriteria.EndDate);
+
+            if(transactions != null)
+            {
+                foreach (var transaction in transactions)
+                {
+                    transaction.IsProcessed = true;
+                }
+            }
+
+            await AddPartnerWallet(partner);
+        }
+
+        private async Task AddPartnerWallet(ExternalPartnerTransactionsPaymentDTO partner)
+        {
+            var wallet = await _walletService.GetWalletBalance(partner.Code);
+            var amountLeft = (wallet.Balance - Convert.ToDecimal(partner.Amount));
+            var addtransaction = new WalletTransactionDTO
+            {
+                WalletId = wallet.WalletId,
+                CreditDebitType = CreditDebitType.Debit,
+                Amount = partner.Amount,
+                ServiceCentreId = partner.GIGGOServiceCenter,
+                //Waybill = waybill,
+                Description = "Debit for shipment delivery payout",
+                PaymentType = PaymentType.Transfer,
+                UserId = partner.UserId
+            };
+            var walletTransaction = await _walletTransactionService.AddWalletTransaction(addtransaction);
+            var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
+            updatedwallet.Balance = amountLeft;
+
+            await AddPartnerPayoutData(partner);
+
+        }
+
+        private async Task AddPartnerPayoutData(ExternalPartnerTransactionsPaymentDTO partner)
+        {
+            var processedByData = new PartnerPayoutDTO
+            {
+                Amount = partner.Amount,
+                ProcessedBy = partner.ProcessedBy,
+                PartnerName = partner.PartnerName,
+                StartDate = partner.filterCriteria.StartDate,
+                EndDate = partner.filterCriteria.EndDate
+            };
+            var addPartnerPayout = await _partnerPayoutService.AddPartnerPayout(processedByData);
+        }
+
+        public async Task<List<PartnerPayoutDTO>> GetPartnersPayout(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            var partnersPayout = await _uow.PartnerPayout.GetPartnerPayoutByDate(filterCriteria);
+
+            return partnersPayout;
+        }
     }
 }
