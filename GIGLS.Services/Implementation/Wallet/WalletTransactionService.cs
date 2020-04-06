@@ -28,7 +28,7 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IServiceCentreService _centreService;
         private readonly ICountryService _countryservice;
 
-        public WalletTransactionService(IUnitOfWork uow, IUserService userService, 
+        public WalletTransactionService(IUnitOfWork uow, IUserService userService,
             IWalletService walletService, ICustomerService customerService,
             IServiceCentreService centreService, ICountryService countryservice)
         {
@@ -124,7 +124,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(item.Wallet.CustomerId);
 
-                    if(partnerDTO != null)
+                    if (partnerDTO != null)
                     {
                         item.Wallet.CustomerName = partnerDTO.PartnerName;
                         item.Wallet.UserActiveCountryId = partnerDTO.UserActiveCountryId;
@@ -136,7 +136,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     // handle IndividualCustomers
                     var individualCustomerDTO = await _uow.IndividualCustomer.GetIndividualCustomerByIdWithCountry(item.Wallet.CustomerId);
 
-                    if(individualCustomerDTO != null)
+                    if (individualCustomerDTO != null)
                     {
                         item.Wallet.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
                         item.Wallet.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
@@ -144,7 +144,6 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
                 }
             }
-
             return walletTransactions;
         }
 
@@ -166,7 +165,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //get the customer info
             //var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
-            
+
             var walletTransactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == walletId);
             if (walletTransactions.Count() < 1)
             {
@@ -184,7 +183,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(s => s.DateCreated));
 
             // get the service centre
-            foreach(var item in walletTransactionDTOList)
+            foreach (var item in walletTransactionDTOList)
             {
                 var serviceCentre = await _centreService.GetServiceCentreById(item.ServiceCentreId);
                 item.ServiceCentre = serviceCentre;
@@ -266,7 +265,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     WalletBalance = wallet.Balance,
                     WalletOwnerName = userid.FirstName + " " + userid.LastName,
                     WalletId = wallet.WalletId
-                   
+
                 };
             }
             var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(s => s.DateCreated));
@@ -280,7 +279,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 WalletBalance = wallet.Balance,
                 WalletOwnerName = userid.FirstName + " " + userid.LastName,
                 WalletId = wallet.WalletId
-                
+
             };
         }
 
