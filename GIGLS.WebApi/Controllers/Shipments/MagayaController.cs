@@ -4,10 +4,10 @@ using GIGLS.Services.Implementation;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using GIGLS.Core.IServices.User;
+using GIGLS.Core.IServices.User;  
 using ThirdParty.WebServices.Magaya.DTO;
 using ThirdParty.WebServices.Magaya.Business.New;
-using ThirdParty.WebServices.Magaya.Services;
+using ThirdParty.WebServices.Magaya.Services;   
 using System.ServiceModel;
 
 namespace GIGLS.WebApi.Controllers.Shipments
