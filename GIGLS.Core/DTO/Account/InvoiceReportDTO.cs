@@ -42,8 +42,8 @@ namespace GIGLS.Core.DTO.Account
         public decimal TotalShipmentAvg{ get; set; }
 
         public List<object> WeightData { get; set; }
-        public decimal AvgLagosShipment { get; set; }
-        public decimal AvgOutLagosShipment { get; set; }
+        public decimal AvgStationShipment { get; set; }
+        public decimal AvgOutStationShipment { get; set; }
 
         public int IndCustomerCount { get; set; }
         public int EcomCustomerCount { get; set; }

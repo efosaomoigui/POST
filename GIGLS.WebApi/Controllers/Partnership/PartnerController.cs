@@ -215,6 +215,37 @@ namespace GIGLS.WebApi.Controllers.Partnership
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("partnersunderfleet/{fleetCode}")]
+        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetAllPartnersUnderFleetPartner(string fleetCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var partners = await _fleetPartnerService.GetVehiclesAttachedToFleetPartner(fleetCode);
+                return new ServiceResponse<IEnumerable<VehicleTypeDTO>>
+                {
+                    Object = partners
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Delete")]
+        [HttpGet]
+        [Route("removepartnerfromfleet/{partnerCode}")]
+        public async Task<IServiceResponse<bool>> RemovePartnerFromFleet(string partnerCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _fleetPartnerService.RemovePartnerFromFleetPartner(partnerCode);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("getallpartnerswithoutenterprise")]
         public async Task<IServiceResponse<IEnumerable<PartnerDTO>>> GetExternalPartnersNotAttachedToAnyFleetPartner()
         {
