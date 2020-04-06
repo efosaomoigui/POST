@@ -117,10 +117,10 @@ namespace GIGLS.Services.Implementation.Report
             //Filter by Station
             else if (filterCriteria.StationId > 0)
             {
-                // get the service centre
-                var serviceCentresInStation = await _serviceCenterService.GetServiceCentresByStationId(filterCriteria.StationId);
-                serviceCenterInStationIds = serviceCentresInStation.Select(s => s.ServiceCentreId).ToArray();
-                
+                //// get the service centre
+                var serviceCentresInStation = _uow.ServiceCentre.GetAllAsQueryable().Where(x => x.StationId == filterCriteria.StationId).Select(s => s.ServiceCentreId);
+                serviceCenterInStationIds = serviceCentresInStation.ToList().ToArray();
+
                 //For the Departure Station Data Only
                 invoices = invoice.Where(s => serviceCenterInStationIds.Contains(s.DepartureServiceCentreId)).ToList();
 
