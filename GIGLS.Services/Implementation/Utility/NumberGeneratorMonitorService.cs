@@ -26,6 +26,11 @@ namespace GIGLS.Services.Implementation.Utility
                 var monitor = _uow.NumberGeneratorMonitor.SingleOrDefault(x =>
                     x.ServiceCentreCode == serviceCenterCode && x.NumberGeneratorType == numberGeneratorType);
 
+                if (numberGeneratorType == NumberGeneratorType.MagayaWb)
+                {
+                    monitor = _uow.NumberGeneratorMonitor.SingleOrDefault(x => x.NumberGeneratorType == numberGeneratorType);
+                }
+
 
                 // At this point, monitor can only be null if it's the first time we're
                 // creating a number for the service centre and numberGeneratorType. 
@@ -33,8 +38,19 @@ namespace GIGLS.Services.Implementation.Utility
                 var numberCode = monitor?.Number ?? "0";
 
                 //2. Increment lastcode to get the next available numberCode by 1
-                var number = long.Parse(numberCode) + 1;
-                var numberStr = number.ToString("000000");
+                var number = 0L;
+                var numberStr = "";
+                if (numberGeneratorType != NumberGeneratorType.MagayaWb)
+                {
+                    number = long.Parse(numberCode) + 1;
+                    numberStr = number.ToString("000000");
+                }
+                else if (numberGeneratorType == NumberGeneratorType.MagayaWb)
+                {
+                    number = long.Parse(numberCode) + 1;
+                    numberStr = number.ToString("00");
+                }
+
 
                 //Add or update the NumberGeneratorMonitor Table for the Service Centre and numberGeneratorType
                 if (monitor != null)
@@ -53,6 +69,11 @@ namespace GIGLS.Services.Implementation.Utility
 
                 //Add the numberCode with the serviceCenterCode and numberGeneratorType
                 numberGenerated = ResolvePrefixFromNumberGeneratorType(numberGeneratorType) + codeStr + numberStr;
+                if (numberGeneratorType == NumberGeneratorType.MagayaWb)
+                {
+                    numberGenerated = "AWR-"+ResolvePrefixFromNumberGeneratorType(numberGeneratorType)  + numberStr;
+                }
+
 
                 if (numberGeneratorType == NumberGeneratorType.CustomerCodeIndividual ||
                    numberGeneratorType == NumberGeneratorType.CustomerCodeCorporate ||
@@ -154,6 +175,10 @@ namespace GIGLS.Services.Implementation.Utility
                 case NumberGeneratorType.BankProcessingOrderForDemurrage:
                     {
                         return (int)NumberGeneratorType.BankProcessingOrderForDemurrage;
+                    }
+                case NumberGeneratorType.MagayaWb:
+                    {
+                        return (int)NumberGeneratorType.MagayaWb;
                     }
                 default:
                     {

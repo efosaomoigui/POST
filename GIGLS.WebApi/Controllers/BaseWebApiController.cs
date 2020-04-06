@@ -95,6 +95,8 @@ namespace GIGLS.WebApi.Controllers
 
                 apiResponse.Object = methodResponse.Object;
                 apiResponse.Total = methodResponse.Total;
+                apiResponse.Cookies = methodResponse.Cookies;
+                apiResponse.more_reults = methodResponse.more_reults;
                 apiResponse.RefCode = methodResponse.RefCode;
                 apiResponse.Shipmentcodref = methodResponse.Shipmentcodref;
                 apiResponse.VehicleType = methodResponse.VehicleType;

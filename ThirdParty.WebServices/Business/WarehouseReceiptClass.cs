@@ -2,7 +2,7 @@
 using System.Xml.Serialization;
 using System.Collections.Generic;
 
-namespace ThirdParty.WebServices.Magaya.Business
+namespace ThirdParty
 {
 	[XmlRoot(ElementName = "ModeOfTransportation", Namespace = "http://www.magaya.com/XMLSchema/V1")]
 	public class ModeOfTransportation

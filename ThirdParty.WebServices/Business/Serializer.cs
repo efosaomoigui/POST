@@ -1,10 +1,11 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
-namespace ThirdParty.WebServices.Magaya.Business
+namespace ThirdParty.WebServices.Magaya.Business.New
 {
     public class Serializer
     {

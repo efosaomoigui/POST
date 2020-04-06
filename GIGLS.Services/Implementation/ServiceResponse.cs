@@ -6,6 +6,7 @@ using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using System.Collections.Generic;
 using GIGLS.Core.DTO.Partnership;
+using ThirdParty.WebServices.Magaya.Services;
 
 namespace GIGLS.Services.Implementation
 {
@@ -24,7 +25,10 @@ namespace GIGLS.Services.Implementation
         public string Code { get; set; }
         public string ShortDescription { get; set; }
         public TResponse Object { get; set; }
-        public decimal Total { get; set; }
+        public api_session_error magayaErrorMessage { get; set; }
+        public string Cookies { get; set; }
+        public int more_reults { get; set; }
+        public decimal Total { get; set; } 
         public string RefCode { get; set; }
 
         //added to display list of shipments for a wallet code
