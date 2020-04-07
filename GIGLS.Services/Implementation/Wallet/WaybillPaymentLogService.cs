@@ -7,6 +7,7 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.CORE.DTO.Shipments;
+using GIGLS.Services.Implementation.Utility.FlutterWaveEncryptionService;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -300,13 +301,11 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             try
             {
-                //https://api.ravepay.co/flwv3-pug/getpaidx/api/charge
-
-                //FlutterDirectAccountDebit
+                var responseResult = new PaystackWebhookDTO();
 
                 string flutterSandBox = ConfigurationManager.AppSettings["FlutterSandBox"];
-                string flutterDirectAccountDebit = ConfigurationManager.AppSettings["FlutterDirectAccountDebit"];
-
+                string flutterDirectAccountDebit = flutterSandBox + ConfigurationManager.AppSettings["FlutterDirectAccountDebit"];
+                string PBFPubKey = ConfigurationManager.AppSettings["FlutterwavePubKey"];
 
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
@@ -328,38 +327,63 @@ namespace GIGLS.Services.Implementation.Wallet
                     PBFPubKey = waybillPaymentLog.FlutterWaveData.PBFPubKey
                 };
 
-                //encrypt the mobile money
+                //encrypt data
+                string mobileMoneySerialize = JsonConvert.SerializeObject(mobileMoney);
+                IPaymentDataEncryption en = new RavePaymentDataEncryption();
+                string key = en.GetEncryptionKey(PBFPubKey);
+                string cipher = en.EncryptData(key, mobileMoneySerialize);
+
+                var flutterObject = new FlutterWaveObject
+                {
+                    PBFPubKey = PBFPubKey,
+                    client = cipher,
+                    alg = "3DES-24"
+                };
 
                 using (var client = new HttpClient())
                 {
-                    client.DefaultRequestHeaders.Accept.Clear();
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", flutterSandBox);
+                    //client.DefaultRequestHeaders.Accept.Clear();
+                    //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", flutterSandBox);
 
-
-                    var json = JsonConvert.SerializeObject(mobileMoney);
+                    var json = JsonConvert.SerializeObject(flutterObject);
                     var data = new StringContent(json, Encoding.UTF8, "application/json");
                     var response = await client.PostAsync(flutterDirectAccountDebit, data);
                     string result = await response.Content.ReadAsStringAsync();
 
-                    var paystackResponse = JsonConvert.DeserializeObject<PaystackWebhookDTO>(result);
+                    var flutterResponse = JsonConvert.DeserializeObject<FlutterWebhookDTO>(result);
 
-                    //update the response from paystack
+                    //update the response from flutterwave
                     var updateWaybillPaymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == waybillPaymentLog.Reference);
 
-                    if (paystackResponse.data != null)
+                    responseResult.Message = flutterResponse.Message;
+                    if(flutterResponse.Status == "success")
                     {
-                        updateWaybillPaymentLog.TransactionStatus = paystackResponse.data.Status;
-                        updateWaybillPaymentLog.TransactionResponse = paystackResponse.data.Display_Text + " " + paystackResponse.data.Message + " " + paystackResponse.data.Gateway_Response;
+                        responseResult.Status = true;
+                    }
+
+                    if (flutterResponse.data != null)
+                    {
+                        responseResult.data.Status = flutterResponse.data.Status;
+                        responseResult.data.Message = flutterResponse.data.ChargeResponseCode + " | " + flutterResponse.data.ChargeResponseMessage;
+
+                        if (flutterResponse.data.validateInstructions != null)
+                        {
+                            responseResult.data.Message = responseResult.data.Message + " | " + flutterResponse.data.validateInstructions.Instruction;
+                        }
                     }
                     else
                     {
-                        updateWaybillPaymentLog.TransactionResponse = paystackResponse.Message;
+                        responseResult.data.Message = flutterResponse.Message;
+                        responseResult.data.Status = flutterResponse.Status;
                     }
 
+                    //update waybill payment log
+                    updateWaybillPaymentLog.TransactionStatus = responseResult.data.Status;
+                    updateWaybillPaymentLog.TransactionResponse = responseResult.data.Gateway_Response;
                     await _uow.CompleteAsync();
 
-                    return paystackResponse;
+                    return responseResult;
                 }
             }
             catch (Exception ex)

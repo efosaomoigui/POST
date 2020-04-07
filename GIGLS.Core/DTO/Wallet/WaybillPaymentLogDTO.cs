@@ -78,4 +78,11 @@ namespace GIGLS.Core.DTO.Wallet
         public string txRef { get; set; }
         public string device_fingerprint { get; set; }
     }
+
+    public class FlutterWaveObject
+    {
+        public string PBFPubKey { get; set; }
+        public string client { get; set; }
+        public string alg { get; set; } 
+    }
 }
