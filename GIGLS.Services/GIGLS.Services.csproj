@@ -291,6 +291,8 @@
     <Compile Include="Implementation\Utility\EnumExtensions.cs" />
     <Compile Include="Implementation\Utility\EnumHelper.cs" />
     <Compile Include="Implementation\Utility\EnumValue.cs" />
+    <Compile Include="Implementation\Utility\FlutterWaveEncryptionService\IPaymentDataEncryption.cs" />
+    <Compile Include="Implementation\Utility\FlutterWaveEncryptionService\RavePaymentDataEncryption.cs" />
     <Compile Include="Implementation\Utility\GlobalPropertyService.cs" />
     <Compile Include="Implementation\Utility\NumberGeneratorMonitorService.cs" />
     <Compile Include="Implementation\Utility\PasswordGenerator.cs" />

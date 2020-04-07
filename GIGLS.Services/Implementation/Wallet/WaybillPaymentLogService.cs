@@ -69,6 +69,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 if(waybillPaymentLog.OnlinePaymentType == Core.Enums.OnlinePaymentType.Flutterwave)
                 {
                     //Process Payment for FlutterWave;
+                    response = await AddWaybillPaymentLogForFlutterWave(waybillPaymentLog);
                 }
             }
                             
@@ -118,12 +119,19 @@ namespace GIGLS.Services.Implementation.Wallet
             };
         }
 
-        private async Task<PaystackWebhookDTO> AddWaybillPaymentLogForPaystack(WaybillPaymentLogDTO waybillPaymentLog)
-        {    
+        private async Task<string> SaveWaybillPaymentLog(WaybillPaymentLogDTO waybillPaymentLog)
+        {
             waybillPaymentLog.Reference = await GenerateWaybillReferenceCode(waybillPaymentLog.Waybill);
             var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
             _uow.WaybillPaymentLog.Add(newPaymentLog);
             await _uow.CompleteAsync();
+
+            return waybillPaymentLog.Reference;
+        }
+
+        private async Task<PaystackWebhookDTO> AddWaybillPaymentLogForPaystack(WaybillPaymentLogDTO waybillPaymentLog)
+        {    
+            waybillPaymentLog.Reference = await SaveWaybillPaymentLog(waybillPaymentLog);
 
             //3. send the request to paystack gateway
             var paystackResponse =  await ProcessMobilePaymentForPaystack(waybillPaymentLog);
@@ -277,6 +285,87 @@ namespace GIGLS.Services.Implementation.Wallet
                     Status = "failed"
                 }
             };
+        }
+
+        private async Task<PaystackWebhookDTO> AddWaybillPaymentLogForFlutterWave(WaybillPaymentLogDTO waybillPaymentLog)
+        {
+            waybillPaymentLog.Reference = await SaveWaybillPaymentLog(waybillPaymentLog);
+
+            //3. send the request to paystack gateway
+            var paystackResponse = await ProcessMobilePaymentForFlutterWave(waybillPaymentLog);
+            return paystackResponse;
+        }
+
+        private async Task<PaystackWebhookDTO> ProcessMobilePaymentForFlutterWave(WaybillPaymentLogDTO waybillPaymentLog)
+        {
+            try
+            {
+                //https://api.ravepay.co/flwv3-pug/getpaidx/api/charge
+
+                //FlutterDirectAccountDebit
+
+                string flutterSandBox = ConfigurationManager.AppSettings["FlutterSandBox"];
+                string flutterDirectAccountDebit = ConfigurationManager.AppSettings["FlutterDirectAccountDebit"];
+
+
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                FlutterWaveDTO mobileMoney = new FlutterWaveDTO
+                {
+                    amount = waybillPaymentLog.Amount,
+                    currency = waybillPaymentLog.Currency,
+                    email = waybillPaymentLog.Email,
+                    txRef = waybillPaymentLog.Reference,
+                    accountbank = waybillPaymentLog.FlutterWaveData.accountbank,
+                    accountnumber = waybillPaymentLog.FlutterWaveData.accountnumber,
+                    bvn = waybillPaymentLog.FlutterWaveData.bvn,
+                    country = waybillPaymentLog.FlutterWaveData.country,
+                    phonenumber = waybillPaymentLog.FlutterWaveData.phonenumber,
+                    payment_type = waybillPaymentLog.FlutterWaveData.payment_type,
+                    firstname = waybillPaymentLog.FlutterWaveData.firstname,
+                    lastname = waybillPaymentLog.FlutterWaveData.firstname,
+                    passcode = waybillPaymentLog.FlutterWaveData.passcode,
+                    PBFPubKey = waybillPaymentLog.FlutterWaveData.PBFPubKey
+                };
+
+                //encrypt the mobile money
+
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", flutterSandBox);
+
+
+                    var json = JsonConvert.SerializeObject(mobileMoney);
+                    var data = new StringContent(json, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(flutterDirectAccountDebit, data);
+                    string result = await response.Content.ReadAsStringAsync();
+
+                    var paystackResponse = JsonConvert.DeserializeObject<PaystackWebhookDTO>(result);
+
+                    //update the response from paystack
+                    var updateWaybillPaymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == waybillPaymentLog.Reference);
+
+                    if (paystackResponse.data != null)
+                    {
+                        updateWaybillPaymentLog.TransactionStatus = paystackResponse.data.Status;
+                        updateWaybillPaymentLog.TransactionResponse = paystackResponse.data.Display_Text + " " + paystackResponse.data.Message + " " + paystackResponse.data.Gateway_Response;
+                    }
+                    else
+                    {
+                        updateWaybillPaymentLog.TransactionResponse = paystackResponse.Message;
+                    }
+
+                    await _uow.CompleteAsync();
+
+                    return paystackResponse;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }
