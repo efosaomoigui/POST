@@ -315,14 +315,14 @@ namespace GIGLS.Services.Implementation.Wallet
                     currency = waybillPaymentLog.Currency,
                     email = waybillPaymentLog.Email,
                     txRef = waybillPaymentLog.Reference,
+                    phonenumber = waybillPaymentLog.PhoneNumber,
                     accountbank = waybillPaymentLog.FlutterWaveData.accountbank,
                     accountnumber = waybillPaymentLog.FlutterWaveData.accountnumber,
                     bvn = waybillPaymentLog.FlutterWaveData.bvn,
                     country = waybillPaymentLog.FlutterWaveData.country,
-                    phonenumber = waybillPaymentLog.FlutterWaveData.phonenumber,
                     payment_type = waybillPaymentLog.FlutterWaveData.payment_type,
                     firstname = waybillPaymentLog.FlutterWaveData.firstname,
-                    lastname = waybillPaymentLog.FlutterWaveData.firstname,
+                    lastname = waybillPaymentLog.FlutterWaveData.lastname,
                     passcode = waybillPaymentLog.FlutterWaveData.passcode,
                     PBFPubKey = waybillPaymentLog.FlutterWaveData.PBFPubKey
                 };
