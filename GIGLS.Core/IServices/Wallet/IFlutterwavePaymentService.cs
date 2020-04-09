@@ -6,5 +6,6 @@ namespace GIGLS.Core.IServices.Wallet
     public interface IFlutterwavePaymentService : IServiceDependencyMarker
     {
         Task VerifyAndValidatePayment(FlutterWebhookDTO webhook);
+        Task<string> GetSecurityKey();
     }
 }

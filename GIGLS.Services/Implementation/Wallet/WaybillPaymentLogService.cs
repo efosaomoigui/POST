@@ -306,6 +306,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 string flutterSandBox = ConfigurationManager.AppSettings["FlutterSandBox"];
                 string flutterDirectAccountDebit = flutterSandBox + ConfigurationManager.AppSettings["FlutterDirectAccountDebit"];
                 string PBFPubKey = ConfigurationManager.AppSettings["FlutterwavePubKey"];
+                string SecretKey = ConfigurationManager.AppSettings["FlutterwaveSecretKey"];
 
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
@@ -324,13 +325,13 @@ namespace GIGLS.Services.Implementation.Wallet
                     firstname = waybillPaymentLog.FlutterWaveData.firstname,
                     lastname = waybillPaymentLog.FlutterWaveData.lastname,
                     passcode = waybillPaymentLog.FlutterWaveData.passcode,
-                    PBFPubKey = waybillPaymentLog.FlutterWaveData.PBFPubKey
+                    PBFPubKey = PBFPubKey
                 };
 
                 //encrypt data
                 string mobileMoneySerialize = JsonConvert.SerializeObject(mobileMoney);
                 IPaymentDataEncryption en = new RavePaymentDataEncryption();
-                string key = en.GetEncryptionKey(PBFPubKey);
+                string key = en.GetEncryptionKey(SecretKey);
                 string cipher = en.EncryptData(key, mobileMoneySerialize);
 
                 var flutterObject = new FlutterWaveObject
