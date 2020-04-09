@@ -29,7 +29,7 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUnitOfWork _uow;
         private readonly IPaymentTransactionService _paymentTransactionService;
 
-        private string secretKey = ConfigurationManager.AppSettings["PayStackSecret"];
+        private readonly string secretKey = ConfigurationManager.AppSettings["PayStackSecret"];
 
         public PaystackPaymentService(IUserService userService, IWalletService walletService, IUnitOfWork uow, IPaymentTransactionService paymentTransactionService)
         {
@@ -106,7 +106,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     return result;
 
                 //2. if the payment successful
-                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited)
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     //a. update the wallet for the customer
                     string customerId = null;  //set customer id to null
@@ -424,7 +424,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     return result;
 
                 //2. if the payment successful
-                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWaybillSettled)
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWaybillSettled && verifyResult.data.Amount == paymentLog.Amount)
                 {
                     //3. Process payment for the waybill if successful
                     PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO

@@ -299,6 +299,7 @@
     <Compile Include="Implementation\Vendors\VendorService.cs" />
     <Compile Include="Implementation\Wallet\CashOnDeliveryAccountService.cs" />
     <Compile Include="Implementation\Wallet\CashOnDeliveryBalanceService.cs" />
+    <Compile Include="Implementation\Wallet\FlutterwavePaymentService.cs" />
     <Compile Include="Implementation\Wallet\PaystackPaymentService.cs" />
     <Compile Include="Implementation\Wallet\WalletPaymentLogService.cs" />
     <Compile Include="Implementation\Wallet\WalletService.cs" />

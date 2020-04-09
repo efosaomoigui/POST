@@ -342,12 +342,12 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 using (var client = new HttpClient())
                 {
-                    //client.DefaultRequestHeaders.Accept.Clear();
-                    //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", flutterSandBox);
 
                     var json = JsonConvert.SerializeObject(flutterObject);
-                    var data = new StringContent(json, Encoding.UTF8, "application/json");
+                    StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
                     var response = await client.PostAsync(flutterDirectAccountDebit, data);
                     string result = await response.Content.ReadAsStringAsync();
 
