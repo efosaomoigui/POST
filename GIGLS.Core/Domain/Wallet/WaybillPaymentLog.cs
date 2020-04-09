@@ -18,6 +18,8 @@ namespace GIGLS.Core.Domain.Wallet
         public decimal Amount { get; set; }
         public string TransactionStatus { get; set; }
         public string TransactionResponse { get; set; }
+
+        [MaxLength(10)]
         public string Currency { get; set; }
 
         public OnlinePaymentType OnlinePaymentType { get; set; }
@@ -27,5 +29,14 @@ namespace GIGLS.Core.Domain.Wallet
 
         public bool IsWaybillSettled { get; set; }
         public bool IsPaymentSuccessful { get; set; }
+
+        [MaxLength(100)]
+        public string PhoneNumber { get; set; }
+
+        [MaxLength(100)]
+        public string Email { get; set; }
+
+        [MaxLength(50)]
+        public string NetworkProvider { get; set; }
     }
 }

@@ -445,6 +445,21 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IActivationCampaignEmailRepository ActivationCampaignEmail { get; set; }
 
+        [Inject]
+        public IGiglgoStationRepository GiglgoStation { get; set; }
+
+        [Inject]
+        public IShipmentHashRepository ShipmentHash { get; set; }
+
+        [Inject]
+        public IFleetPartnerRepository FleetPartner { get; set; }
+
+        [Inject]
+        public IMobileGroupCodeWaybillMappingRepository MobileGroupCodeWaybillMapping { get; set; }
+
+        [Inject]
+        public IPartnerPayoutRepository PartnerPayout { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();

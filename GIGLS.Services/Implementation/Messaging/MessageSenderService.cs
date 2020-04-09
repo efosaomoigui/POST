@@ -1,7 +1,9 @@
-﻿using GIGLS.Core;
+﻿using AutoMapper;
+using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Account;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
@@ -9,7 +11,6 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IMessage;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices;
-using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.MessagingLog;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
@@ -26,29 +27,24 @@ namespace GIGLS.Services.Implementation.Messaging
         private readonly IEmailService _emailService;
         private readonly ISMSService _sMSService;
         private readonly IMessageService _messageService;
-        private readonly ICustomerService _customerService;
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ISmsSendLogService _iSmsSendLogService;
         private readonly IEmailSendLogService _iEmailSendLogService;
         private readonly IUserService _userService;
 
-        public MessageSenderService(IUnitOfWork uow, IEmailService emailService, ISMSService sMSService,
-            IMessageService messageService,
-            ICustomerService customerService,
-            IUserService userService,
-            ISmsSendLogService iSmsSendLogService, IEmailSendLogService iEmailSendLogService,
+        public MessageSenderService(IUnitOfWork uow, IEmailService emailService, ISMSService sMSService, IMessageService messageService,
+            IUserService userService, ISmsSendLogService iSmsSendLogService, IEmailSendLogService iEmailSendLogService,
             IGlobalPropertyService globalPropertyService)
         {
             _uow = uow;
             _emailService = emailService;
             _sMSService = sMSService;
             _messageService = messageService;
-            //_invoiceService = invoiceService;
-            _customerService = customerService;
             _globalPropertyService = globalPropertyService;
             _iSmsSendLogService = iSmsSendLogService;
             _iEmailSendLogService = iEmailSendLogService;
             _userService = userService;
+            MapperConfig.Initialize();
         }
 
         public async Task<bool> SendMessage(MessageType messageType, EmailSmsType emailSmsType, object obj)
@@ -97,8 +93,14 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     //prepare message finalBody
                     await PrepareMessageFinalBody(messageDTO, obj);
+
                     result = await _emailService.SendAsync(messageDTO);
-                    await LogEmailMessage(messageDTO, result);
+
+                    //send email if there is email address
+                    if (messageDTO.ToEmail != null)
+                    {
+                        await LogEmailMessage(messageDTO, result);
+                    }
                 }
             }
             catch (Exception ex)
@@ -121,8 +123,13 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     //prepare message finalBody
                     await PrepareMessageFinalBody(messageDTO, obj);
+
                     result = await _sMSService.SendAsync(messageDTO);
-                    await LogSMSMessage(messageDTO, result);
+
+                    if (messageDTO.To != null)
+                    {
+                        await LogSMSMessage(messageDTO, result);
+                    }
                 }
             }
             catch (Exception ex)
@@ -183,7 +190,7 @@ namespace GIGLS.Services.Implementation.Messaging
                         invoice.CustomerType = CustomerType.IndividualCustomer.ToString();
                     }
                     CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), invoice.CustomerType);
-                    var customerObj = await _customerService.GetCustomer(invoice.CustomerId, customerType);
+                    var customerObj = await GetCustomer(invoice.CustomerId, customerType);
 
                     var userActiveCountryId = await _userService.GetUserActiveCountryId();
 
@@ -408,11 +415,8 @@ namespace GIGLS.Services.Implementation.Messaging
                 //populate the message template
                 messageDTO.FinalBody =
                     string.Format(messageDTO.Body, strArray);
-
-
-
+                               
                 messageDTO.ToEmail = messageObj.gigMail;
-
             }
             if (obj is AppMessageDTO)
             {
@@ -426,7 +430,8 @@ namespace GIGLS.Services.Implementation.Messaging
                     "UserPhoneNumber",
                     "ScreenshotOne",
                     "ScreenshotTwo",
-                    "ScreenshotThree"
+                    "ScreenshotThree",
+                    "UserEmail"
                 };
 
                 var messageObj = (AppMessageDTO)obj;
@@ -441,6 +446,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[6] = messageObj.ScreenShots1;
                 strArray[7] = messageObj.ScreenShots2;
                 strArray[8] = messageObj.ScreenShots3;
+                strArray[9] = messageObj.UserDetails.Email;
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
@@ -457,6 +463,45 @@ namespace GIGLS.Services.Implementation.Messaging
             }
 
             return await Task.FromResult(true);
+        }
+
+        public async Task<CustomerDTO> GetCustomer(int customerId, CustomerType customerType)
+        {
+            try
+            {
+                // handle Company customers
+                if (CustomerType.Company.Equals(customerType))
+                {
+                    var company = await _uow.Company.GetCompanyById(customerId);
+                    var customerDTO = Mapper.Map<CustomerDTO>(company);
+
+                    if (company != null)
+                    {
+                        customerDTO.CustomerType = CustomerType.Company;
+                    }                    
+                    return customerDTO;
+                }
+                else
+                {
+                    // handle IndividualCustomers
+                    var customer = await _uow.IndividualCustomer.GetAsync(customerId);
+                    IndividualCustomerDTO individual = Mapper.Map<IndividualCustomerDTO>(customer);
+
+                    //get all countries and set the country name
+                    if(customer != null)
+                    {
+                        var userCountry = await _uow.Country.GetAsync(individual.UserActiveCountryId);
+                        individual.UserActiveCountryName = userCountry?.CountryName;
+                    }
+
+                    var customerDTO = Mapper.Map<CustomerDTO>(individual);
+                    return customerDTO;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         private async Task<bool> LogSMSMessage(MessageDTO messageDTO, string result, string exceptionMessage = null)
@@ -591,7 +636,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     invoiceViewDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
                 }
                 CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), invoiceViewDTO.CustomerType);
-                var customerObj = await _customerService.GetCustomer(invoiceViewDTO.CustomerId, customerType);
+                var customerObj = await GetCustomer(invoiceViewDTO.CustomerId, customerType);
 
                 //A. map the array
                 strArray[0] = customerObj.CustomerName;
@@ -664,8 +709,7 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 messageDTO.ToEmail = messageExtensionDTO.RegionalManagerEmail;
             }
-
-
+            
             //4 obj is MobileMessageDTO
             if (obj is MobileMessageDTO)
             {
@@ -699,25 +743,28 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 messageDTO.ToEmail = mobileMessageDTO.SenderEmail;
             }
-
-
+            
             //4. obj is PasswordMessageDTO
             if (obj is PasswordMessageDTO)
             {
                 var strArray = new string[]
                 {
-                    "Password"
+                    "Password",
+                    "UserEmail",
+                    "URL",
+                    "CustomerCode"
                 };
                 var passwordMessageDTO = (PasswordMessageDTO)obj;
 
                 strArray[0] = passwordMessageDTO.Password;
+                strArray[1] = passwordMessageDTO.UserEmail;
+                strArray[2] = passwordMessageDTO.CustomerCode;
+
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
                 messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
                 messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
-
                 messageDTO.ToEmail = passwordMessageDTO.UserEmail;
             }
-
 
             return await Task.FromResult(verifySendEmail);
         }

@@ -26,7 +26,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.MessagingLog
                 var startDate = queryDate.Item1;
                 var endDate = queryDate.Item2;
                 
-                var messages = Context.SmsSendLog.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).AsQueryable();
+                var messages = Context.SmsSendLog.AsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
 
                 if (filter.Status.HasValue)
                 {
@@ -70,8 +70,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.MessagingLog
                             break;
                     }
                 }
-
-
+                
                 //populate the count variable
                 var totalCount = queryable.Count();
 

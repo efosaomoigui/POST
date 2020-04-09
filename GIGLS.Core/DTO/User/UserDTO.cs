@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GIGLS.Core.Enums;
 using System;
+using GIGLS.Core.DTO.Partnership;
 
 namespace GIGLS.Core.DTO.User
 {
@@ -68,6 +69,7 @@ namespace GIGLS.Core.DTO.User
         public int UserActiveCountryId { get; set; }
         public CountryDTO UserActiveCountry { get; set; }
         public List<string> VehicleType { get; set; }
+        public List<VehicleTypeDTO> VehicleDetails { get; set; }
         public bool IsFromMobile { get; set; }
 
         public string Referrercode { get; set; }
@@ -76,17 +78,18 @@ namespace GIGLS.Core.DTO.User
 
         public bool IsVerified { get; set; }
 
-        public string MobileCountryName { get; set; }
+        public string CountryPhoneNumberCode { get; set; }
         public bool IsRegisteredFromMobile { get; set; }
 
         public DateTime? VehicleLicenseExpiryDate { get; set; }
 
-        public bool RequiresCod { get; set; }
+        public bool? RequiresCod { get; set; }
 
-        public bool IsUniqueInstalled { get; set; }
+        public bool? IsUniqueInstalled { get; set; }
 
         public string AppType { get; set; }
 
-        public bool IsEligible { get; set; }
+        public bool? IsEligible { get; set; }
+        public string RegistrationReferrercode { get; set; }
     }
 }

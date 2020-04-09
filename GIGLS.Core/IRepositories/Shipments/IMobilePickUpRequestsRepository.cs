@@ -1,6 +1,8 @@
 ﻿using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.DTO.Report;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -10,5 +12,7 @@ namespace GIGLS.Core.IRepositories.Shipments
     {
         Task <List<MobilePickUpRequestsDTO>> GetMobilePickUpRequestsAsync(string userId);
         Task<List<MobilePickUpRequestsDTO>> GetMobilePickUpRequestsAsyncMonthly(string userId);
+        Task<List<FleetMobilePickUpRequestsDTO>> GetPartnerMobilePickUpRequestsForFleetPartner(ShipmentCollectionFilterCriteria filterCriteria, string fleetPartnerCode);
+        Task<PartnerDTO> GetPartnerDetailsForAWaybill(string waybill);
     }
 }

@@ -24,5 +24,31 @@ namespace GIGLS.Core.DTO.Wallet
 
         public bool IsWaybillSettled { get; set; }
         public bool IsPaymentSuccessful { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Email { get; set; }
+        public string NetworkProvider { get; set; }
+    }
+
+    //For Mobile Money
+    public class MobileMoneyDTO 
+    {
+        public MobileMoneyDTO()
+        {
+            mobile_money = new Mobile_Money();
+        }
+
+        public string reference { get; set; }
+
+        public decimal amount { get; set; }
+        public string currency { get; set; }
+        public string email { get; set; }
+
+        public Mobile_Money mobile_money { get; set; }
+    }
+
+    public class Mobile_Money
+    {
+        public string phone { get; set; }
+        public string provider { get; set; }
     }
 }

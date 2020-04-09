@@ -121,6 +121,7 @@ namespace GIGLS.Infrastructure.Persistence
 
         //Partner
         public DbSet<Partner> Partners { get; set; }
+        public DbSet<FleetPartner> FleetPartner { get; set; }
 
         //These entities below are not used for now
         //store
@@ -271,6 +272,12 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<LGA> LGA { get; set; }
         public DbSet<Bank> Bank { get; set; }
         public DbSet<ActivationCampaignEmail> ActivationCampaignEmail { get; set; }
+        public DbSet<ShipmentHash> ShipmentHash { get; set; }
+        public DbSet<GiglgoStation> GiglgoStation { get; set; }
+
+        public DbSet<MobileGroupCodeWaybillMapping> MobileGroupCodeWaybillMapping { get; set; }
+        public DbSet<PartnerPayout> PartnerPayout { get; set; }
+
 
         #endregion
 

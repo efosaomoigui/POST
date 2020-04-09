@@ -22,6 +22,8 @@ namespace GIGLS.Core.IServices.ServiceCentres
         Task<IEnumerable<ServiceCentreDTO>> GetServiceCentresByStationId(int stationId);
         Task<List<ServiceCentreDTO>> GetLocalServiceCentres(int[] countryIds);
         Task<List<ServiceCentreDTO>> GetServiceCentresByCountryId(int countryId);
-        
+        Task<ServiceCentreDTO> GetGIGGOServiceCentre();
+        Task<List<ServiceCentreDTO>> GetHUBServiceCentres();
+        Task<List<ServiceCentreDTO>> GetServiceCentresWithoutHUBForNonLagosStation(int usersServiceCentresId, int countryId);        
     }
 }

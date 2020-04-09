@@ -26,7 +26,11 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Shipments
@@ -521,7 +525,33 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                // create the customer, if not recorded in the system
+                var hashString = await ComputeHash(shipmentDTO);
+
+                var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
+                if (checkForHash != null)
+                {
+                    DateTime dateTime = DateTime.Now.AddMinutes(-30);
+                    int timeResult = DateTime.Compare(checkForHash.DateModified, dateTime);
+
+                    if (timeResult > 0)
+                    {
+                        throw new GenericException("A similar shipment already exists on Agility, kindly view your created shipment to confirm.");
+                    }
+                    else
+                    {
+                        checkForHash.DateModified = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    var hasher = new ShipmentHash()
+                    {
+                        HashedShipment = hashString
+                    };
+                    _uow.ShipmentHash.Add(hasher);
+                }
+
+                // create the customer, if information does not exist in our record
                 var customerId = await CreateCustomer(shipmentDTO);
 
                 // create the shipment and shipmentItems
@@ -543,7 +573,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 });
 
                 //send message
-                await _messageSenderService.SendMessage(MessageType.ShipmentCreation, EmailSmsType.All, shipmentDTO);
+                var smsData = new ShipmentTrackingDTO
+                {
+                    Waybill = newShipment.Waybill
+                };
+
+                if (newShipment.DepartureServiceCentreId == 309)
+                {
+                    await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
+                    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, smsData);
+                }
+                else
+                {
+                    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
+                }
 
                 //For Corporate Customers, Pay for their shipments through wallet immediately
                 if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType)
@@ -563,19 +606,83 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 //implement customer week function here
-                var result = await ProcessPaymentForCustomerWeek(newShipment);
+                //var result = await ProcessPaymentForCustomerWeek(newShipment);
 
-                if (result)
-                {
-                    newShipment.GrandTotal = 0;
-                    newShipment.SealNumber = "";
-                }
+                //if (result)
+                //{
+                //    newShipment.GrandTotal = 0;
+                //    newShipment.SealNumber = "";
+                //}
 
                 return newShipment;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
+            }
+        }
+
+        private async Task<string> ComputeHash(ShipmentDTO shipmentDTO)
+        {
+            //1. Departure Service centre can be zero or null
+            //2. Description should be converted to lower case and you must check for null too  -- Done
+            //3. How do you handle special shipment that might not have weight
+            //4. 
+
+            //get user Service center
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            shipmentDTO.DepartureServiceCentreId = serviceCenterIds[0];
+
+            //Create Hash Set
+            var shipmentHash = new HashSet<ShipmentHashDTO>();
+
+            var shipmentHashDto = new ShipmentHashDTO
+            {
+                DeptServId = shipmentDTO.DepartureServiceCentreId,
+                DestServId = shipmentDTO.DestinationServiceCentreId,
+                SenderPhoneNumber = shipmentDTO.Customer[0].PhoneNumber,
+                ReceiverPhoneNumber = shipmentDTO.ReceiverPhoneNumber,
+                Weight = new List<double>()
+            };
+
+            if (shipmentDTO.Description != null)
+                shipmentHashDto.Description = shipmentDTO.Description.ToLower();
+            
+
+            foreach (var item in shipmentDTO.ShipmentItems)
+            {
+                    shipmentHashDto.Weight.Add(item.Weight);
+            }
+
+            shipmentHash.Add(shipmentHashDto);
+
+            // Create a SHA256   
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                //convert the object to a byte array
+                byte[] objectToArray = ObjectToByteArray(shipmentHash);
+
+                // ComputeHash - returns byte array  
+                byte[] bytes = sha256Hash.ComputeHash(objectToArray);
+
+                // Convert byte array to a string   
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return await Task.FromResult(builder.ToString());
+            }
+        }
+
+        // Convert an object to a byte array
+        private static byte[] ObjectToByteArray(HashSet<ShipmentHashDTO> obj)
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            using (var ms = new MemoryStream())
+            {
+                bf.Serialize(ms, obj);
+                return ms.ToArray();
             }
         }
 
@@ -602,7 +709,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 // individualCustomer
                 customerDTO.CustomerType = CustomerType.IndividualCustomer;
             }
-
+            
             var createdObject = await _customerService.CreateCustomer(customerDTO);
 
             // set the customerId
@@ -642,7 +749,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             return createdObject;
         }
-
+        
         private async Task<ShipmentDTO> CreateShipment(ShipmentDTO shipmentDTO)
         {
             await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
@@ -768,7 +875,7 @@ namespace GIGLS.Services.Implementation.Shipments
             //set before returning
             shipmentDTO.DepartureCountryId = departureCountry.CountryId;
             shipmentDTO.DestinationCountryId = destinationCountry.CountryId;
-
+            
             return shipmentDTO;
         }
 
@@ -994,7 +1101,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 //1. get shipments for that Service Centre
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
-                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false && s.IsGrouped == false);
+                var shipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments()
+                    .Where(s => s.IsShipmentCollected == false && s.IsGrouped == false && (s.PaymentStatus == PaymentStatus.Paid || s.CompanyType == CompanyType.Corporate.ToString()));
 
                 //apply filters for Service Centre
                 if (serviceCenters.Length > 0)
@@ -1022,48 +1130,23 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 var shipmentsBySC = shipmentsQueryable.ToList();
-
-                //2. get only paid shipments from Invoice for Individuals
-                // and allow Ecommerce and Corporate customers to be grouped
-                //var ungroupedWaybills = new HashSet<InvoiceView>();
-                var finalUngroupedList = new List<InvoiceView>();
-
-                foreach (var shipmentItem in shipmentsBySC)
-                {
-                    if (shipmentItem.PaymentStatus == PaymentStatus.Paid || shipmentItem.CompanyType == CompanyType.Corporate.ToString())
-                    {
-                        finalUngroupedList.Add(shipmentItem);
-                    }
-                }
-
-                //var ungroupedWaybills = paidShipments;
-
-                //new solution
-                //1. Get Transit Waybill that is not completed, not group and service centre belong to login user
-                //2. Loop through output of 1 and get the shipment details, then add it to the ungrouped
-                //var finalUngroupedList = new List<InvoiceView>();
-
-                //foreach (var item in ungroupedWaybills)
-                //{
-                //    finalUngroupedList.Add(item);
-                //}
-
-                int currentServiceCentre = serviceCenters[0];
-
+                
                 var allTransitWaybillNumberList = _uow.TransitWaybillNumber.GetAllAsQueryable()
-                    .Where(x => x.ServiceCentreId == currentServiceCentre && x.IsGrouped == false && x.IsTransitCompleted == false).ToList();
+                    .Where(x => serviceCenters.Contains(x.ServiceCentreId) && x.IsGrouped == false && x.IsTransitCompleted == false).ToList();
 
-                foreach (var item in allTransitWaybillNumberList)
+                List<string> transitWaybills = allTransitWaybillNumberList.Select(x => x.WaybillNumber).ToList();
+
+                if(allTransitWaybillNumberList.Count > 0)
                 {
-                    var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().FirstOrDefault(s => s.IsShipmentCollected == false && s.Waybill == item.WaybillNumber);
+                    var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false && transitWaybills.Contains(s.Waybill)).ToList();
 
-                    if (shipment != null)
+                    if(shipment.Count > 0)
                     {
-                        finalUngroupedList.Add(shipment);
+                        shipmentsBySC.AddRange(shipment);
                     }
                 }
-
-                return finalUngroupedList;
+                
+                return shipmentsBySC;
             }
             catch (Exception)
             {
@@ -1273,8 +1356,18 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var results1 = await _uow.Invoice.GetShipmentMonitorSetSP(accountFilterCriteria, serviceCenterIds);
-            var results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
 
+            var results = new List<InvoiceMonitorDTO>();
+
+            if(serviceCenterIds.Length > 0)
+            {
+                results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
+            }
+            else
+            {
+                results = results1;
+            }
+                       
             var result = new MulitipleInvoiceMonitorDTO()
             {
                 ShipmentCreated = results
@@ -1294,15 +1387,32 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var results1 = await _uow.Invoice.GetShipmentMonitorSetSPExpected(accountFilterCriteria, serviceCenterIds);
-            var results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
+            var collectionResults1 = await _uow.Invoice.GetShipmentWaitingForCollection(accountFilterCriteria, serviceCenterIds);
 
+            var results = new List<InvoiceMonitorDTO>();
+            var collectionResults = new List<InvoiceMonitorDTO>();
+
+            if (serviceCenterIds.Length > 0)
+            {
+                results = results1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
+                collectionResults = collectionResults1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
+            }
+            else
+            {
+                results = results1;
+                collectionResults = collectionResults1;
+            }
+            
             var result = new MulitipleInvoiceMonitorDTO()
             {
-                ShipmentCreated = results
+                ShipmentCreated = results,
+                ShipmentCollection = collectionResults
             };
 
             var shipmentsexpected = result.ShipmentCreated;
-            var obj = ReturnShipmentCreatedx(shipmentsexpected, accountFilterCriteria);
+            var shipmentscollected = result.ShipmentCollection;
+
+            var obj = ReturnShipmentCreatedx(shipmentsexpected, shipmentscollected, accountFilterCriteria);
 
             return obj;
         }
@@ -1315,8 +1425,18 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var results1 = await _uow.Invoice.GetShipmentMonitorSetSP(accountFilterCriteria, serviceCenterIds);
-            var results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
 
+            var results = new List<InvoiceMonitorDTO>();
+
+            if (serviceCenterIds.Length > 0)
+            {
+                results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
+            }
+            else
+            {
+                results = results1;
+            }
+            
             var shipmentscreated = results;
 
             var obj = ReturnShipmentCreatedByLimitDates(shipmentscreated, accountFilterCriteria, Limitdates);
@@ -1331,12 +1451,25 @@ namespace GIGLS.Services.Implementation.Shipments
             accountFilterCriteria.CountryId = userActiveCountry.CountryId;
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            var results1 = await _uow.Invoice.GetShipmentMonitorSetSPExpected(accountFilterCriteria, serviceCenterIds);
-            var results = results1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
 
-            var shipmentsexpected = results;
+            var results = new List<InvoiceMonitorDTO>();
 
-            var obj = ReturnShipmentCreatedByLimitDates(shipmentsexpected, accountFilterCriteria, Limitdates);
+            if ((Limitdates.StartLimit == 4 && Limitdates.EndLimit == 5) || (Limitdates.StartLimit == 5 && Limitdates.EndLimit == 6))
+            {
+
+                results = await _uow.Invoice.GetShipmentWaitingForCollection(accountFilterCriteria, serviceCenterIds);
+            }
+            else
+            {
+                results = await _uow.Invoice.GetShipmentMonitorSetSPExpected(accountFilterCriteria, serviceCenterIds);
+            }                                     
+            
+            if (serviceCenterIds.Length > 0)
+            {
+                results = results.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
+            }
+            
+            var obj = ReturnShipmentCreatedByLimitDates(results, accountFilterCriteria, Limitdates);
 
             return obj;
         }
@@ -1346,11 +1479,25 @@ namespace GIGLS.Services.Implementation.Shipments
             var dataValues = ReturnStartAndEndDateLimit(accountFilterCriteria, Limitdates);
             var LimitStartDate = dataValues.Item1;
             var LimitEndDate = dataValues.Item2;
+            
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
 
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var results1 = await _uow.Invoice.GetShipmentMonitorSetSP_NotGrouped(accountFilterCriteria, serviceCenterIds);
-            var results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
 
+            var results = new List<InvoiceViewDTOUNGROUPED>();
+
+            if (serviceCenterIds.Length > 0)
+            {
+                results = results1.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId)).ToList();
+            }
+            else
+            {
+                results = results1;
+            }
+            
             var v = new List<InvoiceViewDTOUNGROUPED2>();
 
             if (Limitdates.StartLimit == 1 && Limitdates.EndLimit == 2)
@@ -1402,10 +1549,28 @@ namespace GIGLS.Services.Implementation.Shipments
             var LimitStartDate = dataValues.Item1;
             var LimitEndDate = dataValues.Item2;
 
-            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-            var results1 = await _uow.Invoice.GetShipmentMonitorSetSP_NotGroupedx(accountFilterCriteria, serviceCenterIds);
-            var results = results1.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
+            //filter by User Active Country
+            var userActiveCountry = await _userService.GetUserActiveCountry();
+            accountFilterCriteria.CountryId = userActiveCountry.CountryId;
 
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
+            var results = new List<InvoiceViewDTOUNGROUPED>();
+                       
+            if ((Limitdates.StartLimit == 4 && Limitdates.EndLimit == 5) || (Limitdates.StartLimit == 5 && Limitdates.EndLimit == 6))
+            {
+                results = await _uow.Invoice.GetShipmentWaitingForCollection_NotGrouped(accountFilterCriteria, serviceCenterIds);
+            }
+            else
+            {
+                results = await _uow.Invoice.GetShipmentMonitorSetSP_NotGroupedx(accountFilterCriteria, serviceCenterIds);
+            }
+
+            if (serviceCenterIds.Length > 0)
+            {
+                results = results.Where(s => serviceCenterIds.Contains(s.DestinationServiceCentreId)).ToList();
+            }
+            
             var v = new List<InvoiceViewDTOUNGROUPED2>();
 
             if (Limitdates.StartLimit == 1 && Limitdates.EndLimit == 2)
@@ -1447,24 +1612,48 @@ namespace GIGLS.Services.Implementation.Shipments
                          Amount = list.Amount
                      }).ToList();
             }
+            else if (Limitdates.StartLimit == 4 && Limitdates.EndLimit == 5)
+            {
+                v = (from list in results
+                     where list.PickupOptions == PickupOptions.SERVICECENTER && list.DateCreated <= LimitEndDate && list.Name == Limitdates.ScName
+                     select new InvoiceViewDTOUNGROUPED2()
+                     {
+                         DestinationServiceCentreName = list.Name,
+                         Waybill = list.Waybill,
+                         ShipmentDate = list.DateCreated,
+                         PaymentMethod = list.PaymentMethod,
+                         Amount = list.Amount
+                     }).ToList();
+            }
+            else if (Limitdates.StartLimit == 5 && Limitdates.EndLimit == 6)
+            {
+                v = (from list in results
+                     where list.PickupOptions == PickupOptions.HOMEDELIVERY && list.DateCreated <= LimitEndDate && list.Name == Limitdates.ScName
+                     select new InvoiceViewDTOUNGROUPED2()
+                     {
+                         DestinationServiceCentreName = list.Name,
+                         Waybill = list.Waybill,
+                         ShipmentDate = list.DateCreated,
+                         PaymentMethod = list.PaymentMethod,
+                         Amount = list.Amount
+                     }).ToList();
+            }
 
             return v;
         }
 
         private Tuple<DateTime, DateTime> ReturnStartAndEndDateLimit(AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates)
         {
-
             var StartDate = new DateTime();
             var EndDate = new DateTime();
-            DateTime now = DateTime.Now.Date;
+            DateTime now = DateTime.Now;
 
-            //var now = new DateTime(2019, 2, 6);
-            var dashboardStartDate = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
+            var dashboardStartDate = (DateTime)accountFilterCriteria.StartDate;
 
             if (Limitdates.StartLimit == 1 && Limitdates.EndLimit == 2)
             {
                 StartDate = now.AddHours(-24);
-                EndDate = now; 
+                EndDate = now;
             }
             else if (Limitdates.StartLimit == 2 && Limitdates.EndLimit == 3)
             {
@@ -1476,8 +1665,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 StartDate = dashboardStartDate;
                 EndDate = now.AddHours(-48);
             }
+            else if (Limitdates.StartLimit == 4 && Limitdates.EndLimit == 5)
+            {
+                StartDate = dashboardStartDate;
+                EndDate = now.AddHours(-48);
+            }
+            else if (Limitdates.StartLimit == 5 && Limitdates.EndLimit == 6)
+            {
+                StartDate = dashboardStartDate;
+                EndDate = now.AddHours(-48);
+            }
 
-            return Tuple.Create<DateTime, DateTime>(StartDate.Date, EndDate.Date);
+            return Tuple.Create(StartDate, EndDate);
         }
 
         private Object[] ReturnShipmentCreatedByLimitDates(List<InvoiceMonitorDTO> shipmentscreated, AccountFilterCriteria accountFilterCriteria, LimitDates Limitdates)
@@ -1520,6 +1719,26 @@ namespace GIGLS.Services.Implementation.Shipments
                               waybill = list.Waybill
                           }).ToList();
             }
+            else if (Limitdates.StartLimit == 4 && Limitdates.EndLimit == 5)
+            {
+                result = (from list in shipmentscreated
+                          where list.PickupOptions == PickupOptions.SERVICECENTER && list.DateCreated <= LimitEndDate
+                          select new InvoiceMonitorDTO3()
+                          {
+                              label = list.Name,
+                              waybill = list.Waybill
+                          }).ToList();
+            }
+            else if (Limitdates.StartLimit == 5 && Limitdates.EndLimit == 6)
+            {
+                result = (from list in shipmentscreated
+                          where list.PickupOptions == PickupOptions.HOMEDELIVERY && list.DateCreated <= LimitEndDate
+                          select new InvoiceMonitorDTO3()
+                          {
+                              label = list.Name,
+                              waybill = list.Waybill
+                          }).ToList();
+            }
 
             var v = (from a in result
                      group a by a.label into g
@@ -1554,14 +1773,12 @@ namespace GIGLS.Services.Implementation.Shipments
             return obj;
         }
 
-        private ColoredInvoiceMonitorDTO ReturnShipmentCreatedx(List<InvoiceMonitorDTO> shipmentsexpected, AccountFilterCriteria accountFilterCriteria)
+        private ColoredInvoiceMonitorDTO ReturnShipmentCreatedx(List<InvoiceMonitorDTO> shipmentsexpected, List<InvoiceMonitorDTO> shipmentscollected, AccountFilterCriteria accountFilterCriteria)
         {
             var obj = new ColoredInvoiceMonitorDTO();
 
-            var now = DateTime.Now.Date;
-            //var now = new DateTime(2019, 2, 6);
-
-            var dashboardStartDate = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
+            var now = DateTime.Now;            
+            var dashboardStartDate = (DateTime)accountFilterCriteria.StartDate;
 
             var totalGreen = (from item in shipmentsexpected
                               where item.DateCreated > now.AddHours(-24) && item.DateCreated <= now
@@ -1575,7 +1792,15 @@ namespace GIGLS.Services.Implementation.Shipments
                             where item.DateCreated > dashboardStartDate && item.DateCreated <= now.AddHours(-48)
                             select item.Waybill).Count();
 
-            var totalzones = ReturnTotalZonesArray(totalGreen, totalyellow, totalRed);
+            var totalPurple = (from item in shipmentscollected
+                               where item.PickupOptions == PickupOptions.SERVICECENTER && item.DateCreated < now.AddHours(-48)
+                               select item.Waybill).Count();
+
+            var totalBrown = (from item in shipmentscollected
+                               where item.PickupOptions == PickupOptions.HOMEDELIVERY && item.DateCreated < now.AddHours(-48)
+                               select item.Waybill).Count();
+            
+            var totalzones = ReturnTotalZonesArray(totalGreen, totalyellow, totalRed, totalPurple, totalBrown);
             obj.totalZones = totalzones;
               
             return obj;
@@ -1586,11 +1811,8 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             var obj = new ColoredInvoiceMonitorDTO();
 
-            //DateTime now = DateTime.Now.Date;
-            var now = DateTime.Now.Date;
-            //DateTime now = new DateTime(2019, 2, 6);
-
-            var dashboardStartDate = DateTime.Parse(ConfigurationManager.AppSettings["dashboardstartdate"]);
+            var now = DateTime.Now; 
+            var dashboardStartDate = (DateTime)accountFilterCriteria.StartDate;
 
             var totalGreen = (from item in shipmentscreated
                               where item.DateCreated > now.AddHours(-24) && item.DateCreated <= now
@@ -1612,12 +1834,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public object[] ReturnChartDataArray(List<InvoiceMonitorDTO2> values)
         {
-
             var chartData = new object[values.Count() + 1];
 
             if (values != null)
             {
-
                 chartData[0] = new object[]
                 {
                     "ServiceCenter",
@@ -1629,52 +1849,60 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     j++;
                     chartData[j] = new object[] {
-                    i.label,
-                    i.y
-                };
+                        i.label,
+                        i.y
+                    };
                 }
             }
 
             return chartData;
-
         }
 
-        public object[] ReturnTotalZonesArray(double totalgreen, double totalyellow, double totalred)
+        public object[] ReturnTotalZonesArray(double totalgreen, double totalyellow, double totalred, double terminal = 0, double homeDelivery = 0)
         {
 
             //var chartData = new object[3];
-            List<object[]> termsList = new List<object[]>();
-
-            termsList.Add(new object[]
+            List<object[]> termsList = new List<object[]>
+            {
+                new object[]
                     {
                     "Zones",
                     "WaybillCount",
                     "Color"
-                    });
+                    },
 
-            termsList.Add(new object[] {
+                new object[] {
                     "Shipments Created within 24hrs",
                     totalgreen,
                     "green"
-                });
-            termsList.Add(new object[] {
-                    "Shipments Created over 24hrs within 48hrs",
+                },
+                new object[] {
+                    "Shipments created between 24 - 48 hrs",
                     totalyellow,
                     "yellow"
-                });
+                },
 
-            termsList.Add(new object[] {
-                    "Shipments Created Over 48hrs - 72hrs plus",
+                new object[] {
+                    "Shipments created between 48 - 72 hrs",
                     totalred,
                     "red"
-                });
-
+                },
+                new object[] {
+                    "Terminal Delivery Shipments Over 48 hrs",
+                    terminal,
+                    "purple"
+                },
+                new object[] {
+                    "Home Delivery Shipments Over 48 hrs",
+                    homeDelivery,
+                    "brown"
+                }
+            };
 
             // You can convert it back to an array if you would like to
             object[] chartData = termsList.ToArray();
 
             return chartData;
-
         }
 
         private ColoredInvoiceMonitorDTO ReturnShipmentEXpected(List<InvoiceMonitorDTO> shipmentsexpected, AccountFilterCriteria accountFilterCriteria)

@@ -12,6 +12,7 @@ using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO.Report;
 using System;
 using System.Linq;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Partnership
 {
@@ -33,6 +34,12 @@ namespace GIGLS.Services.Implementation.Partnership
         public async Task<IEnumerable<PartnerDTO>> GetPartners()
         {
             var partners = await _uow.Partner.GetPartnersAsync();
+            return partners;
+        }
+
+        public async Task<IEnumerable<VehicleTypeDTO>> GetVerifiedPartners()
+        {
+            var partners = await _uow.Partner.GetVerifiedPartnersAsync();
             return partners;
         }
 
@@ -65,13 +72,29 @@ namespace GIGLS.Services.Implementation.Partnership
 
         public async Task<PartnerDTO> GetPartnerById(int partnerId)
         {
+            var partnerDto = new PartnerDTO();
             var partner = await _uow.Partner.GetAsync(partnerId);
 
             if (partner == null)
             {
                 throw new GenericException("PARTNER_NOT_EXIST");
             }
-            var partnerDto = Mapper.Map<PartnerDTO>(partner);
+            else
+            {
+                partnerDto = Mapper.Map<PartnerDTO>(partner);
+                var Wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partner.PartnerCode);
+                var Country = await _uow.Country.GetAsync(s => s.CountryId == partner.UserActiveCountryId);
+                if (Wallet != null)
+                {
+                    partnerDto.WalletBalance = Wallet.Balance;
+                    partnerDto.WalletId = Wallet.WalletId;
+                }
+                if (Country != null)
+                {
+                    partnerDto.CurrencySymbol = Country.CurrencySymbol;
+                   
+                }
+            }
             return partnerDto;
         }
 
@@ -123,6 +146,18 @@ namespace GIGLS.Services.Implementation.Partnership
             }
             _uow.Partner.Remove(existingPartner);
             await _uow.CompleteAsync();
+        }
+        public async Task<IEnumerable<PartnerDTO>> GetExternalDeliveryPartners()
+        {
+            var partners = await _uow.Partner.GetExternalPartnersAsync();
+            return partners;
+        }
+
+        public async Task<List<ExternalPartnerTransactionsPaymentDTO>> GetExternalPartnerTransactionsForPayment(ShipmentCollectionFilterCriteria shipmentCollectionFilterCriteria)
+        {
+            var partnersTransaction = await _uow.PartnerTransactions.GetExternalPartnerTransactionsForPayment(shipmentCollectionFilterCriteria);
+
+            return partnersTransaction;
         }
 
     }

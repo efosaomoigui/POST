@@ -28,12 +28,8 @@ namespace GIGLS.WebApi.Controllers.ShipmentScan
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var scanStatus = await _scanService.GetScanStatus();
-
-                //filter only the status for display
-                scanStatus = scanStatus.Where(s => s.HiddenFlag == false);
-                scanStatus = scanStatus.OrderBy(s => s.Reason);
-
+                var scanStatus = await _scanService.GetNonHiddenScanStatus();
+                
                 return new ServiceResponse<IEnumerable<ScanStatusDTO>>
                 {
                     Object = scanStatus

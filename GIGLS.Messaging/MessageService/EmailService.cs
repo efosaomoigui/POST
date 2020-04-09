@@ -12,7 +12,11 @@ namespace GIGLS.Messaging.MessageService
     {
         public async Task<string> SendAsync(MessageDTO message)
         {
-            var result = await ConfigSendGridasync(message);
+            string result = "";
+            if(message.ToEmail != null)
+            {
+                result = await ConfigSendGridasync(message);
+            }
             return result;
         }
                

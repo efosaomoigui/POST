@@ -10,6 +10,10 @@ using GIGLS.Core.IServices.User;
 using GIGLS.CORE.DTO.Shipments;
 using System.Linq;
 using System;
+using System.Net;
+using System.IO;
+using Newtonsoft.Json;
+using System.Configuration;
 
 namespace GIGLS.Services.Implementation.Messaging
 {
@@ -50,15 +54,15 @@ namespace GIGLS.Services.Implementation.Messaging
             return messages;
         }
 
-        public Tuple<Task<List<SmsSendLogDTO>>, int> GetSmsSendLogAsync_OLD(FilterOptionsDto filterOptionsDto)
+        public async Task<Tuple<List<SmsSendLogDTO>, int>> GetSmsSendLogAsync_OLD(FilterOptionsDto filterOptionsDto)
         {
             try
             {
-                var smsCollection = _uow.SmsSendLog.FindAsync(s => s.IsDeleted == false).Result;
+                var smsCollection =  await _uow.SmsSendLog.FindAsync(s => s.IsDeleted == false);
                 var smsCollectionDto = Mapper.Map<IEnumerable<SmsSendLogDTO>>(smsCollection);
                 smsCollectionDto = smsCollectionDto.OrderByDescending(x => x.DateCreated);
 
-                var count = smsCollectionDto.ToList().Count();
+                var count = smsCollectionDto.Count();
 
                 if (filterOptionsDto != null)
                 {
@@ -92,7 +96,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     smsCollectionDto = smsCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
-                return new Tuple<Task<List<SmsSendLogDTO>>, int>(Task.FromResult(smsCollectionDto.ToList()), count);
+                return new Tuple<List<SmsSendLogDTO>, int>(smsCollectionDto.ToList(), count);
 
             }
             catch (Exception)
@@ -154,6 +158,33 @@ namespace GIGLS.Services.Implementation.Messaging
             message.ResultDescription = messageDto.ResultDescription;
 
             await _uow.CompleteAsync();
+        }
+
+        public async Task<SmsDeliveryDTO> SmsDeliveryLog(string phonenumber)
+        {
+            var response = new SmsDeliveryDTO();
+            try
+            {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                var smsURL = ConfigurationManager.AppSettings["smsURLSearch"];
+                var httpWebRequest = (HttpWebRequest)WebRequest.Create($"{smsURL}{phonenumber}");
+                using (var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse())
+                {
+                    Stream result = httpResponse.GetResponseStream();
+                    StreamReader reader = new StreamReader(result);
+                    string responseFromServer = reader.ReadToEnd();
+                    response = JsonConvert.DeserializeObject<SmsDeliveryDTO>(responseFromServer);
+                    if(response != null)
+                    {
+                        response.data = response.data.OrderByDescending(x => x.Done).ToList();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return await Task.FromResult(response);
         }
     }
 }

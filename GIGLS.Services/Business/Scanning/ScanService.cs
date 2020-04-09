@@ -316,10 +316,10 @@ namespace GIGLS.Services.Business.Scanning
                     if (waybillInManifestList.Count > 0)
                     {
                         //block scanning if any of the waybill has been collected
-                        foreach (var item in waybillInManifestList)
-                        {
-                            await BlockAnyScanOnCollectedShipment(item.Waybill, scan);
-                        }
+                        //foreach (var item in waybillInManifestList)
+                        //{
+                        //    await BlockAnyScanOnCollectedShipment(item.Waybill, scan);
+                        //}
 
                         //update dispatch to scan for Shipment recieved by Courier for delivery manifest
                         if (scan.ShipmentScanStatus == ShipmentScanStatus.SRC) // ||scan.ShipmentScanStatus == ShipmentScanStatus.WC )
@@ -550,14 +550,14 @@ namespace GIGLS.Services.Business.Scanning
                                 transitWaybillNumber.ServiceCentreId = currentUserSercentreId;
                                 transitWaybillNumber.UserId = currentUserId;
                                 transitWaybillNumber.IsGrouped = false;
-                                //_uow.Complete();
+                                _uow.Complete();
                             }
 
                             //4. Update entry in GroupWaybillMapping
                             var groupWaybillNumberMapping = await _uow.GroupWaybillNumberMapping.GetAsync(s => s.WaybillNumber == waybill);
                             //groupWaybillNumberMapping.DepartureServiceCentreId = currentUserSercentreId;
                             _uow.GroupWaybillNumberMapping.Remove(groupWaybillNumberMapping); //remove waybill from mapping 12/09/2019
-                            _uow.Complete();
+                            await _uow.CompleteAsync();
 
                             //5. Get the GroupWaybill numbers in the manifest
                             groupWaybillsInManifest.Add(groupWaybillNumberMapping.GroupWaybillNumber);
@@ -580,7 +580,7 @@ namespace GIGLS.Services.Business.Scanning
 
                             _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupWaybillNumberMapping);
                             _uow.GroupWaybillNumber.Remove(groupwaybill);
-                            _uow.Complete();
+                            await _uow.CompleteAsync();
                         }
                     }
                 }
@@ -707,8 +707,7 @@ namespace GIGLS.Services.Business.Scanning
             else
             {
                 string user = await _userService.GetCurrentUserId();
-
-                shipmentDTO.IsGrouped = false;
+                shipmentDTO.IsGrouped = true;
 
                 //create new transit waybill
                 var newTransit = new TransitWaybillNumber
@@ -818,11 +817,14 @@ namespace GIGLS.Services.Business.Scanning
 
             if (checkShipmentCollected != null)
             {
+                var newScan = scan;
+                newScan.WaybillNumber = waybill;
+
                 //Send Email to Regional Managers whenever this occurs
                 scan.CancelledOrCollected = "Collected";
-                bool emailSentResult = await SendEmailOnAttemptedScanOfCancelledShipment(scan);
+                bool emailSentResult = await SendEmailOnAttemptedScanOfCancelledShipment(newScan);
 
-                throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already collected, no further scan is required!");
+                throw new GenericException($"Shipment with waybill: {newScan.WaybillNumber} already collected, no further scan is required!");
             }
         }
     }

@@ -47,16 +47,14 @@ namespace GIGLS.Services.Implementation.User
             {
                 throw new GenericException($"User with email: {userDto.Email} already exist");
             }
-            var usertemp = new GIGL.GIGLS.Core.Domain.User() { };
 
             var user = Mapper.Map<GIGL.GIGLS.Core.Domain.User>(userDto);
 
-            ///user.Id = usertemp.Id;
             user.Id = Guid.NewGuid().ToString();
             user.DateCreated = DateTime.Now.Date;
             user.DateModified = DateTime.Now.Date;
             user.PasswordExpireDate = DateTime.Now;
-            user.UserName = (user.UserChannelType == UserChannelType.Employee) ? user.Email : user.UserChannelCode;
+            user.UserName = (user.UserChannelType == UserChannelType.Employee) ? user.Email : user.UserChannelCode;            
 
             //UserChannelCode for employee
             if (user.UserChannelType == UserChannelType.Employee)
@@ -64,8 +62,8 @@ namespace GIGLS.Services.Implementation.User
                 var employeeCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Employee);
                 user.UserChannelCode = employeeCode;
                 user.UserChannelPassword = GeneratePassword();
+                user.IsActive = true;
             }
-
 
             var u = await _unitOfWork.User.RegisterUser(user, userDto.Password);
             return u;
@@ -234,7 +232,6 @@ namespace GIGLS.Services.Implementation.User
 
         public async Task<IdentityResult> UpdateUser(string userid, UserDTO userDto)
         {
-
             var user = await _unitOfWork.User.GetUserById(userid);
 
             if (user == null)
@@ -253,11 +250,13 @@ namespace GIGLS.Services.Implementation.User
             user.PhoneNumber = userDto.PhoneNumber;
             user.SystemUserId = userDto.SystemUserId;
             user.SystemUserRole = userDto.SystemUserRole;
+            user.UserName = userDto.Username;
 
             user.UserChannelCode = userDto.UserChannelCode;
             user.UserChannelPassword = userDto.UserChannelPassword;
             user.UserChannelType = userDto.UserChannelType;
             user.PictureUrl = userDto.PictureUrl;
+            user.UserActiveCountryId = userDto.UserActiveCountryId;
 
             return await _unitOfWork.User.UpdateUser(userid, user);
 
@@ -798,6 +797,13 @@ namespace GIGLS.Services.Implementation.User
             var defaultServiceCenter = await _serviceCentreService.GetDefaultServiceCentre();
             return defaultServiceCenter;
         }
+
+        public async Task<ServiceCentreDTO> GetGIGGOServiceCentre()
+        {
+            var gigGOServiceCenter = await _serviceCentreService.GetGIGGOServiceCentre();
+            return gigGOServiceCenter;
+        }
+
 
         //change user password by Admin
         public async Task<IdentityResult> ResetPassword(string userid, string password)
@@ -1412,6 +1418,31 @@ namespace GIGLS.Services.Implementation.User
 
             return Mapper.Map<UserDTO>(user);
         }
+
+        //used for Customer Portal
+        public async Task<UserDTO> GetUserUsingCustomerForCustomerPortal(string emailPhoneCode)
+        {
+            var user = await _unitOfWork.User.GetUserUsingCustomerForCustomerPortal(emailPhoneCode);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist");
+            }
+            return Mapper.Map<UserDTO>(user);
+        }
+
+        //used for Mobile Scanner
+        public async Task<UserDTO> GetUserUsingCustomerForMobileScanner(string emailPhoneCode)
+        {
+            var user = await _unitOfWork.User.GetUserUsingCustomerForMobileScanner(emailPhoneCode);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist");
+            }
+            return Mapper.Map<UserDTO>(user);
+        }
+
 
         public async Task<UserDTO> GetActivatedUserByEmail(string email, bool isActive)
         {

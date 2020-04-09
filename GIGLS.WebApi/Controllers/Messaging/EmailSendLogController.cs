@@ -20,8 +20,7 @@ namespace GIGLS.WebApi.Controllers.Messaging
         {
             _messageService = messageService;
         }
-
-
+        
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
         [Route("")]
@@ -45,10 +44,10 @@ namespace GIGLS.WebApi.Controllers.Messaging
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var smsTuple = _messageService.GetEmailSendLogAsync(filterOptionsDto);
+                var smsTuple = await _messageService.GetEmailSendLogAsync(filterOptionsDto);
                 return new ServiceResponse<IEnumerable<EmailSendLogDTO>>
                 {
-                    Object = await smsTuple.Item1,
+                    Object = smsTuple.Item1,
                     Total = smsTuple.Item2
                 };
             });

@@ -13,6 +13,9 @@ using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.User;
+using GIGLS.CORE.DTO.Report;
+using GIGLS.Core.DTO.MessagingLog;
+using GIGLS.Core.IMessageService;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -22,17 +25,19 @@ namespace GIGLS.Services.Implementation.Customers
         private readonly INumberGeneratorMonitorService _numberGeneratorMonitorService;
         private readonly IPasswordGenerator _passwordGenerator;
         private readonly IUserService _userService;
+        private readonly IMessageSenderService _messageSenderService;
 
         private readonly IUnitOfWork _uow;
 
         public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService,
-            IWalletService walletService, IPasswordGenerator passwordGenerator, IUserService userService, IUnitOfWork uow)
+            IWalletService walletService, IPasswordGenerator passwordGenerator, IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService)
         {
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _passwordGenerator = passwordGenerator;
             _userService = userService;
             _uow = uow;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
 
@@ -40,15 +45,21 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
-                if (await _uow.Company.ExistAsync(c => c.Name.ToLower() == company.Name.Trim().ToLower() || c.PhoneNumber == company.PhoneNumber))
+                if (await _uow.Company.ExistAsync(c => c.Name.ToLower() == company.Name.Trim().ToLower() || c.PhoneNumber == company.PhoneNumber || c.Email == company.Email))
                 {
-                    throw new GenericException($"{company.Name} or phone number already exist");
+                    throw new GenericException($"{company.Name}, phone number or email detail already exist");
                 }
 
                 //check if registration is from Giglgo
-                if(company.IsFromMobile==true)
+                if(company.IsFromMobile == true)
                 {
                     company.IsRegisteredFromMobile = true;
+                }
+
+                //update the customer update to have country code added to it
+                if (company.PhoneNumber.StartsWith("0"))
+                {
+                    company.PhoneNumber = await AddCountryCodeToPhoneNumber(company.PhoneNumber, company.UserActiveCountryId);
                 }
 
                 var newCompany = Mapper.Map<Company>(company);
@@ -140,13 +151,41 @@ namespace GIGLS.Services.Implementation.Customers
                     CustomerCode = newCompany.CustomerCode,
                     CompanyType = companyType
                 });
-                
+
+                //send login detail to the email 
+                var passwordMessage = new PasswordMessageDTO()
+                {
+                    Password = password,
+                    UserEmail = newCompany.Email,
+                    CustomerCode = newCompany.CustomerCode
+                };
+                await _messageSenderService.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
+
                 return Mapper.Map<CompanyDTO>(newCompany);
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        public async Task<string> AddCountryCodeToPhoneNumber(string phoneNumber, int countryId)
+        {
+            if(countryId < 1)
+            {
+                int getUserActiveCountry = await _userService.GetUserActiveCountryId();
+                countryId = getUserActiveCountry;
+            }
+
+            var country = await _uow.Country.GetAsync(x => x.CountryId == countryId);
+            if (country != null)
+            {
+                phoneNumber = phoneNumber.Substring(1, phoneNumber.Length - 1);
+                string phone = $"{country.PhoneNumberCode}{phoneNumber}";
+                phoneNumber = phone;
+
+            }
+            return phoneNumber;
         }
 
         public async Task DeleteCompany(int companyId)
@@ -185,6 +224,11 @@ namespace GIGLS.Services.Implementation.Customers
         public Task<List<CompanyDTO>> GetCompanies()
         {
             return _uow.Company.GetCompanies();
+        }
+
+        public Task<List<CompanyDTO>> GetCompanies(BaseFilterCriteria filterCriteria)
+        {
+            return _uow.Company.GetCompanies(filterCriteria);
         }
 
         public Task<List<CompanyDTO>> GetCompaniesWithoutWallet()
@@ -252,7 +296,6 @@ namespace GIGLS.Services.Implementation.Customers
                 company.ReturnServiceCentre = companyDto.ReturnServiceCentre;
                 company.ReturnAddress = companyDto.ReturnAddress;
                 company.RcNumber = companyDto.RcNumber;
-                //company.UserActiveCountryId = companyDto.UserActiveCountryId;
                 company.isCodNeeded = companyDto.isCodNeeded;
 
                 if (companyDto.ContactPersons.Any())
@@ -275,10 +318,8 @@ namespace GIGLS.Services.Implementation.Customers
                 user.LastName = companyDto.Name;
                 user.FirstName = companyDto.Name;
                 user.Email = companyDto.Email;
-                //user.UserActiveCountryId = companyDto.UserActiveCountryId;
 
                 await _userService.UpdateUser(user.Id, user);
-
                 _uow.Complete();
             }
             catch (Exception)
@@ -416,6 +457,7 @@ namespace GIGLS.Services.Implementation.Customers
                 throw;
             }
         }
+        
         public async Task<EcommerceWalletDTO> GetECommerceWalletById(int companyId)
         {
             try
@@ -426,9 +468,19 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     throw new GenericException("Wallet information does not exist");
                 }
+                return company;                
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
-                return company;
-                
+        public Task<List<CompanyDTO>> GetCompanyByEmail(string email)
+        {
+            try
+            {
+                return _uow.Company.GetCompanyByEmail(email);
             }
             catch (Exception)
             {

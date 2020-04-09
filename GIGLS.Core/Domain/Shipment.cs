@@ -14,6 +14,8 @@ namespace GIGL.GIGLS.Core.Domain
         //Shipment Information
         [Key]
         public int ShipmentId { get; set; }
+
+        [MaxLength(20)]
         public string SealNumber { get; set; }
 
         [MaxLength(100), MinLength(5)]
@@ -42,12 +44,25 @@ namespace GIGL.GIGLS.Core.Domain
         public int DestinationServiceCentreId { get; set; }
         public virtual ServiceCentre DestinationServiceCentre { get; set; }
 
+        [MaxLength(200)]
         public string ReceiverName { get; set; }
+
+        [MaxLength(100)]
         public string ReceiverPhoneNumber { get; set; }
+
+        [MaxLength(100)]
         public string ReceiverEmail { get; set; }
+
+        [MaxLength(500)]
         public string ReceiverAddress { get; set; }
+
+        [MaxLength(50)]
         public string ReceiverCity { get; set; }
+
+        [MaxLength(50)]
         public string ReceiverState { get; set; }
+
+        [MaxLength(50)]
         public string ReceiverCountry { get; set; }
 
         //Delivery Options
@@ -99,12 +114,14 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal? offInvoiceDiscountvalue_display { get; set; }
 
         //payment method
+        [MaxLength(20)]
         public string PaymentMethod { get; set; }
 
         //Cancelled shipment
         public bool IsCancelled { get; set; }
         public bool IsInternational { get; set; }
 
+        [MaxLength(500)]
         public string Description { get; set; }
 
         public DepositStatus DepositStatus { get; set; }
@@ -112,7 +129,10 @@ namespace GIGL.GIGLS.Core.Domain
         public bool ReprintCounterStatus { get; set; }
 
         //Sender's Address - added for the special case of corporate customers
+        [MaxLength(500)]
         public string SenderAddress { get; set; }
+
+        [MaxLength(50)]
         public string SenderState { get; set; }
         //Shipment reroute
         public ShipmentReroute ShipmentReroute { get; set; }
@@ -129,7 +149,8 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal CurrencyRatio { get; set; }
 
         //new property for mobile
+        [MaxLength(20)]
         public string DeliveryNumber { get; set; }
-
+        public bool IsFromMobile { get; set; }
     }
 }

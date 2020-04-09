@@ -41,6 +41,9 @@
         UDM, //Message for shipment that has exceeded delivery time
         WEBPICKUP, //Message for website mail for Schedlue Pickup
         WEBQUOTE, //Message for website mail for Request Quote
-        APPREPORT //Mail sent containing Issues reported by GIGGo Users
+        APPREPORT, //Mail sent containing Issues reported by GIGGo Users
+        HOUSTON,   //Create Message to handle CRT for Hoston Shipment
+        FPEmail, //Message Type for Fleet Partner Login Access
+        CEMAIL // Account creation mail
     } 
 }

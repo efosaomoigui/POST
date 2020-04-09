@@ -148,6 +148,7 @@
     <Compile Include="Persistence\Repositories\Fleets\FleetPartRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\FleetRepository.cs" />
     <Compile Include="Persistence\Repositories\Fleets\FleetTripRepository.cs" />
+    <Compile Include="Persistence\Repositories\GiglgoStationRepository.cs" />
     <Compile Include="Persistence\Repositories\Haulage\HaulageDistanceMappingPriceRepository.cs" />
     <Compile Include="Persistence\Repositories\Haulage\HaulageDistanceMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Haulage\HaulageRepository.cs" />
@@ -165,7 +166,9 @@
     <Compile Include="Persistence\Repositories\Nav\SubSubNavRepository.cs" />
     <Compile Include="Persistence\Repositories\NotificationRepository.cs" />
     <Compile Include="Persistence\Repositories\OTPRepository.cs" />
+    <Compile Include="Persistence\Repositories\Partnership\FleetPartnerRepository.cs" />
     <Compile Include="Persistence\Repositories\Partnership\PartnerApplicationRepository.cs" />
+    <Compile Include="Persistence\Repositories\Partnership\PartnerPayoutRepository.cs" />
     <Compile Include="Persistence\Repositories\Partnership\PartnerRepository.cs" />
     <Compile Include="Persistence\Repositories\Partnership\PartnerTransactionsRepository.cs" />
     <Compile Include="Persistence\Repositories\Partnership\VehicleTypeRepository.cs" />
@@ -183,6 +186,7 @@
     <Compile Include="Persistence\Repositories\ShipmentScan\MobileScanStatusRepository.cs" />
     <Compile Include="Persistence\Repositories\ShipmentScan\ScanStatusRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\DemurrageRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\MobileGroupCodeWaybillMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberMappingRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\GroupWaybillNumberRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\HUBManifestWaybillMappingRepository.cs" />
@@ -204,6 +208,7 @@
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCancelRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentCollectionRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\PreShipmentItemRepository.cs" />
+    <Compile Include="Persistence\Repositories\Shipments\ShipmentHashRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentItemRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentPackagePriceRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\PreShipmentRepository.cs" />
@@ -265,6 +270,10 @@
       <Name>GIGLS.Core</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

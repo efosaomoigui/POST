@@ -42,15 +42,15 @@ namespace GIGLS.Services.Implementation.Messaging
             return messages;
         }
 
-        public Tuple<Task<List<EmailSendLogDTO>>, int> GetEmailSendLogAsync(FilterOptionsDto filterOptionsDto)
+        public async Task<Tuple<List<EmailSendLogDTO>, int>> GetEmailSendLogAsync(FilterOptionsDto filterOptionsDto)
         {
             try
             {
-                var emailCollection = _uow.EmailSendLog.FindAsync(s => s.IsDeleted == false).Result;
+                var emailCollection = await _uow.EmailSendLog.FindAsync(s => s.IsDeleted == false);
                 var emailCollectionDto = Mapper.Map<IEnumerable<EmailSendLogDTO>>(emailCollection);
                 emailCollectionDto = emailCollectionDto.OrderByDescending(x => x.DateCreated);
 
-                var count = emailCollectionDto.ToList().Count();
+                var count = emailCollectionDto.Count(); 
 
                 if (filterOptionsDto != null)
                 {
@@ -84,7 +84,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     emailCollectionDto = emailCollectionDto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
-                return new Tuple<Task<List<EmailSendLogDTO>>, int>(Task.FromResult(emailCollectionDto.ToList()), count);
+                return new Tuple<List<EmailSendLogDTO>, int>(emailCollectionDto.ToList(), count);
 
             }
             catch (Exception)
@@ -137,8 +137,7 @@ namespace GIGLS.Services.Implementation.Messaging
             message.Message = messageDto.Message;
             message.User = messageDto.User;
             message.ResultStatus = messageDto.ResultStatus;
-            message.ResultDescription = messageDto.ResultDescription;
-            
+            message.ResultDescription = messageDto.ResultDescription;            
             await _uow.CompleteAsync();
         }
     }

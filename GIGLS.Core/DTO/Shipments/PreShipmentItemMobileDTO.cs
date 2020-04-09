@@ -34,7 +34,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         //Foreign key information
         public int PreShipmentMobileId { get; set; }
-        public PreShipmentMobileDTO PreShipmentMobile { get; set; }
+        //public PreShipmentMobileDTO PreShipmentMobile { get; set; }
 
         //Agility Calculations
         public decimal? CalculatedPrice { get; set; }
@@ -45,4 +45,6 @@ namespace GIGLS.Core.DTO.Shipments
         public DateTime? PictureDate { get; set; }
         public string WeightRange { get; set; }
     }
+
+    
 }

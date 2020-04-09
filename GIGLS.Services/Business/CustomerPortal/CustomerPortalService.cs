@@ -45,6 +45,9 @@ using GIGLS.Core.DTO.Admin;
 using GIGLS.Core.IServices.Report;
 using GIGLS.Core.IServices.Partnership;
 using System.Configuration;
+using System.Security.Cryptography;
+using System.Text;
+using GIGLS.Core.DTO.Utility;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -74,6 +77,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IAdminReportService _adminReportService;
         public readonly IIndividualCustomerService _individualCustomerService;
         public readonly IPartnerTransactionsService _partnertransactionservice;
+        private readonly IMobileGroupCodeWaybillMappingService _groupCodeWaybillMappingService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
@@ -82,7 +86,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService, 
-            ICountryService countryService, IAdminReportService adminReportService, IIndividualCustomerService individualCustomerService, IPartnerTransactionsService partnertransactionservice)
+            ICountryService countryService, IAdminReportService adminReportService, IIndividualCustomerService individualCustomerService, 
+            IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService)
         {
             _shipmentService = shipmentService;
             _invoiceService = invoiceService;
@@ -108,6 +113,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _adminReportService = adminReportService;
             _individualCustomerService = individualCustomerService;
             _partnertransactionservice = partnertransactionservice;
+            _groupCodeWaybillMappingService = groupCodeWaybillMappingService;
             MapperConfig.Initialize();
         }
 
@@ -643,36 +649,46 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var result = new SignResponseDTO();
 
-            if(user.UserChannelType != UserChannelType.Ecommerce && user.UserChannelType != UserChannelType.IndividualCustomer 
-                && user.UserChannelType != UserChannelType.Partner)
+            if (user.RequiresCod == null)
+            {
+                user.RequiresCod = false;
+            }
+            
+            if (user.IsUniqueInstalled == null)
+            {
+                user.IsUniqueInstalled = false;
+            }
+            
+            if (user.IsEligible == null)
+            {
+                user.IsEligible = false;
+            }
+            
+            if (user.Referrercode != null)
+            {
+                user.RegistrationReferrercode = user.Referrercode;
+            }
+            
+            if (user.UserChannelType != UserChannelType.Ecommerce && user.UserChannelType != UserChannelType.IndividualCustomer && user.UserChannelType != UserChannelType.Partner)
             {
                 throw new GenericException($"Kindly supply valid customer channel ");
             }
-
+            
             if (user.UserChannelType == UserChannelType.Ecommerce)
             {
                 var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
                 throw new GenericException($"{ecommerceEmail.Value}");
             }
-
+            
             if (user.Email != null)
             {
-                user.Email = user.Email.Trim();
-                user.Email = user.Email.ToLower();
+                user.Email = user.Email.Trim().ToLower();
             }
 
-            if ((user.UserActiveCountryId).ToString() == null || user.UserActiveCountryId == 0)
-            {
-                var CountryId = await _preShipmentMobileService.GetCountryId();
-                user.UserActiveCountryId = CountryId;
-            }
-            //to be used when we start getting the country name of the user!!!
-            else if (user.MobileCountryName != null)
-            {
-                var countryid = await _uow.Country.GetAsync(s => s.CountryName.ToLower().Equals(user.MobileCountryName.ToLower()));
-                user.UserActiveCountryId = countryid.CountryId;
-            }
+            //use to handle multiple this kind of value +234+2349022736119
+            user.PhoneNumber = "+" + user.PhoneNumber.Split('+').Last();
 
+            user = await GetCustomerCountryUsingPhoneCode(user);
 
             bool checkRegistrationAccess = await CheckRegistrationAccess(user);
 
@@ -695,15 +711,44 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException("Customer already exists!!!");
             }
-            //}
             
             return result;
         }
 
+        public async Task<UserDTO> GetCustomerCountryUsingPhoneCode(UserDTO userDTO)
+        {
+            if (userDTO.CountryPhoneNumberCode == null)
+            {
+                //Get all countries
+                var country = await _uow.Country.FindAsync(x => x.PhoneNumberCode != null);
+
+                foreach (var c in country)
+                {
+                    if (userDTO.PhoneNumber.Contains(c.PhoneNumberCode))
+                    {
+                        userDTO.UserActiveCountryId = c.CountryId;
+                        return userDTO;
+                    }
+                }
+            }
+            else
+            {
+                var countryid = await _uow.Country.GetAsync(s => s.PhoneNumberCode.Equals(userDTO.CountryPhoneNumberCode));
+                userDTO.UserActiveCountryId = countryid.CountryId;
+            }
+
+            return userDTO;
+        }
+
+
         private async Task<bool> CheckRegistrationAccess(UserDTO user)
         {
-            var PhoneNumber = user.PhoneNumber.Remove(0, 4);
-            var emailUsers = await _uow.User.GetUserListByEmailorPhoneNumber(user.Email, PhoneNumber);
+            if (user.PhoneNumber.StartsWith("0"))
+            {
+                user.PhoneNumber = user.PhoneNumber.Substring(1, user.PhoneNumber.Length - 1);
+            }
+
+            var emailUsers = await _uow.User.GetUserListByEmailorPhoneNumber(user.Email, user.PhoneNumber);
             
             foreach(var u in emailUsers)
             {
@@ -731,7 +776,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var result = new SignResponseDTO();
 
-            var PhoneNumber = user.PhoneNumber.Remove(0, 4);
+            var PhoneNumber = user.PhoneNumber;
             var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
 
             if (EmailUser != null)
@@ -780,6 +825,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                             EmailUser.IsRegisteredFromMobile = true;
                             EmailUser.UserActiveCountryId = user.UserActiveCountryId;
                             EmailUser.AppType = user.AppType;
+                            EmailUser.UserName = user.Email;
+                            EmailUser.UserChannelPassword = user.Password;
                             var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
                             var u = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
 
@@ -805,7 +852,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                             };
                             _uow.VehicleType.Add(vehicletypeDTO);
 
-                            EmailUser.UserChannelPassword = user.Password;
                             user.UserChannelCode = EmailUser.UserChannelCode;
                             user.Id = EmailUser.Id;
                             await _uow.CompleteAsync();
@@ -816,7 +862,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 result = await SendOTPForRegisteredUser(user);
                             }
                             var User = Mapper.Map<UserDTO>(EmailUser);
-                            await CalculateReferralBonus(user);
+                            await GenerateReferrerCode(User);
                         }
                     }
                 }
@@ -888,7 +934,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 result = await SendOTPForRegisteredUser(user);
                 var User = Mapper.Map<UserDTO>(FinalUser);
                 user.Id = FinalUser.Id;
-                await CalculateReferralBonus(user);
+                await GenerateReferrerCode(user);
             }            
 
             return result;
@@ -898,15 +944,14 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var result = new SignResponseDTO();
 
-            var PhoneNumber = user.PhoneNumber.Remove(0, 4);
+            var PhoneNumber = user.PhoneNumber;
             var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
-
+            
             if (EmailUser != null)
             {
                 if (EmailUser.Email != null)
                 {
-                    EmailUser.Email = EmailUser.Email.Trim();
-                    EmailUser.Email = EmailUser.Email.ToLower();
+                    EmailUser.Email = EmailUser.Email.Trim().ToLower();
                 }
 
                 if (EmailUser.UserChannelType == UserChannelType.Employee && EmailUser.Email == user.Email)
@@ -937,7 +982,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                             emailcustomerdetails.Password = user.Password;
                             emailcustomerdetails.PhoneNumber = user.PhoneNumber;
                             emailcustomerdetails.FirstName = user.FirstName;
-                            emailcustomerdetails.LastName = user.LastName;                                                       
+                            emailcustomerdetails.LastName = user.LastName;
+                            emailcustomerdetails.UserActiveCountryId = user.UserActiveCountryId;
                         }
                     }
                     else
@@ -950,7 +996,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             user.UserChannelCode = registeredUser.UserChannelCode;
                             user.Id = registeredUser.Id;
                             result = await SendOTPForRegisteredUser(registeredUser);
-                            await CalculateReferralBonus(user);
+                            await GenerateReferrerCode(user);
                             return result;
                         }
                         else
@@ -982,6 +1028,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                     EmailUser.UserActiveCountryId = user.UserActiveCountryId;
                     EmailUser.DateModified = DateTime.Now;
                     EmailUser.AppType = user.AppType;
+                    EmailUser.UserName = user.Email;
+                    EmailUser.UserChannelPassword = user.Password;
                     var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
                     var update = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
                     var resetPassword = await _userService.ResetPassword(EmailUser.Id, user.Password);
@@ -991,7 +1039,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     var User = Mapper.Map<UserDTO>(EmailUser);
                     user.UserChannelCode = EmailUser.UserChannelCode;
                     user.Id = EmailUser.Id;
-                    await CalculateReferralBonus(user);
+                    await GenerateReferrerCode(user);
                     return result;
                 }                                
             }
@@ -1003,7 +1051,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 result = await SendOTPForRegisteredUser(registeredUser);
                 user.UserChannelCode = registeredUser.UserChannelCode;
                 user.Id = registeredUser.Id;
-                await CalculateReferralBonus(user);
+                await GenerateReferrerCode(user);
             }
 
             return result;
@@ -1018,7 +1066,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 user.Organisation = user.FirstName + " " + user.LastName;
             }
 
-            var PhoneNumber = user.PhoneNumber.Remove(0, 4);
+            var PhoneNumber = user.PhoneNumber;
             var EmailUser = await _uow.User.GetUserByEmailorPhoneNumber(user.Email, PhoneNumber);
             if (EmailUser != null)
             {
@@ -1058,7 +1106,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                             emailcompanydetails.PhoneNumber = user.PhoneNumber;
                             emailcompanydetails.FirstName = user.FirstName;
                             emailcompanydetails.LastName = user.LastName;
-                            emailcompanydetails.Name = user.Organisation;                            
+                            emailcompanydetails.Name = user.Organisation;
+                            emailcompanydetails.UserActiveCountryId = user.UserActiveCountryId;
                         }
                     }
                     else
@@ -1071,12 +1120,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                             user.UserChannelCode = registeredUser.UserChannelCode;
                             user.Id = registeredUser.Id;
                             result = await SendOTPForRegisteredUser(registeredUser);
-                            await CalculateReferralBonus(user);
+                            await GenerateReferrerCode(user);
                             return result;
                         }
                         else
-                        {                           
-
+                        {     
                             var customer = new Company
                             {
                                 Email = user.Email,
@@ -1093,7 +1141,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 ReturnServiceCentre = 0,
                                 UserActiveCountryId = user.UserActiveCountryId,
                                 Name = user.Organisation,
-                                isCodNeeded = user.RequiresCod
+                                isCodNeeded = (bool)user.RequiresCod
                             };
                             _uow.Company.Add(customer);
 
@@ -1108,7 +1156,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                     EmailUser.IsRegisteredFromMobile = true;
                     EmailUser.UserActiveCountryId = user.UserActiveCountryId;
                     EmailUser.AppType = user.AppType;
-
+                    EmailUser.UserName = user.Email;
+                    EmailUser.UserChannelPassword = user.Password;
                     var UpdatedUser = Mapper.Map<UserDTO>(EmailUser);
                     var update = await _userService.UpdateUser(UpdatedUser.Id, UpdatedUser);
                     var u = await _userService.ResetPassword(EmailUser.Id, user.Password);
@@ -1117,10 +1166,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                     result = await SendOTPForRegisteredUser(user);
                     user.UserChannelCode = EmailUser.UserChannelCode;
                     user.Id = EmailUser.Id;
-                    await CalculateReferralBonus(user);
+                    await GenerateReferrerCode(user);
                     return result;
                 }
-
             }
             else if (EmailUser == null)
             {
@@ -1130,7 +1178,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 result = await SendOTPForRegisteredUser(registeredUser);
                 user.UserChannelCode = registeredUser.UserChannelCode;
                 user.Id = registeredUser.Id;
-                await CalculateReferralBonus(user);
+                await GenerateReferrerCode(user);
             }
 
             return result;
@@ -1269,9 +1317,9 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.LoadImage(images);
         }
-        public async Task<bool> VerifyPartnerDetails(PartnerDTO partner)
+        public async Task<bool> VerifyPartnerDetails(PartnerDTO partnerDto)
         {
-            return await _preShipmentMobileService.VerifyPartnerDetails(partner);
+            return await _preShipmentMobileService.VerifyPartnerDetails(partnerDto);
         }
         public Task<string> Generate(int length)
         {
@@ -1332,12 +1380,65 @@ namespace GIGLS.Services.Business.CustomerPortal
                 bool IsPhone = Regex.IsMatch(user, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
                 if (IsPhone)
                 {
-                    user = user.Remove(0, 1);
+                    if (user.StartsWith("0"))
+                    {
+                        user = user.Remove(0, 1);
+                    }
                     emailPhone = user;
                 }
             }
 
             return await _otpService.CheckDetails(emailPhone, userchanneltype);
+        }
+        public async Task<UserDTO> CheckDetailsForCustomerPortal(string user)
+        {
+            string emailPhone = "";
+
+            bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            if (isEmail)
+            {
+                emailPhone = user;
+            }
+            else
+            {
+                bool IsPhone = Regex.IsMatch(user, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
+                if (IsPhone)
+                {
+                    user = user.Remove(0, 1);
+                    emailPhone = user;
+                }
+                else
+                {
+                    emailPhone = user;
+                }
+            }
+
+            return await _otpService.CheckDetailsForCustomerPortal(emailPhone);
+        }
+        public async Task<UserDTO> CheckDetailsForMobileScanner(string user)
+        {
+            string emailPhone = "";
+
+            bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            if (isEmail)
+            {
+                emailPhone = user;
+            }
+            else
+            {
+                bool IsPhone = Regex.IsMatch(user, @"\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})");
+                if (IsPhone)
+                {
+                    user = user.Remove(0, 1);
+                    emailPhone = user;
+                }
+                else
+                {
+                    emailPhone = user;
+                }
+            }
+
+            return await _otpService.CheckDetailsForMobileScanner(emailPhone);
         }
         public async Task<bool> CreateCustomer(string CustomerCode)
         {
@@ -1351,13 +1452,28 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.CreateCompany(CustomerCode);
         }
+
         public async Task<bool> EditProfile(UserDTO user)
         {
             return await _preShipmentMobileService.EditProfile(user);
         }
         public async Task<object> AddPreShipmentMobile(PreShipmentMobileDTO preShipment)
         {
+            var isDisable =  ConfigurationManager.AppSettings["DisableShipmentCreation"];
+            bool disableShipmentCreation = bool.Parse(isDisable);
+
+            if (disableShipmentCreation) {
+                string message = "Pick up service is currently not available due to movement restriction. " +
+                    "This service will be fully restored tomorrow. Thank you for your patience and understanding.";
+
+                throw new GenericException(message);
+            }
             return await _preShipmentMobileService.AddPreShipmentMobile(preShipment);
+        }
+
+        public async Task<MultipleShipmentOutput> AddMultiplePreShipmentMobile(NewPreShipmentMobileDTO preShipment)
+        {
+            return await _preShipmentMobileService.CreateMobileShipment(preShipment);
         }
         public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser()
         {
@@ -1370,6 +1486,18 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
             return await _preShipmentMobileService.GetPrice(preShipment);
+        }
+        public async Task<MultipleMobilePriceDTO> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipment)
+        {
+            return await _preShipmentMobileService.GetPriceForMultipleShipments(preShipment);
+        }
+        public async Task<MobileGroupCodeWaybillMappingDTO> GetWaybillDetailsInGroup(string groupCode)
+        {
+            return await _groupCodeWaybillMappingService.GetWaybillDetailsInGroup(groupCode);
+        }
+        public async Task<MobileGroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCode)
+        {
+            return await _groupCodeWaybillMappingService.GetWaybillNumbersInGroup(groupCode);
         }
         public async Task<WalletDTO> GetWalletBalance()
         {
@@ -1398,6 +1526,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<object> ResolveDisputeForMobile(PreShipmentMobileDTO preShipment)
         {
             return await _preShipmentMobileService.ResolveDisputeForMobile(preShipment);
+        }
+        public async Task<object> ResolveDisputeForMultipleShipment(PreShipmentMobileDTO preShipment)
+        {
+            return await _preShipmentMobileService.ResolveDisputeForMultipleShipments(preShipment);
         }
         public async Task<PreShipmentMobileDTO> GetPreShipmentDetail(string waybill)
         {
@@ -1509,17 +1641,13 @@ namespace GIGLS.Services.Business.CustomerPortal
                         UserActiveCountryId = user.UserActiveCountryId,
                         CompanyType = CompanyType.Ecommerce,
                         Name = user.Organisation,
-                        isCodNeeded = user.RequiresCod
-
-                        //added this to pass channelcode 
+                        isCodNeeded = (bool) user.RequiresCod
                     };
 
-                    //var company = Mapper.Map<Company>(companydto);
                     _uow.Company.Add(companydto);
 
                     // add customer to user's table.
                     User = await CreateNewuser(user);
-
                     await _uow.CompleteAsync();
 
                     // add customer to a wallet
@@ -1540,86 +1668,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw;
             }
-        }
-
-        private async Task CalculateReferralBonus (UserDTO User)
-        {
-            var transaction = new WalletTransactionDTO();
-            if (User.Referrercode == null || User.Referrercode == "")
-            {
-                //Generate referrercode for user that is signing up and didnt 
-                //supply a referrecode
-                var code = await GenerateReferrerCode(User);
-            }
-            else
-            {
-                
-                //based on the referrercode supplied, use it to get the wallet and update the balance 
-                var referrerCode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == User.Referrercode);
-
-                //Generate referrercode for user that is signing up and supplies a referrerCode
-                var code = await GenerateReferrerCode(User);
-
-                if (referrerCode != null && User.IsUniqueInstalled==true)
-                {
-                    var userDTO = await _userService.GetUserByChannelCode(referrerCode.UserCode);
-                    //var campaignEmail = await _uow.ActivationCampaignEmail.GetAsync(s => s.Email == userDTO.Email);
-                    //var activationStartDate = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ActivationCampaignStartDate, User.UserActiveCountryId);
-                    //var activationEndDate = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ActivationCampaignEndDate, User.UserActiveCountryId);
-                    //var startdate = Convert.ToDateTime(activationStartDate.Value);
-                    //var endDate = Convert.ToDateTime(activationEndDate.Value);
-                    //if (campaignEmail != null && (DateTime.Now >= startdate && DateTime.Now <= endDate))
-                    //{
-                    //    var referrerCodeForActivationCampaign = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferralBonusForActivationCampaign, User.UserActiveCountryId);
-                    //    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrerCode.UserCode);
-                    //    wallet.Balance = wallet.Balance + Convert.ToDecimal(referrerCodeForActivationCampaign.Value);
-                    //    transaction = new WalletTransactionDTO
-                    //    {
-                    //        WalletId = wallet.WalletId,
-                    //        CreditDebitType = CreditDebitType.Credit,
-                    //        Amount = Convert.ToDecimal(referrerCodeForActivationCampaign.Value),
-                    //        ServiceCentreId = 296,
-                    //        Waybill = "",
-                    //        Description = "Activation Campaign Referral Bonus",
-                    //        PaymentType = PaymentType.Online,
-                    //        UserId = referrerCode.UserId
-                    //    };
-                    //    var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
-                    //    await _uow.CompleteAsync();
-                    //    var messageExtensionDTO = new MobileMessageDTO()
-                    //    {
-                    //        SenderName = userDTO.FirstName + " " + userDTO.LastName,
-                    //        SenderEmail = userDTO.Email
-
-                    //    };
-                    //    await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
-                    //}
-                    var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, User.UserActiveCountryId);
-                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrerCode.UserCode);
-                    wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
-                    transaction = new WalletTransactionDTO
-                    {
-                        WalletId = wallet.WalletId,
-                        CreditDebitType = CreditDebitType.Credit,
-                        Amount = Convert.ToDecimal(bonus.Value),
-                        ServiceCentreId = 296,
-                        Waybill = "",
-                        Description = "Referral Bonus",
-                        PaymentType = PaymentType.Online,
-                        UserId = referrerCode.UserId
-                    };
-                    var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
-                    await _uow.CompleteAsync();
-                    var messageExtensionDTO = new MobileMessageDTO()
-                    {
-                        SenderName = userDTO.FirstName + " " + userDTO.LastName,
-                        SenderEmail = userDTO.Email
-
-                    };
-                    await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
-                }
-            }
-        }
+        }        
 
         private async Task<UserDTO> CreateNewuser (UserDTO user)
         {
@@ -1642,7 +1691,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                     UserActiveCountryId = user.UserActiveCountryId,
                     IsFromMobile = true,
                     IsRegisteredFromMobile = true,
-                    AppType = user.AppType
+                    AppType = user.AppType,
+                    IsUniqueInstalled = user.IsUniqueInstalled,
+                    RegistrationReferrercode = user.RegistrationReferrercode
                 };
 
                 string username = null;
@@ -1653,7 +1704,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     customerType = CustomerType.IndividualCustomer.ToString();
                     result.Department = customerType;
                     result.Designation = customerType;
-                    result.Organisation = customerType;
                     result.UserChannelType = UserChannelType.IndividualCustomer;
                     username = (user.UserChannelType == UserChannelType.IndividualCustomer) ? user.Email : user.UserChannelCode;
                 }
@@ -1662,7 +1712,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     customerType = CustomerType.Company.ToString();
                     result.Department = customerType;
                     result.Designation = customerType;
-                    result.Organisation = customerType;
+                    result.Organisation = user.Organisation;
                     result.UserChannelType = UserChannelType.Ecommerce;
                     username = (user.UserChannelType == UserChannelType.Ecommerce) ? user.Email : user.UserChannelCode;               
                 }
@@ -1671,8 +1721,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     customerType = CustomerType.Partner.ToString();
                     result.Department = customerType;
                     result.Designation = customerType;
-                    result.Organisation = customerType;
-                    result.UserChannelType = UserChannelType.Ecommerce;
+                    result.UserChannelType = UserChannelType.Partner;
                     username = (user.UserChannelType == UserChannelType.Partner) ? user.Email : user.UserChannelCode;
                 }
                                
@@ -1710,6 +1759,96 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task SendPickUpRequestMessage(string userId)
         {
             await _messageSenderService.SendVoiceMessageAsync(userId);
+        }
+        public async Task<List<GiglgoStationDTO>> GetGoStations()
+        {
+            return await _preShipmentMobileService.GetGoStations();
+        }
+        public async Task<List<DeliveryNumberDTO>> GetDeliveryNumbers(int count)
+        {
+            try
+            {
+               
+                var deliverynumberDto = new List<DeliveryNumberDTO>();
+                //var query = _uow.DeliveryNumber.GetAll();
+                deliverynumberDto = await GenerateDeliveryNumber(count);
+                //query = query.Where(s => s.IsUsed != true);
+                //var deliverynumbers = query.ToList();
+                //deliverynumberDto = Mapper.Map<List<DeliveryNumberDTO>>(deliverynumbers);
+                return await Task.FromResult(deliverynumberDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        private async Task<List<DeliveryNumberDTO>> GenerateDeliveryNumber(int value)
+        {
+            var deliveryNumberlist = new List<DeliveryNumberDTO>();
+            for (int i = 0; i < value; i++)
+            {
+                int maxSize = 6;
+                char[] chars = new char[62];
+                string a;
+                a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+                chars = a.ToCharArray();
+                int size = maxSize;
+                byte[] data = new byte[1];
+                RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
+                crypto.GetNonZeroBytes(data);
+                size = maxSize;
+                data = new byte[size];
+                crypto.GetNonZeroBytes(data);
+                StringBuilder result = new StringBuilder(size);
+                foreach (byte b in data)
+                { result.Append(chars[b % (chars.Length - 1)]); }
+                var strippedText = result.ToString();
+                var number = new DeliveryNumber
+                {
+                    Number = "DN" + strippedText.ToUpper(),
+                    IsUsed = false,
+                };
+                var deliverynumberDTO = Mapper.Map<DeliveryNumberDTO>(number);
+                deliveryNumberlist.Add(deliverynumberDTO);
+                _uow.DeliveryNumber.Add(number);
+                await _uow.CompleteAsync();
+            }
+            return await Task.FromResult(deliveryNumberlist);
+        }
+        public async Task<bool> UpdateGIGGoShipmentStaus(MobilePickUpRequestsDTO mobilePickUpRequestsDTO)
+        {
+            try
+            {
+                var preShipmentMobile = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == mobilePickUpRequestsDTO.Waybill);
+                if (preShipmentMobile == null)
+                {
+                    throw new GenericException("This is not a GIGGo Shipment.It can not be updated");
+                }
+                else
+                {
+                    if((preShipmentMobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString() || preShipmentMobile.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString())
+                        && mobilePickUpRequestsDTO.Status == "Shipment created")
+                    {
+                        throw new GenericException($"You can not change this shipment status to {mobilePickUpRequestsDTO.Status}");
+                    }
+                    else if (preShipmentMobile.ZoneMapping == 1 && mobilePickUpRequestsDTO.Status == MobilePickUpRequestStatus.OnwardProcessing.ToString())
+                    {
+                        throw new GenericException("This is not an Inter-State Shipment");
+                    }
+                    else
+                    {
+                        preShipmentMobile.shipmentstatus = mobilePickUpRequestsDTO.Status;
+                        await _uow.CompleteAsync();
+                    }
+                    
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
         }
     }
 }

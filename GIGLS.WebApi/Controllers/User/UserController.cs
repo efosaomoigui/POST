@@ -23,6 +23,7 @@ using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.Enums;
 using GIGLS.Core.DTO;
+using GIGLS.Core.IServices.CustomerPortal;
 
 namespace GIGLS.WebApi.Controllers.User
 {
@@ -35,15 +36,17 @@ namespace GIGLS.WebApi.Controllers.User
         private IServiceCentreService _serviceCentreService;
         private ICountryService _countryService;
         private readonly IMessageSenderService _messageSenderService;
+        private readonly ICustomerPortalService _customerPortalService;
 
         public UserController(IUserService userService, IPasswordGenerator passwordGenerator,
-            IServiceCentreService serviceCentreService, ICountryService countryService, IMessageSenderService messageSenderService) : base(nameof(UserController))
+            IServiceCentreService serviceCentreService, ICountryService countryService, IMessageSenderService messageSenderService, ICustomerPortalService customerPortalService) : base(nameof(UserController))
         {
             _userService = userService;
             _passwordGenerator = passwordGenerator;
             _serviceCentreService = serviceCentreService;
             _countryService = countryService;
             _messageSenderService = messageSenderService;
+            _customerPortalService = customerPortalService;
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -152,7 +155,6 @@ namespace GIGLS.WebApi.Controllers.User
 
             return await HandleApiOperationAsync(async () =>
             {
-
                 var result = await _userService.AddUser(userdto);
                 if (!result.Succeeded)
                 {
@@ -166,7 +168,6 @@ namespace GIGLS.WebApi.Controllers.User
                 {
                     Object = user
                 };
-
             });
         }
 
@@ -619,7 +620,6 @@ namespace GIGLS.WebApi.Controllers.User
 
             return await HandleApiOperationAsync(async () =>
             {
-
                 using (var client = new HttpClient())
                 {
                     //setup client
@@ -636,7 +636,7 @@ namespace GIGLS.WebApi.Controllers.User
                      });
 
                     //setup login data
-                    HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
+                    HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
 
                     if (!responseMessage.IsSuccessStatusCode)
                     {

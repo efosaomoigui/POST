@@ -7,6 +7,7 @@ using GIGLS.Core;
 using GIGLS.Infrastructure;
 using AutoMapper;
 using GIGLS.Core.Domain.ShipmentScan;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.ShipmentScan
 {
@@ -117,6 +118,21 @@ namespace GIGLS.Services.Implementation.ShipmentScan
                 scanStatus.Reason = scanStatusDto.Reason;
                 scanStatus.HiddenFlag = scanStatusDto.HiddenFlag;
                 _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+              
+
+        public async Task<IEnumerable<ScanStatusDTO>> GetNonHiddenScanStatus()
+        {
+            try
+            {
+                var scanstatus = _uow.ScanStatus.GetAllAsQueryable().Where(x => x.HiddenFlag == false).ToList();
+                var scanstatusDto = Mapper.Map<IEnumerable<ScanStatusDTO>>(scanstatus.OrderBy(x => x.Reason));
+                return await Task.FromResult(scanstatusDto);
             }
             catch (Exception)
             {

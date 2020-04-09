@@ -26,7 +26,7 @@ namespace GIGLS.Services.Implementation.Utility
         {
             try
             {
-                if (await _uow.GlobalProperty.ExistAsync(c => c.Key == globalProperty.Key))
+                if (await _uow.GlobalProperty.ExistAsync(c => c.Key == globalProperty.Key && c.CountryId == globalProperty.CountryId))
                 {
                     throw new GenericException("Information already exist");
                 }

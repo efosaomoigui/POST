@@ -89,8 +89,7 @@ namespace GIGLS.WebApi.Providers
             {
                 User user = await _repo._userManager.FindAsync(context.UserName, context.Password);
 
-
-                if (user != null && user.UserChannelType == UserChannelType.Employee)
+                if (user != null && user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
                 {
                     //Global Property PasswordExpireDaysCount
                     var expiredDayCount = await _repo._globalProperty.GetAsync(s => s.Key == GlobalPropertyType.PasswordExpireDaysCount.ToString());
@@ -114,7 +113,6 @@ namespace GIGLS.WebApi.Providers
                         context.Response.Headers.Add("AuthorizationResponse", new[] { "expireduser" });
                         return;
                     }
-
                 }
 
                 if (user == null)
@@ -166,6 +164,7 @@ namespace GIGLS.WebApi.Providers
                     { "PhoneNumber", user.PhoneNumber},
                     { "IsActive", user.IsActive.ToString()},
                     { "Organization", user.Organisation},
+                    { "Organisation", user.Organisation},
                     { "UserChannelCode", user.UserChannelCode},
                     { "PictureUrl", user.PictureUrl}
                 };

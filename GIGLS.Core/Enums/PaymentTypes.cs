@@ -20,6 +20,7 @@
     public enum OnlinePaymentType
     {
         Paystack,
-        TheTeller
+        TheTeller,
+        Flutterwave
     }
 }

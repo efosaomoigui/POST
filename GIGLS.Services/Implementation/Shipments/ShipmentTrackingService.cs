@@ -62,6 +62,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     //Get shipment Details
                     var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(tracking.Waybill));
+                    shipment.ShipmentScanStatus = ShipmentScanStatus.ARF;
 
                     //add service centre
                     var newShipmentCollection = new ShipmentCollection
@@ -95,9 +96,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.ShipmentTracking.Add(newShipmentTracking);
 
                     Id = newShipmentTracking.ShipmentTrackingId;
-
+                    
                     //send sms and email
-                    await sendSMSEmail(tracking, scanStatus);
+                    if (!scanStatus.Equals(ShipmentScanStatus.CRT))
+                    {
+                        await sendSMSEmail(tracking, scanStatus);
+                    }
                 }
 
                 //use to optimise shipment progress for shipment that has depart service centre
@@ -107,11 +111,15 @@ namespace GIGLS.Services.Implementation.Shipments
                     //Get shipment Details
                     var shipment = await _uow.Shipment.GetAsync(x => x.Waybill.Equals(tracking.Waybill));
 
-                    //update shipment if the user belong to original departure service centre
-                    if (shipment.DepartureServiceCentreId == tracking.ServiceCentreId && shipment.ShipmentScanStatus != scanStatus)
+                    //dont allow shipmet scan status to be update once ARF has been done on the shipment
+                    if(shipment.ShipmentScanStatus != ShipmentScanStatus.ARF)
                     {
-                        shipment.ShipmentScanStatus = scanStatus;
-                    }
+                        //update shipment if the user belong to original departure service centre
+                        if (shipment.DepartureServiceCentreId == tracking.ServiceCentreId && shipment.ShipmentScanStatus != scanStatus)
+                        {
+                            shipment.ShipmentScanStatus = scanStatus;
+                        }
+                    }                    
                 }
                 
                 await _uow.CompleteAsync();

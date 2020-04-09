@@ -57,9 +57,36 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
         {
             try
             {
-                var customers = _context.IndividualCustomer.Where(x => x.PhoneNumber.Contains(searchData) || x.FirstName.Contains(searchData) || x.LastName.Contains(searchData)).ToList();
-                var customersDto = Mapper.Map<List<IndividualCustomerDTO>>(customers);
-                return Task.FromResult(customersDto);
+                var customers = _context.IndividualCustomer.Where(x => x.PhoneNumber.Contains(searchData) || 
+                x.FirstName.Contains(searchData) || x.LastName.Contains(searchData)
+                || x.CustomerCode.Contains(searchData) || x.Email.Contains(searchData));
+                var individualDto = from s in customers
+                                   select new IndividualCustomerDTO
+                                   {
+                                       IndividualCustomerId = s.IndividualCustomerId,
+                                       FirstName = s.FirstName,
+                                       LastName = s.LastName,
+                                       Email = s.Email,
+                                       Address = s.Address,
+                                       City = s.City,
+                                       Gender = s.Gender,
+                                       PictureUrl = s.PictureUrl,
+                                       PhoneNumber = s.PhoneNumber,
+                                       State = s.State,
+                                       DateCreated = s.DateCreated,
+                                       DateModified = s.DateModified,
+                                       CustomerCode = s.CustomerCode,
+                                       UserActiveCountryId = s.UserActiveCountryId,
+                                       Country = _context.Country.Where(x => x.CountryId == s.UserActiveCountryId).Select(x => new CountryDTO
+                                       {
+                                           CountryId = x.CountryId,
+                                           CountryName = x.CountryName,
+                                           CurrencySymbol = x.CurrencySymbol,
+                                           CurrencyCode = x.CurrencyCode,
+                                           PhoneNumberCode = x.PhoneNumberCode
+                                       }).FirstOrDefault()
+                                   };
+                return Task.FromResult(individualDto.ToList());
             }
             catch (Exception)
             {
