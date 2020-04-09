@@ -56,8 +56,8 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO);
         Task<object> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO);
 
-        Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto);
-        Task<PreShipmentDTO> GetPreShipment(string waybill);
+        //Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto);
+        //Task<PreShipmentDTO> GetPreShipment(string waybill);
         Task<UserDTO> Register(UserDTO user);
         Task<SignResponseDTO> SignUp(UserDTO user);
         Task<SignResponseDTO> ResendOTP(UserDTO user);
@@ -135,5 +135,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> ResolveDisputeForMultipleShipment(PreShipmentMobileDTO preShipment);
         Task<MobileGroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCode);
         Task<MobileGroupCodeWaybillMappingDTO> GetWaybillDetailsInGroup(string groupCode);
+        Task<string> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO);
     }
 }

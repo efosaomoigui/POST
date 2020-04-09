@@ -17,6 +17,7 @@
         BankProcessingOrderForDemurrage = 13,
         PayOutOrder = 14,
         FleetPartner = 15,
-        MagayaWb = 16
+        MagayaWb = 16,
+        PreShipmentCode = 17
     }
 }

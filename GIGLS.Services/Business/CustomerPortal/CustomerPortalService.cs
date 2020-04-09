@@ -475,38 +475,38 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _userService.ChangePassword(userid, currentPassword, newPassword);
         }
 
-        public async Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto)
-        {
-            try
-            {
-                //get the current login user 
-                var currentUserId = await _userService.GetCurrentUserId();
+        //public async Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto)
+        //{
+        //    try
+        //    {
+        //        //get the current login user 
+        //        var currentUserId = await _userService.GetCurrentUserId();
 
-                var preShipmentsQuery = _uow.PreShipment.PreShipmentsAsQueryable();
-                preShipmentsQuery = preShipmentsQuery.Where(s => s.UserId == currentUserId);
-                var preShipments = preShipmentsQuery.ToList();
-                var preShipmentsDTO = Mapper.Map<List<PreShipmentDTO>>(preShipments);
-                return preShipmentsDTO;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //        var preShipmentsQuery = _uow.PreShipment.PreShipmentsAsQueryable();
+        //        preShipmentsQuery = preShipmentsQuery.Where(s => s.UserId == currentUserId);
+        //        var preShipments = preShipmentsQuery.ToList();
+        //        var preShipmentsDTO = Mapper.Map<List<PreShipmentDTO>>(preShipments);
+        //        return preShipmentsDTO;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
-        public async Task<PreShipmentDTO> GetPreShipment(string waybill)
-        {
-            try
-            {
-                var preShipmentDTO = await _preShipmentService.GetPreShipment(waybill);
-                return preShipmentDTO;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+        //public async Task<PreShipmentDTO> GetPreShipment(string waybill)
+        //{
+        //    try
+        //    {
+        //        var preShipmentDTO = await _preShipmentService.GetPreShipment(waybill);
+        //        return preShipmentDTO;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
 
-        }
+        //}
 
         public async Task<UserDTO> Register(UserDTO user)
         {
@@ -1236,7 +1236,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
-
         public async Task<Dictionary<string, List<StationDTO>>> GetAllStations()
         {
             Dictionary<string, List<StationDTO>> StationDictionary = new Dictionary<string, List<StationDTO>>();
@@ -1850,5 +1849,52 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             
         }
+
+        public async Task<string> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO)
+        {
+            try
+            {
+                // get the current user info
+                var currentUserId = await _userService.GetCurrentUserId();
+                preShipmentDTO.SenderUserId = currentUserId;
+
+                var newPreShipment = Mapper.Map<PreShipment>(preShipmentDTO);
+                var code = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.PreShipmentCode);
+
+                newPreShipment.TempCode = code;
+                newPreShipment.ApproximateItemsWeight = 0;
+
+                // add serial numbers to the ShipmentItems
+                var serialNumber = 1;
+                foreach (var shipmentItem in newPreShipment.PreShipmentItems)
+                {
+                    shipmentItem.SerialNumber = serialNumber;
+
+                    //sum item weight
+                    //check for volumetric weight
+                    if (shipmentItem.IsVolumetric)
+                    {
+                        double volume = (shipmentItem.Length * shipmentItem.Height * shipmentItem.Width) / 5000;
+                        double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
+
+                        newPreShipment.ApproximateItemsWeight += Weight;
+                    }
+                    else
+                    {
+                        newPreShipment.ApproximateItemsWeight += shipmentItem.Weight;
+                    }
+
+                    serialNumber++;
+                }
+                _uow.PreShipment.Add(newPreShipment);
+
+                return newPreShipment.TempCode;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        
     }
 }

@@ -603,5 +603,19 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{waybill}/preshipment")]
+        public async Task<IServiceResponse<PreShipmentDTO>> GetTempShipment(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipment = await _service.GetTempShipment(waybill);
+                return new ServiceResponse<PreShipmentDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
     }
 }

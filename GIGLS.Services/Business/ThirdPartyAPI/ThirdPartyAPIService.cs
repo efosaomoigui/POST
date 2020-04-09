@@ -112,42 +112,42 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
 
         //Capture PreShipment API
-        public async Task<PreShipmentDTO> AddPreShipment(ThirdPartyPreShipmentDTO thirdPartyPreShipmentDTO)
-        {
-            try
-            {
-                //1. convert thirdPartyPreShipmentDTO to PreShipmentDTO
-                var preShipmentDTO = Mapper.Map<PreShipmentDTO>(thirdPartyPreShipmentDTO);
+        //public async Task<PreShipmentDTO> AddPreShipment(ThirdPartyPreShipmentDTO thirdPartyPreShipmentDTO)
+        //{
+        //    try
+        //    {
+        //        //1. convert thirdPartyPreShipmentDTO to PreShipmentDTO
+        //        var preShipmentDTO = Mapper.Map<PreShipmentDTO>(thirdPartyPreShipmentDTO);
 
-                decimal totalPrice = 0.0M;
-                //2. convert the shipment items
-                var preShipmentItemDTOList = new List<PreShipmentItemDTO>();
-                foreach (var thirdPartyPreShipmentItem in thirdPartyPreShipmentDTO.PreShipmentItems)
-                {
-                    var preShipmentItemDTO = Mapper.Map<PreShipmentItemDTO>(thirdPartyPreShipmentItem);
-                    preShipmentItemDTOList.Add(preShipmentItemDTO);
-                    totalPrice += preShipmentItemDTO.Price;
-                }
-                preShipmentDTO.PreShipmentItems = preShipmentItemDTOList;
+        //        decimal totalPrice = 0.0M;
+        //        //2. convert the shipment items
+        //        var preShipmentItemDTOList = new List<PreShipmentItemDTO>();
+        //        foreach (var thirdPartyPreShipmentItem in thirdPartyPreShipmentDTO.PreShipmentItems)
+        //        {
+        //            var preShipmentItemDTO = Mapper.Map<PreShipmentItemDTO>(thirdPartyPreShipmentItem);
+        //            preShipmentItemDTOList.Add(preShipmentItemDTO);
+        //            totalPrice += preShipmentItemDTO.Price;
+        //        }
+        //        preShipmentDTO.PreShipmentItems = preShipmentItemDTOList;
 
-                //3. set other default values
-                //3.1 price
-                preShipmentDTO.Total = totalPrice;
-                preShipmentDTO.GrandTotal = totalPrice;
+        //        //3. set other default values
+        //        //3.1 price
+        //        preShipmentDTO.Total = totalPrice;
+        //        preShipmentDTO.GrandTotal = totalPrice;
 
-                //3.2 customer info
-                var currentUserId = await _userService.GetCurrentUserId();
-                var currentUser = await _userService.GetUserById(currentUserId);
-                preShipmentDTO.CustomerCode = currentUser.UserChannelCode;
+        //        //3.2 customer info
+        //        var currentUserId = await _userService.GetCurrentUserId();
+        //        var currentUser = await _userService.GetUserById(currentUserId);
+        //        preShipmentDTO.CustomerCode = currentUser.UserChannelCode;
 
-                var newPreShipment = await _preShipmentService.AddPreShipment(preShipmentDTO);
-                return newPreShipment;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //        var newPreShipment = await _preShipmentService.AddPreShipment(preShipmentDTO);
+        //        return newPreShipment;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
         //Route API
 
