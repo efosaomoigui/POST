@@ -605,12 +605,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("{waybill}/preshipment")]
-        public async Task<IServiceResponse<PreShipmentDTO>> GetTempShipment(string waybill)
+        [Route("{code}/preshipment")]
+        public async Task<IServiceResponse<PreShipmentDTO>> GetTempShipment(string code)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipment = await _service.GetTempShipment(waybill);
+                var shipment = await _service.GetTempShipment(code);
                 return new ServiceResponse<PreShipmentDTO>
                 {
                     Object = shipment

@@ -322,7 +322,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var shipment = await _uow.PreShipment.GetAsync(x => x.TempCode == code, "DeliveryOption, PreShipmentItems");
+                var shipment = await _uow.PreShipment.GetAsync(x => x.TempCode == code, "PreShipmentItems");
                 if (shipment == null)
                 {
                     throw new GenericException("Pre Shipment Information does not exist");
@@ -330,33 +330,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var shipmentDto = Mapper.Map<PreShipmentDTO>(shipment);
 
-                // get ServiceCentre
-                //var departureServiceCentre = await _centreService.GetServiceCentreById(shipment.DepartureServiceCentreId);
-                //var destinationServiceCentre = await _centreService.GetServiceCentreById(shipment.DestinationServiceCentreId);
-
-                //shipmentDto.DepartureServiceCentre = departureServiceCentre;
-                //shipmentDto.DestinationServiceCentre = destinationServiceCentre;
-
-                //get CustomerDetails
-                //if (shipmentDto.CustomerType.Contains("Individual"))
-                {
-                    //shipmentDto.CustomerType = CustomerType.IndividualCustomer.ToString();
-                }
-
-                //CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipmentDto.CustomerType);
-                //shipmentDto.CustomerDetails = await _customerService.GetCustomer(shipmentDto.CustomerId, customerType);
-                //shipmentDto.Customer = new List<CustomerDTO>();
-                //shipmentDto.Customer.Add(shipmentDto.CustomerDetails);
-
-                //get wallet number
-                //var wallets = await _walletService.GetWallets();
-                //var customerWallet = _uow.Wallet.SingleOrDefault(
-                   // s => s.CustomerId == shipmentDto.CustomerId && s.CustomerType == customerType);
-                //shipmentDto.WalletNumber = customerWallet?.WalletNumber;
-
-                //Set the Senders AAddress for the Shipment in the CustomerDetails
-                //shipmentDto.CustomerDetails.Address = shipmentDto.SenderAddress ?? shipmentDto.CustomerDetails.Address;
-                //shipmentDto.CustomerDetails.State = shipmentDto.SenderState ?? shipmentDto.CustomerDetails.State;
+                //Get the customer wallet balance
+                var wallet = await _walletService.GetWalletBalance(shipment.CustomerCode);
+                shipmentDto.WalletBalance = wallet.Balance;
 
                 return shipmentDto;
             }

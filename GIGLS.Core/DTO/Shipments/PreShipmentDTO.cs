@@ -27,6 +27,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string CustomerCode { get; set; }
         public string SenderUserId { get; set; }
         public int CountryId { get; set; }
+        public decimal WalletBalance { get; set; }
 
         //PickUp' Information
         //public string PickUpPhoneNumber { get; set; }
