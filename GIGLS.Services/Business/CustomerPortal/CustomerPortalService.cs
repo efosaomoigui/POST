@@ -1854,15 +1854,30 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             try
             {
-                // get the current user info
+                //var existingPreShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == preShipmentDTO.TempCode);
+                string code = null;
+                
+                // get the sender info
                 var currentUserId = await _userService.GetCurrentUserId();
                 preShipmentDTO.SenderUserId = currentUserId;
+                var user = await _userService.GetUserById(currentUserId);
 
+                var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.DepartureStationId);
+                preShipmentDTO.CountryId = Country.CountryId;
+                //preShipmentDTO.CurrencyCode = Country.CurrencyCode;
+                //preShipmentDTO.CurrencySymbol = Country.CurrencySymbol;
+                preShipmentDTO.CompanyType = user.UserChannelType.ToString();
+                preShipmentDTO.CustomerCode = user.UserChannelCode;
+               
                 var newPreShipment = Mapper.Map<PreShipment>(preShipmentDTO);
-                var code = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.PreShipmentCode);
+                //if(existingPreShipment == null)
+                //{
+                    code = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.PreShipmentCode);
+                //}
 
                 newPreShipment.TempCode = code;
                 newPreShipment.ApproximateItemsWeight = 0;
+                newPreShipment.IsProcessed = false;
 
                 // add serial numbers to the ShipmentItems
                 var serialNumber = 1;
@@ -1887,6 +1902,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     serialNumber++;
                 }
                 _uow.PreShipment.Add(newPreShipment);
+                await _uow.CompleteAsync();
 
                 return newPreShipment.TempCode;
             }
@@ -1895,6 +1911,95 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw;
             }
         }
-        
+
+        public async Task UpdateServiceCentre(int serviceCentreId, ServiceCentreDTO service)
+        {
+            try
+            {
+                var centre = await _uow.ServiceCentre.GetAsync(serviceCentreId);
+                if (centre == null || serviceCentreId != service.ServiceCentreId)
+                {
+                    throw new GenericException("Service Centre does not exist");
+                }
+
+                //1. update the old service centre code to the new one in Number Generator Monitor if they are different
+                if (centre.Code.ToLower() != service.Code.ToLower())
+                {
+                    var numberGenerator = await _uow.NumberGeneratorMonitor.FindAsync(x => x.ServiceCentreCode == centre.Code);
+
+                    foreach (var number in numberGenerator)
+                    {
+                        number.ServiceCentreCode = service.Code;
+                    }
+                }
+
+                var station = await _uow.Station.GetAsync(service.StationId);
+
+                //2. Update the service centre details
+                centre.Name = service.Name;
+                centre.PhoneNumber = service.PhoneNumber;
+                centre.Address = service.Address;
+                centre.City = service.City;
+                centre.Email = service.Email;
+                centre.StationId = station.StationId;
+                centre.IsActive = true;
+                centre.Code = service.Code;
+                centre.TargetAmount = service.TargetAmount;
+                centre.TargetOrder = service.TargetOrder;
+                centre.IsHUB = service.IsHUB;
+                _uow.Complete();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateTemporaryShipment(PreShipmentDTO preShipmentDTO)
+        {
+            try
+            {
+                var existingPreShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == preShipmentDTO.TempCode);
+                if (existingPreShipment == null)
+                {
+                    throw new GenericException("Pre Shipment does not exist");
+                }
+                else if (existingPreShipment.IsProcessed)
+                {
+                    throw new GenericException("Pre Shipment already processed");
+                }
+
+                // update receiver
+                existingPreShipment.ReceiverAddress = preShipmentDTO.ReceiverAddress;
+                existingPreShipment.ReceiverCity = preShipmentDTO.ReceiverCity;
+                existingPreShipment.ReceiverName = preShipmentDTO.ReceiverName;
+                existingPreShipment.ReceiverPhoneNumber = preShipmentDTO.ReceiverPhoneNumber;
+                existingPreShipment.ReceiverState = preShipmentDTO.ReceiverState;
+                existingPreShipment.PickupOptions = preShipmentDTO.PickupOptions;
+
+                //update items
+                foreach (var preShipmentItemDTO in preShipmentDTO.PreShipmentItems)
+                {
+                    var preshipment = await _uow.PreShipmentItem.GetAsync(s => s.PreShipmentId == preShipmentItemDTO.PreShipmentId && s.PreShipmentItemId == preShipmentItemDTO.PreShipmentItemId);
+                    if (preshipment != null)
+                    {
+                        preshipment.Description = preShipmentItemDTO.Description;
+                        preshipment.Nature = preShipmentItemDTO.Nature;
+                        preshipment.Quantity = preShipmentItemDTO.Quantity;
+                        preshipment.Weight = (double)preShipmentItemDTO.Weight;
+                        preshipment.ShipmentType = preShipmentItemDTO.ShipmentType;
+                        existingPreShipment.ApproximateItemsWeight += preshipment.Weight;
+                    }
+                }
+                await _uow.CompleteAsync();
+                return true;
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

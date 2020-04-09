@@ -20,7 +20,7 @@ namespace GIGL.GIGLS.Core.Domain
         public string TempCode { get; set; }
 
         [MaxLength(100), MinLength(5)]
-        [Index(IsUnique = true)]
+        //[Index(IsUnique = true)]
         public string Waybill { get; set; }
 
         //Senders' Information

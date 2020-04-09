@@ -1679,7 +1679,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpPost]
-        [Route("createTemporaryShipments")]
+        [Route("createtemporaryshipments")]
         public async Task<IServiceResponse<string>> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
@@ -1687,6 +1687,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 var preshipMentMobile = await _portalService.CreateTemporaryShipment(preShipmentDTO);
 
                 return new ServiceResponse<string>
+                {
+                    Object = preshipMentMobile
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("updatetemporaryshipments")]
+        public async Task<IServiceResponse<bool>> UpdateTemporaryShipment(PreShipmentDTO preShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipMentMobile = await _portalService.UpdateTemporaryShipment(preShipmentDTO);
+
+                return new ServiceResponse<bool>
                 {
                     Object = preshipMentMobile
                 };

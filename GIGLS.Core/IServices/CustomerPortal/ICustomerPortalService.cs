@@ -136,5 +136,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<MobileGroupCodeWaybillMappingDTO> GetWaybillNumbersInGroup(string groupCode);
         Task<MobileGroupCodeWaybillMappingDTO> GetWaybillDetailsInGroup(string groupCode);
         Task<string> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO);
+        Task<bool> UpdateTemporaryShipment(PreShipmentDTO preShipmentDTO);
     }
 }
