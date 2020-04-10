@@ -13,5 +13,6 @@ namespace GIGLS.Core.IRepositories.ServiceCentres
         Task<List<StationDTO>> GetLocalStationsWithoutSuperServiceCentre(int[] countryIds);
         Task<List<StationDTO>> GetInternationalStations();
         Task<List<Station>> GetAllStationsAsync();
+        Task<List<StationDTO>> GetActiveGIGGoStations();
     }
 }

@@ -14,5 +14,6 @@ namespace GIGLS.Core.IServices.ServiceCentres
         Task UpdateStation(int stationId, StationDTO station);
         Task DeleteStation(int stationId);
         Task UpdateGIGGoStationStatus(int stationId, bool status);
+        Task<List<StationDTO>> GetActiveGIGGoStations();
     }
 }

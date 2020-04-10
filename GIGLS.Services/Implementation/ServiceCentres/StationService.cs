@@ -178,5 +178,10 @@ namespace GIGLS.Services.Implementation.ServiceCentres
         {
             return await _uow.Station.GetInternationalStations();
         }
+
+        public async Task<List<StationDTO>> GetActiveGIGGoStations()
+        {
+            return await _uow.Station.GetActiveGIGGoStations();
+        }
     }
 }

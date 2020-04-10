@@ -162,6 +162,21 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("giggostations")]
+        public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetActiveGIGGoStations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stations = await _stationService.GetActiveGIGGoStations();
+                return new ServiceResponse<IEnumerable<StationDTO>>
+                {
+                    Object = stations
+                };
+            });
+        }
+
 
     }
 }
