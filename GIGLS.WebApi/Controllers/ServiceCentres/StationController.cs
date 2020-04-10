@@ -132,6 +132,21 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("{stationId:int}/giggostatus/{status}")]
+        public async Task<IServiceResponse<object>> UpdateGIGGoStationStatus(int stationId, bool status)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _stationService.UpdateGIGGoStationStatus(stationId, status);
+                return new ServiceResponse<object>
+                {
+                    Object = true
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("{stationId:int}")]
