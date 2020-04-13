@@ -66,14 +66,14 @@ namespace GIGLS.Services.Implementation.Wallet
 
             string flutterSandBox = ConfigurationManager.AppSettings["FlutterSandBox"];
             string flutterVerify = flutterSandBox + ConfigurationManager.AppSettings["FlutterVerify"];
-            string PBFPubKey = ConfigurationManager.AppSettings["FlutterwavePubKey"];
+            string secretKey = ConfigurationManager.AppSettings["FlutterwaveSecretKey"];
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
             var obj = new
             {
                 txref = reference,
-                SECKEY = PBFPubKey
+                SECKEY = secretKey
             };
 
             using (var client = new HttpClient())
@@ -139,8 +139,12 @@ namespace GIGLS.Services.Implementation.Wallet
                         paymentLog.TransactionResponse = paymentLog.TransactionResponse + " | " + verifyResult.data.validateInstructions.Instruction;
                     }
 
-                    await _uow.CompleteAsync();
+                    if (verifyResult.data.Status.Equals("failed"))
+                    {
+                        paymentLog.TransactionResponse = verifyResult.data.ChargeMessage;
+                    }
                     result = true;
+                    await _uow.CompleteAsync();
                 }
             }
 
@@ -264,7 +268,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             response.Message = webhook.Message;
-            if (webhook.Status == "success")
+            if (webhook.Status.Equals("success"))
             {
                 response.Status = true;
             }
@@ -277,6 +281,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (webhook.data.validateInstructions != null)
                 {
                     response.data.Message = response.data.Message + " | " + webhook.data.validateInstructions.Instruction;
+                }
+
+                if (webhook.data.Status.Equals("failed"))
+                {
+                    response.data.Message = webhook.data.ChargeMessage;
+                    response.Status = false;
                 }
             }
             else
