@@ -3,6 +3,7 @@ using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.Wallet;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Wallet;
@@ -27,14 +28,16 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IUserService _userService;
         private readonly IPasswordGenerator _passwordGenerator;
         private readonly IPaystackPaymentService _paystackService;
+        private readonly IFlutterwavePaymentService _flutterwavePaymentService;
 
         public WaybillPaymentLogService(IUnitOfWork uow, IUserService userService, IPasswordGenerator passwordGenerator,
-            IPaystackPaymentService paystackService)
+            IPaystackPaymentService paystackService, IFlutterwavePaymentService flutterwavePaymentService)
         {
             _uow = uow;
             _userService = userService;
             _passwordGenerator = passwordGenerator;
             _paystackService = paystackService;
+            _flutterwavePaymentService = flutterwavePaymentService;
             MapperConfig.Initialize();
         }
 
@@ -49,7 +52,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //check if any transaction on the waybill is successful
             var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable()
-                .Where(x => x.Waybill == waybillPaymentLog.Waybill && x.IsPaymentSuccessful == true).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+                .Where(x => x.Waybill == waybillPaymentLog.Waybill && x.IsPaymentSuccessful == true).FirstOrDefault();
 
             if (paymentLog != null)
             {
@@ -62,12 +65,12 @@ namespace GIGLS.Services.Implementation.Wallet
             }
             else
             {
-                if (waybillPaymentLog.OnlinePaymentType == Core.Enums.OnlinePaymentType.Paystack)
+                if (waybillPaymentLog.OnlinePaymentType == OnlinePaymentType.Paystack)
                 {
                     response = await AddWaybillPaymentLogForPaystack(waybillPaymentLog);
                 }
 
-                if(waybillPaymentLog.OnlinePaymentType == Core.Enums.OnlinePaymentType.Flutterwave)
+                if(waybillPaymentLog.OnlinePaymentType == OnlinePaymentType.Flutterwave)
                 {
                     //Process Payment for FlutterWave;
                     response = await AddWaybillPaymentLogForFlutterWave(waybillPaymentLog);
@@ -249,7 +252,17 @@ namespace GIGLS.Services.Implementation.Wallet
             
             if (paymentLog != null)
             {
-                var response = await _paystackService.VerifyAndValidateMobilePayment(paymentLog.Reference);
+                PaystackWebhookDTO response = new PaystackWebhookDTO();
+
+                if (paymentLog.OnlinePaymentType == OnlinePaymentType.Paystack)
+                {
+                    response = await _paystackService.VerifyAndValidateMobilePayment(paymentLog.Reference);
+                }
+
+                if (paymentLog.OnlinePaymentType == OnlinePaymentType.Flutterwave)
+                {
+                    response = await _flutterwavePaymentService.VerifyAndValidateMobilePayment(paymentLog.Reference);
+                }
                 return response;
             }
                         

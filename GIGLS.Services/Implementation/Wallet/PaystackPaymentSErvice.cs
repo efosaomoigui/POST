@@ -442,8 +442,6 @@ namespace GIGLS.Services.Implementation.Wallet
                         //2. Update waybill Payment log
                         paymentLog.IsPaymentSuccessful = true;
                         paymentLog.IsWaybillSettled = true;
-                        //paymentLog.TransactionStatus = verifyResult.data.Status;
-                        //paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                     }
                 }
 

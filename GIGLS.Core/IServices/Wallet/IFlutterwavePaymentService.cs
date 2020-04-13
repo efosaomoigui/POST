@@ -7,5 +7,6 @@ namespace GIGLS.Core.IServices.Wallet
     {
         Task VerifyAndValidatePayment(FlutterWebhookDTO webhook);
         Task<string> GetSecurityKey();
+        Task<PaystackWebhookDTO> VerifyAndValidateMobilePayment(string reference);
     }
 }

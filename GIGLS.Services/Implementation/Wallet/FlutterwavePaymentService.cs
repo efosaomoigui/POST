@@ -216,7 +216,6 @@ namespace GIGLS.Services.Implementation.Wallet
             return await Task.FromResult(result);
         }
 
-
         //Generate security for webhook
         public async Task<string> GetSecurityKey()
         {
@@ -245,6 +244,48 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
             }
             return cipherText;
+        }
+
+        public async Task<PaystackWebhookDTO> VerifyAndValidateMobilePayment(string reference)
+        {
+            var response = new PaystackWebhookDTO();
+
+            var webhook = await VerifyPayment(reference);
+
+            WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(reference);
+
+            if (waybillWalletPaymentType == WaybillWalletPaymentType.Waybill)
+            {
+                await ProcessPaymentForWaybill(webhook);
+            }
+            else
+            {
+                await ProcessPaymentForWallet(webhook);
+            }
+
+            response.Message = webhook.Message;
+            if (webhook.Status == "success")
+            {
+                response.Status = true;
+            }
+
+            if (webhook.data != null)
+            {
+                response.data.Status = webhook.data.Status;
+                response.data.Message = webhook.data.ChargeResponseCode + " | " + webhook.data.ChargeResponseMessage;
+
+                if (webhook.data.validateInstructions != null)
+                {
+                    response.data.Message = response.data.Message + " | " + webhook.data.validateInstructions.Instruction;
+                }
+            }
+            else
+            {
+                response.data.Message = webhook.Message;
+                response.data.Status = webhook.Status;
+            }
+
+            return response;
         }
     }
 }
