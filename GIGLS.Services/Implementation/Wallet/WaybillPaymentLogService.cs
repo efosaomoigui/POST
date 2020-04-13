@@ -125,12 +125,13 @@ namespace GIGLS.Services.Implementation.Wallet
 
         private async Task<string> SaveWaybillPaymentLog(WaybillPaymentLogDTO waybillPaymentLog)
         {
-            waybillPaymentLog.Reference = await GenerateWaybillReferenceCode(waybillPaymentLog.Waybill);
+            string refCode = await GenerateWaybillReferenceCode(waybillPaymentLog.Waybill);
+            waybillPaymentLog.Reference = refCode;
             var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
             _uow.WaybillPaymentLog.Add(newPaymentLog);
             await _uow.CompleteAsync();
 
-            return waybillPaymentLog.Reference;
+            return refCode;
         }
 
         private async Task<PaystackWebhookDTO> AddWaybillPaymentLogForPaystack(WaybillPaymentLogDTO waybillPaymentLog)
@@ -358,7 +359,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", flutterSandBox);
 
                     var json = JsonConvert.SerializeObject(flutterObject);
                     StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
@@ -379,12 +379,19 @@ namespace GIGLS.Services.Implementation.Wallet
                     if (flutterResponse.data != null)
                     {
                         responseResult.data.Status = flutterResponse.data.Status;
-                        responseResult.data.Message = flutterResponse.data.ChargeResponseCode + " | " + flutterResponse.data.ChargeResponseMessage;
 
-                        if (flutterResponse.data.validateInstructions != null)
+                        if (flutterResponse.data.validateInstructions.Instruction != null)
                         {
-                            responseResult.data.Message = responseResult.data.Message + " | " + flutterResponse.data.validateInstructions.Instruction;
+                            responseResult.data.Message =  flutterResponse.data.validateInstructions.Instruction;
                         }
+                        else if(flutterResponse.data.ChargeMessage != null)
+                        {
+                            responseResult.data.Message = flutterResponse.data.ChargeMessage;
+                        }
+                        else
+                        {
+                            responseResult.data.Message = flutterResponse.data.ChargeResponseMessage;
+                        }                        
                     }
                     else
                     {
@@ -394,7 +401,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     //update waybill payment log
                     updateWaybillPaymentLog.TransactionStatus = responseResult.data.Status;
-                    updateWaybillPaymentLog.TransactionResponse = responseResult.data.Gateway_Response;
+                    updateWaybillPaymentLog.TransactionResponse = responseResult.data.Message;
                     await _uow.CompleteAsync();
 
                     return responseResult;

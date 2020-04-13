@@ -132,17 +132,24 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
 
                     paymentLog.TransactionStatus = verifyResult.data.Status;
-                    paymentLog.TransactionResponse = verifyResult.data.ChargeResponseCode + " | " + verifyResult.data.ChargeResponseMessage;
 
-                    if (verifyResult.data.validateInstructions != null)
+                    if (verifyResult.data.validateInstructions.Instruction != null)
                     {
-                        paymentLog.TransactionResponse = paymentLog.TransactionResponse + " | " + verifyResult.data.validateInstructions.Instruction;
+                        paymentLog.TransactionResponse = verifyResult.data.validateInstructions.Instruction;
                     }
-
-                    if (verifyResult.data.Status.Equals("failed"))
+                    else if(verifyResult.data.ChargeMessage != null)
                     {
                         paymentLog.TransactionResponse = verifyResult.data.ChargeMessage;
                     }
+                    else
+                    {
+                        paymentLog.TransactionResponse = verifyResult.data.ChargeResponseMessage;
+                    }
+
+                    //if (verifyResult.data.Status.Equals("failed"))
+                    //{
+                    //    paymentLog.TransactionResponse = verifyResult.data.ChargeMessage;
+                    //}
                     result = true;
                     await _uow.CompleteAsync();
                 }
@@ -206,11 +213,18 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
 
                     paymentLog.TransactionStatus = verifyResult.data.Status;
-                    paymentLog.TransactionResponse = verifyResult.data.ChargeResponseCode + " | " + verifyResult.data.ChargeResponseMessage;
 
-                    if (verifyResult.data.validateInstructions != null)
+                    if (verifyResult.data.validateInstructions.Instruction != null)
                     {
-                        paymentLog.TransactionResponse = paymentLog.TransactionResponse + " | " + verifyResult.data.validateInstructions.Instruction;
+                        paymentLog.TransactionResponse = verifyResult.data.validateInstructions.Instruction;
+                    }
+                    else if(verifyResult.data.ChargeMessage != null)
+                    {
+                        paymentLog.TransactionResponse = verifyResult.data.ChargeMessage;
+                    }
+                    else
+                    {
+                        paymentLog.TransactionResponse = verifyResult.data.ChargeResponseMessage;
                     }
 
                     await _uow.CompleteAsync();
@@ -276,17 +290,20 @@ namespace GIGLS.Services.Implementation.Wallet
             if (webhook.data != null)
             {
                 response.data.Status = webhook.data.Status;
-                response.data.Message = webhook.data.ChargeResponseCode + " | " + webhook.data.ChargeResponseMessage;
 
-                if (webhook.data.validateInstructions != null)
+                if (webhook.data.validateInstructions.Instruction != null)
                 {
-                    response.data.Message = response.data.Message + " | " + webhook.data.validateInstructions.Instruction;
+                    response.data.Message = webhook.data.validateInstructions.Instruction;
                 }
-
-                if (webhook.data.Status.Equals("failed"))
+                else if (webhook.data.ChargeMessage != null)
                 {
                     response.data.Message = webhook.data.ChargeMessage;
+                    response.Message = webhook.data.ChargeMessage; 
                     response.Status = false;
+                }
+                else
+                {
+                    response.data.Message =  webhook.data.ChargeResponseMessage;
                 }
             }
             else
