@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core;
+using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Wallet;
@@ -8,6 +9,7 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Net;
@@ -48,7 +50,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 await ProcessPaymentForWallet(webhook);
             }
         }
-
 
         private WaybillWalletPaymentType GetPackagePaymentType(string refCode)
         {
@@ -146,10 +147,6 @@ namespace GIGLS.Services.Implementation.Wallet
                         paymentLog.TransactionResponse = verifyResult.data.ChargeResponseMessage;
                     }
 
-                    //if (verifyResult.data.Status.Equals("failed"))
-                    //{
-                    //    paymentLog.TransactionResponse = verifyResult.data.ChargeMessage;
-                    //}
                     result = true;
                     await _uow.CompleteAsync();
                 }
@@ -266,8 +263,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<PaystackWebhookDTO> VerifyAndValidateMobilePayment(string reference)
         {
-            var response = new PaystackWebhookDTO();
-
             var webhook = await VerifyPayment(reference);
 
             WaybillWalletPaymentType waybillWalletPaymentType = GetPackagePaymentType(reference);
@@ -281,35 +276,151 @@ namespace GIGLS.Services.Implementation.Wallet
                 await ProcessPaymentForWallet(webhook);
             }
 
-            response.Message = webhook.Message;
-            if (webhook.Status.Equals("success"))
+            return ManageReturnResponse(webhook);
+        }
+
+        public async Task<PaystackWebhookDTO> ProcessPaymentForWaybillUsingOTP(WaybillPaymentLog paymentLog, string otp)
+        {
+            //1. verify the payment  
+            //NetworkProvider represent the security code generated from Flutterwave
+            var verifyResult = await SubmitOTPForPayment(paymentLog.NetworkProvider, otp);
+
+            if  (verifyResult.Status.Equals("success"))
+            {
+                //get wallet payment log by reference code
+                var waybillPaymentLog = await _uow.WaybillPaymentLog.GetAsync(x => x.Reference == paymentLog.Reference);
+
+                if (paymentLog == null)
+                {
+                    return new PaystackWebhookDTO
+                    {
+                        Status = false,
+                        Message = $"No online payment process occurred for the waybill {paymentLog.Waybill}",
+                        data = new Core.DTO.OnlinePayment.Data
+                        {
+                            Message = $"No online payment process occurred for the waybill {paymentLog.Waybill}",
+                            Status = "failed"
+                        }
+                    };
+                }
+
+                //2. if the payment successful
+                if (verifyResult.data.Status.Equals("successful") && verifyResult.data.ChargeResponseCode.Equals("00") && !paymentLog.IsWaybillSettled && verifyResult.data.Amount == paymentLog.Amount)
+                {
+                    //3. Process payment for the waybill if successful
+                    PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
+                    {
+                        Waybill = paymentLog.Waybill,
+                        PaymentType = PaymentType.Cash,
+                        TransactionCode = paymentLog.Reference,
+                        UserId = paymentLog.UserId
+                    };
+
+                    var processWaybillPayment = await _paymentTransactionService.ProcessPaymentTransaction(paymentTransaction);
+
+                    if (processWaybillPayment)
+                    {
+                        //2. Update waybill Payment log
+                        paymentLog.IsPaymentSuccessful = true;
+                        paymentLog.IsWaybillSettled = true;
+                    }
+                }
+
+                paymentLog.TransactionStatus = verifyResult.data.Status;
+
+                if (verifyResult.data.validateInstructions.Instruction != null)
+                {
+                    paymentLog.TransactionResponse = verifyResult.data.validateInstructions.Instruction;
+                }
+                else if (verifyResult.data.ChargeMessage != null)
+                {
+                    paymentLog.TransactionResponse = verifyResult.data.ChargeMessage;
+                }
+                else
+                {
+                    paymentLog.TransactionResponse = verifyResult.data.ChargeResponseMessage;
+                }
+
+                await _uow.CompleteAsync();
+            }
+
+            return ManageReturnResponse(verifyResult);
+        }
+
+        private async Task<FlutterWebhookDTO> SubmitOTPForPayment(string reference, string otp)
+        {
+            try
+            {
+                FlutterWebhookDTO result = new FlutterWebhookDTO();
+
+                string flutterSandBox = ConfigurationManager.AppSettings["FlutterSandBox"];
+                string flutterValidateOtp = flutterSandBox + ConfigurationManager.AppSettings["FlutterValidateOTP"];
+                string PBFPubKey = ConfigurationManager.AppSettings["FlutterwavePubKey"];
+
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                var obj = new FlutterWaveOTPObject
+                {
+                    PBFPubKey = PBFPubKey,
+                    transaction_reference = reference,
+                    otp = otp
+                };
+
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    var json = JsonConvert.SerializeObject(obj);
+                    StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(flutterValidateOtp, data);
+                    string responseResult = await response.Content.ReadAsStringAsync();
+
+                    result = JsonConvert.DeserializeObject<FlutterWebhookDTO>(responseResult);
+                }
+                    return result;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private PaystackWebhookDTO ManageReturnResponse(FlutterWebhookDTO flutterResponse)
+        {
+            var response = new PaystackWebhookDTO
+            {
+                Message = flutterResponse.Message
+            };
+
+            if (flutterResponse.Status.Equals("success"))
             {
                 response.Status = true;
             }
 
-            if (webhook.data != null)
+            if (flutterResponse.data != null)
             {
-                response.data.Status = webhook.data.Status;
+                response.data.Status = flutterResponse.data.Status;
 
-                if (webhook.data.validateInstructions.Instruction != null)
+                if (flutterResponse.data.validateInstructions.Instruction != null)
                 {
-                    response.data.Message = webhook.data.validateInstructions.Instruction;
+                    response.data.Message = flutterResponse.data.validateInstructions.Instruction;
                 }
-                else if (webhook.data.ChargeMessage != null)
+                else if (flutterResponse.data.ChargeMessage != null)
                 {
-                    response.data.Message = webhook.data.ChargeMessage;
-                    response.Message = webhook.data.ChargeMessage; 
+                    response.data.Message = flutterResponse.data.ChargeMessage;
+                    response.Message = flutterResponse.data.ChargeMessage;
                     response.Status = false;
                 }
                 else
                 {
-                    response.data.Message =  webhook.data.ChargeResponseMessage;
+                    response.data.Message = flutterResponse.data.ChargeResponseMessage;
                 }
             }
             else
             {
-                response.data.Message = webhook.Message;
-                response.data.Status = webhook.Status;
+                response.data.Message = flutterResponse.Message;
+                response.data.Status = flutterResponse.Status;
             }
 
             return response;

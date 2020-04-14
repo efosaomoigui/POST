@@ -278,6 +278,41 @@ namespace GIGLS.Services.Implementation.Wallet
             };
         }
 
+        public async Task<PaystackWebhookDTO> VerifyAndValidatePaymentUsingOTP(string waybill, string pin)
+        {
+            //check the current transaction on the waybill
+            var paymentLog = _uow.WaybillPaymentLog.GetAllAsQueryable()
+                .Where(x => x.Waybill == waybill).OrderByDescending(x => x.DateCreated).FirstOrDefault();
+
+            if (paymentLog != null)
+            {
+                if (paymentLog.OnlinePaymentType == OnlinePaymentType.Paystack)
+                {
+                    //VerifyAndValidateWaybillForVodafoneMobilePayment
+                    var response = await _paystackService.ProcessPaymentForWaybillUsingPin(paymentLog, pin);
+                    return response;
+                }
+
+                if (paymentLog.OnlinePaymentType == OnlinePaymentType.Flutterwave)
+                {
+                    var response = await _flutterwavePaymentService.ProcessPaymentForWaybillUsingOTP(paymentLog, pin);
+                    return response;
+                }
+            }
+
+            return new PaystackWebhookDTO
+            {
+                Status = false,
+                Message = $"No online payment process occurred for the waybill {waybill}",
+                data = new Core.DTO.OnlinePayment.Data
+                {
+                    Message = $"No online payment process occurred for the waybill {waybill}",
+                    Status = "failed"
+                }
+            };
+
+        }
+
         public async Task<PaystackWebhookDTO> VerifyAndValidateWaybillForVodafoneMobilePayment(string waybill, string pin)
         {
             //check the current transaction on the waybill
@@ -286,8 +321,17 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (paymentLog != null)
             {
-                var response = await _paystackService.ProcessPaymentForWaybillUsingPin(paymentLog, pin);
-                return response;
+                if(paymentLog.OnlinePaymentType == OnlinePaymentType.Paystack)
+                {
+                    var response = await _paystackService.ProcessPaymentForWaybillUsingPin(paymentLog, pin);
+                    return response;
+                }
+
+                if (paymentLog.OnlinePaymentType == OnlinePaymentType.Paystack)
+                {
+                    var response = await _flutterwavePaymentService.ProcessPaymentForWaybillUsingOTP(paymentLog, pin);
+                    return response;
+                }
             }
 
             return new PaystackWebhookDTO
@@ -378,6 +422,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     if (flutterResponse.data != null)
                     {
+                        //use Reference to represent flutter flwRef -- security code for otp confirmation
+                        responseResult.data.Reference = flutterResponse.data.FlwRef;
                         responseResult.data.Status = flutterResponse.data.Status;
 
                         if (flutterResponse.data.validateInstructions.Instruction != null)
@@ -402,6 +448,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     //update waybill payment log
                     updateWaybillPaymentLog.TransactionStatus = responseResult.data.Status;
                     updateWaybillPaymentLog.TransactionResponse = responseResult.data.Message;
+                    updateWaybillPaymentLog.NetworkProvider = responseResult.data.Reference;  //use NetworkProvide to represent flutter flwRef -- security code for otp confirmation
                     await _uow.CompleteAsync();
 
                     return responseResult;

@@ -85,4 +85,11 @@ namespace GIGLS.Core.DTO.Wallet
         public string client { get; set; }
         public string alg { get; set; } 
     }
+
+    public class FlutterWaveOTPObject
+    {
+        public string PBFPubKey { get; set; }
+        public string transaction_reference { get; set; }
+        public string otp { get; set; }
+    }
 }

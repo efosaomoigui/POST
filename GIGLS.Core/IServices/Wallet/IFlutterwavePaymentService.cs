@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.OnlinePayment;
+﻿using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO.OnlinePayment;
 using System.Threading.Tasks;
 
 namespace GIGLS.Core.IServices.Wallet
@@ -8,5 +9,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task VerifyAndValidatePayment(FlutterWebhookDTO webhook);
         Task<string> GetSecurityKey();
         Task<PaystackWebhookDTO> VerifyAndValidateMobilePayment(string reference);
+        Task<PaystackWebhookDTO> ProcessPaymentForWaybillUsingOTP(WaybillPaymentLog paymentLog, string otp);
     }
 }

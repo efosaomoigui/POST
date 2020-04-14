@@ -59,8 +59,8 @@
         public string ChargeResponseMessage { get; set; }
         public string ChargeResponseCode { get; set; }
         public string ChargeMessage { get; set; }
-
         public string PaymentType { get; set; }
+        public string FlwRef { get; set; }
 
         public ValidateInstructions validateInstructions { get; set; }
     }
