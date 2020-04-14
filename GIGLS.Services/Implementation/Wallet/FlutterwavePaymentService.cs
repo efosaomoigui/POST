@@ -9,7 +9,6 @@ using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Net;
@@ -378,7 +377,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     result = JsonConvert.DeserializeObject<FlutterWebhookDTO>(responseResult);
                 }
-                    return result;
+                return result;
             }
             catch (Exception ex)
             {
