@@ -1692,6 +1692,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
+                    CountryDTO Country = null;
+
+                    
                     foreach (var item in groupList)
                     {
                         var newPreShipment = new PreShipmentMobileDTO();
@@ -1762,12 +1765,13 @@ namespace GIGLS.Services.Implementation.Shipments
 
                                 await ScanMobileShipment(new ScanDTO
                                 {
-                                    WaybillNumber = pickuprequest.Waybill,
+                                    WaybillNumber = item.WaybillNumber,
                                     ShipmentScanStatus = ShipmentScanStatus.MAPT
                                 });
                             }
 
                             newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
+                            newPreShipment.GroupCodeNumber = pickuprequest.GroupCodeNumber;
 
                             if (pickuprequest.ServiceCentreId != null)
                             {
@@ -1776,26 +1780,26 @@ namespace GIGLS.Services.Implementation.Shipments
                                 newPreShipment.ReceiverLocation.Longitude = preshipmentmobile.serviceCentreLocation.Longitude;
                             }
 
-                            var Country = await _uow.Country.GetCountryByStationId(preshipmentmobile.SenderStationId);
-
-                            if (Country != null)
+                            if(Country == null)
                             {
-                                newPreShipment.CurrencyCode = Country.CurrencyCode;
-                                newPreShipment.CurrencySymbol = Country.CurrencySymbol;
+                                Country = await _uow.Country.GetCountryByStationId(preshipmentmobile.SenderStationId);
                             }
+                            newPreShipment.CurrencyCode = Country.CurrencyCode;
+                            newPreShipment.CurrencySymbol = Country.CurrencySymbol;
 
-                            await _uow.CompleteAsync();
+                            //await _uow.CompleteAsync();
                             listOfPreShipments.Add(newPreShipment);
                         }
 
                     }
+                    await _uow.CompleteAsync();
                 }
 
                 return listOfPreShipments;
             }
-            catch
+            catch(Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 
