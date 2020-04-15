@@ -478,6 +478,7 @@
     <Compile Include="DTO\Zone\WeightPercentDTO.cs" />
     <Compile Include="DTO\Zone\ZoneDTO.cs" />
     <Compile Include="DTO\Zone\ZonePercentDTO.cs" />
+    <Compile Include="Enums\ActivityStatus.cs" />
     <Compile Include="Enums\DepositType.cs" />
     <Compile Include="Enums\AccountType.cs" />
     <Compile Include="Enums\CODStatus.cs" />

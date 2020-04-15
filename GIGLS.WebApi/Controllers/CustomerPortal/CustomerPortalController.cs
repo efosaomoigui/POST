@@ -1146,6 +1146,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpPost]
+        [Route("addmobilepickuprequestmultiple")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> AddMobilePickupRequestMultipleShipment(MobilePickUpRequestsDTO PickupRequest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentItem = await _portalService.AddMobilePickupRequestMultipleShipment(PickupRequest);
+
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = shipmentItem
+                };
+            });
+        }
+
         [HttpGet]
         [Route("getmobilepickuprequests")]
         public async Task<IServiceResponse<List<MobilePickUpRequestsDTO>>> GetPickupRequests()
