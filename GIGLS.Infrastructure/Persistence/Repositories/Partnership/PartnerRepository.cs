@@ -9,6 +9,7 @@ using GIGLS.Core.DTO.Partnership;
 using System.Data.Entity;
 using GIGLS.Core.DTO;
 using System;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
 {
@@ -53,6 +54,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
             return Task.FromResult(partnerDto.ToList());
         }
 
+        //Remove this old one after review
         public Task<List<VehicleTypeDTO>> GetVerifiedPartnersAsync()
         {
             var partners = _context.Partners.AsQueryable().Where(x => x.IsActivated == true);
@@ -77,6 +79,44 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                              };
             return Task.FromResult(partnerDto.ToList());
         }
+
+        public Task<List<VehicleTypeDTO>> GetVerifiedPartnersAsync(string fleetCode)
+        {
+            var partners = _context.Partners.AsQueryable();
+
+            if(fleetCode == null)
+            {
+                partners = partners.Where(x => x.IsActivated == true );
+            }
+            else
+            {
+                partners = partners.Where(x => x.IsActivated == true && x.FleetPartnerCode == fleetCode);
+            }
+            
+
+            var partnerDto = from partner in partners
+                             join vehicle in _context.VehicleType on partner.PartnerCode equals vehicle.Partnercode
+                             select new VehicleTypeDTO
+                             {
+                                 PartnerName = partner.PartnerName,
+                                 Vehicletype = vehicle.Vehicletype,
+                                 Partnercode = vehicle.Partnercode,
+                                 PartnerFirstName = partner.FirstName,
+                                 PartnerLastName = partner.LastName,
+                                 PartnerPhoneNumber = partner.PhoneNumber,
+                                 PartnerType = partner.PartnerType,
+                                 ActivityStatus = partner.ActivityStatus,
+                                 ActivityDate = partner.ActivityDate,
+                                 EnterprisePartner = _context.FleetPartner.Where(s => s.FleetPartnerCode == partner.FleetPartnerCode)
+                                 .Select(x => new FleetPartnerDTO
+                                 {
+                                     FirstName = x.FirstName,
+                                     LastName = x.LastName
+                                 }).FirstOrDefault()
+                             };
+            return Task.FromResult(partnerDto.ToList());
+        }
+
 
         public Task<PartnerDTO> GetPartnerByIdWithCountry(int customerId)
         {

@@ -910,7 +910,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     PhoneNumber = user.PhoneNumber,
                     UserId = FinalUser.Id,
                     IsActivated = false,
-                    UserActiveCountryId = user.UserActiveCountryId
+                    UserActiveCountryId = user.UserActiveCountryId,
+                    ActivityStatus = ActivityStatus.Idle.ToString(),
+                    ActivityDate = DateTime.Now
+                
                 };
                 _uow.Partner.Add(partnerDTO);
 

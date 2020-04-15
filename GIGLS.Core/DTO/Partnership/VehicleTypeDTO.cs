@@ -17,6 +17,8 @@ namespace GIGLS.Core.DTO.Partnership
         public string PartnerPhoneNumber { get; set; }
         public string PartnerFirstName { get; set; }
         public string PartnerLastName { get; set; }
+        public string ActivityStatus { get; set; }
+        public DateTime ActivityDate { get; set; }
         public PartnerType PartnerType { get; set; }
         public FleetPartnerDTO EnterprisePartner { get; set; }
 

@@ -1616,6 +1616,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             newRequest.Status = pickuprequest.Status;
                         }
+
+                        //Update Activity Status
+                        await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OnDelivery);
+                        
                     }
                     else
                     {
@@ -1693,7 +1697,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 else
                 {
                     CountryDTO Country = null;
-
+                    var onDelivery = false;
                     
                     foreach (var item in groupList)
                     {
@@ -1730,6 +1734,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             else if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString())
                             {
                                 pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
+                                onDelivery = true;
 
                                 var newRequest = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.UserId == pickuprequest.UserId);
                                 if (newRequest == null)
@@ -1787,12 +1792,17 @@ namespace GIGLS.Services.Implementation.Shipments
                             newPreShipment.CurrencyCode = Country.CurrencyCode;
                             newPreShipment.CurrencySymbol = Country.CurrencySymbol;
 
-                            //await _uow.CompleteAsync();
+                            await _uow.CompleteAsync();
                             listOfPreShipments.Add(newPreShipment);
                         }
 
                     }
-                    await _uow.CompleteAsync();
+
+                    if (onDelivery == true)
+                    {
+                        await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OnDelivery);
+                    }
+                    //await _uow.CompleteAsync();
                 }
 
                 return listOfPreShipments;
@@ -1803,11 +1813,25 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //Activity  Status 
+        private async Task UpdateActivityStatus(string userId, ActivityStatus activity)
+        {
+            var partner = await _uow.Partner.GetAsync(x => x.UserId == userId);
+            if (partner != null)
+            {
+                partner.ActivityStatus = activity.ToString();
+                partner.ActivityDate = DateTime.Now;
+            }
+            await _uow.CompleteAsync();
+        }
+
+
         public async Task<bool> UpdateMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest)
         {
             try
             {
                 var userId = await _userService.GetCurrentUserId();
+                pickuprequest.UserId = userId;
 
                 await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
 
@@ -1819,6 +1843,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 else if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
                 {
                     await DeliveredMobilePickupRequest(pickuprequest, userId);
+                    await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OffDelivery);
+
                 }
 
                 else if (pickuprequest.Status == MobilePickUpRequestStatus.Cancelled.ToString())
@@ -1828,6 +1854,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         WaybillNumber = pickuprequest.Waybill,
                         ShipmentScanStatus = ShipmentScanStatus.SSC
                     });
+
+                    await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OffDelivery);
+
                 }
 
                 else if (pickuprequest.Status == MobilePickUpRequestStatus.Dispute.ToString())
@@ -1842,12 +1871,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
+                    await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OffDelivery);
                     await _uow.CompleteAsync();
                 }
 
                 else if (pickuprequest.Status == MobilePickUpRequestStatus.LogVisit.ToString())
                 {
                     await LogVisitMobilePickupRequest(pickuprequest, userId);
+                    await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OffDelivery);
                 }
 
                 return true;
