@@ -48,7 +48,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                     LastName = partner.LastName,
                                     IdentificationNumber = "",
                                     WalletPan = "",
-                                    IsActivated = partner.IsActivated
+                                    IsActivated = partner.IsActivated,
+                                    ActivityStatus = partner.ActivityStatus
                                 };
 
             return Task.FromResult(partnerDto.ToList());
@@ -75,7 +76,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                  {
                                      FirstName = x.FirstName,
                                      LastName = x.LastName
-                                 }).FirstOrDefault()
+                                 }).FirstOrDefault(),
+                                 ActivityStatus = partner.ActivityStatus
                              };
             return Task.FromResult(partnerDto.ToList());
         }
@@ -107,7 +109,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                  {
                                      FirstName = x.FirstName,
                                      LastName = x.LastName
-                                 }).FirstOrDefault()
+                                 }).FirstOrDefault(),
                              };
             return Task.FromResult(partnerDto.ToList());
         }
@@ -140,7 +142,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                             CurrencySymbol = x.CurrencySymbol,
                                             CurrencyCode = x.CurrencyCode,
                                             PhoneNumberCode = x.PhoneNumberCode
-                                        }).FirstOrDefault()
+                                        }).FirstOrDefault(),
+                                        ActivityStatus = partner.ActivityStatus
                                     };
                 return Task.FromResult(partnersDto.FirstOrDefault());
             }
@@ -171,8 +174,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                                  LastName = partner.LastName,
                                  IsActivated = partner.IsActivated,
                                  WalletBalance = wallet.Balance,
-                                 CurrencySymbol = country.CurrencySymbol
-
+                                 CurrencySymbol = country.CurrencySymbol,
+                                 ActivityStatus = partner.ActivityStatus
                              };
 
             return Task.FromResult(partnerDto.ToList());

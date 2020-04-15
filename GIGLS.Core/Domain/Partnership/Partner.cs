@@ -63,10 +63,8 @@ namespace GIGLS.Core.Domain.Partnership
         [MaxLength(100)]
         public string FleetPartnerCode { get; set; }
 
-        [MaxLength(100)]
-        public string ActivityStatus { get; set; }
+        public ActivityStatus ActivityStatus { get; set; }
 
         public DateTime ActivityDate { get; set; }
-
     }
 }

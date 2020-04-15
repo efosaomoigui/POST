@@ -1837,7 +1837,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var partner = await _uow.Partner.GetAsync(x => x.UserId == userId);
             if (partner != null)
             {
-                partner.ActivityStatus = activity.ToString();
+                partner.ActivityStatus = activity;
                 partner.ActivityDate = DateTime.Now;
             }
             await _uow.CompleteAsync();

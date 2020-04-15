@@ -1,9 +1,5 @@
 ﻿using GIGLS.Core.Enums;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GIGLS.Core.DTO.Partnership
 {
@@ -17,7 +13,7 @@ namespace GIGLS.Core.DTO.Partnership
         public string PartnerPhoneNumber { get; set; }
         public string PartnerFirstName { get; set; }
         public string PartnerLastName { get; set; }
-        public string ActivityStatus { get; set; }
+        public ActivityStatus ActivityStatus { get; set; }
         public DateTime ActivityDate { get; set; }
         public PartnerType PartnerType { get; set; }
         public FleetPartnerDTO EnterprisePartner { get; set; }

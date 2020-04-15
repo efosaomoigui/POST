@@ -911,7 +911,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     UserId = FinalUser.Id,
                     IsActivated = false,
                     UserActiveCountryId = user.UserActiveCountryId,
-                    ActivityStatus = ActivityStatus.Idle.ToString(),
+                    ActivityStatus = ActivityStatus.Idle,
                     ActivityDate = DateTime.Now
                 
                 };
