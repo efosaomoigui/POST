@@ -1149,7 +1149,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var queryDate = filterOptionsDto.getStartDateAndEndDate();
                 var startDate = queryDate.Item1;
                 var endDate = queryDate.Item2;
-                var allShipments = _uow.PreShipmentMobile.GetAllAsQueryable();
+                var allShipmentsResult = _uow.PreShipmentMobile.GetAllAsQueryable();
 
                 if (filterOptionsDto.StartDate == null & filterOptionsDto.EndDate == null && filterOptionsDto.fromGigGoDashboard == false)
                 {
@@ -1166,9 +1166,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 //Excluding It Test
                 string[] testUserId = { "2932eb15-aa30-462c-89f0-7247670f504b", "ab3722d7-57f3-4e6e-a32d-1580315b7da6", "e67d50c2-953a-44b2-bbcd-c38fadef237f", "b476fea8-84e4-4c5b-ac51-2efd68526fdc" };
 
-                var allShipmentsResult = allShipments.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate &&
-                                            !testUserId.Contains(s.UserId) && s.SenderName != "it_test test" 
+                if (filterOptionsDto.StationId > 0)
+                {
+                    allShipmentsResult = allShipmentsResult.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate &&
+                                            !testUserId.Contains(s.UserId) && s.SenderName != "it_test test"
                                             && s.SenderStationId == filterOptionsDto.StationId);
+
+                }
+                else
+                {
+                    allShipmentsResult = allShipmentsResult.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate &&
+                                            !testUserId.Contains(s.UserId) && s.SenderName != "it_test test");
+                }
 
                 List<PreShipmentMobileDTO> shipmentDto = (from r in allShipmentsResult
                                                           select new PreShipmentMobileDTO()

@@ -132,6 +132,21 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPut]
+        [Route("{stationId:int}/giggostatus/{status}")]
+        public async Task<IServiceResponse<object>> UpdateGIGGoStationStatus(int stationId, bool status)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _stationService.UpdateGIGGoStationStatus(stationId, status);
+                return new ServiceResponse<object>
+                {
+                    Object = true
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("{stationId:int}")]
@@ -143,6 +158,21 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                 return new ServiceResponse<bool>
                 {
                     Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("giggostations")]
+        public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetActiveGIGGoStations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stations = await _stationService.GetActiveGIGGoStations();
+                return new ServiceResponse<IEnumerable<StationDTO>>
+                {
+                    Object = stations
                 };
             });
         }
