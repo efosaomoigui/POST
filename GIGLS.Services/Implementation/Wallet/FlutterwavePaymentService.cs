@@ -146,11 +146,13 @@ namespace GIGLS.Services.Implementation.Wallet
                         paymentLog.TransactionResponse = verifyResult.data.ChargeResponseMessage;
                     }
 
-                    if (verifyResult.data.Status.Equals("successful") && verifyResult.data.ChargeCode.Equals("00"))
+                    if(verifyResult.data.ChargeCode != null)
                     {
-                        paymentLog.TransactionResponse = verifyResult.data.ChargeMessage;
+                        if (verifyResult.data.Status.Equals("successful") && verifyResult.data.ChargeCode.Equals("00"))
+                        {
+                            paymentLog.TransactionResponse = verifyResult.data.ChargeMessage;
+                        }
                     }
-
                     result = true;
                     await _uow.CompleteAsync();
                 }
@@ -415,10 +417,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 if (flutterResponse.data.validateInstructions.Instruction != null)
                 {
                     response.data.Message = flutterResponse.data.validateInstructions.Instruction;
+                    response.data.Gateway_Response = flutterResponse.data.validateInstructions.Instruction;
                 }
                 else if (flutterResponse.data.ChargeMessage != null)
                 {
                     response.data.Message = flutterResponse.data.ChargeMessage;
+                    response.data.Gateway_Response = flutterResponse.data.ChargeMessage;
                     response.Message = flutterResponse.data.ChargeMessage;
                     if (!flutterResponse.data.Status.Equals("successful"))
                     {
@@ -428,19 +432,25 @@ namespace GIGLS.Services.Implementation.Wallet
                 else
                 {
                     response.data.Message = flutterResponse.data.ChargeResponseMessage;
+                    response.data.Gateway_Response = flutterResponse.data.ChargeResponseMessage;
+                }
+
+                if(flutterResponse.data.ChargeCode != null)
+                {
+                    if (flutterResponse.data.Status.Equals("successful") && flutterResponse.data.ChargeCode.Equals("00"))
+                    {
+                        response.data.Message = flutterResponse.data.ChargeMessage;
+                        response.data.Gateway_Response = flutterResponse.data.ChargeMessage;
+                        response.Message = flutterResponse.data.ChargeMessage;
+                        response.Status = true;
+                    }
                 }
             }
             else
             {
                 response.data.Message = flutterResponse.Message;
+                response.data.Gateway_Response = flutterResponse.Message;
                 response.data.Status = flutterResponse.Status;
-            }
-
-            if(flutterResponse.data.Status.Equals("successful") && flutterResponse.data.ChargeCode.Equals("00"))
-            {
-                response.data.Message = flutterResponse.data.ChargeMessage;
-                response.Message = flutterResponse.data.ChargeMessage;
-                response.Status = true;
             }
 
             return response;
