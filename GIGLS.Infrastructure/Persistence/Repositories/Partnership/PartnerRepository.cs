@@ -82,17 +82,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
 
         public Task<List<VehicleTypeDTO>> GetVerifiedPartnersAsync(string fleetCode)
         {
-            var partners = _context.Partners.AsQueryable();
+            var partners = _context.Partners.AsQueryable().Where(x => x.IsActivated == true);
 
-            if(fleetCode == null)
+            if (fleetCode != null)
             {
-                partners = partners.Where(x => x.IsActivated == true );
-            }
-            else
-            {
-                partners = partners.Where(x => x.IsActivated == true && x.FleetPartnerCode == fleetCode);
-            }
-            
+                partners = partners.Where(x => x.FleetPartnerCode == fleetCode);
+            }            
 
             var partnerDto = from partner in partners
                              join vehicle in _context.VehicleType on partner.PartnerCode equals vehicle.Partnercode
@@ -116,7 +111,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Partnership
                              };
             return Task.FromResult(partnerDto.ToList());
         }
-
 
         public Task<PartnerDTO> GetPartnerByIdWithCountry(int customerId)
         {

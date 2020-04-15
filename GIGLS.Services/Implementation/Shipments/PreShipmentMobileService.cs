@@ -1577,14 +1577,14 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var newPreShipment = new PreShipmentMobileDTO();
+
                 if (pickuprequest.UserId == null)
                 {
                     pickuprequest.UserId = await _userService.GetCurrentUserId();
                 }
 
-                var newPreShipment = new PreShipmentMobileDTO();
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
-
                 if (preshipmentmobile == null)
                 {
                     throw new GenericException("Shipment does not exist");
@@ -1627,8 +1627,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
 
                         //Update Activity Status
-                        await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OnDelivery);
-                        
+                        await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OnDelivery);                        
                     }
                     else
                     {
