@@ -1698,7 +1698,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     CountryDTO Country = null;
                     var onDelivery = false;
-                    
+                    List<MobilePickUpRequests> mobilePickUpRequests = new List<MobilePickUpRequests>();
+
                     foreach (var item in groupList)
                     {
                         var newPreShipment = new PreShipmentMobileDTO();
@@ -1739,7 +1740,17 @@ namespace GIGLS.Services.Implementation.Shipments
                                 var newRequest = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.UserId == pickuprequest.UserId);
                                 if (newRequest == null)
                                 {
-                                    await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
+                                    //Add new Mapping
+                                    var newMobilePickUpRequests = new MobilePickUpRequests
+                                    {
+                                        Waybill = item.WaybillNumber,
+                                        UserId = pickuprequest.UserId,
+                                        Status = pickuprequest.Status
+                                    };
+
+                                mobilePickUpRequests.Add(newMobilePickUpRequests);
+
+                                  await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
                                 }
                                 else
                                 {
@@ -1802,6 +1813,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OnDelivery);
                     }
+                    _uow.MobilePickUpRequests.AddRange(mobilePickUpRequests);
+                    //Look for a way to do the other 3 updates
                     //await _uow.CompleteAsync();
                 }
 
