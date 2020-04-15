@@ -1692,26 +1692,25 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                var listOfPreShipments = new List<PreShipmentMobileDTO>();
+
                 if (pickuprequest.UserId == null)
                 {
                     pickuprequest.UserId = await _userService.GetCurrentUserId();
                 }
+                
                 var groupList = await _uow.MobileGroupCodeWaybillMapping.FindAsync(x => x.GroupCodeNumber == pickuprequest.GroupCodeNumber);
-                var listOfPreShipments = new List<PreShipmentMobileDTO>();
-
                 if (groupList == null)
                 {
                     throw new GenericException("Group does not exist");
                 }
                 else
                 {
-                    CountryDTO Country = null;
                     var onDelivery = false;
                     List<MobilePickUpRequests> mobilePickUpRequests = new List<MobilePickUpRequests>();
 
                     foreach (var item in groupList)
                     {
-                        var newPreShipment = new PreShipmentMobileDTO();
                         var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == item.WaybillNumber, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
                         if (preshipmentmobile == null)
                         {
@@ -1795,7 +1794,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                 });
                             }
 
-                            newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
+                            var newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
                             newPreShipment.GroupCodeNumber = pickuprequest.GroupCodeNumber;
 
                             if (pickuprequest.ServiceCentreId != null)
@@ -1805,17 +1804,15 @@ namespace GIGLS.Services.Implementation.Shipments
                                 newPreShipment.ReceiverLocation.Longitude = preshipmentmobile.serviceCentreLocation.Longitude;
                             }
 
-                            if(Country == null)
+                            var country = await _uow.Country.GetCountryByStationId(preshipmentmobile.SenderStationId);
+                            if(country == null)
                             {
-                                Country = await _uow.Country.GetCountryByStationId(preshipmentmobile.SenderStationId);
+                                newPreShipment.CurrencyCode = country.CurrencyCode;
+                                newPreShipment.CurrencySymbol = country.CurrencySymbol;
                             }
-                            newPreShipment.CurrencyCode = Country.CurrencyCode;
-                            newPreShipment.CurrencySymbol = Country.CurrencySymbol;
-
                             await _uow.CompleteAsync();
                             listOfPreShipments.Add(newPreShipment);
                         }
-
                     }
 
                     if (onDelivery == true)
