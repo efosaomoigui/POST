@@ -110,7 +110,7 @@ namespace GIGLS.Services.Implementation.Wallet
                         return result;
 
                     //2. if the payment successful
-                    if (verifyResult.data.Status.Equals("successful") && !paymentLog.IsWaybillSettled && verifyResult.data.Amount == paymentLog.Amount)
+                    if (verifyResult.data.Status.Equals("successful") && verifyResult.data.ChargeCode.Equals("00") && !paymentLog.IsWaybillSettled && verifyResult.data.Amount == paymentLog.Amount)
                     {
                         //3. Process payment for the waybill if successful
                         PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
@@ -144,6 +144,11 @@ namespace GIGLS.Services.Implementation.Wallet
                     else
                     {
                         paymentLog.TransactionResponse = verifyResult.data.ChargeResponseMessage;
+                    }
+
+                    if (verifyResult.data.Status.Equals("successful") && verifyResult.data.ChargeCode.Equals("00"))
+                    {
+                        paymentLog.TransactionResponse = verifyResult.data.ChargeMessage;
                     }
 
                     result = true;
@@ -340,6 +345,12 @@ namespace GIGLS.Services.Implementation.Wallet
                     paymentLog.TransactionResponse = verifyResult.data.ChargeResponseMessage;
                 }
 
+                if (verifyResult.data.Acctvalrespcode.Equals("00"))
+                {
+                    paymentLog.TransactionResponse = verifyResult.data.Acctvalrespmsg;
+                    verifyResult.data.ChargeResponseMessage = verifyResult.data.Acctvalrespmsg;
+                }
+
                 await _uow.CompleteAsync();
             }
 
@@ -361,8 +372,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 var obj = new FlutterWaveOTPObject
                 {
                     PBFPubKey = PBFPubKey,
-                    transaction_reference = reference,
-                    otp = otp
+                    transactionreference = reference,
+                    otp = otp                    
                 };
 
                 using (var client = new HttpClient())
@@ -409,7 +420,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     response.data.Message = flutterResponse.data.ChargeMessage;
                     response.Message = flutterResponse.data.ChargeMessage;
-                    response.Status = false;
+                    if (!flutterResponse.data.Status.Equals("successful"))
+                    {
+                        response.Status = false;
+                    }
                 }
                 else
                 {
@@ -420,6 +434,13 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 response.data.Message = flutterResponse.Message;
                 response.data.Status = flutterResponse.Status;
+            }
+
+            if(flutterResponse.data.Status.Equals("successful") && flutterResponse.data.ChargeCode.Equals("00"))
+            {
+                response.data.Message = flutterResponse.data.ChargeMessage;
+                response.Message = flutterResponse.data.ChargeMessage;
+                response.Status = true;
             }
 
             return response;

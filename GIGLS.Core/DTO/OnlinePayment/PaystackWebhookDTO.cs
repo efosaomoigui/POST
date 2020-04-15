@@ -61,6 +61,9 @@
         public string ChargeMessage { get; set; }
         public string PaymentType { get; set; }
         public string FlwRef { get; set; }
+        public string Acctvalrespcode { get; set; }
+        public string Acctvalrespmsg { get; set; }
+        public string ChargeCode { get; set; }
 
         public ValidateInstructions validateInstructions { get; set; }
     }

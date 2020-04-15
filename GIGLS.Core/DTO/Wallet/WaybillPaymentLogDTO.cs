@@ -89,7 +89,10 @@ namespace GIGLS.Core.DTO.Wallet
     public class FlutterWaveOTPObject
     {
         public string PBFPubKey { get; set; }
-        public string transaction_reference { get; set; }
+        public string transactionreference { get; set; }
         public string otp { get; set; }
+        public string validateparameter { get; set; } = "OTP";
+        public bool use_access { get; set; } = true;
     }
+
 }
