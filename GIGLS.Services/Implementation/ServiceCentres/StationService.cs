@@ -110,7 +110,27 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             station.StateId = stationDto.StateId;
             station.SuperServiceCentreId = stationDto.SuperServiceCentreId;
             station.StationPickupPrice = stationDto.StationPickupPrice;
+            station.GIGGoActive = stationDto.GIGGoActive;
+
             await _uow.CompleteAsync();
+        }
+
+        public async Task UpdateGIGGoStationStatus(int stationId, bool status)
+        {
+            try
+            {
+                var station = await _uow.Station.GetAsync(stationId);
+                if (station == null)
+                {
+                    throw new GenericException("LGA Information does not exist");
+                }
+                station.GIGGoActive = status;
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task<IEnumerable<StationDTO>> GetStations()
@@ -141,7 +161,8 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                     StateName = st.State.StateName,
                     SuperServiceCentreId = st.SuperServiceCentreId,
                     StationPickupPrice = st.StationPickupPrice,
-                    SuperServiceCentreDTO = superServiceCentreDTO
+                    SuperServiceCentreDTO = superServiceCentreDTO,
+                    GIGGoActive = st.GIGGoActive
                 });
             }
             return stationDto.OrderBy(x => x.StationName).ToList();
@@ -156,6 +177,11 @@ namespace GIGLS.Services.Implementation.ServiceCentres
         public async Task<List<StationDTO>> GetInternationalStations()
         {
             return await _uow.Station.GetInternationalStations();
+        }
+
+        public async Task<List<StationDTO>> GetActiveGIGGoStations()
+        {
+            return await _uow.Station.GetActiveGIGGoStations();
         }
     }
 }

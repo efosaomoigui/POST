@@ -55,6 +55,21 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getverifiedpartners")]
+        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetVerfiedPartners(FleetPartnerDTO fleetCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var partners = await _partnerService.GetVerifiedPartners(fleetCode.FleetPartnerCode);
+                return new ServiceResponse<IEnumerable<VehicleTypeDTO>>
+                {
+                    Object = partners
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("")]
@@ -209,6 +224,37 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 return new ServiceResponse<IEnumerable<FleetPartnerDTO>>
                 {
                     Object = partners
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("partnersunderfleet/{fleetCode}")]
+        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetAllPartnersUnderFleetPartner(string fleetCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var partners = await _fleetPartnerService.GetVehiclesAttachedToFleetPartner(fleetCode);
+                return new ServiceResponse<IEnumerable<VehicleTypeDTO>>
+                {
+                    Object = partners
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Delete")]
+        [HttpGet]
+        [Route("removepartnerfromfleet/{partnerCode}")]
+        public async Task<IServiceResponse<bool>> RemovePartnerFromFleet(string partnerCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _fleetPartnerService.RemovePartnerFromFleetPartner(partnerCode);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
                 };
             });
         }

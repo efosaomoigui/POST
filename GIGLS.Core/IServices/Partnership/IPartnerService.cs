@@ -16,6 +16,7 @@ namespace GIGLS.Core.IServices.Partnership
         Task<List<PartnerDTO>> GetPartnersByDate(BaseFilterCriteria filterCriteria);
         Task<IEnumerable<PartnerDTO>> GetExternalDeliveryPartners();
         Task<IEnumerable<VehicleTypeDTO>> GetVerifiedPartners();
+        Task<IEnumerable<VehicleTypeDTO>> GetVerifiedPartners(string fleetCode);
         Task<List<ExternalPartnerTransactionsPaymentDTO>> GetExternalPartnerTransactionsForPayment(ShipmentCollectionFilterCriteria shipmentCollectionFilterCriteria);
     }
 }

@@ -16,5 +16,6 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public int SuperServiceCentreId { get; set; } 
         public ServiceCentreDTO SuperServiceCentreDTO { get; set; }
         public decimal StationPickupPrice { get; set; }
+        public bool GIGGoActive { get; set; }
     }
 }

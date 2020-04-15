@@ -195,6 +195,12 @@ namespace GIGLS.Services.Implementation.Partnership
             return vehicles;
         }
 
+        public async Task<List<VehicleTypeDTO>> GetVehiclesAttachedToFleetPartner(string fleetCode)
+        {
+            var vehicles = await _uow.FleetPartner.GetVehiclesAttachedToFleetPartner(fleetCode);
+            return vehicles;
+        }
+
         public async Task<List<FleetPartnerTransactionsDTO>> GetFleetTransaction(ShipmentCollectionFilterCriteria filterCriteria)
         {
             //get the current login user 
@@ -254,6 +260,20 @@ namespace GIGLS.Services.Implementation.Partnership
             await _uow.CompleteAsync();
             
         }
+
+        public async Task RemovePartnerFromFleetPartner(string partnerCode)
+        {
+                var partner = await _uow.Partner.GetAsync(x => x.PartnerCode == partnerCode);
+                if (partner != null)
+                {
+                    partner.FleetPartnerCode = null;
+                }
+            
+            await _uow.CompleteAsync();
+
+        }
+
+
 
     }
 }

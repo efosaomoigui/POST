@@ -12,4 +12,5 @@ namespace GIGLS.Core.Domain
         [Timestamp]
         public byte[] RowVersion { get; set; }
     }
+
 }

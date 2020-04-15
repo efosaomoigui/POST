@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<Locations xmlns="http://www.magaya.com/XMLSchema/V1">
+
+  <Location Code="WR">
+
+    <Description>WH</Description>
+
+    <Type>Receiving</Type>
+
+    <NetworkID>35652</NetworkID>
+
+    <WarehouseZoneName>Default Zone</WarehouseZoneName>
+
+    <IsDisabled>false</IsDisabled>
+
+  </Location>
+
+
+  <Location Code="WH">
+
+    <Description>WAREHOUSE</Description>
+
+    <Type>Storage</Type>
+
+    <NetworkID>35652</NetworkID>
+
+    <WarehouseZoneName>Default Zone</WarehouseZoneName>
+
+    <IsDisabled>false</IsDisabled>
+
+  </Location>
+
+</Locations>

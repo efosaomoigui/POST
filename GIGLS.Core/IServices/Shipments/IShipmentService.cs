@@ -11,8 +11,9 @@ using GIGLS.CORE.DTO.Shipments;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ThirdParty.WebServices;
+using ThirdParty.WebServices.Magaya.Business.New;
 using ThirdParty.WebServices.Magaya.DTO;
+using ThirdParty.WebServices.Magaya.Services;
 
 namespace GIGLS.Core.IServices.Shipments
 {
@@ -66,12 +67,31 @@ namespace GIGLS.Core.IServices.Shipments
     {
         bool OpenConnection(out int access_key); 
         string CloseConnection(int access_key);
-        string SetTransactions(int access_key, MagayaShipmentDto magayaShipmentDTO);
-        string GetTransactions(int access_key, MagayaShipmentDto magayaShipmentDTO);
+        api_session_error SetTransactions(int access_key, WarehouseReceipt magayaShipmentDTO);
+        string GetTransactions(int access_key, WarehouseReceipt magayaShipmentDTO);
         string SetEntity(int access_key, EntityDto entitydto);
-        Entities GetEntities(int access_key, string startwithstring);
-        Employees GetEmployees(int access_key, string startwithstring);
-        Employees GetVendors(int access_key, string startwithstring);
+        EntityList GetEntities(int access_key, string startwithstring);
+        //List<Entity> GetEmployees(int access_key, string startwithstring);
+        //EntityList GetVendors(int access_key, string startwithstring);
+        List<ModeOfTransportation> GetModesOfTransportation();
+        PortList GetPorts();
+        PackageList GetPackageList();
+        LocationList GetLocations();
+        ChargeDefinitionList GetChargeDefinitionList(int access_key);
+        List<string> GetItemStatus();
+        Description CommodityDescription();
+        GUIDItemList QueryLog(int access_key, QuerylogDt0 qdto);
+        TransactionTypes TransactionTypes();
+        WarehouseReceiptList GetWarehouseReceiptRangeByDate(int access_key, QuerylogDt0 querydto);
+        Tuple<WarehouseReceiptList, ShipmentList, InvoiceList, PaymentList> GetFirstTransbyDate(int access_key, QuerylogDt0 querydto, out string customcookie, out int more_result);
+        bool GetNextTransByDate(int access_key, ref string cookie, out string trans_list_xml, out int more_results);
+        bool GetFirstTransByDate(int access_key, QuerylogDt0 querydto, out string cookie, out int more_results);
+        //ShipmentList GetShipmentRangeByDate(int access_key, QuerylogDt0 querydto);
+        Tuple<WarehouseReceiptList, ShipmentList, InvoiceList, PaymentList> GetNextTransByDate2(int access_key, out int more_results,  ref string cookie,  string type);
+        TransactionResults LargeQueryLog(int access_key, QuerylogDt0 querydto);
+
+        Task<string> GetMagayaWayBillNumber();
     }
+
 
 }

@@ -43,6 +43,12 @@ namespace GIGLS.Services.Implementation.Partnership
             return partners;
         }
 
+        public async Task<IEnumerable<VehicleTypeDTO>> GetVerifiedPartners(string fleetCode)
+        {
+            var partners = await _uow.Partner.GetVerifiedPartnersAsync(fleetCode);
+            return partners;
+        }
+
         public async Task<List<PartnerDTO>> GetPartnersByDate(BaseFilterCriteria filterCriteria)
         {
             var queryDate = filterCriteria.getStartDateAndEndDate();

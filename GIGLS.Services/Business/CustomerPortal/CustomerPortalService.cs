@@ -910,7 +910,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     PhoneNumber = user.PhoneNumber,
                     UserId = FinalUser.Id,
                     IsActivated = false,
-                    UserActiveCountryId = user.UserActiveCountryId
+                    UserActiveCountryId = user.UserActiveCountryId,
+                    ActivityStatus = ActivityStatus.Idle,
+                    ActivityDate = DateTime.Now
+                
                 };
                 _uow.Partner.Add(partnerDTO);
 
@@ -1515,6 +1518,12 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.AddMobilePickupRequest(pickuprequest);
         }
+
+        public async Task<List<PreShipmentMobileDTO>> AddMobilePickupRequestMultipleShipment(MobilePickUpRequestsDTO pickuprequest)
+        {
+            return await _preShipmentMobileService.AddMobilePickupRequestMultipleShipment(pickuprequest);
+        }
+
         public async Task<List<MobilePickUpRequestsDTO>> GetMobilePickupRequest()
         {
             return await _preShipmentMobileService.GetMobilePickupRequest();

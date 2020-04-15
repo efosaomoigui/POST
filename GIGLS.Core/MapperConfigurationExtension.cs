@@ -38,6 +38,7 @@ using GIGLS.Core.Domain.Expenses;
 using ThirdParty.WebServices.Magaya.DTO;
 using ThirdParty.WebServices.Magaya.Business;
 using ThirdParty.WebServices;
+using ThirdParty.WebServices.Magaya.Business.New;
 
 namespace GIGLS.Core
 {

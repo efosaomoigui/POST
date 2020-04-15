@@ -51,7 +51,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                  PartnerName = partner.FirstName + " " + partner.LastName,
                                  PartnerPhoneNumber = partner.PhoneNumber,
                                  PartnerFirstName =  partner.FirstName,
-                                 PartnerLastName = partner.LastName
+                                 PartnerLastName = partner.LastName,
+                                 EnterprisePartner = _context.FleetPartner.Where(c => c.FleetPartnerCode == fleetPartnerCode).Select(x => new FleetPartnerDTO
+                                 {
+                                     FirstName = x.FirstName,
+                                     LastName = x.LastName
+                                 }).FirstOrDefault()
+
                              };
 
             return Task.FromResult(partnerDto.ToList());

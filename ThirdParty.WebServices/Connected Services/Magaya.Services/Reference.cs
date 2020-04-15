@@ -26,11 +26,11 @@ namespace ThirdParty.WebServices.Magaya.Services {
         
         [System.ServiceModel.OperationContractAttribute(Action="#StartTracking", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.StartTrackingResponse StartTracking(ThirdParty.WebServices.Magaya.Services.StartTrackingRequest request);
+        StartTrackingResponse StartTracking(StartTrackingRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#StartTracking", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.StartTrackingResponse> StartTrackingAsync(ThirdParty.WebServices.Magaya.Services.StartTrackingRequest request);
+        System.Threading.Tasks.Task<StartTrackingResponse> StartTrackingAsync(StartTrackingRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetTrackingTransaction", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
@@ -70,208 +70,208 @@ namespace ThirdParty.WebServices.Magaya.Services {
         
         [System.ServiceModel.OperationContractAttribute(Action="#AnswerInvitation", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.AnswerInvitationResponse AnswerInvitation(ThirdParty.WebServices.Magaya.Services.AnswerInvitationRequest request);
+        AnswerInvitationResponse AnswerInvitation(AnswerInvitationRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#AnswerInvitation", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.AnswerInvitationResponse> AnswerInvitationAsync(ThirdParty.WebServices.Magaya.Services.AnswerInvitationRequest request);
+        System.Threading.Tasks.Task<AnswerInvitationResponse> AnswerInvitationAsync(AnswerInvitationRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#AnswerInvitation2", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.AnswerInvitation2Response AnswerInvitation2(ThirdParty.WebServices.Magaya.Services.AnswerInvitation2Request request);
+        AnswerInvitation2Response AnswerInvitation2(AnswerInvitation2Request request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#AnswerInvitation2", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.AnswerInvitation2Response> AnswerInvitation2Async(ThirdParty.WebServices.Magaya.Services.AnswerInvitation2Request request);
+        System.Threading.Tasks.Task<AnswerInvitation2Response> AnswerInvitation2Async(AnswerInvitation2Request request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#StartSession", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.StartSessionResponse StartSession(ThirdParty.WebServices.Magaya.Services.StartSessionRequest request);
+        StartSessionResponse StartSession(StartSessionRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#StartSession", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.StartSessionResponse> StartSessionAsync(ThirdParty.WebServices.Magaya.Services.StartSessionRequest request);
+        System.Threading.Tasks.Task<StartSessionResponse> StartSessionAsync(StartSessionRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#EndSession", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        ThirdParty.WebServices.Magaya.Services.api_session_error EndSession(int access_key);
+        api_session_error EndSession(int access_key);
         
         [System.ServiceModel.OperationContractAttribute(Action="#EndSession", ReplyAction="*")]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> EndSessionAsync(int access_key);
+        System.Threading.Tasks.Task<api_session_error> EndSessionAsync(int access_key);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetTransaction", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetTransactionResponse GetTransaction(ThirdParty.WebServices.Magaya.Services.GetTransactionRequest request);
+        GetTransactionResponse GetTransaction(GetTransactionRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetTransaction", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetTransactionResponse> GetTransactionAsync(ThirdParty.WebServices.Magaya.Services.GetTransactionRequest request);
+        System.Threading.Tasks.Task<GetTransactionResponse> GetTransactionAsync(GetTransactionRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SetTransaction", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.SetTransactionResponse SetTransaction(ThirdParty.WebServices.Magaya.Services.SetTransactionRequest request);
+        SetTransactionResponse SetTransaction(SetTransactionRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#SetTransaction", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SetTransactionResponse> SetTransactionAsync(ThirdParty.WebServices.Magaya.Services.SetTransactionRequest request);
+        System.Threading.Tasks.Task<SetTransactionResponse> SetTransactionAsync(SetTransactionRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetTransRangeByDate", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateResponse GetTransRangeByDate(ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateRequest request);
+        GetTransRangeByDateResponse GetTransRangeByDate(GetTransRangeByDateRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetTransRangeByDate", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateResponse> GetTransRangeByDateAsync(ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateRequest request);
+        System.Threading.Tasks.Task<GetTransRangeByDateResponse> GetTransRangeByDateAsync(GetTransRangeByDateRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#DeleteTransaction", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        ThirdParty.WebServices.Magaya.Services.api_session_error DeleteTransaction(int access_key, string type, string number);
+        api_session_error DeleteTransaction(int access_key, string type, string number);
         
         [System.ServiceModel.OperationContractAttribute(Action="#DeleteTransaction", ReplyAction="*")]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> DeleteTransactionAsync(int access_key, string type, string number);
+        System.Threading.Tasks.Task<api_session_error> DeleteTransactionAsync(int access_key, string type, string number);
         
         [System.ServiceModel.OperationContractAttribute(Action="#RenameTransaction", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        ThirdParty.WebServices.Magaya.Services.api_session_error RenameTransaction(int access_key, string type, string number, string new_name);
+        api_session_error RenameTransaction(int access_key, string type, string number, string new_name);
         
         [System.ServiceModel.OperationContractAttribute(Action="#RenameTransaction", ReplyAction="*")]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> RenameTransactionAsync(int access_key, string type, string number, string new_name);
+        System.Threading.Tasks.Task<api_session_error> RenameTransactionAsync(int access_key, string type, string number, string new_name);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetWorkingPorts", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetWorkingPortsResponse GetWorkingPorts(ThirdParty.WebServices.Magaya.Services.GetWorkingPortsRequest request);
+        GetWorkingPortsResponse GetWorkingPorts(GetWorkingPortsRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetWorkingPorts", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetWorkingPortsResponse> GetWorkingPortsAsync(ThirdParty.WebServices.Magaya.Services.GetWorkingPortsRequest request);
+        System.Threading.Tasks.Task<GetWorkingPortsResponse> GetWorkingPortsAsync(GetWorkingPortsRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetTripSchedule", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetTripScheduleResponse GetTripSchedule(ThirdParty.WebServices.Magaya.Services.GetTripScheduleRequest request);
+        GetTripScheduleResponse GetTripSchedule(GetTripScheduleRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetTripSchedule", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetTripScheduleResponse> GetTripScheduleAsync(ThirdParty.WebServices.Magaya.Services.GetTripScheduleRequest request);
+        System.Threading.Tasks.Task<GetTripScheduleResponse> GetTripScheduleAsync(GetTripScheduleRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#BookingRequest", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.BookingRequestResponse BookingRequest(ThirdParty.WebServices.Magaya.Services.BookingRequestRequest request);
+        BookingRequestResponse BookingRequest(BookingRequestRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#BookingRequest", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.BookingRequestResponse> BookingRequestAsync(ThirdParty.WebServices.Magaya.Services.BookingRequestRequest request);
+        System.Threading.Tasks.Task<BookingRequestResponse> BookingRequestAsync(BookingRequestRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#StartTracking2", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.StartTracking2Response StartTracking2(ThirdParty.WebServices.Magaya.Services.StartTracking2Request request);
+        StartTracking2Response StartTracking2(StartTracking2Request request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#StartTracking2", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.StartTracking2Response> StartTracking2Async(ThirdParty.WebServices.Magaya.Services.StartTracking2Request request);
+        System.Threading.Tasks.Task<StartTracking2Response> StartTracking2Async(StartTracking2Request request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetPackageTypes", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetPackageTypesResponse GetPackageTypes(ThirdParty.WebServices.Magaya.Services.GetPackageTypesRequest request);
+        GetPackageTypesResponse GetPackageTypes(GetPackageTypesRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetPackageTypes", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetPackageTypesResponse> GetPackageTypesAsync(ThirdParty.WebServices.Magaya.Services.GetPackageTypesRequest request);
+        System.Threading.Tasks.Task<GetPackageTypesResponse> GetPackageTypesAsync(GetPackageTypesRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#CancelBooking", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        ThirdParty.WebServices.Magaya.Services.api_session_error CancelBooking(string booking_uuid);
+        api_session_error CancelBooking(string booking_uuid);
         
         [System.ServiceModel.OperationContractAttribute(Action="#CancelBooking", ReplyAction="*")]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> CancelBookingAsync(string booking_uuid);
+        System.Threading.Tasks.Task<api_session_error> CancelBookingAsync(string booking_uuid);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetCustomFieldDefinitions", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetCustomFieldDefinitionsResponse GetCustomFieldDefinitions(ThirdParty.WebServices.Magaya.Services.GetCustomFieldDefinitionsRequest request);
+        GetCustomFieldDefinitionsResponse GetCustomFieldDefinitions(GetCustomFieldDefinitionsRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetCustomFieldDefinitions", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetCustomFieldDefinitionsResponse> GetCustomFieldDefinitionsAsync(ThirdParty.WebServices.Magaya.Services.GetCustomFieldDefinitionsRequest request);
+        System.Threading.Tasks.Task<GetCustomFieldDefinitionsResponse> GetCustomFieldDefinitionsAsync(GetCustomFieldDefinitionsRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetItemFromVIN", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetItemFromVINResponse GetItemFromVIN(ThirdParty.WebServices.Magaya.Services.GetItemFromVINRequest request);
+        GetItemFromVINResponse GetItemFromVIN(GetItemFromVINRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetItemFromVIN", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetItemFromVINResponse> GetItemFromVINAsync(ThirdParty.WebServices.Magaya.Services.GetItemFromVINRequest request);
+        System.Threading.Tasks.Task<GetItemFromVINResponse> GetItemFromVINAsync(GetItemFromVINRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SetShipmentStatus", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        ThirdParty.WebServices.Magaya.Services.api_session_error SetShipmentStatus(int access_key, string status, string shipment_uuid);
+        api_session_error SetShipmentStatus(int access_key, string status, string shipment_uuid);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SetShipmentStatus", ReplyAction="*")]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> SetShipmentStatusAsync(int access_key, string status, string shipment_uuid);
+        System.Threading.Tasks.Task<api_session_error> SetShipmentStatusAsync(int access_key, string status, string shipment_uuid);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetMagayaDocument", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetMagayaDocumentResponse GetMagayaDocument(ThirdParty.WebServices.Magaya.Services.GetMagayaDocumentRequest request);
+        GetMagayaDocumentResponse GetMagayaDocument(GetMagayaDocumentRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetMagayaDocument", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetMagayaDocumentResponse> GetMagayaDocumentAsync(ThirdParty.WebServices.Magaya.Services.GetMagayaDocumentRequest request);
+        System.Threading.Tasks.Task<GetMagayaDocumentResponse> GetMagayaDocumentAsync(GetMagayaDocumentRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetAccountingTransactions", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetAccountingTransactionsResponse GetAccountingTransactions(ThirdParty.WebServices.Magaya.Services.GetAccountingTransactionsRequest request);
+        GetAccountingTransactionsResponse GetAccountingTransactions(GetAccountingTransactionsRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetAccountingTransactions", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetAccountingTransactionsResponse> GetAccountingTransactionsAsync(ThirdParty.WebServices.Magaya.Services.GetAccountingTransactionsRequest request);
+        System.Threading.Tasks.Task<GetAccountingTransactionsResponse> GetAccountingTransactionsAsync(GetAccountingTransactionsRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetRelatedTransactions", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetRelatedTransactionsResponse GetRelatedTransactions(ThirdParty.WebServices.Magaya.Services.GetRelatedTransactionsRequest request);
+        GetRelatedTransactionsResponse GetRelatedTransactions(GetRelatedTransactionsRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetRelatedTransactions", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetRelatedTransactionsResponse> GetRelatedTransactionsAsync(ThirdParty.WebServices.Magaya.Services.GetRelatedTransactionsRequest request);
+        System.Threading.Tasks.Task<GetRelatedTransactionsResponse> GetRelatedTransactionsAsync(GetRelatedTransactionsRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetAccountDefinitions", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetAccountDefinitionsResponse GetAccountDefinitions(ThirdParty.WebServices.Magaya.Services.GetAccountDefinitionsRequest request);
+        GetAccountDefinitionsResponse GetAccountDefinitions(GetAccountDefinitionsRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetAccountDefinitions", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetAccountDefinitionsResponse> GetAccountDefinitionsAsync(ThirdParty.WebServices.Magaya.Services.GetAccountDefinitionsRequest request);
+        System.Threading.Tasks.Task<GetAccountDefinitionsResponse> GetAccountDefinitionsAsync(GetAccountDefinitionsRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetChargeDefinitions", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetChargeDefinitionsResponse GetChargeDefinitions(ThirdParty.WebServices.Magaya.Services.GetChargeDefinitionsRequest request);
+        GetChargeDefinitionsResponse GetChargeDefinitions(GetChargeDefinitionsRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetChargeDefinitions", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetChargeDefinitionsResponse> GetChargeDefinitionsAsync(ThirdParty.WebServices.Magaya.Services.GetChargeDefinitionsRequest request);
+        System.Threading.Tasks.Task<GetChargeDefinitionsResponse> GetChargeDefinitionsAsync(GetChargeDefinitionsRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetActiveCurrencies", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetActiveCurrenciesResponse GetActiveCurrencies(ThirdParty.WebServices.Magaya.Services.GetActiveCurrenciesRequest request);
+        GetActiveCurrenciesResponse GetActiveCurrencies(GetActiveCurrenciesRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetActiveCurrencies", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetActiveCurrenciesResponse> GetActiveCurrenciesAsync(ThirdParty.WebServices.Magaya.Services.GetActiveCurrenciesRequest request);
+        System.Threading.Tasks.Task<GetActiveCurrenciesResponse> GetActiveCurrenciesAsync(GetActiveCurrenciesRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#QueryLog", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.QueryLogResponse QueryLog(ThirdParty.WebServices.Magaya.Services.QueryLogRequest request);
+        QueryLogResponse QueryLog(QueryLogRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#QueryLog", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.QueryLogResponse> QueryLogAsync(ThirdParty.WebServices.Magaya.Services.QueryLogRequest request);
+        System.Threading.Tasks.Task<QueryLogResponse> QueryLogAsync(QueryLogRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetPODData", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
@@ -284,336 +284,336 @@ namespace ThirdParty.WebServices.Magaya.Services {
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetClientRates", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetClientRatesResponse GetClientRates(ThirdParty.WebServices.Magaya.Services.GetClientRatesRequest request);
+        GetClientRatesResponse GetClientRates(GetClientRatesRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetClientRates", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetClientRatesResponse> GetClientRatesAsync(ThirdParty.WebServices.Magaya.Services.GetClientRatesRequest request);
+        System.Threading.Tasks.Task<GetClientRatesResponse> GetClientRatesAsync(GetClientRatesRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetStandardRates", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetStandardRatesResponse GetStandardRates(ThirdParty.WebServices.Magaya.Services.GetStandardRatesRequest request);
+        GetStandardRatesResponse GetStandardRates(GetStandardRatesRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetStandardRates", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetStandardRatesResponse> GetStandardRatesAsync(ThirdParty.WebServices.Magaya.Services.GetStandardRatesRequest request);
+        System.Threading.Tasks.Task<GetStandardRatesResponse> GetStandardRatesAsync(GetStandardRatesRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetClientChargeDefinitions", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetClientChargeDefinitionsResponse GetClientChargeDefinitions(ThirdParty.WebServices.Magaya.Services.GetClientChargeDefinitionsRequest request);
+        GetClientChargeDefinitionsResponse GetClientChargeDefinitions(GetClientChargeDefinitionsRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetClientChargeDefinitions", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetClientChargeDefinitionsResponse> GetClientChargeDefinitionsAsync(ThirdParty.WebServices.Magaya.Services.GetClientChargeDefinitionsRequest request);
+        System.Threading.Tasks.Task<GetClientChargeDefinitionsResponse> GetClientChargeDefinitionsAsync(GetClientChargeDefinitionsRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SetRate", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.SetRateResponse SetRate(ThirdParty.WebServices.Magaya.Services.SetRateRequest request);
+        SetRateResponse SetRate(SetRateRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#SetRate", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SetRateResponse> SetRateAsync(ThirdParty.WebServices.Magaya.Services.SetRateRequest request);
+        System.Threading.Tasks.Task<SetRateResponse> SetRateAsync(SetRateRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SetEntity", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.SetEntityResponse SetEntity(ThirdParty.WebServices.Magaya.Services.SetEntityRequest request);
+        SetEntityResponse SetEntity(SetEntityRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#SetEntity", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SetEntityResponse> SetEntityAsync(ThirdParty.WebServices.Magaya.Services.SetEntityRequest request);
+        System.Threading.Tasks.Task<SetEntityResponse> SetEntityAsync(SetEntityRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetEntities", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetEntitiesResponse GetEntities(ThirdParty.WebServices.Magaya.Services.GetEntitiesRequest request);
+        GetEntitiesResponse GetEntities(GetEntitiesRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetEntities", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetEntitiesResponse> GetEntitiesAsync(ThirdParty.WebServices.Magaya.Services.GetEntitiesRequest request);
+        System.Threading.Tasks.Task<GetEntitiesResponse> GetEntitiesAsync(GetEntitiesRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetEntityContacts", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetEntityContactsResponse GetEntityContacts(ThirdParty.WebServices.Magaya.Services.GetEntityContactsRequest request);
+        GetEntityContactsResponse GetEntityContacts(GetEntityContactsRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetEntityContacts", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetEntityContactsResponse> GetEntityContactsAsync(ThirdParty.WebServices.Magaya.Services.GetEntityContactsRequest request);
+        System.Threading.Tasks.Task<GetEntityContactsResponse> GetEntityContactsAsync(GetEntityContactsRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SubmitSalesOrder", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.SubmitSalesOrderResponse SubmitSalesOrder(ThirdParty.WebServices.Magaya.Services.SubmitSalesOrderRequest request);
+        SubmitSalesOrderResponse SubmitSalesOrder(SubmitSalesOrderRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#SubmitSalesOrder", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SubmitSalesOrderResponse> SubmitSalesOrderAsync(ThirdParty.WebServices.Magaya.Services.SubmitSalesOrderRequest request);
+        System.Threading.Tasks.Task<SubmitSalesOrderResponse> SubmitSalesOrderAsync(SubmitSalesOrderRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SubmitCargoRelease", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.SubmitCargoReleaseResponse SubmitCargoRelease(ThirdParty.WebServices.Magaya.Services.SubmitCargoReleaseRequest request);
+        SubmitCargoReleaseResponse SubmitCargoRelease(SubmitCargoReleaseRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#SubmitCargoRelease", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SubmitCargoReleaseResponse> SubmitCargoReleaseAsync(ThirdParty.WebServices.Magaya.Services.SubmitCargoReleaseRequest request);
+        System.Threading.Tasks.Task<SubmitCargoReleaseResponse> SubmitCargoReleaseAsync(SubmitCargoReleaseRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SubmitShipment", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.SubmitShipmentResponse SubmitShipment(ThirdParty.WebServices.Magaya.Services.SubmitShipmentRequest request);
+        SubmitShipmentResponse SubmitShipment(SubmitShipmentRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#SubmitShipment", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SubmitShipmentResponse> SubmitShipmentAsync(ThirdParty.WebServices.Magaya.Services.SubmitShipmentRequest request);
+        System.Threading.Tasks.Task<SubmitShipmentResponse> SubmitShipmentAsync(SubmitShipmentRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetEventDefinitions", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetEventDefinitionsResponse GetEventDefinitions(ThirdParty.WebServices.Magaya.Services.GetEventDefinitionsRequest request);
+        GetEventDefinitionsResponse GetEventDefinitions(GetEventDefinitionsRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetEventDefinitions", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetEventDefinitionsResponse> GetEventDefinitionsAsync(ThirdParty.WebServices.Magaya.Services.GetEventDefinitionsRequest request);
+        System.Threading.Tasks.Task<GetEventDefinitionsResponse> GetEventDefinitionsAsync(GetEventDefinitionsRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SetTransactionEvents", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.SetTransactionEventsResponse SetTransactionEvents(ThirdParty.WebServices.Magaya.Services.SetTransactionEventsRequest request);
+        SetTransactionEventsResponse SetTransactionEvents(SetTransactionEventsRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#SetTransactionEvents", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SetTransactionEventsResponse> SetTransactionEventsAsync(ThirdParty.WebServices.Magaya.Services.SetTransactionEventsRequest request);
+        System.Threading.Tasks.Task<SetTransactionEventsResponse> SetTransactionEventsAsync(SetTransactionEventsRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#UpdateOrder", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.UpdateOrderResponse UpdateOrder(ThirdParty.WebServices.Magaya.Services.UpdateOrderRequest request);
+        UpdateOrderResponse UpdateOrder(UpdateOrderRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#UpdateOrder", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.UpdateOrderResponse> UpdateOrderAsync(ThirdParty.WebServices.Magaya.Services.UpdateOrderRequest request);
+        System.Threading.Tasks.Task<UpdateOrderResponse> UpdateOrderAsync(UpdateOrderRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SetCustomFieldValue", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        ThirdParty.WebServices.Magaya.Services.api_session_error SetCustomFieldValue(int access_key, string type, string number, string field_internal_name, string field_value);
+        api_session_error SetCustomFieldValue(int access_key, string type, string number, string field_internal_name, string field_value);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SetCustomFieldValue", ReplyAction="*")]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> SetCustomFieldValueAsync(int access_key, string type, string number, string field_internal_name, string field_value);
+        System.Threading.Tasks.Task<api_session_error> SetCustomFieldValueAsync(int access_key, string type, string number, string field_internal_name, string field_value);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SetApprovalStatus", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        ThirdParty.WebServices.Magaya.Services.api_session_error SetApprovalStatus(int access_key, string type, string number, int status);
+        api_session_error SetApprovalStatus(int access_key, string type, string number, int status);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SetApprovalStatus", ReplyAction="*")]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> SetApprovalStatusAsync(int access_key, string type, string number, int status);
+        System.Threading.Tasks.Task<api_session_error> SetApprovalStatusAsync(int access_key, string type, string number, int status);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetCarrierRates", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetCarrierRatesResponse GetCarrierRates(ThirdParty.WebServices.Magaya.Services.GetCarrierRatesRequest request);
+        GetCarrierRatesResponse GetCarrierRates(GetCarrierRatesRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetCarrierRates", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetCarrierRatesResponse> GetCarrierRatesAsync(ThirdParty.WebServices.Magaya.Services.GetCarrierRatesRequest request);
+        System.Threading.Tasks.Task<GetCarrierRatesResponse> GetCarrierRatesAsync(GetCarrierRatesRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetEntityTransactions", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetEntityTransactionsResponse GetEntityTransactions(ThirdParty.WebServices.Magaya.Services.GetEntityTransactionsRequest request);
+        GetEntityTransactionsResponse GetEntityTransactions(GetEntityTransactionsRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetEntityTransactions", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetEntityTransactionsResponse> GetEntityTransactionsAsync(ThirdParty.WebServices.Magaya.Services.GetEntityTransactionsRequest request);
+        System.Threading.Tasks.Task<GetEntityTransactionsResponse> GetEntityTransactionsAsync(GetEntityTransactionsRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#QueryLogJS", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.QueryLogJSResponse QueryLogJS(ThirdParty.WebServices.Magaya.Services.QueryLogJSRequest request);
+        QueryLogJSResponse QueryLogJS(QueryLogJSRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#QueryLogJS", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.QueryLogJSResponse> QueryLogJSAsync(ThirdParty.WebServices.Magaya.Services.QueryLogJSRequest request);
+        System.Threading.Tasks.Task<QueryLogJSResponse> QueryLogJSAsync(QueryLogJSRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#ExistsTransaction", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.ExistsTransactionResponse ExistsTransaction(ThirdParty.WebServices.Magaya.Services.ExistsTransactionRequest request);
+        ExistsTransactionResponse ExistsTransaction(ExistsTransactionRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#ExistsTransaction", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.ExistsTransactionResponse> ExistsTransactionAsync(ThirdParty.WebServices.Magaya.Services.ExistsTransactionRequest request);
+        System.Threading.Tasks.Task<ExistsTransactionResponse> ExistsTransactionAsync(ExistsTransactionRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetTransactionStatus", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetTransactionStatusResponse GetTransactionStatus(ThirdParty.WebServices.Magaya.Services.GetTransactionStatusRequest request);
+        GetTransactionStatusResponse GetTransactionStatus(GetTransactionStatusRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetTransactionStatus", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetTransactionStatusResponse> GetTransactionStatusAsync(ThirdParty.WebServices.Magaya.Services.GetTransactionStatusRequest request);
+        System.Threading.Tasks.Task<GetTransactionStatusResponse> GetTransactionStatusAsync(GetTransactionStatusRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SetTrackingUser", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        ThirdParty.WebServices.Magaya.Services.api_session_error SetTrackingUser(int access_key, string contact_uuid, string login, string password, string user_config_xml, int xml_flags);
+        api_session_error SetTrackingUser(int access_key, string contact_uuid, string login, string password, string user_config_xml, int xml_flags);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SetTrackingUser", ReplyAction="*")]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> SetTrackingUserAsync(int access_key, string contact_uuid, string login, string password, string user_config_xml, int xml_flags);
+        System.Threading.Tasks.Task<api_session_error> SetTrackingUserAsync(int access_key, string contact_uuid, string login, string password, string user_config_xml, int xml_flags);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetItemDefinitionsByCustomer", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetItemDefinitionsByCustomerResponse GetItemDefinitionsByCustomer(ThirdParty.WebServices.Magaya.Services.GetItemDefinitionsByCustomerRequest request);
+        GetItemDefinitionsByCustomerResponse GetItemDefinitionsByCustomer(GetItemDefinitionsByCustomerRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetItemDefinitionsByCustomer", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetItemDefinitionsByCustomerResponse> GetItemDefinitionsByCustomerAsync(ThirdParty.WebServices.Magaya.Services.GetItemDefinitionsByCustomerRequest request);
+        System.Threading.Tasks.Task<GetItemDefinitionsByCustomerResponse> GetItemDefinitionsByCustomerAsync(GetItemDefinitionsByCustomerRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetInventoryItemsByItemDefinition", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetInventoryItemsByItemDefinitionResponse GetInventoryItemsByItemDefinition(ThirdParty.WebServices.Magaya.Services.GetInventoryItemsByItemDefinitionRequest request);
+        GetInventoryItemsByItemDefinitionResponse GetInventoryItemsByItemDefinition(GetInventoryItemsByItemDefinitionRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetInventoryItemsByItemDefinition", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetInventoryItemsByItemDefinitionResponse> GetInventoryItemsByItemDefinitionAsync(ThirdParty.WebServices.Magaya.Services.GetInventoryItemsByItemDefinitionRequest request);
+        System.Threading.Tasks.Task<GetInventoryItemsByItemDefinitionResponse> GetInventoryItemsByItemDefinitionAsync(GetInventoryItemsByItemDefinitionRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetTransactionsByBillingClient", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetTransactionsByBillingClientResponse GetTransactionsByBillingClient(ThirdParty.WebServices.Magaya.Services.GetTransactionsByBillingClientRequest request);
+        GetTransactionsByBillingClientResponse GetTransactionsByBillingClient(GetTransactionsByBillingClientRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetTransactionsByBillingClient", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetTransactionsByBillingClientResponse> GetTransactionsByBillingClientAsync(ThirdParty.WebServices.Magaya.Services.GetTransactionsByBillingClientRequest request);
+        System.Threading.Tasks.Task<GetTransactionsByBillingClientResponse> GetTransactionsByBillingClientAsync(GetTransactionsByBillingClientRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetEntitiesOfType", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetEntitiesOfTypeResponse GetEntitiesOfType(ThirdParty.WebServices.Magaya.Services.GetEntitiesOfTypeRequest request);
+        GetEntitiesOfTypeResponse GetEntitiesOfType(GetEntitiesOfTypeRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetEntitiesOfType", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetEntitiesOfTypeResponse> GetEntitiesOfTypeAsync(ThirdParty.WebServices.Magaya.Services.GetEntitiesOfTypeRequest request);
+        System.Threading.Tasks.Task<GetEntitiesOfTypeResponse> GetEntitiesOfTypeAsync(GetEntitiesOfTypeRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetWebDocument", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetWebDocumentResponse GetWebDocument(ThirdParty.WebServices.Magaya.Services.GetWebDocumentRequest request);
+        GetWebDocumentResponse GetWebDocument(GetWebDocumentRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetWebDocument", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetWebDocumentResponse> GetWebDocumentAsync(ThirdParty.WebServices.Magaya.Services.GetWebDocumentRequest request);
+        System.Threading.Tasks.Task<GetWebDocumentResponse> GetWebDocumentAsync(GetWebDocumentRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetFirstTransbyDate", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateResponse GetFirstTransbyDate(ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateRequest request);
+        GetFirstTransbyDateResponse GetFirstTransbyDate(GetFirstTransbyDateRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetFirstTransbyDate", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateResponse> GetFirstTransbyDateAsync(ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateRequest request);
+        System.Threading.Tasks.Task<GetFirstTransbyDateResponse> GetFirstTransbyDateAsync(GetFirstTransbyDateRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetFirstTransbyDateJS", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateJSResponse GetFirstTransbyDateJS(ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateJSRequest request);
+        GetFirstTransbyDateJSResponse GetFirstTransbyDateJS(GetFirstTransbyDateJSRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetFirstTransbyDateJS", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateJSResponse> GetFirstTransbyDateJSAsync(ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateJSRequest request);
+        System.Threading.Tasks.Task<GetFirstTransbyDateJSResponse> GetFirstTransbyDateJSAsync(GetFirstTransbyDateJSRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetNextTransbyDate", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetNextTransbyDateResponse GetNextTransbyDate(ThirdParty.WebServices.Magaya.Services.GetNextTransbyDateRequest request);
+        GetNextTransbyDateResponse GetNextTransbyDate(GetNextTransbyDateRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetNextTransbyDate", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetNextTransbyDateResponse> GetNextTransbyDateAsync(ThirdParty.WebServices.Magaya.Services.GetNextTransbyDateRequest request);
+        System.Threading.Tasks.Task<GetNextTransbyDateResponse> GetNextTransbyDateAsync(GetNextTransbyDateRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetTransRangeByDateJS", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateJSResponse GetTransRangeByDateJS(ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateJSRequest request);
+        GetTransRangeByDateJSResponse GetTransRangeByDateJS(GetTransRangeByDateJSRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetTransRangeByDateJS", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateJSResponse> GetTransRangeByDateJSAsync(ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateJSRequest request);
+        System.Threading.Tasks.Task<GetTransRangeByDateJSResponse> GetTransRangeByDateJSAsync(GetTransRangeByDateJSRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetSecureTrackingTransaction", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetSecureTrackingTransactionResponse GetSecureTrackingTransaction(ThirdParty.WebServices.Magaya.Services.GetSecureTrackingTransactionRequest request);
+        GetSecureTrackingTransactionResponse GetSecureTrackingTransaction(GetSecureTrackingTransactionRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetSecureTrackingTransaction", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetSecureTrackingTransactionResponse> GetSecureTrackingTransactionAsync(ThirdParty.WebServices.Magaya.Services.GetSecureTrackingTransactionRequest request);
+        System.Threading.Tasks.Task<GetSecureTrackingTransactionResponse> GetSecureTrackingTransactionAsync(GetSecureTrackingTransactionRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#Invoke", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.InvokeResponse Invoke(ThirdParty.WebServices.Magaya.Services.InvokeRequest request);
+        InvokeResponse Invoke(InvokeRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#Invoke", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.InvokeResponse> InvokeAsync(ThirdParty.WebServices.Magaya.Services.InvokeRequest request);
+        System.Threading.Tasks.Task<InvokeResponse> InvokeAsync(InvokeRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#ValidateSalesOrder", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.ValidateSalesOrderResponse ValidateSalesOrder(ThirdParty.WebServices.Magaya.Services.ValidateSalesOrderRequest request);
+        ValidateSalesOrderResponse ValidateSalesOrder(ValidateSalesOrderRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#ValidateSalesOrder", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.ValidateSalesOrderResponse> ValidateSalesOrderAsync(ThirdParty.WebServices.Magaya.Services.ValidateSalesOrderRequest request);
+        System.Threading.Tasks.Task<ValidateSalesOrderResponse> ValidateSalesOrderAsync(ValidateSalesOrderRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#CancelSalesOrder", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.CancelSalesOrderResponse CancelSalesOrder(ThirdParty.WebServices.Magaya.Services.CancelSalesOrderRequest request);
+        CancelSalesOrderResponse CancelSalesOrder(CancelSalesOrderRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#CancelSalesOrder", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.CancelSalesOrderResponse> CancelSalesOrderAsync(ThirdParty.WebServices.Magaya.Services.CancelSalesOrderRequest request);
+        System.Threading.Tasks.Task<CancelSalesOrderResponse> CancelSalesOrderAsync(CancelSalesOrderRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SetTransactionCharges", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.SetTransactionChargesResponse SetTransactionCharges(ThirdParty.WebServices.Magaya.Services.SetTransactionChargesRequest request);
+        SetTransactionChargesResponse SetTransactionCharges(SetTransactionChargesRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#SetTransactionCharges", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SetTransactionChargesResponse> SetTransactionChargesAsync(ThirdParty.WebServices.Magaya.Services.SetTransactionChargesRequest request);
+        System.Threading.Tasks.Task<SetTransactionChargesResponse> SetTransactionChargesAsync(SetTransactionChargesRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#UpdatePOD", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.UpdatePODResponse UpdatePOD(ThirdParty.WebServices.Magaya.Services.UpdatePODRequest request);
+        UpdatePODResponse UpdatePOD(UpdatePODRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#UpdatePOD", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.UpdatePODResponse> UpdatePODAsync(ThirdParty.WebServices.Magaya.Services.UpdatePODRequest request);
+        System.Threading.Tasks.Task<UpdatePODResponse> UpdatePODAsync(UpdatePODRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#ApproveOrder", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        ThirdParty.WebServices.Magaya.Services.api_session_error ApproveOrder(int access_key, string type, string number, string approved_by);
+        api_session_error ApproveOrder(int access_key, string type, string number, string approved_by);
         
         [System.ServiceModel.OperationContractAttribute(Action="#ApproveOrder", ReplyAction="*")]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> ApproveOrderAsync(int access_key, string type, string number, string approved_by);
+        System.Threading.Tasks.Task<api_session_error> ApproveOrderAsync(int access_key, string type, string number, string approved_by);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SubmitPickupOrder", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.SubmitPickupOrderResponse SubmitPickupOrder(ThirdParty.WebServices.Magaya.Services.SubmitPickupOrderRequest request);
+        SubmitPickupOrderResponse SubmitPickupOrder(SubmitPickupOrderRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#SubmitPickupOrder", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SubmitPickupOrderResponse> SubmitPickupOrderAsync(ThirdParty.WebServices.Magaya.Services.SubmitPickupOrderRequest request);
+        System.Threading.Tasks.Task<SubmitPickupOrderResponse> SubmitPickupOrderAsync(SubmitPickupOrderRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SetAttachment", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.SetAttachmentResponse SetAttachment(ThirdParty.WebServices.Magaya.Services.SetAttachmentRequest request);
+        SetAttachmentResponse SetAttachment(SetAttachmentRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#SetAttachment", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SetAttachmentResponse> SetAttachmentAsync(ThirdParty.WebServices.Magaya.Services.SetAttachmentRequest request);
+        System.Threading.Tasks.Task<SetAttachmentResponse> SetAttachmentAsync(SetAttachmentRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#GetAllAttachments", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
-        ThirdParty.WebServices.Magaya.Services.GetAllAttachmentsResponse GetAllAttachments(ThirdParty.WebServices.Magaya.Services.GetAllAttachmentsRequest request);
+        GetAllAttachmentsResponse GetAllAttachments(GetAllAttachmentsRequest request);
         
         // CODEGEN: Generating message contract since the operation has multiple return values.
         [System.ServiceModel.OperationContractAttribute(Action="#GetAllAttachments", ReplyAction="*")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetAllAttachmentsResponse> GetAllAttachmentsAsync(ThirdParty.WebServices.Magaya.Services.GetAllAttachmentsRequest request);
+        System.Threading.Tasks.Task<GetAllAttachmentsResponse> GetAllAttachmentsAsync(GetAllAttachmentsRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SetParentEntity", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style=System.ServiceModel.OperationFormatStyle.Rpc, SupportFaults=true, Use=System.ServiceModel.OperationFormatUse.Encoded)]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        ThirdParty.WebServices.Magaya.Services.api_session_error SetParentEntity(int access_key, string entity_guid, string parent_guid);
+        api_session_error SetParentEntity(int access_key, string entity_guid, string parent_guid);
         
         [System.ServiceModel.OperationContractAttribute(Action="#SetParentEntity", ReplyAction="*")]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> SetParentEntityAsync(int access_key, string entity_guid, string parent_guid);
+        System.Threading.Tasks.Task<api_session_error> SetParentEntityAsync(int access_key, string entity_guid, string parent_guid);
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
@@ -1117,12 +1117,12 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public string city;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=7)]
-        public ThirdParty.WebServices.Magaya.Services.contact_info pInfo;
+        public contact_info pInfo;
         
         public AnswerInvitationRequest() {
         }
         
-        public AnswerInvitationRequest(int bAccepted, string uuid, string employee, string body, string company, string country, string city, ThirdParty.WebServices.Magaya.Services.contact_info pInfo) {
+        public AnswerInvitationRequest(int bAccepted, string uuid, string employee, string body, string company, string country, string city, contact_info pInfo) {
             this.bAccepted = bAccepted;
             this.uuid = uuid;
             this.employee = employee;
@@ -1143,12 +1143,12 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public int @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
-        public ThirdParty.WebServices.Magaya.Services.contact_info pInfo;
+        public contact_info pInfo;
         
         public AnswerInvitationResponse() {
         }
         
-        public AnswerInvitationResponse(int @return, ThirdParty.WebServices.Magaya.Services.contact_info pInfo) {
+        public AnswerInvitationResponse(int @return, contact_info pInfo) {
             this.@return = @return;
             this.pInfo = pInfo;
         }
@@ -1181,12 +1181,12 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public string city;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=7)]
-        public ThirdParty.WebServices.Magaya.Services.contact_info2 pInfo;
+        public contact_info2 pInfo;
         
         public AnswerInvitation2Request() {
         }
         
-        public AnswerInvitation2Request(int bAccepted, string uuid, string employee, string body, string company, string country, string city, ThirdParty.WebServices.Magaya.Services.contact_info2 pInfo) {
+        public AnswerInvitation2Request(int bAccepted, string uuid, string employee, string body, string company, string country, string city, contact_info2 pInfo) {
             this.bAccepted = bAccepted;
             this.uuid = uuid;
             this.employee = employee;
@@ -1207,12 +1207,12 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public int @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
-        public ThirdParty.WebServices.Magaya.Services.contact_info2 pInfo;
+        public contact_info2 pInfo;
         
         public AnswerInvitation2Response() {
         }
         
-        public AnswerInvitation2Response(int @return, ThirdParty.WebServices.Magaya.Services.contact_info2 pInfo) {
+        public AnswerInvitation2Response(int @return, contact_info2 pInfo) {
             this.@return = @return;
             this.pInfo = pInfo;
         }
@@ -1290,7 +1290,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class StartSessionResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public int access_key;
@@ -1298,7 +1298,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public StartSessionResponse() {
         }
         
-        public StartSessionResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, int access_key) {
+        public StartSessionResponse(api_session_error @return, int access_key) {
             this.@return = @return;
             this.access_key = access_key;
         }
@@ -1338,7 +1338,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetTransactionResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string trans_xml;
@@ -1346,7 +1346,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetTransactionResponse() {
         }
         
-        public GetTransactionResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string trans_xml) {
+        public GetTransactionResponse(api_session_error @return, string trans_xml) {
             this.@return = @return;
             this.trans_xml = trans_xml;
         }
@@ -1386,7 +1386,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class SetTransactionResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string error_desc;
@@ -1394,7 +1394,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public SetTransactionResponse() {
         }
         
-        public SetTransactionResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string error_desc) {
+        public SetTransactionResponse(api_session_error @return, string error_desc) {
             this.@return = @return;
             this.error_desc = error_desc;
         }
@@ -1438,7 +1438,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetTransRangeByDateResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string trans_list_xml;
@@ -1446,7 +1446,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetTransRangeByDateResponse() {
         }
         
-        public GetTransRangeByDateResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string trans_list_xml) {
+        public GetTransRangeByDateResponse(api_session_error @return, string trans_list_xml) {
             this.@return = @return;
             this.trans_list_xml = trans_list_xml;
         }
@@ -1467,7 +1467,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetWorkingPortsResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string ports_list_xml;
@@ -1475,7 +1475,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetWorkingPortsResponse() {
         }
         
-        public GetWorkingPortsResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string ports_list_xml) {
+        public GetWorkingPortsResponse(api_session_error @return, string ports_list_xml) {
             this.@return = @return;
             this.ports_list_xml = ports_list_xml;
         }
@@ -1523,7 +1523,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetTripScheduleResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string trip_list_xml;
@@ -1531,7 +1531,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetTripScheduleResponse() {
         }
         
-        public GetTripScheduleResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string trip_list_xml) {
+        public GetTripScheduleResponse(api_session_error @return, string trip_list_xml) {
             this.@return = @return;
             this.trip_list_xml = trip_list_xml;
         }
@@ -1563,7 +1563,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class BookingRequestResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string booking_number;
@@ -1574,7 +1574,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public BookingRequestResponse() {
         }
         
-        public BookingRequestResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string booking_number, string result_string) {
+        public BookingRequestResponse(api_session_error @return, string booking_number, string result_string) {
             this.@return = @return;
             this.booking_number = booking_number;
             this.result_string = result_string;
@@ -1648,7 +1648,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetPackageTypesResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string pack_list_xml;
@@ -1656,7 +1656,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetPackageTypesResponse() {
         }
         
-        public GetPackageTypesResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string pack_list_xml) {
+        public GetPackageTypesResponse(api_session_error @return, string pack_list_xml) {
             this.@return = @return;
             this.pack_list_xml = pack_list_xml;
         }
@@ -1684,7 +1684,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetCustomFieldDefinitionsResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string field_list_xml;
@@ -1692,7 +1692,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetCustomFieldDefinitionsResponse() {
         }
         
-        public GetCustomFieldDefinitionsResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string field_list_xml) {
+        public GetCustomFieldDefinitionsResponse(api_session_error @return, string field_list_xml) {
             this.@return = @return;
             this.field_list_xml = field_list_xml;
         }
@@ -1724,7 +1724,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetItemFromVINResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string item_xml;
@@ -1732,7 +1732,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetItemFromVINResponse() {
         }
         
-        public GetItemFromVINResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string item_xml) {
+        public GetItemFromVINResponse(api_session_error @return, string item_xml) {
             this.@return = @return;
             this.item_xml = item_xml;
         }
@@ -1760,7 +1760,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetMagayaDocumentResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string attach_xml;
@@ -1771,7 +1771,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetMagayaDocumentResponse() {
         }
         
-        public GetMagayaDocumentResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string attach_xml, string error) {
+        public GetMagayaDocumentResponse(api_session_error @return, string attach_xml, string error) {
             this.@return = @return;
             this.attach_xml = attach_xml;
             this.error = error;
@@ -1812,7 +1812,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetAccountingTransactionsResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string trans_xml;
@@ -1820,7 +1820,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetAccountingTransactionsResponse() {
         }
         
-        public GetAccountingTransactionsResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string trans_xml) {
+        public GetAccountingTransactionsResponse(api_session_error @return, string trans_xml) {
             this.@return = @return;
             this.trans_xml = trans_xml;
         }
@@ -1860,7 +1860,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetRelatedTransactionsResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string trans_xml;
@@ -1868,7 +1868,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetRelatedTransactionsResponse() {
         }
         
-        public GetRelatedTransactionsResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string trans_xml) {
+        public GetRelatedTransactionsResponse(api_session_error @return, string trans_xml) {
             this.@return = @return;
             this.trans_xml = trans_xml;
         }
@@ -1896,7 +1896,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetAccountDefinitionsResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string account_list_xml;
@@ -1904,7 +1904,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetAccountDefinitionsResponse() {
         }
         
-        public GetAccountDefinitionsResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string account_list_xml) {
+        public GetAccountDefinitionsResponse(api_session_error @return, string account_list_xml) {
             this.@return = @return;
             this.account_list_xml = account_list_xml;
         }
@@ -1932,7 +1932,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetChargeDefinitionsResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string service_list_xml;
@@ -1940,7 +1940,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetChargeDefinitionsResponse() {
         }
         
-        public GetChargeDefinitionsResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string service_list_xml) {
+        public GetChargeDefinitionsResponse(api_session_error @return, string service_list_xml) {
             this.@return = @return;
             this.service_list_xml = service_list_xml;
         }
@@ -1968,7 +1968,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetActiveCurrenciesResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string currency_list_xml;
@@ -1976,7 +1976,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetActiveCurrenciesResponse() {
         }
         
-        public GetActiveCurrenciesResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string currency_list_xml) {
+        public GetActiveCurrenciesResponse(api_session_error @return, string currency_list_xml) {
             this.@return = @return;
             this.currency_list_xml = currency_list_xml;
         }
@@ -2024,7 +2024,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class QueryLogResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string trans_list_xml;
@@ -2032,7 +2032,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public QueryLogResponse() {
         }
         
-        public QueryLogResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string trans_list_xml) {
+        public QueryLogResponse(api_session_error @return, string trans_list_xml) {
             this.@return = @return;
             this.trans_list_xml = trans_list_xml;
         }
@@ -2080,7 +2080,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetClientRatesResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string rate_list_xml;
@@ -2088,7 +2088,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetClientRatesResponse() {
         }
         
-        public GetClientRatesResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string rate_list_xml) {
+        public GetClientRatesResponse(api_session_error @return, string rate_list_xml) {
             this.@return = @return;
             this.rate_list_xml = rate_list_xml;
         }
@@ -2128,7 +2128,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetStandardRatesResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string rate_list_xml;
@@ -2136,7 +2136,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetStandardRatesResponse() {
         }
         
-        public GetStandardRatesResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string rate_list_xml) {
+        public GetStandardRatesResponse(api_session_error @return, string rate_list_xml) {
             this.@return = @return;
             this.rate_list_xml = rate_list_xml;
         }
@@ -2168,7 +2168,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetClientChargeDefinitionsResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string charge_list_xml;
@@ -2176,7 +2176,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetClientChargeDefinitionsResponse() {
         }
         
-        public GetClientChargeDefinitionsResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string charge_list_xml) {
+        public GetClientChargeDefinitionsResponse(api_session_error @return, string charge_list_xml) {
             this.@return = @return;
             this.charge_list_xml = charge_list_xml;
         }
@@ -2212,7 +2212,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class SetRateResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string error_desc;
@@ -2220,7 +2220,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public SetRateResponse() {
         }
         
-        public SetRateResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string error_desc) {
+        public SetRateResponse(api_session_error @return, string error_desc) {
             this.@return = @return;
             this.error_desc = error_desc;
         }
@@ -2256,7 +2256,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class SetEntityResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string error_desc;
@@ -2264,7 +2264,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public SetEntityResponse() {
         }
         
-        public SetEntityResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string error_desc) {
+        public SetEntityResponse(api_session_error @return, string error_desc) {
             this.@return = @return;
             this.error_desc = error_desc;
         }
@@ -2300,7 +2300,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetEntitiesResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string entity_list_xml;
@@ -2308,7 +2308,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetEntitiesResponse() {
         }
         
-        public GetEntitiesResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string entity_list_xml) {
+        public GetEntitiesResponse(api_session_error @return, string entity_list_xml) {
             this.@return = @return;
             this.entity_list_xml = entity_list_xml;
         }
@@ -2344,7 +2344,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetEntityContactsResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string contact_list_xml;
@@ -2352,7 +2352,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetEntityContactsResponse() {
         }
         
-        public GetEntityContactsResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string contact_list_xml) {
+        public GetEntityContactsResponse(api_session_error @return, string contact_list_xml) {
             this.@return = @return;
             this.contact_list_xml = contact_list_xml;
         }
@@ -2388,7 +2388,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class SubmitSalesOrderResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string sales_order_number;
@@ -2399,7 +2399,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public SubmitSalesOrderResponse() {
         }
         
-        public SubmitSalesOrderResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string sales_order_number, string result_string) {
+        public SubmitSalesOrderResponse(api_session_error @return, string sales_order_number, string result_string) {
             this.@return = @return;
             this.sales_order_number = sales_order_number;
             this.result_string = result_string;
@@ -2436,7 +2436,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class SubmitCargoReleaseResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string cargo_release_number;
@@ -2447,7 +2447,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public SubmitCargoReleaseResponse() {
         }
         
-        public SubmitCargoReleaseResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string cargo_release_number, string result_string) {
+        public SubmitCargoReleaseResponse(api_session_error @return, string cargo_release_number, string result_string) {
             this.@return = @return;
             this.cargo_release_number = cargo_release_number;
             this.result_string = result_string;
@@ -2484,7 +2484,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class SubmitShipmentResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string shipment_number;
@@ -2495,7 +2495,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public SubmitShipmentResponse() {
         }
         
-        public SubmitShipmentResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string shipment_number, string result_string) {
+        public SubmitShipmentResponse(api_session_error @return, string shipment_number, string result_string) {
             this.@return = @return;
             this.shipment_number = shipment_number;
             this.result_string = result_string;
@@ -2524,7 +2524,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetEventDefinitionsResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string event_definition_list_xml;
@@ -2532,7 +2532,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetEventDefinitionsResponse() {
         }
         
-        public GetEventDefinitionsResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string event_definition_list_xml) {
+        public GetEventDefinitionsResponse(api_session_error @return, string event_definition_list_xml) {
             this.@return = @return;
             this.event_definition_list_xml = event_definition_list_xml;
         }
@@ -2576,7 +2576,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class SetTransactionEventsResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string error_desc;
@@ -2584,7 +2584,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public SetTransactionEventsResponse() {
         }
         
-        public SetTransactionEventsResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string error_desc) {
+        public SetTransactionEventsResponse(api_session_error @return, string error_desc) {
             this.@return = @return;
             this.error_desc = error_desc;
         }
@@ -2620,7 +2620,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class UpdateOrderResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string error_desc;
@@ -2628,7 +2628,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public UpdateOrderResponse() {
         }
         
-        public UpdateOrderResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string error_desc) {
+        public UpdateOrderResponse(api_session_error @return, string error_desc) {
             this.@return = @return;
             this.error_desc = error_desc;
         }
@@ -2672,7 +2672,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetCarrierRatesResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string rate_list_xml;
@@ -2680,7 +2680,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetCarrierRatesResponse() {
         }
         
-        public GetCarrierRatesResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string rate_list_xml) {
+        public GetCarrierRatesResponse(api_session_error @return, string rate_list_xml) {
             this.@return = @return;
             this.rate_list_xml = rate_list_xml;
         }
@@ -2724,7 +2724,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetEntityTransactionsResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string acctrans_list_xml;
@@ -2732,7 +2732,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetEntityTransactionsResponse() {
         }
         
-        public GetEntityTransactionsResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string acctrans_list_xml) {
+        public GetEntityTransactionsResponse(api_session_error @return, string acctrans_list_xml) {
             this.@return = @return;
             this.acctrans_list_xml = acctrans_list_xml;
         }
@@ -2792,7 +2792,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class QueryLogJSResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string trans_list_xml;
@@ -2800,7 +2800,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public QueryLogJSResponse() {
         }
         
-        public QueryLogJSResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string trans_list_xml) {
+        public QueryLogJSResponse(api_session_error @return, string trans_list_xml) {
             this.@return = @return;
             this.trans_list_xml = trans_list_xml;
         }
@@ -2836,7 +2836,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class ExistsTransactionResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public int exist_trans;
@@ -2844,7 +2844,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public ExistsTransactionResponse() {
         }
         
-        public ExistsTransactionResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, int exist_trans) {
+        public ExistsTransactionResponse(api_session_error @return, int exist_trans) {
             this.@return = @return;
             this.exist_trans = exist_trans;
         }
@@ -2880,7 +2880,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetTransactionStatusResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string trans_status;
@@ -2888,7 +2888,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetTransactionStatusResponse() {
         }
         
-        public GetTransactionStatusResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string trans_status) {
+        public GetTransactionStatusResponse(api_session_error @return, string trans_status) {
             this.@return = @return;
             this.trans_status = trans_status;
         }
@@ -2924,7 +2924,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetItemDefinitionsByCustomerResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string def_list_xml;
@@ -2932,7 +2932,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetItemDefinitionsByCustomerResponse() {
         }
         
-        public GetItemDefinitionsByCustomerResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string def_list_xml) {
+        public GetItemDefinitionsByCustomerResponse(api_session_error @return, string def_list_xml) {
             this.@return = @return;
             this.def_list_xml = def_list_xml;
         }
@@ -2968,7 +2968,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetInventoryItemsByItemDefinitionResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string item_list_xml;
@@ -2976,7 +2976,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetInventoryItemsByItemDefinitionResponse() {
         }
         
-        public GetInventoryItemsByItemDefinitionResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string item_list_xml) {
+        public GetInventoryItemsByItemDefinitionResponse(api_session_error @return, string item_list_xml) {
             this.@return = @return;
             this.item_list_xml = item_list_xml;
         }
@@ -3024,7 +3024,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetTransactionsByBillingClientResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string trans_list_xml;
@@ -3032,7 +3032,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetTransactionsByBillingClientResponse() {
         }
         
-        public GetTransactionsByBillingClientResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string trans_list_xml) {
+        public GetTransactionsByBillingClientResponse(api_session_error @return, string trans_list_xml) {
             this.@return = @return;
             this.trans_list_xml = trans_list_xml;
         }
@@ -3072,7 +3072,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetEntitiesOfTypeResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string entity_list_xml;
@@ -3080,7 +3080,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetEntitiesOfTypeResponse() {
         }
         
-        public GetEntitiesOfTypeResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string entity_list_xml) {
+        public GetEntitiesOfTypeResponse(api_session_error @return, string entity_list_xml) {
             this.@return = @return;
             this.entity_list_xml = entity_list_xml;
         }
@@ -3176,7 +3176,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetFirstTransbyDateResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string cookie;
@@ -3187,7 +3187,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetFirstTransbyDateResponse() {
         }
         
-        public GetFirstTransbyDateResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string cookie, int more_results) {
+        public GetFirstTransbyDateResponse(api_session_error @return, string cookie, int more_results) {
             this.@return = @return;
             this.cookie = cookie;
             this.more_results = more_results;
@@ -3248,7 +3248,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetFirstTransbyDateJSResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string cookie;
@@ -3259,7 +3259,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetFirstTransbyDateJSResponse() {
         }
         
-        public GetFirstTransbyDateJSResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string cookie, int more_results) {
+        public GetFirstTransbyDateJSResponse(api_session_error @return, string cookie, int more_results) {
             this.@return = @return;
             this.cookie = cookie;
             this.more_results = more_results;
@@ -3288,7 +3288,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetNextTransbyDateResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string cookie;
@@ -3302,7 +3302,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetNextTransbyDateResponse() {
         }
         
-        public GetNextTransbyDateResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string cookie, string trans_list_xml, int more_results) {
+        public GetNextTransbyDateResponse(api_session_error @return, string cookie, string trans_list_xml, int more_results) {
             this.@return = @return;
             this.cookie = cookie;
             this.trans_list_xml = trans_list_xml;
@@ -3356,7 +3356,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetTransRangeByDateJSResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string trans_list_xml;
@@ -3364,7 +3364,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetTransRangeByDateJSResponse() {
         }
         
-        public GetTransRangeByDateJSResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string trans_list_xml) {
+        public GetTransRangeByDateJSResponse(api_session_error @return, string trans_list_xml) {
             this.@return = @return;
             this.trans_list_xml = trans_list_xml;
         }
@@ -3404,7 +3404,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetSecureTrackingTransactionResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string trans_xml;
@@ -3412,7 +3412,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetSecureTrackingTransactionResponse() {
         }
         
-        public GetSecureTrackingTransactionResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string trans_xml) {
+        public GetSecureTrackingTransactionResponse(api_session_error @return, string trans_xml) {
             this.@return = @return;
             this.trans_xml = trans_xml;
         }
@@ -3452,7 +3452,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class InvokeResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string output;
@@ -3460,7 +3460,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public InvokeResponse() {
         }
         
-        public InvokeResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string output) {
+        public InvokeResponse(api_session_error @return, string output) {
             this.@return = @return;
             this.output = output;
         }
@@ -3492,7 +3492,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class ValidateSalesOrderResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string result_xml;
@@ -3503,7 +3503,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public ValidateSalesOrderResponse() {
         }
         
-        public ValidateSalesOrderResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string result_xml, string result_string) {
+        public ValidateSalesOrderResponse(api_session_error @return, string result_xml, string result_string) {
             this.@return = @return;
             this.result_xml = result_xml;
             this.result_string = result_string;
@@ -3536,7 +3536,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class CancelSalesOrderResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string result_string;
@@ -3544,7 +3544,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public CancelSalesOrderResponse() {
         }
         
-        public CancelSalesOrderResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string result_string) {
+        public CancelSalesOrderResponse(api_session_error @return, string result_string) {
             this.@return = @return;
             this.result_string = result_string;
         }
@@ -3588,7 +3588,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class SetTransactionChargesResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string error_desc;
@@ -3596,7 +3596,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public SetTransactionChargesResponse() {
         }
         
-        public SetTransactionChargesResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string error_desc) {
+        public SetTransactionChargesResponse(api_session_error @return, string error_desc) {
             this.@return = @return;
             this.error_desc = error_desc;
         }
@@ -3648,7 +3648,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class UpdatePODResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string error_desc;
@@ -3656,7 +3656,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public UpdatePODResponse() {
         }
         
-        public UpdatePODResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string error_desc) {
+        public UpdatePODResponse(api_session_error @return, string error_desc) {
             this.@return = @return;
             this.error_desc = error_desc;
         }
@@ -3688,7 +3688,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class SubmitPickupOrderResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string pickup_order_number;
@@ -3699,7 +3699,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public SubmitPickupOrderResponse() {
         }
         
-        public SubmitPickupOrderResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string pickup_order_number, string result_string) {
+        public SubmitPickupOrderResponse(api_session_error @return, string pickup_order_number, string result_string) {
             this.@return = @return;
             this.pickup_order_number = pickup_order_number;
             this.result_string = result_string;
@@ -3744,7 +3744,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class SetAttachmentResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string error_desc;
@@ -3752,7 +3752,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public SetAttachmentResponse() {
         }
         
-        public SetAttachmentResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string error_desc) {
+        public SetAttachmentResponse(api_session_error @return, string error_desc) {
             this.@return = @return;
             this.error_desc = error_desc;
         }
@@ -3792,7 +3792,7 @@ namespace ThirdParty.WebServices.Magaya.Services {
     public partial class GetAllAttachmentsResponse {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=0)]
-        public ThirdParty.WebServices.Magaya.Services.api_session_error @return;
+        public api_session_error @return;
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="", Order=1)]
         public string attach_list_xml;
@@ -3800,19 +3800,19 @@ namespace ThirdParty.WebServices.Magaya.Services {
         public GetAllAttachmentsResponse() {
         }
         
-        public GetAllAttachmentsResponse(ThirdParty.WebServices.Magaya.Services.api_session_error @return, string attach_list_xml) {
+        public GetAllAttachmentsResponse(api_session_error @return, string attach_list_xml) {
             this.@return = @return;
             this.attach_list_xml = attach_list_xml;
         }
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public interface CSSoapServiceSoapChannel : ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap, System.ServiceModel.IClientChannel {
+    public interface CSSoapServiceSoapChannel : CSSoapServiceSoap, System.ServiceModel.IClientChannel {
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class CSSoapServiceSoapClient : System.ServiceModel.ClientBase<ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap>, ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap {
+    public partial class CSSoapServiceSoapClient : System.ServiceModel.ClientBase<CSSoapServiceSoap>, CSSoapServiceSoap {
         
         public CSSoapServiceSoapClient() {
         }
@@ -3842,22 +3842,22 @@ namespace ThirdParty.WebServices.Magaya.Services {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.StartTrackingResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.StartTracking(ThirdParty.WebServices.Magaya.Services.StartTrackingRequest request) {
+        StartTrackingResponse CSSoapServiceSoap.StartTracking(StartTrackingRequest request) {
             return base.Channel.StartTracking(request);
         }
         
         public int StartTracking(string login, string password, out int services, out string company_info, out int cookie) {
-            ThirdParty.WebServices.Magaya.Services.StartTrackingRequest inValue = new ThirdParty.WebServices.Magaya.Services.StartTrackingRequest();
+            StartTrackingRequest inValue = new StartTrackingRequest();
             inValue.login = login;
             inValue.password = password;
-            ThirdParty.WebServices.Magaya.Services.StartTrackingResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).StartTracking(inValue);
+            StartTrackingResponse retVal = ((CSSoapServiceSoap)(this)).StartTracking(inValue);
             services = retVal.services;
             company_info = retVal.company_info;
             cookie = retVal.cookie;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.StartTrackingResponse> StartTrackingAsync(ThirdParty.WebServices.Magaya.Services.StartTrackingRequest request) {
+        public System.Threading.Tasks.Task<StartTrackingResponse> StartTrackingAsync(StartTrackingRequest request) {
             return base.Channel.StartTrackingAsync(request);
         }
         
@@ -3894,12 +3894,12 @@ namespace ThirdParty.WebServices.Magaya.Services {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.AnswerInvitationResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.AnswerInvitation(ThirdParty.WebServices.Magaya.Services.AnswerInvitationRequest request) {
+        AnswerInvitationResponse CSSoapServiceSoap.AnswerInvitation(AnswerInvitationRequest request) {
             return base.Channel.AnswerInvitation(request);
         }
         
-        public int AnswerInvitation(int bAccepted, string uuid, string employee, string body, string company, string country, string city, ref ThirdParty.WebServices.Magaya.Services.contact_info pInfo) {
-            ThirdParty.WebServices.Magaya.Services.AnswerInvitationRequest inValue = new ThirdParty.WebServices.Magaya.Services.AnswerInvitationRequest();
+        public int AnswerInvitation(int bAccepted, string uuid, string employee, string body, string company, string country, string city, ref contact_info pInfo) {
+            AnswerInvitationRequest inValue = new AnswerInvitationRequest();
             inValue.bAccepted = bAccepted;
             inValue.uuid = uuid;
             inValue.employee = employee;
@@ -3908,22 +3908,22 @@ namespace ThirdParty.WebServices.Magaya.Services {
             inValue.country = country;
             inValue.city = city;
             inValue.pInfo = pInfo;
-            ThirdParty.WebServices.Magaya.Services.AnswerInvitationResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).AnswerInvitation(inValue);
+            AnswerInvitationResponse retVal = ((CSSoapServiceSoap)(this)).AnswerInvitation(inValue);
             pInfo = retVal.pInfo;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.AnswerInvitationResponse> AnswerInvitationAsync(ThirdParty.WebServices.Magaya.Services.AnswerInvitationRequest request) {
+        public System.Threading.Tasks.Task<AnswerInvitationResponse> AnswerInvitationAsync(AnswerInvitationRequest request) {
             return base.Channel.AnswerInvitationAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.AnswerInvitation2Response ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.AnswerInvitation2(ThirdParty.WebServices.Magaya.Services.AnswerInvitation2Request request) {
+        AnswerInvitation2Response CSSoapServiceSoap.AnswerInvitation2(AnswerInvitation2Request request) {
             return base.Channel.AnswerInvitation2(request);
         }
         
-        public int AnswerInvitation2(int bAccepted, string uuid, string employee, string body, string company, string country, string city, ref ThirdParty.WebServices.Magaya.Services.contact_info2 pInfo) {
-            ThirdParty.WebServices.Magaya.Services.AnswerInvitation2Request inValue = new ThirdParty.WebServices.Magaya.Services.AnswerInvitation2Request();
+        public int AnswerInvitation2(int bAccepted, string uuid, string employee, string body, string company, string country, string city, ref contact_info2 pInfo) {
+            AnswerInvitation2Request inValue = new AnswerInvitation2Request();
             inValue.bAccepted = bAccepted;
             inValue.uuid = uuid;
             inValue.employee = employee;
@@ -3932,185 +3932,185 @@ namespace ThirdParty.WebServices.Magaya.Services {
             inValue.country = country;
             inValue.city = city;
             inValue.pInfo = pInfo;
-            ThirdParty.WebServices.Magaya.Services.AnswerInvitation2Response retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).AnswerInvitation2(inValue);
+            AnswerInvitation2Response retVal = ((CSSoapServiceSoap)(this)).AnswerInvitation2(inValue);
             pInfo = retVal.pInfo;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.AnswerInvitation2Response> AnswerInvitation2Async(ThirdParty.WebServices.Magaya.Services.AnswerInvitation2Request request) {
+        public System.Threading.Tasks.Task<AnswerInvitation2Response> AnswerInvitation2Async(AnswerInvitation2Request request) {
             return base.Channel.AnswerInvitation2Async(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.StartSessionResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.StartSession(ThirdParty.WebServices.Magaya.Services.StartSessionRequest request) {
+        StartSessionResponse CSSoapServiceSoap.StartSession(StartSessionRequest request) {
             return base.Channel.StartSession(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error StartSession(string user, string pass, out int access_key) {
-            ThirdParty.WebServices.Magaya.Services.StartSessionRequest inValue = new ThirdParty.WebServices.Magaya.Services.StartSessionRequest();
+        public api_session_error StartSession(string user, string pass, out int access_key) {
+            StartSessionRequest inValue = new StartSessionRequest();
             inValue.user = user;
             inValue.pass = pass;
-            ThirdParty.WebServices.Magaya.Services.StartSessionResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).StartSession(inValue);
+            StartSessionResponse retVal = ((CSSoapServiceSoap)(this)).StartSession(inValue);
             access_key = retVal.access_key;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.StartSessionResponse> StartSessionAsync(ThirdParty.WebServices.Magaya.Services.StartSessionRequest request) {
+        public System.Threading.Tasks.Task<StartSessionResponse> StartSessionAsync(StartSessionRequest request) {
             return base.Channel.StartSessionAsync(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error EndSession(int access_key) {
+        public api_session_error EndSession(int access_key) {
             return base.Channel.EndSession(access_key);
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> EndSessionAsync(int access_key) {
+        public System.Threading.Tasks.Task<api_session_error> EndSessionAsync(int access_key) {
             return base.Channel.EndSessionAsync(access_key);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetTransactionResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetTransaction(ThirdParty.WebServices.Magaya.Services.GetTransactionRequest request) {
+        GetTransactionResponse CSSoapServiceSoap.GetTransaction(GetTransactionRequest request) {
             return base.Channel.GetTransaction(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetTransaction(int access_key, string type, int flags, string number, out string trans_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetTransactionRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetTransactionRequest();
+        public api_session_error GetTransaction(int access_key, string type, int flags, string number, out string trans_xml) {
+            GetTransactionRequest inValue = new GetTransactionRequest();
             inValue.access_key = access_key;
             inValue.type = type;
             inValue.flags = flags;
             inValue.number = number;
-            ThirdParty.WebServices.Magaya.Services.GetTransactionResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetTransaction(inValue);
+            GetTransactionResponse retVal = ((CSSoapServiceSoap)(this)).GetTransaction(inValue);
             trans_xml = retVal.trans_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetTransactionResponse> GetTransactionAsync(ThirdParty.WebServices.Magaya.Services.GetTransactionRequest request) {
+        public System.Threading.Tasks.Task<GetTransactionResponse> GetTransactionAsync(GetTransactionRequest request) {
             return base.Channel.GetTransactionAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.SetTransactionResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.SetTransaction(ThirdParty.WebServices.Magaya.Services.SetTransactionRequest request) {
+        SetTransactionResponse CSSoapServiceSoap.SetTransaction(SetTransactionRequest request) {
             return base.Channel.SetTransaction(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error SetTransaction(int access_key, string type, int flags, string trans_xml, out string error_desc) {
-            ThirdParty.WebServices.Magaya.Services.SetTransactionRequest inValue = new ThirdParty.WebServices.Magaya.Services.SetTransactionRequest();
+        public api_session_error SetTransaction(int access_key, string type, int flags, string trans_xml, out string error_desc) {
+            SetTransactionRequest inValue = new SetTransactionRequest();
             inValue.access_key = access_key;
             inValue.type = type;
             inValue.flags = flags;
             inValue.trans_xml = trans_xml;
-            ThirdParty.WebServices.Magaya.Services.SetTransactionResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).SetTransaction(inValue);
+            SetTransactionResponse retVal = ((CSSoapServiceSoap)(this)).SetTransaction(inValue);
             error_desc = retVal.error_desc;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SetTransactionResponse> SetTransactionAsync(ThirdParty.WebServices.Magaya.Services.SetTransactionRequest request) {
+        public System.Threading.Tasks.Task<SetTransactionResponse> SetTransactionAsync(SetTransactionRequest request) {
             return base.Channel.SetTransactionAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetTransRangeByDate(ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateRequest request) {
+        GetTransRangeByDateResponse CSSoapServiceSoap.GetTransRangeByDate(GetTransRangeByDateRequest request) {
             return base.Channel.GetTransRangeByDate(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetTransRangeByDate(int access_key, string type, string start_date, string end_date, int flags, out string trans_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateRequest();
+        public api_session_error GetTransRangeByDate(int access_key, string type, string start_date, string end_date, int flags, out string trans_list_xml) {
+            GetTransRangeByDateRequest inValue = new GetTransRangeByDateRequest();
             inValue.access_key = access_key;
             inValue.type = type;
             inValue.start_date = start_date;
             inValue.end_date = end_date;
             inValue.flags = flags;
-            ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetTransRangeByDate(inValue);
+            GetTransRangeByDateResponse retVal = ((CSSoapServiceSoap)(this)).GetTransRangeByDate(inValue);
             trans_list_xml = retVal.trans_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateResponse> GetTransRangeByDateAsync(ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateRequest request) {
+        public System.Threading.Tasks.Task<GetTransRangeByDateResponse> GetTransRangeByDateAsync(GetTransRangeByDateRequest request) {
             return base.Channel.GetTransRangeByDateAsync(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error DeleteTransaction(int access_key, string type, string number) {
+        public api_session_error DeleteTransaction(int access_key, string type, string number) {
             return base.Channel.DeleteTransaction(access_key, type, number);
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> DeleteTransactionAsync(int access_key, string type, string number) {
+        public System.Threading.Tasks.Task<api_session_error> DeleteTransactionAsync(int access_key, string type, string number) {
             return base.Channel.DeleteTransactionAsync(access_key, type, number);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error RenameTransaction(int access_key, string type, string number, string new_name) {
+        public api_session_error RenameTransaction(int access_key, string type, string number, string new_name) {
             return base.Channel.RenameTransaction(access_key, type, number, new_name);
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> RenameTransactionAsync(int access_key, string type, string number, string new_name) {
+        public System.Threading.Tasks.Task<api_session_error> RenameTransactionAsync(int access_key, string type, string number, string new_name) {
             return base.Channel.RenameTransactionAsync(access_key, type, number, new_name);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetWorkingPortsResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetWorkingPorts(ThirdParty.WebServices.Magaya.Services.GetWorkingPortsRequest request) {
+        GetWorkingPortsResponse CSSoapServiceSoap.GetWorkingPorts(GetWorkingPortsRequest request) {
             return base.Channel.GetWorkingPorts(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetWorkingPorts(out string ports_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetWorkingPortsRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetWorkingPortsRequest();
-            ThirdParty.WebServices.Magaya.Services.GetWorkingPortsResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetWorkingPorts(inValue);
+        public api_session_error GetWorkingPorts(out string ports_list_xml) {
+            GetWorkingPortsRequest inValue = new GetWorkingPortsRequest();
+            GetWorkingPortsResponse retVal = ((CSSoapServiceSoap)(this)).GetWorkingPorts(inValue);
             ports_list_xml = retVal.ports_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetWorkingPortsResponse> GetWorkingPortsAsync(ThirdParty.WebServices.Magaya.Services.GetWorkingPortsRequest request) {
+        public System.Threading.Tasks.Task<GetWorkingPortsResponse> GetWorkingPortsAsync(GetWorkingPortsRequest request) {
             return base.Channel.GetWorkingPortsAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetTripScheduleResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetTripSchedule(ThirdParty.WebServices.Magaya.Services.GetTripScheduleRequest request) {
+        GetTripScheduleResponse CSSoapServiceSoap.GetTripSchedule(GetTripScheduleRequest request) {
             return base.Channel.GetTripSchedule(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetTripSchedule(string arr_start_date, string arr_end_date, string dep_start_date, string dep_end_date, string org_port, string dest_port, out string trip_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetTripScheduleRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetTripScheduleRequest();
+        public api_session_error GetTripSchedule(string arr_start_date, string arr_end_date, string dep_start_date, string dep_end_date, string org_port, string dest_port, out string trip_list_xml) {
+            GetTripScheduleRequest inValue = new GetTripScheduleRequest();
             inValue.arr_start_date = arr_start_date;
             inValue.arr_end_date = arr_end_date;
             inValue.dep_start_date = dep_start_date;
             inValue.dep_end_date = dep_end_date;
             inValue.org_port = org_port;
             inValue.dest_port = dest_port;
-            ThirdParty.WebServices.Magaya.Services.GetTripScheduleResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetTripSchedule(inValue);
+            GetTripScheduleResponse retVal = ((CSSoapServiceSoap)(this)).GetTripSchedule(inValue);
             trip_list_xml = retVal.trip_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetTripScheduleResponse> GetTripScheduleAsync(ThirdParty.WebServices.Magaya.Services.GetTripScheduleRequest request) {
+        public System.Threading.Tasks.Task<GetTripScheduleResponse> GetTripScheduleAsync(GetTripScheduleRequest request) {
             return base.Channel.GetTripScheduleAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.BookingRequestResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.BookingRequest(ThirdParty.WebServices.Magaya.Services.BookingRequestRequest request) {
+        BookingRequestResponse CSSoapServiceSoap.BookingRequest(BookingRequestRequest request) {
             return base.Channel.BookingRequest(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error BookingRequest(string booking_xml, string trip_uuid, out string booking_number, out string result_string) {
-            ThirdParty.WebServices.Magaya.Services.BookingRequestRequest inValue = new ThirdParty.WebServices.Magaya.Services.BookingRequestRequest();
+        public api_session_error BookingRequest(string booking_xml, string trip_uuid, out string booking_number, out string result_string) {
+            BookingRequestRequest inValue = new BookingRequestRequest();
             inValue.booking_xml = booking_xml;
             inValue.trip_uuid = trip_uuid;
-            ThirdParty.WebServices.Magaya.Services.BookingRequestResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).BookingRequest(inValue);
+            BookingRequestResponse retVal = ((CSSoapServiceSoap)(this)).BookingRequest(inValue);
             booking_number = retVal.booking_number;
             result_string = retVal.result_string;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.BookingRequestResponse> BookingRequestAsync(ThirdParty.WebServices.Magaya.Services.BookingRequestRequest request) {
+        public System.Threading.Tasks.Task<BookingRequestResponse> BookingRequestAsync(BookingRequestRequest request) {
             return base.Channel.BookingRequestAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.StartTracking2Response ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.StartTracking2(ThirdParty.WebServices.Magaya.Services.StartTracking2Request request) {
+        StartTracking2Response CSSoapServiceSoap.StartTracking2(StartTracking2Request request) {
             return base.Channel.StartTracking2(request);
         }
         
         public int StartTracking2(string login, string password, out int services, out string company_info, out string user_info, out int cookie) {
-            ThirdParty.WebServices.Magaya.Services.StartTracking2Request inValue = new ThirdParty.WebServices.Magaya.Services.StartTracking2Request();
+            StartTracking2Request inValue = new StartTracking2Request();
             inValue.login = login;
             inValue.password = password;
-            ThirdParty.WebServices.Magaya.Services.StartTracking2Response retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).StartTracking2(inValue);
+            StartTracking2Response retVal = ((CSSoapServiceSoap)(this)).StartTracking2(inValue);
             services = retVal.services;
             company_info = retVal.company_info;
             user_info = retVal.user_info;
@@ -4118,205 +4118,206 @@ namespace ThirdParty.WebServices.Magaya.Services {
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.StartTracking2Response> StartTracking2Async(ThirdParty.WebServices.Magaya.Services.StartTracking2Request request) {
+        public System.Threading.Tasks.Task<StartTracking2Response> StartTracking2Async(StartTracking2Request request) {
             return base.Channel.StartTracking2Async(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetPackageTypesResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetPackageTypes(ThirdParty.WebServices.Magaya.Services.GetPackageTypesRequest request) {
+        GetPackageTypesResponse CSSoapServiceSoap.GetPackageTypes(GetPackageTypesRequest request) {
             return base.Channel.GetPackageTypes(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetPackageTypes(out string pack_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetPackageTypesRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetPackageTypesRequest();
-            ThirdParty.WebServices.Magaya.Services.GetPackageTypesResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetPackageTypes(inValue);
+        public api_session_error GetPackageTypes(out string pack_list_xml) {
+            GetPackageTypesRequest inValue = new GetPackageTypesRequest();
+            GetPackageTypesResponse retVal = ((CSSoapServiceSoap)(this)).GetPackageTypes(inValue);
             pack_list_xml = retVal.pack_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetPackageTypesResponse> GetPackageTypesAsync(ThirdParty.WebServices.Magaya.Services.GetPackageTypesRequest request) {
+        public System.Threading.Tasks.Task<GetPackageTypesResponse> GetPackageTypesAsync(GetPackageTypesRequest request) {
             return base.Channel.GetPackageTypesAsync(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error CancelBooking(string booking_uuid) {
+        public api_session_error CancelBooking(string booking_uuid) {
             return base.Channel.CancelBooking(booking_uuid);
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> CancelBookingAsync(string booking_uuid) {
+        public System.Threading.Tasks.Task<api_session_error> CancelBookingAsync(string booking_uuid) {
             return base.Channel.CancelBookingAsync(booking_uuid);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetCustomFieldDefinitionsResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetCustomFieldDefinitions(ThirdParty.WebServices.Magaya.Services.GetCustomFieldDefinitionsRequest request) {
+        GetCustomFieldDefinitionsResponse CSSoapServiceSoap.GetCustomFieldDefinitions(GetCustomFieldDefinitionsRequest request) {
             return base.Channel.GetCustomFieldDefinitions(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetCustomFieldDefinitions(string type, out string field_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetCustomFieldDefinitionsRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetCustomFieldDefinitionsRequest();
+        public api_session_error GetCustomFieldDefinitions(string type, out string field_list_xml) {
+            GetCustomFieldDefinitionsRequest inValue = new GetCustomFieldDefinitionsRequest();
             inValue.type = type;
-            ThirdParty.WebServices.Magaya.Services.GetCustomFieldDefinitionsResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetCustomFieldDefinitions(inValue);
+            GetCustomFieldDefinitionsResponse retVal = ((CSSoapServiceSoap)(this)).GetCustomFieldDefinitions(inValue);
             field_list_xml = retVal.field_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetCustomFieldDefinitionsResponse> GetCustomFieldDefinitionsAsync(ThirdParty.WebServices.Magaya.Services.GetCustomFieldDefinitionsRequest request) {
+        public System.Threading.Tasks.Task<GetCustomFieldDefinitionsResponse> GetCustomFieldDefinitionsAsync(GetCustomFieldDefinitionsRequest request) {
             return base.Channel.GetCustomFieldDefinitionsAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetItemFromVINResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetItemFromVIN(ThirdParty.WebServices.Magaya.Services.GetItemFromVINRequest request) {
+        GetItemFromVINResponse CSSoapServiceSoap.GetItemFromVIN(GetItemFromVINRequest request) {
             return base.Channel.GetItemFromVIN(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetItemFromVIN(int access_key, string vin, out string item_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetItemFromVINRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetItemFromVINRequest();
+        public api_session_error GetItemFromVIN(int access_key, string vin, out string item_xml) {
+            GetItemFromVINRequest inValue = new GetItemFromVINRequest();
             inValue.access_key = access_key;
             inValue.vin = vin;
-            ThirdParty.WebServices.Magaya.Services.GetItemFromVINResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetItemFromVIN(inValue);
+            GetItemFromVINResponse retVal = ((CSSoapServiceSoap)(this)).GetItemFromVIN(inValue);
             item_xml = retVal.item_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetItemFromVINResponse> GetItemFromVINAsync(ThirdParty.WebServices.Magaya.Services.GetItemFromVINRequest request) {
+        public System.Threading.Tasks.Task<GetItemFromVINResponse> GetItemFromVINAsync(GetItemFromVINRequest request) {
             return base.Channel.GetItemFromVINAsync(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error SetShipmentStatus(int access_key, string status, string shipment_uuid) {
+        public api_session_error SetShipmentStatus(int access_key, string status, string shipment_uuid) {
             return base.Channel.SetShipmentStatus(access_key, status, shipment_uuid);
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> SetShipmentStatusAsync(int access_key, string status, string shipment_uuid) {
+        public System.Threading.Tasks.Task<api_session_error> SetShipmentStatusAsync(int access_key, string status, string shipment_uuid) {
             return base.Channel.SetShipmentStatusAsync(access_key, status, shipment_uuid);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetMagayaDocumentResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetMagayaDocument(ThirdParty.WebServices.Magaya.Services.GetMagayaDocumentRequest request) {
+        GetMagayaDocumentResponse CSSoapServiceSoap.GetMagayaDocument(GetMagayaDocumentRequest request) {
             return base.Channel.GetMagayaDocument(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetMagayaDocument(string filename, out string attach_xml, out string error) {
-            ThirdParty.WebServices.Magaya.Services.GetMagayaDocumentRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetMagayaDocumentRequest();
+        public api_session_error GetMagayaDocument(string filename, out string attach_xml, out string error) {
+            GetMagayaDocumentRequest inValue = new GetMagayaDocumentRequest();
             inValue.filename = filename;
-            ThirdParty.WebServices.Magaya.Services.GetMagayaDocumentResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetMagayaDocument(inValue);
+            GetMagayaDocumentResponse retVal = ((CSSoapServiceSoap)(this)).GetMagayaDocument(inValue);
             attach_xml = retVal.attach_xml;
             error = retVal.error;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetMagayaDocumentResponse> GetMagayaDocumentAsync(ThirdParty.WebServices.Magaya.Services.GetMagayaDocumentRequest request) {
+        public System.Threading.Tasks.Task<GetMagayaDocumentResponse> GetMagayaDocumentAsync(GetMagayaDocumentRequest request) {
             return base.Channel.GetMagayaDocumentAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetAccountingTransactionsResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetAccountingTransactions(ThirdParty.WebServices.Magaya.Services.GetAccountingTransactionsRequest request) {
+        GetAccountingTransactionsResponse CSSoapServiceSoap.GetAccountingTransactions(GetAccountingTransactionsRequest request) {
             return base.Channel.GetAccountingTransactions(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetAccountingTransactions(int access_key, string type, int flags, string number, out string trans_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetAccountingTransactionsRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetAccountingTransactionsRequest();
+        public api_session_error GetAccountingTransactions(int access_key, string type, int flags, string number, out string trans_xml) {
+            GetAccountingTransactionsRequest inValue = new GetAccountingTransactionsRequest();
             inValue.access_key = access_key;
             inValue.type = type;
             inValue.flags = flags;
             inValue.number = number;
-            ThirdParty.WebServices.Magaya.Services.GetAccountingTransactionsResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetAccountingTransactions(inValue);
+            GetAccountingTransactionsResponse retVal = ((CSSoapServiceSoap)(this)).GetAccountingTransactions(inValue);
             trans_xml = retVal.trans_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetAccountingTransactionsResponse> GetAccountingTransactionsAsync(ThirdParty.WebServices.Magaya.Services.GetAccountingTransactionsRequest request) {
+        public System.Threading.Tasks.Task<GetAccountingTransactionsResponse> GetAccountingTransactionsAsync(GetAccountingTransactionsRequest request) {
             return base.Channel.GetAccountingTransactionsAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetRelatedTransactionsResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetRelatedTransactions(ThirdParty.WebServices.Magaya.Services.GetRelatedTransactionsRequest request) {
+        GetRelatedTransactionsResponse CSSoapServiceSoap.GetRelatedTransactions(GetRelatedTransactionsRequest request) {
             return base.Channel.GetRelatedTransactions(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetRelatedTransactions(int access_key, string type, int flags, string number, out string trans_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetRelatedTransactionsRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetRelatedTransactionsRequest();
+        public api_session_error GetRelatedTransactions(int access_key, string type, int flags, string number, out string trans_xml) {
+            GetRelatedTransactionsRequest inValue = new GetRelatedTransactionsRequest();
             inValue.access_key = access_key;
             inValue.type = type;
             inValue.flags = flags;
             inValue.number = number;
-            ThirdParty.WebServices.Magaya.Services.GetRelatedTransactionsResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetRelatedTransactions(inValue);
+            GetRelatedTransactionsResponse retVal = ((CSSoapServiceSoap)(this)).GetRelatedTransactions(inValue);
             trans_xml = retVal.trans_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetRelatedTransactionsResponse> GetRelatedTransactionsAsync(ThirdParty.WebServices.Magaya.Services.GetRelatedTransactionsRequest request) {
+        public System.Threading.Tasks.Task<GetRelatedTransactionsResponse> GetRelatedTransactionsAsync(GetRelatedTransactionsRequest request) {
             return base.Channel.GetRelatedTransactionsAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetAccountDefinitionsResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetAccountDefinitions(ThirdParty.WebServices.Magaya.Services.GetAccountDefinitionsRequest request) {
+        GetAccountDefinitionsResponse CSSoapServiceSoap.GetAccountDefinitions(GetAccountDefinitionsRequest request) {
             return base.Channel.GetAccountDefinitions(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetAccountDefinitions(int access_key, out string account_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetAccountDefinitionsRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetAccountDefinitionsRequest();
+        public api_session_error GetAccountDefinitions(int access_key, out string account_list_xml) {
+            GetAccountDefinitionsRequest inValue = new GetAccountDefinitionsRequest();
             inValue.access_key = access_key;
-            ThirdParty.WebServices.Magaya.Services.GetAccountDefinitionsResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetAccountDefinitions(inValue);
+            GetAccountDefinitionsResponse retVal = ((CSSoapServiceSoap)(this)).GetAccountDefinitions(inValue);
             account_list_xml = retVal.account_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetAccountDefinitionsResponse> GetAccountDefinitionsAsync(ThirdParty.WebServices.Magaya.Services.GetAccountDefinitionsRequest request) {
+        public System.Threading.Tasks.Task<GetAccountDefinitionsResponse> GetAccountDefinitionsAsync(GetAccountDefinitionsRequest request) {
             return base.Channel.GetAccountDefinitionsAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetChargeDefinitionsResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetChargeDefinitions(ThirdParty.WebServices.Magaya.Services.GetChargeDefinitionsRequest request) {
+        GetChargeDefinitionsResponse CSSoapServiceSoap.GetChargeDefinitions(GetChargeDefinitionsRequest request) {
             return base.Channel.GetChargeDefinitions(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetChargeDefinitions(int access_key, out string service_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetChargeDefinitionsRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetChargeDefinitionsRequest();
+        public api_session_error GetChargeDefinitions(int access_key, out string service_list_xml) {
+            GetChargeDefinitionsRequest inValue = new GetChargeDefinitionsRequest();
             inValue.access_key = access_key;
-            ThirdParty.WebServices.Magaya.Services.GetChargeDefinitionsResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetChargeDefinitions(inValue);
+            GetChargeDefinitionsResponse retVal = ((CSSoapServiceSoap)(this)).GetChargeDefinitions(inValue);
             service_list_xml = retVal.service_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetChargeDefinitionsResponse> GetChargeDefinitionsAsync(ThirdParty.WebServices.Magaya.Services.GetChargeDefinitionsRequest request) {
+        public System.Threading.Tasks.Task<GetChargeDefinitionsResponse> GetChargeDefinitionsAsync(GetChargeDefinitionsRequest request) {
             return base.Channel.GetChargeDefinitionsAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetActiveCurrenciesResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetActiveCurrencies(ThirdParty.WebServices.Magaya.Services.GetActiveCurrenciesRequest request) {
+        GetActiveCurrenciesResponse CSSoapServiceSoap.GetActiveCurrencies(GetActiveCurrenciesRequest request) {
             return base.Channel.GetActiveCurrencies(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetActiveCurrencies(int access_key, out string currency_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetActiveCurrenciesRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetActiveCurrenciesRequest();
+        public api_session_error GetActiveCurrencies(int access_key, out string currency_list_xml) {
+            GetActiveCurrenciesRequest inValue = new GetActiveCurrenciesRequest();
             inValue.access_key = access_key;
-            ThirdParty.WebServices.Magaya.Services.GetActiveCurrenciesResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetActiveCurrencies(inValue);
+            GetActiveCurrenciesResponse retVal = ((CSSoapServiceSoap)(this)).GetActiveCurrencies(inValue);
             currency_list_xml = retVal.currency_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetActiveCurrenciesResponse> GetActiveCurrenciesAsync(ThirdParty.WebServices.Magaya.Services.GetActiveCurrenciesRequest request) {
+        public System.Threading.Tasks.Task<GetActiveCurrenciesResponse> GetActiveCurrenciesAsync(GetActiveCurrenciesRequest request) {
             return base.Channel.GetActiveCurrenciesAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.QueryLogResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.QueryLog(ThirdParty.WebServices.Magaya.Services.QueryLogRequest request) {
+        QueryLogResponse CSSoapServiceSoap.QueryLog(QueryLogRequest request) {
             return base.Channel.QueryLog(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error QueryLog(int access_key, string start_date, string end_date, int log_entry_type, string trans_type, int flags, out string trans_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.QueryLogRequest inValue = new ThirdParty.WebServices.Magaya.Services.QueryLogRequest();
+        public api_session_error QueryLog(int access_key, string start_date, string end_date, int log_entry_type, string trans_type, int flags, out string trans_list_xml) 
+        {
+            QueryLogRequest inValue = new QueryLogRequest();
             inValue.access_key = access_key;
             inValue.start_date = start_date;
             inValue.end_date = end_date;
             inValue.log_entry_type = log_entry_type;
             inValue.trans_type = trans_type;
             inValue.flags = flags;
-            ThirdParty.WebServices.Magaya.Services.QueryLogResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).QueryLog(inValue);
+            QueryLogResponse retVal = ((CSSoapServiceSoap)(this)).QueryLog(inValue);
             trans_list_xml = retVal.trans_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.QueryLogResponse> QueryLogAsync(ThirdParty.WebServices.Magaya.Services.QueryLogRequest request) {
+        public System.Threading.Tasks.Task<QueryLogResponse> QueryLogAsync(QueryLogRequest request) {
             return base.Channel.QueryLogAsync(request);
         }
         
@@ -4329,323 +4330,323 @@ namespace ThirdParty.WebServices.Magaya.Services {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetClientRatesResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetClientRates(ThirdParty.WebServices.Magaya.Services.GetClientRatesRequest request) {
+        GetClientRatesResponse CSSoapServiceSoap.GetClientRates(GetClientRatesRequest request) {
             return base.Channel.GetClientRates(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetClientRates(int access_key, string client_uuid, string org_port, string dest_port, string method, int include_standard, out string rate_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetClientRatesRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetClientRatesRequest();
+        public api_session_error GetClientRates(int access_key, string client_uuid, string org_port, string dest_port, string method, int include_standard, out string rate_list_xml) {
+            GetClientRatesRequest inValue = new GetClientRatesRequest();
             inValue.access_key = access_key;
             inValue.client_uuid = client_uuid;
             inValue.org_port = org_port;
             inValue.dest_port = dest_port;
             inValue.method = method;
             inValue.include_standard = include_standard;
-            ThirdParty.WebServices.Magaya.Services.GetClientRatesResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetClientRates(inValue);
+            GetClientRatesResponse retVal = ((CSSoapServiceSoap)(this)).GetClientRates(inValue);
             rate_list_xml = retVal.rate_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetClientRatesResponse> GetClientRatesAsync(ThirdParty.WebServices.Magaya.Services.GetClientRatesRequest request) {
+        public System.Threading.Tasks.Task<GetClientRatesResponse> GetClientRatesAsync(GetClientRatesRequest request) {
             return base.Channel.GetClientRatesAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetStandardRatesResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetStandardRates(ThirdParty.WebServices.Magaya.Services.GetStandardRatesRequest request) {
+        GetStandardRatesResponse CSSoapServiceSoap.GetStandardRates(GetStandardRatesRequest request) {
             return base.Channel.GetStandardRates(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetStandardRates(int access_key, string org_port, string dest_port, string method, out string rate_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetStandardRatesRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetStandardRatesRequest();
+        public api_session_error GetStandardRates(int access_key, string org_port, string dest_port, string method, out string rate_list_xml) {
+            GetStandardRatesRequest inValue = new GetStandardRatesRequest();
             inValue.access_key = access_key;
             inValue.org_port = org_port;
             inValue.dest_port = dest_port;
             inValue.method = method;
-            ThirdParty.WebServices.Magaya.Services.GetStandardRatesResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetStandardRates(inValue);
+            GetStandardRatesResponse retVal = ((CSSoapServiceSoap)(this)).GetStandardRates(inValue);
             rate_list_xml = retVal.rate_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetStandardRatesResponse> GetStandardRatesAsync(ThirdParty.WebServices.Magaya.Services.GetStandardRatesRequest request) {
+        public System.Threading.Tasks.Task<GetStandardRatesResponse> GetStandardRatesAsync(GetStandardRatesRequest request) {
             return base.Channel.GetStandardRatesAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetClientChargeDefinitionsResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetClientChargeDefinitions(ThirdParty.WebServices.Magaya.Services.GetClientChargeDefinitionsRequest request) {
+        GetClientChargeDefinitionsResponse CSSoapServiceSoap.GetClientChargeDefinitions(GetClientChargeDefinitionsRequest request) {
             return base.Channel.GetClientChargeDefinitions(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetClientChargeDefinitions(int access_key, string client_uuid, out string charge_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetClientChargeDefinitionsRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetClientChargeDefinitionsRequest();
+        public api_session_error GetClientChargeDefinitions(int access_key, string client_uuid, out string charge_list_xml) {
+            GetClientChargeDefinitionsRequest inValue = new GetClientChargeDefinitionsRequest();
             inValue.access_key = access_key;
             inValue.client_uuid = client_uuid;
-            ThirdParty.WebServices.Magaya.Services.GetClientChargeDefinitionsResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetClientChargeDefinitions(inValue);
+            GetClientChargeDefinitionsResponse retVal = ((CSSoapServiceSoap)(this)).GetClientChargeDefinitions(inValue);
             charge_list_xml = retVal.charge_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetClientChargeDefinitionsResponse> GetClientChargeDefinitionsAsync(ThirdParty.WebServices.Magaya.Services.GetClientChargeDefinitionsRequest request) {
+        public System.Threading.Tasks.Task<GetClientChargeDefinitionsResponse> GetClientChargeDefinitionsAsync(GetClientChargeDefinitionsRequest request) {
             return base.Channel.GetClientChargeDefinitionsAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.SetRateResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.SetRate(ThirdParty.WebServices.Magaya.Services.SetRateRequest request) {
+        SetRateResponse CSSoapServiceSoap.SetRate(SetRateRequest request) {
             return base.Channel.SetRate(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error SetRate(int access_key, int flags, string rate_xml, out string error_desc) {
-            ThirdParty.WebServices.Magaya.Services.SetRateRequest inValue = new ThirdParty.WebServices.Magaya.Services.SetRateRequest();
+        public api_session_error SetRate(int access_key, int flags, string rate_xml, out string error_desc) {
+            SetRateRequest inValue = new SetRateRequest();
             inValue.access_key = access_key;
             inValue.flags = flags;
             inValue.rate_xml = rate_xml;
-            ThirdParty.WebServices.Magaya.Services.SetRateResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).SetRate(inValue);
+            SetRateResponse retVal = ((CSSoapServiceSoap)(this)).SetRate(inValue);
             error_desc = retVal.error_desc;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SetRateResponse> SetRateAsync(ThirdParty.WebServices.Magaya.Services.SetRateRequest request) {
+        public System.Threading.Tasks.Task<SetRateResponse> SetRateAsync(SetRateRequest request) {
             return base.Channel.SetRateAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.SetEntityResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.SetEntity(ThirdParty.WebServices.Magaya.Services.SetEntityRequest request) {
+        SetEntityResponse CSSoapServiceSoap.SetEntity(SetEntityRequest request) {
             return base.Channel.SetEntity(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error SetEntity(int access_key, int flags, string entity_xml, out string error_desc) {
-            ThirdParty.WebServices.Magaya.Services.SetEntityRequest inValue = new ThirdParty.WebServices.Magaya.Services.SetEntityRequest();
+        public api_session_error SetEntity(int access_key, int flags, string entity_xml, out string error_desc) {
+            SetEntityRequest inValue = new SetEntityRequest();
             inValue.access_key = access_key;
             inValue.flags = flags;
             inValue.entity_xml = entity_xml;
-            ThirdParty.WebServices.Magaya.Services.SetEntityResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).SetEntity(inValue);
+            SetEntityResponse retVal = ((CSSoapServiceSoap)(this)).SetEntity(inValue);
             error_desc = retVal.error_desc;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SetEntityResponse> SetEntityAsync(ThirdParty.WebServices.Magaya.Services.SetEntityRequest request) {
+        public System.Threading.Tasks.Task<SetEntityResponse> SetEntityAsync(SetEntityRequest request) {
             return base.Channel.SetEntityAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetEntitiesResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetEntities(ThirdParty.WebServices.Magaya.Services.GetEntitiesRequest request) {
+        GetEntitiesResponse CSSoapServiceSoap.GetEntities(GetEntitiesRequest request) {
             return base.Channel.GetEntities(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetEntities(int access_key, int flags, string start_with, out string entity_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetEntitiesRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetEntitiesRequest();
+        public api_session_error GetEntities(int access_key, int flags, string start_with, out string entity_list_xml) {
+            GetEntitiesRequest inValue = new GetEntitiesRequest();
             inValue.access_key = access_key;
             inValue.flags = flags;
             inValue.start_with = start_with;
-            ThirdParty.WebServices.Magaya.Services.GetEntitiesResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetEntities(inValue);
+            GetEntitiesResponse retVal = ((CSSoapServiceSoap)(this)).GetEntities(inValue);
             entity_list_xml = retVal.entity_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetEntitiesResponse> GetEntitiesAsync(ThirdParty.WebServices.Magaya.Services.GetEntitiesRequest request) {
+        public System.Threading.Tasks.Task<GetEntitiesResponse> GetEntitiesAsync(GetEntitiesRequest request) {
             return base.Channel.GetEntitiesAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetEntityContactsResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetEntityContacts(ThirdParty.WebServices.Magaya.Services.GetEntityContactsRequest request) {
+        GetEntityContactsResponse CSSoapServiceSoap.GetEntityContacts(GetEntityContactsRequest request) {
             return base.Channel.GetEntityContacts(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetEntityContacts(int access_key, int flags, string entity_uuid, out string contact_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetEntityContactsRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetEntityContactsRequest();
+        public api_session_error GetEntityContacts(int access_key, int flags, string entity_uuid, out string contact_list_xml) {
+            GetEntityContactsRequest inValue = new GetEntityContactsRequest();
             inValue.access_key = access_key;
             inValue.flags = flags;
             inValue.entity_uuid = entity_uuid;
-            ThirdParty.WebServices.Magaya.Services.GetEntityContactsResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetEntityContacts(inValue);
+            GetEntityContactsResponse retVal = ((CSSoapServiceSoap)(this)).GetEntityContacts(inValue);
             contact_list_xml = retVal.contact_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetEntityContactsResponse> GetEntityContactsAsync(ThirdParty.WebServices.Magaya.Services.GetEntityContactsRequest request) {
+        public System.Threading.Tasks.Task<GetEntityContactsResponse> GetEntityContactsAsync(GetEntityContactsRequest request) {
             return base.Channel.GetEntityContactsAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.SubmitSalesOrderResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.SubmitSalesOrder(ThirdParty.WebServices.Magaya.Services.SubmitSalesOrderRequest request) {
+        SubmitSalesOrderResponse CSSoapServiceSoap.SubmitSalesOrder(SubmitSalesOrderRequest request) {
             return base.Channel.SubmitSalesOrder(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error SubmitSalesOrder(int access_key, string sales_order_xml, int flags, out string sales_order_number, out string result_string) {
-            ThirdParty.WebServices.Magaya.Services.SubmitSalesOrderRequest inValue = new ThirdParty.WebServices.Magaya.Services.SubmitSalesOrderRequest();
+        public api_session_error SubmitSalesOrder(int access_key, string sales_order_xml, int flags, out string sales_order_number, out string result_string) {
+            SubmitSalesOrderRequest inValue = new SubmitSalesOrderRequest();
             inValue.access_key = access_key;
             inValue.sales_order_xml = sales_order_xml;
             inValue.flags = flags;
-            ThirdParty.WebServices.Magaya.Services.SubmitSalesOrderResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).SubmitSalesOrder(inValue);
+            SubmitSalesOrderResponse retVal = ((CSSoapServiceSoap)(this)).SubmitSalesOrder(inValue);
             sales_order_number = retVal.sales_order_number;
             result_string = retVal.result_string;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SubmitSalesOrderResponse> SubmitSalesOrderAsync(ThirdParty.WebServices.Magaya.Services.SubmitSalesOrderRequest request) {
+        public System.Threading.Tasks.Task<SubmitSalesOrderResponse> SubmitSalesOrderAsync(SubmitSalesOrderRequest request) {
             return base.Channel.SubmitSalesOrderAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.SubmitCargoReleaseResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.SubmitCargoRelease(ThirdParty.WebServices.Magaya.Services.SubmitCargoReleaseRequest request) {
+        SubmitCargoReleaseResponse CSSoapServiceSoap.SubmitCargoRelease(SubmitCargoReleaseRequest request) {
             return base.Channel.SubmitCargoRelease(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error SubmitCargoRelease(int access_key, string cargo_release_xml, int flags, out string cargo_release_number, out string result_string) {
-            ThirdParty.WebServices.Magaya.Services.SubmitCargoReleaseRequest inValue = new ThirdParty.WebServices.Magaya.Services.SubmitCargoReleaseRequest();
+        public api_session_error SubmitCargoRelease(int access_key, string cargo_release_xml, int flags, out string cargo_release_number, out string result_string) {
+            SubmitCargoReleaseRequest inValue = new SubmitCargoReleaseRequest();
             inValue.access_key = access_key;
             inValue.cargo_release_xml = cargo_release_xml;
             inValue.flags = flags;
-            ThirdParty.WebServices.Magaya.Services.SubmitCargoReleaseResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).SubmitCargoRelease(inValue);
+            SubmitCargoReleaseResponse retVal = ((CSSoapServiceSoap)(this)).SubmitCargoRelease(inValue);
             cargo_release_number = retVal.cargo_release_number;
             result_string = retVal.result_string;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SubmitCargoReleaseResponse> SubmitCargoReleaseAsync(ThirdParty.WebServices.Magaya.Services.SubmitCargoReleaseRequest request) {
+        public System.Threading.Tasks.Task<SubmitCargoReleaseResponse> SubmitCargoReleaseAsync(SubmitCargoReleaseRequest request) {
             return base.Channel.SubmitCargoReleaseAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.SubmitShipmentResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.SubmitShipment(ThirdParty.WebServices.Magaya.Services.SubmitShipmentRequest request) {
+        SubmitShipmentResponse CSSoapServiceSoap.SubmitShipment(SubmitShipmentRequest request) {
             return base.Channel.SubmitShipment(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error SubmitShipment(int access_key, string shipment_xml, int flags, out string shipment_number, out string result_string) {
-            ThirdParty.WebServices.Magaya.Services.SubmitShipmentRequest inValue = new ThirdParty.WebServices.Magaya.Services.SubmitShipmentRequest();
+        public api_session_error SubmitShipment(int access_key, string shipment_xml, int flags, out string shipment_number, out string result_string) {
+            SubmitShipmentRequest inValue = new SubmitShipmentRequest();
             inValue.access_key = access_key;
             inValue.shipment_xml = shipment_xml;
             inValue.flags = flags;
-            ThirdParty.WebServices.Magaya.Services.SubmitShipmentResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).SubmitShipment(inValue);
+            SubmitShipmentResponse retVal = ((CSSoapServiceSoap)(this)).SubmitShipment(inValue);
             shipment_number = retVal.shipment_number;
             result_string = retVal.result_string;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SubmitShipmentResponse> SubmitShipmentAsync(ThirdParty.WebServices.Magaya.Services.SubmitShipmentRequest request) {
+        public System.Threading.Tasks.Task<SubmitShipmentResponse> SubmitShipmentAsync(SubmitShipmentRequest request) {
             return base.Channel.SubmitShipmentAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetEventDefinitionsResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetEventDefinitions(ThirdParty.WebServices.Magaya.Services.GetEventDefinitionsRequest request) {
+        GetEventDefinitionsResponse CSSoapServiceSoap.GetEventDefinitions(GetEventDefinitionsRequest request) {
             return base.Channel.GetEventDefinitions(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetEventDefinitions(int access_key, out string event_definition_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetEventDefinitionsRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetEventDefinitionsRequest();
+        public api_session_error GetEventDefinitions(int access_key, out string event_definition_list_xml) {
+            GetEventDefinitionsRequest inValue = new GetEventDefinitionsRequest();
             inValue.access_key = access_key;
-            ThirdParty.WebServices.Magaya.Services.GetEventDefinitionsResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetEventDefinitions(inValue);
+            GetEventDefinitionsResponse retVal = ((CSSoapServiceSoap)(this)).GetEventDefinitions(inValue);
             event_definition_list_xml = retVal.event_definition_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetEventDefinitionsResponse> GetEventDefinitionsAsync(ThirdParty.WebServices.Magaya.Services.GetEventDefinitionsRequest request) {
+        public System.Threading.Tasks.Task<GetEventDefinitionsResponse> GetEventDefinitionsAsync(GetEventDefinitionsRequest request) {
             return base.Channel.GetEventDefinitionsAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.SetTransactionEventsResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.SetTransactionEvents(ThirdParty.WebServices.Magaya.Services.SetTransactionEventsRequest request) {
+        SetTransactionEventsResponse CSSoapServiceSoap.SetTransactionEvents(SetTransactionEventsRequest request) {
             return base.Channel.SetTransactionEvents(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error SetTransactionEvents(int access_key, int flags, string type, string number, string event_list_xml, out string error_desc) {
-            ThirdParty.WebServices.Magaya.Services.SetTransactionEventsRequest inValue = new ThirdParty.WebServices.Magaya.Services.SetTransactionEventsRequest();
+        public api_session_error SetTransactionEvents(int access_key, int flags, string type, string number, string event_list_xml, out string error_desc) {
+            SetTransactionEventsRequest inValue = new SetTransactionEventsRequest();
             inValue.access_key = access_key;
             inValue.flags = flags;
             inValue.type = type;
             inValue.number = number;
             inValue.event_list_xml = event_list_xml;
-            ThirdParty.WebServices.Magaya.Services.SetTransactionEventsResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).SetTransactionEvents(inValue);
+            SetTransactionEventsResponse retVal = ((CSSoapServiceSoap)(this)).SetTransactionEvents(inValue);
             error_desc = retVal.error_desc;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SetTransactionEventsResponse> SetTransactionEventsAsync(ThirdParty.WebServices.Magaya.Services.SetTransactionEventsRequest request) {
+        public System.Threading.Tasks.Task<SetTransactionEventsResponse> SetTransactionEventsAsync(SetTransactionEventsRequest request) {
             return base.Channel.SetTransactionEventsAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.UpdateOrderResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.UpdateOrder(ThirdParty.WebServices.Magaya.Services.UpdateOrderRequest request) {
+        UpdateOrderResponse CSSoapServiceSoap.UpdateOrder(UpdateOrderRequest request) {
             return base.Channel.UpdateOrder(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error UpdateOrder(int access_key, int flags, string order_xml, out string error_desc) {
-            ThirdParty.WebServices.Magaya.Services.UpdateOrderRequest inValue = new ThirdParty.WebServices.Magaya.Services.UpdateOrderRequest();
+        public api_session_error UpdateOrder(int access_key, int flags, string order_xml, out string error_desc) {
+            UpdateOrderRequest inValue = new UpdateOrderRequest();
             inValue.access_key = access_key;
             inValue.flags = flags;
             inValue.order_xml = order_xml;
-            ThirdParty.WebServices.Magaya.Services.UpdateOrderResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).UpdateOrder(inValue);
+            UpdateOrderResponse retVal = ((CSSoapServiceSoap)(this)).UpdateOrder(inValue);
             error_desc = retVal.error_desc;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.UpdateOrderResponse> UpdateOrderAsync(ThirdParty.WebServices.Magaya.Services.UpdateOrderRequest request) {
+        public System.Threading.Tasks.Task<UpdateOrderResponse> UpdateOrderAsync(UpdateOrderRequest request) {
             return base.Channel.UpdateOrderAsync(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error SetCustomFieldValue(int access_key, string type, string number, string field_internal_name, string field_value) {
+        public api_session_error SetCustomFieldValue(int access_key, string type, string number, string field_internal_name, string field_value) {
             return base.Channel.SetCustomFieldValue(access_key, type, number, field_internal_name, field_value);
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> SetCustomFieldValueAsync(int access_key, string type, string number, string field_internal_name, string field_value) {
+        public System.Threading.Tasks.Task<api_session_error> SetCustomFieldValueAsync(int access_key, string type, string number, string field_internal_name, string field_value) {
             return base.Channel.SetCustomFieldValueAsync(access_key, type, number, field_internal_name, field_value);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error SetApprovalStatus(int access_key, string type, string number, int status) {
+        public api_session_error SetApprovalStatus(int access_key, string type, string number, int status) {
             return base.Channel.SetApprovalStatus(access_key, type, number, status);
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> SetApprovalStatusAsync(int access_key, string type, string number, int status) {
+        public System.Threading.Tasks.Task<api_session_error> SetApprovalStatusAsync(int access_key, string type, string number, int status) {
             return base.Channel.SetApprovalStatusAsync(access_key, type, number, status);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetCarrierRatesResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetCarrierRates(ThirdParty.WebServices.Magaya.Services.GetCarrierRatesRequest request) {
+        GetCarrierRatesResponse CSSoapServiceSoap.GetCarrierRates(GetCarrierRatesRequest request) {
             return base.Channel.GetCarrierRates(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetCarrierRates(int access_key, string carrier_uuid, string org_port, string dest_port, string method, out string rate_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetCarrierRatesRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetCarrierRatesRequest();
+        public api_session_error GetCarrierRates(int access_key, string carrier_uuid, string org_port, string dest_port, string method, out string rate_list_xml) {
+            GetCarrierRatesRequest inValue = new GetCarrierRatesRequest();
             inValue.access_key = access_key;
             inValue.carrier_uuid = carrier_uuid;
             inValue.org_port = org_port;
             inValue.dest_port = dest_port;
             inValue.method = method;
-            ThirdParty.WebServices.Magaya.Services.GetCarrierRatesResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetCarrierRates(inValue);
+            GetCarrierRatesResponse retVal = ((CSSoapServiceSoap)(this)).GetCarrierRates(inValue);
             rate_list_xml = retVal.rate_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetCarrierRatesResponse> GetCarrierRatesAsync(ThirdParty.WebServices.Magaya.Services.GetCarrierRatesRequest request) {
+        public System.Threading.Tasks.Task<GetCarrierRatesResponse> GetCarrierRatesAsync(GetCarrierRatesRequest request) {
             return base.Channel.GetCarrierRatesAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetEntityTransactionsResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetEntityTransactions(ThirdParty.WebServices.Magaya.Services.GetEntityTransactionsRequest request) {
+        GetEntityTransactionsResponse CSSoapServiceSoap.GetEntityTransactions(GetEntityTransactionsRequest request) {
             return base.Channel.GetEntityTransactions(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetEntityTransactions(int access_key, string entity_uuid, int flags, string start_date, string end_date, out string acctrans_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetEntityTransactionsRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetEntityTransactionsRequest();
+        public api_session_error GetEntityTransactions(int access_key, string entity_uuid, int flags, string start_date, string end_date, out string acctrans_list_xml) {
+            GetEntityTransactionsRequest inValue = new GetEntityTransactionsRequest();
             inValue.access_key = access_key;
             inValue.entity_uuid = entity_uuid;
             inValue.flags = flags;
             inValue.start_date = start_date;
             inValue.end_date = end_date;
-            ThirdParty.WebServices.Magaya.Services.GetEntityTransactionsResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetEntityTransactions(inValue);
+            GetEntityTransactionsResponse retVal = ((CSSoapServiceSoap)(this)).GetEntityTransactions(inValue);
             acctrans_list_xml = retVal.acctrans_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetEntityTransactionsResponse> GetEntityTransactionsAsync(ThirdParty.WebServices.Magaya.Services.GetEntityTransactionsRequest request) {
+        public System.Threading.Tasks.Task<GetEntityTransactionsResponse> GetEntityTransactionsAsync(GetEntityTransactionsRequest request) {
             return base.Channel.GetEntityTransactionsAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.QueryLogJSResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.QueryLogJS(ThirdParty.WebServices.Magaya.Services.QueryLogJSRequest request) {
+        QueryLogJSResponse CSSoapServiceSoap.QueryLogJS(QueryLogJSRequest request) {
             return base.Channel.QueryLogJS(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error QueryLogJS(int access_key, string start_date, string end_date, int log_entry_type, string trans_type, string function, string xml_params, int log_flags, int xml_flags, out string trans_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.QueryLogJSRequest inValue = new ThirdParty.WebServices.Magaya.Services.QueryLogJSRequest();
+        public api_session_error QueryLogJS(int access_key, string start_date, string end_date, int log_entry_type, string trans_type, string function, string xml_params, int log_flags, int xml_flags, out string trans_list_xml) {
+            QueryLogJSRequest inValue = new QueryLogJSRequest();
             inValue.access_key = access_key;
             inValue.start_date = start_date;
             inValue.end_date = end_date;
@@ -4655,167 +4656,167 @@ namespace ThirdParty.WebServices.Magaya.Services {
             inValue.xml_params = xml_params;
             inValue.log_flags = log_flags;
             inValue.xml_flags = xml_flags;
-            ThirdParty.WebServices.Magaya.Services.QueryLogJSResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).QueryLogJS(inValue);
+            QueryLogJSResponse retVal = ((CSSoapServiceSoap)(this)).QueryLogJS(inValue);
             trans_list_xml = retVal.trans_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.QueryLogJSResponse> QueryLogJSAsync(ThirdParty.WebServices.Magaya.Services.QueryLogJSRequest request) {
+        public System.Threading.Tasks.Task<QueryLogJSResponse> QueryLogJSAsync(QueryLogJSRequest request) {
             return base.Channel.QueryLogJSAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.ExistsTransactionResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.ExistsTransaction(ThirdParty.WebServices.Magaya.Services.ExistsTransactionRequest request) {
+        ExistsTransactionResponse CSSoapServiceSoap.ExistsTransaction(ExistsTransactionRequest request) {
             return base.Channel.ExistsTransaction(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error ExistsTransaction(int access_key, string type, string number, out int exist_trans) {
-            ThirdParty.WebServices.Magaya.Services.ExistsTransactionRequest inValue = new ThirdParty.WebServices.Magaya.Services.ExistsTransactionRequest();
+        public api_session_error ExistsTransaction(int access_key, string type, string number, out int exist_trans) {
+            ExistsTransactionRequest inValue = new ExistsTransactionRequest();
             inValue.access_key = access_key;
             inValue.type = type;
             inValue.number = number;
-            ThirdParty.WebServices.Magaya.Services.ExistsTransactionResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).ExistsTransaction(inValue);
+            ExistsTransactionResponse retVal = ((CSSoapServiceSoap)(this)).ExistsTransaction(inValue);
             exist_trans = retVal.exist_trans;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.ExistsTransactionResponse> ExistsTransactionAsync(ThirdParty.WebServices.Magaya.Services.ExistsTransactionRequest request) {
+        public System.Threading.Tasks.Task<ExistsTransactionResponse> ExistsTransactionAsync(ExistsTransactionRequest request) {
             return base.Channel.ExistsTransactionAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetTransactionStatusResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetTransactionStatus(ThirdParty.WebServices.Magaya.Services.GetTransactionStatusRequest request) {
+        GetTransactionStatusResponse CSSoapServiceSoap.GetTransactionStatus(GetTransactionStatusRequest request) {
             return base.Channel.GetTransactionStatus(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetTransactionStatus(int access_key, string type, string number, out string trans_status) {
-            ThirdParty.WebServices.Magaya.Services.GetTransactionStatusRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetTransactionStatusRequest();
+        public api_session_error GetTransactionStatus(int access_key, string type, string number, out string trans_status) {
+            GetTransactionStatusRequest inValue = new GetTransactionStatusRequest();
             inValue.access_key = access_key;
             inValue.type = type;
             inValue.number = number;
-            ThirdParty.WebServices.Magaya.Services.GetTransactionStatusResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetTransactionStatus(inValue);
+            GetTransactionStatusResponse retVal = ((CSSoapServiceSoap)(this)).GetTransactionStatus(inValue);
             trans_status = retVal.trans_status;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetTransactionStatusResponse> GetTransactionStatusAsync(ThirdParty.WebServices.Magaya.Services.GetTransactionStatusRequest request) {
+        public System.Threading.Tasks.Task<GetTransactionStatusResponse> GetTransactionStatusAsync(GetTransactionStatusRequest request) {
             return base.Channel.GetTransactionStatusAsync(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error SetTrackingUser(int access_key, string contact_uuid, string login, string password, string user_config_xml, int xml_flags) {
+        public api_session_error SetTrackingUser(int access_key, string contact_uuid, string login, string password, string user_config_xml, int xml_flags) {
             return base.Channel.SetTrackingUser(access_key, contact_uuid, login, password, user_config_xml, xml_flags);
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> SetTrackingUserAsync(int access_key, string contact_uuid, string login, string password, string user_config_xml, int xml_flags) {
+        public System.Threading.Tasks.Task<api_session_error> SetTrackingUserAsync(int access_key, string contact_uuid, string login, string password, string user_config_xml, int xml_flags) {
             return base.Channel.SetTrackingUserAsync(access_key, contact_uuid, login, password, user_config_xml, xml_flags);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetItemDefinitionsByCustomerResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetItemDefinitionsByCustomer(ThirdParty.WebServices.Magaya.Services.GetItemDefinitionsByCustomerRequest request) {
+        GetItemDefinitionsByCustomerResponse CSSoapServiceSoap.GetItemDefinitionsByCustomer(GetItemDefinitionsByCustomerRequest request) {
             return base.Channel.GetItemDefinitionsByCustomer(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetItemDefinitionsByCustomer(int access_key, string customer_uuid, int flags, out string def_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetItemDefinitionsByCustomerRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetItemDefinitionsByCustomerRequest();
+        public api_session_error GetItemDefinitionsByCustomer(int access_key, string customer_uuid, int flags, out string def_list_xml) {
+            GetItemDefinitionsByCustomerRequest inValue = new GetItemDefinitionsByCustomerRequest();
             inValue.access_key = access_key;
             inValue.customer_uuid = customer_uuid;
             inValue.flags = flags;
-            ThirdParty.WebServices.Magaya.Services.GetItemDefinitionsByCustomerResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetItemDefinitionsByCustomer(inValue);
+            GetItemDefinitionsByCustomerResponse retVal = ((CSSoapServiceSoap)(this)).GetItemDefinitionsByCustomer(inValue);
             def_list_xml = retVal.def_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetItemDefinitionsByCustomerResponse> GetItemDefinitionsByCustomerAsync(ThirdParty.WebServices.Magaya.Services.GetItemDefinitionsByCustomerRequest request) {
+        public System.Threading.Tasks.Task<GetItemDefinitionsByCustomerResponse> GetItemDefinitionsByCustomerAsync(GetItemDefinitionsByCustomerRequest request) {
             return base.Channel.GetItemDefinitionsByCustomerAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetInventoryItemsByItemDefinitionResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetInventoryItemsByItemDefinition(ThirdParty.WebServices.Magaya.Services.GetInventoryItemsByItemDefinitionRequest request) {
+        GetInventoryItemsByItemDefinitionResponse CSSoapServiceSoap.GetInventoryItemsByItemDefinition(GetInventoryItemsByItemDefinitionRequest request) {
             return base.Channel.GetInventoryItemsByItemDefinition(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetInventoryItemsByItemDefinition(int access_key, string uuid, int flags, out string item_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetInventoryItemsByItemDefinitionRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetInventoryItemsByItemDefinitionRequest();
+        public api_session_error GetInventoryItemsByItemDefinition(int access_key, string uuid, int flags, out string item_list_xml) {
+            GetInventoryItemsByItemDefinitionRequest inValue = new GetInventoryItemsByItemDefinitionRequest();
             inValue.access_key = access_key;
             inValue.uuid = uuid;
             inValue.flags = flags;
-            ThirdParty.WebServices.Magaya.Services.GetInventoryItemsByItemDefinitionResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetInventoryItemsByItemDefinition(inValue);
+            GetInventoryItemsByItemDefinitionResponse retVal = ((CSSoapServiceSoap)(this)).GetInventoryItemsByItemDefinition(inValue);
             item_list_xml = retVal.item_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetInventoryItemsByItemDefinitionResponse> GetInventoryItemsByItemDefinitionAsync(ThirdParty.WebServices.Magaya.Services.GetInventoryItemsByItemDefinitionRequest request) {
+        public System.Threading.Tasks.Task<GetInventoryItemsByItemDefinitionResponse> GetInventoryItemsByItemDefinitionAsync(GetInventoryItemsByItemDefinitionRequest request) {
             return base.Channel.GetInventoryItemsByItemDefinitionAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetTransactionsByBillingClientResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetTransactionsByBillingClient(ThirdParty.WebServices.Magaya.Services.GetTransactionsByBillingClientRequest request) {
+        GetTransactionsByBillingClientResponse CSSoapServiceSoap.GetTransactionsByBillingClient(GetTransactionsByBillingClientRequest request) {
             return base.Channel.GetTransactionsByBillingClient(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetTransactionsByBillingClient(int access_key, string customer_uuid, string type, string start_date, string end_date, int flags, out string trans_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetTransactionsByBillingClientRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetTransactionsByBillingClientRequest();
+        public api_session_error GetTransactionsByBillingClient(int access_key, string customer_uuid, string type, string start_date, string end_date, int flags, out string trans_list_xml) {
+            GetTransactionsByBillingClientRequest inValue = new GetTransactionsByBillingClientRequest();
             inValue.access_key = access_key;
             inValue.customer_uuid = customer_uuid;
             inValue.type = type;
             inValue.start_date = start_date;
             inValue.end_date = end_date;
             inValue.flags = flags;
-            ThirdParty.WebServices.Magaya.Services.GetTransactionsByBillingClientResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetTransactionsByBillingClient(inValue);
+            GetTransactionsByBillingClientResponse retVal = ((CSSoapServiceSoap)(this)).GetTransactionsByBillingClient(inValue);
             trans_list_xml = retVal.trans_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetTransactionsByBillingClientResponse> GetTransactionsByBillingClientAsync(ThirdParty.WebServices.Magaya.Services.GetTransactionsByBillingClientRequest request) {
+        public System.Threading.Tasks.Task<GetTransactionsByBillingClientResponse> GetTransactionsByBillingClientAsync(GetTransactionsByBillingClientRequest request) {
             return base.Channel.GetTransactionsByBillingClientAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetEntitiesOfTypeResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetEntitiesOfType(ThirdParty.WebServices.Magaya.Services.GetEntitiesOfTypeRequest request) {
+        GetEntitiesOfTypeResponse CSSoapServiceSoap.GetEntitiesOfType(GetEntitiesOfTypeRequest request) {
             return base.Channel.GetEntitiesOfType(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetEntitiesOfType(int access_key, int flags, string start_with, int entity_type, out string entity_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetEntitiesOfTypeRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetEntitiesOfTypeRequest();
+        public api_session_error GetEntitiesOfType(int access_key, int flags, string start_with, int entity_type, out string entity_list_xml) {
+            GetEntitiesOfTypeRequest inValue = new GetEntitiesOfTypeRequest();
             inValue.access_key = access_key;
             inValue.flags = flags;
             inValue.start_with = start_with;
             inValue.entity_type = entity_type;
-            ThirdParty.WebServices.Magaya.Services.GetEntitiesOfTypeResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetEntitiesOfType(inValue);
+            GetEntitiesOfTypeResponse retVal = ((CSSoapServiceSoap)(this)).GetEntitiesOfType(inValue);
             entity_list_xml = retVal.entity_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetEntitiesOfTypeResponse> GetEntitiesOfTypeAsync(ThirdParty.WebServices.Magaya.Services.GetEntitiesOfTypeRequest request) {
+        public System.Threading.Tasks.Task<GetEntitiesOfTypeResponse> GetEntitiesOfTypeAsync(GetEntitiesOfTypeRequest request) {
             return base.Channel.GetEntitiesOfTypeAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetWebDocumentResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetWebDocument(ThirdParty.WebServices.Magaya.Services.GetWebDocumentRequest request) {
+        GetWebDocumentResponse CSSoapServiceSoap.GetWebDocument(GetWebDocumentRequest request) {
             return base.Channel.GetWebDocument(request);
         }
         
         public string GetWebDocument(string trans_uuid, int doc_id, out int document_length, out int is_ole_doc) {
-            ThirdParty.WebServices.Magaya.Services.GetWebDocumentRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetWebDocumentRequest();
+            GetWebDocumentRequest inValue = new GetWebDocumentRequest();
             inValue.trans_uuid = trans_uuid;
             inValue.doc_id = doc_id;
-            ThirdParty.WebServices.Magaya.Services.GetWebDocumentResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetWebDocument(inValue);
+            GetWebDocumentResponse retVal = ((CSSoapServiceSoap)(this)).GetWebDocument(inValue);
             document_length = retVal.document_length;
             is_ole_doc = retVal.is_ole_doc;
             return retVal.document;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetWebDocumentResponse> GetWebDocumentAsync(ThirdParty.WebServices.Magaya.Services.GetWebDocumentRequest request) {
+        public System.Threading.Tasks.Task<GetWebDocumentResponse> GetWebDocumentAsync(GetWebDocumentRequest request) {
             return base.Channel.GetWebDocumentAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetFirstTransbyDate(ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateRequest request) {
+        GetFirstTransbyDateResponse CSSoapServiceSoap.GetFirstTransbyDate(GetFirstTransbyDateRequest request) {
             return base.Channel.GetFirstTransbyDate(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetFirstTransbyDate(int access_key, string type, string start_date, string end_date, int flags, int record_quantity, int backwards_order, out string cookie, out int more_results) {
-            ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateRequest();
+        public api_session_error GetFirstTransbyDate(int access_key, string type, string start_date, string end_date, int flags, int record_quantity, int backwards_order, out string cookie, out int more_results) {
+            GetFirstTransbyDateRequest inValue = new GetFirstTransbyDateRequest();
             inValue.access_key = access_key;
             inValue.type = type;
             inValue.start_date = start_date;
@@ -4823,23 +4824,23 @@ namespace ThirdParty.WebServices.Magaya.Services {
             inValue.flags = flags;
             inValue.record_quantity = record_quantity;
             inValue.backwards_order = backwards_order;
-            ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetFirstTransbyDate(inValue);
+            GetFirstTransbyDateResponse retVal = ((CSSoapServiceSoap)(this)).GetFirstTransbyDate(inValue);
             cookie = retVal.cookie;
             more_results = retVal.more_results;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateResponse> GetFirstTransbyDateAsync(ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateRequest request) {
+        public System.Threading.Tasks.Task<GetFirstTransbyDateResponse> GetFirstTransbyDateAsync(GetFirstTransbyDateRequest request) {
             return base.Channel.GetFirstTransbyDateAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateJSResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetFirstTransbyDateJS(ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateJSRequest request) {
+        GetFirstTransbyDateJSResponse CSSoapServiceSoap.GetFirstTransbyDateJS(GetFirstTransbyDateJSRequest request) {
             return base.Channel.GetFirstTransbyDateJS(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetFirstTransbyDateJS(int access_key, string type, string start_date, string end_date, int flags, int record_quantity, int backwards_order, string function, string xml_params, out string cookie, out int more_results) {
-            ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateJSRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateJSRequest();
+        public api_session_error GetFirstTransbyDateJS(int access_key, string type, string start_date, string end_date, int flags, int record_quantity, int backwards_order, string function, string xml_params, out string cookie, out int more_results) {
+            GetFirstTransbyDateJSRequest inValue = new GetFirstTransbyDateJSRequest();
             inValue.access_key = access_key;
             inValue.type = type;
             inValue.start_date = start_date;
@@ -4849,42 +4850,42 @@ namespace ThirdParty.WebServices.Magaya.Services {
             inValue.backwards_order = backwards_order;
             inValue.function = function;
             inValue.xml_params = xml_params;
-            ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateJSResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetFirstTransbyDateJS(inValue);
+            GetFirstTransbyDateJSResponse retVal = ((CSSoapServiceSoap)(this)).GetFirstTransbyDateJS(inValue);
             cookie = retVal.cookie;
             more_results = retVal.more_results;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateJSResponse> GetFirstTransbyDateJSAsync(ThirdParty.WebServices.Magaya.Services.GetFirstTransbyDateJSRequest request) {
+        public System.Threading.Tasks.Task<GetFirstTransbyDateJSResponse> GetFirstTransbyDateJSAsync(GetFirstTransbyDateJSRequest request) {
             return base.Channel.GetFirstTransbyDateJSAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetNextTransbyDateResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetNextTransbyDate(ThirdParty.WebServices.Magaya.Services.GetNextTransbyDateRequest request) {
+        GetNextTransbyDateResponse CSSoapServiceSoap.GetNextTransbyDate(GetNextTransbyDateRequest request) {
             return base.Channel.GetNextTransbyDate(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetNextTransbyDate(ref string cookie, out string trans_list_xml, out int more_results) {
-            ThirdParty.WebServices.Magaya.Services.GetNextTransbyDateRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetNextTransbyDateRequest();
+        public api_session_error GetNextTransbyDate(ref string cookie, out string trans_list_xml, out int more_results) {
+            GetNextTransbyDateRequest inValue = new GetNextTransbyDateRequest();
             inValue.cookie = cookie;
-            ThirdParty.WebServices.Magaya.Services.GetNextTransbyDateResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetNextTransbyDate(inValue);
+            GetNextTransbyDateResponse retVal = ((CSSoapServiceSoap)(this)).GetNextTransbyDate(inValue);
             cookie = retVal.cookie;
             trans_list_xml = retVal.trans_list_xml;
             more_results = retVal.more_results;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetNextTransbyDateResponse> GetNextTransbyDateAsync(ThirdParty.WebServices.Magaya.Services.GetNextTransbyDateRequest request) {
+        public System.Threading.Tasks.Task<GetNextTransbyDateResponse> GetNextTransbyDateAsync(GetNextTransbyDateRequest request) {
             return base.Channel.GetNextTransbyDateAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateJSResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetTransRangeByDateJS(ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateJSRequest request) {
+        GetTransRangeByDateJSResponse CSSoapServiceSoap.GetTransRangeByDateJS(GetTransRangeByDateJSRequest request) {
             return base.Channel.GetTransRangeByDateJS(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetTransRangeByDateJS(int access_key, string type, string start_date, string end_date, int flags, string function, string xml_params, out string trans_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateJSRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateJSRequest();
+        public api_session_error GetTransRangeByDateJS(int access_key, string type, string start_date, string end_date, int flags, string function, string xml_params, out string trans_list_xml) {
+            GetTransRangeByDateJSRequest inValue = new GetTransRangeByDateJSRequest();
             inValue.access_key = access_key;
             inValue.type = type;
             inValue.start_date = start_date;
@@ -4892,120 +4893,120 @@ namespace ThirdParty.WebServices.Magaya.Services {
             inValue.flags = flags;
             inValue.function = function;
             inValue.xml_params = xml_params;
-            ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateJSResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetTransRangeByDateJS(inValue);
+            GetTransRangeByDateJSResponse retVal = ((CSSoapServiceSoap)(this)).GetTransRangeByDateJS(inValue);
             trans_list_xml = retVal.trans_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateJSResponse> GetTransRangeByDateJSAsync(ThirdParty.WebServices.Magaya.Services.GetTransRangeByDateJSRequest request) {
+        public System.Threading.Tasks.Task<GetTransRangeByDateJSResponse> GetTransRangeByDateJSAsync(GetTransRangeByDateJSRequest request) {
             return base.Channel.GetTransRangeByDateJSAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetSecureTrackingTransactionResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetSecureTrackingTransaction(ThirdParty.WebServices.Magaya.Services.GetSecureTrackingTransactionRequest request) {
+        GetSecureTrackingTransactionResponse CSSoapServiceSoap.GetSecureTrackingTransaction(GetSecureTrackingTransactionRequest request) {
             return base.Channel.GetSecureTrackingTransaction(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetSecureTrackingTransaction(string user, string pass, string app, string number, out string trans_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetSecureTrackingTransactionRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetSecureTrackingTransactionRequest();
+        public api_session_error GetSecureTrackingTransaction(string user, string pass, string app, string number, out string trans_xml) {
+            GetSecureTrackingTransactionRequest inValue = new GetSecureTrackingTransactionRequest();
             inValue.user = user;
             inValue.pass = pass;
             inValue.app = app;
             inValue.number = number;
-            ThirdParty.WebServices.Magaya.Services.GetSecureTrackingTransactionResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetSecureTrackingTransaction(inValue);
+            GetSecureTrackingTransactionResponse retVal = ((CSSoapServiceSoap)(this)).GetSecureTrackingTransaction(inValue);
             trans_xml = retVal.trans_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetSecureTrackingTransactionResponse> GetSecureTrackingTransactionAsync(ThirdParty.WebServices.Magaya.Services.GetSecureTrackingTransactionRequest request) {
+        public System.Threading.Tasks.Task<GetSecureTrackingTransactionResponse> GetSecureTrackingTransactionAsync(GetSecureTrackingTransactionRequest request) {
             return base.Channel.GetSecureTrackingTransactionAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.InvokeResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.Invoke(ThirdParty.WebServices.Magaya.Services.InvokeRequest request) {
+        InvokeResponse CSSoapServiceSoap.Invoke(InvokeRequest request) {
             return base.Channel.Invoke(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error Invoke(int access_key, string operation, int flags, string input, out string output) {
-            ThirdParty.WebServices.Magaya.Services.InvokeRequest inValue = new ThirdParty.WebServices.Magaya.Services.InvokeRequest();
+        public api_session_error Invoke(int access_key, string operation, int flags, string input, out string output) {
+            InvokeRequest inValue = new InvokeRequest();
             inValue.access_key = access_key;
             inValue.operation = operation;
             inValue.flags = flags;
             inValue.input = input;
-            ThirdParty.WebServices.Magaya.Services.InvokeResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).Invoke(inValue);
+            InvokeResponse retVal = ((CSSoapServiceSoap)(this)).Invoke(inValue);
             output = retVal.output;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.InvokeResponse> InvokeAsync(ThirdParty.WebServices.Magaya.Services.InvokeRequest request) {
+        public System.Threading.Tasks.Task<InvokeResponse> InvokeAsync(InvokeRequest request) {
             return base.Channel.InvokeAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.ValidateSalesOrderResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.ValidateSalesOrder(ThirdParty.WebServices.Magaya.Services.ValidateSalesOrderRequest request) {
+        ValidateSalesOrderResponse CSSoapServiceSoap.ValidateSalesOrder(ValidateSalesOrderRequest request) {
             return base.Channel.ValidateSalesOrder(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error ValidateSalesOrder(int access_key, string sales_order_xml, out string result_xml, out string result_string) {
-            ThirdParty.WebServices.Magaya.Services.ValidateSalesOrderRequest inValue = new ThirdParty.WebServices.Magaya.Services.ValidateSalesOrderRequest();
+        public api_session_error ValidateSalesOrder(int access_key, string sales_order_xml, out string result_xml, out string result_string) {
+            ValidateSalesOrderRequest inValue = new ValidateSalesOrderRequest();
             inValue.access_key = access_key;
             inValue.sales_order_xml = sales_order_xml;
-            ThirdParty.WebServices.Magaya.Services.ValidateSalesOrderResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).ValidateSalesOrder(inValue);
+            ValidateSalesOrderResponse retVal = ((CSSoapServiceSoap)(this)).ValidateSalesOrder(inValue);
             result_xml = retVal.result_xml;
             result_string = retVal.result_string;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.ValidateSalesOrderResponse> ValidateSalesOrderAsync(ThirdParty.WebServices.Magaya.Services.ValidateSalesOrderRequest request) {
+        public System.Threading.Tasks.Task<ValidateSalesOrderResponse> ValidateSalesOrderAsync(ValidateSalesOrderRequest request) {
             return base.Channel.ValidateSalesOrderAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.CancelSalesOrderResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.CancelSalesOrder(ThirdParty.WebServices.Magaya.Services.CancelSalesOrderRequest request) {
+        CancelSalesOrderResponse CSSoapServiceSoap.CancelSalesOrder(CancelSalesOrderRequest request) {
             return base.Channel.CancelSalesOrder(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error CancelSalesOrder(int access_key, string sales_order_number, out string result_string) {
-            ThirdParty.WebServices.Magaya.Services.CancelSalesOrderRequest inValue = new ThirdParty.WebServices.Magaya.Services.CancelSalesOrderRequest();
+        public api_session_error CancelSalesOrder(int access_key, string sales_order_number, out string result_string) {
+            CancelSalesOrderRequest inValue = new CancelSalesOrderRequest();
             inValue.access_key = access_key;
             inValue.sales_order_number = sales_order_number;
-            ThirdParty.WebServices.Magaya.Services.CancelSalesOrderResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).CancelSalesOrder(inValue);
+            CancelSalesOrderResponse retVal = ((CSSoapServiceSoap)(this)).CancelSalesOrder(inValue);
             result_string = retVal.result_string;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.CancelSalesOrderResponse> CancelSalesOrderAsync(ThirdParty.WebServices.Magaya.Services.CancelSalesOrderRequest request) {
+        public System.Threading.Tasks.Task<CancelSalesOrderResponse> CancelSalesOrderAsync(CancelSalesOrderRequest request) {
             return base.Channel.CancelSalesOrderAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.SetTransactionChargesResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.SetTransactionCharges(ThirdParty.WebServices.Magaya.Services.SetTransactionChargesRequest request) {
+        SetTransactionChargesResponse CSSoapServiceSoap.SetTransactionCharges(SetTransactionChargesRequest request) {
             return base.Channel.SetTransactionCharges(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error SetTransactionCharges(int access_key, int flags, string type, string number, string charge_list_xml, out string error_desc) {
-            ThirdParty.WebServices.Magaya.Services.SetTransactionChargesRequest inValue = new ThirdParty.WebServices.Magaya.Services.SetTransactionChargesRequest();
+        public api_session_error SetTransactionCharges(int access_key, int flags, string type, string number, string charge_list_xml, out string error_desc) {
+            SetTransactionChargesRequest inValue = new SetTransactionChargesRequest();
             inValue.access_key = access_key;
             inValue.flags = flags;
             inValue.type = type;
             inValue.number = number;
             inValue.charge_list_xml = charge_list_xml;
-            ThirdParty.WebServices.Magaya.Services.SetTransactionChargesResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).SetTransactionCharges(inValue);
+            SetTransactionChargesResponse retVal = ((CSSoapServiceSoap)(this)).SetTransactionCharges(inValue);
             error_desc = retVal.error_desc;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SetTransactionChargesResponse> SetTransactionChargesAsync(ThirdParty.WebServices.Magaya.Services.SetTransactionChargesRequest request) {
+        public System.Threading.Tasks.Task<SetTransactionChargesResponse> SetTransactionChargesAsync(SetTransactionChargesRequest request) {
             return base.Channel.SetTransactionChargesAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.UpdatePODResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.UpdatePOD(ThirdParty.WebServices.Magaya.Services.UpdatePODRequest request) {
+        UpdatePODResponse CSSoapServiceSoap.UpdatePOD(UpdatePODRequest request) {
             return base.Channel.UpdatePOD(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error UpdatePOD(int access_key, string trans_type, string trans_uuid, string pod_xml, string delivered_items_xml, string undelivered_items_xml, string internal_comments, out string error_desc) {
-            ThirdParty.WebServices.Magaya.Services.UpdatePODRequest inValue = new ThirdParty.WebServices.Magaya.Services.UpdatePODRequest();
+        public api_session_error UpdatePOD(int access_key, string trans_type, string trans_uuid, string pod_xml, string delivered_items_xml, string undelivered_items_xml, string internal_comments, out string error_desc) {
+            UpdatePODRequest inValue = new UpdatePODRequest();
             inValue.access_key = access_key;
             inValue.trans_type = trans_type;
             inValue.trans_uuid = trans_uuid;
@@ -5013,88 +5014,88 @@ namespace ThirdParty.WebServices.Magaya.Services {
             inValue.delivered_items_xml = delivered_items_xml;
             inValue.undelivered_items_xml = undelivered_items_xml;
             inValue.internal_comments = internal_comments;
-            ThirdParty.WebServices.Magaya.Services.UpdatePODResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).UpdatePOD(inValue);
+            UpdatePODResponse retVal = ((CSSoapServiceSoap)(this)).UpdatePOD(inValue);
             error_desc = retVal.error_desc;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.UpdatePODResponse> UpdatePODAsync(ThirdParty.WebServices.Magaya.Services.UpdatePODRequest request) {
+        public System.Threading.Tasks.Task<UpdatePODResponse> UpdatePODAsync(UpdatePODRequest request) {
             return base.Channel.UpdatePODAsync(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error ApproveOrder(int access_key, string type, string number, string approved_by) {
+        public api_session_error ApproveOrder(int access_key, string type, string number, string approved_by) {
             return base.Channel.ApproveOrder(access_key, type, number, approved_by);
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> ApproveOrderAsync(int access_key, string type, string number, string approved_by) {
+        public System.Threading.Tasks.Task<api_session_error> ApproveOrderAsync(int access_key, string type, string number, string approved_by) {
             return base.Channel.ApproveOrderAsync(access_key, type, number, approved_by);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.SubmitPickupOrderResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.SubmitPickupOrder(ThirdParty.WebServices.Magaya.Services.SubmitPickupOrderRequest request) {
+        SubmitPickupOrderResponse CSSoapServiceSoap.SubmitPickupOrder(SubmitPickupOrderRequest request) {
             return base.Channel.SubmitPickupOrder(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error SubmitPickupOrder(int access_key, string pickup_order_xml, out string pickup_order_number, out string result_string) {
-            ThirdParty.WebServices.Magaya.Services.SubmitPickupOrderRequest inValue = new ThirdParty.WebServices.Magaya.Services.SubmitPickupOrderRequest();
+        public api_session_error SubmitPickupOrder(int access_key, string pickup_order_xml, out string pickup_order_number, out string result_string) {
+            SubmitPickupOrderRequest inValue = new SubmitPickupOrderRequest();
             inValue.access_key = access_key;
             inValue.pickup_order_xml = pickup_order_xml;
-            ThirdParty.WebServices.Magaya.Services.SubmitPickupOrderResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).SubmitPickupOrder(inValue);
+            SubmitPickupOrderResponse retVal = ((CSSoapServiceSoap)(this)).SubmitPickupOrder(inValue);
             pickup_order_number = retVal.pickup_order_number;
             result_string = retVal.result_string;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SubmitPickupOrderResponse> SubmitPickupOrderAsync(ThirdParty.WebServices.Magaya.Services.SubmitPickupOrderRequest request) {
+        public System.Threading.Tasks.Task<SubmitPickupOrderResponse> SubmitPickupOrderAsync(SubmitPickupOrderRequest request) {
             return base.Channel.SubmitPickupOrderAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.SetAttachmentResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.SetAttachment(ThirdParty.WebServices.Magaya.Services.SetAttachmentRequest request) {
+        SetAttachmentResponse CSSoapServiceSoap.SetAttachment(SetAttachmentRequest request) {
             return base.Channel.SetAttachment(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error SetAttachment(int access_key, int flags, string type, string number, string attach_xml, out string error_desc) {
-            ThirdParty.WebServices.Magaya.Services.SetAttachmentRequest inValue = new ThirdParty.WebServices.Magaya.Services.SetAttachmentRequest();
+        public api_session_error SetAttachment(int access_key, int flags, string type, string number, string attach_xml, out string error_desc) {
+            SetAttachmentRequest inValue = new SetAttachmentRequest();
             inValue.access_key = access_key;
             inValue.flags = flags;
             inValue.type = type;
             inValue.number = number;
             inValue.attach_xml = attach_xml;
-            ThirdParty.WebServices.Magaya.Services.SetAttachmentResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).SetAttachment(inValue);
+            SetAttachmentResponse retVal = ((CSSoapServiceSoap)(this)).SetAttachment(inValue);
             error_desc = retVal.error_desc;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.SetAttachmentResponse> SetAttachmentAsync(ThirdParty.WebServices.Magaya.Services.SetAttachmentRequest request) {
+        public System.Threading.Tasks.Task<SetAttachmentResponse> SetAttachmentAsync(SetAttachmentRequest request) {
             return base.Channel.SetAttachmentAsync(request);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ThirdParty.WebServices.Magaya.Services.GetAllAttachmentsResponse ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap.GetAllAttachments(ThirdParty.WebServices.Magaya.Services.GetAllAttachmentsRequest request) {
+        GetAllAttachmentsResponse CSSoapServiceSoap.GetAllAttachments(GetAllAttachmentsRequest request) {
             return base.Channel.GetAllAttachments(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error GetAllAttachments(int access_key, int flags, string type, string number, out string attach_list_xml) {
-            ThirdParty.WebServices.Magaya.Services.GetAllAttachmentsRequest inValue = new ThirdParty.WebServices.Magaya.Services.GetAllAttachmentsRequest();
+        public api_session_error GetAllAttachments(int access_key, int flags, string type, string number, out string attach_list_xml) {
+            GetAllAttachmentsRequest inValue = new GetAllAttachmentsRequest();
             inValue.access_key = access_key;
             inValue.flags = flags;
             inValue.type = type;
             inValue.number = number;
-            ThirdParty.WebServices.Magaya.Services.GetAllAttachmentsResponse retVal = ((ThirdParty.WebServices.Magaya.Services.CSSoapServiceSoap)(this)).GetAllAttachments(inValue);
+            GetAllAttachmentsResponse retVal = ((CSSoapServiceSoap)(this)).GetAllAttachments(inValue);
             attach_list_xml = retVal.attach_list_xml;
             return retVal.@return;
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.GetAllAttachmentsResponse> GetAllAttachmentsAsync(ThirdParty.WebServices.Magaya.Services.GetAllAttachmentsRequest request) {
+        public System.Threading.Tasks.Task<GetAllAttachmentsResponse> GetAllAttachmentsAsync(GetAllAttachmentsRequest request) {
             return base.Channel.GetAllAttachmentsAsync(request);
         }
         
-        public ThirdParty.WebServices.Magaya.Services.api_session_error SetParentEntity(int access_key, string entity_guid, string parent_guid) {
+        public api_session_error SetParentEntity(int access_key, string entity_guid, string parent_guid) {
             return base.Channel.SetParentEntity(access_key, entity_guid, parent_guid);
         }
         
-        public System.Threading.Tasks.Task<ThirdParty.WebServices.Magaya.Services.api_session_error> SetParentEntityAsync(int access_key, string entity_guid, string parent_guid) {
+        public System.Threading.Tasks.Task<api_session_error> SetParentEntityAsync(int access_key, string entity_guid, string parent_guid) {
             return base.Channel.SetParentEntityAsync(access_key, entity_guid, parent_guid);
         }
     }
