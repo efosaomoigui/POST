@@ -193,17 +193,17 @@ namespace GIGLS.Services.Implementation.Partnership
 
         private async Task UpdatePartnerTransactionPayment(ExternalPartnerTransactionsPaymentDTO partner)
         {
-            var transactions = await _uow.PartnerTransactions.FindAsync(x => x.UserId == partner.UserId 
-                                            && x.DateCreated >= partner.filterCriteria.StartDate 
-                                            && x.DateCreated <= partner.filterCriteria.EndDate);
+            //var transactions = await _uow.PartnerTransactions.FindAsync(x => x.UserId == partner.UserId 
+            //                                && x.DateCreated >= partner.filterCriteria.StartDate 
+            //                                && x.DateCreated <= partner.filterCriteria.EndDate);
 
-            if(transactions != null)
-            {
-                foreach (var transaction in transactions)
-                {
-                    transaction.IsProcessed = true;
-                }
-            }
+            //if(transactions != null)
+            //{
+            //    foreach (var transaction in transactions)
+            //    {
+            //        transaction.IsProcessed = true;
+            //    }
+            //}
 
             await AddPartnerWallet(partner);
         }
