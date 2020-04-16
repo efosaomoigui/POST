@@ -539,11 +539,11 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                      });
 
                     //setup login data
-                    HttpResponseMessage responseMessage = client.PostAsync("token", formContent).Result;
+                    HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
 
                     if (!responseMessage.IsSuccessStatusCode)
                     {
-                        throw new GenericException("Operation could not complete login successfully:");
+                        throw new GenericException("Incorrect Login Details");
                     }
 
                     //get access token from response body
