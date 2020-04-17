@@ -79,10 +79,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
         {
             try
             {
-                var MobilePickUpRequests = _context.MobilePickUpRequests.AsQueryable().Where(x => x.UserId == userId).ToList();
+                var MobilePickUpRequests = _context.MobilePickUpRequests.AsQueryable().Where(x => x.UserId == userId);
 
                 var MobilePickUpRequestsDto = (from mobilepickuprequest in MobilePickUpRequests
-                                              where mobilepickuprequest.DateCreated.Month == DateTime.Now.Month && mobilepickuprequest.DateCreated.Year== DateTime.Now.Year
+                                              where mobilepickuprequest.DateCreated.Month == DateTime.Now.Month && mobilepickuprequest.DateCreated.Year == DateTime.Now.Year
                                               select new MobilePickUpRequestsDTO
                                               {
                                                   DateCreated = mobilepickuprequest.DateCreated,
