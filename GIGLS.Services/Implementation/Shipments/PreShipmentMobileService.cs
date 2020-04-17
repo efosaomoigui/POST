@@ -1591,43 +1591,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() 
-                        || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString()
-                        || pickuprequest.Status == MobilePickUpRequestStatus.Missed.ToString())
-                    {
-                        var request = await _uow.MobilePickUpRequests.GetAsync(s => 
-                            s.Waybill == pickuprequest.Waybill && s.UserId == pickuprequest.UserId
-                            && (s.Status == MobilePickUpRequestStatus.Rejected.ToString() || s.Status == MobilePickUpRequestStatus.TimedOut.ToString() 
-                            || s.Status == MobilePickUpRequestStatus.Missed.ToString()));
-
-                        if (request == null)
-                        {
-                            await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
-                        }
-                        else if (request.Status == MobilePickUpRequestStatus.Missed.ToString()) {
-                            request.Status = pickuprequest.Status;
-                        }
-                        else
-                        {
-                            throw new GenericException($"Shipment with waybill number: {pickuprequest.Waybill} already exists");
-                        }
-                    }
-                    else if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString())
+                    if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString())
                     {
                         pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
 
-                        var newRequest = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.UserId == pickuprequest.UserId);
-                        if (newRequest == null) 
-                        {
-                            await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
-                        }
-                        else
-                        {
-                            newRequest.Status = pickuprequest.Status;
-                        }
+                        await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequests(pickuprequest);
 
                         //Update Activity Status
-                        await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OnDelivery);                        
+                        await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OnDelivery);
+                    }
+                    else if(pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString()
+                        || pickuprequest.Status == MobilePickUpRequestStatus.Missed.ToString())
+                    {
+                        await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequests(pickuprequest);                        
                     }
                     else
                     {
