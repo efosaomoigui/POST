@@ -116,7 +116,7 @@ namespace GIGLS.Services.Implementation.Wallet
                         PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
                         {
                             Waybill = paymentLog.Waybill,
-                            PaymentType = PaymentType.Cash,
+                            PaymentType = PaymentType.Online,
                             TransactionCode = paymentLog.Reference,
                             UserId = paymentLog.UserId
                         };
@@ -317,7 +317,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
                     {
                         Waybill = paymentLog.Waybill,
-                        PaymentType = PaymentType.Cash,
+                        PaymentType = PaymentType.Online,
                         TransactionCode = paymentLog.Reference,
                         UserId = paymentLog.UserId
                     };
