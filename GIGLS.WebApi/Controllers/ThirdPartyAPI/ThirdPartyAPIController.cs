@@ -505,7 +505,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         /// <returns></returns>
         [AllowAnonymous]
         [HttpPost]
-        [Route("user/login")]
+        [Route("login")]
         public async Task<IServiceResponse<JObject>> Login(UserloginDetailsModel userLoginModel)
         {
             var user = await _thirdPartyAPIService.CheckDetailsForLogin(userLoginModel.username);
