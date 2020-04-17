@@ -1596,8 +1596,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequests(pickuprequest);
                     }
-                    else if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString() && 
-                        (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString()))
+                    else if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString())
                     {
                         pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
                         await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequests(pickuprequest);
