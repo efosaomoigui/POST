@@ -1834,7 +1834,6 @@ namespace GIGLS.Services.Implementation.Shipments
             await _uow.CompleteAsync();
         }
 
-
         public async Task<bool> UpdateMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest)
         {
             try
@@ -1887,6 +1886,104 @@ namespace GIGLS.Services.Implementation.Shipments
                 else if (pickuprequest.Status == MobilePickUpRequestStatus.LogVisit.ToString())
                 {
                     await LogVisitMobilePickupRequest(pickuprequest, userId);
+                    await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OffDelivery);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        
+        public async Task<bool> UpdateMobilePickupRequestByGroup(MobilePickUpRequestsDTO pickuprequest)
+        {
+            try
+            {
+                var userId = await _userService.GetCurrentUserId();
+                pickuprequest.UserId = userId;
+
+                //The ones by group
+                if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() ||
+                            pickuprequest.Status == MobilePickUpRequestStatus.ProceedToPickUp.ToString() ||
+                            pickuprequest.Status == MobilePickUpRequestStatus.Arrived.ToString() ||
+                            pickuprequest.Status == MobilePickUpRequestStatus.Cancelled.ToString() ||
+                            pickuprequest.Status == MobilePickUpRequestStatus.LogVisit.ToString())
+                {
+                    var groupList = await _uow.MobileGroupCodeWaybillMapping.FindAsync(x => x.GroupCodeNumber == pickuprequest.GroupCodeNumber);
+                    if (groupList == null)
+                    {
+                        throw new GenericException("Group does not exist");
+                    }
+                    else
+                    {
+                        var waybillList = new HashSet<string>();
+
+                        foreach (var item in groupList)
+                        {
+                            if (item.WaybillNumber != null)
+                            {
+                                waybillList.Add(item.WaybillNumber);
+                            }
+                        }
+
+                        foreach (var waybillNumber in waybillList)
+                        {
+                            pickuprequest.Waybill = waybillNumber;
+                            await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
+
+                            if(pickuprequest.Status == MobilePickUpRequestStatus.Cancelled.ToString())
+                            {
+                                await ScanMobileShipment(new ScanDTO
+                                {
+                                    WaybillNumber = waybillNumber,
+                                    ShipmentScanStatus = ShipmentScanStatus.SSC
+                                });
+                            }
+                            else if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
+                            {
+                                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == waybillNumber);
+                                preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
+                                await _uow.CompleteAsync();
+                            }
+                            else if (pickuprequest.Status == MobilePickUpRequestStatus.LogVisit.ToString())
+                            {
+                                await LogVisitMobilePickupRequestByGroup(pickuprequest, userId);
+                            }
+
+                        }
+                    }
+                }
+
+                else 
+                {
+                    await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
+                    if (pickuprequest.Status == MobilePickUpRequestStatus.Confirmed.ToString())
+                    {
+                        await ConfirmMobilePickupRequest(pickuprequest, userId);
+                    }
+                    else if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
+                    {
+                        await DeliveredMobilePickupRequest(pickuprequest, userId);
+                        //await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OffDelivery);
+                    }
+                    else if (pickuprequest.Status == MobilePickUpRequestStatus.Dispute.ToString())
+                    {
+                        var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
+                        preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Dispute.ToString();
+                        //pickuprequest.Status = MobilePickUpRequestStatus.Dispute.ToString();
+                        //await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
+                        await _uow.CompleteAsync();
+                    }
+
+                }
+
+                if(pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString() || 
+                    pickuprequest.Status == MobilePickUpRequestStatus.Cancelled.ToString() ||
+                    pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() ||
+                    pickuprequest.Status == MobilePickUpRequestStatus.LogVisit.ToString())
+                {
                     await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OffDelivery);
                 }
 
@@ -2176,6 +2273,55 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 await _messageSenderService.SendGenericEmailMessage(MessageType.MATD, emailMessageExtensionDTO);
                 await _messageSenderService.SendMessage(MessageType.MATD, EmailSmsType.SMS, smsMessageExtensionDTO);
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private async Task LogVisitMobilePickupRequestByGroup(MobilePickUpRequestsDTO pickuprequest, string userId)
+        {
+            try
+            {
+                var mobileRequest = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill);
+                if (mobileRequest == null)
+                {
+                    throw new GenericException("Shipment item does not exist in Pickup");
+                }
+                else
+                {
+                    mobileRequest.Status = MobilePickUpRequestStatus.Visited.ToString();
+                }
+                var preshipmentMobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
+                if (preshipmentMobile == null)
+                {
+                    throw new GenericException("Shipment item does not exist");
+                }
+                preshipmentMobile.shipmentstatus = MobilePickUpRequestStatus.Visited.ToString();
+
+                await _uow.CompleteAsync();
+
+                //var user = await _userService.GetUserByChannelCode(preshipmentMobile.CustomerCode);
+
+                //var emailMessageExtensionDTO = new MobileMessageDTO()
+                //{
+                //    SenderName = user.FirstName + " " + user.LastName,
+                //    SenderEmail = user.Email,
+                //    WaybillNumber = preshipmentMobile.Waybill,
+                //    SenderPhoneNumber = preshipmentMobile.SenderPhoneNumber
+                //};
+
+                //var smsMessageExtensionDTO = new MobileMessageDTO()
+                //{
+                //    SenderName = preshipmentMobile.ReceiverName,
+                //    WaybillNumber = preshipmentMobile.Waybill,
+                //    SenderPhoneNumber = preshipmentMobile.ReceiverPhoneNumber
+                //};
+
+                //await _messageSenderService.SendGenericEmailMessage(MessageType.MATD, emailMessageExtensionDTO);
+                //await _messageSenderService.SendMessage(MessageType.MATD, EmailSmsType.SMS, smsMessageExtensionDTO);
 
             }
             catch (Exception ex)
