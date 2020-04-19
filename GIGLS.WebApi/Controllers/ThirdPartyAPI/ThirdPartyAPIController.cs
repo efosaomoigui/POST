@@ -5,6 +5,7 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.Wallet;
@@ -38,306 +39,306 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
             _thirdPartyAPIService = portalService;
         }
 
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpPost]
-        [Route("haulageprice")]
-        private async Task<IServiceResponse<decimal>> GetHaulagePrice(HaulagePricingDTO haulagePricingDto)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var price = await _thirdPartyAPIService.GetHaulagePrice(haulagePricingDto);
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpPost]
+        //[Route("haulageprice")]
+        //private async Task<IServiceResponse<decimal>> GetHaulagePrice(HaulagePricingDTO haulagePricingDto)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var price = await _thirdPartyAPIService.GetHaulagePrice(haulagePricingDto);
 
-                return new ServiceResponse<decimal>
-                {
-                    Object = price
-                };
-            });
-        }
+        //        return new ServiceResponse<decimal>
+        //        {
+        //            Object = price
+        //        };
+        //    });
+        //}
 
-        //Route API
-
-
-        //Track API
+        ////Route API
 
 
-        //Invoice API
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("invoice")]
-        private async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetInvoices()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var invoice = await _thirdPartyAPIService.GetInvoices();
+        ////Track API
 
-                return new ServiceResponse<IEnumerable<InvoiceViewDTO>>
-                {
-                    Object = invoice
-                };
-            });
-        }
 
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("bywaybill/{waybill}")]
-        private async Task<IServiceResponse<InvoiceDTO>> GetInvoiceByWaybill([FromUri]  string waybill)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var invoice = await _thirdPartyAPIService.GetInvoiceByWaybill(waybill);
+        ////Invoice API
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("invoice")]
+        //private async Task<IServiceResponse<IEnumerable<InvoiceViewDTO>>> GetInvoices()
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var invoice = await _thirdPartyAPIService.GetInvoices();
 
-                return new ServiceResponse<InvoiceDTO>
-                {
-                    Object = invoice
-                };
-            });
-        }
+        //        return new ServiceResponse<IEnumerable<InvoiceViewDTO>>
+        //        {
+        //            Object = invoice
+        //        };
+        //    });
+        //}
 
-        //Transaction History API
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpPost]
-        [Route("transaction")]
-        private async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var invoices = await _thirdPartyAPIService.GetShipmentTransactions(f_Criteria);
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("bywaybill/{waybill}")]
+        //private async Task<IServiceResponse<InvoiceDTO>> GetInvoiceByWaybill([FromUri]  string waybill)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var invoice = await _thirdPartyAPIService.GetInvoiceByWaybill(waybill);
 
-                return new ServiceResponse<List<InvoiceViewDTO>>
-                {
-                    Object = invoices
-                };
-            });
-        }
+        //        return new ServiceResponse<InvoiceDTO>
+        //        {
+        //            Object = invoice
+        //        };
+        //    });
+        //}
 
-        //General API
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("dashboard")]
-        private async Task<IServiceResponse<DashboardDTO>> GetDashboard()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var dashboard = await _thirdPartyAPIService.GetDashboard();
+        ////Transaction History API
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpPost]
+        //[Route("transaction")]
+        //private async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentFilterCriteria f_Criteria)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var invoices = await _thirdPartyAPIService.GetShipmentTransactions(f_Criteria);
 
-                return new ServiceResponse<DashboardDTO>
-                {
-                    Object = dashboard
-                };
-            });
-        }
+        //        return new ServiceResponse<List<InvoiceViewDTO>>
+        //        {
+        //            Object = invoices
+        //        };
+        //    });
+        //}
 
-        //For Quick Quotes
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("wallet")]
-        private async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactions()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var walletTransactionSummary = await _thirdPartyAPIService.GetWalletTransactions();
+        ////General API
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("dashboard")]
+        //private async Task<IServiceResponse<DashboardDTO>> GetDashboard()
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var dashboard = await _thirdPartyAPIService.GetDashboard();
 
-                return new ServiceResponse<WalletTransactionSummaryDTO>
-                {
-                    Object = walletTransactionSummary
-                };
-            });
-        }
+        //        return new ServiceResponse<DashboardDTO>
+        //        {
+        //            Object = dashboard
+        //        };
+        //    });
+        //}
 
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("cod")]
-        private async Task<IServiceResponse<CashOnDeliveryAccountSummaryDTO>> GetCashOnDeliveryAccount()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var result = await _thirdPartyAPIService.GetCashOnDeliveryAccount();
+        ////For Quick Quotes
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("wallet")]
+        //private async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactions()
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var walletTransactionSummary = await _thirdPartyAPIService.GetWalletTransactions();
 
-                return new ServiceResponse<CashOnDeliveryAccountSummaryDTO>
-                {
-                    Object = result
-                };
-            });
-        }
+        //        return new ServiceResponse<WalletTransactionSummaryDTO>
+        //        {
+        //            Object = walletTransactionSummary
+        //        };
+        //    });
+        //}
 
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("partialPaymentTransaction/{waybill}")]
-        private async Task<IServiceResponse<IEnumerable<PaymentPartialTransactionDTO>>> GetPartialPaymentTransaction(string waybill)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var payment = await _thirdPartyAPIService.GetPartialPaymentTransaction(waybill);
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("cod")]
+        //private async Task<IServiceResponse<CashOnDeliveryAccountSummaryDTO>> GetCashOnDeliveryAccount()
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var result = await _thirdPartyAPIService.GetCashOnDeliveryAccount();
 
-                return new ServiceResponse<IEnumerable<PaymentPartialTransactionDTO>>
-                {
-                    Object = payment
-                };
-            });
-        }
+        //        return new ServiceResponse<CashOnDeliveryAccountSummaryDTO>
+        //        {
+        //            Object = result
+        //        };
+        //    });
+        //}
 
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("state")]
-        private async Task<IServiceResponse<IEnumerable<StateDTO>>> GetStates(int pageSize = 10, int page = 1)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var state = await _thirdPartyAPIService.GetStates(pageSize, page);
-                var total = _thirdPartyAPIService.GetStatesTotal();
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("partialPaymentTransaction/{waybill}")]
+        //private async Task<IServiceResponse<IEnumerable<PaymentPartialTransactionDTO>>> GetPartialPaymentTransaction(string waybill)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var payment = await _thirdPartyAPIService.GetPartialPaymentTransaction(waybill);
 
-                return new ServiceResponse<IEnumerable<StateDTO>>
-                {
-                    Total = total,
-                    Object = state
-                };
-            });
-        }
+        //        return new ServiceResponse<IEnumerable<PaymentPartialTransactionDTO>>
+        //        {
+        //            Object = payment
+        //        };
+        //    });
+        //}
 
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("localservicecentre")]
-        private async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetLocalServiceCentres()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var centres = await _thirdPartyAPIService.GetLocalServiceCentres();
-                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
-                {
-                    Object = centres
-                };
-            });
-        }
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("state")]
+        //private async Task<IServiceResponse<IEnumerable<StateDTO>>> GetStates(int pageSize = 10, int page = 1)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var state = await _thirdPartyAPIService.GetStates(pageSize, page);
+        //        var total = _thirdPartyAPIService.GetStatesTotal();
 
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("deliveryoption")]
-        private async Task<IServiceResponse<IEnumerable<DeliveryOptionDTO>>> GetDeliveryOptions()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var delivery = await _thirdPartyAPIService.GetDeliveryOptions();
+        //        return new ServiceResponse<IEnumerable<StateDTO>>
+        //        {
+        //            Total = total,
+        //            Object = state
+        //        };
+        //    });
+        //}
 
-                return new ServiceResponse<IEnumerable<DeliveryOptionDTO>>
-                {
-                    Object = delivery
-                };
-            });
-        }
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("localservicecentre")]
+        //private async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetLocalServiceCentres()
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var centres = await _thirdPartyAPIService.GetLocalServiceCentres();
+        //        return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+        //        {
+        //            Object = centres
+        //        };
+        //    });
+        //}
 
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("specialdomesticpackage")]
-        private async Task<IServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>> GetSpecialDomesticPackages()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var packages = await _thirdPartyAPIService.GetSpecialDomesticPackages();
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("deliveryoption")]
+        //private async Task<IServiceResponse<IEnumerable<DeliveryOptionDTO>>> GetDeliveryOptions()
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var delivery = await _thirdPartyAPIService.GetDeliveryOptions();
 
-                return new ServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>
-                {
-                    Object = packages
-                };
-            });
-        }
+        //        return new ServiceResponse<IEnumerable<DeliveryOptionDTO>>
+        //        {
+        //            Object = delivery
+        //        };
+        //    });
+        //}
 
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("haulage")]
-        private async Task<IServiceResponse<IEnumerable<HaulageDTO>>> GetHaulages()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var haulage = await _thirdPartyAPIService.GetHaulages();
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("specialdomesticpackage")]
+        //private async Task<IServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>> GetSpecialDomesticPackages()
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var packages = await _thirdPartyAPIService.GetSpecialDomesticPackages();
 
-                return new ServiceResponse<IEnumerable<HaulageDTO>>
-                {
-                    Object = haulage
-                };
-            });
-        }
+        //        return new ServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>
+        //        {
+        //            Object = packages
+        //        };
+        //    });
+        //}
 
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("vat")]
-        private async Task<IServiceResponse<VATDTO>> GetVATs()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var vat = await _thirdPartyAPIService.GetVATs();
-                return new ServiceResponse<VATDTO>
-                {
-                    Object = vat
-                };
-            });
-        }
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("haulage")]
+        //private async Task<IServiceResponse<IEnumerable<HaulageDTO>>> GetHaulages()
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var haulage = await _thirdPartyAPIService.GetHaulages();
 
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("insurance")]
-        private async Task<IServiceResponse<InsuranceDTO>> GetInsurances()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var insurance = await _thirdPartyAPIService.GetInsurances();
-                return new ServiceResponse<InsuranceDTO>
-                {
-                    Object = insurance
-                };
-            });
-        }
+        //        return new ServiceResponse<IEnumerable<HaulageDTO>>
+        //        {
+        //            Object = haulage
+        //        };
+        //    });
+        //}
 
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("{departure:int}/{destination:int}")]
-        private async Task<IServiceResponse<DomesticRouteZoneMapDTO>> GetZone(int departure, int destination)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var zone = await _thirdPartyAPIService.GetZone(departure, destination);
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("vat")]
+        //private async Task<IServiceResponse<VATDTO>> GetVATs()
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var vat = await _thirdPartyAPIService.GetVATs();
+        //        return new ServiceResponse<VATDTO>
+        //        {
+        //            Object = vat
+        //        };
+        //    });
+        //}
 
-                return new ServiceResponse<DomesticRouteZoneMapDTO>
-                {
-                    Object = zone
-                };
-            });
-        }
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("insurance")]
+        //private async Task<IServiceResponse<InsuranceDTO>> GetInsurances()
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var insurance = await _thirdPartyAPIService.GetInsurances();
+        //        return new ServiceResponse<InsuranceDTO>
+        //        {
+        //            Object = insurance
+        //        };
+        //    });
+        //}
 
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("user/{userId}")]
-        private async Task<IServiceResponse<CustomerDTO>> GetUser(string userId)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var user = await _thirdPartyAPIService.GetCustomer(userId);
-                return new ServiceResponse<CustomerDTO>
-                {
-                    Object = user
-                };
-            });
-        }
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("{departure:int}/{destination:int}")]
+        //private async Task<IServiceResponse<DomesticRouteZoneMapDTO>> GetZone(int departure, int destination)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var zone = await _thirdPartyAPIService.GetZone(departure, destination);
 
-        [ThirdPartyActivityAuthorize(Activity = "Update")]
-        [HttpPut]
-        [Route("changepassword/{userid}/{currentPassword}/{newPassword}")]
-        private async Task<IServiceResponse<bool>> ChangePassword(string userid, string currentPassword, string newPassword)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var result = await _thirdPartyAPIService.ChangePassword(userid, currentPassword, newPassword);
+        //        return new ServiceResponse<DomesticRouteZoneMapDTO>
+        //        {
+        //            Object = zone
+        //        };
+        //    });
+        //}
 
-                if (!result.Succeeded)
-                {
-                    throw new GenericException("Operation could not complete successfully");
-                }
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("user/{userId}")]
+        //private async Task<IServiceResponse<CustomerDTO>> GetUser(string userId)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var user = await _thirdPartyAPIService.GetCustomer(userId);
+        //        return new ServiceResponse<CustomerDTO>
+        //        {
+        //            Object = user
+        //        };
+        //    });
+        //}
 
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
+        //[ThirdPartyActivityAuthorize(Activity = "Update")]
+        //[HttpPut]
+        //[Route("changepassword/{userid}/{currentPassword}/{newPassword}")]
+        //private async Task<IServiceResponse<bool>> ChangePassword(string userid, string currentPassword, string newPassword)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var result = await _thirdPartyAPIService.ChangePassword(userid, currentPassword, newPassword);
+
+        //        if (!result.Succeeded)
+        //        {
+        //            throw new GenericException("Operation could not complete successfully");
+        //        }
+
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Object = true
+        //        };
+        //    });
+        //}
 
 
         //////////////////////////////PUBLIC API//////////////////////////////////////////////////////////////////
@@ -417,23 +418,23 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         /// <summary>
         /// This api is used to track shipment created by the user
         /// </summary>
-        /// <param name="waybillNumber"></param>
-        /// <returns></returns>
-        [ThirdPartyActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("TrackShipment/{waybillNumber}")]
-        public async Task<IServiceResponse<IEnumerable<ShipmentTrackingDTO>>> TrackShipment(string waybillNumber)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var result = await _thirdPartyAPIService.TrackShipment(waybillNumber);
+        /// <param name = "waybillNumber" ></ param >
+        /// < returns ></ returns >
+        //[ThirdPartyActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("TrackShipment/{waybillNumber}")]
+        //public async Task<IServiceResponse<IEnumerable<ShipmentTrackingDTO>>> TrackShipment(string waybillNumber)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var result = await _thirdPartyAPIService.TrackShipment(waybillNumber);
 
-                return new ServiceResponse<IEnumerable<ShipmentTrackingDTO>>
-                {
-                    Object = result
-                };
-            });
-        }
+        //        return new ServiceResponse<IEnumerable<ShipmentTrackingDTO>>
+        //        {
+        //            Object = result
+        //        };
+        //    });
+        //}
 
         /// <summary>
         /// This api is used to track all shipments
@@ -462,7 +463,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         /// <returns></returns>
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("LocalStations")]
+        [Route("localStations")]
         public async Task<IServiceResponse<IEnumerable<StationDTO>>> GetLocalStations()
         {
             return await HandleApiOperationAsync(async () =>
@@ -504,18 +505,15 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         /// <returns></returns>
         [AllowAnonymous]
         [HttpPost]
-        [Route("user/login")]
+        [Route("login")]
         public async Task<IServiceResponse<JObject>> Login(UserloginDetailsModel userLoginModel)
         {
-            //trim
-            if (userLoginModel.username != null)
-            {
-                userLoginModel.username = userLoginModel.username.Trim();
-            }
+            var user = await _thirdPartyAPIService.CheckDetailsForLogin(userLoginModel.username);
 
-            if (userLoginModel.Password != null)
+            //trim
+            if (user.Username != null)
             {
-                userLoginModel.Password = userLoginModel.Password.Trim();
+                user.Username = user.Username.Trim();
             }
 
             string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
@@ -534,7 +532,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                     var formContent = new FormUrlEncodedContent(new[]
                     {
                          new KeyValuePair<string, string>("grant_type", "password"),
-                         new KeyValuePair<string, string>("Username", userLoginModel.username),
+                         new KeyValuePair<string, string>("Username", user.Username),
                          new KeyValuePair<string, string>("Password", userLoginModel.Password),
                      });
 
@@ -570,14 +568,14 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         [ThirdPartyActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("PickUpRequests")]
-        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> ViewShipment()
+        public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentCollectionFilterCriteria f_Criteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var PreshipMentMobile = await _thirdPartyAPIService.GetPreShipmentById();
-                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                var preshipMentMobile = await _thirdPartyAPIService.GetShipmentTransactions(f_Criteria);
+                return new ServiceResponse<List<InvoiceViewDTO>>
                 {
-                    Object = PreshipMentMobile,
+                    Object = preshipMentMobile
                 };
             });
         }
@@ -593,7 +591,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _thirdPartyAPIService.TrackMobileShipment(waybillNumber);
+                var result = await _thirdPartyAPIService.TrackShipment(waybillNumber);
 
                 return new ServiceResponse<MobileShipmentTrackingHistoryDTO>
                 {

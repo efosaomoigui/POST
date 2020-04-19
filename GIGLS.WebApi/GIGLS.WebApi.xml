@@ -121,13 +121,6 @@
             <param name="thirdPartyPreShipmentDTO"></param>
             <returns></returns>
         </member>
-        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.TrackShipment(System.String)">
-            <summary>
-            This api is used to track shipment created by the user
-            </summary>
-            <param name="waybillNumber"></param>
-            <returns></returns>
-        </member>
         <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.PublicTrackShipment(System.String)">
             <summary>
             This api is used to track all shipments
@@ -155,7 +148,7 @@
             <param name="userLoginModel"></param>
             <returns></returns>
         </member>
-        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.ViewShipment">
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.GetShipmentTransactions(GIGLS.Core.DTO.Report.ShipmentCollectionFilterCriteria)">
             <summary>
             This api is used to get shipments created by user
             </summary>
