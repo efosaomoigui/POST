@@ -295,7 +295,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 centre.IsHUB = service.IsHUB;
                 _uow.Complete();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

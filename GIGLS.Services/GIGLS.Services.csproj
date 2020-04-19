@@ -172,7 +172,6 @@
   <ItemGroup>
     <Compile Include="Business\CustomerPortal\CustomerPortalService.cs" />
     <Compile Include="Business\Magaya\MagayaService.cs" />
-    <Compile Include="Business\PackagingAndShipment\ShipmentPackaging.cs" />
     <Compile Include="Business\Payment\PaymentService.cs" />
     <Compile Include="Business\Pricing\PricingService.cs" />
     <Compile Include="Business\Scanning\ScanService.cs" />
@@ -533,6 +532,7 @@
     <Folder Include="Business\AdminConsole\" />
     <Folder Include="Business\Finance\" />
     <Folder Include="Business\OrderManagement\" />
+    <Folder Include="Business\PackagingAndShipment\" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />

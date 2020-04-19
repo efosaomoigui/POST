@@ -115,7 +115,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
                 return totaltransactions;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

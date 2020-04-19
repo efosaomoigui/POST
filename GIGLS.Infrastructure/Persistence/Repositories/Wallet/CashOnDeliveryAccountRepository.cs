@@ -95,7 +95,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Wallet
             }
             catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 

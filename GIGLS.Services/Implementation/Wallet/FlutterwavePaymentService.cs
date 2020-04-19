@@ -241,11 +241,16 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<string> GetSecurityKey()
         {
             var securityKey = ConfigurationManager.AppSettings["FlutterwaveApiSecurityKey"];
-            return await Decrypt(securityKey);
+            return await Task.FromResult(Decrypt(securityKey));
         }
 
-        public async Task<string> Decrypt(string cipherText)
+        public static string Decrypt(string cipherText)
         {
+            if (cipherText is null)
+            {
+                throw new ArgumentNullException(nameof(cipherText));
+            }
+
             string EncryptionKey = "abc123";
             cipherText = cipherText.Replace(" ", "+");
             byte[] cipherBytes = Convert.FromBase64String(cipherText);

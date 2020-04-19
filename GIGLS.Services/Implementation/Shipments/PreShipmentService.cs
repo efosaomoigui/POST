@@ -183,7 +183,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return preShipmentDto;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

@@ -48,9 +48,7 @@ namespace GIGLS.Services.Implementation.Wallet
             // Initializing a transaction
             var response = api.Transactions.Initialize(wpd.Email, wpd.PaystackAmount);
 
-            //return response.Status;
             return response.Status;
-
         }
 
         //not used for now

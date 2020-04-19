@@ -61,34 +61,42 @@ namespace GIGLS.Services.Implementation.Account
 
         public async Task<object> AddGeneralLedger(GeneralLedgerDTO generalLedgerDto)
         {
-            var newGeneralLedger = Mapper.Map<GeneralLedger>(generalLedgerDto);
-            newGeneralLedger.DateOfEntry = DateTime.Now;
-            
-            if (generalLedgerDto.UserId == null)
-            {
-                newGeneralLedger.UserId = await _userService.GetCurrentUserId();
-            }
-
-            if (generalLedgerDto.ServiceCentreId < 1)
-            {
-                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-                newGeneralLedger.ServiceCentreId = serviceCenterIds[0];
-            }
-
-            ////--start--///Set the DepartureCountryId
-            int countryIdFromServiceCentreId = 0;
             try
             {
+                var newGeneralLedger = Mapper.Map<GeneralLedger>(generalLedgerDto);
+                newGeneralLedger.DateOfEntry = DateTime.Now;
+
+                if(generalLedgerDto != null)
+                {
+                    if (generalLedgerDto.UserId == null)
+                    {
+                        newGeneralLedger.UserId = await _userService.GetCurrentUserId();
+                    }
+
+                    if (generalLedgerDto.ServiceCentreId < 1)
+                    {
+                        var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                        newGeneralLedger.ServiceCentreId = serviceCenterIds[0];
+                    }
+                }
+
+                ////--start--///Set the DepartureCountryId
+                int countryIdFromServiceCentreId = 0;
+
                 var departureCountry = await _uow.Country.GetCountryByServiceCentreId(newGeneralLedger.ServiceCentreId);
                 countryIdFromServiceCentreId = departureCountry.CountryId;
+
+                ////--end--///Set the DepartureCountryId
+                newGeneralLedger.CountryId = countryIdFromServiceCentreId;
+                _uow.GeneralLedger.Add(newGeneralLedger);
+                await _uow.CompleteAsync();
+
+                return new { id = newGeneralLedger.GeneralLedgerId };
             }
-            catch (Exception) { }
-            ////--end--///Set the DepartureCountryId
-            
-            newGeneralLedger.CountryId = countryIdFromServiceCentreId;
-            _uow.GeneralLedger.Add(newGeneralLedger);
-            await _uow.CompleteAsync();
-            return new { id = newGeneralLedger.GeneralLedgerId };
+            catch (Exception) 
+            {
+                throw;
+            }
         }
 
         public async Task UpdateGeneralLedger(int generalLedgerId, GeneralLedgerDTO generalLedgerDto)
