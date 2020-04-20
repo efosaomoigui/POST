@@ -1666,7 +1666,6 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var newPreShipmentList = new List<PreShipmentMobileDTO>();
                 if(pickuprequest.UserId == null)
                 {
                     pickuprequest.UserId = await _userService.GetCurrentUserId();
@@ -1679,131 +1678,150 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    var waybillList = new HashSet<string>();
+                    var waybillHashSet = new HashSet<string>();
 
                     foreach(var item in groupList)
                     {
                         if (item.WaybillNumber != null)
                         {
-                            waybillList.Add(item.WaybillNumber);
+                            waybillHashSet.Add(item.WaybillNumber);
                         }
                     }
+                    var waybillList = waybillHashSet.ToList();
+
+                    //I need to find a way to get the other things in PreShipmentMobile
+                    //var allpreshipmentmobile = await _uow.PreShipmentMobile.FindAsync(s => waybillList.Contains(s.Waybill), "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
+                    var allpreshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill)).ToList();
                     
-                    var allpreshipmentmobile = await _uow.PreShipmentMobile.FindAsync(s => waybillList.Contains(s.Waybill), "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
                     var mobilePickupRequest = new List<MobilePickUpRequests>();
                     var country = await _uow.Country.GetCountryByStationId(allpreshipmentmobile.FirstOrDefault().SenderStationId);
                     var onDelivery = false;
 
-                    foreach (var waybillNumber in waybillList)
-                    {
-                        var preshipment = allpreshipmentmobile.Where(x => x.Waybill == waybillNumber).FirstOrDefault();
-
-                        if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString()
+                    if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString()
                                 || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString()
                                 || pickuprequest.Status == MobilePickUpRequestStatus.Missed.ToString())
+                    {
+                        var request = _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill)
+                             && s.UserId == pickuprequest.UserId
+                            && (s.Status == MobilePickUpRequestStatus.Rejected.ToString() || s.Status == MobilePickUpRequestStatus.TimedOut.ToString()
+                            || s.Status == MobilePickUpRequestStatus.Missed.ToString()));
+
+                        if (request == null)
                         {
-                            var request = await _uow.MobilePickUpRequests.GetAsync(s =>
-                                s.Waybill == waybillNumber && s.UserId == pickuprequest.UserId
-                                && (s.Status == MobilePickUpRequestStatus.Rejected.ToString() || s.Status == MobilePickUpRequestStatus.TimedOut.ToString()
-                                || s.Status == MobilePickUpRequestStatus.Missed.ToString()));
-
-                            if (request == null)
-                            {
-                                //Add new request
-                                var newrequest = new MobilePickUpRequests
-                                {
-                                   Status = pickuprequest.Status,
-                                   Waybill = waybillNumber,
-                                   UserId = pickuprequest.UserId,
-                                   Reason = pickuprequest.Reason,
-                                };
-
-                                mobilePickupRequest.Add(newrequest);
-                                //await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
-                            }
-                            else if (request.Status == MobilePickUpRequestStatus.Missed.ToString())
-                            {
-                                request.Status = pickuprequest.Status;
-                            }
-                            else
-                            {
-                                throw new GenericException($"Shipment with waybill number: {waybillNumber} already exists");
-                            }
-                        }
-
-                        else if (preshipment.shipmentstatus == "Shipment created" || preshipment.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString())
-                        {
-                            pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
-                            onDelivery = true;
-
-                            var newRequest = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == waybillNumber && s.UserId == pickuprequest.UserId);
-                            if (newRequest == null)
+                            foreach(var waybill in waybillList)
                             {
                                 //Add new request
                                 var newrequest = new MobilePickUpRequests
                                 {
                                     Status = pickuprequest.Status,
-                                    Waybill = waybillNumber,
+                                    Waybill = waybill,
+                                    UserId = pickuprequest.UserId,
+                                    Reason = pickuprequest.Reason,
+                                };
+
+                                mobilePickupRequest.Add(newrequest);
+                            }
+                            //await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
+                        }
+                        else if (request.All(x => x.Status == MobilePickUpRequestStatus.Missed.ToString()))
+                        {
+                            await _mobilepickuprequestservice.UpdateMobilePickUpRequestsForWaybillList(waybillList, pickuprequest.UserId, MobilePickUpRequestStatus.Missed.ToString());
+                            //request.Status = pickuprequest.Status;
+                        }
+                        else
+                        {
+                            throw new GenericException($"Shipment with group number: {pickuprequest.GroupCodeNumber} already exists");
+                        }
+                    }
+
+                    else if (allpreshipmentmobile.All(x => x.shipmentstatus == "Shipment created" || x.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString() ))
+                    {
+                        pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
+                        onDelivery = true;
+
+                        var newRequest =  _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill) && s.UserId == pickuprequest.UserId);
+                        if (newRequest == null)
+                        {
+                            foreach(var waybill in waybillList)
+                            {
+                                //Add new request
+                                var newrequest = new MobilePickUpRequests
+                                {
+                                    Status = pickuprequest.Status,
+                                    Waybill = waybill,
                                     UserId = pickuprequest.UserId,
                                     Reason = pickuprequest.Reason
                                 };
 
                                 mobilePickupRequest.Add(newrequest);
+                            }
 
-                                //await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
-                            }
-                            else
-                            {
-                                newRequest.Status = pickuprequest.Status;
-                            }
+                            //await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
                         }
                         else
                         {
-                            throw new GenericException($"Shipment has already been accepted..");
+                            await _mobilepickuprequestservice.UpdateMobilePickUpRequestsForWaybillList(waybillList, pickuprequest.UserId, pickuprequest.Status);
+                            //newRequest.Status = pickuprequest.Status;
                         }
+                    }
+                    else
+                    {
+                        throw new GenericException($"Shipment has already been accepted..");
+                    }
 
-                        if (pickuprequest.ServiceCentreId != null)
+                    string serviceCentreAddress = null;
+                    double? latitude = null;
+                    double? longitude = null;
+
+                    if (pickuprequest.ServiceCentreId != null)
+                    {
+                        var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickuprequest.ServiceCentreId);
+
+                        allpreshipmentmobile.ForEach(x => x.ServiceCentreAddress = DestinationServiceCentreId.Address);
+
+                        var Locationdto = new LocationDTO
                         {
-                            var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickuprequest.ServiceCentreId);
-                            preshipment.ServiceCentreAddress = DestinationServiceCentreId.Address;
-                            var Locationdto = new LocationDTO
-                            {
-                                Latitude = DestinationServiceCentreId.Latitude,
-                                Longitude = DestinationServiceCentreId.Longitude
-                            };
-                            var Location = Mapper.Map<Location>(Locationdto);
-                            preshipment.serviceCentreLocation = Location;
-                        }
+                            Latitude = DestinationServiceCentreId.Latitude,
+                            Longitude = DestinationServiceCentreId.Longitude
+                        };
+                        var Location = Mapper.Map<Location>(Locationdto);
 
-                        if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString())
+                        allpreshipmentmobile.ForEach(x => x.serviceCentreLocation = Location);
+
+                        serviceCentreAddress = DestinationServiceCentreId.Address;
+                        latitude = DestinationServiceCentreId.Latitude;
+                        longitude = DestinationServiceCentreId.Longitude;
+                    }
+
+                    if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString())
+                    {
+                        allpreshipmentmobile.ForEach(x => x.shipmentstatus = "Assigned for Pickup");
+                        //preshipment.shipmentstatus = "Assigned for Pickup";
+
+                        foreach(var waybill in waybillList)
                         {
-                            preshipment.shipmentstatus = "Assigned for Pickup";
-
                             await ScanMobileShipment(new ScanDTO
                             {
-                                WaybillNumber = waybillNumber,
+                                WaybillNumber = waybill,
                                 ShipmentScanStatus = ShipmentScanStatus.MAPT
                             });
                         }
+                        
+                    }
 
-                        var newPreShipment = Mapper.Map<PreShipmentMobileDTO>(preshipment);
-                        newPreShipment.GroupCodeNumber = pickuprequest.GroupCodeNumber;
+                    var newPreShipment = Mapper.Map<List<PreShipmentMobileDTO>>(allpreshipmentmobile);
+                    newPreShipment.ForEach(x => x.GroupCodeNumber = pickuprequest.GroupCodeNumber);
 
-                        if (pickuprequest.ServiceCentreId != null)
-                        {
-                            newPreShipment.ReceiverAddress = preshipment.ServiceCentreAddress;
-                            newPreShipment.ReceiverLocation.Latitude = preshipment.serviceCentreLocation.Latitude;
-                            newPreShipment.ReceiverLocation.Longitude = preshipment.serviceCentreLocation.Longitude;
-                        }
-
-                        if (country != null)
-                        {
-                            newPreShipment.CurrencyCode = country.CurrencyCode;
-                            newPreShipment.CurrencySymbol = country.CurrencySymbol;
-                        }
-                        await _uow.CompleteAsync();
-                        newPreShipmentList.Add(newPreShipment);
-
+                    if (pickuprequest.ServiceCentreId != null)
+                    {
+                        newPreShipment.ForEach(x => x.ReceiverAddress = serviceCentreAddress);
+                        newPreShipment.ForEach(x => x.ReceiverLocation.Latitude = latitude);
+                        newPreShipment.ForEach(x => x.ReceiverLocation.Longitude = longitude);
+                    }
+                    if (country != null)
+                    {
+                        newPreShipment.ForEach(x => x.CurrencyCode = country.CurrencyCode);
+                        newPreShipment.ForEach(x => x.CurrencySymbol = country.CurrencySymbol);
                     }
 
                     if (onDelivery == true)
@@ -1811,9 +1829,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OnDelivery);
                     }
                     _uow.MobilePickUpRequests.AddRange(mobilePickupRequest);
-                    await _uow.CompleteAsync();
-                    return newPreShipmentList;
 
+                    await _uow.CompleteAsync();
+                    return newPreShipment;
                 }
             }
             catch (Exception ex)
@@ -1911,7 +1929,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 pickuprequest.UserId = userId;
 
                 //String ACCEPTED = "Accepted"; //by group
-                //How do you handle Accepted status
+                //How do you handle Accepted status  
+
+                //They are not calling Accepted here
+
 
                 //The ones by group
                 if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.ProceedToPickUp.ToString() ||
@@ -1925,50 +1946,52 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else
                     {
-                        var waybillList = new HashSet<string>();
+                        var waybillHashSet = new HashSet<string>();
 
                         foreach (var item in groupList)
                         {
                             if (item.WaybillNumber != null)
                             {
-                                waybillList.Add(item.WaybillNumber);
+                                waybillHashSet.Add(item.WaybillNumber);
                             }
                         }
+                        var waybillList = waybillHashSet.ToList();
 
-                        //find a way to do this at once
-                        foreach (var waybillNumber in waybillList)
+                        //DONE create your own process to update those waybills at once
+                        await _mobilepickuprequestservice.UpdateMobilePickUpRequestsForWaybillList(waybillList, userId, pickuprequest.Status);
+
+                        //you can use loop for this.  
+                        if (pickuprequest.Status == MobilePickUpRequestStatus.Cancelled.ToString())
                         {
-                            pickuprequest.Waybill = waybillNumber;
-
-                            //create your own process to update those waybills at once
-                            await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
-
-                            //you can use loop for this.  
-                            if(pickuprequest.Status == MobilePickUpRequestStatus.Cancelled.ToString())
+                            foreach(var waybill in waybillList)
                             {
                                 await ScanMobileShipment(new ScanDTO
                                 {
-                                    WaybillNumber = waybillNumber,
+                                    WaybillNumber = waybill,
                                     ShipmentScanStatus = ShipmentScanStatus.SSC
                                 });
                             }
+                        }
+                        else if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
+                        {
+                            // DONE Move this to a seperate method and use foreach to update those record at once
+                            // DONE pass the status and the list of waybills
+                            //This method can also be use in LogVisitMobilePickupRequestByGroup
 
-                            else if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
-                            {
-                                //Move this to a seperate method and use foreach to update those record at once
-                                //pass the status and the list of waybills
-                                //This method can also be use in LogVisitMobilePickupRequestByGroup
-                                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == waybillNumber);
-                                preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
-                                await _uow.CompleteAsync();
-                            }
-                            else if (pickuprequest.Status == MobilePickUpRequestStatus.LogVisit.ToString())
-                            {
-                                await LogVisitMobilePickupRequestByGroup(pickuprequest, userId);
-                            }
-
+                            //var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == waybillNumber);
+                            //preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
+                            await _mobilepickuprequestservice.UpdatePreShipmentMobileStatus(waybillList, MobilePickUpRequestStatus.Processing.ToString());
+                        }
+                        else if (pickuprequest.Status == MobilePickUpRequestStatus.LogVisit.ToString())
+                        {
+                            await LogVisitMobilePickupRequestByGroup(waybillList, userId);
                         }
                     }
+                }
+
+                else if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString())
+                {
+                    throw new GenericException($"Api does not accept {pickuprequest.Status} ");
                 }
 
                 else 
@@ -1982,15 +2005,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     else if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
                     {
                         await DeliveredMobilePickupRequest(pickuprequest, userId);
-                        //await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OffDelivery);
                     }
                     else if (pickuprequest.Status == MobilePickUpRequestStatus.Dispute.ToString())
                     {
+                        //This is not a list
                         //use the method I mentioned to update shipment details
                         var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Dispute.ToString();
-                        //pickuprequest.Status = MobilePickUpRequestStatus.Dispute.ToString();
-                        //await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
                         await _uow.CompleteAsync();
                     }
 
@@ -2296,31 +2317,19 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        private async Task LogVisitMobilePickupRequestByGroup(MobilePickUpRequestsDTO pickuprequest, string userId)
+        private async Task LogVisitMobilePickupRequestByGroup(List<string> waybills, string userId)
         {
             try
             {
-                //filter this request with the user not only by waybill
+                //DONE filter this request with the user not only by waybill
                 //Also, you should use foreach to update the record at once
                 //Pass arrayList of waybills
-                var mobileRequest = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill);
-                if (mobileRequest == null)
-                {
-                    throw new GenericException("Shipment item does not exist in Pickup");
-                }
-                else
-                {
-                    mobileRequest.Status = MobilePickUpRequestStatus.Visited.ToString();
-                }
+                
+                var mobileRequest = _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybills.Contains(s.Waybill) && s.UserId == userId).ToList();
+                mobileRequest.ForEach(u => u.Status = MobilePickUpRequestStatus.Visited.ToString());
 
-                //use the method I mentioned above to do this update
-                var preshipmentMobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
-                if (preshipmentMobile == null)
-                {
-                    throw new GenericException("Shipment item does not exist");
-                }
-                preshipmentMobile.shipmentstatus = MobilePickUpRequestStatus.Visited.ToString();
-
+                // DONE use the method I mentioned above to do this update
+                await _mobilepickuprequestservice.UpdatePreShipmentMobileStatus(waybills, MobilePickUpRequestStatus.Visited.ToString());
                 await _uow.CompleteAsync();
 
                 //var user = await _userService.GetUserByChannelCode(preshipmentMobile.CustomerCode);

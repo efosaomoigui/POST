@@ -139,5 +139,34 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw;
                 }
         }
+
+        public async Task UpdatePreShipmentMobileStatus(List<string> waybillList, string status)
+        {
+            try
+            {
+                var preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill)).ToList();
+                preshipmentmobile.ForEach(u => u.shipmentstatus = status);
+                await _uow.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdateMobilePickUpRequestsForWaybillList(List<string> waybills, string userId, string status)
+        {
+            try
+            {
+                var MobilePickupRequests = _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybills.Contains(s.Waybill) && s.UserId == userId
+                            && s.Status != MobilePickUpRequestStatus.Rejected.ToString()).ToList();
+                MobilePickupRequests.ForEach(u => u.Status = status);
+                await _uow.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
