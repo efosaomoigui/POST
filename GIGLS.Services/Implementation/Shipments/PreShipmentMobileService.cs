@@ -1577,6 +1577,11 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                if (pickuprequest == null)
+                {
+                    throw new GenericException("Group does not exist");
+                }
+
                 var newPreShipment = new PreShipmentMobileDTO();
 
                 if (pickuprequest.UserId == null)
@@ -1666,11 +1671,17 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                if(pickuprequest.UserId == null)
+                if(pickuprequest == null)
+                {
+                    throw new GenericException("Group does not exist");
+                }
+
+                if (pickuprequest.UserId == null)
                 {
                     pickuprequest.UserId = await _userService.GetCurrentUserId();
                 }
 
+                //do you have another endpoint to handle only waybill?
                 var groupList = await _uow.MobileGroupCodeWaybillMapping.FindAsync(x => x.GroupCodeNumber == pickuprequest.GroupCodeNumber);
                 if(groupList == null)
                 {
@@ -1697,12 +1708,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     var country = await _uow.Country.GetCountryByStationId(allpreshipmentmobile.FirstOrDefault().SenderStationId);
                     var onDelivery = false;
 
-                    if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString()
-                                || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString()
+                    if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString()  || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString()
                                 || pickuprequest.Status == MobilePickUpRequestStatus.Missed.ToString())
                     {
-                        var request = _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill)
-                             && s.UserId == pickuprequest.UserId
+                        //Move the code inside this If statement to a method, you can check this method AddMobilePickupRequest above
+                        var request = _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill)  && s.UserId == pickuprequest.UserId
                             && (s.Status == MobilePickUpRequestStatus.Rejected.ToString() || s.Status == MobilePickUpRequestStatus.TimedOut.ToString()
                             || s.Status == MobilePickUpRequestStatus.Missed.ToString()));
 
@@ -1725,6 +1735,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                         else if (request.All(x => x.Status == MobilePickUpRequestStatus.Missed.ToString()))
                         {
+                            //why forcing the status to be missed???
                             await _mobilepickuprequestservice.UpdateMobilePickUpRequestsForWaybillList(waybillList, pickuprequest.UserId, MobilePickUpRequestStatus.Missed.ToString());
                             //request.Status = pickuprequest.Status;
                         }
@@ -1733,12 +1744,15 @@ namespace GIGLS.Services.Implementation.Shipments
                             throw new GenericException($"Shipment with group number: {pickuprequest.GroupCodeNumber} already exists");
                         }
                     }
-
-                    else if (allpreshipmentmobile.All(x => x.shipmentstatus == "Shipment created" || x.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString() ))
+                    else if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString() && allpreshipmentmobile.All(x => x.shipmentstatus == "Shipment created" || x.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString()))
                     {
-                        pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
+                        //Move the code inside if statement method 
+                        //we need to be sure they are sending accepted to us. I notice the issue but we can't update the app for now
+                        //our update should force them to send it
+                        //pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString(); 
                         onDelivery = true;
 
+                        //check this AddOrUpdateMobilePickUpRequests to see how I handle this scenario
                         var newRequest =  _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill) && s.UserId == pickuprequest.UserId);
                         if (newRequest == null)
                         {
@@ -1805,9 +1819,18 @@ namespace GIGLS.Services.Implementation.Shipments
                                 WaybillNumber = waybill,
                                 ShipmentScanStatus = ShipmentScanStatus.MAPT
                             });
-                        }
-                        
+                        }                        
                     }
+
+                    if (onDelivery == true)
+                    {
+                        await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OnDelivery);
+                    }
+
+                    //Move this process into a method alot with other process above
+                    //You should be able to create a method that handle multiple add and multiple update at once. 
+                    _uow.MobilePickUpRequests.AddRange(mobilePickupRequest);
+                    await _uow.CompleteAsync();
 
                     var newPreShipment = Mapper.Map<List<PreShipmentMobileDTO>>(allpreshipmentmobile);
                     newPreShipment.ForEach(x => x.GroupCodeNumber = pickuprequest.GroupCodeNumber);
@@ -1824,13 +1847,6 @@ namespace GIGLS.Services.Implementation.Shipments
                         newPreShipment.ForEach(x => x.CurrencySymbol = country.CurrencySymbol);
                     }
 
-                    if (onDelivery == true)
-                    {
-                        await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OnDelivery);
-                    }
-                    _uow.MobilePickUpRequests.AddRange(mobilePickupRequest);
-
-                    await _uow.CompleteAsync();
                     return newPreShipment;
                 }
             }
