@@ -403,7 +403,6 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             return await Task.FromResult(result);
-
         }
 
         private async Task<bool> ProcessPaymentForWaybill(PaystackWebhookDTO webhook)
