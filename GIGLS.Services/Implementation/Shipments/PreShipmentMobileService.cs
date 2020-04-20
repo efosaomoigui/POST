@@ -1899,7 +1899,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<bool> UpdateMobilePickupRequestByGroup(MobilePickUpRequestsDTO pickuprequest)
+        public async Task<bool> UpdateMobilePickupRequestForMultipleShipments(MobilePickUpRequestsDTO pickuprequest)
         {
             try
             {

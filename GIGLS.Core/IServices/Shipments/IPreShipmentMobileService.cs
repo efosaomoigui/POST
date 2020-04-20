@@ -64,6 +64,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<MultipleMobilePriceDTO> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipmentItemMobileDTO);
         Task<object> ResolveDisputeForMultipleShipments(PreShipmentMobileDTO preShipment);
         Task ScanMobileShipment(ScanDTO scan);
+        Task<bool> UpdateMobilePickupRequestForMultipleShipments(MobilePickUpRequestsDTO pickuprequest);
 
 
 
