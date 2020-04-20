@@ -1591,19 +1591,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString())
+                    if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString()
+                       || pickuprequest.Status == MobilePickUpRequestStatus.Missed.ToString())
+                    {
+                        await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequests(pickuprequest);
+                    }
+                    else if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString())
                     {
                         pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
-
                         await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequests(pickuprequest);
 
                         //Update Activity Status
                         await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OnDelivery);
-                    }
-                    else if(pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString()
-                        || pickuprequest.Status == MobilePickUpRequestStatus.Missed.ToString())
-                    {
-                        await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequests(pickuprequest);                        
                     }
                     else
                     {
