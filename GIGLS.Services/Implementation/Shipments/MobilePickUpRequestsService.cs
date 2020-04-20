@@ -2,6 +2,7 @@
 using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
@@ -18,10 +19,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userservice;
-        public MobilePickUpRequestsService(IUnitOfWork uow, IUserService userservice)
+        private readonly IPreShipmentMobileService _preShipmentMobileService;
+        public MobilePickUpRequestsService(IUnitOfWork uow, IUserService userservice, IPreShipmentMobileService preShipmentMobileService)
         {
             _uow = uow;
             _userservice = userservice;
+            _preShipmentMobileService = preShipmentMobileService;
             MapperConfig.Initialize();
         }
 
@@ -50,6 +53,58 @@ namespace GIGLS.Services.Implementation.Shipments
 
             request.Status = PickUpRequest.Status;
             await _uow.CompleteAsync();
+        }
+
+        public async Task AddOrUpdateMobilePickUpRequestsForUnacceptedGroupByPartner(MobilePickUpRequestsDTO pickUpRequest, List<string> waybillList)
+        {
+            var request = _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill) && s.UserId == pickUpRequest.UserId
+                            && (s.Status == MobilePickUpRequestStatus.Rejected.ToString() || s.Status == MobilePickUpRequestStatus.TimedOut.ToString()
+                            || s.Status == MobilePickUpRequestStatus.Missed.ToString()));
+
+            if (request == null)
+            {
+                foreach (var waybill in waybillList)
+                {
+                    pickUpRequest.Waybill = waybill;
+                    await AddMobilePickUpRequests(pickUpRequest);
+                }
+            }
+            else if (request.All(x => x.Status == MobilePickUpRequestStatus.Missed.ToString()))
+            {
+                //why forcing the status to be missed???    I am not forcing the status to be missed
+                await UpdateMobilePickUpRequestsForWaybillList(waybillList, pickUpRequest.UserId, MobilePickUpRequestStatus.Missed.ToString());
+            }
+            else
+            {
+                throw new GenericException($"Shipment with group number: {pickUpRequest.GroupCodeNumber} already exists");
+            }
+
+
+        }
+
+        public async Task AddOrUpdateMobilePickUpRequestsForAcceptedGroupByPartner(MobilePickUpRequestsDTO pickUpRequest, List<string> waybillList)
+        {
+            var request = _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill) && s.UserId == pickUpRequest.UserId);
+
+            if (request == null)
+            {
+                foreach (var waybill in waybillList)
+                {
+                    pickUpRequest.Waybill = waybill;
+                    await AddMobilePickUpRequests(pickUpRequest);
+
+                    await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
+                    {
+                        WaybillNumber = waybill,
+                        ShipmentScanStatus = ShipmentScanStatus.MAPT
+                    });
+                }
+            }
+            else
+            {
+                await UpdateMobilePickUpRequestsForWaybillList(waybillList, pickUpRequest.UserId, pickUpRequest.Status);
+                
+            }
         }
 
         public async Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequests()

@@ -16,5 +16,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task AddOrUpdateMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest);
         Task UpdatePreShipmentMobileStatus(List<string> waybillList, string status);
         Task UpdateMobilePickUpRequestsForWaybillList(List<string> waybills, string userId, string status);
+        Task AddOrUpdateMobilePickUpRequestsForUnacceptedGroupByPartner(MobilePickUpRequestsDTO pickUpRequest, List<string> waybillList);
+        Task AddOrUpdateMobilePickUpRequestsForAcceptedGroupByPartner(MobilePickUpRequestsDTO pickUpRequest, List<string> waybillList);
     }
 }
