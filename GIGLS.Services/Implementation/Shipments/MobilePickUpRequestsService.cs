@@ -38,7 +38,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        
+
+        public async Task AddOrUpdateMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest)
+        {
+            var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == PickUpRequest.Waybill && s.UserId == PickUpRequest.UserId);
+
+            if(request == null)
+            {
+                await AddMobilePickUpRequests(PickUpRequest);
+            }
+
+            request.Status = PickUpRequest.Status;
+            await _uow.CompleteAsync();
+        }
 
         public async Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequests()
         {
