@@ -3,6 +3,7 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IRepositories.Shipments;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
@@ -162,7 +163,11 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
         {
             try
             {
-                var mobileRequests = _context.MobilePickUpRequests.AsQueryable().Where(x => x.Waybill == waybill && x.Status != "TimedOut");
+                var mobileRequests = _context.MobilePickUpRequests.AsQueryable().Where(x => x.Waybill == waybill && (
+                                        x.Status != MobilePickUpRequestStatus.TimedOut.ToString()
+                                        || x.Status != MobilePickUpRequestStatus.Missed.ToString()
+                                        || x.Status != MobilePickUpRequestStatus.Rejected.ToString())
+                                        );
 
                 var partnerDTO =   (from n in mobileRequests
                                               join partner in _context.Partners on n.UserId equals partner.UserId
