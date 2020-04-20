@@ -1902,13 +1902,20 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var userId = await _userService.GetCurrentUserId();
+
+                if(pickuprequest == null)
+                {
+                    throw new GenericException("Pick Up Request is Null");
+                }
+
                 pickuprequest.UserId = userId;
 
+                //String ACCEPTED = "Accepted"; //by group
+                //How do you handle Accepted status
+
                 //The ones by group
-                if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() ||
-                            pickuprequest.Status == MobilePickUpRequestStatus.ProceedToPickUp.ToString() ||
-                            pickuprequest.Status == MobilePickUpRequestStatus.Arrived.ToString() ||
-                            pickuprequest.Status == MobilePickUpRequestStatus.Cancelled.ToString() ||
+                if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.ProceedToPickUp.ToString() ||
+                            pickuprequest.Status == MobilePickUpRequestStatus.Arrived.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.Cancelled.ToString() ||
                             pickuprequest.Status == MobilePickUpRequestStatus.LogVisit.ToString())
                 {
                     var groupList = await _uow.MobileGroupCodeWaybillMapping.FindAsync(x => x.GroupCodeNumber == pickuprequest.GroupCodeNumber);
@@ -1928,11 +1935,15 @@ namespace GIGLS.Services.Implementation.Shipments
                             }
                         }
 
+                        //find a way to do this at once
                         foreach (var waybillNumber in waybillList)
                         {
                             pickuprequest.Waybill = waybillNumber;
+
+                            //create your own process to update those waybills at once
                             await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
 
+                            //you can use loop for this.  
                             if(pickuprequest.Status == MobilePickUpRequestStatus.Cancelled.ToString())
                             {
                                 await ScanMobileShipment(new ScanDTO
@@ -1941,8 +1952,12 @@ namespace GIGLS.Services.Implementation.Shipments
                                     ShipmentScanStatus = ShipmentScanStatus.SSC
                                 });
                             }
+
                             else if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
                             {
+                                //Move this to a seperate method and use foreach to update those record at once
+                                //pass the status and the list of waybills
+                                //This method can also be use in LogVisitMobilePickupRequestByGroup
                                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == waybillNumber);
                                 preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
                                 await _uow.CompleteAsync();
@@ -1958,6 +1973,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 else 
                 {
+                    //This place is handling waybill, How can I know that is what is handling???
                     await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
                     if (pickuprequest.Status == MobilePickUpRequestStatus.Confirmed.ToString())
                     {
@@ -1970,6 +1986,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else if (pickuprequest.Status == MobilePickUpRequestStatus.Dispute.ToString())
                     {
+                        //use the method I mentioned to update shipment details
                         var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Dispute.ToString();
                         //pickuprequest.Status = MobilePickUpRequestStatus.Dispute.ToString();
@@ -1979,19 +1996,17 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 }
 
-                if(pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString() || 
-                    pickuprequest.Status == MobilePickUpRequestStatus.Cancelled.ToString() ||
-                    pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() ||
-                    pickuprequest.Status == MobilePickUpRequestStatus.LogVisit.ToString())
+                if(pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.Cancelled.ToString() ||
+                    pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() ||  pickuprequest.Status == MobilePickUpRequestStatus.LogVisit.ToString())
                 {
                     await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OffDelivery);
                 }
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -2285,6 +2300,9 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                //filter this request with the user not only by waybill
+                //Also, you should use foreach to update the record at once
+                //Pass arrayList of waybills
                 var mobileRequest = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill);
                 if (mobileRequest == null)
                 {
@@ -2294,6 +2312,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     mobileRequest.Status = MobilePickUpRequestStatus.Visited.ToString();
                 }
+
+                //use the method I mentioned above to do this update
                 var preshipmentMobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
                 if (preshipmentMobile == null)
                 {
