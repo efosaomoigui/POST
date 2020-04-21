@@ -361,7 +361,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var isWaybillsMappedActiveResult = isWaybillMappedActive.Select(x => x.Waybill).Distinct().ToList();
 
-                if (isWaybillsMappedActiveResult.Count() > 0)
+                if (isWaybillsMappedActiveResult.Any())
                 {
                     throw new GenericException($"Error: Manifest cannot be created. " +
                                $"The following waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
@@ -402,6 +402,8 @@ namespace GIGLS.Services.Implementation.Shipments
                             ServiceCentreId = serviceIds[0]
                         };
 
+                        //create a list to add waybill that has not been mapped
+                        //then add then using addrange
                         await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
                         {
                             WaybillNumber = waybill,
@@ -412,8 +414,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
+                //what if some of the waybill has been added before and some is in processing
                 //update all as shipment Assigned for Pickup
                 shipmentList.ForEach(x => x.shipmentstatus = "Assigned for Pickup");
+
                 _uow.PickupManifestWaybillMapping.AddRange(newMappingList);
                 _uow.Complete();
             }
