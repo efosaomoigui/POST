@@ -14,4 +14,15 @@ namespace GIGLS.Core.DTO
         public SMSSenderPlatform SMSSenderPlatform { get; set; }
 
     }
+
+    public class MobileShipmentCreationMessageDTO
+    {
+        public string SenderName { get; set; }
+        public string WaybillNumber { get; set; }
+        public string CustomerCarePhoneNumber1 { get; set; }
+        public string CustomerCarePhoneNumber2 { get; set; }
+        public string SenderPhoneNumber { get; set; }
+        public SMSSenderPlatform SMSSenderPlatform { get; set; }
+
+    }
 }
