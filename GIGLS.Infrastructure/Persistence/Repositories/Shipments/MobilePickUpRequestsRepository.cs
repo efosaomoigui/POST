@@ -177,7 +177,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                   PhoneNumber = partner.PhoneNumber,
                                                   PartnerCode = partner.PartnerCode,
                                                   PartnerType = partner.PartnerType
-                                              }).First();
+                                              }).FirstOrDefault();
 
                 return Task.FromResult(partnerDTO);
             }
