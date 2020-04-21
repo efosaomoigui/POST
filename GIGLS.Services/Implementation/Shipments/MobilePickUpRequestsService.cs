@@ -47,9 +47,11 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 await AddMobilePickUpRequests(PickUpRequest);
             }
-
-            request.Status = PickUpRequest.Status;
-            await _uow.CompleteAsync();
+            else
+            {
+                request.Status = PickUpRequest.Status;
+                await _uow.CompleteAsync();
+            }
         }
 
         public async Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequests()
