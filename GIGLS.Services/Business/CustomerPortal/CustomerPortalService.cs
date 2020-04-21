@@ -303,7 +303,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var finalResult = new List<ShipmentTrackingDTO>();
                 var result = await _iShipmentTrackService.TrackShipment(waybillNumber);
 
-                if (result.Count() > 0)
+                if (result.Any())
                 {
                     string smim = ShipmentScanStatus.SMIM.ToString();
                     string fms = ShipmentScanStatus.FMS.ToString();
@@ -331,7 +331,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             var result = await _iShipmentTrackService.TrackShipment(waybillNumber);
 
-            if (result.Count() > 0)
+            if (result.Any())
             {
                 string smim = ShipmentScanStatus.SMIM.ToString();
                 string fms = ShipmentScanStatus.FMS.ToString();
@@ -1848,41 +1848,38 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         preShipmentMobile.shipmentstatus = mobilePickUpRequestsDTO.Status;
 
-                        if(mobilePickUpRequestsDTO.Status == "Shipment created")
+                        string pickedUp = MobilePickUpRequestStatus.PickedUp.ToString();
+                        string onwardProcessing = MobilePickUpRequestStatus.OnwardProcessing.ToString();
+                        string delivered = MobilePickUpRequestStatus.Delivered.ToString();
+
+                        if (mobilePickUpRequestsDTO.Status == pickedUp || mobilePickUpRequestsDTO.Status == onwardProcessing || mobilePickUpRequestsDTO.Status == delivered)
                         {
+                            ShipmentScanStatus status = ShipmentScanStatus.MCRT;
+
+                            if (mobilePickUpRequestsDTO.Status == pickedUp)
+                            {
+                                status = ShipmentScanStatus.MSHC;
+                            }
+
+                            if (mobilePickUpRequestsDTO.Status == onwardProcessing)
+                            {
+                                status = ShipmentScanStatus.MSVC;
+                            }
+
+                            if (mobilePickUpRequestsDTO.Status == delivered)
+                            {
+                                status = ShipmentScanStatus.MAHD;
+                            }
+
                             await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
                             {
                                 WaybillNumber = mobilePickUpRequestsDTO.Waybill,
-                                ShipmentScanStatus = ShipmentScanStatus.MCRT
+                                ShipmentScanStatus = status
                             });
                         }
-                        else if (mobilePickUpRequestsDTO.Status == MobilePickUpRequestStatus.PickedUp.ToString())
-                        {
-                            await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
-                            {
-                                WaybillNumber = mobilePickUpRequestsDTO.Waybill,
-                                ShipmentScanStatus = ShipmentScanStatus.MSHC
-                            });
-                        }
-                        else if (mobilePickUpRequestsDTO.Status == MobilePickUpRequestStatus.OnwardProcessing.ToString())
-                        {
-                            await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
-                            {
-                                WaybillNumber = mobilePickUpRequestsDTO.Waybill,
-                                ShipmentScanStatus = ShipmentScanStatus.MSVC
-                            });
-                        }
-                        else if (mobilePickUpRequestsDTO.Status == MobilePickUpRequestStatus.Delivered.ToString())
-                        {
-                            await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
-                            {
-                                WaybillNumber = mobilePickUpRequestsDTO.Waybill,
-                                ShipmentScanStatus = ShipmentScanStatus.MAHD
-                            });
-                        }
+
                         await _uow.CompleteAsync();
-                    }
-                    
+                    }                    
                 }
                 return true;
             }
