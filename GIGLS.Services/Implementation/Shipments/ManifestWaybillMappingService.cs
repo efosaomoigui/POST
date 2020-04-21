@@ -40,7 +40,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _customerService = customerService;
             _shipmentService = shipmentService;
             _preShipmentMobileService = preShipmentMobileService;
-            
+
             MapperConfig.Initialize();
         }
 
@@ -346,13 +346,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        
+
         //map waybill to Manifest (Pickup)
         public async Task MappingManifestToWaybillsPickup(string manifest, List<string> waybills)
         {
             try
             {
-                var serviceIds = await _userService.GetPriviledgeServiceCenters();                
+                var serviceIds = await _userService.GetPriviledgeServiceCenters();
 
                 //1. check if any of the waybills has not been mapped to a manifest 
                 // and has not been process for return in case it was not delivered (i.e still active) that day
@@ -380,27 +380,19 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                     _uow.PickupManifest.Add(newManifest);
                 }
-               
-                var unmappedWaybillList = new HashSet<string>();
 
-                foreach (var waybill in waybills)
-                {
-                    if (!isWaybillsMappedActiveResult.Contains(waybill))
-                    {
-                        unmappedWaybillList.Add(waybill);
-                    }
-                }
-
+                var newWaybillList = new HashSet<string>(waybills);
                 var newMappingList = new List<PickupManifestWaybillMapping>();
-                var shipmentList = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => unmappedWaybillList.Contains(x.Waybill)).ToList();
+                List<string> newWaybillToMap = new List<string>();
 
-                foreach (var waybill in unmappedWaybillList)
+                foreach (var waybill in newWaybillList)
                 {
                     //check if Waybill has not been added to this manifest 
-                    ///var isWaybillMapped = await _uow.PickupManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
+                    var isWaybillMapped = await _uow.PickupManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
+
                     //if the waybill has not been added to this manifest, add it
-                    //if (!isWaybillMapped)
-                    //{
+                    if (!isWaybillMapped)
+                    {
                         //Add new Mapping
                         var newMapping = new PickupManifestWaybillMapping
                         {
@@ -410,23 +402,29 @@ namespace GIGLS.Services.Implementation.Shipments
                             ServiceCentreId = serviceIds[0]
                         };
 
-                        //create a list to add waybill that has not been mapped
-                        //then add then using addrange
-                        await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
-                        {
-                            WaybillNumber = waybill,
-                            ShipmentScanStatus = ShipmentScanStatus.MAPT
-                        });
-
+                        newWaybillToMap.Add(waybill);
                         newMappingList.Add(newMapping);
-                    //}
+                    }
                 }
 
                 //what if some of the waybill has been added before and some is in processing
                 //update all as shipment Assigned for Pickup
+                var shipmentList = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => newWaybillToMap.Contains(x.Waybill)).ToList();
                 shipmentList.ForEach(x => x.shipmentstatus = "Assigned for Pickup");
 
                 _uow.PickupManifestWaybillMapping.AddRange(newMappingList);
+
+                foreach(string waybill in newWaybillToMap)
+                {
+                    //create a list to add waybill that has not been mapped
+                    //then add then using addrange
+                    await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
+                    {
+                        WaybillNumber = waybill,
+                        ShipmentScanStatus = ShipmentScanStatus.MAPT
+                    });
+                }
+
                 _uow.Complete();
             }
             catch (Exception) { }
@@ -814,8 +812,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipment.shipmentstatus = "Shipment created";
                 }
                 _uow.PickupManifestWaybillMapping.Remove(pickuupManifestWaybillMapping);
-                
-               
+
+
                 _uow.Complete();
             }
             catch (Exception)
@@ -983,7 +981,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        
+
         //get manifest waiting to signoff
         public async Task<List<ManifestWaybillMappingDTO>> GetManifestWaitingForSignOff()
         {

@@ -1557,9 +1557,8 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException("Please an error occurred while trying to scan shipment.");
             }
-
-
         }
+
         public async Task<PreShipmentMobile> GetMobileShipmentForScan(string waybill)
         {
             try
