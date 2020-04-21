@@ -384,16 +384,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 var newWaybillList = new HashSet<string>(waybills);
 
                 var newMappingList = new List<PickupManifestWaybillMapping>();
+                var shipmentList = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => newWaybillList.Contains(x.Waybill)).ToList();
 
                 foreach (var waybill in newWaybillList)
                 {
-                    //check if the waybill exist
-                    var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
-                    if (shipment == null)
-                    {
-                        throw new GenericException($"No Waybill exists for this number: {waybill}");
-                    }
-                                                           
                     //check if Waybill has not been added to this manifest 
                     var isWaybillMapped = await _uow.PickupManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
                     //if the waybill has not been added to this manifest, add it
@@ -408,13 +402,18 @@ namespace GIGLS.Services.Implementation.Shipments
                             ServiceCentreId = serviceIds[0]
                         };
 
+                        await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
+                        {
+                            WaybillNumber = waybill,
+                            ShipmentScanStatus = ShipmentScanStatus.MAPT
+                        });
+
                         newMappingList.Add(newMapping);
-
-                        //_uow.PickupManifestWaybillMapping.Add(newMapping);
-
-                        shipment.shipmentstatus = "Assigned for Pickup";
                     }
                 }
+
+                //update all as shipment Assigned for Pickup
+                shipmentList.ForEach(x => x.shipmentstatus = "Assigned for Pickup");
                 _uow.PickupManifestWaybillMapping.AddRange(newMappingList);
                 _uow.Complete();
             }

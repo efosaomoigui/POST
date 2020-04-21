@@ -1847,6 +1847,39 @@ namespace GIGLS.Services.Business.CustomerPortal
                     else
                     {
                         preShipmentMobile.shipmentstatus = mobilePickUpRequestsDTO.Status;
+
+                        if(mobilePickUpRequestsDTO.Status == "Shipment created")
+                        {
+                            await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
+                            {
+                                WaybillNumber = mobilePickUpRequestsDTO.Waybill,
+                                ShipmentScanStatus = ShipmentScanStatus.MCRT
+                            });
+                        }
+                        else if (mobilePickUpRequestsDTO.Status == MobilePickUpRequestStatus.PickedUp.ToString())
+                        {
+                            await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
+                            {
+                                WaybillNumber = mobilePickUpRequestsDTO.Waybill,
+                                ShipmentScanStatus = ShipmentScanStatus.MSHC
+                            });
+                        }
+                        else if (mobilePickUpRequestsDTO.Status == MobilePickUpRequestStatus.OnwardProcessing.ToString())
+                        {
+                            await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
+                            {
+                                WaybillNumber = mobilePickUpRequestsDTO.Waybill,
+                                ShipmentScanStatus = ShipmentScanStatus.MSVC
+                            });
+                        }
+                        else if (mobilePickUpRequestsDTO.Status == MobilePickUpRequestStatus.Delivered.ToString())
+                        {
+                            await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
+                            {
+                                WaybillNumber = mobilePickUpRequestsDTO.Waybill,
+                                ShipmentScanStatus = ShipmentScanStatus.MAHD
+                            });
+                        }
                         await _uow.CompleteAsync();
                     }
                     
