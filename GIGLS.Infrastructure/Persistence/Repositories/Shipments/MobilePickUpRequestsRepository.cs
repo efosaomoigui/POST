@@ -165,8 +165,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             {
                 var mobileRequests = _context.MobilePickUpRequests.AsQueryable().Where(x => x.Waybill == waybill && (
                                         x.Status != MobilePickUpRequestStatus.TimedOut.ToString()
-                                        || x.Status != MobilePickUpRequestStatus.Missed.ToString()
-                                        || x.Status != MobilePickUpRequestStatus.Rejected.ToString())
+                                        && x.Status != MobilePickUpRequestStatus.Missed.ToString()
+                                        && x.Status != MobilePickUpRequestStatus.Rejected.ToString())
                                         );
 
                 var partnerDTO =   (from n in mobileRequests
@@ -177,7 +177,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                                   PhoneNumber = partner.PhoneNumber,
                                                   PartnerCode = partner.PartnerCode,
                                                   PartnerType = partner.PartnerType
-                                              }).FirstOrDefault();
+                                              }).First();
 
                 return Task.FromResult(partnerDTO);
             }
