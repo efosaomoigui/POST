@@ -154,8 +154,6 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 SenderName = preShipmentMobile.SenderName,
                 WaybillNumber = preShipmentMobile.Waybill,
-                CustomerCarePhoneNumber1 = ConfigurationManager.AppSettings["CustomerCareNumber1"],
-                CustomerCarePhoneNumber2 = ConfigurationManager.AppSettings["CustomerCareNumber2"],
                 SenderPhoneNumber = preShipmentMobile.SenderPhoneNumber
             };
 
