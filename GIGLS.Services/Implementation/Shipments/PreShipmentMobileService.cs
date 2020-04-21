@@ -1729,6 +1729,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         allpreshipmentmobile.ForEach(x => x.shipmentstatus = "Assigned for Pickup");
 
                         //check this AddOrUpdateMobilePickUpRequests to see how I handle this scenario
+                        //you should be able to use this method AddOrUpdateMobilePickUpRequestsForUnacceptedGroupByPartner
+                        //Need to create anothe one again
                         await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequestsForAcceptedGroupByPartner(pickuprequest, waybillList);
                     }
                     else
@@ -1738,7 +1740,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     if (pickuprequest.ServiceCentreId != null)
                     {
-
                         newPreShipment = await UpdatePreShipmentMobileForServiceCenter(allpreshipmentmobile, pickuprequest);
                     }
                     else
@@ -1760,6 +1761,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     //        });
                     //    }                        
                     //}
+
 
                     if (onDelivery == true)
                     {
@@ -1795,31 +1797,26 @@ namespace GIGLS.Services.Implementation.Shipments
         
         private async Task<List<PreShipmentMobileDTO>> UpdatePreShipmentMobileForServiceCenter(List<PreShipmentMobile> preShipmentMobile, MobilePickUpRequestsDTO pickUpRequests)
         {
+            var newPreShipment = Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentMobile);
+
             var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickUpRequests.ServiceCentreId);
-
-            preShipmentMobile.ForEach(x => x.ServiceCentreAddress = DestinationServiceCentreId.Address);
-
             var Locationdto = new LocationDTO
             {
                 Latitude = DestinationServiceCentreId.Latitude,
                 Longitude = DestinationServiceCentreId.Longitude
             };
-            var Location = Mapper.Map<Location>(Locationdto);
+            //var Location = Mapper.Map<Location>(Locationdto);
 
-            preShipmentMobile.ForEach(x => x.serviceCentreLocation = Location);
-            
-
-            var newPreShipment = Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentMobile);
+            newPreShipment.ForEach(x => x.ServiceCentreAddress = DestinationServiceCentreId.Address);
+            newPreShipment.ForEach(x => x.serviceCentreLocation = Locationdto);          
             newPreShipment.ForEach(x => x.GroupCodeNumber = pickUpRequests.GroupCodeNumber);
 
-            //if (pickuprequest.ServiceCentreId != null)
-            //{
-                newPreShipment.ForEach(x => x.ReceiverAddress = DestinationServiceCentreId.Address);
-                newPreShipment.ForEach(x => x.ReceiverLocation.Latitude = DestinationServiceCentreId.Latitude);
-                newPreShipment.ForEach(x => x.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude);
-            //}
+            newPreShipment.ForEach(x => x.ReceiverAddress = DestinationServiceCentreId.Address);
+            newPreShipment.ForEach(x => x.ReceiverLocation.Latitude = DestinationServiceCentreId.Latitude);
+            newPreShipment.ForEach(x => x.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude);
 
-            await _uow.CompleteAsync();
+            //are you updating shipment information here???
+           // await _uow.CompleteAsync();
             return newPreShipment;
             
         }
