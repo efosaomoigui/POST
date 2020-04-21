@@ -380,19 +380,27 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                     _uow.PickupManifest.Add(newManifest);
                 }
+               
+                var unmappedWaybillList = new HashSet<string>();
 
-                var newWaybillList = new HashSet<string>(waybills);
+                foreach (var waybill in waybills)
+                {
+                    if (!isWaybillsMappedActiveResult.Contains(waybill))
+                    {
+                        unmappedWaybillList.Add(waybill);
+                    }
+                }
 
                 var newMappingList = new List<PickupManifestWaybillMapping>();
-                var shipmentList = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => newWaybillList.Contains(x.Waybill)).ToList();
+                var shipmentList = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => unmappedWaybillList.Contains(x.Waybill)).ToList();
 
-                foreach (var waybill in newWaybillList)
+                foreach (var waybill in unmappedWaybillList)
                 {
                     //check if Waybill has not been added to this manifest 
-                    var isWaybillMapped = await _uow.PickupManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
+                    ///var isWaybillMapped = await _uow.PickupManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
                     //if the waybill has not been added to this manifest, add it
-                    if (!isWaybillMapped)
-                    {
+                    //if (!isWaybillMapped)
+                    //{
                         //Add new Mapping
                         var newMapping = new PickupManifestWaybillMapping
                         {
@@ -411,7 +419,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         });
 
                         newMappingList.Add(newMapping);
-                    }
+                    //}
                 }
 
                 //what if some of the waybill has been added before and some is in processing
