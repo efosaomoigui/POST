@@ -158,7 +158,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
             }
 
-            return await Task.FromResult(result);
+            return result;
         }
 
         private async Task<bool> ProcessPaymentForWallet(FlutterWebhookDTO webhook)
@@ -234,14 +234,14 @@ namespace GIGLS.Services.Implementation.Wallet
                     result = true;
                 }
             }
-            return await Task.FromResult(result);
+            return result;
         }
 
         //Generate security for webhook
-        public async Task<string> GetSecurityKey()
+        public Task<string> GetSecurityKey()
         {
             var securityKey = ConfigurationManager.AppSettings["FlutterwaveApiSecurityKey"];
-            return await Task.FromResult(Decrypt(securityKey));
+            return Task.FromResult(Decrypt(securityKey));
         }
 
         public static string Decrypt(string cipherText)
@@ -397,9 +397,9 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
