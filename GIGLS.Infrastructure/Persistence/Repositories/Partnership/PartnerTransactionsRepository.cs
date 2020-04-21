@@ -92,6 +92,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                   PreShipment = _context.PresShipmentMobile.Where(c => c.Waybill == transaction.Waybill)
                                   .Select(x => new PreShipmentMobileDTO
                                   {
+                                      SenderStationName = _context.Station.Where(y => y.StationId == x.SenderStationId).Select(y => y.StationName).FirstOrDefault(),
+                                      ReceiverStationName = _context.Station.Where(y => y.StationId == x.ReceiverStationId).Select(y => y.StationName).FirstOrDefault(),
                                       PreShipmentItems = _context.PresShipmentItemMobile.Where(d => d.PreShipmentMobileId == x.PreShipmentMobileId)
                                       .Select(y => new PreShipmentItemMobileDTO
                                       {
@@ -130,6 +132,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                   PreShipment = _context.PresShipmentMobile.Where(c => c.Waybill == transaction.Waybill)
                                   .Select(x => new PreShipmentMobileDTO
                                   {
+                                      SenderStationName = _context.Station.Where(y => y.StationId == x.SenderStationId).Select(y => y.StationName).FirstOrDefault(),
+                                      ReceiverStationName = _context.Station.Where(y => y.StationId == x.ReceiverStationId).Select(y => y.StationName).FirstOrDefault(),
                                       PreShipmentItems = _context.PresShipmentItemMobile.Where(y => y.PreShipmentMobileId == x.PreShipmentMobileId)
                                                             .Select(d => new PreShipmentItemMobileDTO
                                                             {
