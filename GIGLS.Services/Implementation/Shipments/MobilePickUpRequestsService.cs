@@ -100,67 +100,6 @@ namespace GIGLS.Services.Implementation.Shipments
             await _uow.CompleteAsync();
         }
 
-        //what if partner send Accepted, can you use this method
-        public async Task AddOrUpdateMobilePickUpRequestsForUnacceptedGroupByPartner(MobilePickUpRequestsDTO pickUpRequest, List<string> waybillList)
-        {
-            //why doing the filtering by status again
-            var request = _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill) && s.UserId == pickUpRequest.UserId
-                            && (s.Status == MobilePickUpRequestStatus.Rejected.ToString() || s.Status == MobilePickUpRequestStatus.TimedOut.ToString()
-                            || s.Status == MobilePickUpRequestStatus.Missed.ToString()));
-
-            if (request == null)
-            {
-                //use add range for those waybill at once                
-                foreach (var waybill in waybillList)
-                {
-                    pickUpRequest.Waybill = waybill;
-                    await AddMobilePickUpRequests(pickUpRequest);
-                }
-            }
-            else if (request.All(x => x.Status == MobilePickUpRequestStatus.Missed.ToString()))
-            {
-                //why forcing the status to be missed???    I am not forcing the status to be missed
-                //check you code again, you are sending Missed status yourself not the status send from the user
-                //Assuming partner send TimeOut 
-                await UpdateMobilePickUpRequestsForWaybillList(waybillList, pickUpRequest.UserId, MobilePickUpRequestStatus.Missed.ToString());
-            }
-            else
-            {
-                //This error should not be here because you are not using group to filter here
-                //You already did from  AddMobilePickupRequestMultipleShipment
-                throw new GenericException($"Shipment with group number: {pickUpRequest.GroupCodeNumber} already exists");
-            }
-        }
-
-        //FInd a way to merge this method to AddOrUpdateMobilePickUpRequestsForUnacceptedGroupByPartner
-        //A single method can solve your problem. Check your flow again
-        //This method should be deleted
-        public async Task AddOrUpdateMobilePickUpRequestsForAcceptedGroupByPartner(MobilePickUpRequestsDTO pickUpRequest, List<string> waybillList)
-        {
-            var request = _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill) && s.UserId == pickUpRequest.UserId);
-
-            if (request == null)
-            {
-                foreach (var waybill in waybillList)
-                {
-                    pickUpRequest.Waybill = waybill;
-                    await AddMobilePickUpRequests(pickUpRequest);
-
-                    //implement you scan method that manage multiple shipment at once 
-                    await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
-                    {
-                        WaybillNumber = waybill,
-                        ShipmentScanStatus = ShipmentScanStatus.MAPT
-                    });
-                }
-            }
-            else
-            {
-                await UpdateMobilePickUpRequestsForWaybillList(waybillList, pickUpRequest.UserId, pickUpRequest.Status);
-                
-            }
-        }
-
         public async Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequests()
         {
             try
