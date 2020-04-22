@@ -117,7 +117,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var isWaybillsMappedActiveResult = isWaybillMappedActive.Select(x => x.Waybill).Distinct().ToList();
 
-                if (isWaybillsMappedActiveResult.Count() > 0)
+                if (isWaybillsMappedActiveResult.Any())
                 {
                     throw new GenericException($"Error: Delivery Manifest cannot be created. " +
                                $"The following waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
@@ -216,7 +216,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 List<string> isWaybillsMappedActiveResult = isWaybillMappedActive.Select(x => x.Waybill).Distinct().ToList();
 
-                if (isWaybillsMappedActiveResult.Count() > 0)
+                if (isWaybillsMappedActiveResult.Any())
                 {
                     throw new GenericException($"Error: Delivery Manifest cannot be created. " +
                                $"The following waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
@@ -290,16 +290,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 //1a. Get the shipment status of the waybills we want to manifest && extrack waybills into a list from shipment collection
 
                 //1b. check if all the waybills has the same status (ARF)
-                if (shipmentCollectionList.Count() == 0)
+                int shipmentCollectionListCount = shipmentCollectionList.Count;
+                if (shipmentCollectionListCount == 0)
                 {
                     throw new GenericException($"No waybill available for Processing");
                 }
 
-                if (shipmentCollectionList.Count() != waybills.Count())
+                if (shipmentCollectionListCount != waybills.Count)
                 {
                     var result = waybills.Where(x => !shipmentCollectionList.Contains(x));
 
-                    if (result.Count() > 0)
+                    if (result.Any())
                     {
                         throw new GenericException($"Error: Delivery Manifest cannot be created. " +
                             $"The following waybills [{string.Join(", ", result.ToList())}] are not available for Processing");
@@ -325,11 +326,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 var InvoicesBySCList = InvoicesBySC.Select(x => x.Waybill).Distinct().ToList();
 
                 //1b. check if all the waybills are equal to our home delivery 
-                if (InvoicesBySCList.Count() != waybills.Count())
+                if (InvoicesBySCList.Count != waybills.Count)
                 {
                     var result = waybills.Where(x => !InvoicesBySCList.Contains(x));
 
-                    if (result.Count() > 0)
+                    if (result.Any())
                     {
                         throw new GenericException($"Error: Delivery Manifest cannot be created. " +
                             $"The following waybills [{string.Join(", ", result.ToList())}] are not available for Processing. " +
@@ -535,7 +536,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var userDispatchs = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == userId && s.ReceivedBy == null).ToList();
 
                 //get the active manifest for the dispatch user
-                if (userDispatchs.Count > 0)
+                if (userDispatchs.Any())
                 {
                     //error, the dispatch user cannot have an undelivered dispatch
                     var manifestCodeArray = userDispatchs.Select(s => s.ManifestNumber).ToList();
