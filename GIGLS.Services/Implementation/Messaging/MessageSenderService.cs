@@ -467,8 +467,6 @@ namespace GIGLS.Services.Implementation.Messaging
                  {
                      "Sender Name",
                      "WaybillNumber",
-                     "Customer Care1",
-                     "Customer Care2",
                      "Sender Phone Number"
                  };
 
@@ -476,9 +474,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 //map the array
                 strArray[0] = mobileShipmentCreationMessage.SenderName;
                 strArray[1] = mobileShipmentCreationMessage.WaybillNumber;
-                strArray[2] = mobileShipmentCreationMessage.CustomerCarePhoneNumber1;
-                strArray[3] = mobileShipmentCreationMessage.CustomerCarePhoneNumber2;
-                strArray[4] = mobileShipmentCreationMessage.SenderPhoneNumber;
+                strArray[2] = mobileShipmentCreationMessage.SenderPhoneNumber;
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
