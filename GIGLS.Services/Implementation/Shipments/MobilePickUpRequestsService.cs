@@ -50,9 +50,11 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 await AddMobilePickUpRequests(PickUpRequest);
             }
-
-            request.Status = PickUpRequest.Status;
-            await _uow.CompleteAsync();
+            else
+            {
+                request.Status = PickUpRequest.Status;
+                await _uow.CompleteAsync();
+            }
         }
 
         //what if partner send Accepted, can you use this method

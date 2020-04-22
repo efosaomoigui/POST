@@ -1136,11 +1136,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 List<string> transitWaybills = allTransitWaybillNumberList.Select(x => x.WaybillNumber).ToList();
 
-                if(allTransitWaybillNumberList.Count > 0)
+                if(allTransitWaybillNumberList.Any())
                 {
                     var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false && transitWaybills.Contains(s.Waybill)).ToList();
 
-                    if(shipment.Count > 0)
+                    if(shipment.Any())
                     {
                         shipmentsBySC.AddRange(shipment);
                     }
