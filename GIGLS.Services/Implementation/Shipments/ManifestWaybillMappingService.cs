@@ -410,10 +410,13 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //what if some of the waybill has been added before and some is in processing
                 //update all as shipment Assigned for Pickup
-                var shipmentList = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => newWaybillToMap.Contains(x.Waybill)).ToList();
-                shipmentList.ForEach(x => x.shipmentstatus = "Assigned for Pickup");
+                if (newMappingList.Any())
+                {
+                    var shipmentList = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => newWaybillToMap.Contains(x.Waybill)).ToList();
+                    shipmentList.ForEach(x => x.shipmentstatus = "Assigned for Pickup");
 
-                _uow.PickupManifestWaybillMapping.AddRange(newMappingList);
+                    _uow.PickupManifestWaybillMapping.AddRange(newMappingList);
+                }
 
                 foreach(string waybill in newWaybillToMap)
                 {
