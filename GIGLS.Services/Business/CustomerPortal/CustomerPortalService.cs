@@ -1839,7 +1839,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var preShipmentMobile = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == mobilePickUpRequestsDTO.Waybill);
                 if (preShipmentMobile == null)
                 {
-                    throw new GenericException("This is not a GIGGo Shipment.It can not be updated");
+                    throw new GenericException("This is not a GIGGo Shipment. It can not be updated");
                 }
                 else
                 {
@@ -1851,6 +1851,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     else if (preShipmentMobile.ZoneMapping == 1 && mobilePickUpRequestsDTO.Status == MobilePickUpRequestStatus.OnwardProcessing.ToString())
                     {
                         throw new GenericException("This is not an Inter-State Shipment");
+                    }
+                    else if(preShipmentMobile.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString())
+                    {
+                        throw new GenericException("The GIGGo Shipment has been delivered. It can not be updated");
                     }
                     else
                     {
