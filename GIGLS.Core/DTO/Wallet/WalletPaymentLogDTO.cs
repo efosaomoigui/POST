@@ -1,4 +1,5 @@
-﻿using GIGLS.CORE.DTO;
+﻿using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO;
 
 namespace GIGLS.Core.DTO.Wallet
 {
@@ -19,6 +20,10 @@ namespace GIGLS.Core.DTO.Wallet
 
         public bool IsWalletCredited { get; set; }
         public string Reference { get; set; }
+
+        public OnlinePaymentType OnlinePaymentType { get; set; }
+        public string Currency { get; set; }
+        public int PaymentCountryId { get; set; }
     }
 
 }
