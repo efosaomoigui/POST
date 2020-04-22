@@ -526,7 +526,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //check if the waybill that need to be grouped are in ungroupedWaybills above
                 var getWaybillNotAvailableForGrouping = newWaybillNumberArray.Where(x => !ungroupedWaybillsList.Contains(x));
 
-                if (getWaybillNotAvailableForGrouping.Count() > 0)
+                if (getWaybillNotAvailableForGrouping.Any())
                 {
                     throw new GenericException($"Error: The following waybills [{string.Join(", ", getWaybillNotAvailableForGrouping.ToList())}]" +
                         $" can not be added to this group because they are not available to you. Remove them from the list to proceed");
@@ -643,7 +643,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Delete the GroupWaybill If All the Waybills attached to it have been deleted.
                 var checkIfWaybillExistForGroup = await _uow.GroupWaybillNumberMapping.FindAsync(x => x.GroupWaybillNumber == groupWaybillNumber);
-                if(checkIfWaybillExistForGroup.Count() == 0)
+                if(!checkIfWaybillExistForGroup.Any())
                 {
                     //Delete the manifest mapping if groupway has been mapped to manifest
                     _uow.ManifestGroupWaybillNumberMapping.Remove(manifestGroupWaybillNumberMapping);
@@ -743,7 +743,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //validate if the waybills are all overdue shipment
                 var result = waybillNumberList.Where(x => !overdueShipmentList.Contains(x));
 
-                if (result.Count() > 0)
+                if (result.Any())
                 {
                     throw new GenericException($"Error: Group cannot be created. " +
                         $"The following waybills [{string.Join(", ", result.ToList())}] are not overdue shipments");

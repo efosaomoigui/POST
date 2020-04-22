@@ -262,7 +262,7 @@ namespace GIGLS.Services.Business.Tracking
         {
             var result = await _shipmentTrackingService.GetShipmentTrackingsForMobile(waybillNumber);
 
-            if (result.Count() > 0)
+            if (result.Any())
             {
                 //get shipment Details
                 var shipment = await _shipmentService.GetBasicShipmentDetail(waybillNumber);                               

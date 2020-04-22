@@ -303,7 +303,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var finalResult = new List<ShipmentTrackingDTO>();
                 var result = await _iShipmentTrackService.TrackShipment(waybillNumber);
 
-                if (result.Count() > 0)
+                if (result.Any())
                 {
                     string smim = ShipmentScanStatus.SMIM.ToString();
                     string fms = ShipmentScanStatus.FMS.ToString();
@@ -331,7 +331,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             var result = await _iShipmentTrackService.TrackShipment(waybillNumber);
 
-            if (result.Count() > 0)
+            if (result.Any())
             {
                 string smim = ShipmentScanStatus.SMIM.ToString();
                 string fms = ShipmentScanStatus.FMS.ToString();
@@ -1847,9 +1847,39 @@ namespace GIGLS.Services.Business.CustomerPortal
                     else
                     {
                         preShipmentMobile.shipmentstatus = mobilePickUpRequestsDTO.Status;
+
+                        string pickedUp = MobilePickUpRequestStatus.PickedUp.ToString();
+                        string onwardProcessing = MobilePickUpRequestStatus.OnwardProcessing.ToString();
+                        string delivered = MobilePickUpRequestStatus.Delivered.ToString();
+
+                        if (mobilePickUpRequestsDTO.Status == pickedUp || mobilePickUpRequestsDTO.Status == onwardProcessing || mobilePickUpRequestsDTO.Status == delivered)
+                        {
+                            ShipmentScanStatus status = ShipmentScanStatus.MCRT;
+
+                            if (mobilePickUpRequestsDTO.Status == pickedUp)
+                            {
+                                status = ShipmentScanStatus.MSHC;
+                            }
+
+                            if (mobilePickUpRequestsDTO.Status == onwardProcessing)
+                            {
+                                status = ShipmentScanStatus.MSVC;
+                            }
+
+                            if (mobilePickUpRequestsDTO.Status == delivered)
+                            {
+                                status = ShipmentScanStatus.MAHD;
+                            }
+
+                            await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
+                            {
+                                WaybillNumber = mobilePickUpRequestsDTO.Waybill,
+                                ShipmentScanStatus = status
+                            });
+                        }
+
                         await _uow.CompleteAsync();
-                    }
-                    
+                    }                    
                 }
                 return true;
             }

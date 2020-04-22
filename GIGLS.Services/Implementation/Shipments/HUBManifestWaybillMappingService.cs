@@ -309,7 +309,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 
                 var isWaybillAvailableForMapping = waybills.Where(x => !_shipmentWaitingForCollectionForHubResult.Contains(x));
 
-                if (isWaybillAvailableForMapping.Count() > 0)
+                if (isWaybillAvailableForMapping.Any())
                 {
                     throw new GenericException($"Error: The following waybills [{string.Join(", ", isWaybillAvailableForMapping.ToList())}]" +
                            $" can not be added to the manifest because they are not available for processing. Remove them from the list to proceed");
@@ -403,7 +403,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 List<string> isWaybillsMappedActiveResult = isWaybillMappedActive.Select(x => x.Waybill).Distinct().ToList();
 
-                if (isWaybillsMappedActiveResult.Count() > 0)
+                if (isWaybillsMappedActiveResult.Any())
                 {
                     throw new GenericException($"Error: Delivery Manifest cannot be created. " +
                                $"The following waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
@@ -477,16 +477,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 //1a. Get the shipment status of the waybills we want to manifest && extrack waybills into a list from shipment collection
 
                 //1b. check if all the waybills has the same status (ARF)
-                if (shipmentCollectionList.Count() == 0)
+                if (!shipmentCollectionList.Any())
                 {
                     throw new GenericException($"No waybill available for Processing");
                 }
 
-                if (shipmentCollectionList.Count() != waybills.Count())
+                if (shipmentCollectionList.Count != waybills.Count)
                 {
                     var result = waybills.Where(x => !shipmentCollectionList.Contains(x));
 
-                    if (result.Count() > 0)
+                    if (result.Any())
                     {
                         throw new GenericException($"Error: Delivery Manifest cannot be created. " +
                             $"The following waybills [{string.Join(", ", result.ToList())}] are not available for Processing");
@@ -510,11 +510,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 var InvoicesBySCList = InvoicesBySC.Select(x => x.Waybill).Distinct().ToList();
 
                 //1b. check if all the waybills are equal to our home delivery 
-                if (InvoicesBySCList.Count() != waybills.Count())
+                if (InvoicesBySCList.Count != waybills.Count)
                 {
                     var result = waybills.Where(x => !InvoicesBySCList.Contains(x));
 
-                    if (result.Count() > 0)
+                    if (result.Any())
                     {
                         throw new GenericException($"Error: Delivery Manifest cannot be created. " +
                             $"The following waybills [{string.Join(", ", result.ToList())}] are not available for Processing. " +
@@ -660,9 +660,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //get the dispatch for the user
                 var userDispatchs = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == userId && s.ReceivedBy == null).ToList();
-                int userDispatchsCount = userDispatchs.Count;
+               // int userDispatchsCount = userDispatchs.Count;
 
-                if (userDispatchsCount == 0)
+                if (!userDispatchs.Any())
                 {
                     //return an empty list
                     return new List<HUBManifestWaybillMappingDTO>();
@@ -677,8 +677,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //update userDispatchs
                     var deliveryManifestCodeArray = manifestObjects.Select(s => s.ManifestCode).ToList();
-                    userDispatchs = userDispatchs.Where(s =>
-                    deliveryManifestCodeArray.Contains(s.ManifestNumber)).ToList();
+                    userDispatchs = userDispatchs.Where(s =>  deliveryManifestCodeArray.Contains(s.ManifestNumber)).ToList();
                 }
 
                 List<HUBManifestWaybillMappingDTO> manifestWaybillNumberMappingDto = new List<HUBManifestWaybillMappingDTO>();

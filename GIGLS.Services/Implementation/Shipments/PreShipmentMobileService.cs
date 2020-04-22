@@ -32,6 +32,7 @@ using VehicleType = GIGLS.Core.Domain.VehicleType;
 using Hangfire;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.DTO.Utility;
+using System.Configuration;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -145,6 +146,19 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+        private async Task SendSMSForMobileShipmentCreation(PreShipmentMobileDTO preShipmentMobile)
+        {
+            var smsMessageExtensionDTO = new MobileShipmentCreationMessageDTO()
+            {
+                SenderName = preShipmentMobile.SenderName,
+                WaybillNumber = preShipmentMobile.Waybill,
+                SenderPhoneNumber = preShipmentMobile.SenderPhoneNumber
+            };
+
+
+            await _messageSenderService.SendMessage(MessageType.MCS, EmailSmsType.SMS, smsMessageExtensionDTO);
         }
 
         //Multiple Shipment New Flow NEW
@@ -401,6 +415,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
                     var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
                     updatedwallet.Balance = price;
+                    await SendSMSForMobileShipmentCreation(preShipmentDTO);
                     await _uow.CompleteAsync();
                     return preShipmentDTO;
                 }
@@ -1540,9 +1555,8 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw new GenericException("Please an error occurred while trying to scan shipment.");
             }
-
-
         }
+
         public async Task<PreShipmentMobile> GetMobileShipmentForScan(string waybill)
         {
             try

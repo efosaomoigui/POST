@@ -200,7 +200,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var shipmentTracking = await _uow.ShipmentTracking.GetShipmentTrackingsAsync(waybill);
 
-                if (shipmentTracking.Count > 0)
+                if (shipmentTracking.Any())
                 {
                     //1. check if waybill is a returned waybill
                     {
@@ -267,7 +267,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var shipmentTracking = await _uow.ShipmentTracking.GetShipmentTrackingsForMobileAsync(waybill);
 
-                if (shipmentTracking.Count > 0)
+                if (shipmentTracking.Any())
                 {
                     //1. check if waybill is a returned waybill
                     {
