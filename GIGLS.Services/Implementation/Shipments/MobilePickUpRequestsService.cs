@@ -57,6 +57,49 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task AddOrUpdateMobilePickUpRequests2(MobilePickUpRequestsDTO PickUpRequest, List<string> waybillList)
+        {
+            var request =  _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill) && s.UserId == PickUpRequest.UserId).ToList();
+
+            if (request == null)
+            {
+                List<MobilePickUpRequests> mobilePickUpRequests = new List<MobilePickUpRequests>();
+
+                foreach ( var waybill in waybillList)
+                {
+                    //Add new request
+                    var newRequest = new MobilePickUpRequests
+                    {
+                        Waybill = waybill,
+                        Status = PickUpRequest.Status,
+                        UserId = PickUpRequest.UserId,
+                        Reason = PickUpRequest.Reason
+                    };
+                    mobilePickUpRequests.Add(newRequest);
+                }
+
+                if( PickUpRequest.Status == MobilePickUpRequestStatus.Accepted.ToString())
+                {
+                    foreach (string waybill in waybillList)
+                    {
+                        await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
+                        {
+                            WaybillNumber = waybill,
+                            ShipmentScanStatus = ShipmentScanStatus.MAPT
+                        });
+                    }
+                }
+                
+
+                _uow.MobilePickUpRequests.AddRange(mobilePickUpRequests);
+            }
+            else
+            {
+                request.ForEach(x => x.Status = PickUpRequest.Status);
+            }
+            await _uow.CompleteAsync();
+        }
+
         //what if partner send Accepted, can you use this method
         public async Task AddOrUpdateMobilePickUpRequestsForUnacceptedGroupByPartner(MobilePickUpRequestsDTO pickUpRequest, List<string> waybillList)
         {

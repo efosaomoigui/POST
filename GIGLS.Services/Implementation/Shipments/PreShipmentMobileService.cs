@@ -1681,6 +1681,104 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<List<PreShipmentMobileDTO>> AddMobilePickupRequest2(MobilePickUpRequestsDTO pickuprequest)
+        {
+            try
+            {
+                if (pickuprequest == null)
+                {
+                    throw new GenericException("Group does not exist");
+                }
+
+                if (pickuprequest.UserId == null)
+                {
+                    pickuprequest.UserId = await _userService.GetCurrentUserId();
+                }
+
+                //do you have another endpoint to handle only waybill?          It is only Group for this endpoint
+                var groupList = await _uow.MobileGroupCodeWaybillMapping.FindAsync(x => x.GroupCodeNumber == pickuprequest.GroupCodeNumber);
+                if(groupList == null)
+                {
+                    throw new GenericException("Group does not exist");
+                }
+                else
+                {
+                    var waybillHashSet = new HashSet<string>();
+                    var newPreShipment = new List<PreShipmentMobileDTO>();
+
+                    foreach (var item in groupList)
+                    {
+                        if (item.WaybillNumber != null)
+                        {
+                            waybillHashSet.Add(item.WaybillNumber);
+                        }
+                    }
+
+                    var waybillList = waybillHashSet.ToList();
+
+                    //I need to find a way to get the other things in PreShipmentMobile
+                    //var allpreshipmentmobile = await _uow.PreShipmentMobile.FindAsync(s => waybillList.Contains(s.Waybill), "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
+                    var allpreshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill)).ToList();
+
+                    //Get the country info
+                    var country = await _uow.Country.GetCountryByStationId(allpreshipmentmobile.FirstOrDefault().SenderStationId);
+                    var onDelivery = false;
+
+                    if(pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString()
+                        || pickuprequest.Status == MobilePickUpRequestStatus.Missed.ToString())
+                    {
+                        await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequests2(pickuprequest, waybillList);
+                    }
+                    else if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString()
+                        && allpreshipmentmobile.All(x => x.shipmentstatus == "Shipment created" || x.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString()))
+                    {
+                        onDelivery = true;
+
+                        allpreshipmentmobile.ForEach(x => x.shipmentstatus = "Assigned for Pickup");
+
+                        await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequests2(pickuprequest, waybillList);
+                        
+                    }
+                    else
+                    {
+                        throw new GenericException($"Shipment has already been accepted..");
+                    }
+
+                    if(pickuprequest.ServiceCentreId != null)
+                    {
+                        newPreShipment = await UpdatePreShipmentMobileForServiceCenter(allpreshipmentmobile, pickuprequest);
+                    }
+                    else
+                    {
+                        newPreShipment = Mapper.Map<List<PreShipmentMobileDTO>>(allpreshipmentmobile);
+                    }
+
+                    newPreShipment.ForEach(x => x.GroupCodeNumber = pickuprequest.GroupCodeNumber);
+
+                    if (onDelivery == true)
+                    {
+                        await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OnDelivery);
+                    }
+
+                    await _uow.CompleteAsync();
+
+                    if (country != null)
+                    {
+                        newPreShipment.ForEach(x => x.CurrencyCode = country.CurrencyCode);
+                        newPreShipment.ForEach(x => x.CurrencySymbol = country.CurrencySymbol);
+                    }
+
+                    return newPreShipment;
+
+
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         //For Multiple Shipment Mobile Pickup Request
         public async Task<List<PreShipmentMobileDTO>> AddMobilePickupRequestMultipleShipment(MobilePickUpRequestsDTO pickuprequest)
         {
@@ -1811,27 +1909,27 @@ namespace GIGLS.Services.Implementation.Shipments
         
         private async Task<List<PreShipmentMobileDTO>> UpdatePreShipmentMobileForServiceCenter(List<PreShipmentMobile> preShipmentMobile, MobilePickUpRequestsDTO pickUpRequests)
         {
-            var newPreShipment = Mapper.Map<List<PreShipmentMobileDTO>>(preShipmentMobile);
-
+            
             var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickUpRequests.ServiceCentreId);
             var Locationdto = new LocationDTO
             {
                 Latitude = DestinationServiceCentreId.Latitude,
                 Longitude = DestinationServiceCentreId.Longitude
             };
-            //var Location = Mapper.Map<Location>(Locationdto);
+            var Location = Mapper.Map<Location>(Locationdto);
 
-            newPreShipment.ForEach(x => x.ServiceCentreAddress = DestinationServiceCentreId.Address);
-            newPreShipment.ForEach(x => x.serviceCentreLocation = Locationdto);          
-            newPreShipment.ForEach(x => x.GroupCodeNumber = pickUpRequests.GroupCodeNumber);
+            //I am updating this
+            preShipmentMobile.ForEach(x => x.serviceCentreLocation = Location);
+           
+            //are you updating shipment information here??? YES
+            await _uow.CompleteAsync();
 
-            newPreShipment.ForEach(x => x.ReceiverAddress = DestinationServiceCentreId.Address);
-            newPreShipment.ForEach(x => x.ReceiverLocation.Latitude = DestinationServiceCentreId.Latitude);
-            newPreShipment.ForEach(x => x.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude);
+            var newPreshipmentDTO = new List<PreShipmentMobileDTO>();
+            newPreshipmentDTO.ForEach(x => x.ReceiverAddress = DestinationServiceCentreId.Address);
+            newPreshipmentDTO.ForEach(x => x.ReceiverLocation.Latitude = DestinationServiceCentreId.Latitude);
+            newPreshipmentDTO.ForEach(x => x.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude);
 
-            //are you updating shipment information here???
-           // await _uow.CompleteAsync();
-            return newPreShipment;
+            return newPreshipmentDTO;
             
         }
 
