@@ -1856,6 +1856,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         throw new GenericException("This is not an Inter-State Shipment");
                     }
+                    else if(preShipmentMobile.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString())
+                    {
+                        throw new GenericException("This shipment has already been delivered. No further action can be taken");
+                    }
                     else
                     {
                         preShipmentMobile.shipmentstatus = mobilePickUpRequestsDTO.Status;
