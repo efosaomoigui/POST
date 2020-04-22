@@ -1697,7 +1697,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //do you have another endpoint to handle only waybill?          It is only Group for this endpoint
                 var groupList = await _uow.MobileGroupCodeWaybillMapping.FindAsync(x => x.GroupCodeNumber == pickuprequest.GroupCodeNumber);
-                if(groupList == null)
+                if (groupList == null)
                 {
                     throw new GenericException("Group does not exist");
                 }
@@ -1722,7 +1722,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var country = await _uow.Country.GetCountryByStationId(allpreshipmentmobile.FirstOrDefault().SenderStationId);
                     var onDelivery = false;
 
-                    if(pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString()
+                    if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString()
                         || pickuprequest.Status == MobilePickUpRequestStatus.Missed.ToString())
                     {
                         await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequestsMultipleShipments(pickuprequest, waybillList);
@@ -1736,7 +1736,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                         await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequestsMultipleShipments(pickuprequest, waybillList);
 
-                        foreach(var waybill in waybillList)
+                        foreach (var waybill in waybillList)
                         {
                             await ScanMobileShipment(new ScanDTO
                             {
@@ -1744,14 +1744,14 @@ namespace GIGLS.Services.Implementation.Shipments
                                 ShipmentScanStatus = ShipmentScanStatus.MAPT
                             });
                         }
-                        
+
                     }
                     else
                     {
                         throw new GenericException($"Shipment has already been accepted..");
                     }
 
-                    if(pickuprequest.ServiceCentreId != null)
+                    if (pickuprequest.ServiceCentreId != null)
                     {
                         newPreShipment = await UpdatePreShipmentMobileForServiceCenter(allpreshipmentmobile, pickuprequest);
                     }
@@ -1903,7 +1903,7 @@ namespace GIGLS.Services.Implementation.Shipments
         //            //    newPreShipment.ForEach(x => x.ReceiverLocation.Latitude = latitude);
         //            //    newPreShipment.ForEach(x => x.ReceiverLocation.Longitude = longitude);
         //            //}
-                    
+
         //            return newPreShipment;
         //        }
         //    }
@@ -1913,10 +1913,10 @@ namespace GIGLS.Services.Implementation.Shipments
         //    }
         //}
 
-        
+
         private async Task<List<PreShipmentMobileDTO>> UpdatePreShipmentMobileForServiceCenter(List<PreShipmentMobile> preShipmentMobile, MobilePickUpRequestsDTO pickUpRequests)
         {
-            
+
             var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickUpRequests.ServiceCentreId);
             var Locationdto = new LocationDTO
             {
@@ -1927,7 +1927,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //I am updating this
             preShipmentMobile.ForEach(x => x.serviceCentreLocation = Location);
-           
+
             //are you updating shipment information here??? YES
             await _uow.CompleteAsync();
 
@@ -1937,7 +1937,7 @@ namespace GIGLS.Services.Implementation.Shipments
             newPreshipmentDTO.ForEach(x => x.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude);
 
             return newPreshipmentDTO;
-            
+
         }
 
         //Activity  Status 
@@ -2019,25 +2019,19 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var userId = await _userService.GetCurrentUserId();
-
                 if (pickuprequest == null)
                 {
                     throw new GenericException("Pick Up Request is Null");
                 }
 
+                var userId = await _userService.GetCurrentUserId();
                 pickuprequest.UserId = userId;
-
-                //String ACCEPTED = "Accepted"; //by group
-                //How do you handle Accepted status  
-
-                //They are not calling Accepted here
-
+                
 
                 //The ones by group
-                if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.ProceedToPickUp.ToString() ||
-                            pickuprequest.Status == MobilePickUpRequestStatus.Arrived.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.Cancelled.ToString() ||
-                            pickuprequest.Status == MobilePickUpRequestStatus.LogVisit.ToString())
+                if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.ProceedToPickUp.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.Arrived.ToString() 
+                    || pickuprequest.Status == MobilePickUpRequestStatus.Cancelled.ToString() ||
+                     pickuprequest.Status == MobilePickUpRequestStatus.LogVisit.ToString())
                 {
                     var groupList = await _uow.MobileGroupCodeWaybillMapping.FindAsync(x => x.GroupCodeNumber == pickuprequest.GroupCodeNumber);
                     if (groupList == null)
@@ -2089,11 +2083,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
-                else if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString())
-                {
-                    throw new GenericException($"Api does not accept {pickuprequest.Status} ");
-                }
-
                 else
                 {
                     //This place is handling waybill, How can I know that is what is handling???
@@ -2108,7 +2097,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else if (pickuprequest.Status == MobilePickUpRequestStatus.Dispute.ToString())
                     {
-                        //This is not a list
                         //use the method I mentioned to update shipment details
                         var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Dispute.ToString();
@@ -2125,9 +2113,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 
@@ -2429,28 +2417,28 @@ namespace GIGLS.Services.Implementation.Shipments
                 mobileRequest.ForEach(u => u.Status = MobilePickUpRequestStatus.Visited.ToString());
 
                 // DONE use the method I mentioned above to do this update
-                await _mobilepickuprequestservice.UpdatePreShipmentMobileStatus(waybills, MobilePickUpRequestStatus.Visited.ToString());
+                var preshipmentMobile = await _mobilepickuprequestservice.UpdatePreShipmentMobileStatus(waybills, MobilePickUpRequestStatus.Visited.ToString());
                 await _uow.CompleteAsync();
 
-                //var user = await _userService.GetUserByChannelCode(preshipmentMobile.CustomerCode);
+                var user = await _userService.GetUserByChannelCode(preshipmentMobile.CustomerCode);
 
-                //var emailMessageExtensionDTO = new MobileMessageDTO()
-                //{
-                //    SenderName = user.FirstName + " " + user.LastName,
-                //    SenderEmail = user.Email,
-                //    WaybillNumber = preshipmentMobile.Waybill,
-                //    SenderPhoneNumber = preshipmentMobile.SenderPhoneNumber
-                //};
+                var emailMessageExtensionDTO = new MobileMessageDTO()
+                {
+                    SenderName = user.FirstName + " " + user.LastName,
+                    SenderEmail = user.Email,
+                    WaybillNumber = preshipmentMobile.Waybill,
+                    SenderPhoneNumber = preshipmentMobile.SenderPhoneNumber
+                };
 
-                //var smsMessageExtensionDTO = new MobileMessageDTO()
-                //{
-                //    SenderName = preshipmentMobile.ReceiverName,
-                //    WaybillNumber = preshipmentMobile.Waybill,
-                //    SenderPhoneNumber = preshipmentMobile.ReceiverPhoneNumber
-                //};
+                var smsMessageExtensionDTO = new MobileMessageDTO()
+                {
+                    SenderName = preshipmentMobile.ReceiverName,
+                    WaybillNumber = preshipmentMobile.Waybill,
+                    SenderPhoneNumber = preshipmentMobile.ReceiverPhoneNumber
+                };
 
-                //await _messageSenderService.SendGenericEmailMessage(MessageType.MATD, emailMessageExtensionDTO);
-                //await _messageSenderService.SendMessage(MessageType.MATD, EmailSmsType.SMS, smsMessageExtensionDTO);
+                await _messageSenderService.SendGenericEmailMessage(MessageType.MATD, emailMessageExtensionDTO);
+                await _messageSenderService.SendMessage(MessageType.MATD, EmailSmsType.SMS, smsMessageExtensionDTO);
 
             }
             catch (Exception ex)

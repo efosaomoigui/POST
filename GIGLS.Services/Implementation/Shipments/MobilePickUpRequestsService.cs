@@ -168,13 +168,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
         }
 
-        public async Task UpdatePreShipmentMobileStatus(List<string> waybillList, string status)
+        public async Task<PreShipmentMobile> UpdatePreShipmentMobileStatus(List<string> waybillList, string status)
         {
             try
             {
                 var preshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill)).ToList();
                 preshipmentmobile.ForEach(u => u.shipmentstatus = status);
                 await _uow.CompleteAsync();
+
+                return preshipmentmobile.FirstOrDefault();
             }
             catch (Exception)
             {
@@ -186,10 +188,15 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //why doing the filtering by status again
-                var MobilePickupRequests = _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybills.Contains(s.Waybill) && s.UserId == userId
-                            && s.Status != MobilePickUpRequestStatus.Rejected.ToString()).ToList();
+                //why doing the filtering by status again 
+                //I am doing just filtering by rejected, i don't want to update rejected
+                var MobilePickupRequests = _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybills.Contains(s.Waybill) 
+                && s.UserId == userId
+                && s.Status != MobilePickUpRequestStatus.Rejected.ToString()).ToList();
+
+                
                 MobilePickupRequests.ForEach(u => u.Status = status);
+
                 await _uow.CompleteAsync();
             }
             catch (Exception)
