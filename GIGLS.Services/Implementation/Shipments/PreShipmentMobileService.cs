@@ -1681,7 +1681,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<PreShipmentMobileDTO>> AddMobilePickupRequest2(MobilePickUpRequestsDTO pickuprequest)
+        public async Task<List<PreShipmentMobileDTO>> AddMobilePickupRequestMultipleShipment(MobilePickUpRequestsDTO pickuprequest)
         {
             try
             {
@@ -1716,8 +1716,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     var waybillList = waybillHashSet.ToList();
 
-                    //I need to find a way to get the other things in PreShipmentMobile
-                    //var allpreshipmentmobile = await _uow.PreShipmentMobile.FindAsync(s => waybillList.Contains(s.Waybill), "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
                     var allpreshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill)).ToList();
 
                     //Get the country info
@@ -1727,7 +1725,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     if(pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString()
                         || pickuprequest.Status == MobilePickUpRequestStatus.Missed.ToString())
                     {
-                        await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequests2(pickuprequest, waybillList);
+                        await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequestsMultipleShipments(pickuprequest, waybillList);
                     }
                     else if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString()
                         && allpreshipmentmobile.All(x => x.shipmentstatus == "Shipment created" || x.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString()))
@@ -1736,7 +1734,16 @@ namespace GIGLS.Services.Implementation.Shipments
 
                         allpreshipmentmobile.ForEach(x => x.shipmentstatus = "Assigned for Pickup");
 
-                        await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequests2(pickuprequest, waybillList);
+                        await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequestsMultipleShipments(pickuprequest, waybillList);
+
+                        foreach(var waybill in waybillList)
+                        {
+                            await ScanMobileShipment(new ScanDTO
+                            {
+                                WaybillNumber = waybill,
+                                ShipmentScanStatus = ShipmentScanStatus.MAPT
+                            });
+                        }
                         
                     }
                     else

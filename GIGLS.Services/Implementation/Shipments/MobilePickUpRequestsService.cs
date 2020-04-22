@@ -4,6 +4,7 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.Core.IServices.User;
 using GIGLS.Infrastructure;
@@ -19,12 +20,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userservice;
-        private readonly IPreShipmentMobileService _preShipmentMobileService;
-        public MobilePickUpRequestsService(IUnitOfWork uow, IUserService userservice, IPreShipmentMobileService preShipmentMobileService)
+
+        public MobilePickUpRequestsService(IUnitOfWork uow, IUserService userservice)
         {
             _uow = uow;
             _userservice = userservice;
-            _preShipmentMobileService = preShipmentMobileService;
             MapperConfig.Initialize();
         }
 
@@ -57,45 +57,25 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task AddOrUpdateMobilePickUpRequests2(MobilePickUpRequestsDTO PickUpRequest, List<string> waybillList)
+        public async Task AddOrUpdateMobilePickUpRequestsMultipleShipments(MobilePickUpRequestsDTO pickUpRequest, List<string> waybillList)
         {
-            var request =  _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill) && s.UserId == PickUpRequest.UserId).ToList();
+            var request =  _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill) && s.UserId == pickUpRequest.UserId).ToList();
 
-            if (request == null)
+            if (!request.Any())
             {
                 List<MobilePickUpRequests> mobilePickUpRequests = new List<MobilePickUpRequests>();
 
                 foreach ( var waybill in waybillList)
                 {
-                    //Add new request
-                    var newRequest = new MobilePickUpRequests
-                    {
-                        Waybill = waybill,
-                        Status = PickUpRequest.Status,
-                        UserId = PickUpRequest.UserId,
-                        Reason = PickUpRequest.Reason
-                    };
+                    pickUpRequest.Waybill = waybill;
+                    var newRequest = Mapper.Map<MobilePickUpRequests>(pickUpRequest);
                     mobilePickUpRequests.Add(newRequest);
                 }
-
-                if( PickUpRequest.Status == MobilePickUpRequestStatus.Accepted.ToString())
-                {
-                    foreach (string waybill in waybillList)
-                    {
-                        await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
-                        {
-                            WaybillNumber = waybill,
-                            ShipmentScanStatus = ShipmentScanStatus.MAPT
-                        });
-                    }
-                }
-                
-
                 _uow.MobilePickUpRequests.AddRange(mobilePickUpRequests);
             }
             else
             {
-                request.ForEach(x => x.Status = PickUpRequest.Status);
+                request.ForEach(x => x.Status = pickUpRequest.Status);
             }
             await _uow.CompleteAsync();
         }
@@ -217,5 +197,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
     }
 }
