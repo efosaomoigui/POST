@@ -165,7 +165,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Wallet does not exists");
             }
 
-            await CheckIfEcommerceIsEligible(wallet, walletTransactionDTO.Amount);
+            //Manage want every customer to be eligible
+            //await CheckIfEcommerceIsEligible(wallet, walletTransactionDTO.Amount);
 
             if (walletTransactionDTO.UserId == null)
             {

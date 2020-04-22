@@ -337,7 +337,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         DestinationStationId = preShipmentDTO.ReceiverStationId
                     });
                     preShipmentDTO.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
-                    if (preShipmentDTO.PreShipmentItems.Count() > 0)
+                    if (preShipmentDTO.PreShipmentItems.Any())
                     {
                         foreach (var shipment in preShipmentDTO.PreShipmentItems)
                         {
@@ -632,7 +632,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                if (preShipment.PreShipmentItems.Count() == 0)
+                if (!preShipment.PreShipmentItems.Any())
                 {
                     throw new GenericException("No Preshipitem was added");
                 }
@@ -3348,7 +3348,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         Password = user.Password,
                         CustomerCode = user.UserChannelCode,
                         IsRegisteredFromMobile = true,
-                        UserActiveCountryId = user.UserActiveCountryId
+                        UserActiveCountryId = user.UserActiveCountryId,
+                        IsEligible = true
                     };
                     var Company = Mapper.Map<Company>(companydto);
                     _uow.Company.Add(Company);
@@ -3358,7 +3359,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw new GenericException("An error occurred while trying to create company(L).M");
+                throw new GenericException("An error occurred while trying to create company");
             }
         }
 

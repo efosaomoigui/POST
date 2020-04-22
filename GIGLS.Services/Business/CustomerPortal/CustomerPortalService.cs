@@ -647,6 +647,10 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<SignResponseDTO> SignUp(UserDTO user)
         {
+            if(user == null)
+                throw new GenericException("NULL INPUT");
+
+
             var result = new SignResponseDTO();
 
             if (user.RequiresCod == null)
@@ -658,11 +662,13 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 user.IsUniqueInstalled = false;
             }
-            
-            if (user.IsEligible == null)
-            {
-                user.IsEligible = false;
-            }
+
+            //if (user.IsEligible == null)
+            //{
+            //    user.IsEligible = false;
+            //}
+            //enable eligibility
+            user.IsEligible = true;
             
             if (user.Referrercode != null)
             {
@@ -674,11 +680,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException($"Kindly supply valid customer channel ");
             }
             
-            if (user.UserChannelType == UserChannelType.Ecommerce)
-            {
-                var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
-                throw new GenericException($"{ecommerceEmail.Value}");
-            }
+            //if (user.UserChannelType == UserChannelType.Ecommerce)
+            //{
+            //    var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
+            //    throw new GenericException($"{ecommerceEmail.Value}");
+            //}
             
             if (user.Email != null)
             {
@@ -1111,6 +1117,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             emailcompanydetails.LastName = user.LastName;
                             emailcompanydetails.Name = user.Organisation;
                             emailcompanydetails.UserActiveCountryId = user.UserActiveCountryId;
+                            emailcompanydetails.IsEligible = user.IsEligible;
                         }
                     }
                     else
@@ -1144,7 +1151,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 ReturnServiceCentre = 0,
                                 UserActiveCountryId = user.UserActiveCountryId,
                                 Name = user.Organisation,
-                                isCodNeeded = (bool)user.RequiresCod
+                                isCodNeeded = (bool)user.RequiresCod,
+                                IsEligible = user.IsEligible
                             };
                             _uow.Company.Add(customer);
 
@@ -1636,8 +1644,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (user.UserChannelType == UserChannelType.Ecommerce)
                 {
-                    var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
-                    NumberGeneratorType.CustomerCodeEcommerce);
+                    var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeEcommerce);
                     user.UserChannelCode = customerCode;
                     var companydto = new Company
                     {
@@ -1650,7 +1657,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                         UserActiveCountryId = user.UserActiveCountryId,
                         CompanyType = CompanyType.Ecommerce,
                         Name = user.Organisation,
-                        isCodNeeded = (bool) user.RequiresCod
+                        isCodNeeded = (bool) user.RequiresCod,
+                        IsEligible = user.IsEligible
                     };
 
                     _uow.Company.Add(companydto);
