@@ -1617,7 +1617,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         else
                         {
                             //if the current status fall into this category, update it
-                            if (request.Status == MobilePickUpRequestStatus.Rejected.ToString() || request.Status == MobilePickUpRequestStatus.TimedOut.ToString() || request.Status == MobilePickUpRequestStatus.Missed.ToString())
+                            if (request.Status == MobilePickUpRequestStatus.Missed.ToString())
                             {
                                 request.Status = pickuprequest.Status;
                             }
