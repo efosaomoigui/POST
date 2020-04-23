@@ -1616,7 +1616,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                         else
                         {
-                            //if the current status fall into this category, update it
+                            //if the current status is Missed, update it else do nothing
                             if (request.Status == MobilePickUpRequestStatus.Missed.ToString())
                             {
                                 request.Status = pickuprequest.Status;
