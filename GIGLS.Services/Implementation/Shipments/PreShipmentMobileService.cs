@@ -1614,7 +1614,20 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString()
                        || pickuprequest.Status == MobilePickUpRequestStatus.Missed.ToString())
                     {
-                        await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequests(pickuprequest);
+                        var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickuprequest.Waybill && s.UserId == pickuprequest.UserId);
+
+                        if (request == null)
+                        {
+                            await _mobilepickuprequestservice.AddMobilePickUpRequests(pickuprequest);
+                        }
+                        else
+                        {
+                            //if the current status is Missed, update it else do nothing
+                            if (request.Status == MobilePickUpRequestStatus.Missed.ToString())
+                            {
+                                request.Status = pickuprequest.Status;
+                            }
+                        }
                     }
                     else if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString())
                     {

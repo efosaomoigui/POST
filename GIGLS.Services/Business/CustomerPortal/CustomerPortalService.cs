@@ -1843,7 +1843,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var preShipmentMobile = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == mobilePickUpRequestsDTO.Waybill);
                 if (preShipmentMobile == null)
                 {
-                    throw new GenericException("This is not a GIGGo Shipment.It can not be updated");
+                    throw new GenericException("This is not a GIGGo Shipment. It can not be updated");
                 }
                 else
                 {
