@@ -303,7 +303,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var finalResult = new List<ShipmentTrackingDTO>();
                 var result = await _iShipmentTrackService.TrackShipment(waybillNumber);
 
-                if (result.Count() > 0)
+                if (result.Any())
                 {
                     string smim = ShipmentScanStatus.SMIM.ToString();
                     string fms = ShipmentScanStatus.FMS.ToString();
@@ -331,7 +331,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             var result = await _iShipmentTrackService.TrackShipment(waybillNumber);
 
-            if (result.Count() > 0)
+            if (result.Any())
             {
                 string smim = ShipmentScanStatus.SMIM.ToString();
                 string fms = ShipmentScanStatus.FMS.ToString();
@@ -647,6 +647,10 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<SignResponseDTO> SignUp(UserDTO user)
         {
+            if(user == null)
+                throw new GenericException("NULL INPUT");
+
+
             var result = new SignResponseDTO();
 
             if (user.RequiresCod == null)
@@ -658,11 +662,13 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 user.IsUniqueInstalled = false;
             }
-            
-            if (user.IsEligible == null)
-            {
-                user.IsEligible = false;
-            }
+
+            //if (user.IsEligible == null)
+            //{
+            //    user.IsEligible = false;
+            //}
+            //enable eligibility
+            user.IsEligible = true;
             
             if (user.Referrercode != null)
             {
@@ -674,11 +680,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw new GenericException($"Kindly supply valid customer channel ");
             }
             
-            if (user.UserChannelType == UserChannelType.Ecommerce)
-            {
-                var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
-                throw new GenericException($"{ecommerceEmail.Value}");
-            }
+            //if (user.UserChannelType == UserChannelType.Ecommerce)
+            //{
+            //    var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
+            //    throw new GenericException($"{ecommerceEmail.Value}");
+            //}
             
             if (user.Email != null)
             {
@@ -910,7 +916,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     PhoneNumber = user.PhoneNumber,
                     UserId = FinalUser.Id,
                     IsActivated = false,
-                    UserActiveCountryId = user.UserActiveCountryId
+                    UserActiveCountryId = user.UserActiveCountryId,
+                    ActivityStatus = ActivityStatus.Idle,
+                    ActivityDate = DateTime.Now
+                
                 };
                 _uow.Partner.Add(partnerDTO);
 
@@ -1108,6 +1117,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                             emailcompanydetails.LastName = user.LastName;
                             emailcompanydetails.Name = user.Organisation;
                             emailcompanydetails.UserActiveCountryId = user.UserActiveCountryId;
+                            emailcompanydetails.IsEligible = user.IsEligible;
                         }
                     }
                     else
@@ -1141,7 +1151,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                                 ReturnServiceCentre = 0,
                                 UserActiveCountryId = user.UserActiveCountryId,
                                 Name = user.Organisation,
-                                isCodNeeded = (bool)user.RequiresCod
+                                isCodNeeded = (bool)user.RequiresCod,
+                                IsEligible = user.IsEligible
                             };
                             _uow.Company.Add(customer);
 
@@ -1514,6 +1525,12 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.AddMobilePickupRequest(pickuprequest);
         }
+
+        public async Task<List<PreShipmentMobileDTO>> AddMobilePickupRequestMultipleShipment(MobilePickUpRequestsDTO pickuprequest)
+        {
+            return await _preShipmentMobileService.AddMobilePickupRequestMultipleShipment(pickuprequest);
+        }
+
         public async Task<List<MobilePickUpRequestsDTO>> GetMobilePickupRequest()
         {
             return await _preShipmentMobileService.GetMobilePickupRequest();
@@ -1626,8 +1643,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (user.UserChannelType == UserChannelType.Ecommerce)
                 {
-                    var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(
-                    NumberGeneratorType.CustomerCodeEcommerce);
+                    var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeEcommerce);
                     user.UserChannelCode = customerCode;
                     var companydto = new Company
                     {
@@ -1640,7 +1656,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                         UserActiveCountryId = user.UserActiveCountryId,
                         CompanyType = CompanyType.Ecommerce,
                         Name = user.Organisation,
-                        isCodNeeded = (bool) user.RequiresCod
+                        isCodNeeded = (bool) user.RequiresCod,
+                        IsEligible = user.IsEligible
                     };
 
                     _uow.Company.Add(companydto);
@@ -1821,7 +1838,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var preShipmentMobile = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == mobilePickUpRequestsDTO.Waybill);
                 if (preShipmentMobile == null)
                 {
-                    throw new GenericException("This is not a GIGGo Shipment.It can not be updated");
+                    throw new GenericException("This is not a GIGGo Shipment. It can not be updated");
                 }
                 else
                 {
@@ -1834,12 +1851,46 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         throw new GenericException("This is not an Inter-State Shipment");
                     }
+                    else if(preShipmentMobile.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString())
+                    {
+                        throw new GenericException("The GIGGo Shipment has been delivered. It can not be updated");
+                    }
                     else
                     {
                         preShipmentMobile.shipmentstatus = mobilePickUpRequestsDTO.Status;
+
+                        string pickedUp = MobilePickUpRequestStatus.PickedUp.ToString();
+                        string onwardProcessing = MobilePickUpRequestStatus.OnwardProcessing.ToString();
+                        string delivered = MobilePickUpRequestStatus.Delivered.ToString();
+
+                        if (mobilePickUpRequestsDTO.Status == pickedUp || mobilePickUpRequestsDTO.Status == onwardProcessing || mobilePickUpRequestsDTO.Status == delivered)
+                        {
+                            ShipmentScanStatus status = ShipmentScanStatus.MCRT;
+
+                            if (mobilePickUpRequestsDTO.Status == pickedUp)
+                            {
+                                status = ShipmentScanStatus.MSHC;
+                            }
+
+                            if (mobilePickUpRequestsDTO.Status == onwardProcessing)
+                            {
+                                status = ShipmentScanStatus.MSVC;
+                            }
+
+                            if (mobilePickUpRequestsDTO.Status == delivered)
+                            {
+                                status = ShipmentScanStatus.MAHD;
+                            }
+
+                            await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
+                            {
+                                WaybillNumber = mobilePickUpRequestsDTO.Waybill,
+                                ShipmentScanStatus = status
+                            });
+                        }
+
                         await _uow.CompleteAsync();
-                    }
-                    
+                    }                    
                 }
                 return true;
             }

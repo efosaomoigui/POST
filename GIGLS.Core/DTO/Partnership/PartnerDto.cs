@@ -42,5 +42,7 @@ namespace GIGLS.Core.DTO.Partnership
         public string CurrencySymbol { get; set; }
 
         public string FleetPartnerCode { get; set; }
+        public ActivityStatus ActivityStatus { get; set; }
+        public DateTime ActivityDate { get; set; }
     }
 }

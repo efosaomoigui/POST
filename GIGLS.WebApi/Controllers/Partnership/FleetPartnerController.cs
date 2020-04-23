@@ -161,5 +161,19 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
+        [HttpGet]
+        [Route("getverifiedpartners")]
+        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetVerifiedPartners()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var partners = await _fleetPartnerService.GetVerifiedPartners();
+                return new ServiceResponse<IEnumerable<VehicleTypeDTO>>
+                {
+                    Object = partners
+                };
+            });
+        }
+
     }
 }

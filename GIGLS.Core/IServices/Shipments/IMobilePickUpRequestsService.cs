@@ -12,7 +12,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task AddMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest);
         Task UpdateMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest, string userId);
         Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequests();
-
         Task<Partnerdto> GetMonthlyTransactions();
+        Task AddOrUpdateMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest);
     }
 }

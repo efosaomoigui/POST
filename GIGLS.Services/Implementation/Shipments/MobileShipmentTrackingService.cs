@@ -32,9 +32,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _shipmentTrackService = shipmentTrackService;
 
         }
-
         
-
         public async Task<MobileShipmentTrackingHistoryDTO> GetMobileShipmentTrackings(string waybill)
         {
             try

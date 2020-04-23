@@ -38,7 +38,21 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        
+
+        public async Task AddOrUpdateMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest)
+        {
+            var request = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == PickUpRequest.Waybill && s.UserId == PickUpRequest.UserId);
+
+            if(request == null)
+            {
+                await AddMobilePickUpRequests(PickUpRequest);
+            }
+            else
+            {
+                request.Status = PickUpRequest.Status;
+                await _uow.CompleteAsync();
+            }
+        }
 
         public async Task<List<MobilePickUpRequestsDTO>> GetAllMobilePickUpRequests()
         {
@@ -80,7 +94,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 
                 var mobilerequests = await _uow.MobilePickUpRequests.GetMobilePickUpRequestsAsyncMonthly(userid);
-                var Count = await _uow.MobilePickUpRequests.FindAsync(x => x.UserId == userid && x.DateCreated.Month == DateTime.Now.Month && x.DateCreated.Year == DateTime.Now.Year && x.Status =="Delivered");
                 foreach (var item in mobilerequests)
                 {
                     if (item.PreShipment.ServiceCentreAddress != null)
@@ -90,7 +103,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         item.PreShipment.ReceiverAddress = item.PreShipment.ServiceCentreAddress;
                     }
                 }
-                var TotalDelivery = Count.Count();
+                var Count = await _uow.MobilePickUpRequests.FindAsync(x => x.UserId == userid && x.DateCreated.Month == DateTime.Now.Month && x.DateCreated.Year == DateTime.Now.Year && x.Status == "Delivered");
+                int TotalDelivery = Count.Count();
                 var TotalEarnings =  await _uow.PartnerTransactions.FindAsync(s => s.UserId == userid && s.DateCreated.Month == DateTime.Now.Month && s.DateCreated.Year == DateTime.Now.Year);
                 var TotalEarning = TotalEarnings.Sum(x =>x.AmountReceived);
                 var totaltransactions = new Partnerdto
@@ -103,7 +117,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
                 return totaltransactions;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }

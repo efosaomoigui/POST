@@ -40,7 +40,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _customerService = customerService;
             _shipmentService = shipmentService;
             _preShipmentMobileService = preShipmentMobileService;
-            
+
             MapperConfig.Initialize();
         }
 
@@ -117,7 +117,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var isWaybillsMappedActiveResult = isWaybillMappedActive.Select(x => x.Waybill).Distinct().ToList();
 
-                if (isWaybillsMappedActiveResult.Count() > 0)
+                if (isWaybillsMappedActiveResult.Any())
                 {
                     throw new GenericException($"Error: Delivery Manifest cannot be created. " +
                                $"The following waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
@@ -216,7 +216,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 List<string> isWaybillsMappedActiveResult = isWaybillMappedActive.Select(x => x.Waybill).Distinct().ToList();
 
-                if (isWaybillsMappedActiveResult.Count() > 0)
+                if (isWaybillsMappedActiveResult.Any())
                 {
                     throw new GenericException($"Error: Delivery Manifest cannot be created. " +
                                $"The following waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
@@ -290,16 +290,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 //1a. Get the shipment status of the waybills we want to manifest && extrack waybills into a list from shipment collection
 
                 //1b. check if all the waybills has the same status (ARF)
-                if (shipmentCollectionList.Count() == 0)
+                int shipmentCollectionListCount = shipmentCollectionList.Count;
+                if (shipmentCollectionListCount == 0)
                 {
                     throw new GenericException($"No waybill available for Processing");
                 }
 
-                if (shipmentCollectionList.Count() != waybills.Count())
+                if (shipmentCollectionListCount != waybills.Count)
                 {
                     var result = waybills.Where(x => !shipmentCollectionList.Contains(x));
 
-                    if (result.Count() > 0)
+                    if (result.Any())
                     {
                         throw new GenericException($"Error: Delivery Manifest cannot be created. " +
                             $"The following waybills [{string.Join(", ", result.ToList())}] are not available for Processing");
@@ -325,11 +326,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 var InvoicesBySCList = InvoicesBySC.Select(x => x.Waybill).Distinct().ToList();
 
                 //1b. check if all the waybills are equal to our home delivery 
-                if (InvoicesBySCList.Count() != waybills.Count())
+                if (InvoicesBySCList.Count != waybills.Count)
                 {
                     var result = waybills.Where(x => !InvoicesBySCList.Contains(x));
 
-                    if (result.Count() > 0)
+                    if (result.Any())
                     {
                         throw new GenericException($"Error: Delivery Manifest cannot be created. " +
                             $"The following waybills [{string.Join(", ", result.ToList())}] are not available for Processing. " +
@@ -346,13 +347,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        
+
         //map waybill to Manifest (Pickup)
         public async Task MappingManifestToWaybillsPickup(string manifest, List<string> waybills)
         {
             try
             {
-                var serviceIds = await _userService.GetPriviledgeServiceCenters();                
+                var serviceIds = await _userService.GetPriviledgeServiceCenters();
 
                 //1. check if any of the waybills has not been mapped to a manifest 
                 // and has not been process for return in case it was not delivered (i.e still active) that day
@@ -361,7 +362,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var isWaybillsMappedActiveResult = isWaybillMappedActive.Select(x => x.Waybill).Distinct().ToList();
 
-                if (isWaybillsMappedActiveResult.Count() > 0)
+                if (isWaybillsMappedActiveResult.Any())
                 {
                     throw new GenericException($"Error: Manifest cannot be created. " +
                                $"The following waybills [{string.Join(", ", isWaybillsMappedActiveResult.ToList())}] already been manifested");
@@ -382,20 +383,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 var newWaybillList = new HashSet<string>(waybills);
-
                 var newMappingList = new List<PickupManifestWaybillMapping>();
+                List<string> newWaybillToMap = new List<string>();
 
                 foreach (var waybill in newWaybillList)
                 {
-                    //check if the waybill exist
-                    var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
-                    if (shipment == null)
-                    {
-                        throw new GenericException($"No Waybill exists for this number: {waybill}");
-                    }
-                                                           
                     //check if Waybill has not been added to this manifest 
                     var isWaybillMapped = await _uow.PickupManifestWaybillMapping.ExistAsync(x => x.ManifestCode == manifest && x.Waybill == waybill);
+
                     //if the waybill has not been added to this manifest, add it
                     if (!isWaybillMapped)
                     {
@@ -408,14 +403,32 @@ namespace GIGLS.Services.Implementation.Shipments
                             ServiceCentreId = serviceIds[0]
                         };
 
+                        newWaybillToMap.Add(waybill);
                         newMappingList.Add(newMapping);
-
-                        //_uow.PickupManifestWaybillMapping.Add(newMapping);
-
-                        shipment.shipmentstatus = "Assigned for Pickup";
                     }
                 }
-                _uow.PickupManifestWaybillMapping.AddRange(newMappingList);
+
+                //what if some of the waybill has been added before and some is in processing
+                //update all as shipment Assigned for Pickup
+                if (newMappingList.Any())
+                {
+                    var shipmentList = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => newWaybillToMap.Contains(x.Waybill)).ToList();
+                    shipmentList.ForEach(x => x.shipmentstatus = "Assigned for Pickup");
+
+                    _uow.PickupManifestWaybillMapping.AddRange(newMappingList);
+                }
+
+                foreach(string waybill in newWaybillToMap)
+                {
+                    //create a list to add waybill that has not been mapped
+                    //then add then using addrange
+                    await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
+                    {
+                        WaybillNumber = waybill,
+                        ShipmentScanStatus = ShipmentScanStatus.MAPT
+                    });
+                }
+
                 _uow.Complete();
             }
             catch (Exception) { }
@@ -526,7 +539,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var userDispatchs = _uow.Dispatch.GetAll().Where(s => s.DriverDetail == userId && s.ReceivedBy == null).ToList();
 
                 //get the active manifest for the dispatch user
-                if (userDispatchs.Count > 0)
+                if (userDispatchs.Any())
                 {
                     //error, the dispatch user cannot have an undelivered dispatch
                     var manifestCodeArray = userDispatchs.Select(s => s.ManifestNumber).ToList();
@@ -803,8 +816,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipment.shipmentstatus = "Shipment created";
                 }
                 _uow.PickupManifestWaybillMapping.Remove(pickuupManifestWaybillMapping);
-                
-               
+
+
                 _uow.Complete();
             }
             catch (Exception)
@@ -972,7 +985,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
-        
+
         //get manifest waiting to signoff
         public async Task<List<ManifestWaybillMappingDTO>> GetManifestWaitingForSignOff()
         {

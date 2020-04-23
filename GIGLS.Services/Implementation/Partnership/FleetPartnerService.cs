@@ -29,7 +29,8 @@ namespace GIGLS.Services.Implementation.Partnership
         private readonly IMessageSenderService _messageSenderService;
 
         public FleetPartnerService(IUnitOfWork uow, INumberGeneratorMonitorService numberGeneratorMonitorService,
-            IUserService userService, ICompanyService companyService, IPasswordGenerator passwordGenerator, IMessageSenderService messageSenderService)
+            IUserService userService, ICompanyService companyService, IPasswordGenerator passwordGenerator,
+            IMessageSenderService messageSenderService)
         {
             _uow = uow;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
@@ -271,6 +272,17 @@ namespace GIGLS.Services.Implementation.Partnership
             
             await _uow.CompleteAsync();
 
+        }
+
+        public async Task<List<VehicleTypeDTO>> GetVerifiedPartners()
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            var partners = await _uow.Partner.GetVerifiedPartnersAsync(currentUser.UserChannelCode);
+
+            return partners;
         }
 
 
