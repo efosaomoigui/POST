@@ -28,9 +28,6 @@ namespace GIGLS.Core.Domain.Wallet
         //manage GIGGO process 
         public OnlinePaymentType OnlinePaymentType { get; set; }
 
-        [MaxLength(10)]
-        public string Currency { get; set; }
-
         public int PaymentCountryId { get; set; }
     }
 }
