@@ -1904,29 +1904,20 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<string> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO)
         {
             try
-            {
-                //var existingPreShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == preShipmentDTO.TempCode);
-                string code = null;
-                
+            {                
                 // get the sender info
                 var currentUserId = await _userService.GetCurrentUserId();
                 preShipmentDTO.SenderUserId = currentUserId;
-                var user = await _userService.GetUserById(currentUserId);
 
-                var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.DepartureStationId);
-                preShipmentDTO.CountryId = Country.CountryId;
-                //preShipmentDTO.CurrencyCode = Country.CurrencyCode;
-                //preShipmentDTO.CurrencySymbol = Country.CurrencySymbol;
+                var user = await _userService.GetUserById(currentUserId);
                 preShipmentDTO.CompanyType = user.UserChannelType.ToString();
                 preShipmentDTO.CustomerCode = user.UserChannelCode;
+
+                var country = await _uow.Country.GetCountryByStationId(preShipmentDTO.DepartureStationId);
+                preShipmentDTO.CountryId = country.CountryId;
                
                 var newPreShipment = Mapper.Map<PreShipment>(preShipmentDTO);
-                //if(existingPreShipment == null)
-                //{
-                    code = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.PreShipmentCode);
-                //}
-
-                newPreShipment.TempCode = code;
+                newPreShipment.TempCode =  await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.PreShipmentCode); ;
                 newPreShipment.ApproximateItemsWeight = 0;
                 newPreShipment.IsProcessed = false;
 
