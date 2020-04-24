@@ -54,7 +54,6 @@ namespace GIGLS.Services.Business.CustomerPortal
     public class CustomerPortalService : ICustomerPortalService
     {
         private readonly IUnitOfWork _uow;
-        private readonly IShipmentService _shipmentService;
         private readonly IInvoiceService _invoiceService;
         private readonly IShipmentTrackService _iShipmentTrackService;
         private readonly IUserService _userService;
@@ -75,21 +74,19 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IMessageSenderService _messageSenderService;
         private readonly ICountryService _countryService;
         private readonly IAdminReportService _adminReportService;
-        public readonly IIndividualCustomerService _individualCustomerService;
-        public readonly IPartnerTransactionsService _partnertransactionservice;
+        private readonly IPartnerTransactionsService _partnertransactionservice;
         private readonly IMobileGroupCodeWaybillMappingService _groupCodeWaybillMappingService;
 
 
-        public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
+        public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService, ICustomerService customerService,
             IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService, 
-            ICountryService countryService, IAdminReportService adminReportService, IIndividualCustomerService individualCustomerService, 
+            ICountryService countryService, IAdminReportService adminReportService, 
             IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService)
         {
-            _shipmentService = shipmentService;
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
             _userService = userService;
@@ -111,7 +108,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             _messageSenderService = messageSenderService;
             _countryService = countryService;
             _adminReportService = adminReportService;
-            _individualCustomerService = individualCustomerService;
             _partnertransactionservice = partnertransactionservice;
             _groupCodeWaybillMappingService = groupCodeWaybillMappingService;
             MapperConfig.Initialize();
