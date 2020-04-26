@@ -148,6 +148,37 @@ namespace GIGLS.Services.Implementation.Wallet
             return await Task.FromResult(result);
         }
 
+        public async Task<PaymentResponse> VerifyAndProcessPayment(string referenceCode)
+        {
+            PaymentResponse result = new PaymentResponse();            
+
+            //1. Get PaymentLog
+            var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+            if(paymentLog != null)
+            {
+                //Process for Nigeria
+                if(paymentLog.PaymentCountryId == 1)
+                {
+                    result = await VerifyAndValidateWallet(referenceCode);                    
+                }                                
+
+                if(paymentLog.PaymentCountryId == 76)
+                {
+                    //process for Ghana
+                    result = await ProcessPaymentForWallet(referenceCode);
+                }
+            }
+            else
+            {
+                result.Result = false;
+                result.Message = "";
+                result.GatewayResponse = "Wallet Payment Log Information does not exist";
+            }
+
+            return await Task.FromResult(result);
+        }
+
         public async Task<PaymentResponse> VerifyAndValidateWallet(string referenceCode)
         {
             //1. verify the payment 
@@ -345,6 +376,7 @@ namespace GIGLS.Services.Implementation.Wallet
             return result;
         }
 
+        //Ghana Wallet Payment
         private async Task<bool> ProcessPaymentForWallet(PaystackWebhookDTO webhook)
         {
             bool result = false;
@@ -400,6 +432,83 @@ namespace GIGLS.Services.Implementation.Wallet
                 paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
                 await _uow.CompleteAsync();
                 result = true;
+            }
+
+            return await Task.FromResult(result);
+        }
+
+        private async Task<PaymentResponse> ProcessPaymentForWallet(string referenceCode)
+        {
+            //1. verify the payment 
+            var verifyResult = await VerifyGhanaPayment(referenceCode);
+
+            PaymentResponse result = new PaymentResponse()
+            {
+                Result = verifyResult.Status,
+                Message = verifyResult.Message
+            };
+
+            if (verifyResult.Status)
+            {
+                //get wallet payment log by reference code
+                var paymentLog = _uow.WalletPaymentLog.SingleOrDefault(x => x.Reference == referenceCode);
+
+                if (paymentLog == null)
+                {
+                    result.GatewayResponse = "Wallet Payment Log Information does not exist";
+                    return result;
+                }
+
+                //2. if the payment successful
+                if (verifyResult.data.Status.Equals("success") && !paymentLog.IsWalletCredited)
+                {
+                    //a. update the wallet for the customer
+                    string customerId = null;  //set customer id to null
+
+                    //get wallet detail to get customer code
+                    var walletDto = await _walletService.GetWalletById(paymentLog.WalletId);
+
+                    if (walletDto != null)
+                    {
+                        //use customer code to get customer id
+                        var user = await _userService.GetUserByChannelCode(walletDto.CustomerCode);
+
+                        if (user != null)
+                            customerId = user.Id;
+                    }
+
+                    //update the wallet
+                    await _walletService.UpdateWallet(paymentLog.WalletId, new WalletTransactionDTO()
+                    {
+                        WalletId = paymentLog.WalletId,
+                        Amount = verifyResult.data.Amount,
+                        CreditDebitType = CreditDebitType.Credit,
+                        Description = "Funding made through online payment",
+                        PaymentType = PaymentType.Online,
+                        PaymentTypeReference = verifyResult.data.Reference,
+                        UserId = customerId
+                    }, false);
+                }
+
+                //3. update the wallet payment log
+                if (verifyResult.data.Status != null)
+                {
+                    paymentLog.IsWalletCredited = true;
+                }
+                paymentLog.TransactionStatus = verifyResult.data.Status;
+                paymentLog.TransactionResponse = verifyResult.data.Gateway_Response;
+                await _uow.CompleteAsync();
+
+                //update return response
+                result.GatewayResponse = verifyResult.data.Gateway_Response;
+                result.Status = verifyResult.data.Status;
+            }
+            {
+                if (verifyResult.data.Status != null)
+                {
+                    result.Status = verifyResult.data.Status;
+                    result.GatewayResponse = verifyResult.data.Gateway_Response;
+                }
             }
 
             return await Task.FromResult(result);
