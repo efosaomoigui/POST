@@ -61,21 +61,24 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             var request =  _uow.MobilePickUpRequests.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill) && s.UserId == pickUpRequest.UserId).ToList();
 
-            if (!request.Any())
+            if (request.Any())
             {
-                List<MobilePickUpRequests> mobilePickUpRequests = new List<MobilePickUpRequests>();
-
-                foreach ( var waybill in waybillList)
-                {
-                    pickUpRequest.Waybill = waybill;
-                    var newRequest = Mapper.Map<MobilePickUpRequests>(pickUpRequest);
-                    mobilePickUpRequests.Add(newRequest);
-                }
-                _uow.MobilePickUpRequests.AddRange(mobilePickUpRequests);
+                request.ForEach(x => x.Status = pickUpRequest.Status);
             }
             else
             {
-                request.ForEach(x => x.Status = pickUpRequest.Status);
+                if (waybillList.Any())
+                {
+                    List<MobilePickUpRequests> mobilePickUpRequests = new List<MobilePickUpRequests>();
+
+                    foreach (var waybill in waybillList)
+                    {
+                        pickUpRequest.Waybill = waybill;
+                        var newRequest = Mapper.Map<MobilePickUpRequests>(pickUpRequest);
+                        mobilePickUpRequests.Add(newRequest);
+                    }
+                    _uow.MobilePickUpRequests.AddRange(mobilePickUpRequests);
+                }
             }
             await _uow.CompleteAsync();
         }
