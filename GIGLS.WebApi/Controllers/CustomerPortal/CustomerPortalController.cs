@@ -1206,6 +1206,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpPost]
+        [Route("updatemobilepickuprequestsbywaybill")]
+        public async Task<IServiceResponse<object>> UpdatePickupRequestsUsingWaybill(MobilePickUpRequestsDTO PickupRequest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _portalService.UpdateMobilePickupRequestUsingWaybill(PickupRequest);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
 
         [HttpGet]
         [Route("getpreshipmentmobiledetails/{waybillNumber}")]

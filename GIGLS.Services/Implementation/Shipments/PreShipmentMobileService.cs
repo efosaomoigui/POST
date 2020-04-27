@@ -2134,6 +2134,55 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<bool> UpdateMobilePickupRequestUsingWaybill(MobilePickUpRequestsDTO pickuprequest)
+        {
+            try
+            {
+                if (pickuprequest == null)
+                {
+                    throw new GenericException("Pick Up Request is Null");
+                }
+
+                bool result = false;
+                var userId = await _userService.GetCurrentUserId();
+                pickuprequest.UserId = userId;
+
+                string delivered = MobilePickUpRequestStatus.Delivered.ToString();
+                string dispute = MobilePickUpRequestStatus.Dispute.ToString();
+                string confirmed = MobilePickUpRequestStatus.Confirmed.ToString();
+
+                if (pickuprequest.Status == delivered || pickuprequest.Status == dispute || pickuprequest.Status == confirmed)
+                {
+                    //you can use loop for this.  
+                    if (pickuprequest.Status == confirmed)
+                    {
+                        await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
+                        await ConfirmMobilePickupRequest(pickuprequest, userId);
+                    }
+                    
+                    if (pickuprequest.Status == delivered)
+                    {
+                        //await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
+                        await DeliveredMobilePickupRequest(pickuprequest, userId);
+                        await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OffDelivery);
+                    }
+                    
+                    if (pickuprequest.Status == dispute)
+                    {
+                        //use the method I mentioned to update shipment details
+                        var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
+                        preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Dispute.ToString();
+                        await _uow.CompleteAsync();
+                    }
+                }
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task ConfirmMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest, string userId)
         {
             try
@@ -2228,13 +2277,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     ShipmentScanStatus = ShipmentScanStatus.MSHC
                 });
 
-                var item = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
+                //var item = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
                 //await CheckDeliveryTimeAndSendMail(item);
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -2247,7 +2296,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Shipment item does not exist");
                 }
-                //preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Delivered.ToString();
+
                 preshipmentmobile.IsDelivered = true;
 
                 if (preshipmentmobile.ZoneMapping == 1)
@@ -2321,7 +2370,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         var Pickuprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId, preshipmentmobile.UserId = null);
                         pickuprequest.Status = MobilePickUpRequestStatus.Delivered.ToString();
                         await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
-                        //var Pickupprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId, preshipmentmobile.UserId=null);
+
                         var Partner = new PartnerPayDTO
                         {
                             ShipmentPrice = preshipmentmobile.GrandTotal,
@@ -2365,9 +2414,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
