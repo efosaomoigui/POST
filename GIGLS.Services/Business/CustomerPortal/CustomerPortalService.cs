@@ -1535,9 +1535,9 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.UpdateMobilePickupRequest(pickuprequest);
         }
-        public async Task<bool> UpdateMobilePickupRequestMultipleShipment(MobilePickUpRequestsDTO pickuprequest)
+        public async Task<bool> UpdateMobilePickupRequestUsingGroupCode(MobilePickUpRequestsDTO pickuprequest)
         {
-            return await _preShipmentMobileService.UpdateMobilePickupRequestForMultipleShipments(pickuprequest);
+            return await _preShipmentMobileService.UpdateMobilePickupRequestUsingGroupCode(pickuprequest);
         }
         public async Task<object> ResolveDisputeForMobile(PreShipmentMobileDTO preShipment)
         {

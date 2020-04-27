@@ -1192,12 +1192,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpPost]
-        [Route("updatemobilepickuprequestsmultiple")]
-        public async Task<IServiceResponse<object>> UpdatePickupRequestsForMultiple(MobilePickUpRequestsDTO PickupRequest)
+        [Route("updatemobilepickuprequestsbygroup")]
+        public async Task<IServiceResponse<object>> UpdatePickupRequestsUsingGroupCode(MobilePickUpRequestsDTO PickupRequest)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var flag = await _portalService.UpdateMobilePickupRequestMultipleShipment(PickupRequest);
+                var flag = await _portalService.UpdateMobilePickupRequestUsingGroupCode(PickupRequest);
 
                 return new ServiceResponse<object>
                 {
