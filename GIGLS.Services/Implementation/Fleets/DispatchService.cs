@@ -84,6 +84,7 @@ namespace GIGLS.Services.Implementation.Fleets
                         var pickupManifestEntity = _uow.PickupManifest.Get(pickupManifestObj.PickupManifestId);
                         pickupManifestEntity.DispatchedById = currentUserId;
                         pickupManifestEntity.IsDispatched = true;
+                        pickupManifestEntity.ManifestStatus = ManifestStatus.Pending;
                         pickupManifestEntity.ManifestType = dispatchDTO.ManifestType;
                     }
                 }
@@ -440,5 +441,45 @@ namespace GIGLS.Services.Implementation.Fleets
             }
             return true;
         }
+
+        public async Task UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO)
+        {
+            try
+            {
+                var userId = await _userService.GetCurrentUserId();
+                var currentUser = await _userService.GetUserById(userId);
+                var driver = currentUser.FirstName + currentUser.LastName;
+
+                var dispatch = await _uow.Dispatch.GetAsync(s => s.ManifestNumber == manifestStatusDTO.ManifestCode && s.DriverDetail.ToLower().Trim() == driver.ToLower().Trim());
+                if(dispatch == null)
+                {
+                    throw new GenericException("This manifest is not assigned to you");
+                }
+                else
+                {
+                    var pickupManifestObj = _uow.PickupManifest.SingleOrDefault(s => s.ManifestCode == manifestStatusDTO.ManifestCode);
+                    if (pickupManifestObj != null)
+                    {
+                        if (pickupManifestObj.ManifestStatus != ManifestStatus.Delivered)
+                        {
+                            //ASK IF THERE IS ANY OTHER CONDITION FOR REJECTED AND ACCEPTED
+                            var pickupManifestEntity = _uow.PickupManifest.Get(pickupManifestObj.PickupManifestId);
+                            pickupManifestEntity.ManifestStatus = manifestStatusDTO.ManifestStatus;
+                        }
+                        else
+                        {
+                            throw new GenericException("This Manifest has been delivered");
+                        }
+                       
+                    }
+                }
+                await _uow.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        
     }
 }

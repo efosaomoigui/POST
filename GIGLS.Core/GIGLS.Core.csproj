@@ -326,6 +326,7 @@
     <Compile Include="DTO\Fleets\FleetPartInventoryDTO.cs" />
     <Compile Include="DTO\Fleets\FleetPartInventoryHistoryDTO.cs" />
     <Compile Include="DTO\Fleets\FleetTripDTO.cs" />
+    <Compile Include="DTO\Fleets\ManifestStatusDTO.cs" />
     <Compile Include="DTO\GiglgoStationDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDistanceMappingPriceDTO.cs" />
@@ -500,6 +501,7 @@
     <Compile Include="Enums\JobCardStatus.cs" />
     <Compile Include="Enums\JobCardType.cs" />
     <Compile Include="Enums\MaintenanceType.cs" />
+    <Compile Include="Enums\ManifestStatus.cs" />
     <Compile Include="Enums\ManifestType.cs" />
     <Compile Include="Enums\MessageType.cs" />
     <Compile Include="Enums\MessagingLogStatus.cs" />

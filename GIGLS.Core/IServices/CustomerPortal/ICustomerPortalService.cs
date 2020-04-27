@@ -5,6 +5,7 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Admin;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.PaymentTransactions;
@@ -139,5 +140,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<PreShipmentMobileDTO>> AddMobilePickupRequestMultipleShipment(MobilePickUpRequestsDTO pickuprequest);
         Task<string> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO);
         Task<bool> UpdateTemporaryShipment(PreShipmentDTO preShipmentDTO);
+        Task UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO);
     }
 }

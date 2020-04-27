@@ -431,7 +431,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 _uow.Complete();
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                throw ex;
+                
+            }
         }
         //Get Waybills In Manifest
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifest(string manifestcode)
@@ -979,6 +983,22 @@ namespace GIGLS.Services.Implementation.Shipments
                                      Description = r.Description
                                  }).ToList();
                 return shipmentsBySC;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<PreShipmentMobileDTO>> GetUnMappedWaybillsForPickupManifest()
+        {
+            try
+            {
+                var preshipment = _uow.PreShipmentMobile.GetAll().Where(x => x.shipmentstatus == "Shipment created");
+
+                var preshipmentdto = Mapper.Map<List<PreShipmentMobileDTO>>(preshipment);
+
+                return preshipmentdto;
             }
             catch (Exception)
             {

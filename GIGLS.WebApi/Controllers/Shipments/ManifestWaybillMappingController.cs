@@ -261,6 +261,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("unmappedwaybillforpickupmanifest")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetUnMappedWaybillsForPickupManifest()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var unMappedWaybill = await _service.GetUnMappedWaybillsForPickupManifest();
+
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = unMappedWaybill
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("signoff/{manifestCode}")]

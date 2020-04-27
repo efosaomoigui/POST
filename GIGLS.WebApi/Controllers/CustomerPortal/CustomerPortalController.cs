@@ -35,6 +35,7 @@ using GIGLS.Core.DTO.Admin;
 using GIGLS.Core.Domain;
 using EfeAuthen.Models;
 using GIGLS.Core.DTO.Utility;
+using GIGLS.Core.DTO.Fleets;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -1719,6 +1720,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<bool>
                 {
                     Object = preshipMentMobile
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("updatepickupmanifeststatus")]
+        public async Task<IServiceResponse<bool>> UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                 await _portalService.UpdatePickupManifestStatus(manifestStatusDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
                 };
             });
         }

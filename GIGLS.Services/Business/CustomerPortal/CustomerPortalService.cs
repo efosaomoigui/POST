@@ -48,6 +48,8 @@ using System.Configuration;
 using System.Security.Cryptography;
 using System.Text;
 using GIGLS.Core.DTO.Utility;
+using GIGLS.Core.IServices.Fleets;
+using GIGLS.Core.DTO.Fleets;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -76,6 +78,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IAdminReportService _adminReportService;
         private readonly IPartnerTransactionsService _partnertransactionservice;
         private readonly IMobileGroupCodeWaybillMappingService _groupCodeWaybillMappingService;
+        private readonly IDispatchService _dispatchService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -85,7 +88,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService, 
             ICountryService countryService, IAdminReportService adminReportService, 
-            IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService)
+            IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
+            IDispatchService dispatchService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -110,6 +114,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _adminReportService = adminReportService;
             _partnertransactionservice = partnertransactionservice;
             _groupCodeWaybillMappingService = groupCodeWaybillMappingService;
+            _dispatchService = dispatchService;
             MapperConfig.Initialize();
         }
 
@@ -2037,6 +2042,15 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw;
             }
+        }
+
+        public async Task UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO)
+        {
+            if (manifestStatusDTO != null)
+            {
+                await _dispatchService.UpdatePickupManifestStatus(manifestStatusDTO);
+            }
+            
         }
 
     }
