@@ -65,7 +65,7 @@ namespace GIGLS.Services.Implementation.Account
                 var departureCountry = await _uow.Country.GetCountryByServiceCentreId(expenditure.ServiceCentreId);
                 countryIdFromServiceCentreId = departureCountry.CountryId;
             }
-            catch (Exception) { }
+            catch (Exception) { throw; }
             ////--end--///Set the DepartureCountryId
 
             //Add record to general ledger

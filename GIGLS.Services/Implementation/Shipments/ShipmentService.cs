@@ -318,6 +318,30 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<PreShipmentDTO> GetTempShipment(string code)
+        {
+            try
+            {
+                var shipment = await _uow.PreShipment.GetAsync(x => x.TempCode == code, "PreShipmentItems");
+                if (shipment == null)
+                {
+                    throw new GenericException("Pre Shipment Information does not exist");
+                }
+
+                var shipmentDto = Mapper.Map<PreShipmentDTO>(shipment);
+
+                //Get the customer wallet balance
+                var wallet = await _walletService.GetWalletBalance(shipment.CustomerCode);
+                shipmentDto.WalletBalance = wallet.Balance;
+
+                return shipmentDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //get basic shipment details
         public async Task<ShipmentDTO> GetBasicShipmentDetail(string waybill)
         {

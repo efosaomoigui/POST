@@ -12,9 +12,9 @@ namespace GIGLS.Services.Implementation.Customers
 {
     public class CustomerService : ICustomerService
     {
-        public readonly IIndividualCustomerService _individualCustomerService;
-        public readonly ICompanyService _companyService;
-        public readonly IUnitOfWork _uow;
+        private readonly IIndividualCustomerService _individualCustomerService;
+        private readonly ICompanyService _companyService;
+        private readonly IUnitOfWork _uow;
 
         public CustomerService(IUnitOfWork uow,
             IIndividualCustomerService individualCustomerService, ICompanyService companyService)

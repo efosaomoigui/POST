@@ -54,7 +54,6 @@ namespace GIGLS.Services.Business.CustomerPortal
     public class CustomerPortalService : ICustomerPortalService
     {
         private readonly IUnitOfWork _uow;
-        private readonly IShipmentService _shipmentService;
         private readonly IInvoiceService _invoiceService;
         private readonly IShipmentTrackService _iShipmentTrackService;
         private readonly IUserService _userService;
@@ -75,21 +74,19 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IMessageSenderService _messageSenderService;
         private readonly ICountryService _countryService;
         private readonly IAdminReportService _adminReportService;
-        public readonly IIndividualCustomerService _individualCustomerService;
-        public readonly IPartnerTransactionsService _partnertransactionservice;
+        private readonly IPartnerTransactionsService _partnertransactionservice;
         private readonly IMobileGroupCodeWaybillMappingService _groupCodeWaybillMappingService;
 
 
-        public CustomerPortalService(IUnitOfWork uow, IShipmentService shipmentService, IInvoiceService invoiceService,
+        public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
             IShipmentTrackService iShipmentTrackService, IUserService userService, IWalletTransactionService iWalletTransactionService,
             ICashOnDeliveryAccountService iCashOnDeliveryAccountService, IPricingService pricingService, ICustomerService customerService,
             IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService, 
-            ICountryService countryService, IAdminReportService adminReportService, IIndividualCustomerService individualCustomerService, 
+            ICountryService countryService, IAdminReportService adminReportService, 
             IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService)
         {
-            _shipmentService = shipmentService;
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
             _userService = userService;
@@ -111,7 +108,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             _messageSenderService = messageSenderService;
             _countryService = countryService;
             _adminReportService = adminReportService;
-            _individualCustomerService = individualCustomerService;
             _partnertransactionservice = partnertransactionservice;
             _groupCodeWaybillMappingService = groupCodeWaybillMappingService;
             MapperConfig.Initialize();
@@ -475,38 +471,38 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _userService.ChangePassword(userid, currentPassword, newPassword);
         }
 
-        public async Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto)
-        {
-            try
-            {
-                //get the current login user 
-                var currentUserId = await _userService.GetCurrentUserId();
+        //public async Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto)
+        //{
+        //    try
+        //    {
+        //        //get the current login user 
+        //        var currentUserId = await _userService.GetCurrentUserId();
 
-                var preShipmentsQuery = _uow.PreShipment.PreShipmentsAsQueryable();
-                preShipmentsQuery = preShipmentsQuery.Where(s => s.UserId == currentUserId);
-                var preShipments = preShipmentsQuery.ToList();
-                var preShipmentsDTO = Mapper.Map<List<PreShipmentDTO>>(preShipments);
-                return preShipmentsDTO;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //        var preShipmentsQuery = _uow.PreShipment.PreShipmentsAsQueryable();
+        //        preShipmentsQuery = preShipmentsQuery.Where(s => s.UserId == currentUserId);
+        //        var preShipments = preShipmentsQuery.ToList();
+        //        var preShipmentsDTO = Mapper.Map<List<PreShipmentDTO>>(preShipments);
+        //        return preShipmentsDTO;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
-        public async Task<PreShipmentDTO> GetPreShipment(string waybill)
-        {
-            try
-            {
-                var preShipmentDTO = await _preShipmentService.GetPreShipment(waybill);
-                return preShipmentDTO;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+        //public async Task<PreShipmentDTO> GetPreShipment(string waybill)
+        //{
+        //    try
+        //    {
+        //        var preShipmentDTO = await _preShipmentService.GetPreShipment(waybill);
+        //        return preShipmentDTO;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
 
-        }
+        //}
 
         public async Task<UserDTO> Register(UserDTO user)
         {
@@ -1247,7 +1243,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
-
         public async Task<Dictionary<string, List<StationDTO>>> GetAllStations()
         {
             Dictionary<string, List<StationDTO>> StationDictionary = new Dictionary<string, List<StationDTO>>();
@@ -1905,5 +1900,148 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             
         }
+
+        public async Task<string> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO)
+        {
+            try
+            {                
+                // get the sender info
+                var currentUserId = await _userService.GetCurrentUserId();
+                preShipmentDTO.SenderUserId = currentUserId;
+
+                var user = await _userService.GetUserById(currentUserId);
+                preShipmentDTO.CompanyType = user.UserChannelType.ToString();
+                preShipmentDTO.CustomerCode = user.UserChannelCode;
+
+                var country = await _uow.Country.GetCountryByStationId(preShipmentDTO.DepartureStationId);
+                preShipmentDTO.CountryId = country.CountryId;
+               
+                var newPreShipment = Mapper.Map<PreShipment>(preShipmentDTO);
+                newPreShipment.TempCode =  await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.PreShipmentCode); ;
+                newPreShipment.ApproximateItemsWeight = 0;
+                newPreShipment.IsProcessed = false;
+
+                // add serial numbers to the ShipmentItems
+                var serialNumber = 1;
+                foreach (var shipmentItem in newPreShipment.PreShipmentItems)
+                {
+                    shipmentItem.SerialNumber = serialNumber;
+
+                    //sum item weight
+                    //check for volumetric weight
+                    if (shipmentItem.IsVolumetric)
+                    {
+                        double volume = (shipmentItem.Length * shipmentItem.Height * shipmentItem.Width) / 5000;
+                        double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
+
+                        newPreShipment.ApproximateItemsWeight += Weight;
+                    }
+                    else
+                    {
+                        newPreShipment.ApproximateItemsWeight += shipmentItem.Weight;
+                    }
+
+                    serialNumber++;
+                }
+                _uow.PreShipment.Add(newPreShipment);
+                await _uow.CompleteAsync();
+
+                return newPreShipment.TempCode;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdateServiceCentre(int serviceCentreId, ServiceCentreDTO service)
+        {
+            try
+            {
+                var centre = await _uow.ServiceCentre.GetAsync(serviceCentreId);
+                if (centre == null || serviceCentreId != service.ServiceCentreId)
+                {
+                    throw new GenericException("Service Centre does not exist");
+                }
+
+                //1. update the old service centre code to the new one in Number Generator Monitor if they are different
+                if (centre.Code.ToLower() != service.Code.ToLower())
+                {
+                    var numberGenerator = await _uow.NumberGeneratorMonitor.FindAsync(x => x.ServiceCentreCode == centre.Code);
+
+                    foreach (var number in numberGenerator)
+                    {
+                        number.ServiceCentreCode = service.Code;
+                    }
+                }
+
+                var station = await _uow.Station.GetAsync(service.StationId);
+
+                //2. Update the service centre details
+                centre.Name = service.Name;
+                centre.PhoneNumber = service.PhoneNumber;
+                centre.Address = service.Address;
+                centre.City = service.City;
+                centre.Email = service.Email;
+                centre.StationId = station.StationId;
+                centre.IsActive = true;
+                centre.Code = service.Code;
+                centre.TargetAmount = service.TargetAmount;
+                centre.TargetOrder = service.TargetOrder;
+                centre.IsHUB = service.IsHUB;
+                _uow.Complete();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateTemporaryShipment(PreShipmentDTO preShipmentDTO)
+        {
+            try
+            {
+                var existingPreShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == preShipmentDTO.TempCode);
+                if (existingPreShipment == null)
+                {
+                    throw new GenericException("Pre Shipment does not exist");
+                }
+                else if (existingPreShipment.IsProcessed)
+                {
+                    throw new GenericException("Pre Shipment already processed");
+                }
+
+                // update receiver
+                existingPreShipment.ReceiverAddress = preShipmentDTO.ReceiverAddress;
+                existingPreShipment.ReceiverCity = preShipmentDTO.ReceiverCity;
+                existingPreShipment.ReceiverName = preShipmentDTO.ReceiverName;
+                existingPreShipment.ReceiverPhoneNumber = preShipmentDTO.ReceiverPhoneNumber;
+                existingPreShipment.ReceiverState = preShipmentDTO.ReceiverState;
+                existingPreShipment.PickupOptions = preShipmentDTO.PickupOptions;
+
+                //update items
+                foreach (var preShipmentItemDTO in preShipmentDTO.PreShipmentItems)
+                {
+                    var preshipment = await _uow.PreShipmentItem.GetAsync(s => s.PreShipmentId == preShipmentItemDTO.PreShipmentId && s.PreShipmentItemId == preShipmentItemDTO.PreShipmentItemId);
+                    if (preshipment != null)
+                    {
+                        preshipment.Description = preShipmentItemDTO.Description;
+                        preshipment.Nature = preShipmentItemDTO.Nature;
+                        preshipment.Quantity = preShipmentItemDTO.Quantity;
+                        preshipment.Weight = (double)preShipmentItemDTO.Weight;
+                        preshipment.ShipmentType = preShipmentItemDTO.ShipmentType;
+                        existingPreShipment.ApproximateItemsWeight += preshipment.Weight;
+                    }
+                }
+                await _uow.CompleteAsync();
+                return true;
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

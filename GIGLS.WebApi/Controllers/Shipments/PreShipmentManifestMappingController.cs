@@ -70,21 +70,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("waybillsinmanifestforpickup")]
-        public async Task<IServiceResponse<List<PreShipmentManifestMappingDTO>>> GetWaybillsInManifestForPickup()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var waybillNumbersInManifest = await _service.GetWaybillsInManifestForPickup();
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("waybillsinmanifestforpickup")]
+        //public async Task<IServiceResponse<List<PreShipmentManifestMappingDTO>>> GetWaybillsInManifestForPickup()
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var waybillNumbersInManifest = await _service.GetWaybillsInManifestForPickup();
 
-                return new ServiceResponse<List<PreShipmentManifestMappingDTO>>
-                {
-                    Object = waybillNumbersInManifest
-                };
-            });
-        }
+        //        return new ServiceResponse<List<PreShipmentManifestMappingDTO>>
+        //        {
+        //            Object = waybillNumbersInManifest
+        //        };
+        //    });
+        //}
 
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -103,37 +103,37 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Delete")]
-        [HttpDelete]
-        [Route("removewaybillfrommanifest/{manifest}/{waybill}")]
-        public async Task<IServiceResponse<bool>> RemoveWaybillFromManifest(string manifest, string waybill)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _service.RemoveWaybillFromManifest(manifest, waybill);
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });
-        }
+        //[GIGLSActivityAuthorize(Activity = "Delete")]
+        //[HttpDelete]
+        //[Route("removewaybillfrommanifest/{manifest}/{waybill}")]
+        //public async Task<IServiceResponse<bool>> RemoveWaybillFromManifest(string manifest, string waybill)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        await _service.RemoveWaybillFromManifest(manifest, waybill);
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Object = true
+        //        };
+        //    });
+        //}
 
 
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("unmappedwaybillforpickupmanifest")]
-        public async Task<IServiceResponse<List<PreShipmentDTO>>> GetUnMappedWaybillsForPickupManifest()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var unMappedWaybill = await _service.GetUnMappedWaybillsForPickupManifest();
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("unmappedwaybillforpickupmanifest")]
+        //public async Task<IServiceResponse<List<PreShipmentDTO>>> GetUnMappedWaybillsForPickupManifest()
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var unMappedWaybill = await _service.GetUnMappedWaybillsForPickupManifest();
 
-                return new ServiceResponse<List<PreShipmentDTO>>
-                {
-                    Object = unMappedWaybill
-                };
-            });
-        }
+        //        return new ServiceResponse<List<PreShipmentDTO>>
+        //        {
+        //            Object = unMappedWaybill
+        //        };
+        //    });
+        //}
 
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpGet]

@@ -514,33 +514,33 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
 
-        [HttpGet]
-        [Route("PreShipments")]
-        public async Task<IServiceResponse<IEnumerable<PreShipmentDTO>>> GetPreShipments([FromUri]FilterOptionsDto filterOptionsDto)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var preShipments = await _portalService.GetPreShipments(filterOptionsDto);
-                return new ServiceResponse<IEnumerable<PreShipmentDTO>>
-                {
-                    Object = preShipments
-                };
-            });
-        }
+        //[HttpGet]
+        //[Route("PreShipments")]
+        //public async Task<IServiceResponse<IEnumerable<PreShipmentDTO>>> GetPreShipments([FromUri]FilterOptionsDto filterOptionsDto)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var preShipments = await _portalService.GetPreShipments(filterOptionsDto);
+        //        return new ServiceResponse<IEnumerable<PreShipmentDTO>>
+        //        {
+        //            Object = preShipments
+        //        };
+        //    });
+        //}
 
-        [HttpGet]
-        [Route("PreShipments/{waybill}")]
-        public async Task<IServiceResponse<PreShipmentDTO>> GetPreShipment(string waybill)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var preShipment = await _portalService.GetPreShipment(waybill);
-                return new ServiceResponse<PreShipmentDTO>
-                {
-                    Object = preShipment
-                };
-            });
-        }
+        //[HttpGet]
+        //[Route("PreShipments/{waybill}")]
+        //public async Task<IServiceResponse<PreShipmentDTO>> GetPreShipment(string waybill)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var preShipment = await _portalService.GetPreShipment(waybill);
+        //        return new ServiceResponse<PreShipmentDTO>
+        //        {
+        //            Object = preShipment
+        //        };
+        //    });
+        //}
 
         [HttpGet]
         [Route("sla")]
@@ -1705,6 +1705,36 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<bool>
                 {
                     Object = status
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("createtemporaryshipments")]
+        public async Task<IServiceResponse<string>> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipMentMobile = await _portalService.CreateTemporaryShipment(preShipmentDTO);
+
+                return new ServiceResponse<string>
+                {
+                    Object = preshipMentMobile
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("updatetemporaryshipments")]
+        public async Task<IServiceResponse<bool>> UpdateTemporaryShipment(PreShipmentDTO preShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipMentMobile = await _portalService.UpdateTemporaryShipment(preShipmentDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = preshipMentMobile
                 };
             });
         }
