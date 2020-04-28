@@ -74,8 +74,6 @@ namespace GIGLS.Services.Implementation.Partnership
             return await Task.FromResult(partnerDTO.OrderByDescending(x => x.DateCreated).ToList());
         }
 
-
-
         public async Task<PartnerDTO> GetPartnerById(int partnerId)
         {
             var partnerDto = new PartnerDTO();
@@ -99,6 +97,34 @@ namespace GIGLS.Services.Implementation.Partnership
                 {
                     partnerDto.CurrencySymbol = Country.CurrencySymbol;
                    
+                }
+            }
+            return partnerDto;
+        }
+
+        public async Task<PartnerDTO> GetPartnerByCode(string partnerCode)
+        {
+            var partnerDto = new PartnerDTO();
+            var partner = await _uow.Partner.GetAsync(x => x.PartnerCode == partnerCode);
+
+            if (partner == null)
+            {
+                throw new GenericException("PARTNER_NOT_EXIST");
+            }
+            else
+            {
+                partnerDto = Mapper.Map<PartnerDTO>(partner);
+                var Wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partner.PartnerCode);
+                var Country = await _uow.Country.GetAsync(s => s.CountryId == partner.UserActiveCountryId);
+                if (Wallet != null)
+                {
+                    partnerDto.WalletBalance = Wallet.Balance;
+                    partnerDto.WalletId = Wallet.WalletId;
+                }
+                if (Country != null)
+                {
+                    partnerDto.CurrencySymbol = Country.CurrencySymbol;
+
                 }
             }
             return partnerDto;
@@ -153,6 +179,7 @@ namespace GIGLS.Services.Implementation.Partnership
             _uow.Partner.Remove(existingPartner);
             await _uow.CompleteAsync();
         }
+
         public async Task<IEnumerable<PartnerDTO>> GetExternalDeliveryPartners()
         {
             var partners = await _uow.Partner.GetExternalPartnersAsync();

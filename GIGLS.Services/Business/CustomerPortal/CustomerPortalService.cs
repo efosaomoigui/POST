@@ -79,6 +79,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IPartnerTransactionsService _partnertransactionservice;
         private readonly IMobileGroupCodeWaybillMappingService _groupCodeWaybillMappingService;
         private readonly IDispatchService _dispatchService;
+        private readonly IManifestWaybillMappingService _manifestWaybillMappingService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -89,7 +90,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService, 
             ICountryService countryService, IAdminReportService adminReportService, 
             IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
-            IDispatchService dispatchService)
+            IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -115,6 +116,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _partnertransactionservice = partnertransactionservice;
             _groupCodeWaybillMappingService = groupCodeWaybillMappingService;
             _dispatchService = dispatchService;
+            _manifestWaybillMappingService = manifestWaybillMappingService;
             MapperConfig.Initialize();
         }
 
@@ -2051,6 +2053,13 @@ namespace GIGLS.Services.Business.CustomerPortal
                 await _dispatchService.UpdatePickupManifestStatus(manifestStatusDTO);
             }
             
+        }
+
+        public async Task<List<PickupManifestWaybillMappingDTO>> GetWaybillsInPickupManifest(string manifestCode)
+        {
+            var pickupDetails = await _manifestWaybillMappingService.GetWaybillsInPickupManifest(manifestCode);
+
+            return pickupDetails;
         }
 
     }

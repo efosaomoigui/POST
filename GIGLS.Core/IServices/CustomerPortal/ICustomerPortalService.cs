@@ -141,5 +141,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<string> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO);
         Task<bool> UpdateTemporaryShipment(PreShipmentDTO preShipmentDTO);
         Task UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO);
+        Task<List<PickupManifestWaybillMappingDTO>> GetWaybillsInPickupManifest(string manifestCode);
     }
 }

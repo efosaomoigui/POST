@@ -100,7 +100,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     result.Add(item);
                 }
             }
-            return result.OrderByDescending(x => x.DateCreated).ToList();
+            return result.OrderByDescending(x => x.DateModified).ToList();
         }
 
         //map waybills to Manifest
@@ -506,20 +506,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //get preshipment details
                     pickupManifestWaybill.PreShipment = await _preShipmentMobileService.GetPreShipmentDetail(pickupManifestWaybill.Waybill);
-
-                    //CustomerType customerType;
-                    //if (pickupManifestWaybill.PreShipment.CustomerType == CustomerType.Company.ToString())
-                    //{
-                    //    customerType = CustomerType.Company;
-                    //}
-                    //else
-                    //{
-                    //    customerType = CustomerType.IndividualCustomer;
-                    //}
-
-                    //Get customer detail
-                    //var currentCustomerObject = await _customerService.GetCustomer(pickupManifestWaybill.PreShipment., customerType);
-
                 }
                 return pickupManifestWaybillMappingDto;
 
@@ -1093,6 +1079,22 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 return resultList.OrderBy(x => x.ManifestDetails.DateTime).ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //Get Pickup Manifest
+        public async Task<PickupManifestDTO> GetPickupManifest(string manifestCode)
+        {
+            try
+            {
+                var pickupManifestDTO = await _manifestService.GetPickupManifestByCode(manifestCode);
+                
+                return pickupManifestDTO;
+
             }
             catch (Exception)
             {

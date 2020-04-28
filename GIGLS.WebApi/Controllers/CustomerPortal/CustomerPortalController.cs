@@ -1738,5 +1738,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("waybillsinpickupmanifest/{manifest}")]
+        public async Task<IServiceResponse<List<PickupManifestWaybillMappingDTO>>> GetWaybillsInPickupManifest(string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var waybillNumbersIPickupManifest = await _portalService.GetWaybillsInPickupManifest(manifest);
+
+                return new ServiceResponse<List<PickupManifestWaybillMappingDTO>>
+                {
+                    Object = waybillNumbersIPickupManifest
+                };
+            });
+        }
+
     }
 }

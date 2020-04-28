@@ -40,10 +40,19 @@ namespace GIGLS.Services.Implementation.Fleets
         public async Task<object> AddDispatch(DispatchDTO dispatchDTO)
         {
             {
-                
-                // get user login service centre
-                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-                var userServiceCentreId = serviceCenterIds[0];
+                int userServiceCentreId;
+                int dispatchId;
+
+                if (dispatchDTO.ManifestType != ManifestType.Pickup)
+                {
+                    var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                    userServiceCentreId = serviceCenterIds[0];
+                }
+                else
+                {
+                    var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
+                    userServiceCentreId = gigGOServiceCenter.ServiceCentreId;
+                }
 
                 //get the login user
                 var currentUserId = await _userService.GetCurrentUserId();
@@ -66,13 +75,26 @@ namespace GIGLS.Services.Implementation.Fleets
                     }
                 }
 
-                // create dispatch
-                var newDispatch = Mapper.Map<Dispatch>(dispatchDTO);
-                newDispatch.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
-                newDispatch.ServiceCentreId = userServiceCentreId;
-                newDispatch.DepartureServiceCenterId = dispatchDTO.DepartureServiceCenterId;
-                newDispatch.DestinationServiceCenterId = dispatchDTO.DestinationServiceCenterId;
-                _uow.Dispatch.Add(newDispatch);
+                var dispatchObj = _uow.Dispatch.SingleOrDefault(s => s.ManifestNumber == dispatchDTO.ManifestNumber);
+                if (dispatchDTO != null && dispatchDTO.ManifestType == ManifestType.Pickup)
+                {
+                    var dispatchDTOEntity = _uow.Dispatch.Get(dispatchObj.DispatchId);
+                    dispatchDTOEntity.DriverDetail = dispatchDTO.DriverDetail;
+                    dispatchDTOEntity.Amount = dispatchDTO.Amount;
+                    dispatchDTOEntity.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
+                    dispatchId = dispatchObj.DispatchId;
+                }
+                else
+                {
+                    // create dispatch
+                    var newDispatch = Mapper.Map<Dispatch>(dispatchDTO);
+                    newDispatch.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
+                    newDispatch.ServiceCentreId = userServiceCentreId;
+                    newDispatch.DepartureServiceCenterId = dispatchDTO.DepartureServiceCenterId;
+                    newDispatch.DestinationServiceCenterId = dispatchDTO.DestinationServiceCenterId;
+                    _uow.Dispatch.Add(newDispatch);
+                    dispatchId = newDispatch.DispatchId;
+                }
 
                 // update manifest
                 var manifestObj = _uow.Manifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
@@ -138,7 +160,7 @@ namespace GIGLS.Services.Implementation.Fleets
 
                 // commit transaction
                 await _uow.CompleteAsync();
-                return new { Id = newDispatch.DispatchId };
+                return new { Id = dispatchId };
             }
         }
 
@@ -447,10 +469,8 @@ namespace GIGLS.Services.Implementation.Fleets
             try
             {
                 var userId = await _userService.GetCurrentUserId();
-                var currentUser = await _userService.GetUserById(userId);
-                var driver = currentUser.FirstName + currentUser.LastName;
-
-                var dispatch = await _uow.Dispatch.GetAsync(s => s.ManifestNumber == manifestStatusDTO.ManifestCode && s.DriverDetail.ToLower().Trim() == driver.ToLower().Trim());
+                
+                var dispatch = await _uow.Dispatch.GetAsync(s => s.ManifestNumber == manifestStatusDTO.ManifestCode && s.DriverDetail == userId);
                 if(dispatch == null)
                 {
                     throw new GenericException("This manifest is not assigned to you");
@@ -462,6 +482,10 @@ namespace GIGLS.Services.Implementation.Fleets
                     {
                         if (pickupManifestObj.ManifestStatus != ManifestStatus.Delivered)
                         {
+                            if(pickupManifestObj.ManifestStatus == ManifestStatus.Accepted && manifestStatusDTO.ManifestStatus == ManifestStatus.Rejected)
+                            {
+                                throw new GenericException("This has been accepted by you");
+                            }
                             //ASK IF THERE IS ANY OTHER CONDITION FOR REJECTED AND ACCEPTED
                             var pickupManifestEntity = _uow.PickupManifest.Get(pickupManifestObj.PickupManifestId);
                             pickupManifestEntity.ManifestStatus = manifestStatusDTO.ManifestStatus;
