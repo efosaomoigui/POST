@@ -22,7 +22,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
         Task<MobileShipmentTrackingHistoryDTO> TrackShipment(string waybillNumber);
         Task<PreShipmentMobileDTO> AddMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest);
-        Task<List<PreShipmentMobileDTO>> AddMobilePickupRequestMultipleShipment(MobilePickUpRequestsDTO pickuprequest);
+        //Task<List<PreShipmentMobileDTO>> AddMobilePickupRequestMultipleShipment(MobilePickUpRequestsDTO pickuprequest);
         Task<List<MobilePickUpRequestsDTO>> GetMobilePickupRequest();
         Task<bool> UpdateMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest);
         Task <bool> UpdatePreShipmentMobileDetails(List<PreShipmentItemMobileDTO> Preshipmentmobile);
@@ -64,5 +64,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task<MultipleMobilePriceDTO> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipmentItemMobileDTO);
         Task<object> ResolveDisputeForMultipleShipments(PreShipmentMobileDTO preShipment);
         Task ScanMobileShipment(ScanDTO scanDTO);
+        Task<bool> UpdateMobilePickupRequestUsingGroupCode(MobilePickUpRequestsDTO pickuprequest);
+        Task<bool> UpdateMobilePickupRequestUsingWaybill(MobilePickUpRequestsDTO pickuprequest);
+        Task<List<PreShipmentMobileDTO>> AddMobilePickupRequestMultipleShipment(MobilePickUpRequestsDTO pickuprequest);        
     }
 }

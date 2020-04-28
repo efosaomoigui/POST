@@ -1535,6 +1535,15 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.UpdateMobilePickupRequest(pickuprequest);
         }
+        public async Task<bool> UpdateMobilePickupRequestUsingGroupCode(MobilePickUpRequestsDTO pickuprequest)
+        {
+            return await _preShipmentMobileService.UpdateMobilePickupRequestUsingGroupCode(pickuprequest);
+        }
+        public async Task<bool> UpdateMobilePickupRequestUsingWaybill(MobilePickUpRequestsDTO pickuprequest)
+        {
+            return await _preShipmentMobileService.UpdateMobilePickupRequestUsingWaybill(pickuprequest);
+        }
+
         public async Task<object> ResolveDisputeForMobile(PreShipmentMobileDTO preShipment)
         {
             return await _preShipmentMobileService.ResolveDisputeForMobile(preShipment);
@@ -1849,7 +1858,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     }
                     else if(preShipmentMobile.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString())
                     {
-                        throw new GenericException("The GIGGo Shipment has been delivered. It can not be updated");
+                        throw new GenericException("This shipment has already been delivered. No further action can be taken");
                     }
                     else
                     {
