@@ -279,12 +279,12 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("unmappedwaybillforpickupmanifest")]
-        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetUnMappedWaybillsForPickupManifest()
+        [Route("unmappedwaybillforpickupmanifest/{stationId:int}")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetUnMappedWaybillsForPickupManifest(int stationId)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var unMappedWaybill = await _service.GetUnMappedWaybillsForPickupManifest();
+                var unMappedWaybill = await _service.GetUnMappedWaybillsForPickupManifest(stationId);
 
                 return new ServiceResponse<List<PreShipmentMobileDTO>>
                 {

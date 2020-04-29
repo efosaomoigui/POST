@@ -978,11 +978,11 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<PreShipmentMobileDTO>> GetUnMappedWaybillsForPickupManifest()
+        public async Task<List<PreShipmentMobileDTO>> GetUnMappedWaybillsForPickupManifest(int senderStationId)
         {
             try
             {
-                var preshipment = _uow.PreShipmentMobile.GetAll().Where(x => x.shipmentstatus == "Shipment created");
+                var preshipment = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.SenderStationId == senderStationId && x.shipmentstatus == "Shipment created").ToList();
 
                 var preshipmentdto = Mapper.Map<List<PreShipmentMobileDTO>>(preshipment);
 
