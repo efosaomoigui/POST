@@ -28,7 +28,6 @@ namespace GIGLS.Services.Implementation.Shipments
         private readonly IUserService _userService;
         private readonly ICustomerService _customerService;
         private readonly IShipmentService _shipmentService;
-        private readonly IDispatchService _dispatchService;
         private readonly IPreShipmentMobileService _preShipmentMobileService;
 
         public ManifestWaybillMappingService(IUnitOfWork uow, IManifestService manifestService,
