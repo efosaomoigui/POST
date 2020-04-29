@@ -1695,12 +1695,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpPost]
-        [Route("createtemporaryshipments")]
-        public async Task<IServiceResponse<string>> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO)
+        [Route("createdropoff")]
+        public async Task<IServiceResponse<string>> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var preshipMentMobile = await _portalService.CreateTemporaryShipment(preShipmentDTO);
+                var preshipMentMobile = await _portalService.CreateOrUpdateDropOff(preShipmentDTO);
 
                 return new ServiceResponse<string>
                 {
@@ -1709,21 +1709,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [HttpPost]
-        [Route("updatetemporaryshipments")]
-        public async Task<IServiceResponse<bool>> UpdateTemporaryShipment(PreShipmentDTO preShipmentDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var preshipMentMobile = await _portalService.UpdateTemporaryShipment(preShipmentDTO);
-
-                return new ServiceResponse<bool>
-                {
-                    Object = preshipMentMobile
-                };
-            });
-        }
-
+        
         [HttpPost]
         [Route("updatepickupmanifeststatus")]
         public async Task<IServiceResponse<bool>> UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO)
@@ -1753,6 +1739,36 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpPost]
+        [Route("dropoffs")]
+        public async Task<IServiceResponse<List<PreShipmentDTO>>> GetDropOffsOfUser(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var dropoffs = await _portalService.GetDropOffsForUser(filterCriteria);
+
+                return new ServiceResponse<List<PreShipmentDTO>>
+                {
+                    Object = dropoffs
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("dropoffs/{tempcode}")]
+        public async Task<IServiceResponse<PreShipmentDTO>> GetDropOffDetail(string tempCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _portalService.GetDropOffDetail(tempCode);
+                return new ServiceResponse<PreShipmentDTO>
+                {
+                    Object = preshipment
+                };
+            });
+        }
+
 
     }
 }

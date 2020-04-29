@@ -18,34 +18,18 @@ namespace GIGLS.Core.DTO.Shipments
         public string Waybill { get; set; }
 
         //Senders' Information
-        //public decimal Value { get; set; }
-        //public DateTime? DeliveryTime { get; set; }
-        //public PaymentStatus PaymentStatus { get; set; }
-        //public string CustomerType { get; set; }
-        //public int CustomerId { get; set; }
+        
         public string CompanyType { get; set; }
         public string CustomerCode { get; set; }
-        public string SenderUserId { get; set; }
         public int CountryId { get; set; }
         public decimal WalletBalance { get; set; }
-
-        //PickUp' Information
-        //public string PickUpPhoneNumber { get; set; }
-        //public string PickUpAddress { get; set; }
-        //public string PickUpCity { get; set; }
-        //public string PickUpState { get; set; }
-        //public string PickUpCountry { get; set; }
-
-        //Receivers Information
-        //public int DepartureServiceCentreId { get; set; }
-        //public ServiceCentreDTO DepartureServiceCentre { get; set; }
-
-        //public int DestinationServiceCentreId { get; set; }
-        //public ServiceCentreDTO DestinationServiceCentre { get; set; }
+        public string SenderUserId { get; set; }
+        public string SenderName { get; set; }
+        public string SenderPhoneNumber { get; set; }
+        public string SenderCity { get; set; }
 
         public string ReceiverName { get; set; }
         public string ReceiverPhoneNumber { get; set; }
-        //public string ReceiverEmail { get; set; }
         public string ReceiverAddress { get; set; }
         public string ReceiverCity { get; set; }
         public string ReceiverState { get; set; }

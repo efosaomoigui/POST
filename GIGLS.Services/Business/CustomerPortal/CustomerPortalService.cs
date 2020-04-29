@@ -1904,15 +1904,36 @@ namespace GIGLS.Services.Business.CustomerPortal
             
         }
 
-        public async Task<string> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO)
+        public async Task<string> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO)
+        {
+            string tempCode;
+
+            var existingPreShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == preShipmentDTO.TempCode);
+            if (existingPreShipment != null)
+            {
+                var update = await UpdateTemporaryShipment(preShipmentDTO);
+                tempCode = update.ToString();
+            }
+            else
+            {
+                tempCode = await CreateTemporaryShipment(preShipmentDTO);
+            }
+            return tempCode;
+        }
+
+        private async Task<string> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO)
         {
             try
             {                
+                if(preShipmentDTO.TempCode != null)
+                {
+                }
                 // get the sender info
                 var currentUserId = await _userService.GetCurrentUserId();
+                var user = await _userService.GetUserById(currentUserId);
                 preShipmentDTO.SenderUserId = currentUserId;
 
-                var user = await _userService.GetUserById(currentUserId);
+                //var user = await _userService.GetUserById(currentUserId);
                 preShipmentDTO.CompanyType = user.UserChannelType.ToString();
                 preShipmentDTO.CustomerCode = user.UserChannelCode;
 
@@ -2000,7 +2021,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
-        public async Task<bool> UpdateTemporaryShipment(PreShipmentDTO preShipmentDTO)
+        private async Task<bool> UpdateTemporaryShipment(PreShipmentDTO preShipmentDTO)
         {
             try
             {
@@ -2060,6 +2081,48 @@ namespace GIGLS.Services.Business.CustomerPortal
             var pickupDetails = await _manifestWaybillMappingService.GetWaybillsInPickupManifest(manifestCode);
 
             return pickupDetails;
+        }
+
+        public async Task<List<PreShipmentDTO>> GetDropOffsForUser(ShipmentCollectionFilterCriteria f_Criteria)
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            
+            //get startDate and endDate
+            var queryDate = f_Criteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var dropOffs = await _uow.PreShipment.FindAsync(x => x.SenderUserId ==currentUserId  && x.DateCreated >= startDate && x.DateCreated < endDate);
+            
+            var dropOffsDTO = Mapper.Map<List<PreShipmentDTO>>(dropOffs);
+
+
+            return await Task.FromResult(dropOffsDTO);
+        }
+
+        public async Task<PreShipmentDTO> GetDropOffDetail(string tempCode)
+        {
+            try
+            {
+                var dropOffDTO = new PreShipmentDTO();
+
+                var preShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == tempCode, "PreShipmentItems");
+                if (preShipment != null)
+                {
+                    dropOffDTO = Mapper.Map<PreShipmentDTO>(preShipment);
+                }
+                else
+                {
+                    throw new GenericException($"DropOff with code: {tempCode} does not exist");
+                }
+
+                return await Task.FromResult(dropOffDTO);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
     }
