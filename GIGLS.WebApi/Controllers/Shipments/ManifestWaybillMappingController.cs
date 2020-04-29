@@ -151,6 +151,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("pickupmanifest/{manifest}")]
+        public async Task<IServiceResponse<PickupManifestDTO>> GetPickupManifestDetails(string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var waybillNumbersIPickupManifest = await _service.GetPickupManifest(manifest);
+
+                return new ServiceResponse<PickupManifestDTO>
+                {
+                    Object = waybillNumbersIPickupManifest
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("waybillsinmanifestfordispatch")]
         public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetWaybillsInManifestForDispatch()
         {
@@ -255,6 +271,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var unMappedWaybill = await _service.GetUnMappedWaybillsForDeliveryManifestByServiceCentre();
 
                 return new ServiceResponse<List<ShipmentDTO>>
+                {
+                    Object = unMappedWaybill
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("unmappedwaybillforpickupmanifest/{stationId:int}")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetUnMappedWaybillsForPickupManifest(int stationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var unMappedWaybill = await _service.GetUnMappedWaybillsForPickupManifest(stationId);
+
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
                 {
                     Object = unMappedWaybill
                 };

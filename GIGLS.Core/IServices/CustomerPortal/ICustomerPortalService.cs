@@ -5,6 +5,7 @@ using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.Admin;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
+using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.PaymentTransactions;
@@ -137,6 +138,11 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<MobileGroupCodeWaybillMappingDTO> GetWaybillDetailsInGroup(string groupCode);
 
         Task<List<PreShipmentMobileDTO>> AddMobilePickupRequestMultipleShipment(MobilePickUpRequestsDTO pickuprequest);
+        Task UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO);
+        Task<List<PickupManifestWaybillMappingDTO>> GetWaybillsInPickupManifest(string manifestCode);
+        Task<List<PreShipmentDTO>> GetDropOffsForUser(ShipmentCollectionFilterCriteria f_Criteria);
+        Task<PreShipmentDTO> GetDropOffDetail(string tempCode);
+        Task<bool> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO);
         Task<bool> UpdateMobilePickupRequestUsingGroupCode(MobilePickUpRequestsDTO pickuprequest);
         Task<bool> UpdateMobilePickupRequestUsingWaybill(MobilePickUpRequestsDTO pickupRequest);
         Task<string> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO);

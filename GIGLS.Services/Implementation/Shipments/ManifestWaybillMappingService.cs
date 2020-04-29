@@ -100,7 +100,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     result.Add(item);
                 }
             }
-            return result.OrderByDescending(x => x.DateCreated).ToList();
+            return result.OrderByDescending(x => x.DateModified).ToList();
         }
 
         //map waybills to Manifest
@@ -353,7 +353,9 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var serviceIds = await _userService.GetPriviledgeServiceCenters();
+                //var serviceIds = await _userService.GetPriviledgeServiceCenters();
+                var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
+                int userServiceCentreId = gigGOServiceCenter.ServiceCentreId;
 
                 //1. check if any of the waybills has not been mapped to a manifest 
                 // and has not been process for return in case it was not delivered (i.e still active) that day
@@ -400,7 +402,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             ManifestCode = manifest,
                             Waybill = waybill,
                             IsActive = true,
-                            ServiceCentreId = serviceIds[0]
+                            ServiceCentreId = userServiceCentreId
                         };
 
                         newWaybillToMap.Add(waybill);
@@ -431,7 +433,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 _uow.Complete();
             }
-            catch (Exception) { }
+            catch (Exception)
+            {
+                throw;
+                
+            }
         }
         //Get Waybills In Manifest
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifest(string manifestcode)
@@ -502,20 +508,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //get preshipment details
                     pickupManifestWaybill.PreShipment = await _preShipmentMobileService.GetPreShipmentDetail(pickupManifestWaybill.Waybill);
-
-                    //CustomerType customerType;
-                    //if (pickupManifestWaybill.PreShipment.CustomerType == CustomerType.Company.ToString())
-                    //{
-                    //    customerType = CustomerType.Company;
-                    //}
-                    //else
-                    //{
-                    //    customerType = CustomerType.IndividualCustomer;
-                    //}
-
-                    //Get customer detail
-                    //var currentCustomerObject = await _customerService.GetCustomer(pickupManifestWaybill.PreShipment., customerType);
-
                 }
                 return pickupManifestWaybillMappingDto;
 
@@ -986,6 +978,22 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<List<PreShipmentMobileDTO>> GetUnMappedWaybillsForPickupManifest(int senderStationId)
+        {
+            try
+            {
+                var preshipment = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.SenderStationId == senderStationId && x.shipmentstatus == "Shipment created").ToList();
+
+                var preshipmentdto = Mapper.Map<List<PreShipmentMobileDTO>>(preshipment);
+
+                return preshipmentdto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //get manifest waiting to signoff
         public async Task<List<ManifestWaybillMappingDTO>> GetManifestWaitingForSignOff()
         {
@@ -1073,6 +1081,22 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 return resultList.OrderBy(x => x.ManifestDetails.DateTime).ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //Get Pickup Manifest
+        public async Task<PickupManifestDTO> GetPickupManifest(string manifestCode)
+        {
+            try
+            {
+                var pickupManifestDTO = await _manifestService.GetPickupManifestByCode(manifestCode);
+                
+                return pickupManifestDTO;
+
             }
             catch (Exception)
             {

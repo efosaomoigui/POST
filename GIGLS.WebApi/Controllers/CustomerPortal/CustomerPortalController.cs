@@ -35,6 +35,7 @@ using GIGLS.Core.DTO.Admin;
 using GIGLS.Core.Domain;
 using EfeAuthen.Models;
 using GIGLS.Core.DTO.Utility;
+using GIGLS.Core.DTO.Fleets;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -1724,27 +1725,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpPost]
-        [Route("createtemporaryshipments")]
-        public async Task<IServiceResponse<string>> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO)
+        [Route("createdropoff")]
+        public async Task<IServiceResponse<bool>> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var preshipMentMobile = await _portalService.CreateTemporaryShipment(preShipmentDTO);
-
-                return new ServiceResponse<string>
-                {
-                    Object = preshipMentMobile
-                };
-            });
-        }
-
-        [HttpPost]
-        [Route("updatetemporaryshipments")]
-        public async Task<IServiceResponse<bool>> UpdateTemporaryShipment(PreShipmentDTO preShipmentDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var preshipMentMobile = await _portalService.UpdateTemporaryShipment(preShipmentDTO);
+                var preshipMentMobile = await _portalService.CreateOrUpdateDropOff(preShipmentDTO);
 
                 return new ServiceResponse<bool>
                 {
@@ -1752,5 +1738,67 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        
+        [HttpPost]
+        [Route("updatepickupmanifeststatus")]
+        public async Task<IServiceResponse<bool>> UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                 await _portalService.UpdatePickupManifestStatus(manifestStatusDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("waybillsinpickupmanifest/{manifest}")]
+        public async Task<IServiceResponse<List<PickupManifestWaybillMappingDTO>>> GetWaybillsInPickupManifest(string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var waybillNumbersIPickupManifest = await _portalService.GetWaybillsInPickupManifest(manifest);
+
+                return new ServiceResponse<List<PickupManifestWaybillMappingDTO>>
+                {
+                    Object = waybillNumbersIPickupManifest
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("dropoffs")]
+        public async Task<IServiceResponse<List<PreShipmentDTO>>> GetDropOffsOfUser(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var dropoffs = await _portalService.GetDropOffsForUser(filterCriteria);
+
+                return new ServiceResponse<List<PreShipmentDTO>>
+                {
+                    Object = dropoffs
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("dropoffs/{tempcode}")]
+        public async Task<IServiceResponse<PreShipmentDTO>> GetDropOffDetail(string tempCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _portalService.GetDropOffDetail(tempCode);
+                return new ServiceResponse<PreShipmentDTO>
+                {
+                    Object = preshipment
+                };
+            });
+        }
+
+
     }
 }

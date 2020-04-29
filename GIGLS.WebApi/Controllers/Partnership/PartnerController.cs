@@ -102,6 +102,22 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getpartner/{partnercode}")]
+        public async Task<IServiceResponse<PartnerDTO>> GetPartnerByCode(string partnercode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var state = await _partnerService.GetPartnerByCode(partnercode);
+
+                return new ServiceResponse<PartnerDTO>
+                {
+                    Object = state
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
         [Route("{partnerId:int}")]

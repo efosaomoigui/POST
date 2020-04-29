@@ -48,6 +48,8 @@ using System.Configuration;
 using System.Security.Cryptography;
 using System.Text;
 using GIGLS.Core.DTO.Utility;
+using GIGLS.Core.IServices.Fleets;
+using GIGLS.Core.DTO.Fleets;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -76,6 +78,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IAdminReportService _adminReportService;
         private readonly IPartnerTransactionsService _partnertransactionservice;
         private readonly IMobileGroupCodeWaybillMappingService _groupCodeWaybillMappingService;
+        private readonly IDispatchService _dispatchService;
+        private readonly IManifestWaybillMappingService _manifestWaybillMappingService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -85,7 +89,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService, 
             ICountryService countryService, IAdminReportService adminReportService, 
-            IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService)
+            IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
+            IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -110,6 +115,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             _adminReportService = adminReportService;
             _partnertransactionservice = partnertransactionservice;
             _groupCodeWaybillMappingService = groupCodeWaybillMappingService;
+            _dispatchService = dispatchService;
+            _manifestWaybillMappingService = manifestWaybillMappingService;
             MapperConfig.Initialize();
         }
 
@@ -1906,7 +1913,23 @@ namespace GIGLS.Services.Business.CustomerPortal
             
         }
 
-        public async Task<string> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO)
+        public async Task<bool> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO)
+        {
+            bool tempCode;
+
+            var existingPreShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == preShipmentDTO.TempCode);
+            if (existingPreShipment != null)
+            {
+                tempCode = await UpdateTemporaryShipment(preShipmentDTO);                
+            }
+            else
+            {
+                tempCode = await CreateTemporaryShipment(preShipmentDTO);
+            }
+            return tempCode;
+        }
+
+        private async Task<bool> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO)
         {
             try
             {                
@@ -1951,7 +1974,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 _uow.PreShipment.Add(newPreShipment);
                 await _uow.CompleteAsync();
 
-                return newPreShipment.TempCode;
+                return true;
             }
             catch (Exception)
             {
@@ -2002,7 +2025,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
-        public async Task<bool> UpdateTemporaryShipment(PreShipmentDTO preShipmentDTO)
+        private async Task<bool> UpdateTemporaryShipment(PreShipmentDTO preShipmentDTO)
         {
             try
             {
@@ -2011,9 +2034,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                 {
                     throw new GenericException("Pre Shipment does not exist");
                 }
-                else if (existingPreShipment.IsProcessed)
+                else
                 {
-                    throw new GenericException("Pre Shipment already processed");
+                    if (existingPreShipment.IsProcessed)
+                    {
+                        throw new GenericException("Pre Shipment already processed");
+                    }
                 }
 
                 // update receiver
@@ -2040,7 +2066,58 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 await _uow.CompleteAsync();
                 return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
+        public async Task UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO)
+        {
+            if (manifestStatusDTO != null)
+            {
+                await _dispatchService.UpdatePickupManifestStatus(manifestStatusDTO);
+            }            
+        }
+
+        public async Task<List<PickupManifestWaybillMappingDTO>> GetWaybillsInPickupManifest(string manifestCode)
+        {
+            var pickupDetails = await _manifestWaybillMappingService.GetWaybillsInPickupManifest(manifestCode);
+
+            return pickupDetails;
+        }
+
+        public async Task<List<PreShipmentDTO>> GetDropOffsForUser(ShipmentCollectionFilterCriteria f_Criteria)
+        {
+            //get the current login user 
+            var currentUserId = await _userService.GetCurrentUserId();
+            
+            //get startDate and endDate
+            var queryDate = f_Criteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var dropOffs = await _uow.PreShipment.FindAsync(x => x.SenderUserId ==currentUserId  && x.DateCreated >= startDate && x.DateCreated < endDate);
+            
+            var dropOffsDTO = Mapper.Map<List<PreShipmentDTO>>(dropOffs);
+            return dropOffsDTO;
+        }
+
+        public async Task<PreShipmentDTO> GetDropOffDetail(string tempCode)
+        {
+            try
+            {
+                var preShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == tempCode, "PreShipmentItems");
+                if (preShipment != null)
+                {
+                    PreShipmentDTO dropOffDTO = Mapper.Map<PreShipmentDTO>(preShipment);
+                    return dropOffDTO;
+                }
+                else
+                {
+                    throw new GenericException($"DropOff with code: {tempCode} does not exist");
+                }
             }
             catch (Exception)
             {
