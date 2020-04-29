@@ -2083,18 +2083,27 @@ namespace GIGLS.Services.Business.CustomerPortal
             return pickupDetails;
         }
 
-        public async Task<List<PreShipmentDTO>> GetDropOffsForUser(ShipmentCollectionFilterCriteria f_Criteria)
+        public async Task<List<PreShipmentDTO>> GetDropOffsForUser(ShipmentCollectionFilterCriteria filterCriteria)
         {
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
             
             //get startDate and endDate
-            var queryDate = f_Criteria.getStartDateAndEndDate();
+            var queryDate = filterCriteria.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var dropOffs = await _uow.PreShipment.FindAsync(x => x.SenderUserId ==currentUserId  && x.DateCreated >= startDate && x.DateCreated < endDate);
-            
+            var dropOffs = _uow.PreShipment.GetAllAsQueryable().Where(x => x.SenderUserId == currentUserId).ToList();
+
+            if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
+            {
+                dropOffs = dropOffs.OrderByDescending(s => s.DateCreated).Take(20).ToList();
+            }
+            else
+            {
+                dropOffs = dropOffs.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate).OrderByDescending(s => s.DateCreated).ToList();
+            }
+
             var dropOffsDTO = Mapper.Map<List<PreShipmentDTO>>(dropOffs);
             return dropOffsDTO;
         }

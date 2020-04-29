@@ -140,7 +140,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<PreShipmentMobileDTO>> AddMobilePickupRequestMultipleShipment(MobilePickUpRequestsDTO pickuprequest);
         Task UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO);
         Task<List<PickupManifestWaybillMappingDTO>> GetWaybillsInPickupManifest(string manifestCode);
-        Task<List<PreShipmentDTO>> GetDropOffsForUser(ShipmentCollectionFilterCriteria f_Criteria);
+        Task<List<PreShipmentDTO>> GetDropOffsForUser(ShipmentCollectionFilterCriteria filterCriteria);
         Task<PreShipmentDTO> GetDropOffDetail(string tempCode);
         Task<bool> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO);
     }
