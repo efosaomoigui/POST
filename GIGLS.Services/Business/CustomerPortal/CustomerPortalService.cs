@@ -1858,6 +1858,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         throw new GenericException("The GIGGo Shipment has been delivered. It can not be updated");
                     }
+                    else if (preShipmentMobile.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString())
+                    {
+                        throw new GenericException("The GIGGo Shipment has been cancelled. It can not be updated");
+                    }
                     else
                     {
                         preShipmentMobile.shipmentstatus = mobilePickUpRequestsDTO.Status;
