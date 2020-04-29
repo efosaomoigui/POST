@@ -76,7 +76,6 @@ namespace GIGLS.Services.Implementation.Partnership
 
         public async Task<PartnerDTO> GetPartnerById(int partnerId)
         {
-            var partnerDto = new PartnerDTO();
             var partner = await _uow.Partner.GetAsync(partnerId);
 
             if (partner == null)
@@ -85,21 +84,22 @@ namespace GIGLS.Services.Implementation.Partnership
             }
             else
             {
-                partnerDto = Mapper.Map<PartnerDTO>(partner);
-                var Wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partner.PartnerCode);
-                var Country = await _uow.Country.GetAsync(s => s.CountryId == partner.UserActiveCountryId);
-                if (Wallet != null)
+                PartnerDTO partnerDto = Mapper.Map<PartnerDTO>(partner);
+                var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partner.PartnerCode);
+                if (wallet != null)
                 {
-                    partnerDto.WalletBalance = Wallet.Balance;
-                    partnerDto.WalletId = Wallet.WalletId;
+                    partnerDto.WalletBalance = wallet.Balance;
+                    partnerDto.WalletId = wallet.WalletId;
                 }
-                if (Country != null)
+
+                var country = await _uow.Country.GetAsync(s => s.CountryId == partner.UserActiveCountryId);
+                if (country != null)
                 {
-                    partnerDto.CurrencySymbol = Country.CurrencySymbol;
-                   
+                    partnerDto.CurrencySymbol = country.CurrencySymbol;
+
                 }
+                return partnerDto;
             }
-            return partnerDto;
         }
 
         public async Task<PartnerDTO> GetPartnerByCode(string partnerCode)

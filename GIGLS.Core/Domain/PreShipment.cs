@@ -1,7 +1,6 @@
 ﻿using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -10,8 +9,6 @@ namespace GIGL.GIGLS.Core.Domain
 {
     public class PreShipment : BaseDomain, IAuditable
     {
-
-        //Shipment Information
         [Key]
         public int PreShipmentId { get; set; }
 
@@ -19,28 +16,45 @@ namespace GIGL.GIGLS.Core.Domain
         [Index(IsUnique = true)]
         public string TempCode { get; set; }
 
-        [MaxLength(100), MinLength(5)]
+        [MaxLength(100)]
         public string Waybill { get; set; }
-
         
         [MaxLength(100)]
         public string CompanyType { get; set; }
+
         [MaxLength(100)]
         public string CustomerCode { get; set; }
 
         //General Details comes with role user
         [MaxLength(128)]
         public string SenderUserId { get; set; }
+
+        [MaxLength(100)]
         public string SenderName { get; set; }
+
+        [MaxLength(100)]
         public string SenderPhoneNumber { get; set; }
+
+        [MaxLength(100)]
         public string SenderCity { get; set; }
         //Receivers Information
 
+        [MaxLength(100)]
         public string ReceiverName { get; set; }
+
+        [MaxLength(100)]
         public string ReceiverPhoneNumber { get; set; }
+
+        [MaxLength(500)]
         public string ReceiverAddress { get; set; }
+
+        [MaxLength(100)]
         public string ReceiverCity { get; set; }
+
+        [MaxLength(100)]
         public string ReceiverState { get; set; }
+
+        [MaxLength(100)]
         public string ReceiverCountry { get; set; }
         public PickupOptions PickupOptions { get; set; }
 

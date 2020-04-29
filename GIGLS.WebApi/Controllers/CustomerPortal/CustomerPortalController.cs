@@ -1696,13 +1696,13 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpPost]
         [Route("createdropoff")]
-        public async Task<IServiceResponse<string>> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO)
+        public async Task<IServiceResponse<bool>> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var preshipMentMobile = await _portalService.CreateOrUpdateDropOff(preShipmentDTO);
 
-                return new ServiceResponse<string>
+                return new ServiceResponse<bool>
                 {
                     Object = preshipMentMobile
                 };

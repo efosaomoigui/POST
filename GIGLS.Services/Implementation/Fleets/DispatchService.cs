@@ -43,15 +43,15 @@ namespace GIGLS.Services.Implementation.Fleets
                 int userServiceCentreId;
                 int dispatchId;
 
-                if (dispatchDTO.ManifestType != ManifestType.Pickup)
-                {
-                    var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-                    userServiceCentreId = serviceCenterIds[0];
-                }
-                else
+                if(dispatchDTO.ManifestType == ManifestType.Pickup)
                 {
                     var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
                     userServiceCentreId = gigGOServiceCenter.ServiceCentreId;
+                }
+                else
+                {
+                    var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                    userServiceCentreId = serviceCenterIds[0];
                 }
 
                 //get the login user
@@ -78,10 +78,9 @@ namespace GIGLS.Services.Implementation.Fleets
                 var dispatchObj = _uow.Dispatch.SingleOrDefault(s => s.ManifestNumber == dispatchDTO.ManifestNumber);
                 if (dispatchDTO != null && dispatchDTO.ManifestType == ManifestType.Pickup)
                 {
-                    var dispatchDTOEntity = _uow.Dispatch.Get(dispatchObj.DispatchId);
-                    dispatchDTOEntity.DriverDetail = dispatchDTO.DriverDetail;
-                    dispatchDTOEntity.Amount = dispatchDTO.Amount;
-                    dispatchDTOEntity.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
+                    dispatchObj.DriverDetail = dispatchDTO.DriverDetail;
+                    dispatchObj.Amount = dispatchDTO.Amount;
+                    dispatchObj.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
                     dispatchId = dispatchObj.DispatchId;
                 }
                 else
@@ -480,30 +479,31 @@ namespace GIGLS.Services.Implementation.Fleets
                     var pickupManifestObj = _uow.PickupManifest.SingleOrDefault(s => s.ManifestCode == manifestStatusDTO.ManifestCode);
                     if (pickupManifestObj != null)
                     {
-                        if (pickupManifestObj.ManifestStatus != ManifestStatus.Delivered)
+                        if (pickupManifestObj.ManifestStatus == ManifestStatus.Delivered)
                         {
-                            if(pickupManifestObj.ManifestStatus == ManifestStatus.Accepted && manifestStatusDTO.ManifestStatus == ManifestStatus.Rejected)
-                            {
-                                throw new GenericException("This has been accepted by you");
-                            }
-                            //ASK IF THERE IS ANY OTHER CONDITION FOR REJECTED AND ACCEPTED
-                            var pickupManifestEntity = _uow.PickupManifest.Get(pickupManifestObj.PickupManifestId);
-                            pickupManifestEntity.ManifestStatus = manifestStatusDTO.ManifestStatus;
+                            throw new GenericException($"Manifest {manifestStatusDTO.ManifestCode} has been delivered");
                         }
                         else
                         {
-                            throw new GenericException("This Manifest has been delivered");
-                        }
-                       
+                            //This condition need to be review  
+                            if (pickupManifestObj.ManifestStatus == ManifestStatus.Accepted &&
+                                (manifestStatusDTO.ManifestStatus == ManifestStatus.Rejected || manifestStatusDTO.ManifestStatus == ManifestStatus.Pending))
+                            {
+                                throw new GenericException($"Manifest {manifestStatusDTO.ManifestCode} has been accepted by you");
+                            }
+                            else
+                            {
+                                pickupManifestObj.ManifestStatus = manifestStatusDTO.ManifestStatus;
+                                await _uow.CompleteAsync();
+                            }
+                        }                       
                     }
                 }
-                await _uow.CompleteAsync();
             }
             catch (Exception)
             {
                 throw;
             }
-        }
-        
+        }        
     }
 }

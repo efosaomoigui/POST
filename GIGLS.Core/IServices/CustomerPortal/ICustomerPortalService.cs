@@ -142,6 +142,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<List<PickupManifestWaybillMappingDTO>> GetWaybillsInPickupManifest(string manifestCode);
         Task<List<PreShipmentDTO>> GetDropOffsForUser(ShipmentCollectionFilterCriteria f_Criteria);
         Task<PreShipmentDTO> GetDropOffDetail(string tempCode);
-        Task<string> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO);
+        Task<bool> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO);
     }
 }

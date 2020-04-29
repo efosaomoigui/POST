@@ -1904,15 +1904,14 @@ namespace GIGLS.Services.Business.CustomerPortal
             
         }
 
-        public async Task<string> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO)
+        public async Task<bool> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO)
         {
-            string tempCode;
+            bool tempCode;
 
             var existingPreShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == preShipmentDTO.TempCode);
             if (existingPreShipment != null)
             {
-                var update = await UpdateTemporaryShipment(preShipmentDTO);
-                tempCode = update.ToString();
+                tempCode = await UpdateTemporaryShipment(preShipmentDTO);                
             }
             else
             {
@@ -1921,19 +1920,15 @@ namespace GIGLS.Services.Business.CustomerPortal
             return tempCode;
         }
 
-        private async Task<string> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO)
+        private async Task<bool> CreateTemporaryShipment(PreShipmentDTO preShipmentDTO)
         {
             try
             {                
-                if(preShipmentDTO.TempCode != null)
-                {
-                }
                 // get the sender info
                 var currentUserId = await _userService.GetCurrentUserId();
-                var user = await _userService.GetUserById(currentUserId);
                 preShipmentDTO.SenderUserId = currentUserId;
 
-                //var user = await _userService.GetUserById(currentUserId);
+                var user = await _userService.GetUserById(currentUserId);
                 preShipmentDTO.CompanyType = user.UserChannelType.ToString();
                 preShipmentDTO.CustomerCode = user.UserChannelCode;
 
@@ -1970,7 +1965,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 _uow.PreShipment.Add(newPreShipment);
                 await _uow.CompleteAsync();
 
-                return newPreShipment.TempCode;
+                return true;
             }
             catch (Exception)
             {
@@ -2030,9 +2025,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                 {
                     throw new GenericException("Pre Shipment does not exist");
                 }
-                else if (existingPreShipment.IsProcessed)
+                else
                 {
-                    throw new GenericException("Pre Shipment already processed");
+                    if (existingPreShipment.IsProcessed)
+                    {
+                        throw new GenericException("Pre Shipment already processed");
+                    }
                 }
 
                 // update receiver
@@ -2059,7 +2057,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 await _uow.CompleteAsync();
                 return true;
-
             }
             catch (Exception)
             {
@@ -2072,8 +2069,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             if (manifestStatusDTO != null)
             {
                 await _dispatchService.UpdatePickupManifestStatus(manifestStatusDTO);
-            }
-            
+            }            
         }
 
         public async Task<List<PickupManifestWaybillMappingDTO>> GetWaybillsInPickupManifest(string manifestCode)
@@ -2096,28 +2092,23 @@ namespace GIGLS.Services.Business.CustomerPortal
             var dropOffs = await _uow.PreShipment.FindAsync(x => x.SenderUserId ==currentUserId  && x.DateCreated >= startDate && x.DateCreated < endDate);
             
             var dropOffsDTO = Mapper.Map<List<PreShipmentDTO>>(dropOffs);
-
-
-            return await Task.FromResult(dropOffsDTO);
+            return dropOffsDTO;
         }
 
         public async Task<PreShipmentDTO> GetDropOffDetail(string tempCode)
         {
             try
             {
-                var dropOffDTO = new PreShipmentDTO();
-
                 var preShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == tempCode, "PreShipmentItems");
                 if (preShipment != null)
                 {
-                    dropOffDTO = Mapper.Map<PreShipmentDTO>(preShipment);
+                    PreShipmentDTO dropOffDTO = Mapper.Map<PreShipmentDTO>(preShipment);
+                    return dropOffDTO;
                 }
                 else
                 {
                     throw new GenericException($"DropOff with code: {tempCode} does not exist");
                 }
-
-                return await Task.FromResult(dropOffDTO);
             }
             catch (Exception)
             {

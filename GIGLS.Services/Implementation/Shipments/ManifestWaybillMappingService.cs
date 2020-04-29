@@ -355,7 +355,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //var serviceIds = await _userService.GetPriviledgeServiceCenters();
                 var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
-                var userServiceCentreId = gigGOServiceCenter.ServiceCentreId;
+                int userServiceCentreId = gigGOServiceCenter.ServiceCentreId;
 
                 //1. check if any of the waybills has not been mapped to a manifest 
                 // and has not been process for return in case it was not delivered (i.e still active) that day
@@ -433,9 +433,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 _uow.Complete();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
                 
             }
         }
