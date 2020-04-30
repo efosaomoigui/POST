@@ -31,7 +31,7 @@ namespace GIGLS.WebApi
             {
                 AllowInsecureHttp = true,
                 TokenEndpointPath = new PathString("/token"),
-                AccessTokenExpireTimeSpan = TimeSpan.FromDays(3),
+                AccessTokenExpireTimeSpan = TimeSpan.FromDays(1),
                 Provider = new GiglsCustomOAuthProvider(),
                 AccessTokenFormat = new GiglsCustomJwtFormat(ApiUrl)
 
