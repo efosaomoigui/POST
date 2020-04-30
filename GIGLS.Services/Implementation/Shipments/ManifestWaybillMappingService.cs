@@ -981,7 +981,8 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var preshipment = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.SenderStationId == senderStationId && x.shipmentstatus == "Shipment created").ToList();
+                var preshipment = _uow.PreShipmentMobile.GetAllAsQueryable().Where(x => x.SenderStationId == senderStationId && x.shipmentstatus == "Shipment created")
+                    .ToList().OrderByDescending(s => s.DateCreated).ToList();
 
                 var preshipmentdto = Mapper.Map<List<PreShipmentMobileDTO>>(preshipment);
 

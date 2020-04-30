@@ -1867,6 +1867,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         throw new GenericException("This shipment has already been delivered. No further action can be taken");
                     }
+                    else if (preShipmentMobile.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString())
+                    {
+                        throw new GenericException("The GIGGo Shipment has been cancelled. It can not be updated");
+                    }
                     else
                     {
                         preShipmentMobile.shipmentstatus = mobilePickUpRequestsDTO.Status;
@@ -2088,19 +2092,28 @@ namespace GIGLS.Services.Business.CustomerPortal
             return pickupDetails;
         }
 
-        public async Task<List<PreShipmentDTO>> GetDropOffsForUser(ShipmentCollectionFilterCriteria f_Criteria)
+        public async Task<List<PreShipmentDTO>> GetDropOffsForUser(ShipmentCollectionFilterCriteria filterCriteria)
         {
             //get the current login user 
             var currentUserId = await _userService.GetCurrentUserId();
             
             //get startDate and endDate
-            var queryDate = f_Criteria.getStartDateAndEndDate();
+            var queryDate = filterCriteria.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var dropOffs = await _uow.PreShipment.FindAsync(x => x.SenderUserId ==currentUserId  && x.DateCreated >= startDate && x.DateCreated < endDate);
-            
-            var dropOffsDTO = Mapper.Map<List<PreShipmentDTO>>(dropOffs);
+            var dropOffs = _uow.PreShipment.GetAllAsQueryable().Where(x => x.SenderUserId == currentUserId);
+
+            if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
+            {
+                dropOffs = dropOffs.OrderByDescending(s => s.DateCreated).Take(20);
+            }
+            else
+            {
+                dropOffs = dropOffs.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate).OrderByDescending(s => s.DateCreated);
+            }
+
+            var dropOffsDTO = Mapper.Map<List<PreShipmentDTO>>(dropOffs.ToList());
             return dropOffsDTO;
         }
 
