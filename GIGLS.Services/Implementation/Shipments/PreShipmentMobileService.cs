@@ -3555,8 +3555,8 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == detail.WaybillNumber, "PreShipmentItems,SenderLocation,ReceiverLocation");
-                var Pickupprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId, preshipmentmobile.UserId);
-                var user = await _userService.GetUserByChannelCode(preshipmentmobile.CustomerCode);
+                //var Pickupprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId, preshipmentmobile.UserId);
+                //var user = await _userService.GetUserByChannelCode(preshipmentmobile.CustomerCode);
 
                 if (preshipmentmobile.ZoneMapping != 1)
                 {
@@ -3576,8 +3576,11 @@ namespace GIGLS.Services.Implementation.Shipments
                                 var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
                                 customerid = companyid.CompanyId;
                             }
-                            var DepartureCountryId = await GetCountryByServiceCentreId(detail.SenderServiceCentreId);
-                            var DestinationCountryId = await GetCountryByServiceCentreId(detail.ReceiverServiceCentreId);
+                            int departureCountryId = await GetCountryByServiceCentreId(detail.SenderServiceCentreId);
+                            int destinationCountryId = await GetCountryByServiceCentreId(detail.ReceiverServiceCentreId);
+                            var user = await _userService.GetCurrentUserId();
+                            var pickupprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId, preshipmentmobile.UserId);
+
                             var MobileShipment = new ShipmentDTO
                             {
                                 Waybill = preshipmentmobile.Waybill,
@@ -3595,7 +3598,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                 DestinationServiceCentreId = detail.ReceiverServiceCentreId,
                                 DepartureServiceCentreId = detail.SenderServiceCentreId,
                                 CustomerId = customerid,
-                                UserId = user.Id,
+                                UserId = user,
                                 PickupOptions = PickupOptions.HOMEDELIVERY,
                                 IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
                                 ShipmentPackagePrice = preshipmentmobile.GrandTotal,
@@ -3606,9 +3609,9 @@ namespace GIGLS.Services.Implementation.Shipments
                                 Value = preshipmentmobile.Value,
                                 PaymentStatus = PaymentStatus.Paid,
                                 IsFromMobile = true,
-                                ShipmentPickupPrice = Pickupprice,
-                                DestinationCountryId = DestinationCountryId,
-                                DepartureCountryId = DepartureCountryId,
+                                ShipmentPickupPrice = pickupprice,
+                                DestinationCountryId = destinationCountryId,
+                                DepartureCountryId = departureCountryId,
                                 ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
                                 {
                                     Description = s.Description,
