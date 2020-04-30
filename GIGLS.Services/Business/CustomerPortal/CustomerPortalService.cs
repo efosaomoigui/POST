@@ -2093,18 +2093,18 @@ namespace GIGLS.Services.Business.CustomerPortal
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var dropOffs = _uow.PreShipment.GetAllAsQueryable().Where(x => x.SenderUserId == currentUserId).ToList();
+            var dropOffs = _uow.PreShipment.GetAllAsQueryable().Where(x => x.SenderUserId == currentUserId);
 
             if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
             {
-                dropOffs = dropOffs.OrderByDescending(s => s.DateCreated).Take(20).ToList();
+                dropOffs = dropOffs.OrderByDescending(s => s.DateCreated).Take(20);
             }
             else
             {
-                dropOffs = dropOffs.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate).OrderByDescending(s => s.DateCreated).ToList();
+                dropOffs = dropOffs.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate).OrderByDescending(s => s.DateCreated);
             }
 
-            var dropOffsDTO = Mapper.Map<List<PreShipmentDTO>>(dropOffs);
+            var dropOffsDTO = Mapper.Map<List<PreShipmentDTO>>(dropOffs.ToList());
             return dropOffsDTO;
         }
 
