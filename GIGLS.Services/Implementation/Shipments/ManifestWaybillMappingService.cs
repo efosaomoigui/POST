@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GIGLS.CORE.DTO.Shipments;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -978,7 +979,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<PreShipmentMobileDTO>> GetUnMappedWaybillsForPickupManifest(int senderStationId)
+        public async Task<Tuple<List<PreShipmentMobileDTO>, int>> GetUnMappedWaybillsForPickupManifest(FilterOptionsDto filterOptionsDto, int senderStationId)
         {
             try
             {
@@ -987,7 +988,43 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var preshipmentdto = Mapper.Map<List<PreShipmentMobileDTO>>(preshipment);
 
-                return preshipmentdto;
+                var count = preshipmentdto.Count();
+
+                if (filterOptionsDto != null)
+                {
+                    //filter
+                    var filter = filterOptionsDto.filter;
+                    var filterValue = filterOptionsDto.filterValue;
+                    if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
+                    {
+                        preshipmentdto = preshipmentdto.Where(s => (s.GetType().GetProperty(filter).GetValue(s)) != null
+                            && (s.GetType().GetProperty(filter).GetValue(s)).ToString().Contains(filterValue)).ToList();
+                    }
+
+                    //sort
+                    var sortorder = filterOptionsDto.sortorder;
+                    var sortvalue = filterOptionsDto.sortvalue;
+
+                    if (!string.IsNullOrEmpty(sortorder) && !string.IsNullOrEmpty(sortvalue))
+                    {
+                        System.Reflection.PropertyInfo prop = typeof(Invoice).GetProperty(sortvalue);
+
+                        if (sortorder == "0")
+                        {
+                            preshipmentdto = preshipmentdto.OrderBy(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                        }
+                        else
+                        {
+                            preshipmentdto = preshipmentdto.OrderByDescending(x => x.GetType().GetProperty(prop.Name).GetValue(x)).ToList();
+                        }
+                    }
+
+                    preshipmentdto = preshipmentdto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
+                }
+
+
+                return new Tuple<List<PreShipmentMobileDTO>, int>(preshipmentdto.ToList(), count);
+                //return preshipmentdto;
             }
             catch (Exception)
             {
