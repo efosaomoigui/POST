@@ -3773,8 +3773,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 currentUser.FirstName = user.FirstName;
                 currentUser.LastName = user.LastName;
-                //User.PhoneNumber = user.PhoneNumber;
-                //User.Email = user.Email;
                 currentUser.PictureUrl = user.PictureUrl;
                 await _userService.UpdateUser(currentUser.Id, currentUser);
 
@@ -4002,7 +4000,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 partner.FirstName = user.FirstName;
                 partner.LastName = user.LastName;
-                //partner.Email = user.Email;
+                partner.PartnerName = user.FirstName + " " + user.LastName;
                 partner.PictureUrl = user.PictureUrl;
             }
         }
@@ -4013,7 +4011,6 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 customer.FirstName = user.FirstName;
                 customer.LastName = user.LastName;
-                //customer.Email = user.Email;
                 customer.PictureUrl = user.PictureUrl;
             }
         }
@@ -4024,8 +4021,11 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 company.FirstName = user.FirstName;
                 company.LastName = user.LastName;
-                //company.Email = user.Email;
-                company.Name = user.Organisation;
+
+                if(!company.Name.Equals(user.Organisation, StringComparison.OrdinalIgnoreCase))
+                {
+                    company.Name = user.Organisation;
+                }
             }
         }
         private async Task<int> GetCountryByServiceCentreId(int ServicecentreId)
