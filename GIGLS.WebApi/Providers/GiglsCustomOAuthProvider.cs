@@ -157,7 +157,7 @@ namespace GIGLS.WebApi.Providers
 
                 if (user.UserChannelType == UserChannelType.Corporate || user.UserChannelType == UserChannelType.IndividualCustomer || user.UserChannelType == UserChannelType.Ecommerce)
                 {
-                    context.Options.AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(5);
+                    context.Options.AccessTokenExpireTimeSpan = TimeSpan.FromDays(5);
                 }
 
                 ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(userManager, "JWT");
