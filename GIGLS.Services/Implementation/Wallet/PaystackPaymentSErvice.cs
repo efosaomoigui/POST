@@ -157,16 +157,15 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if(paymentLog != null)
             {
-                //Process for Nigeria
-                if(paymentLog.PaymentCountryId == 1)
-                {
-                    result = await VerifyAndValidateWallet(referenceCode);                    
-                }                                
-
                 if(paymentLog.PaymentCountryId == 76)
                 {
                     //process for Ghana
                     result = await ProcessPaymentForWallet(referenceCode);
+                }
+                else
+                {
+                    //Process for Nigeria
+                    result = await VerifyAndValidateWallet(referenceCode);
                 }
             }
             else
