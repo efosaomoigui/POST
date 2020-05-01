@@ -3564,7 +3564,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     if (preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString())
                     {
-                        throw new GenericException($"This shipment {detail.WaybillNumber} has been Cancelled. It can not be process!!!");
+                        throw new GenericException($"This shipment {detail.WaybillNumber} has been Cancelled. It can not be processed!!!");
                     }
                     else
                     {
