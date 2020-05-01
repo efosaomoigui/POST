@@ -152,7 +152,12 @@ namespace GIGLS.WebApi.Providers
                 //differentiate expire toke time
                 if(user.UserChannelType == UserChannelType.Partner || user.SystemUserRole == "Dispatch Rider")
                 {
-                    context.Options.AccessTokenExpireTimeSpan = TimeSpan.FromDays(3);
+                    context.Options.AccessTokenExpireTimeSpan = TimeSpan.FromDays(5);
+                }
+
+                if (user.UserChannelType == UserChannelType.Corporate || user.UserChannelType == UserChannelType.IndividualCustomer || user.UserChannelType == UserChannelType.Ecommerce)
+                {
+                    context.Options.AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(5);
                 }
 
                 ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(userManager, "JWT");
