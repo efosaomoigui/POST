@@ -682,6 +682,14 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException($"Kindly supply valid customer channel ");
             }
+
+            if(user.UserChannelType == UserChannelType.Ecommerce)
+            {
+                if (string.IsNullOrEmpty(user.Organisation))
+                {
+                    throw new GenericException($"Kindly supply your company name ");
+                }
+            }
             
             //if (user.UserChannelType == UserChannelType.Ecommerce)
             //{
@@ -1073,7 +1081,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var result = new SignResponseDTO();
 
-            if (user.Organisation == null)
+            if (string.IsNullOrEmpty(user.Organisation))
             {
                 user.Organisation = user.FirstName + " " + user.LastName;
             }
@@ -1102,13 +1110,17 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else
                 {
-                    var emailcompanydetails = await _uow.Company.GetAsync(s => s.Email == user.Email || s.PhoneNumber.Contains(PhoneNumber));                                       
-
+                    var emailcompanydetails = await _uow.Company.GetAsync(s => s.Email == user.Email || s.PhoneNumber.Contains(PhoneNumber));
+                    
                     if (emailcompanydetails != null)
                     {
                         if (emailcompanydetails.IsRegisteredFromMobile == true)
                         {
                             throw new GenericException("Email already Exists as Company Customer!");
+                        }
+                        else if (emailcompanydetails.Name.Equals(user.Organisation, StringComparison.OrdinalIgnoreCase))
+                        {
+                            throw new GenericException($"Company Name Already Exists. Kindly provide another one!!!");
                         }
                         else
                         {
@@ -1137,7 +1149,14 @@ namespace GIGLS.Services.Business.CustomerPortal
                             return result;
                         }
                         else
-                        {     
+                        {
+                            var checkCompanyName = await _uow.Company.FindAsync(x => x.Name == user.Organisation);
+
+                            if (checkCompanyName.Any())
+                            {
+                                throw new GenericException($"Company Name Already Exists. Kindly provide another one!!!");
+                            }
+
                             var customer = new Company
                             {
                                 Email = user.Email,
@@ -1610,7 +1629,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 var User = new UserDTO();
 
-                if (user.Organisation == null)
+                if (string.IsNullOrEmpty(user.Organisation))
                 {
                     user.Organisation = user.FirstName + " " + user.LastName;
                 }
@@ -1655,6 +1674,13 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (user.UserChannelType == UserChannelType.Ecommerce)
                 {
+                    var checkCompanyName = await _uow.Company.FindAsync(x => x.Name == user.Organisation);
+
+                    if (checkCompanyName.Any())
+                    {
+                        throw new GenericException($"Company Name Already Exists. Kindly provide another one!!!");
+                    }
+
                     var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeEcommerce);
                     user.UserChannelCode = customerCode;
                     var companydto = new Company
