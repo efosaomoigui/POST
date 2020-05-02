@@ -32,5 +32,17 @@ namespace GIGLS.Services.Implementation
             }
         }
 
+        public async Task<GiglgoStationDTO> GetGoStationsById(int stationId)
+        {
+            try
+            {
+                var station = await _uow.GiglgoStation.GetGoStationsById(stationId);
+                return station;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -76,7 +76,7 @@ namespace GIGLS.Services.Implementation.Fleets
                 }
 
                 var dispatchObj = _uow.Dispatch.SingleOrDefault(s => s.ManifestNumber == dispatchDTO.ManifestNumber);
-                if (dispatchDTO != null && dispatchDTO.ManifestType == ManifestType.Pickup)
+                if (dispatchObj != null && dispatchDTO.ManifestType == ManifestType.Pickup)
                 {
                     dispatchObj.DriverDetail = dispatchDTO.DriverDetail;
                     dispatchObj.Amount = dispatchDTO.Amount;

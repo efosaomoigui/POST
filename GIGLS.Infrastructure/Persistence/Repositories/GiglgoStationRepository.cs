@@ -37,5 +37,24 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
                 throw;
             }
         }
+
+        public Task<GiglgoStationDTO> GetGoStationsById(int stationId)
+        {
+            try
+            {
+                var stations = _context.GiglgoStation.Where(s => s.StationId == stationId);
+                var stationsDto = from station in stations
+                                  select new GiglgoStationDTO
+                                  {
+                                      StationId = station.StationId,
+                                      StationName = station.StateName
+                                  };
+                return Task.FromResult(stationsDto.FirstOrDefault());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
