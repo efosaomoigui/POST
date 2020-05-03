@@ -335,6 +335,23 @@ namespace GIGLS.WebApi.Controllers.Shipments
             };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getmobileshipments/{waybill}")]
+        public async Task<IServiceResponse<PreShipmentMobileDTO>> GetPreShipmentsMobileByWaybill(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipmentMobile = await _preShipmentMobileService.GetShipmentByWaybill(waybill);
+                return new ServiceResponse<PreShipmentMobileDTO>
+                {
+                    Object = preshipmentMobile
+
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("waybill/{waybill}")]

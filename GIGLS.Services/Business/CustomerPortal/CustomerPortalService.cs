@@ -2097,12 +2097,12 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
             {
-                dropOffs = dropOffs.OrderByDescending(s => s.DateCreated).Take(20);
+                //Last 20 days
+                startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-20);
+                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
             }
-            else
-            {
-                dropOffs = dropOffs.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate).OrderByDescending(s => s.DateCreated);
-            }
+
+            dropOffs = dropOffs.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate).OrderByDescending(s => s.DateCreated);
 
             var dropOffsDTO = Mapper.Map<List<PreShipmentDTO>>(dropOffs.ToList());
             return dropOffsDTO;
