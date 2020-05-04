@@ -40,10 +40,19 @@ namespace GIGLS.Services.Implementation.Fleets
         public async Task<object> AddDispatch(DispatchDTO dispatchDTO)
         {
             {
-                
-                // get user login service centre
-                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
-                var userServiceCentreId = serviceCenterIds[0];
+                int userServiceCentreId;
+                int dispatchId;
+
+                if(dispatchDTO.ManifestType == ManifestType.Pickup)
+                {
+                    var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
+                    userServiceCentreId = gigGOServiceCenter.ServiceCentreId;
+                }
+                else
+                {
+                    var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                    userServiceCentreId = serviceCenterIds[0];
+                }
 
                 //get the login user
                 var currentUserId = await _userService.GetCurrentUserId();
@@ -66,13 +75,25 @@ namespace GIGLS.Services.Implementation.Fleets
                     }
                 }
 
-                // create dispatch
-                var newDispatch = Mapper.Map<Dispatch>(dispatchDTO);
-                newDispatch.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
-                newDispatch.ServiceCentreId = userServiceCentreId;
-                newDispatch.DepartureServiceCenterId = dispatchDTO.DepartureServiceCenterId;
-                newDispatch.DestinationServiceCenterId = dispatchDTO.DestinationServiceCenterId;
-                _uow.Dispatch.Add(newDispatch);
+                var dispatchObj = _uow.Dispatch.SingleOrDefault(s => s.ManifestNumber == dispatchDTO.ManifestNumber);
+                if (dispatchDTO != null && dispatchDTO.ManifestType == ManifestType.Pickup)
+                {
+                    dispatchObj.DriverDetail = dispatchDTO.DriverDetail;
+                    dispatchObj.Amount = dispatchDTO.Amount;
+                    dispatchObj.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
+                    dispatchId = dispatchObj.DispatchId;
+                }
+                else
+                {
+                    // create dispatch
+                    var newDispatch = Mapper.Map<Dispatch>(dispatchDTO);
+                    newDispatch.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
+                    newDispatch.ServiceCentreId = userServiceCentreId;
+                    newDispatch.DepartureServiceCenterId = dispatchDTO.DepartureServiceCenterId;
+                    newDispatch.DestinationServiceCenterId = dispatchDTO.DestinationServiceCenterId;
+                    _uow.Dispatch.Add(newDispatch);
+                    dispatchId = newDispatch.DispatchId;
+                }
 
                 // update manifest
                 var manifestObj = _uow.Manifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
@@ -84,6 +105,7 @@ namespace GIGLS.Services.Implementation.Fleets
                         var pickupManifestEntity = _uow.PickupManifest.Get(pickupManifestObj.PickupManifestId);
                         pickupManifestEntity.DispatchedById = currentUserId;
                         pickupManifestEntity.IsDispatched = true;
+                        pickupManifestEntity.ManifestStatus = ManifestStatus.Pending;
                         pickupManifestEntity.ManifestType = dispatchDTO.ManifestType;
                     }
                 }
@@ -137,7 +159,7 @@ namespace GIGLS.Services.Implementation.Fleets
 
                 // commit transaction
                 await _uow.CompleteAsync();
-                return new { Id = newDispatch.DispatchId };
+                return new { Id = dispatchId };
             }
         }
 
@@ -440,5 +462,48 @@ namespace GIGLS.Services.Implementation.Fleets
             }
             return true;
         }
+
+        public async Task UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO)
+        {
+            try
+            {
+                var userId = await _userService.GetCurrentUserId();
+                
+                var dispatch = await _uow.Dispatch.GetAsync(s => s.ManifestNumber == manifestStatusDTO.ManifestCode && s.DriverDetail == userId);
+                if(dispatch == null)
+                {
+                    throw new GenericException("This manifest is not assigned to you");
+                }
+                else
+                {
+                    var pickupManifestObj = _uow.PickupManifest.SingleOrDefault(s => s.ManifestCode == manifestStatusDTO.ManifestCode);
+                    if (pickupManifestObj != null)
+                    {
+                        if (pickupManifestObj.ManifestStatus == ManifestStatus.Delivered)
+                        {
+                            throw new GenericException($"Manifest {manifestStatusDTO.ManifestCode} has been delivered");
+                        }
+                        else
+                        {
+                            //This condition need to be review  
+                            if (pickupManifestObj.ManifestStatus == ManifestStatus.Accepted &&
+                                (manifestStatusDTO.ManifestStatus == ManifestStatus.Rejected || manifestStatusDTO.ManifestStatus == ManifestStatus.Pending))
+                            {
+                                throw new GenericException($"Manifest {manifestStatusDTO.ManifestCode} has been accepted by you");
+                            }
+                            else
+                            {
+                                pickupManifestObj.ManifestStatus = manifestStatusDTO.ManifestStatus;
+                                await _uow.CompleteAsync();
+                            }
+                        }                       
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }        
     }
 }

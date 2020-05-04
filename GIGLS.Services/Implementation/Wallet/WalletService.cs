@@ -157,8 +157,7 @@ namespace GIGLS.Services.Implementation.Wallet
             await _uow.CompleteAsync();
         }
 
-        public async Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO,
-            bool hasServiceCentre = true)
+        public async Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO, bool hasServiceCentre = true)
         {
             var wallet = await _uow.Wallet.GetAsync(walletId);
             if (wallet == null)
@@ -166,22 +165,21 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Wallet does not exists");
             }
 
-            await CheckIfEcommerceIsEligible(wallet, walletTransactionDTO.Amount);
+            //Manage want every customer to be eligible
+            //await CheckIfEcommerceIsEligible(wallet, walletTransactionDTO.Amount);
 
             if (walletTransactionDTO.UserId == null)
             {
                 walletTransactionDTO.UserId = await _userService.GetCurrentUserId();
             }
 
-            ////////////
             var serviceCenterIds = new int[] { };
             if (hasServiceCentre == true)
             {
                 serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             }
-            ///////////////
 
-            if (serviceCenterIds.Length <= 0)
+            if (serviceCenterIds.Length < 1)
             {
                 serviceCenterIds = new int[] { 0 };
                 var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
@@ -212,7 +210,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
             }
 
-            wallet = await _uow.Wallet.GetAsync(walletId);
+            //wallet = await _uow.Wallet.GetAsync(walletId);
             wallet.Balance = balance;
             await _uow.CompleteAsync();
         }

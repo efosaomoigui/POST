@@ -66,19 +66,22 @@ namespace GIGLS.Services.Business.Pricing
 
         public Task<decimal> GetPrice(PricingDTO pricingDto)
         {
-            switch (pricingDto.ShipmentType)
+            if(pricingDto != null)
             {
-                case ShipmentType.Special:
-                    return GetSpecialPrice(pricingDto);
+                switch (pricingDto.ShipmentType)
+                {
+                    case ShipmentType.Special:
+                        return GetSpecialPrice(pricingDto);
 
-                case ShipmentType.Regular:
-                    return GetRegularPrice(pricingDto);
+                    case ShipmentType.Regular:
+                        return GetRegularPrice(pricingDto);
 
-                case ShipmentType.Ecommerce:
-                    return GetEcommercePrice(pricingDto);
-                default:
-                    break;
-            }
+                    case ShipmentType.Ecommerce:
+                        return GetEcommercePrice(pricingDto);
+                    default:
+                        break;
+                }
+            }            
             return null;
         }
 

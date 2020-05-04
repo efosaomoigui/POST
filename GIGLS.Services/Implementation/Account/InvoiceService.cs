@@ -259,7 +259,7 @@ namespace GIGLS.Services.Implementation.Account
             {
                 var partialTransactionsForWaybill = await _uow.PaymentPartialTransaction.FindAsync(x => x.Waybill.Equals(waybill));
 
-                if (partialTransactionsForWaybill.Count() > 0)
+                if (partialTransactionsForWaybill.Any())
                 {
                     invoiceDTO.PaymentPartialTransaction = new PaymentPartialTransactionProcessDTO()
                     {
@@ -323,7 +323,7 @@ namespace GIGLS.Services.Implementation.Account
             {
                 var partialTransactionsForWaybill = await _uow.PaymentPartialTransaction.FindAsync(x => x.Waybill.Equals(waybill));
 
-                if (partialTransactionsForWaybill.Count() > 0)
+                if (partialTransactionsForWaybill.Any())
                 {
                     invoiceDTO.PaymentPartialTransaction = new PaymentPartialTransactionProcessDTO()
                     {

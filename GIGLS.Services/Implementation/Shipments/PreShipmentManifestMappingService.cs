@@ -90,22 +90,22 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Get Waybills In Manifest for Dispatch
-        public async Task<List<PreShipmentManifestMappingDTO>> GetWaybillsInManifestForPickup()
-        {
-            try
-            {
-                var manifestWaybillMappingList = await _uow.PreShipmentManifestMapping.
-                    FindAsync(x => x.PreShipment.RequestStatus == PreShipmentRequestStatus.Valid
-                    && x.PreShipment.ProcessingStatus == PreShipmentProcessingStatus.Valid);
-                var manifestWaybillNumberMappingDto = Mapper.Map<List<PreShipmentManifestMappingDTO>>(manifestWaybillMappingList.ToList());
+        //public async Task<List<PreShipmentManifestMappingDTO>> GetWaybillsInManifestForPickup()
+        //{
+        //    try
+        //    {
+        //        var manifestWaybillMappingList = await _uow.PreShipmentManifestMapping.
+        //            FindAsync(x => x.PreShipment.RequestStatus == PreShipmentRequestStatus.Valid
+        //            && x.PreShipment.ProcessingStatus == PreShipmentProcessingStatus.Valid);
+        //        var manifestWaybillNumberMappingDto = Mapper.Map<List<PreShipmentManifestMappingDTO>>(manifestWaybillMappingList.ToList());
 
-                return manifestWaybillNumberMappingDto;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //        return manifestWaybillNumberMappingDto;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
 
         //Get All Manifests that a Waybill has been mapped to
@@ -132,49 +132,49 @@ namespace GIGLS.Services.Implementation.Shipments
 
 
         //remove Waybill from manifest
-        public async Task RemoveWaybillFromManifest(string manifest, string waybill)
-        {
-            try
-            {
-                var manifestWaybillMapping = _uow.PreShipmentManifestMapping.
-                    SingleOrDefault(s => s.ManifestCode == manifest && s.Waybill == waybill);
+        //public async Task RemoveWaybillFromManifest(string manifest, string waybill)
+        //{
+        //    try
+        //    {
+        //        var manifestWaybillMapping = _uow.PreShipmentManifestMapping.
+        //            SingleOrDefault(s => s.ManifestCode == manifest && s.Waybill == waybill);
 
-                if (manifestWaybillMapping == null)
-                {
-                    throw new GenericException($"Waybill {waybill} is not mapped to the manifest {manifest}");
-                }
+        //        if (manifestWaybillMapping == null)
+        //        {
+        //            throw new GenericException($"Waybill {waybill} is not mapped to the manifest {manifest}");
+        //        }
 
-                //get the PreShipment and update the status
-                var preShipment = _uow.PreShipment.SingleOrDefault(s => s.Waybill == waybill);
-                preShipment.IsMapped = true;
+        //        //get the PreShipment and update the status
+        //        var preShipment = _uow.PreShipment.SingleOrDefault(s => s.Waybill == waybill);
+        //        preShipment.IsMapped = true;
 
-                _uow.PreShipmentManifestMapping.Remove(manifestWaybillMapping);
-                await _uow.CompleteAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //        _uow.PreShipmentManifestMapping.Remove(manifestWaybillMapping);
+        //        await _uow.CompleteAsync();
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
 
-        public async Task<List<PreShipmentDTO>> GetUnMappedWaybillsForPickupManifest()
-        {
-            try
-            {
-                var query = _uow.PreShipment.PreShipmentsAsQueryable();
-                query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
-                && s.ProcessingStatus == PreShipmentProcessingStatus.Valid);
-                var unmappedWaybills = query.Where(s => s.IsMapped == false).ToList();
+        //public async Task<List<PreShipmentDTO>> GetUnMappedWaybillsForPickupManifest()
+        //{
+        //    try
+        //    {
+        //        var query = _uow.PreShipment.PreShipmentsAsQueryable();
+        //        query = query.Where(s => s.RequestStatus == PreShipmentRequestStatus.Valid
+        //        && s.ProcessingStatus == PreShipmentProcessingStatus.Valid);
+        //        var unmappedWaybills = query.Where(s => s.IsMapped == false).ToList();
 
-                var unmappedWaybillsDto = Mapper.Map<List<PreShipmentDTO>>(unmappedWaybills);
-                return await Task.FromResult(unmappedWaybillsDto);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        //        var unmappedWaybillsDto = Mapper.Map<List<PreShipmentDTO>>(unmappedWaybills);
+        //        return await Task.FromResult(unmappedWaybillsDto);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
 
         public async Task<string> GenerateManifestCode()
         {

@@ -318,6 +318,30 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<PreShipmentDTO> GetTempShipment(string code)
+        {
+            try
+            {
+                var shipment = await _uow.PreShipment.GetAsync(x => x.TempCode == code, "PreShipmentItems");
+                if (shipment == null)
+                {
+                    throw new GenericException("Pre Shipment Information does not exist");
+                }
+
+                var shipmentDto = Mapper.Map<PreShipmentDTO>(shipment);
+
+                //Get the customer wallet balance
+                var wallet = await _walletService.GetWalletBalance(shipment.CustomerCode);
+                shipmentDto.WalletBalance = wallet.Balance;
+
+                return shipmentDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //get basic shipment details
         public async Task<ShipmentDTO> GetBasicShipmentDetail(string waybill)
         {
@@ -1136,11 +1160,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 List<string> transitWaybills = allTransitWaybillNumberList.Select(x => x.WaybillNumber).ToList();
 
-                if(allTransitWaybillNumberList.Count > 0)
+                if(allTransitWaybillNumberList.Any())
                 {
                     var shipment = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.IsShipmentCollected == false && transitWaybills.Contains(s.Waybill)).ToList();
 
-                    if(shipment.Count > 0)
+                    if(shipment.Any())
                     {
                         shipmentsBySC.AddRange(shipment);
                     }
@@ -2216,7 +2240,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<bool> AddShipmentFromMobile(ShipmentDTO shipment)
         {
-
             try
             {
                 //check if shipment already exists
@@ -2271,7 +2294,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     CreateGeneralLedger(shipment);
                     var newShipment = Mapper.Map<Shipment>(shipment);
                     _uow.Shipment.Add(newShipment);
-                    //await _uow.CompleteAsync();
                     return true;
                 }
             }

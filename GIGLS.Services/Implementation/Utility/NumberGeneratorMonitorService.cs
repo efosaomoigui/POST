@@ -78,7 +78,7 @@ namespace GIGLS.Services.Implementation.Utility
                 if (numberGeneratorType == NumberGeneratorType.CustomerCodeIndividual || numberGeneratorType == NumberGeneratorType.CustomerCodeCorporate ||
                     numberGeneratorType == NumberGeneratorType.CustomerCodeEcommerce   ||  numberGeneratorType == NumberGeneratorType.Wallet ||
                     numberGeneratorType == NumberGeneratorType.Partner || numberGeneratorType == NumberGeneratorType.Employee || 
-                    numberGeneratorType == NumberGeneratorType.FleetPartner
+                    numberGeneratorType == NumberGeneratorType.FleetPartner || numberGeneratorType == NumberGeneratorType.PreShipmentCode
                    )
                 {
                     numberGenerated = ResolvePrefixFromNumberGeneratorTypeForCustomers(numberGeneratorType) + numberStr;
@@ -216,6 +216,10 @@ namespace GIGLS.Services.Implementation.Utility
                 case NumberGeneratorType.Employee:
                     {
                         return "EMP";
+                    }
+                case NumberGeneratorType.PreShipmentCode:
+                    {
+                        return "PRE";
                     }
                 default:
                     {

@@ -172,7 +172,6 @@
   <ItemGroup>
     <Compile Include="Business\CustomerPortal\CustomerPortalService.cs" />
     <Compile Include="Business\Magaya\MagayaService.cs" />
-    <Compile Include="Business\PackagingAndShipment\ShipmentPackaging.cs" />
     <Compile Include="Business\Payment\PaymentService.cs" />
     <Compile Include="Business\Pricing\PricingService.cs" />
     <Compile Include="Business\Scanning\ScanService.cs" />
@@ -291,12 +290,15 @@
     <Compile Include="Implementation\Utility\EnumExtensions.cs" />
     <Compile Include="Implementation\Utility\EnumHelper.cs" />
     <Compile Include="Implementation\Utility\EnumValue.cs" />
+    <Compile Include="Implementation\Utility\FlutterWaveEncryptionService\IPaymentDataEncryption.cs" />
+    <Compile Include="Implementation\Utility\FlutterWaveEncryptionService\RavePaymentDataEncryption.cs" />
     <Compile Include="Implementation\Utility\GlobalPropertyService.cs" />
     <Compile Include="Implementation\Utility\NumberGeneratorMonitorService.cs" />
     <Compile Include="Implementation\Utility\PasswordGenerator.cs" />
     <Compile Include="Implementation\Vendors\VendorService.cs" />
     <Compile Include="Implementation\Wallet\CashOnDeliveryAccountService.cs" />
     <Compile Include="Implementation\Wallet\CashOnDeliveryBalanceService.cs" />
+    <Compile Include="Implementation\Wallet\FlutterwavePaymentService.cs" />
     <Compile Include="Implementation\Wallet\PaystackPaymentService.cs" />
     <Compile Include="Implementation\Wallet\WalletPaymentLogService.cs" />
     <Compile Include="Implementation\Wallet\WalletService.cs" />
@@ -530,6 +532,7 @@
     <Folder Include="Business\AdminConsole\" />
     <Folder Include="Business\Finance\" />
     <Folder Include="Business\OrderManagement\" />
+    <Folder Include="Business\PackagingAndShipment\" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />

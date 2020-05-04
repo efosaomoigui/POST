@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Partnership;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
 using System;
@@ -24,7 +25,7 @@ namespace GIGLS.Core.DTO.Shipments
 
         //Senders' Information
         public string SenderName { get; set; }
-
+        public string SenderStationName { get; set; }
         public string SenderPhoneNumber { get; set; }
         public decimal Value { get; set; }
         public DateTime? DeliveryTime { get; set; }
@@ -45,7 +46,8 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverCity { get; set; }
         public string ReceiverState { get; set; }
         public string ReceiverCountry { get; set; }
-        
+        public string ReceiverStationName { get; set; }
+
         public LocationDTO SenderLocation { get; set; }      
 
         public  LocationDTO ReceiverLocation { get; set; }

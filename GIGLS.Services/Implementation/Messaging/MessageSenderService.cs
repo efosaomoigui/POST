@@ -461,6 +461,44 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 messageDTO.ToEmail = messageObj.Recipient;
             }
+            if (obj is MobileShipmentCreationMessageDTO)
+            {
+                var strArray = new string[]
+                 {
+                     "Sender Name",
+                     "WaybillNumber",
+                     "Sender Phone Number"
+                 };
+
+                var mobileShipmentCreationMessage = (MobileShipmentCreationMessageDTO)obj;
+                //map the array
+                strArray[0] = mobileShipmentCreationMessage.SenderName;
+                strArray[1] = mobileShipmentCreationMessage.WaybillNumber;
+                strArray[2] = mobileShipmentCreationMessage.SenderPhoneNumber;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject =
+                    string.Format(messageDTO.Subject, strArray);
+
+
+                //populate the message template
+                messageDTO.FinalBody =
+                    string.Format(messageDTO.Body, strArray);
+
+
+                messageDTO.To = mobileShipmentCreationMessage.SenderPhoneNumber;
+                //messageDTO.ToEmail = mobileMessageDTO.SenderEmail;
+
+                //Set default country as Nigeria for GIG Go APP
+                //prepare message format base on country code
+                messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
+
+                //use to determine sms sender service to use
+                messageDTO.SMSSenderPlatform = mobileShipmentCreationMessage.SMSSenderPlatform;
+            }
 
             return await Task.FromResult(true);
         }
