@@ -334,5 +334,20 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 };
             });
         }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("creditpartner")]
+        public async Task<IServiceResponse<bool>> CreditPartner(CreditPartnerTransactionsDTO transactionsDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _partnerTransactionsService.CreditPartnerTransactionByAdmin(transactionsDTO);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
     }
 }
