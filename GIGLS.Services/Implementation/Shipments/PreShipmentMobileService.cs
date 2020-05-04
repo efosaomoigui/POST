@@ -1241,8 +1241,7 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<PreShipmentMobileDTO> GetShipmentByWaybill(string waybill)
         {
             try
-            {
-                
+            {                
                 var shipmentsResult =  await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == waybill);
                 if (shipmentsResult == null)
                 {
@@ -1250,9 +1249,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 var shipmentDTO = Mapper.Map<PreShipmentMobileDTO>(shipmentsResult);
 
-
-                return await Task.FromResult(shipmentDTO);
-
+                return shipmentDTO;
             }
             catch (Exception)
             {

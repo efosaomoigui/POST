@@ -61,10 +61,9 @@ namespace GIGLS.Services.Implementation.Partnership
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // An exception occurred making the REST call
-                throw ex;
+                throw;
             }
 
             return await Task.FromResult(Response);
@@ -242,7 +241,7 @@ namespace GIGLS.Services.Implementation.Partnership
                 StartDate = partner.filterCriteria.StartDate,
                 EndDate = partner.filterCriteria.EndDate
             };
-            var addPartnerPayout = await _partnerPayoutService.AddPartnerPayout(processedByData);
+            await _partnerPayoutService.AddPartnerPayout(processedByData);
         }
 
         public async Task<List<PartnerPayoutDTO>> GetPartnersPayout(ShipmentCollectionFilterCriteria filterCriteria)
@@ -262,16 +261,16 @@ namespace GIGLS.Services.Implementation.Partnership
                     throw new GenericException($"This waybill {transactionsDTO.Waybill} does not exist");
                 }
 
-                var partner = await _userService.GetUserByEmail(transactionsDTO.Email);
+                var partnerTrans = await _uow.PartnerTransactions.GetAsync(x => x.Waybill == transactionsDTO.Waybill);
+                if (partnerTrans != null)
+                {
+                    throw new GenericException($"This transaction already exists");
+                }
+
+                var partner = await _uow.Partner.GetAsync(x => x.Email == transactionsDTO.Email);
                 if (partner == null)
                 {
                     throw new GenericException($"This partner with Email {transactionsDTO.Email} does not exist");
-                }
-
-                var partnerTrans = await _uow.PartnerTransactions.GetAsync(x => x.Waybill == transactionsDTO.Waybill);
-                if(partnerTrans != null)
-                {
-                    throw new GenericException($"This transaction already exists");
                 }
 
                 var defaultServiceCenter = await _userService.GetGIGGOServiceCentre();
@@ -283,13 +282,13 @@ namespace GIGLS.Services.Implementation.Partnership
                     Departure = preshipment.SenderAddress,
                     AmountReceived = transactionsDTO.AmountReceived,
                     Waybill = preshipment.Waybill,
-                    UserId = partner.Id,
+                    UserId = partner.UserId,
                 };
                 var partnerPayment = Mapper.Map<PartnerTransactions>(partnerTransactions);
                 _uow.PartnerTransactions.Add(partnerPayment);
 
                 //Add to Wallet 
-                var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partner.UserChannelCode);
+                var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == partner.PartnerCode);
                 wallet.Balance = wallet.Balance + transactionsDTO.AmountReceived;
 
                 //Add to Wallet Transactions
@@ -302,20 +301,17 @@ namespace GIGLS.Services.Implementation.Partnership
                     Waybill = preshipment.Waybill,
                     Description = "Credit for Delivered Shipment Request",
                     PaymentType = PaymentType.Online,
-                    UserId = partner.Id,
+                    UserId = partner.UserId,
                     DateOfEntry = DateTime.Now
                 };
                 var newWalletTransaction = Mapper.Map<WalletTransaction>(walletTransaction);
                 _uow.WalletTransaction.Add(newWalletTransaction);
-
                 _uow.Complete();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw ;
             }
-            
-
         }
     }
 }

@@ -988,7 +988,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var preshipmentdto = Mapper.Map<List<PreShipmentMobileDTO>>(preshipment);
 
-                var count = preshipmentdto.Count();
+                int count = preshipmentdto.Count;
 
                 if (filterOptionsDto != null)
                 {
@@ -1022,9 +1022,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     preshipmentdto = preshipmentdto.Skip(filterOptionsDto.count * (filterOptionsDto.page - 1)).Take(filterOptionsDto.count).ToList();
                 }
 
-
                 return new Tuple<List<PreShipmentMobileDTO>, int>(preshipmentdto.ToList(), count);
-                //return preshipmentdto;
             }
             catch (Exception)
             {
