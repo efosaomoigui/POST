@@ -20,6 +20,8 @@ using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.IServices.Shipments;
 
 namespace GIGLS.Services.Implementation.Partnership
 {
@@ -30,15 +32,20 @@ namespace GIGLS.Services.Implementation.Partnership
         private readonly IWalletService _walletService;
         private readonly IWalletTransactionService _walletTransactionService;
         private readonly IPartnerPayoutService _partnerPayoutService;
+        private readonly IMobileShipmentTrackingService _mobileShipmentTrackingService;
+        //private readonly IPreShipmentMobileService _preShipmentMobileService;
 
         public PartnerTransactionsService(IUnitOfWork uow, IUserService userService, IWalletService walletService,
-                                        IWalletTransactionService walletTransactionService, IPartnerPayoutService partnerPayoutService)
+                                        IWalletTransactionService walletTransactionService, IPartnerPayoutService partnerPayoutService,
+                                        IMobileShipmentTrackingService mobileShipmentTrackingService) //,IPreShipmentMobileService preShipmentMobileService)
         {
             _userService = userService;
             _uow = uow;
             _walletService = walletService;
             _walletTransactionService = walletTransactionService;
             _partnerPayoutService = partnerPayoutService;
+            _mobileShipmentTrackingService = mobileShipmentTrackingService;
+            //_preShipmentMobileService = preShipmentMobileService;
             MapperConfig.Initialize();
         }
 
@@ -306,6 +313,39 @@ namespace GIGLS.Services.Implementation.Partnership
                 };
                 var newWalletTransaction = Mapper.Map<WalletTransaction>(walletTransaction);
                 _uow.WalletTransaction.Add(newWalletTransaction);
+
+                //Update Status if not already updated
+                string delivered = MobilePickUpRequestStatus.Delivered.ToString();
+                string onwardProcessing = MobilePickUpRequestStatus.OnwardProcessing.ToString();
+
+                if (preshipment.shipmentstatus != delivered && preshipment.shipmentstatus != onwardProcessing)
+                {
+                    ShipmentScanStatus status = ShipmentScanStatus.MCRT;
+
+                    if (preshipment.ZoneMapping == 1)
+                    {
+                        preshipment.shipmentstatus = delivered;
+                        status = ShipmentScanStatus.MAHD;
+
+                    }
+                    else if (preshipment.ZoneMapping != 1)
+                    {
+                        preshipment.shipmentstatus = onwardProcessing;
+                        status = ShipmentScanStatus.MSVC;
+                    }
+                    await ScanMobileShipment(new ScanDTO
+                    {
+                        WaybillNumber = preshipment.Waybill,
+                        ShipmentScanStatus = status
+                    });
+                    //await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
+                    //{
+                    //    WaybillNumber = preshipment.Waybill,
+                    //    ShipmentScanStatus = status
+                    //});
+                }
+                
+
                 _uow.Complete();
             }
             catch (Exception)
@@ -313,5 +353,25 @@ namespace GIGLS.Services.Implementation.Partnership
                 throw ;
             }
         }
+
+        private async Task ScanMobileShipment(ScanDTO scan)
+        {
+            try
+            {
+                string scanStatus = scan.ShipmentScanStatus.ToString();
+                await _mobileShipmentTrackingService.AddMobileShipmentTracking(new MobileShipmentTrackingDTO
+                {
+                    DateTime = DateTime.Now,
+                    Status = scanStatus,
+                    Waybill = scan.WaybillNumber,
+                }, scan.ShipmentScanStatus);
+                
+            }
+            catch (Exception)
+            {
+                throw new GenericException("Please an error occurred while trying to scan shipment.");
+            }
+        }
+
     }
 }

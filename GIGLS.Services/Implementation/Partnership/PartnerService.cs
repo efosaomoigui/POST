@@ -37,11 +37,6 @@ namespace GIGLS.Services.Implementation.Partnership
             return partners;
         }
 
-        public async Task<IEnumerable<VehicleTypeDTO>> GetVerifiedPartners()
-        {
-            var partners = await _uow.Partner.GetVerifiedPartnersAsync();
-            return partners;
-        }
 
         public async Task<IEnumerable<VehicleTypeDTO>> GetVerifiedPartners(string fleetCode)
         {
