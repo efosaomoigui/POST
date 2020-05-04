@@ -48,6 +48,20 @@ namespace GIGLS.Services.Implementation.Wallet
                 walletPaymentLogDto.UserId = await _userService.GetCurrentUserId();
             }
 
+            //Get the Customer Activity country
+            if(walletPaymentLogDto.PaymentCountryId == 0)
+            {
+                //use the current user id to get the country of the user
+                var user = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
+                walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
+
+                //set Nigeria as default country if no country assign for the customer
+                if(walletPaymentLogDto.PaymentCountryId == 0)
+                {
+                    walletPaymentLogDto.PaymentCountryId = 1;
+                }
+            }
+
             var walletPaymentLog = Mapper.Map<WalletPaymentLog>(walletPaymentLogDto);
             walletPaymentLog.Wallet = null;
             _uow.WalletPaymentLog.Add(walletPaymentLog);

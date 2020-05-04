@@ -2240,7 +2240,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task<bool> AddShipmentFromMobile(ShipmentDTO shipment)
         {
-
             try
             {
                 //check if shipment already exists
@@ -2295,7 +2294,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     CreateGeneralLedger(shipment);
                     var newShipment = Mapper.Map<Shipment>(shipment);
                     _uow.Shipment.Add(newShipment);
-                    //await _uow.CompleteAsync();
                     return true;
                 }
             }

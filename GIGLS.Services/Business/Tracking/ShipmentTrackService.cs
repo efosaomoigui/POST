@@ -203,13 +203,9 @@ namespace GIGLS.Services.Business.Tracking
 
         public async Task<List<ShipmentTrackingDTO>> TrackShipmentForInternational(string waybillNumber)
         {
-            var shipmentTrackings = new List<ShipmentTrackingDTO>();
-
             try
             {
-                //Create an instance of ConnectionAPI using the token of the user
-                //String key = System.IO.File.ReadAllText(@"\\psf\Home\Documents\aftership-key.txt");
-                //ConnectionAPI connection_api_backup = new ConnectionAPI(key, "https://api-backup.aftership.com/");
+                var shipmentTrackings = new List<ShipmentTrackingDTO>();
 
                 string key = ConfigurationManager.AppSettings["aramex:API_KEY"];
                 ConnectionAPI connection_api = new ConnectionAPI(key, null);
@@ -235,7 +231,6 @@ namespace GIGLS.Services.Business.Tracking
                     DateTime checkpointTime = checkpoint.createdAt;
                     DateTime.TryParse(checkpoint.checkpointTime, out checkpointTime);
 
-
                     var newShipmentTrackingDTO = new ShipmentTrackingDTO()
                     {
                         DateCreated = checkpoint.createdAt,
@@ -255,13 +250,12 @@ namespace GIGLS.Services.Business.Tracking
 
                     shipmentTrackings.Add(newShipmentTrackingDTO);
                 }
+                return await Task.FromResult(shipmentTrackings.ToList().OrderByDescending(x => x.DateTime).ToList());
             }
             catch (Exception)
             {
-                //do nothing
+                throw;
             }
-
-            return await Task.FromResult(shipmentTrackings.ToList().OrderByDescending(x => x.DateTime).ToList());
         }
         
         public async Task<IEnumerable<ShipmentTrackingDTO>> TrackShipmentForMobile(string waybillNumber)

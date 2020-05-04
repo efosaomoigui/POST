@@ -65,17 +65,20 @@ namespace GIGLS.Services.Business.Scanning
             {
                 result = await ScanShipment(item);
             }
-
             return result;
         }
 
         public async Task<bool> ScanShipment(ScanDTO scan)
         {
+            if (scan == null)
+                return false;
+
             //1. check if the waybill number exists in the system
             if (scan.WaybillNumber != null)
             {
                 scan.WaybillNumber = scan.WaybillNumber.Trim();
             }
+
             var shipment = await _shipmentService.GetShipmentForScan(scan.WaybillNumber);
 
             //2. check if the shipment has not been cancelled (DSC)
@@ -92,24 +95,11 @@ namespace GIGLS.Services.Business.Scanning
             var currentCenter = serviceCenters[0].ServiceCentreId;
             var cashondeliveryinfo = new List<CashOnDeliveryRegisterAccount>();
 
-
             //block scanning if the waybill has been collected
             if(scan.ShipmentScanStatus != ShipmentScanStatus.SMIM)
             {
                 await BlockAnyScanOnCollectedShipment(scan.WaybillNumber, scan);
             }
-
-            //check if the waybill has not been scan for (AHK) shipment collecte or Delivered status before
-            //var shipmentCollected = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(scan.WaybillNumber) && (x.ShipmentScanStatus == ShipmentScanStatus.OKT || x.ShipmentScanStatus == ShipmentScanStatus.OKC));
-
-            //if (shipmentCollected != null)
-            //{
-            //    //Send Email to Regional Managers whenever this occurs
-            //    scan.CancelledOrCollected = "Collected";
-            //    bool emailSentResult = await SendEmailOnAttemptedScanOfCancelledShipment(scan);
-
-            //    throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} already collected, no further scan is required!");
-            //}
 
             string scanStatus = scan.ShipmentScanStatus.ToString();
 

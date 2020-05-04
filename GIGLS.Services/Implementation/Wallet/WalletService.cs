@@ -157,8 +157,7 @@ namespace GIGLS.Services.Implementation.Wallet
             await _uow.CompleteAsync();
         }
 
-        public async Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO,
-            bool hasServiceCentre = true)
+        public async Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO, bool hasServiceCentre = true)
         {
             var wallet = await _uow.Wallet.GetAsync(walletId);
             if (wallet == null)
@@ -180,7 +179,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             }
 
-            if (serviceCenterIds.Length <= 0)
+            if (serviceCenterIds.Length < 1)
             {
                 serviceCenterIds = new int[] { 0 };
                 var defaultServiceCenter = await _userService.GetDefaultServiceCenter();
@@ -211,7 +210,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
             }
 
-            wallet = await _uow.Wallet.GetAsync(walletId);
+            //wallet = await _uow.Wallet.GetAsync(walletId);
             wallet.Balance = balance;
             await _uow.CompleteAsync();
         }

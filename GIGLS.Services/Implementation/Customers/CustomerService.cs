@@ -16,8 +16,7 @@ namespace GIGLS.Services.Implementation.Customers
         private readonly ICompanyService _companyService;
         private readonly IUnitOfWork _uow;
 
-        public CustomerService(IUnitOfWork uow,
-            IIndividualCustomerService individualCustomerService, ICompanyService companyService)
+        public CustomerService(IUnitOfWork uow,IIndividualCustomerService individualCustomerService, ICompanyService companyService)
         {
             _uow = uow;
             _individualCustomerService = individualCustomerService;

@@ -133,15 +133,15 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         [Route("verifypayment/{referenceCode}")]
         public async Task<IServiceResponse<PaymentResponse>> VerifyAndValidateWallet(string referenceCode)
         {
-            //return await HandleApiOperationAsync(async () =>
-            //{
-            var result = await _paymentService.VerifyAndValidateWallet(referenceCode);
-
-            return new ServiceResponse<PaymentResponse>
+            return await HandleApiOperationAsync(async () =>
             {
-                Object = result
-            };
-            //});
+                var result = await _paymentService.VerifyAndProcessPayment(referenceCode);
+
+                return new ServiceResponse<PaymentResponse>
+                {
+                    Object = result
+                };
+            });
         }
 
 
@@ -1184,6 +1184,36 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return await HandleApiOperationAsync(async () =>
             {
                 var flag = await _portalService.UpdateMobilePickupRequest(PickupRequest);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("updatemobilepickuprequestsbygroup")]
+        public async Task<IServiceResponse<object>> UpdatePickupRequestsUsingGroupCode(MobilePickUpRequestsDTO PickupRequest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _portalService.UpdateMobilePickupRequestUsingGroupCode(PickupRequest);
+
+                return new ServiceResponse<object>
+                {
+                    Object = flag
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("updatemobilepickuprequestsbywaybill")]
+        public async Task<IServiceResponse<object>> UpdatePickupRequestsUsingWaybill(MobilePickUpRequestsDTO PickupRequest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var flag = await _portalService.UpdateMobilePickupRequestUsingWaybill(PickupRequest);
 
                 return new ServiceResponse<object>
                 {
