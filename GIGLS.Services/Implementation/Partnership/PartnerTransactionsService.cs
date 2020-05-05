@@ -33,11 +33,10 @@ namespace GIGLS.Services.Implementation.Partnership
         private readonly IWalletTransactionService _walletTransactionService;
         private readonly IPartnerPayoutService _partnerPayoutService;
         private readonly IMobileShipmentTrackingService _mobileShipmentTrackingService;
-        //private readonly IPreShipmentMobileService _preShipmentMobileService;
 
         public PartnerTransactionsService(IUnitOfWork uow, IUserService userService, IWalletService walletService,
                                         IWalletTransactionService walletTransactionService, IPartnerPayoutService partnerPayoutService,
-                                        IMobileShipmentTrackingService mobileShipmentTrackingService) //,IPreShipmentMobileService preShipmentMobileService)
+                                        IMobileShipmentTrackingService mobileShipmentTrackingService) 
         {
             _userService = userService;
             _uow = uow;
@@ -45,7 +44,6 @@ namespace GIGLS.Services.Implementation.Partnership
             _walletTransactionService = walletTransactionService;
             _partnerPayoutService = partnerPayoutService;
             _mobileShipmentTrackingService = mobileShipmentTrackingService;
-            //_preShipmentMobileService = preShipmentMobileService;
             MapperConfig.Initialize();
         }
 
@@ -326,26 +324,19 @@ namespace GIGLS.Services.Implementation.Partnership
                     {
                         preshipment.shipmentstatus = delivered;
                         status = ShipmentScanStatus.MAHD;
-
                     }
-                    else if (preshipment.ZoneMapping != 1)
+                    else
                     {
                         preshipment.shipmentstatus = onwardProcessing;
                         status = ShipmentScanStatus.MSVC;
                     }
+
                     await ScanMobileShipment(new ScanDTO
                     {
                         WaybillNumber = preshipment.Waybill,
                         ShipmentScanStatus = status
                     });
-                    //await _preShipmentMobileService.ScanMobileShipment(new ScanDTO
-                    //{
-                    //    WaybillNumber = preshipment.Waybill,
-                    //    ShipmentScanStatus = status
-                    //});
                 }
-                
-
                 _uow.Complete();
             }
             catch (Exception)
