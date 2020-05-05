@@ -300,23 +300,27 @@ namespace GIGLS.Services.Implementation.Account
                     invoiceDTO.Shipment.Demurrage.AmountPaid = demurage.AmountPaid;
                     invoiceDTO.Shipment.Demurrage.ApprovedBy = demurage.ApprovedBy;
                 }
-            }         
-           
+            }
+
+            //Update to Get wallet by customer code
             //get wallet number
-            if (invoiceDTO.Customer.CustomerType == CustomerType.Company)
-            {
-                var wallet = await _uow.Wallet.GetAsync(
-                    s => s.CustomerId == invoiceDTO.Customer.CompanyId &&
-                    s.CustomerType == CustomerType.Company);
-                invoiceDTO.Customer.WalletNumber = wallet?.WalletNumber;
-            }
-            else
-            {
-                var wallet = await _uow.Wallet.GetAsync(
-                    s => s.CustomerId == invoiceDTO.Customer.IndividualCustomerId &&
-                    s.CustomerType == CustomerType.IndividualCustomer);
-                invoiceDTO.Customer.WalletNumber = wallet?.WalletNumber;
-            }
+            //if (invoiceDTO.Customer.CustomerType == CustomerType.Company)
+            //{
+            //    var wallet = await _uow.Wallet.GetAsync(
+            //        s => s.CustomerId == invoiceDTO.Customer.CompanyId &&
+            //        s.CustomerType == CustomerType.Company);
+            //    invoiceDTO.Customer.WalletNumber = wallet?.WalletNumber;
+            //}
+            //else
+            //{
+            //    var wallet = await _uow.Wallet.GetAsync(
+            //        s => s.CustomerId == invoiceDTO.Customer.IndividualCustomerId &&
+            //        s.CustomerType == CustomerType.IndividualCustomer);
+            //    invoiceDTO.Customer.WalletNumber = wallet?.WalletNumber;
+            //}
+
+            var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == invoiceDTO.Customer.CustomerCode);
+            invoiceDTO.Customer.WalletNumber = wallet?.WalletNumber;
 
             ///// Partial Payments, if invoice status is pending
             if (invoiceDTO.PaymentStatus == PaymentStatus.Pending)

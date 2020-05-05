@@ -251,8 +251,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //get wallet number
                 //var wallets = await _walletService.GetWallets();
-                var customerWallet = _uow.Wallet.SingleOrDefault(
-                    s => s.CustomerId == shipmentDto.CustomerId && s.CustomerType == customerType);
+                //var customerWallet = _uow.Wallet.SingleOrDefault(
+                //    s => s.CustomerId == shipmentDto.CustomerId && s.CustomerType == customerType);
+                //shipmentDto.WalletNumber = customerWallet?.WalletNumber;
+
+                var customerWallet = _uow.Wallet.SingleOrDefault(s => s.CustomerCode == shipmentDto.CustomerCode);
                 shipmentDto.WalletNumber = customerWallet?.WalletNumber;
 
                 if (shipmentDto.IsCancelled)
@@ -420,10 +423,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.ReceiverCountry = shipmentDto.ReceiverCountry;
                 shipment.ReceiverCity = shipmentDto.ReceiverCity;
                 shipment.PaymentStatus = shipmentDto.PaymentStatus;
-                //shipment.IsDomestic = shipmentDto.IsDomestic;
-                //shipment.IndentificationUrl = shipmentDto.IndentificationUrl;
-                //shipment.IdentificationType = shipmentDto.IdentificationType;
-                //shipment.GroupWaybill = shipmentDto.GroupWaybill;
                 shipment.ExpectedDateOfArrival = shipmentDto.ExpectedDateOfArrival;
                 shipment.DestinationServiceCentreId = shipmentDto.DestinationServiceCentreId;
                 shipment.DepartureServiceCentreId = shipmentDto.DepartureServiceCentreId;
@@ -431,9 +430,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.DeliveryOptionId = shipmentDto.DeliveryOptionId;
                 shipment.CustomerType = shipmentDto.CustomerType;
                 shipment.CustomerId = shipmentDto.CustomerId;
-                //shipment.Comments = shipmentDto.Comments;
-                //shipment.ActualreceiverPhone = shipmentDto.ActualreceiverPhone;
-                //shipment.ActualReceiverName = shipmentDto.ActualReceiverName;
                 shipment.ActualDateOfArrival = shipmentDto.ActualDateOfArrival;
 
                 await _uow.CompleteAsync();
