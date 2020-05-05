@@ -260,18 +260,10 @@ namespace GIGLS.Services.Implementation.User
 
             return await _unitOfWork.User.UpdateUser(userid, user);
 
-            //var userdomain = Mapper.Map<GIGL.GIGLS.Core.Domain.User>(userDto);
-            //userdomain.Id = userid;
-            //return await _unitOfWork.User.UpdateUser(userid, userdomain);
-
         }
 
         public async Task<IdentityResult> ActivateUser(string userid, bool val)
         {
-            //Code to add existing users to roles and reset password
-            //await CodeToAddUsersToAspNetUserRolesTable();
-            //await CodeToAddUsersToAspNetUserRolesTable_LOCATION();
-
             var user = await _unitOfWork.User.GetUserById(userid);
 
             if (user == null)
@@ -287,21 +279,18 @@ namespace GIGLS.Services.Implementation.User
         public Task<AppRole> GetRoleById(string roleId)
         {
             var role = _unitOfWork.User.GetRoleById(roleId);
-            //var role = Mapper.Map<RoleDTO>(result);
             return role;
         }
 
         public Task<AppRole> GetRoleByName(string roleName)
         {
             var role = _unitOfWork.User.GetRoleById(roleName);
-            //var role = Mapper.Map<RoleDTO>(result);
             return role;
         }
 
         public Task<IEnumerable<AppRole>> GetRoles()
         {
             var role = _unitOfWork.User.GetRoles();
-            //var role = Mapper.Map<RoleDTO>(result);
             return role;
         }
 

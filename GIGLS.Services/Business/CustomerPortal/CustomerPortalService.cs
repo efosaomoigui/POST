@@ -653,7 +653,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             if(user == null)
                 throw new GenericException("NULL INPUT");
 
-
             var result = new SignResponseDTO();
 
             if (user.RequiresCod == null)
@@ -666,11 +665,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 user.IsUniqueInstalled = false;
             }
 
-            //if (user.IsEligible == null)
-            //{
-            //    user.IsEligible = false;
-            //}
-            //enable eligibility
+            //automatic enable Ecommerce eligibility
             user.IsEligible = true;
             
             if (user.Referrercode != null)
@@ -1648,8 +1643,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                         PictureUrl = user.PictureUrl,
                         IsRegisteredFromMobile = true,
                         UserActiveCountryId = user.UserActiveCountryId
-                      
-                        //added this to pass channelcode 
                     };
                     
                     //update : we need to check if the customer exists before adding 
