@@ -20,6 +20,7 @@ namespace GIGL.GIGLS.Core.Domain
         public double Length { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
+        public int? SpecialPackageId { get; set; }
 
         //Foreign key information
         public int PreShipmentId { get; set; }

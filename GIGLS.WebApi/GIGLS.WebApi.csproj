@@ -35,6 +35,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>GIGLS.WebApi.xml</DocumentationFile>
+    <NoWarn>1062;1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -308,6 +309,7 @@
     <Compile Include="Controllers\CountryController.cs" />
     <Compile Include="Controllers\CustomerPortal\CustomerPortalController.cs" />
     <Compile Include="Controllers\CustomerPortal\FirebaseAccessController.cs" />
+    <Compile Include="Controllers\CustomerPortal\FlutterwaveController.cs" />
     <Compile Include="Controllers\CustomerPortal\PaystackController.cs" />
     <Compile Include="Controllers\CustomerPortal\PublicTrackingController.cs" />
     <Compile Include="Controllers\Customers\CompanyContactPersonController.cs" />

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GIGLS.WebApi.Filters;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.WebApi.Controllers.ServiceCentres
 {
@@ -173,6 +174,21 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
                 return new ServiceResponse<IEnumerable<StationDTO>>
                 {
                     Object = stations
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{stationId:int}/giggostation")]
+        public async Task<IServiceResponse<GiglgoStationDTO>> GetGIGGoStationById(int stationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var station = await _stationService.GetGIGGoStationById(stationId);
+                return new ServiceResponse<GiglgoStationDTO>
+                {
+                    Object = station
                 };
             });
         }

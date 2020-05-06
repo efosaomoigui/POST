@@ -35,4 +35,41 @@
         Waybill,
         Wallet
     }
+
+    public class FlutterWebhookDTO
+    {
+        public FlutterWebhookDTO()
+        {
+            data = new FlutterResponseData();
+        }
+        public string Message { get; set; }
+        public string Status { get; set; }
+        public FlutterResponseData data { get; set; }
+    }
+
+    public class FlutterResponseData
+    {
+        public FlutterResponseData()
+        {
+            validateInstructions = new ValidateInstructions();
+        }
+        public string Status { get; set; }
+        public string TXRef { get; set; }
+        public decimal Amount { get; set; }
+        public string ChargeResponseMessage { get; set; }
+        public string ChargeResponseCode { get; set; }
+        public string ChargeMessage { get; set; }
+        public string PaymentType { get; set; }
+        public string FlwRef { get; set; }
+        public string Acctvalrespcode { get; set; }
+        public string Acctvalrespmsg { get; set; }
+        public string ChargeCode { get; set; }
+
+        public ValidateInstructions validateInstructions { get; set; }
+    }
+
+    public class ValidateInstructions
+    {
+        public string Instruction { get; set; }
+    }
 }

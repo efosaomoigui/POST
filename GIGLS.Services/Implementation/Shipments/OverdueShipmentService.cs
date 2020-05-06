@@ -15,10 +15,9 @@ namespace GIGLS.Services.Implementation.Shipments
     public class OverdueShipmentService : IOverdueShipmentService
     {
         private readonly IUnitOfWork _uow;
-        private IUserService _userService;
+        private readonly IUserService _userService;
 
-        public OverdueShipmentService(IUnitOfWork uow, IUserService userService,
-            IGlobalPropertyService globalPropertyService)
+        public OverdueShipmentService(IUnitOfWork uow, IUserService userService)
         {
             _uow = uow;
             _userService = userService;

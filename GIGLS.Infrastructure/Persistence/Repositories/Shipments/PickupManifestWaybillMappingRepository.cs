@@ -51,6 +51,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                           DateModified = p.DateModified,
                                                           ManifestCode = p.ManifestCode,
                                                           ManifestType = p.ManifestType,
+                                                          ManifestStatus = p.ManifestStatus,
                                                           DateTime = p.DateTime,
                                                           IsDispatched = p.IsDispatched,
                                                           IsReceived = p.IsReceived,

@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.WebApi.Filters;
 using GIGLS.Core.IServices.Business;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.CORE.DTO.Shipments;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -151,6 +152,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("pickupmanifest/{manifest}")]
+        public async Task<IServiceResponse<PickupManifestDTO>> GetPickupManifestDetails(string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var waybillNumbersIPickupManifest = await _service.GetPickupManifest(manifest);
+
+                return new ServiceResponse<PickupManifestDTO>
+                {
+                    Object = waybillNumbersIPickupManifest
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("waybillsinmanifestfordispatch")]
         public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetWaybillsInManifestForDispatch()
         {
@@ -257,6 +274,23 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<List<ShipmentDTO>>
                 {
                     Object = unMappedWaybill
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("unmappedwaybillforpickupmanifest/{stationId:int}")]
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetUnMappedWaybillsForPickupManifest([FromUri]FilterOptionsDto filterOptionsDto, int stationId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var unMappedWaybill = await _service.GetUnMappedWaybillsForPickupManifest(filterOptionsDto,stationId);
+
+                return new ServiceResponse<List<PreShipmentMobileDTO>>
+                {
+                    Object = unMappedWaybill.Item1,
+                    Total = unMappedWaybill.Item2
                 };
             });
         }

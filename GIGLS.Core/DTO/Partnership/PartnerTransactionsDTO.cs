@@ -82,4 +82,11 @@ namespace GIGLS.Core.DTO.Partnership
         public string AccountNumber { get; set; }
 
     }
+
+    public class CreditPartnerTransactionsDTO : BaseDomainDTO
+    {
+        public string Email { get; set; }
+        public decimal AmountReceived { get; set; }
+        public string Waybill { get; set; }
+    }
 }

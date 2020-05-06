@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.ServiceCentres;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -15,5 +16,6 @@ namespace GIGLS.Core.IServices.ServiceCentres
         Task DeleteStation(int stationId);
         Task UpdateGIGGoStationStatus(int stationId, bool status);
         Task<List<StationDTO>> GetActiveGIGGoStations();
+        Task<GiglgoStationDTO> GetGIGGoStationById(int stationId);
     }
 }

@@ -40,20 +40,6 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("getverifiedpartners")]
-        public async Task<IServiceResponse<IEnumerable<VehicleTypeDTO>>> GetVerfiedPartners()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var partners = await _partnerService.GetVerifiedPartners();
-                return new ServiceResponse<IEnumerable<VehicleTypeDTO>>
-                {
-                    Object = partners
-                };
-            });
-        }
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPost]
@@ -94,6 +80,22 @@ namespace GIGLS.WebApi.Controllers.Partnership
             return await HandleApiOperationAsync(async () =>
             {
                 var state = await _partnerService.GetPartnerById(partnerId);
+
+                return new ServiceResponse<PartnerDTO>
+                {
+                    Object = state
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getpartner/{partnercode}")]
+        public async Task<IServiceResponse<PartnerDTO>> GetPartnerByCode(string partnercode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var state = await _partnerService.GetPartnerByCode(partnercode);
 
                 return new ServiceResponse<PartnerDTO>
                 {
@@ -315,6 +317,21 @@ namespace GIGLS.WebApi.Controllers.Partnership
                 return new ServiceResponse<IEnumerable<PartnerPayoutDTO>>
                 {
                     Object = payout
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("creditpartner")]
+        public async Task<IServiceResponse<bool>> CreditPartner(CreditPartnerTransactionsDTO transactionsDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _partnerTransactionsService.CreditPartnerTransactionByAdmin(transactionsDTO);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
                 };
             });
         }

@@ -149,6 +149,17 @@ namespace GIGLS.WebApi.Providers
                     return;
                 }
 
+                //differentiate expire toke time
+                if(user.UserChannelType == UserChannelType.Partner || user.SystemUserRole == "Dispatch Rider")
+                {
+                    context.Options.AccessTokenExpireTimeSpan = TimeSpan.FromDays(5);
+                }
+
+                if (user.UserChannelType == UserChannelType.Corporate || user.UserChannelType == UserChannelType.IndividualCustomer || user.UserChannelType == UserChannelType.Ecommerce)
+                {
+                    context.Options.AccessTokenExpireTimeSpan = TimeSpan.FromDays(5);
+                }
+
                 ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(userManager, "JWT");
 
                 //preparing AuthenticationProperties Dictionary object
