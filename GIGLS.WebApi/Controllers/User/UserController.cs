@@ -185,43 +185,46 @@ namespace GIGLS.WebApi.Controllers.User
                 {
                     var userClaims = await _userService.GetClaimsAsync(user.Id);
 
-                    if (userClaims.Count() > 0)
+                    if (userClaims.Any())
                     {
-                        //set service centre
-                        int[] serviceCenterIds = await _userService.GetPriviledgeServiceCenters(userId);
-                        if (serviceCenterIds.Length == 1)
+                        if(userClaims.Any(x => x.Type == "Privilege"))
                         {
-                            var serviceCentre = await _serviceCentreService.GetServiceCentreById(serviceCenterIds[0]);
-                            user.UserActiveServiceCentre = serviceCentre.Name;
-                        }
-
-                        //set country from PriviledgeCountrys
-                        var countries = await _userService.GetPriviledgeCountrys(userId);
-                        user.Country = countries;
-                        user.CountryName = countries.Select(x => x.CountryName).ToList();
-
-                        //If UserActive Country is already set in the UserEntity, use that value
-                        if (user.UserActiveCountryId > 0)
-                        {
-                            var userActiveCountry = await _countryService.GetCountryById(user.UserActiveCountryId);
-                            user.UserActiveCountry = userActiveCountry;
-                            user.UserActiveCountryId = userActiveCountry.CountryId;
-
-                            //If countries is empty, use UserActiveCountry
-                            if (countries.Count == 0)
+                            //set service centre
+                            int[] serviceCenterIds = await _userService.GetPriviledgeServiceCenters(userId);
+                            if (serviceCenterIds.Length == 1)
                             {
-                                user.Country = new CountryDTO[] { userActiveCountry }.ToList();
-                                user.CountryName = new String[] { userActiveCountry.CountryName }.ToList();
+                                var serviceCentre = await _serviceCentreService.GetServiceCentreById(serviceCenterIds[0]);
+                                user.UserActiveServiceCentre = serviceCentre.Name;
                             }
-                        }
-                        else
-                        {
-                            //set user active country
-                            if (countries.Count == 1)
+
+                            //set country from PriviledgeCountrys
+                            var countries = await _userService.GetPriviledgeCountrys(userId);
+                            user.Country = countries;
+                            user.CountryName = countries.Select(x => x.CountryName).ToList();
+
+                            //If UserActive Country is already set in the UserEntity, use that value
+                            if (user.UserActiveCountryId > 0)
                             {
-                                user.UserActiveCountry = countries[0];
+                                var userActiveCountry = await _countryService.GetCountryById(user.UserActiveCountryId);
+                                user.UserActiveCountry = userActiveCountry;
+                                user.UserActiveCountryId = userActiveCountry.CountryId;
+
+                                //If countries is empty, use UserActiveCountry
+                                if (countries.Count == 0)
+                                {
+                                    user.Country = new CountryDTO[] { userActiveCountry }.ToList();
+                                    user.CountryName = new String[] { userActiveCountry.CountryName }.ToList();
+                                }
                             }
-                        }
+                            else
+                            {
+                                //set user active country
+                                if (countries.Count == 1)
+                                {
+                                    user.UserActiveCountry = countries[0];
+                                }
+                            }
+                        }                        
                     }
                 }
 
