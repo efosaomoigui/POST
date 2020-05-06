@@ -28,7 +28,5 @@ namespace GIGL.GIGLS.Core.Domain
 
         //Agility Calculations
         public decimal CalculatedPrice { get; set; }
-        public int? SpecialPackageId { get; set; }
-
     }
 }
