@@ -2181,7 +2181,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Delete the GroupWaybill If All the Waybills attached to it have been deleted.
                 var checkIfWaybillExistForGroup = await _uow.GroupWaybillNumberMapping.FindAsync(x => x.GroupWaybillNumber == groupWaybillNumber);
-                if (checkIfWaybillExistForGroup.Count() == 0)
+                if (!checkIfWaybillExistForGroup.Any())
                 {
                     //ensure that the Manifest containing the Groupwaybill has not been dispatched
                     var manifestGroupWaybillNumberMapping = _uow.ManifestGroupWaybillNumberMapping.SingleOrDefault(x => x.GroupWaybillNumber == groupWaybillNumber);
