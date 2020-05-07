@@ -293,13 +293,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Please select a vehicle type");
                 }
 
+                if (!preShipmentDTO.PreShipmentItems.Any())
+                {
+                    throw new GenericException("Shipment Items cannot be empty");
+                }
+
                 var PreshipmentPriceDTO = new MobilePriceDTO();
+
                 // get the current user info
                 var currentUserId = await _userService.GetCurrentUserId();
                 preShipmentDTO.UserId = currentUserId;
                 var user = await _userService.GetUserById(currentUserId);
+
                 var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
                 preShipmentDTO.CountryId = Country.CountryId;
+
                 var customer = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
                 if (customer != null)
                 {
@@ -308,7 +316,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         preShipmentDTO.IsEligible = false;
                         preShipmentDTO.IsCodNeeded = customer.isCodNeeded;
                         preShipmentDTO.CurrencySymbol = Country.CurrencySymbol;
-                        preShipmentDTO.CurrentWalletAmount = Convert.ToDecimal(customer.WalletAmount);
+                        preShipmentDTO.CurrentWalletAmount = (decimal)customer.WalletAmount;
                         return preShipmentDTO;
                     }
                 }
@@ -342,20 +350,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 var wallet = await _walletService.GetWalletBalance();
-                if (wallet.Balance >= Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal))
-                {
-                    var price = (wallet.Balance - Convert.ToDecimal(PreshipmentPriceDTO.GrandTotal));
+                decimal shipmentGrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
 
+                if (wallet.Balance >= shipmentGrandTotal)
+                {
                     var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
 
                     //generate waybill
                     var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, gigGOServiceCenter.Code);
                     preShipmentDTO.Waybill = waybill;
-
-                    if (!preShipmentDTO.PreShipmentItems.Any())
-                    {
-                        throw new GenericException("Shipment Items cannot be empty");
-                    }
 
                     var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
 
@@ -373,7 +376,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     newPreShipment.IsDelivered = false;
                     newPreShipment.shipmentstatus = "Shipment created";
                     newPreShipment.DateCreated = DateTime.Now;
-                    newPreShipment.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
+                    newPreShipment.GrandTotal = shipmentGrandTotal;
                     preShipmentDTO.IsBalanceSufficient = true;
                     preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
                     newPreShipment.ShipmentPickupPrice = (decimal)(PreshipmentPriceDTO.PickUpCharge == null ? 0.0M : PreshipmentPriceDTO.PickUpCharge);
@@ -396,8 +399,12 @@ namespace GIGLS.Services.Implementation.Shipments
                         PaymentType = PaymentType.Online,
                         UserId = newPreShipment.UserId
                     };
+
                     var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
                     var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
+
+                    //update wallet
+                    decimal price = updatedwallet.Balance - shipmentGrandTotal;
                     updatedwallet.Balance = price;
                     await _uow.CompleteAsync();
                     await SendSMSForMobileShipmentCreation(preShipmentDTO);
@@ -637,7 +644,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //undo comment when App is updated
                 if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
                 {
-                    var ShipmentCount = preShipment.PreShipmentItems.Count();
+                    int ShipmentCount = preShipment.PreShipmentItems.Count;
 
                     amount = await CalculateGeoDetailsBasedonLocation(preShipment);
                     IndividualPrice = (amount / ShipmentCount);
