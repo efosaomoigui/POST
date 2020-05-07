@@ -123,7 +123,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     newPreShipment.Waybill = "";
 
                     throw new GenericException(message);
-
                 }
                 return new { waybill = newPreShipment.Waybill, message = message, IsBalanceSufficient, Zone = zoneid.ZoneId };
             }
@@ -289,10 +288,11 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                if (preShipmentDTO.VehicleType == null || preShipmentDTO.VehicleType == "")
+                if (string.IsNullOrEmpty(preShipmentDTO.VehicleType))
                 {
                     throw new GenericException("Please select a vehicle type");
                 }
+
                 var PreshipmentPriceDTO = new MobilePriceDTO();
                 // get the current user info
                 var currentUserId = await _userService.GetCurrentUserId();
@@ -300,18 +300,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 var user = await _userService.GetUserById(currentUserId);
                 var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
                 preShipmentDTO.CountryId = Country.CountryId;
-                var customer = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
-                if (customer != null)
-                {
-                    if (customer.IsEligible != true)
-                    {
-                        preShipmentDTO.IsEligible = false;
-                        preShipmentDTO.IsCodNeeded = customer.isCodNeeded;
-                        preShipmentDTO.CurrencySymbol = Country.CurrencySymbol;
-                        preShipmentDTO.CurrentWalletAmount = Convert.ToDecimal(customer.WalletAmount);
-                        return preShipmentDTO;
-                    }
-                }
+
+                //The code was commended since we are not checking for Ecommerce Eligibility again
+                //var customer = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+                //if (customer != null)
+                //{
+                //    if (customer.IsEligible != true)
+                //    {
+                //        preShipmentDTO.IsEligible = false;
+                //        preShipmentDTO.IsCodNeeded = customer.isCodNeeded;
+                //        preShipmentDTO.CurrencySymbol = Country.CurrencySymbol;
+                //        preShipmentDTO.CurrentWalletAmount = Convert.ToDecimal(customer.WalletAmount);
+                //        return preShipmentDTO;
+                //    }
+                //}
 
                 if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
                 {
@@ -332,8 +334,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    //var exists = await _uow.Company.ExistAsync(s => s.CustomerCode == user.UserChannelCode);
-                    if (user.UserChannelType == UserChannelType.Ecommerce || customer != null)
+                    var customerExists = await _uow.Company.ExistAsync(s => s.CustomerCode == user.UserChannelCode);
+                    if (user.UserChannelType == UserChannelType.Ecommerce || customerExists)
                     {
                         preShipmentDTO.Shipmentype = ShipmentType.Ecommerce;
                     }
@@ -352,8 +354,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, gigGOServiceCenter.Code);
                     preShipmentDTO.Waybill = waybill;
 
-
-                    if (preShipmentDTO.PreShipmentItems.Count == 0)
+                    if (!preShipmentDTO.PreShipmentItems.Any())
                     {
                         throw new GenericException("Shipment Items cannot be empty");
                     }
@@ -400,8 +401,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
                     var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
                     updatedwallet.Balance = price;
-                    await SendSMSForMobileShipmentCreation(preShipmentDTO);
                     await _uow.CompleteAsync();
+                    await SendSMSForMobileShipmentCreation(preShipmentDTO);
                     return preShipmentDTO;
                 }
                 else
