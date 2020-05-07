@@ -300,20 +300,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 var user = await _userService.GetUserById(currentUserId);
                 var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
                 preShipmentDTO.CountryId = Country.CountryId;
-
-                //The code was commended since we are not checking for Ecommerce Eligibility again
-                //var customer = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
-                //if (customer != null)
-                //{
-                //    if (customer.IsEligible != true)
-                //    {
-                //        preShipmentDTO.IsEligible = false;
-                //        preShipmentDTO.IsCodNeeded = customer.isCodNeeded;
-                //        preShipmentDTO.CurrencySymbol = Country.CurrencySymbol;
-                //        preShipmentDTO.CurrentWalletAmount = Convert.ToDecimal(customer.WalletAmount);
-                //        return preShipmentDTO;
-                //    }
-                //}
+                var customer = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
+                if (customer != null)
+                {
+                    if (customer.IsEligible != true)
+                    {
+                        preShipmentDTO.IsEligible = false;
+                        preShipmentDTO.IsCodNeeded = customer.isCodNeeded;
+                        preShipmentDTO.CurrencySymbol = Country.CurrencySymbol;
+                        preShipmentDTO.CurrentWalletAmount = Convert.ToDecimal(customer.WalletAmount);
+                        return preShipmentDTO;
+                    }
+                }
 
                 if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
                 {
@@ -334,8 +332,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    var customerExists = await _uow.Company.ExistAsync(s => s.CustomerCode == user.UserChannelCode);
-                    if (user.UserChannelType == UserChannelType.Ecommerce || customerExists)
+                    //var exists = await _uow.Company.ExistAsync(s => s.CustomerCode == user.UserChannelCode);
+                    if (user.UserChannelType == UserChannelType.Ecommerce || customer != null)
                     {
                         preShipmentDTO.Shipmentype = ShipmentType.Ecommerce;
                     }
