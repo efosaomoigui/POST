@@ -349,8 +349,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
                 }
 
-                var wallet = await _walletService.GetWalletBalance();
                 decimal shipmentGrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
+                var wallet = await _walletService.GetWalletBalance();
 
                 if (wallet.Balance >= shipmentGrandTotal)
                 {
@@ -381,13 +381,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
                     newPreShipment.ShipmentPickupPrice = (decimal)(PreshipmentPriceDTO.PickUpCharge == null ? 0.0M : PreshipmentPriceDTO.PickUpCharge);
                     _uow.PreShipmentMobile.Add(newPreShipment);
-                    await _uow.CompleteAsync();
-                    await ScanMobileShipment(new ScanDTO
-                    {
-                        WaybillNumber = newPreShipment.Waybill,
-                        ShipmentScanStatus = ShipmentScanStatus.MCRT
-                    });
 
+                    //process payment
                     var transaction = new WalletTransactionDTO
                     {
                         WalletId = wallet.WalletId,
@@ -400,13 +395,28 @@ namespace GIGLS.Services.Implementation.Shipments
                         UserId = newPreShipment.UserId
                     };
 
-                    var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
+                    //update wallet
                     var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
 
-                    //update wallet
+                    //double check in case something is wrong with the server before complete the transaction
+                    if(updatedwallet.Balance < shipmentGrandTotal)
+                    {
+                        preShipmentDTO.IsBalanceSufficient = false;
+                        return preShipmentDTO;
+                    }
+
                     decimal price = updatedwallet.Balance - shipmentGrandTotal;
                     updatedwallet.Balance = price;
+                    var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
+                    
                     await _uow.CompleteAsync();
+
+                    await ScanMobileShipment(new ScanDTO
+                    {
+                        WaybillNumber = newPreShipment.Waybill,
+                        ShipmentScanStatus = ShipmentScanStatus.MCRT
+                    });
+
                     await SendSMSForMobileShipmentCreation(preShipmentDTO);
                     return preShipmentDTO;
                 }
