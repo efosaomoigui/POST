@@ -654,10 +654,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 //undo comment when App is updated
                 if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
                 {
-                    int ShipmentCount = preShipment.PreShipmentItems.Count;
+                    if(preShipment.ReceiverLocation.Latitude != null && preShipment.SenderLocation.Latitude != null)
+                    {
+                        int ShipmentCount = preShipment.PreShipmentItems.Count;
 
-                    amount = await CalculateGeoDetailsBasedonLocation(preShipment);
-                    IndividualPrice = (amount / ShipmentCount);
+                        amount = await CalculateGeoDetailsBasedonLocation(preShipment);
+                        IndividualPrice = (amount / ShipmentCount);
+                    }
                 }
 
                 //Get the customer Type
@@ -791,7 +794,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
                 return returnprice;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
