@@ -738,6 +738,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 CustomerEmail = user.Email,
                 CustomerPhoneNumber = user.PhoneNumber,
+                CustomerCompanyName = user.Organisation,
                 EcommerceEmail = ecommerceEmail.Value
             };
 

@@ -853,12 +853,14 @@ namespace GIGLS.Services.Implementation.Messaging
                 var strArray = new string[]
                 {
                     "Email",
-                    "PhoneNumber"
+                    "PhoneNumber",
+                    "CompanyName"
                 };
                 var emailMessageDTO = (EcommerceMessageDTO)obj;
 
                 strArray[0] = emailMessageDTO.CustomerEmail;
                 strArray[1] = emailMessageDTO.CustomerPhoneNumber;
+                strArray[2] = emailMessageDTO.CustomerCompanyName;
 
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
                 messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
