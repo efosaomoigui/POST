@@ -3021,30 +3021,24 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     if (user.SystemUserRole == "Dispatch Rider")
                     {
-                        partnerDTO.PartnerType = PartnerType.InternalDeliveryPartner;
-                        partnerDTO.PartnerName = user.FirstName + "" + user.LastName;
-                        partnerDTO.PartnerCode = user.UserChannelCode;
-                        partnerDTO.FirstName = user.FirstName;
-                        partnerDTO.LastName = user.LastName;
-                        partnerDTO.Email = user.Email;
-                        partnerDTO.PhoneNumber = user.PhoneNumber;
-                        partnerDTO.UserId = user.Id;
+                        partnerDTO.PartnerType = PartnerType.InternalDeliveryPartner;                        
                         partnerDTO.IsActivated = true;
-                        partnerDTO.UserActiveCountryId = user.UserActiveCountryId;
                     }
                     else
                     {
                         partnerDTO.PartnerType = PartnerType.DeliveryPartner;
-                        partnerDTO.PartnerName = user.FirstName + "" + user.LastName;
-                        partnerDTO.PartnerCode = user.UserChannelCode;
-                        partnerDTO.FirstName = user.FirstName;
-                        partnerDTO.LastName = user.LastName;
-                        partnerDTO.Email = user.Email;
-                        partnerDTO.PhoneNumber = user.PhoneNumber;
-                        partnerDTO.UserId = user.Id;
                         partnerDTO.IsActivated = false;
-                        partnerDTO.UserActiveCountryId = user.UserActiveCountryId;
                     }
+
+                    partnerDTO.PartnerName = user.FirstName + "" + user.LastName;
+                    partnerDTO.PartnerCode = user.UserChannelCode;
+                    partnerDTO.FirstName = user.FirstName;
+                    partnerDTO.LastName = user.LastName;
+                    partnerDTO.Email = user.Email;
+                    partnerDTO.PhoneNumber = user.PhoneNumber;
+                    partnerDTO.UserId = user.Id;
+                    partnerDTO.UserActiveCountryId = user.UserActiveCountryId;
+                    partnerDTO.ActivityDate = DateTime.Now;
                     var FinalPartner = Mapper.Map<Partner>(partnerDTO);
                     _uow.Partner.Add(FinalPartner);
                     await _uow.CompleteAsync();
@@ -3069,9 +3063,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 var finalPartner = Mapper.Map<PartnerDTO>(partner);
                 return finalPartner;
             }
-            catch
+            catch(Exception ex)
             {
-                throw new GenericException("An error occurred while trying to create a Partner record(L)."); ;
+                throw new GenericException($"An error occurred while trying to create a Partner record(L).{ex.Message} {ex}"); ;
             }
         }
 
