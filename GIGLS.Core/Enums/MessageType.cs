@@ -45,6 +45,7 @@
         HOUSTON,   //Create Message to handle CRT for Hoston Shipment
         FPEmail, //Message Type for Fleet Partner Login Access
         CEMAIL, // Account creation mail,
-        MCS //Message for Mobile Create Shipment
+        MCS, //Message for Mobile Create Shipment
+        ENM //ECOMMERCE NOTIFICATION  MESSAGE FOR GIGGO CUSTOMER REGISTRATION
     } 
 }

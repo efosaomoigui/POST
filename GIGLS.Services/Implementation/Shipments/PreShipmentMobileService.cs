@@ -141,7 +141,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 SenderPhoneNumber = preShipmentMobile.SenderPhoneNumber
             };
 
-
             await _messageSenderService.SendMessage(MessageType.MCS, EmailSmsType.SMS, smsMessageExtensionDTO);
         }
 

@@ -50,6 +50,7 @@ using System.Text;
 using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.IServices.Fleets;
 using GIGLS.Core.DTO.Fleets;
+using GIGLS.Core.DTO.MessagingLog;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -688,8 +689,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (user.UserChannelType == UserChannelType.Ecommerce)
             {
-                var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
-                throw new GenericException($"{ecommerceEmail.Value}");
+                string message = await SendRegistrationMessage(user);
+                throw new GenericException($"{message}");
             }
 
             if (user.Email != null)
@@ -725,6 +726,26 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             
             return result;
+        }
+
+        //Notify Ecommerce Team for Ecommerce Regstration Attempt 
+        private async Task<string> SendRegistrationMessage(UserDTO user)
+        {
+            var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
+
+            //customer email, customer phone, receiver email
+            EcommerceMessageDTO email = new EcommerceMessageDTO
+            {
+                CustomerEmail = user.Email,
+                CustomerPhoneNumber = user.PhoneNumber,
+                EcommerceEmail = ecommerceEmail.Value
+            };
+
+            await _messageSenderService.SendGenericEmailMessage(MessageType.ENM, email);
+
+            //4. return registration message to the customer
+            var message = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.RegistrationMessage, 1);
+            return message.Value;
         }
 
         public async Task<UserDTO> GetCustomerCountryUsingPhoneCode(UserDTO userDTO)
