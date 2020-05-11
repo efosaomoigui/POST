@@ -149,7 +149,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
         private async Task SendSMSForShipmentDeliveryNotification(PreShipmentMobileDTO preShipmentMobile)
         {
-            var stationList = ConfigurationManager.AppSettings["stationDelayList"];
+            string stationList = ConfigurationManager.AppSettings["stationDelayList"];
 
             //get station list from web config
             int[] delayDeliveryStation = stationList.Split(',').Select(int.Parse).ToArray();
@@ -167,7 +167,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     StationName = station.StationName
                 };
 
-                await _messageSenderService.SendMessage(MessageType.DELAYMESSAGE, EmailSmsType.SMS, smsMessageExtensionDTO);
+                await _messageSenderService.SendMessage(MessageType.DLD, EmailSmsType.SMS, smsMessageExtensionDTO);
             }
         }
 
