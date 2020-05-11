@@ -46,6 +46,7 @@
         FPEmail, //Message Type for Fleet Partner Login Access
         CEMAIL, // Account creation mail,
         MCS, //Message for Mobile Create Shipment
-        ENM //ECOMMERCE NOTIFICATION  MESSAGE FOR GIGGO CUSTOMER REGISTRATION
+        ENM, //ECOMMERCE NOTIFICATION  MESSAGE FOR GIGGO CUSTOMER REGISTRATION
+        DELAYMESSAGE //Notification message if there will be delay in delivery time
     } 
 }

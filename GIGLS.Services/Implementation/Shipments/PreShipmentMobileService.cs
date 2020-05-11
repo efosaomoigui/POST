@@ -31,6 +31,8 @@ using VehicleType = GIGLS.Core.Domain.VehicleType;
 using Hangfire;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.DTO.Utility;
+using Audit.Core;
+using System.Configuration;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -142,6 +144,31 @@ namespace GIGLS.Services.Implementation.Shipments
             };
 
             await _messageSenderService.SendMessage(MessageType.MCS, EmailSmsType.SMS, smsMessageExtensionDTO);
+            await SendSMSForShipmentDeliveryNotification(preShipmentMobile);
+        }
+
+        private async Task SendSMSForShipmentDeliveryNotification(PreShipmentMobileDTO preShipmentMobile)
+        {
+            var stationList = ConfigurationManager.AppSettings["stationDelayList"];
+
+            //get station list from web config
+            int[] delayDeliveryStation = stationList.Split(',').Select(int.Parse).ToArray();
+
+            //send notification message for delay shipment
+            if (delayDeliveryStation.Contains(preShipmentMobile.ReceiverStationId))
+            {
+                var station = await _uow.Station.GetAsync(x => x.StationId == preShipmentMobile.ReceiverStationId);
+
+                var smsMessageExtensionDTO = new ShipmentDeliveryDelayMessageDTO()
+                {
+                    SenderName = preShipmentMobile.SenderName,
+                    WaybillNumber = preShipmentMobile.Waybill,
+                    SenderPhoneNumber = preShipmentMobile.SenderPhoneNumber,
+                    StationName = station.StationName
+                };
+
+                await _messageSenderService.SendMessage(MessageType.DELAYMESSAGE, EmailSmsType.SMS, smsMessageExtensionDTO);
+            }
         }
 
         //Multiple Shipment New Flow NEW

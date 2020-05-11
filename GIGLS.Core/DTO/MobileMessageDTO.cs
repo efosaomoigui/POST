@@ -25,4 +25,9 @@ namespace GIGLS.Core.DTO
         public SMSSenderPlatform SMSSenderPlatform { get; set; }
 
     }
+
+    public class ShipmentDeliveryDelayMessageDTO : MobileShipmentCreationMessageDTO
+    {
+        public string StationName { get; set; }
+    }
 }
