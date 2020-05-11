@@ -524,15 +524,10 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
 
                 //C. populate the message subject
-                messageDTO.Subject =
-                    string.Format(messageDTO.Subject, strArray);
-
+                messageDTO.Subject =  string.Format(messageDTO.Subject, strArray);
 
                 //populate the message template
-                messageDTO.FinalBody =
-                    string.Format(messageDTO.Body, strArray);
-
-
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
                 messageDTO.To = mobileShipmentCreationMessage.SenderPhoneNumber;
 
                 //Set default country as Nigeria for GIG Go APP

@@ -3043,23 +3043,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.Partner.Add(FinalPartner);
                     await _uow.CompleteAsync();
 
+                    partnerDTO.PartnerId = FinalPartner.PartnerId;
                     return partnerDTO;
                 }
-                //else
-                //{
-                //    if (user.SystemUserRole == "Dispatch Rider")
-                //    {
-                //        partner.PartnerType = PartnerType.InternalDeliveryPartner;
-                //        partner.IsActivated = true;
-                //        partner.UserActiveCountryId = user.UserActiveCountryId;
-                //    }
-                //    else
-                //    {
-                //        partner.PartnerType = PartnerType.DeliveryPartner;
-                //        partner.UserActiveCountryId = user.UserActiveCountryId;
-                //    }
-                //}
-                //var latestpartner = await _uow.Partner.GetAsync(s => s.PartnerCode == CustomerCode);
                 var finalPartner = Mapper.Map<PartnerDTO>(partner);
                 return finalPartner;
             }
