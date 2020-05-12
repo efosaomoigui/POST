@@ -12,5 +12,6 @@ namespace GIGLS.Core.IServices
     public interface IGiglgoStationService: IServiceDependencyMarker
     {
         Task<List<GiglgoStationDTO>> GetGoStations();
+        Task<GiglgoStationDTO> GetGoStationsById(int stationId);
     }
 }

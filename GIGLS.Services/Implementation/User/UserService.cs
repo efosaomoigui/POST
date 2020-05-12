@@ -260,18 +260,10 @@ namespace GIGLS.Services.Implementation.User
 
             return await _unitOfWork.User.UpdateUser(userid, user);
 
-            //var userdomain = Mapper.Map<GIGL.GIGLS.Core.Domain.User>(userDto);
-            //userdomain.Id = userid;
-            //return await _unitOfWork.User.UpdateUser(userid, userdomain);
-
         }
 
         public async Task<IdentityResult> ActivateUser(string userid, bool val)
         {
-            //Code to add existing users to roles and reset password
-            //await CodeToAddUsersToAspNetUserRolesTable();
-            //await CodeToAddUsersToAspNetUserRolesTable_LOCATION();
-
             var user = await _unitOfWork.User.GetUserById(userid);
 
             if (user == null)
@@ -287,21 +279,18 @@ namespace GIGLS.Services.Implementation.User
         public Task<AppRole> GetRoleById(string roleId)
         {
             var role = _unitOfWork.User.GetRoleById(roleId);
-            //var role = Mapper.Map<RoleDTO>(result);
             return role;
         }
 
         public Task<AppRole> GetRoleByName(string roleName)
         {
             var role = _unitOfWork.User.GetRoleById(roleName);
-            //var role = Mapper.Map<RoleDTO>(result);
             return role;
         }
 
         public Task<IEnumerable<AppRole>> GetRoles()
         {
             var role = _unitOfWork.User.GetRoles();
-            //var role = Mapper.Map<RoleDTO>(result);
             return role;
         }
 
@@ -672,10 +661,8 @@ namespace GIGLS.Services.Implementation.User
             // get current user
             try
             {
-                var currentUser = GetUserById(currentUserId).Result;
-                var userClaims = GetClaimsAsync(currentUserId).Result;
-
-                //currentUser.ServiceCentres
+                var currentUser = await GetUserById(currentUserId);
+                var userClaims = await GetClaimsAsync(currentUserId);
 
                 string[] claimValue = null;
                 foreach (var claim in userClaims)
@@ -696,13 +683,13 @@ namespace GIGLS.Services.Implementation.User
                 }
                 else if (claimValue[0] == "Region")
                 {
-                    var regionId = int.Parse(claimValue[1]);
+                    int regionId = int.Parse(claimValue[1]);
                     var regionServiceCentreMappingDTOList = await _regionServiceCentreMappingService.GetServiceCentresInRegion(regionId);
                     serviceCenterIds = regionServiceCentreMappingDTOList.Select(s => s.ServiceCentre.ServiceCentreId).ToArray();
                 }
                 else if (claimValue[0] == "Station")
                 {
-                    var stationId = int.Parse(claimValue[1]);
+                    int stationId = int.Parse(claimValue[1]);
                     var serviceCentres = await _serviceCentreService.GetServiceCentres();
                     serviceCenterIds = serviceCentres.Where(s => s.StationId == stationId).Select(s => s.ServiceCentreId).ToArray();
                 }
@@ -720,9 +707,9 @@ namespace GIGLS.Services.Implementation.User
                     throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
 
             return serviceCenterIds;
@@ -735,9 +722,9 @@ namespace GIGLS.Services.Implementation.User
             // get current user
             try
             {
-                var currentUserId = GetCurrentUserId().Result;
-                var currentUser = GetUserById(currentUserId).Result;
-                var userClaims = GetClaimsAsync(currentUserId).Result;
+                var currentUserId = await GetCurrentUserId();
+                var currentUser = await GetUserById(currentUserId);
+                var userClaims = await GetClaimsAsync(currentUserId);
 
                 //currentUser.ServiceCentres
 
@@ -784,9 +771,9 @@ namespace GIGLS.Services.Implementation.User
                     throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
 
             return serviceCenterIds;
@@ -810,7 +797,7 @@ namespace GIGLS.Services.Implementation.User
         {
             var user = await _unitOfWork.User.GetUserById(userid);
 
-            if (user == null || password == null || password == "")
+            if (user == null || string.IsNullOrEmpty(password))
             {
                 throw new GenericException("User does not exist!");
             }
@@ -824,7 +811,7 @@ namespace GIGLS.Services.Implementation.User
         public async Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword)
         {
             var user = await _unitOfWork.User.GetUserById(userid);
-            if (user == null || newPassword == null || newPassword == "")
+            if (user == null || string.IsNullOrEmpty(newPassword))
             {
                 throw new GenericException("Operation could not complete, kindly supply valid credential");
             }
@@ -843,7 +830,7 @@ namespace GIGLS.Services.Implementation.User
         public async Task<IdentityResult> ResetExpiredPassword(string email, string currentPassword, string newPassword)
         {
             var user = await _unitOfWork.User.GetUserByEmail(email);
-            if (user == null || newPassword == null || newPassword == "")
+            if (user == null || string.IsNullOrEmpty(newPassword))
             {
                 throw new GenericException("Operation could not complete, kindly supply valid credential");
             }

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System;
 using GIGLS.Core.IServices.User;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Services.Implementation.ServiceCentres
 {
@@ -182,6 +183,11 @@ namespace GIGLS.Services.Implementation.ServiceCentres
         public async Task<List<StationDTO>> GetActiveGIGGoStations()
         {
             return await _uow.Station.GetActiveGIGGoStations();
+        }
+
+        public async Task<GiglgoStationDTO> GetGIGGoStationById(int stationId)
+        {
+            return await _uow.GiglgoStation.GetGoStationsById(stationId);
         }
     }
 }

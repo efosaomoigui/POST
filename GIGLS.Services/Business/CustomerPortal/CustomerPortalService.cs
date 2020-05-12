@@ -653,7 +653,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             if(user == null)
                 throw new GenericException("NULL INPUT");
 
-
             var result = new SignResponseDTO();
 
             if (user.RequiresCod == null)
@@ -666,11 +665,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 user.IsUniqueInstalled = false;
             }
 
-            //if (user.IsEligible == null)
-            //{
-            //    user.IsEligible = false;
-            //}
-            //enable eligibility
+            //automatic enable Ecommerce eligibility
             user.IsEligible = true;
             
             if (user.Referrercode != null)
@@ -690,13 +685,13 @@ namespace GIGLS.Services.Business.CustomerPortal
                     throw new GenericException($"Kindly supply your company name ");
                 }
             }
-            
-            //if (user.UserChannelType == UserChannelType.Ecommerce)
-            //{
-            //    var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
-            //    throw new GenericException($"{ecommerceEmail.Value}");
-            //}
-            
+
+            if (user.UserChannelType == UserChannelType.Ecommerce)
+            {
+                var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
+                throw new GenericException($"{ecommerceEmail.Value}");
+            }
+
             if (user.Email != null)
             {
                 user.Email = user.Email.Trim().ToLower();
@@ -1648,8 +1643,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                         PictureUrl = user.PictureUrl,
                         IsRegisteredFromMobile = true,
                         UserActiveCountryId = user.UserActiveCountryId
-                      
-                        //added this to pass channelcode 
                     };
                     
                     //update : we need to check if the customer exists before adding 
@@ -2132,12 +2125,12 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
             {
-                dropOffs = dropOffs.OrderByDescending(s => s.DateCreated).Take(20);
+                //Last 20 days
+                startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-20);
+                endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
             }
-            else
-            {
-                dropOffs = dropOffs.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate).OrderByDescending(s => s.DateCreated);
-            }
+
+            dropOffs = dropOffs.Where(x => x.DateCreated >= startDate && x.DateCreated < endDate).OrderByDescending(s => s.DateCreated);
 
             var dropOffsDTO = Mapper.Map<List<PreShipmentDTO>>(dropOffs.ToList());
             return dropOffsDTO;

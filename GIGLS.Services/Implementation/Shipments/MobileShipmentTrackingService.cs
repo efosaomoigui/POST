@@ -40,6 +40,15 @@ namespace GIGLS.Services.Implementation.Shipments
                 //1. call agility core tracking
                 var shipmentTracking = await _shipmentTrackService.TrackShipmentForMobile(waybill);
 
+                //remove missing and not found status from customer history
+                if (shipmentTracking.Any())
+                {
+                    string smim = ShipmentScanStatus.SMIM.ToString();
+                    string fms = ShipmentScanStatus.FMS.ToString();
+
+                    shipmentTracking = shipmentTracking.Where(x => !(x.Status == smim || x.Status == fms));
+                }
+
                 //2. call mobile tracking
                 var MobileshipmentTracking = await _uow.MobileShipmentTracking.GetMobileShipmentTrackingsAsync(waybill);
 

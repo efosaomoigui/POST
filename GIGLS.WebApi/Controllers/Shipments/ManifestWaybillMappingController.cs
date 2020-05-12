@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.WebApi.Filters;
 using GIGLS.Core.IServices.Business;
 using GIGLS.CORE.DTO.Report;
+using GIGLS.CORE.DTO.Shipments;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -280,15 +281,16 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("unmappedwaybillforpickupmanifest/{stationId:int}")]
-        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetUnMappedWaybillsForPickupManifest(int stationId)
+        public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetUnMappedWaybillsForPickupManifest([FromUri]FilterOptionsDto filterOptionsDto, int stationId)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var unMappedWaybill = await _service.GetUnMappedWaybillsForPickupManifest(stationId);
+                var unMappedWaybill = await _service.GetUnMappedWaybillsForPickupManifest(filterOptionsDto,stationId);
 
                 return new ServiceResponse<List<PreShipmentMobileDTO>>
                 {
-                    Object = unMappedWaybill
+                    Object = unMappedWaybill.Item1,
+                    Total = unMappedWaybill.Item2
                 };
             });
         }

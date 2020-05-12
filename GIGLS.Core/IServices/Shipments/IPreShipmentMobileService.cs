@@ -17,6 +17,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<object> AddPreShipmentMobile(PreShipmentMobileDTO preShipment);
         Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment);
         Task<List<PreShipmentMobileDTO>> GetShipments(BaseFilterCriteria filterOptionsDto);
+        Task<PreShipmentMobileDTO> GetShipmentByWaybill(string waybill);
         Task<PreShipmentMobileDTO> GetPreShipmentDetail(string waybill);
         Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser();
         Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();

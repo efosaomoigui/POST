@@ -108,34 +108,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
 
         public async Task<IdentityResult> UpdateUser(string userId, GIGL.GIGLS.Core.Domain.User user)
         {
-
-            //var updateuser = await _userManager.FindByIdAsync(userId);
-
-            //updateuser.Department = user.Department;
-            //updateuser.Designation = user.Designation;
-            //updateuser.Email = user.Email;
-            //updateuser.FirstName = user.FirstName;
-            //updateuser.LastName = user.LastName;
-            //user.Gender = user.Gender;
-            //updateuser.Organisation = user.Organisation;
-            //updateuser.IsActive = user.IsActive;
-
             return await _userManager.UpdateAsync(user);
         }
 
         public async Task<IdentityResult> RegisterUser(GIGL.GIGLS.Core.Domain.User user, string password)
         {
-            //var user = new GIGL.GIGLS.Core.Domain.User()
-            //{
-
-            //    FirstName = userdto.FirstName,
-            //    LastName = userdto.LastName,
-            //    //Gender = userdto.Gender,
-            //    Email = userdto.Email,
-            //    DateCreated = DateTime.Now.Date,
-            //    DateModified = DateTime.Now.Date,
-            //    UserName = userdto.Username,
-            //};
             try
             {
                 return await _userManager.CreateAsync(user, password);
@@ -179,16 +156,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             var user = await _userManager.FindByIdAsync(userId);
             user.IsDeleted = true;
             return await _userManager.UpdateAsync(user);
-
-            //return await _userManager.DeleteAsync(user);
         }
 
         public async Task<IdentityResult> RemoveRole(string roleId)
         {
-            //var rolResult = await _roleManager.FindByIdAsync(roleId);
-            //var result = _roleManager.DeleteAsync(rolResult);
-            //return await result;
-
             var rolResult = await _roleManager.FindByIdAsync(roleId);
             rolResult.IsDeleted = true;
             rolResult.DateModified = DateTime.Now.Date;
@@ -206,7 +177,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
         //Add a user to a role
         public async Task<IdentityResult> AddToRoleAsync(string userid, string name)
         {
-            //var user = await this.GetUserById(userid);
             var Result = await _userManager.AddToRoleAsync(userid, name);
             return Result;
         }
@@ -329,7 +299,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             x.UserChannelCode.Equals(emailPhoneCode) || x.PhoneNumber.Contains(emailPhoneCode)) && (x.UserChannelType == UserChannelType.Employee)).FirstOrDefault();
             return Task.FromResult(user);
         }
-
 
         public async Task<GIGL.GIGLS.Core.Domain.User> ActivateUserByEmail(string email, bool isActive)
         {

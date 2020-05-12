@@ -44,13 +44,23 @@ namespace GIGLS.Services.Implementation.Customers
                 // handle Company customers
                 if (CustomerType.Company.Equals(customerDTO.CustomerType))
                 {
-                    var companyId = 0;
-                    var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.ToLower() 
-                    || c.PhoneNumber == customerDTO.PhoneNumber || c.Email == customerDTO.Email || c.CustomerCode == customerDTO.CustomerCode);
+                    int companyId = 0;
 
-                    foreach (var item in CompanyByName)
+                    var companyByCode = await _uow.Company.GetAsync(x => x.CustomerCode == customerDTO.CustomerCode);
+
+                    if(companyByCode == null)
                     {
-                        companyId = item.CompanyId;
+                        var CompanyByName = await _uow.Company.FindAsync(c => c.Name.ToLower() == customerDTO.Name.ToLower()
+                        || c.PhoneNumber == customerDTO.PhoneNumber || c.Email == customerDTO.Email || c.CustomerCode == customerDTO.CustomerCode);
+
+                        foreach (var item in CompanyByName)
+                        {
+                            companyId = item.CompanyId;
+                        }
+                    }
+                    else
+                    {
+                        companyId = companyByCode.CompanyId;
                     }
 
                     if (companyId > 0)
@@ -77,7 +87,7 @@ namespace GIGLS.Services.Implementation.Customers
                 // handle IndividualCustomers
                 if (CustomerType.IndividualCustomer.Equals(customerDTO.CustomerType))
                 {
-                    var individualCustomerId = 0;
+                    int individualCustomerId = 0;
                     var individualCustomerByPhone = await _uow.IndividualCustomer.GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber || c.CustomerCode == customerDTO.CustomerCode);
 
                     if(individualCustomerByPhone != null)
