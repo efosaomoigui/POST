@@ -48,7 +48,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"Shipment with waybill {waybill} has been collected, it can not be cancel");
             }
 
-
             var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
 
             if (shipment == null)
@@ -59,7 +58,7 @@ namespace GIGLS.Services.Implementation.Shipments
             //shipment should only be cancel by regional manager or admin
             var user = await _userService.GetCurrentUserId();
 
-            //Allow Chairman, Director and Administrator to cancelled waybill
+            //Allow Chairman, Director or Administrator to cancelled waybill
             bool hasAdminRole = await _userService.IsUserHasAdminRole(user);
 
             if (hasAdminRole)

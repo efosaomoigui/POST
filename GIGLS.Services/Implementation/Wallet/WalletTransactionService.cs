@@ -248,7 +248,6 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             //get the customer info
             var country = new CountryDTO();
-            //var customerDTO = await _customerService.GetCustomer(wallet.CustomerId, wallet.CustomerType);
             var userid = await _userService.GetUserByChannelCode(wallet.CustomerCode);
             if (userid != null)
             {
@@ -262,7 +261,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 }
             }
             var walletTransactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == wallet.WalletId);
-            if (walletTransactions.Count() < 1)
+            if (!walletTransactions.Any())
             {
                 return new WalletTransactionSummaryDTO
                 {

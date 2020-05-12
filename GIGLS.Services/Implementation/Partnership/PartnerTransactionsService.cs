@@ -318,6 +318,7 @@ namespace GIGLS.Services.Implementation.Partnership
 
                 if (preshipment.shipmentstatus != delivered && preshipment.shipmentstatus != onwardProcessing)
                 {
+                    preshipment.IsDelivered = true;
                     ShipmentScanStatus status = ShipmentScanStatus.MCRT;
 
                     if (preshipment.ZoneMapping == 1)

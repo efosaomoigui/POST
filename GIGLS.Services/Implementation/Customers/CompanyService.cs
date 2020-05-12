@@ -65,6 +65,9 @@ namespace GIGLS.Services.Implementation.Customers
                 var newCompany = Mapper.Map<Company>(company);
                 newCompany.CompanyStatus = CompanyStatus.Active;
 
+                //Enable Eligibility so that the customer can create shipment on GIGGO APP
+                newCompany.IsEligible = true;
+
                 //get the CompanyType
                 var companyType = "";
 
