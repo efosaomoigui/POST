@@ -2092,8 +2092,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                 existingPreShipment.ReceiverCity = preShipmentDTO.ReceiverCity;
                 existingPreShipment.ReceiverName = preShipmentDTO.ReceiverName;
                 existingPreShipment.ReceiverPhoneNumber = preShipmentDTO.ReceiverPhoneNumber;
-                existingPreShipment.ReceiverState = preShipmentDTO.ReceiverState;
                 existingPreShipment.PickupOptions = preShipmentDTO.PickupOptions;
+                existingPreShipment.SenderCity = existingPreShipment.SenderCity;
+                existingPreShipment.Value = existingPreShipment.Value;
 
                 //update items
                 foreach (var preShipmentItemDTO in preShipmentDTO.PreShipmentItems)
@@ -2106,6 +2107,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         preshipment.Quantity = preShipmentItemDTO.Quantity;
                         preshipment.Weight = (double)preShipmentItemDTO.Weight;
                         preshipment.ShipmentType = preShipmentItemDTO.ShipmentType;
+                        preshipment.SpecialPackageId = preShipmentItemDTO.SpecialPackageId;
                         existingPreShipment.ApproximateItemsWeight += preshipment.Weight;
                     }
                 }
