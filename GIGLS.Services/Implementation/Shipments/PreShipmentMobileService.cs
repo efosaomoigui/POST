@@ -219,12 +219,12 @@ namespace GIGLS.Services.Implementation.Shipments
             var listOfPreShipment = new List<PreShipmentMobileDTO>();
 
             //check for sender information for validation
-            if (newPreShipment.VehicleType == null || newPreShipment.VehicleType == "")
+            if (string.IsNullOrEmpty(newPreShipment.VehicleType))
             {
                 throw new GenericException("Please select a vehicle type");
             }
 
-            if (newPreShipment.Receivers.Count() == 0)
+            if (!newPreShipment.Receivers.Any())
             {
                 throw new GenericException("No Receiver was added");
             }
@@ -233,6 +233,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
             int numOfItems = 0;
             var maxNumOfShipment = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GiglgoMaxNumShipment, newPreShipment.CountryId);
+            if(maxNumOfShipment == null)
+            {
+                throw new GenericException("Maximum Number of Shipment on Global Property is not set");
+            }
+
             int maximumShipmentItemsAllow = Convert.ToInt32(maxNumOfShipment.Value);
 
             foreach (var item in newPreShipment.Receivers)
@@ -482,7 +487,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipmentMobileDTO.IsEligible = false;
                     preShipmentMobileDTO.IsCodNeeded = customer.isCodNeeded;
                     preShipmentMobileDTO.CurrencySymbol = Country.CurrencySymbol;
-                    preShipmentMobileDTO.CurrentWalletAmount = Convert.ToDecimal(customer.WalletAmount);
+                    preShipmentMobileDTO.CurrentWalletAmount = (decimal) customer.WalletAmount;
                 }
             }
 
@@ -550,7 +555,7 @@ namespace GIGLS.Services.Implementation.Shipments
         private async Task<MultipleShipmentOutput> GenerateWaybill(List<PreShipmentMobileDTO> preShipmentDTO, decimal pickupValue)
         {
             var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
-            var numberOfReceiver = preShipmentDTO.Count();
+            var numberOfReceiver = preShipmentDTO.Count;
             var individualPickupPrice = pickupValue / numberOfReceiver;
 
             HashSet<MultipleShipmentResult> waybillList = new HashSet<MultipleShipmentResult>(new MultipleShipmentResultComparer());
@@ -1773,7 +1778,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     List<string> waybillList = waybillHashSet.ToList();
 
-                    var allpreshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill)).ToList();
+                    //var allpreshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill)).ToList();
+                    var allpreshipmentmobile = await _uow.PreShipmentMobile.FindAsync(x => waybillList.Contains(x.Waybill), "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
+
+                    //var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
 
                     //map the result 
                     List<PreShipmentMobileDTO>  newPreShipmentDTO = Mapper.Map<List<PreShipmentMobileDTO>>(allpreshipmentmobile);
@@ -1799,27 +1807,49 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString() && allpreshipmentmobile.All(x => x.shipmentstatus == "Shipment created" || x.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString()))
                     {
-                        allpreshipmentmobile.ForEach(x => x.shipmentstatus = "Assigned for Pickup");
+                        //update the shipment status
+                        foreach (var item in allpreshipmentmobile)
+                        {
+                            item.shipmentstatus = "Assigned for Pickup";
+                        }
 
-                        if (pickuprequest.ServiceCentreId != null)
+                        //if some shipment going outside the state, update the location of those shipment
+                        if (!string.IsNullOrEmpty(pickuprequest.ServiceCentreId))
                         {
                             var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickuprequest.ServiceCentreId);
+
                             Location location = new Location
                             {
                                 Latitude = DestinationServiceCentreId.Latitude,
                                 Longitude = DestinationServiceCentreId.Longitude
                             };
 
-                            allpreshipmentmobile.ForEach(x => x.serviceCentreLocation = location);
+                            //update only the shipment going outside the state
+                            foreach(var item in allpreshipmentmobile)
+                            {
+                                if(item.ZoneMapping != 1)
+                                {
+                                    item.serviceCentreLocation = location;
+                                }
+                            }
 
                             //update the return data
                             LocationDTO locationDTO = Mapper.Map<LocationDTO>(location);
-                            newPreShipmentDTO.ForEach(x => x.ReceiverAddress = DestinationServiceCentreId.Address);
-                            newPreShipmentDTO.ForEach(x => x.ReceiverLocation.Latitude = DestinationServiceCentreId.Latitude);
-                            newPreShipmentDTO.ForEach(x => x.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude);
-                            newPreShipmentDTO.ForEach(x => x.serviceCentreLocation = locationDTO);
-                            newPreShipmentDTO.ForEach(x => x.GroupCodeNumber = pickuprequest.GroupCodeNumber);
+
+                            //update the location for return data
+                            foreach (var item in newPreShipmentDTO)
+                            {
+                                if(item.ZoneMapping != 1)
+                                {
+                                    item.ReceiverAddress = DestinationServiceCentreId.Address;
+                                    item.ReceiverLocation.Latitude = DestinationServiceCentreId.Latitude;
+                                    item.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude;
+                                    item.serviceCentreLocation = locationDTO;
+                                }
+                            }
                         }
+
+                        newPreShipmentDTO.ForEach(x => x.GroupCodeNumber = pickuprequest.GroupCodeNumber);
 
                         await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequestsMultipleShipments(pickuprequest, waybillList);
 
