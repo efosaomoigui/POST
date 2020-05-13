@@ -411,8 +411,15 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipmentDTO.IsBalanceSufficient = true;
                     preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
                     newPreShipment.ShipmentPickupPrice = (decimal)(PreshipmentPriceDTO.PickUpCharge == null ? 0.0M : PreshipmentPriceDTO.PickUpCharge);
-                    _uow.PreShipmentMobile.Add(newPreShipment);
 
+
+                    //assuming I get a customer that we want to do bonus for
+                    //set the shipment amount to zero
+                    //add the grand total to bonus
+                    //set grand total to zero
+                    //how will customer know we don't collect money from this shipment ???
+
+                    _uow.PreShipmentMobile.Add(newPreShipment);
                     //process payment
                     var transaction = new WalletTransactionDTO
                     {
@@ -2048,6 +2055,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
 
                         await _uow.CompleteAsync();
+                        result = true;
                     }
                 }
                 return result;
@@ -2098,6 +2106,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Dispute.ToString();
                         await _uow.CompleteAsync();
                     }
+                    result = true;
                 }
                 return result;
             }
