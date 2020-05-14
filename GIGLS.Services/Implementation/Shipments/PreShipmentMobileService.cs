@@ -101,7 +101,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
                 preShipment.ZoneMapping = zoneid.ZoneId;
                 var newPreShipment = await CreatePreShipment(preShipment);
-                await _uow.CompleteAsync();
+                //await _uow.CompleteAsync();
                 bool IsBalanceSufficient = true;
                 string message = "Shipment created successfully";
                 if (newPreShipment.IsBalanceSufficient == false)
@@ -144,7 +144,7 @@ namespace GIGLS.Services.Implementation.Shipments
             };
 
             await _messageSenderService.SendMessage(MessageType.MCS, EmailSmsType.SMS, smsMessageExtensionDTO);
-            await SendSMSForShipmentDeliveryNotification(preShipmentMobile);
+            //await SendSMSForShipmentDeliveryNotification(preShipmentMobile);
         }
 
         private async Task SendSMSForShipmentDeliveryNotification(PreShipmentMobileDTO preShipmentMobile)
@@ -411,15 +411,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipmentDTO.IsBalanceSufficient = true;
                     preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
                     newPreShipment.ShipmentPickupPrice = (decimal)(PreshipmentPriceDTO.PickUpCharge == null ? 0.0M : PreshipmentPriceDTO.PickUpCharge);
-
-
-                    //assuming I get a customer that we want to do bonus for
-                    //set the shipment amount to zero
-                    //add the grand total to bonus
-                    //set grand total to zero
-                    //how will customer know we don't collect money from this shipment ???
-
                     _uow.PreShipmentMobile.Add(newPreShipment);
+
                     //process payment
                     var transaction = new WalletTransactionDTO
                     {
