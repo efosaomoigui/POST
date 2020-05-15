@@ -14,4 +14,12 @@ namespace GIGLS.Core.DTO.MessagingLog
         public string ResultStatus { get; set; }
         public string ResultDescription { get; set; }
     }
+
+    public class EcommerceMessageDTO
+    {
+        public string CustomerEmail { get; set; }
+        public string CustomerPhoneNumber { get; set; }
+        public string CustomerCompanyName { get; set; }
+        public string EcommerceEmail { get; set; }
+    }
 }
