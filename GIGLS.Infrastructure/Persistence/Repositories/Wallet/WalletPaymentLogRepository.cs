@@ -10,6 +10,8 @@ using AutoMapper;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Core.View;
+using GIGLS.CORE.DTO.Report;
+using GIGLS.Infrastructure;
 
 namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 {
@@ -160,6 +162,41 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
         {
             var walletPaymentLogViews = _GIGLSContextForView.WalletPaymentLogView.AsQueryable();
             return walletPaymentLogViews;
+        }
+
+        public Task<List<WalletPaymentLogView>> GetFromWalletPaymentLogView(DateFilterCriteria filterCriteria)
+        {
+            //get startDate and endDate
+            var queryDate = filterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var walletPaymentLogViews = _GIGLSContextForView.WalletPaymentLogView.AsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate
+                                    && s.UserActiveCountryId == filterCriteria.CountryId);
+
+            return Task.FromResult(walletPaymentLogViews.OrderByDescending(x => x.DateCreated).ToList());
+            
+        }
+
+        public Task<List<WalletPaymentLogView>> GetFromWalletPaymentLogViewBySearchParameter(string searchItem)
+        {
+            var walletPaymentLogViews = _GIGLSContextForView.WalletPaymentLogView.AsQueryable();
+
+            if (searchItem != null)
+            {
+                searchItem = searchItem.ToLower();
+                walletPaymentLogViews = walletPaymentLogViews.Where(x => x.PhoneNumber == searchItem || x.Reference == searchItem
+                                        || x.CustomerCode == searchItem || x.Email == searchItem);
+
+            }
+            else
+            {
+                throw new GenericException("Kindly enter a search parameter");
+            }
+
+
+            return Task.FromResult(walletPaymentLogViews.OrderByDescending(x => x.DateCreated).ToList());
+
         }
     }
 

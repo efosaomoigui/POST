@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.View;
+using GIGLS.CORE.DTO.Report;
 using GIGLS.CORE.DTO.Shipments;
 using System;
 using System.Collections.Generic;
@@ -17,5 +18,7 @@ namespace GIGLS.Core.IServices.Wallet
         Task PaystackPaymentService(WalletPaymentLogDTO WalletPaymentInfo);
         Tuple<Task<List<WalletPaymentLogView>>, int> GetWalletPaymentLogs(FilterOptionsDto filterOptionsDto);
         Task AddWalletPaymentLogMobile(WalletPaymentLogDTO walletPaymentLogDto);
+        Task<List<WalletPaymentLogView>> GetWalletPaymentLogs(DateFilterCriteria baseFilter);
+        Task<List<WalletPaymentLogView>> GetFromWalletPaymentLogViewBySearchParameter(string searchItem);
     }
 }
