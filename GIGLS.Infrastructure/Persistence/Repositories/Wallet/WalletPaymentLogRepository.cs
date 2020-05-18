@@ -172,10 +172,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
             var endDate = queryDate.Item2;
 
             var walletPaymentLogViews = _GIGLSContextForView.WalletPaymentLogView.AsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate
-                                    && s.UserActiveCountryId == filterCriteria.CountryId);
+                                    && s.UserActiveCountryId == filterCriteria.CountryId).ToList();
 
-            return Task.FromResult(walletPaymentLogViews.OrderByDescending(x => x.DateCreated).ToList());
-            
+            return Task.FromResult(walletPaymentLogViews.OrderByDescending(x => x.DateCreated).ToList());            
         }
 
         public Task<List<WalletPaymentLogView>> GetFromWalletPaymentLogViewBySearchParameter(string searchItem)
@@ -187,17 +186,13 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                 searchItem = searchItem.ToLower();
                 walletPaymentLogViews = walletPaymentLogViews.Where(x => x.PhoneNumber == searchItem || x.Reference == searchItem
                                         || x.CustomerCode == searchItem || x.Email == searchItem);
-
             }
             else
             {
                 throw new GenericException("Kindly enter a search parameter");
             }
 
-
             return Task.FromResult(walletPaymentLogViews.OrderByDescending(x => x.DateCreated).ToList());
-
         }
     }
-
 }
