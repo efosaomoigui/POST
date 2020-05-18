@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.Shipments;
+﻿using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Shipments;
 using GIGLS.CORE.DTO.Report;
@@ -114,6 +115,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
+
+        [HttpGet]
+        [Route("giggopresentdayshipments")]
+        public async Task<IServiceResponse<List<LocationDTO>>> GetOnlyTodayShipments()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _preShipmentMobileService.GetOnlyTodayShipments();
+                return new ServiceResponse<List<LocationDTO>>
+                {
+                    Object = preshipment
+                };
+            });
+        }
+
 
     }
 }
