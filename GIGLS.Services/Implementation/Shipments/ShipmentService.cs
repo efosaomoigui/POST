@@ -330,6 +330,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Pre Shipment Information does not exist");
                 }
+                if (shipment.IsProcessed)
+                {
+                    throw new GenericException($" {code} has been processed already");
+                }
 
                 var shipmentDto = Mapper.Map<PreShipmentDTO>(shipment);
 
@@ -545,6 +549,18 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                if(shipmentDTO.TempCode != null)
+                {
+                    //check if it has been processed 
+                    var dropoff = await _uow.PreShipment.GetAsync(s => s.TempCode == shipmentDTO.TempCode);
+
+                    if (dropoff.IsProcessed)
+                    {
+                        throw new GenericException($"This drop off {shipmentDTO.TempCode} has already been processed");
+                    }
+                }
+                
+
                 var hashString = await ComputeHash(shipmentDTO);
 
                 var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
@@ -570,7 +586,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                     _uow.ShipmentHash.Add(hasher);
                 }
-
+                                
                 // create the customer, if information does not exist in our record
                 var customerId = await CreateCustomer(shipmentDTO);
 
@@ -584,6 +600,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
+
+                if(shipmentDTO.TempCode != null)
+                {
+                    await UpdateDropOff(newShipment.Waybill, shipmentDTO.TempCode);
+                }
 
                 //scan the shipment for tracking
                 await ScanShipment(new ScanDTO
@@ -695,6 +716,17 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //Update Drop Off
+        private async Task UpdateDropOff (string waybill, string dropOffCode)
+        {
+            var dropOff = await _uow.PreShipment.GetAsync(s => s.TempCode == dropOffCode);
+
+            dropOff.Waybill = waybill;
+            dropOff.IsProcessed = true;
+
+            await _uow.CompleteAsync();
+        }
+
         // Convert an object to a byte array
         private static byte[] ObjectToByteArray(HashSet<ShipmentHashDTO> obj)
         {
@@ -802,6 +834,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
             var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
+
+
 
             shipmentDTO.Waybill = waybill;
 

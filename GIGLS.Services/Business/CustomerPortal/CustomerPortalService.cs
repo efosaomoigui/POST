@@ -1512,9 +1512,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             bool disableShipmentCreation = bool.Parse(isDisable);
 
             if (disableShipmentCreation) {
-                string message = "Pick up service is currently not available due to movement restriction. " +
-                    "This service will be fully restored tomorrow. Thank you for your patience and understanding.";
-
+                string message = ConfigurationManager.AppSettings["DisableShipmentCreationMessage"];
                 throw new GenericException(message);
             }
             return await _preShipmentMobileService.AddPreShipmentMobile(preShipment);
@@ -2092,8 +2090,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                 existingPreShipment.ReceiverCity = preShipmentDTO.ReceiverCity;
                 existingPreShipment.ReceiverName = preShipmentDTO.ReceiverName;
                 existingPreShipment.ReceiverPhoneNumber = preShipmentDTO.ReceiverPhoneNumber;
-                existingPreShipment.ReceiverState = preShipmentDTO.ReceiverState;
                 existingPreShipment.PickupOptions = preShipmentDTO.PickupOptions;
+                existingPreShipment.SenderCity = existingPreShipment.SenderCity;
+                existingPreShipment.Value = existingPreShipment.Value;
 
                 //update items
                 foreach (var preShipmentItemDTO in preShipmentDTO.PreShipmentItems)
@@ -2106,6 +2105,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                         preshipment.Quantity = preShipmentItemDTO.Quantity;
                         preshipment.Weight = (double)preShipmentItemDTO.Weight;
                         preshipment.ShipmentType = preShipmentItemDTO.ShipmentType;
+                        preshipment.SpecialPackageId = preShipmentItemDTO.SpecialPackageId;
                         existingPreShipment.ApproximateItemsWeight += preshipment.Weight;
                     }
                 }

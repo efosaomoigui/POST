@@ -137,5 +137,8 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal CurrencyRatio { get; set; }
 
         public string ShipmentHash { get; set; }
+
+        //Drop Off
+        public string TempCode { get; set; }
     }
 }

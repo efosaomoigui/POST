@@ -30,12 +30,6 @@ namespace GIGL.GIGLS.Core.Domain
         public string SenderUserId { get; set; }
 
         [MaxLength(100)]
-        public string SenderName { get; set; }
-
-        [MaxLength(100)]
-        public string SenderPhoneNumber { get; set; }
-
-        [MaxLength(100)]
         public string SenderCity { get; set; }
         //Receivers Information
 
@@ -51,12 +45,9 @@ namespace GIGL.GIGLS.Core.Domain
         [MaxLength(100)]
         public string ReceiverCity { get; set; }
 
-        [MaxLength(100)]
-        public string ReceiverState { get; set; }
-
-        [MaxLength(100)]
-        public string ReceiverCountry { get; set; }
         public PickupOptions PickupOptions { get; set; }
+
+        public decimal Value { get; set; }
 
         public int DepartureStationId { get; set; }
         public int DestinationStationId { get; set; }
