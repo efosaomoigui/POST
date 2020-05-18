@@ -1512,9 +1512,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             bool disableShipmentCreation = bool.Parse(isDisable);
 
             if (disableShipmentCreation) {
-                string message = "Pick up service is currently not available due to movement restriction. " +
-                    "This service will be fully restored tomorrow. Thank you for your patience and understanding.";
-
+                string message = ConfigurationManager.AppSettings["DisableShipmentCreationMessage"];
                 throw new GenericException(message);
             }
             return await _preShipmentMobileService.AddPreShipmentMobile(preShipment);

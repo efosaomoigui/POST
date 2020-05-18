@@ -1973,17 +1973,22 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Pick Up Request is Null");
                 }
 
+                if (string.IsNullOrEmpty(pickuprequest.GroupCodeNumber))
+                {
+                    throw new GenericException("Group Code can not be null");
+                }
+
                 bool result = false;
                 var userId = await _userService.GetCurrentUserId();
                 pickuprequest.UserId = userId;
 
                 string rejected = MobilePickUpRequestStatus.Rejected.ToString();
-                string proceedToPickUp = MobilePickUpRequestStatus.ProceedToPickUp.ToString();
+                string enrouteToPickUp = MobilePickUpRequestStatus.EnrouteToPickUp.ToString();
                 string arrived = MobilePickUpRequestStatus.Arrived.ToString();
                 string cancelled = MobilePickUpRequestStatus.Cancelled.ToString();
                 string logVisit = MobilePickUpRequestStatus.LogVisit.ToString();
 
-                if (pickuprequest.Status == rejected || pickuprequest.Status == proceedToPickUp||   pickuprequest.Status == arrived || pickuprequest.Status == cancelled ||  pickuprequest.Status == logVisit)
+                if (pickuprequest.Status == rejected || pickuprequest.Status == enrouteToPickUp ||   pickuprequest.Status == arrived || pickuprequest.Status == cancelled ||  pickuprequest.Status == logVisit)
                 {
                     var groupList = await _uow.MobileGroupCodeWaybillMapping.FindAsync(x => x.GroupCodeNumber == pickuprequest.GroupCodeNumber);
                     if (groupList == null)
@@ -2038,10 +2043,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                         else
                         {
-                            //DONE create your own process to update those waybills at once
                             _mobilepickuprequestservice.UpdateMobilePickUpRequestsForWaybillList(waybillList, pickuprequest.UserId, pickuprequest.Status);
 
-                            if (pickuprequest.Status == proceedToPickUp || pickuprequest.Status == arrived)
+                            if (pickuprequest.Status == enrouteToPickUp || pickuprequest.Status == arrived)
                             {
                                 await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OnDelivery);
                             }
@@ -2066,6 +2070,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (pickuprequest == null)
                 {
                     throw new GenericException("Pick Up Request is Null");
+                }
+
+                if (string.IsNullOrEmpty(pickuprequest.Waybill))
+                {
+                    throw new GenericException("Waybill can not be null");
                 }
 
                 bool result = false;
