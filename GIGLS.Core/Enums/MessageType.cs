@@ -47,6 +47,7 @@
         CEMAIL, // Account creation mail,
         MCS, //Message for Mobile Create Shipment
         ENM, //ECOMMERCE NOTIFICATION  MESSAGE FOR GIGGO CUSTOMER REGISTRATION
-        DLD  //DELAYED DELIVERY	
+        DLD,  //DELAYED DELIVERY	
+        MMCS //Message for Multiple Mobile Create Shipment
     } 
 }
