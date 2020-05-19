@@ -1905,6 +1905,11 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                if (pickuprequest == null)
+                {
+                    throw new GenericException("Pick Up Request is Null");
+                }
+
                 var userId = await _userService.GetCurrentUserId();
                 pickuprequest.UserId = userId;
 
@@ -1919,7 +1924,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     await DeliveredMobilePickupRequest(pickuprequest, userId);
                     await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OffDelivery);
-
                 }
 
                 else if (pickuprequest.Status == MobilePickUpRequestStatus.Cancelled.ToString())
@@ -2152,46 +2156,49 @@ namespace GIGLS.Services.Implementation.Shipments
                     customerid = companyid.CompanyId;
                 }
 
-                var MobileShipment = new ShipmentDTO
+                if(preshipmentmobile.IsApproved != true && preshipmentmobile.ZoneMapping != 1)
                 {
-                    Waybill = preshipmentmobile.Waybill,
-                    ReceiverName = preshipmentmobile.ReceiverName,
-                    ReceiverPhoneNumber = preshipmentmobile.ReceiverPhoneNumber,
-                    ReceiverEmail = preshipmentmobile.ReceiverEmail,
-                    ReceiverAddress = preshipmentmobile.ReceiverAddress,
-                    DeliveryOptionId = 1,
-                    GrandTotal = preshipmentmobile.GrandTotal,
-                    Insurance = preshipmentmobile.InsuranceValue,
-                    Vat = preshipmentmobile.Vat,
-                    SenderAddress = preshipmentmobile.SenderAddress,
-                    IsCashOnDelivery = false,
-                    CustomerCode = preshipmentmobile.CustomerCode,
-                    DestinationServiceCentreId = destinationServiceCentreId,
-                    DepartureServiceCentreId = departureServiceCentreId,
-                    CustomerId = customerid,
-                    UserId = userId,
-                    PickupOptions = PickupOptions.HOMEDELIVERY,
-                    IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
-                    ShipmentPackagePrice = preshipmentmobile.GrandTotal,
-                    ApproximateItemsWeight = 0.00,
-                    ReprintCounterStatus = false,
-                    CustomerType = preshipmentmobile.CustomerType,
-                    CompanyType = preshipmentmobile.CompanyType,
-                    Value = preshipmentmobile.Value,
-                    PaymentStatus = PaymentStatus.Paid,
-                    IsFromMobile = true,
-                    ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
+                    var MobileShipment = new ShipmentDTO
                     {
-                        Description = s.Description,
-                        IsVolumetric = s.IsVolumetric,
-                        Weight = s.Weight,
-                        Nature = s.ItemType,
-                        Price = (decimal)s.CalculatedPrice,
-                        Quantity = s.Quantity
+                        Waybill = preshipmentmobile.Waybill,
+                        ReceiverName = preshipmentmobile.ReceiverName,
+                        ReceiverPhoneNumber = preshipmentmobile.ReceiverPhoneNumber,
+                        ReceiverEmail = preshipmentmobile.ReceiverEmail,
+                        ReceiverAddress = preshipmentmobile.ReceiverAddress,
+                        DeliveryOptionId = 1,
+                        GrandTotal = preshipmentmobile.GrandTotal,
+                        Insurance = preshipmentmobile.InsuranceValue,
+                        Vat = preshipmentmobile.Vat,
+                        SenderAddress = preshipmentmobile.SenderAddress,
+                        IsCashOnDelivery = false,
+                        CustomerCode = preshipmentmobile.CustomerCode,
+                        DestinationServiceCentreId = destinationServiceCentreId,
+                        DepartureServiceCentreId = departureServiceCentreId,
+                        CustomerId = customerid,
+                        UserId = userId,
+                        PickupOptions = PickupOptions.HOMEDELIVERY,
+                        IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
+                        ShipmentPackagePrice = preshipmentmobile.GrandTotal,
+                        ApproximateItemsWeight = 0.00,
+                        ReprintCounterStatus = false,
+                        CustomerType = preshipmentmobile.CustomerType,
+                        CompanyType = preshipmentmobile.CompanyType,
+                        Value = preshipmentmobile.Value,
+                        PaymentStatus = PaymentStatus.Paid,
+                        IsFromMobile = true,
+                        ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
+                        {
+                            Description = s.Description,
+                            IsVolumetric = s.IsVolumetric,
+                            Weight = s.Weight,
+                            Nature = s.ItemType,
+                            Price = (decimal)s.CalculatedPrice,
+                            Quantity = s.Quantity
+                        }).ToList()
+                    };
+                    var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
+                }
 
-                    }).ToList()
-                };
-                var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
                 preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.PickedUp.ToString();
                 preshipmentmobile.IsConfirmed = true;
 
@@ -2202,10 +2209,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     WaybillNumber = pickuprequest.Waybill,
                     ShipmentScanStatus = ShipmentScanStatus.MSHC
                 });
-
-                //var item = Mapper.Map<PreShipmentMobileDTO>(preshipmentmobile);
-                //await CheckDeliveryTimeAndSendMail(item);
-
             }
             catch (Exception)
             {
