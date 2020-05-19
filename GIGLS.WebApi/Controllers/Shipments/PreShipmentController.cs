@@ -115,14 +115,14 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 };
             });
         }
-
+               
         [HttpGet]
         [Route("giggopresentdayshipments")]
-        public async Task<IServiceResponse<List<LocationDTO>>> GetOnlyTodayShipments()
+        public async Task<IServiceResponse<List<LocationDTO>>> GetPresentDayShipmentLocations()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var preshipment = await _preShipmentMobileService.GetOnlyTodayShipments();
+                var preshipment = await _preShipmentMobileService.GetPresentDayShipmentLocations();
                 return new ServiceResponse<List<LocationDTO>>
                 {
                     Object = preshipment

@@ -4256,24 +4256,25 @@ namespace GIGLS.Services.Implementation.Shipments
             return preShipmentDTO;
         }
 
-        public async Task<List<LocationDTO>> GetOnlyTodayShipments()
+        public async Task<List<LocationDTO>> GetPresentDayShipmentLocations()
         {
+            //Excluding It Test
+            string excludeUserList = ConfigurationManager.AppSettings["excludeUserList"];
+            string[] testUserId = excludeUserList.Split(',').ToArray();
+
             var startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
             var endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
 
-            //Excluding It Test
-            string[] testUserId = { "2932eb15-aa30-462c-89f0-7247670f504b", "ab3722d7-57f3-4e6e-a32d-1580315b7da6", "e67d50c2-953a-44b2-bbcd-c38fadef237f", "b476fea8-84e4-4c5b-ac51-2efd68526fdc" };
-
             var shipmentsResult = _uow.PreShipmentMobile.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate &&
-                                        !testUserId.Contains(s.UserId) && s.SenderName != "it_test test");
+                                        !testUserId.Contains(s.UserId));
 
 
             List<LocationDTO> locationDTOs = (from r in shipmentsResult
                                               select new LocationDTO()
-                                                      {
-                                                          Longitude = r.SenderLocation.Longitude,
-                                                          Latitude = r.SenderLocation.Latitude
-                                                      }).ToList();
+                                              {
+                                                  Longitude = r.SenderLocation.Longitude,
+                                                  Latitude = r.SenderLocation.Latitude
+                                              }).ToList();
 
             return await Task.FromResult(locationDTOs.OrderByDescending(x => x.DateCreated).ToList());
         }

@@ -68,6 +68,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<bool> UpdateMobilePickupRequestUsingGroupCode(MobilePickUpRequestsDTO pickuprequest);
         Task<bool> UpdateMobilePickupRequestUsingWaybill(MobilePickUpRequestsDTO pickuprequest);
         Task<List<PreShipmentMobileDTO>> AddMobilePickupRequestMultipleShipment(MobilePickUpRequestsDTO pickuprequest);
-        Task<List<LocationDTO>> GetOnlyTodayShipments();
+        Task<List<LocationDTO>> GetPresentDayShipmentLocations();
     }
 }
