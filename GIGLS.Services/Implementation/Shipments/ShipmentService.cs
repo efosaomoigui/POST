@@ -893,16 +893,17 @@ namespace GIGLS.Services.Implementation.Shipments
             if (newShipment.IsCashOnDelivery == true)
             {
                 //collect the cods and add to CashOnDeliveryRegisterAccount()
-                var cashondeliveryentity = new CashOnDeliveryRegisterAccount();
-                cashondeliveryentity.Amount = newShipment.CashOnDeliveryAmount ?? 0;
-                cashondeliveryentity.CODStatusHistory = CODStatushistory.Created;
-                cashondeliveryentity.Description = "Cod From Sales";
-                //cashondeliveryentity.ServiceCenterCode = newShipment.DepartureServiceCentreId;
-                cashondeliveryentity.ServiceCenterId = 0;
-                cashondeliveryentity.Waybill = newShipment.Waybill;
-                cashondeliveryentity.UserId = newShipment.UserId;
-                cashondeliveryentity.DepartureServiceCenterId = newShipment.DepartureServiceCentreId;
-                cashondeliveryentity.DestinationCountryId = destinationCountry.CountryId;
+                var cashondeliveryentity = new CashOnDeliveryRegisterAccount
+                {
+                    Amount = newShipment.CashOnDeliveryAmount ?? 0,
+                    CODStatusHistory = CODStatushistory.Created,
+                    Description = "Cod From Sales",
+                    ServiceCenterId = 0,
+                    Waybill = newShipment.Waybill,
+                    UserId = newShipment.UserId,
+                    DepartureServiceCenterId = newShipment.DepartureServiceCentreId,
+                    DestinationCountryId = destinationCountry.CountryId
+                };
 
                 _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
             }
