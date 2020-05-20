@@ -160,14 +160,14 @@ namespace GIGLS.Services.Implementation.Utility
                 var global = _uow.GlobalProperty.SingleOrDefault(s => s.Key == globalPropertyType.ToString() && s.CountryId == countryId);
                 if (global == null)
                 {
-                    throw new GenericException($"Global Property '{globalPropertyType.ToString()}' does not exist", $"{(int)HttpStatusCode.NotFound}");
+                    throw new GenericException($"Global Property '{globalPropertyType}' does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
                 var globalDTo = Mapper.Map<GlobalPropertyDTO>(global);
                 return await Task.FromResult(globalDTo);
             }
             catch (Exception)
             {
-                throw new GenericException($"Global Property '{globalPropertyType.ToString()}' does not exist");
+                throw;
             }
         }
     }

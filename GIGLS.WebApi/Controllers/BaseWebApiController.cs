@@ -18,14 +18,13 @@ using Microsoft.Owin;
 using Newtonsoft.Json;
 using System.IO;
 using System.Text;
+using System.Data.Entity.Infrastructure;
+using GIGLS.WebApi.Controllers.Helper;
+using System.Data.Entity.Validation;
 
 namespace GIGLS.WebApi.Controllers
-
-
 {
-
-    //[AuditApi]
-    public class BaseWebApiController : ApiController
+    public abstract class BaseWebApiController : ApiController
     {
         private readonly string _controllerName;
         private ModelFactory _modelFactory;
@@ -65,6 +64,8 @@ namespace GIGLS.WebApi.Controllers
                 return _modelFactory;
             }
         }
+
+        private string _databaseForeignKeyErrorMessage;
 
         protected async Task<IServiceResponse<T>> HandleApiOperationAsync<T>(
             Func<Task<ServiceResponse<T>>> action, [CallerLineNumber] int lineNo = 0,
@@ -129,6 +130,16 @@ namespace GIGLS.WebApi.Controllers
                     if(giglsex.InnerException?.InnerException?.InnerException != null) errorList.Add(giglsex.InnerException?.InnerException?.InnerException?.Message);
                     apiResponse.ValidationErrors.Add("Error", errorList);
                 }
+            }
+            catch(DbUpdateException duex) when (duex.IsDatabaseFkDeleteException(out _databaseForeignKeyErrorMessage))
+            {
+                apiResponse.ShortDescription = "You cannot delete this record because it's currently in use.";
+                apiResponse.Code = $"{(int)HttpStatusCode.Forbidden}"; 
+            }
+            catch (DbEntityValidationException devex) // Shouldn't happen but is useful for catching & fixing DB validation errors
+            {
+                apiResponse.ShortDescription = "A data validation error occurred. Please contact admin for assistance.";
+                apiResponse.Code = $"{(int)HttpStatusCode.Forbidden}";
             }
             catch (Exception ex)
             {

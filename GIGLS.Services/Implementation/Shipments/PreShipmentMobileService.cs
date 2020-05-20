@@ -337,8 +337,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 preShipmentDTO.UserId = currentUserId;
                 var user = await _userService.GetUserById(currentUserId);
 
-                var Country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
-                preShipmentDTO.CountryId = Country.CountryId;
+                var country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
+                if (country == null)
+                {
+                    throw new GenericException("Sender Station Country Not Found", $"{(int)HttpStatusCode.NotFound}");
+                }
+                preShipmentDTO.CountryId = country.CountryId;
 
                 var customer = await _uow.Company.GetAsync(s => s.CustomerCode == user.UserChannelCode);
                 if (customer != null)
@@ -347,7 +351,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         preShipmentDTO.IsEligible = false;
                         preShipmentDTO.IsCodNeeded = customer.isCodNeeded;
-                        preShipmentDTO.CurrencySymbol = Country.CurrencySymbol;
+                        preShipmentDTO.CurrencySymbol = country.CurrencySymbol;
                         preShipmentDTO.CurrentWalletAmount = (decimal)customer.WalletAmount;
                         return preShipmentDTO;
                     }
@@ -372,7 +376,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    //var exists = await _uow.Company.ExistAsync(s => s.CustomerCode == user.UserChannelCode);
                     if (user.UserChannelType == UserChannelType.Ecommerce || customer != null)
                     {
                         preShipmentDTO.Shipmentype = ShipmentType.Ecommerce;
@@ -439,8 +442,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     decimal price = updatedwallet.Balance - shipmentGrandTotal;
                     updatedwallet.Balance = price;
-                    var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
-                    
+                    var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);                    
                     await _uow.CompleteAsync();
 
                     await ScanMobileShipment(new ScanDTO
@@ -3636,16 +3638,15 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //check haulage exists
                 var haulage = await _haulageService.GetHaulageById(haulagePricingDto.Haulageid);
-                if (haulage == null)
-                {
-                    throw new GenericException("The Tonne specified has not been mapped");
-                }
-
                 var country = await _uow.Country.GetCountryByStationId(haulagePricingDto.DestinationStationId);
+                if (country == null)
+                {
+                    throw new GenericException("Destination Station Country Not Found", $"{(int)HttpStatusCode.NotFound}");
+                }
                 var IsWithinProcessingTime = await WithinProcessingTime(country.CountryId);
                 var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, country.CountryId);
 
-                var Percentage = (Convert.ToDecimal(DiscountPercent.Value));
+                var Percentage = Convert.ToDecimal(DiscountPercent.Value);
                 var PercentageTobeUsed = ((100M - Percentage) / 100M);
                 var discount = (1 - PercentageTobeUsed);
 

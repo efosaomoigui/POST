@@ -5,6 +5,7 @@ using GIGLS.Infrastructure;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Haulage;
+using System.Net;
 
 namespace GIGLS.Services.Implementation
 {
@@ -36,7 +37,7 @@ namespace GIGLS.Services.Implementation
 
             if (haulage == null)
             {
-                throw new GenericException("HAULAGE INFORMATION DOES NOT EXIST");
+                throw new GenericException("HAULAGE INFORMATION DOES NOT EXIST", $"{(int)HttpStatusCode.NotFound}");
             }
             return Mapper.Map<HaulageDTO>(haulage);
         }
@@ -45,7 +46,7 @@ namespace GIGLS.Services.Implementation
         {
             if (await _uow.Haulage.ExistAsync(v => v.Tonne == haulageDto.Tonne))
             {
-                throw new GenericException($"{haulageDto.Tonne} Tonne already exist");
+                throw new GenericException($"{haulageDto.Tonne} Tonne already exist", $"{(int)HttpStatusCode.Forbidden}");
             }
 
             var newHaulage = new Core.Domain.Haulage

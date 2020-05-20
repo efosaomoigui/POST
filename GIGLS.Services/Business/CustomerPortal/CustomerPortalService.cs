@@ -1513,7 +1513,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (disableShipmentCreation) {
                 string message = ConfigurationManager.AppSettings["DisableShipmentCreationMessage"];
-                throw new GenericException(message);
+                throw new GenericException(message, $"{(int)System.Net.HttpStatusCode.ServiceUnavailable}");
             }
             return await _preShipmentMobileService.AddPreShipmentMobile(preShipment);
         }
