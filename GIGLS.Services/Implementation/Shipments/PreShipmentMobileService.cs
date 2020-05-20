@@ -3113,24 +3113,23 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    if (number.IsUsed == true)
+                    if (number.IsUsed)
                     {
                         throw new GenericException("Delivery Number has been used", $"{(int)HttpStatusCode.Forbidden}");
                     }
                     else
                     {
-                        number.IsUsed = true;
-                        number.UserId = userId;
-                        var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == detail.WayBill);
-                        if (shipment != null)
-                        {
-                            shipment.DeliveryNumber = detail.DeliveryNumber;
-                            await _uow.CompleteAsync();
-                        }
-                        else
+                        var shipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == detail.WayBill);
+
+                        if(shipment == null)
                         {
                             throw new GenericException("Waybill does not exist in Shipments", $"{(int)HttpStatusCode.NotFound}");
                         }
+
+                        number.IsUsed = true;
+                        number.UserId = userId;
+                        shipment.DeliveryNumber = detail.DeliveryNumber;
+                        await _uow.CompleteAsync();
                     }
                 }
                 return true;
