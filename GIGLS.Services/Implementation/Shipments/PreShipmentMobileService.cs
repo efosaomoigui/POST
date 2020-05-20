@@ -1246,7 +1246,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 else
                 {
                     allShipmentsResult = allShipmentsResult.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate &&
-                                            !testUserId.Contains(s.UserId);
+                                            !testUserId.Contains(s.UserId));
                 }
 
                 List<PreShipmentMobileDTO> shipmentDto = (from r in allShipmentsResult
