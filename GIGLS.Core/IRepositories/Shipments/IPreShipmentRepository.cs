@@ -2,9 +2,6 @@
 using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
-using GIGLS.CORE.DTO.Report;
-using GIGLS.CORE.DTO.Shipments;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
