@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using GIGLS.Core.IServices.Zone;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Infrastructure;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -70,7 +71,7 @@ namespace GIGLS.Services.Implementation.Zone
                 var option = await _uow.DeliveryOption.GetAsync(optionId);
                 if (option == null)
                 {
-                    throw new GenericException("Delivery Option Not Exist");
+                    throw new GenericException("Delivery Option Not Exist", $"{(int)HttpStatusCode.NotFound}");
                 }
                 return new DeliveryOptionDTO
                 {

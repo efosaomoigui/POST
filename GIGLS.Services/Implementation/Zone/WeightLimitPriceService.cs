@@ -9,6 +9,7 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.Enums;
 using System.Linq;
 using GIGLS.Core.DTO;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -73,7 +74,7 @@ namespace GIGLS.Services.Implementation.Zone
                 && x.RegularEcommerceType == regularEcommerceType && x.CountryId == countryId);
             if (weight == null)
             {
-                throw new GenericException("Weight limit price does not exist");
+                throw new GenericException("Weight limit price does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
             return Mapper.Map<WeightLimitPriceDTO>(weight);

@@ -887,7 +887,6 @@ namespace GIGLS.Services.Business.Pricing
 
         public async Task<decimal> GetMobileEcommercePrice(PricingDTO pricingDto)
         {
-
             decimal deliveryOptionPriceTemp = 0;
             var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
             if (zone != null)
@@ -903,8 +902,6 @@ namespace GIGLS.Services.Business.Pricing
             }
 
             deliveryOptionPriceTemp = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
-
-
             decimal deliveryOptionPrice = deliveryOptionPriceTemp;
 
             //check for volumetric weight
@@ -916,7 +913,6 @@ namespace GIGLS.Services.Business.Pricing
 
             //Get Ecommerce limit weight from GlobalProperty
             var ecommerceWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceWeightLimit, pricingDto.CountryId);
-
             decimal weightLimit = decimal.Parse(ecommerceWeightLimitObj.Value);
 
             decimal PackagePrice;

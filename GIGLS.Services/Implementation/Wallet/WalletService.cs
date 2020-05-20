@@ -360,12 +360,12 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<WalletDTO> GetWalletBalance(string userChannelCode)
         {
             var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(userChannelCode));
-            var walletDTO = Mapper.Map<WalletDTO>(wallet);
             if (wallet == null)
             {
-                throw new GenericException("Wallet does not exist");
+                throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
+            var walletDTO = Mapper.Map<WalletDTO>(wallet);
             return walletDTO;
         }
 

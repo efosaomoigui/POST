@@ -254,7 +254,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var maxNumOfShipment = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GiglgoMaxNumShipment, newPreShipment.CountryId);
             if (maxNumOfShipment == null)
             {
-                throw new GenericException("Maximum Number of Shipment on Global Property is not set");
+                throw new GenericException("Maximum Number of Shipment on Global Property is not set", $"{(int)HttpStatusCode.NotFound}");
             }
 
             int maximumShipmentItemsAllow = Convert.ToInt32(maxNumOfShipment.Value);
@@ -284,7 +284,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (numOfItems > maximumShipmentItemsAllow)
                 {
-                    throw new GenericException($"Total number of Shipment items can not exceed {maxNumOfShipment.Value}");
+                    throw new GenericException($"Total number of Shipment items can not exceed {maxNumOfShipment.Value}", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 newShipment.ReceiverAddress = item.ReceiverAddress;
@@ -292,7 +292,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 newShipment.ReceiverLocation = item.ReceiverLocation;
                 newShipment.ReceiverName = item.ReceiverName;
                 newShipment.ReceiverPhoneNumber = item.ReceiverPhoneNumber;
-
                 newShipment.SenderName = newPreShipment.SenderName;
                 newShipment.SenderPhoneNumber = newPreShipment.SenderPhoneNumber;
                 newShipment.SenderLocation = newPreShipment.SenderLocation;
@@ -492,10 +491,14 @@ namespace GIGLS.Services.Implementation.Shipments
             preShipmentMobileDTO.UserId = currentUserId;
             var user = await _userService.GetUserById(currentUserId);
 
-            var Country = await _uow.Country.GetCountryByStationId(preShipmentMobileDTO.SenderStationId);
-            preShipmentMobileDTO.CountryId = Country.CountryId;
-            preShipmentMobileDTO.CurrencyCode = Country.CurrencyCode;
-            preShipmentMobileDTO.CurrencySymbol = Country.CurrencySymbol;
+            var country = await _uow.Country.GetCountryByStationId(preShipmentMobileDTO.SenderStationId);
+            if (country == null)
+            {
+                throw new GenericException("Sender Station Country Not Found", $"{(int)HttpStatusCode.NotFound}");
+            }
+            preShipmentMobileDTO.CountryId = country.CountryId;
+            preShipmentMobileDTO.CurrencyCode = country.CurrencyCode;
+            preShipmentMobileDTO.CurrencySymbol = country.CurrencySymbol;
             preShipmentMobileDTO.CustomerType = user.UserChannelType.ToString();
             preShipmentMobileDTO.CustomerCode = user.UserChannelCode;
             preShipmentMobileDTO.IsEligible = true;
@@ -507,7 +510,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     preShipmentMobileDTO.IsEligible = false;
                     preShipmentMobileDTO.IsCodNeeded = customer.isCodNeeded;
-                    preShipmentMobileDTO.CurrencySymbol = Country.CurrencySymbol;
+                    preShipmentMobileDTO.CurrencySymbol = country.CurrencySymbol;
                     preShipmentMobileDTO.CurrentWalletAmount = (decimal)customer.WalletAmount;
                 }
             }
@@ -542,9 +545,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 return preShipmentDTO;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -562,7 +565,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             preShipmentDTO.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
 
-            if (preShipmentDTO.PreShipmentItems.Count() > 0)
+            if (preShipmentDTO.PreShipmentItems.Any())
             {
                 foreach (var shipment in preShipmentDTO.PreShipmentItems)
                 {
@@ -1104,8 +1107,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 //undo comment when App is updated
                 if (preShipment.ZoneMapping == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
                 {
-                    var ShipmentCount = preShipment.PreShipmentItems.Count();
-
+                    int ShipmentCount = preShipment.PreShipmentItems.Count;
                     amount = await CalculateGeoDetailsBasedonLocation(preShipment);
                     IndividualPrice = (amount / ShipmentCount);
                 }
@@ -1114,7 +1116,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     if (preShipmentItem.Quantity == 0)
                     {
-                        throw new GenericException("Quantity cannot be zero");
+                        throw new GenericException($"Quantity cannot be zero for {preShipmentItem.ItemName}");
                     }
 
                     var PriceDTO = new PricingDTO
@@ -1142,7 +1144,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         if (preShipmentItem.Weight == 0)
                         {
-                            throw new GenericException("Item weight cannot be zero");
+                            throw new GenericException($"Item weight cannot be zero for {preShipmentItem.ItemName}");
                         }
 
                         if (preShipment.Shipmentype == ShipmentType.Ecommerce)
@@ -1188,7 +1190,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
 
                 var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
-                var Percentage = (Convert.ToDecimal(DiscountPercent.Value));
+                var Percentage = Convert.ToDecimal(DiscountPercent.Value);
                 var PercentageTobeUsed = ((100M - Percentage) / 100M);
 
                 decimal EstimatedDeclaredPrice = Convert.ToDecimal(DeclaredValue);
@@ -1215,9 +1217,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
                 return returnprice;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 

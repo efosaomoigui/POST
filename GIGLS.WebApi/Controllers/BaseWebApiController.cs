@@ -13,14 +13,9 @@ using Microsoft.AspNet.Identity;
 using GIGLS.WebApi.Models;
 //using Audit.WebApi;
 using System.Collections.Generic;
-using System.ServiceModel;
-using Microsoft.Owin;
-using Newtonsoft.Json;
-using System.IO;
-using System.Text;
 using System.Data.Entity.Infrastructure;
-using GIGLS.WebApi.Controllers.Helper;
 using System.Data.Entity.Validation;
+using GIGLS.WebApi.Helper;
 
 namespace GIGLS.WebApi.Controllers
 {
