@@ -32,7 +32,6 @@ namespace GIGLS.Core.DTO.Shipments
 
         //PreShipment Items
         public List<PreShipmentItemDTO> PreShipmentItems { get; set; }
-        public decimal GrandTotal { get; set; }
         public bool IsProcessed { get; set; }
     }
 }
