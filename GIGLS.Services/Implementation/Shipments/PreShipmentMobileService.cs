@@ -1214,6 +1214,10 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                //Excluding It Test
+                string excludeUserList = ConfigurationManager.AppSettings["excludeUserList"];
+                string[] testUserId = excludeUserList.Split(',').ToArray();
+
                 //get startDate and endDate
                 var queryDate = filterOptionsDto.getStartDateAndEndDate();
                 var startDate = queryDate.Item1;
@@ -1232,20 +1236,17 @@ namespace GIGLS.Services.Implementation.Shipments
                     endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
                 }
 
-                //Excluding It Test
-                string[] testUserId = { "2932eb15-aa30-462c-89f0-7247670f504b", "ab3722d7-57f3-4e6e-a32d-1580315b7da6", "e67d50c2-953a-44b2-bbcd-c38fadef237f", "b476fea8-84e4-4c5b-ac51-2efd68526fdc" };
-
                 if (filterOptionsDto.StationId > 0)
                 {
                     allShipmentsResult = allShipmentsResult.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate &&
-                                            !testUserId.Contains(s.UserId) && s.SenderName != "it_test test"
+                                            !testUserId.Contains(s.UserId) 
                                             && s.SenderStationId == filterOptionsDto.StationId);
 
                 }
                 else
                 {
                     allShipmentsResult = allShipmentsResult.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate &&
-                                            !testUserId.Contains(s.UserId) && s.SenderName != "it_test test");
+                                            !testUserId.Contains(s.UserId);
                 }
 
                 List<PreShipmentMobileDTO> shipmentDto = (from r in allShipmentsResult
