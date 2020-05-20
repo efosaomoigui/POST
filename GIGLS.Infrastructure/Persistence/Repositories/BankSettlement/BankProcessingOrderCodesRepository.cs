@@ -74,6 +74,37 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
             return Task.FromResult(processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit).ToList());
         }
 
+        //gets the regional deposits for the date range
+        public Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria, int[] serviceCenters)
+        {
+            //get startDate and endDate
+            var queryDate = dateFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var processingorderCodes = Context.BankProcessingOrderCodes.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.DepositType == type
+                            && serviceCenters.Contains(s.ServiceCenter)).AsQueryable();
+
+            var processingcodes = from processingorderCode in processingorderCodes
+                                  select new BankProcessingOrderCodesDTO
+                                  {
+                                      CodeId = processingorderCode.CodeId,
+                                      Code = processingorderCode.Code,
+                                      DateAndTimeOfDeposit = processingorderCode.DateAndTimeOfDeposit,
+                                      DepositType = processingorderCode.DepositType,
+                                      TotalAmount = processingorderCode.TotalAmount,
+                                      UserId = processingorderCode.UserId,
+                                      Status = processingorderCode.Status,
+                                      ServiceCenter = processingorderCode.ServiceCenter,
+                                      ScName = processingorderCode.ScName,
+                                      FullName = processingorderCode.FullName,
+                                      VerifiedBy = processingorderCode.VerifiedBy,
+                                      BankName = processingorderCode.BankName
+                                  };
+
+            return Task.FromResult(processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit).ToList());
+        }
+
         public IQueryable<BankProcessingOrderCodesDTO> GetBankOrderProcessingCodeAsQueryable()
         {
             var processingorderCodes = Context.BankProcessingOrderCodes.AsQueryable();
