@@ -1529,6 +1529,14 @@ namespace GIGLS.Services.Business.CustomerPortal
         }
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile()
         {
+            var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
+            bool disableShipmentCreation = bool.Parse(isDisable);
+
+            if (disableShipmentCreation)
+            {
+                throw new GenericException($"App under maintenance. Service currently not available", System.Net.HttpStatusCode.InternalServerError.ToString());
+            }
+
             return await _iWalletTransactionService.GetWalletTransactionsForMobile();
         }
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
