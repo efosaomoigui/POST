@@ -1799,6 +1799,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpGet]
+        [Route("giggopresentdayshipments")]
+        public async Task<IServiceResponse<List<LocationDTO>>> GetPresentDayShipmentLocations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _portalService.GetPresentDayShipmentLocations();
+                return new ServiceResponse<List<LocationDTO>>
+                {
+                    Object = preshipment
+                };
+            });
+        }
+
 
     }
 }

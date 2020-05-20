@@ -2187,5 +2187,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
         }
 
+        public async Task<List<LocationDTO>> GetPresentDayShipmentLocations()
+        {
+            return await _preShipmentMobileService.GetPresentDayShipmentLocations();
+        }
+
     }
 }
