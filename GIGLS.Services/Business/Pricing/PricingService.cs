@@ -942,7 +942,7 @@ namespace GIGLS.Services.Business.Pricing
             {
                 if (zone.ZoneId == 1)
                 {
-                    if (pricingDto.DeliveryOptionId.ToString() == null || pricingDto.DeliveryOptionId == 0)
+                    if (pricingDto.DeliveryOptionId == 0)
                     {
                         pricingDto.DeliveryOptionId = 7;
                     }

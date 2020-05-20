@@ -14,6 +14,7 @@ using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
@@ -45,7 +46,7 @@ namespace GIGLS.Services.Implementation.User
         {
             if (await _unitOfWork.User.GetUserByEmail(userDto.Email.ToLower()) != null)
             {
-                throw new GenericException($"User with email: {userDto.Email} already exist");
+                throw new GenericException($"User with email: {userDto.Email} already exist", $"{(int)HttpStatusCode.Forbidden}");
             }
 
             var user = Mapper.Map<GIGL.GIGLS.Core.Domain.User>(userDto);
@@ -118,7 +119,7 @@ namespace GIGLS.Services.Implementation.User
 
             if (user == null)
             {
-                throw new GenericException("User does not exist!");
+                throw new GenericException("User Information Not Found!", $"{(int)HttpStatusCode.NotFound}");
             }
 
             var userDto = Mapper.Map<UserDTO>(user);
@@ -132,7 +133,7 @@ namespace GIGLS.Services.Implementation.User
 
             if (user == null)
             {
-                throw new GenericException("User does not exist!");
+                throw new GenericException("User Information Not Found!", $"{(int)HttpStatusCode.NotFound}");
             }
 
             return Mapper.Map<UserDTO>(user);
@@ -145,7 +146,7 @@ namespace GIGLS.Services.Implementation.User
 
             if (user == null)
             {
-                throw new GenericException("User does not exist!");
+                throw new GenericException("User Information Not Found!", $"{(int)HttpStatusCode.NotFound}");
             }
 
             return Mapper.Map<UserDTO>(user);
@@ -158,7 +159,7 @@ namespace GIGLS.Services.Implementation.User
 
             if (user == null)
             {
-                throw new GenericException("User does not exist!");
+                throw new GenericException("User Information Not Found!", $"{(int)HttpStatusCode.NotFound}");
             }
 
             return user.UserChannelCode;
@@ -170,7 +171,7 @@ namespace GIGLS.Services.Implementation.User
 
             if (user == null)
             {
-                throw new GenericException("User does not exist!");
+                throw new GenericException("User Information Not Found!", $"{(int)HttpStatusCode.NotFound}");
             }
 
             return Mapper.Map<UserDTO>(user);
@@ -185,7 +186,7 @@ namespace GIGLS.Services.Implementation.User
 
             if (user == null)
             {
-                throw new GenericException("User does not exist!");
+                throw new GenericException("User Information Not Found!", $"{(int)HttpStatusCode.NotFound}");
             }
 
             if (user.UserChannelType.Equals(UserChannelType.Corporate) || user.UserChannelType.Equals(UserChannelType.Ecommerce))

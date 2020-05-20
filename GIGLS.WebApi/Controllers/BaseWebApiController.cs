@@ -28,15 +28,9 @@ namespace GIGLS.WebApi.Controllers
     public class BaseWebApiController : ApiController
     {
         private readonly string _controllerName;
-
         private ModelFactory _modelFactory;
         private ApplicationUserManager _AppUserManager = null;
         private ApplicationRoleManager _AppRoleManager = null;
-        //private string _databaseForeignKeyErrorMessage;
-
-        //protected string CurrentUserId => $"[{User.Identity.GetUserId() ?? "0"}]({(!string.IsNullOrEmpty(User.Identity.Name) ? User.Identity.Name : "Anonymous")})";
-
-        //protected ILog Logger;
 
         protected BaseWebApiController(string controllerName)
         {
@@ -82,10 +76,6 @@ namespace GIGLS.WebApi.Controllers
                 ShortDescription = "Operation was successful!"
             };
 
-            //var logger = LogManager.GetLogger($"{_controllerName} / {method} - {CurrentUserId}");
-
-            //logger.Info($">>>=============== ENTERS ({method}) ===============>>>");
-
             try
             {
                 if (!ModelState.IsValid)
@@ -112,8 +102,6 @@ namespace GIGLS.WebApi.Controllers
             }
             catch (GenericException giglsex) //Error involving form field values
             {
-                //logger.Warn($"L{lineNo} - {gmgex.ErrorCode}: {gmgex.Message}");
-
                 apiResponse.ShortDescription = giglsex.Message;
                 apiResponse.Code = giglsex.ErrorCode;
 
@@ -130,7 +118,10 @@ namespace GIGLS.WebApi.Controllers
                 }
                 else
                 {
-                    apiResponse.Code = $"{(int)HttpStatusCode.InternalServerError}";
+                    if (string.IsNullOrWhiteSpace(apiResponse.Code))
+                    {
+                        apiResponse.Code = $"{(int)HttpStatusCode.BadRequest}";
+                    }
                     List<string> errorList = new List<string>();
                     errorList.Add(giglsex.Message);
                     if(giglsex.InnerException != null ) errorList.Add(giglsex.InnerException?.Message);
@@ -141,7 +132,6 @@ namespace GIGLS.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                //logger.Error($"L{lineNo} {ex}");
                 apiResponse.ShortDescription = $"Sorry, we are unable process your request. Please try again or contact support for assistance.";
                 apiResponse.Code = $"{(int)HttpStatusCode.InternalServerError}";
 
@@ -153,70 +143,9 @@ namespace GIGLS.WebApi.Controllers
                 apiResponse.ValidationErrors.Add("Error", errorList);
             }
 
-            //logger.Info($"<<<=============== EXITS ({method}) ===============<<< ");
-
             return apiResponse;
         }
-
-        protected async Task<IServiceResponse<T>> HandleApiOperationAsync2<T>(
-            Func<ServiceResponse<T>> action, [CallerLineNumber] int lineNo = 0,
-            [CallerMemberName] string method = "")
-        {
-            var apiResponse = new ServiceResponse<T>
-            {
-                Code = $"{(int)HttpStatusCode.OK}",
-                ShortDescription = "Operation was successful!"
-            };
-
-            //var logger = LogManager.GetLogger($"{_controllerName} / {method} - {CurrentUserId}");
-
-            //logger.Info($">>>=============== ENTERS ({method}) ===============>>>");
-
-            try
-            {
-                if (!ModelState.IsValid)
-                    throw new GenericException("There were errors in your input, please correct them and try again.", $"{(int)HttpStatusCode.BadRequest}");
-
-                var methodResponse = action.Invoke();
-
-                apiResponse.Object = methodResponse.Object;
-
-                //Checking if we set description from controller else set with apiResponse ShortDescription
-                apiResponse.ShortDescription = string.IsNullOrEmpty(methodResponse.ShortDescription)
-                    ? apiResponse.ShortDescription
-                    : methodResponse.ShortDescription;
-
-            }
-            catch (GenericException giglsex)
-            {
-                //logger.Warn($"L{lineNo} - {gmgex.ErrorCode}: {gmgex.Message}");
-                apiResponse.ShortDescription = giglsex.Message;
-                apiResponse.Code = giglsex.ErrorCode;
-
-                if (!ModelState.IsValid)
-                {
-                    apiResponse.ValidationErrors = ModelState.ToDictionary(
-                        m =>
-                        {
-                            var tokens = m.Key.Split('.');
-                            return tokens.Length > 0 ? tokens[tokens.Length - 1] : tokens[0];
-                        },
-                        m => m.Value.Errors.Select(e => e.Exception?.Message ?? e.ErrorMessage)
-                    );
-                }
-            }
-            catch (Exception ex)
-            {
-                //logger.Error($"L{lineNo} {ex}");
-                apiResponse.ShortDescription = "Sorry, we are unable process your request. Please try again or contact support for assistance.(" + ex.Message + ")";
-                apiResponse.Code = $"{(int)HttpStatusCode.InternalServerError}";
-            }
-
-            //logger.Info($"<<<=============== EXITS ({method}) ===============<<< ");
-
-            return apiResponse;
-        }
-
+              
         protected IHttpActionResult GetErrorResult(IdentityResult result)
         {
             if (result == null)
@@ -246,6 +175,4 @@ namespace GIGLS.WebApi.Controllers
             return null;
         }
     }
-
-
 }
