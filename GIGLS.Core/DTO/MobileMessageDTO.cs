@@ -22,6 +22,7 @@ namespace GIGLS.Core.DTO
         public string CustomerCarePhoneNumber1 { get; set; }
         public string CustomerCarePhoneNumber2 { get; set; }
         public string SenderPhoneNumber { get; set; }
+        public string GroupCode { get; set; }
         public SMSSenderPlatform SMSSenderPlatform { get; set; }
 
     }
