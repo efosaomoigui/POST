@@ -117,7 +117,7 @@ namespace GIGLS.Core.Domain
         public bool? IsApproved { get; set; }
         public decimal ShipmentPickupPrice { get; set; }
 
-
-
+        [MaxLength(20)]
+        public string DeliveryNumber { get; set; }
     }
 }

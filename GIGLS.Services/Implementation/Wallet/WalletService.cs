@@ -13,6 +13,7 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Wallet
@@ -345,26 +346,26 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var currentUser = await _userService.GetCurrentUserId();
             var user = await _uow.User.GetUserById(currentUser);
-            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
 
-            var walletDTO = Mapper.Map<WalletDTO>(wallet);
             if (wallet == null)
             {
-                throw new GenericException("Wallet does not exist");
+                throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
+            var walletDTO = Mapper.Map<WalletDTO>(wallet);
             return walletDTO;
         }
 
         public async Task<WalletDTO> GetWalletBalance(string userChannelCode)
         {
             var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(userChannelCode));
-            var walletDTO = Mapper.Map<WalletDTO>(wallet);
             if (wallet == null)
             {
-                throw new GenericException("Wallet does not exist");
+                throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
+            var walletDTO = Mapper.Map<WalletDTO>(wallet);
             return walletDTO;
         }
 

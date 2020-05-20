@@ -6,6 +6,7 @@ using GIGLS.Core;
 using GIGLS.Infrastructure;
 using GIGLS.Core.Domain;
 using AutoMapper;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -25,7 +26,7 @@ namespace GIGLS.Services.Implementation.Zone
                                     .ExistAsync( p => p.Name.Trim().ToLower() == packageName.ToLower().Trim());
             if(true == await exists)
             {
-                throw new GenericException($"{packageName.ToUpper()} already exist");
+                throw new GenericException($"{packageName.ToUpper()} already exist", $"{(int)HttpStatusCode.Forbidden}");
             }
             return exists.Result;
         }
@@ -59,7 +60,7 @@ namespace GIGLS.Services.Implementation.Zone
             var package = await  _uow.SpecialDomesticPackage.GetAsync(specialDomesticPackageId);
 
             if (package == null)
-                throw new GenericException("Special Package does not exist");
+                throw new GenericException("Special Package does not exist", $"{(int)HttpStatusCode.NotFound}");
 
             _uow.SpecialDomesticPackage.Remove(package);
             _uow.Complete();
@@ -71,7 +72,7 @@ namespace GIGLS.Services.Implementation.Zone
             var package = await _uow.SpecialDomesticPackage.GetAsync(packageId);
 
             if (package == null)
-                throw new GenericException("Special Package does not exist");
+                throw new GenericException("Special Package does not exist", $"{(int)HttpStatusCode.NotFound}");
 
             return Mapper.Map<SpecialDomesticPackageDTO>(package); 
         }
@@ -86,10 +87,10 @@ namespace GIGLS.Services.Implementation.Zone
             var package = await _uow.SpecialDomesticPackage.GetAsync(specialDomesticPackageId);
 
             if (package == null)
-                throw new GenericException("Special Package does not exist");
+                throw new GenericException("Special Package does not exist", $"{(int)HttpStatusCode.NotFound}");
 
             if (package.SpecialDomesticPackageId != specialDomestic.SpecialDomesticPackageId)
-                throw new GenericException("Invalid Package update request");
+                throw new GenericException("Invalid Package update request", $"{(int)HttpStatusCode.Forbidden}");
 
             package.Name = specialDomestic.Name;
             package.Status = specialDomestic.Status;
@@ -105,7 +106,7 @@ namespace GIGLS.Services.Implementation.Zone
             var package = await _uow.SpecialDomesticPackage.GetAsync(specialDomesticPackageId);
 
             if (package == null)
-                throw new GenericException("Special Package does not exist");
+                throw new GenericException("Special Package does not exist", $"{(int)HttpStatusCode.NotFound}");
                         
             package.Status = status;
             await _uow.CompleteAsync();
