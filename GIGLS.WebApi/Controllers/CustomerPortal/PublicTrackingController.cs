@@ -98,6 +98,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
         [HttpPost]
         [Route("reportIssues")]
         public async Task<IServiceResponse<bool>> SendGIGGoIssuesMail(AppMessageDTO obj)
@@ -109,6 +110,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<bool>
                 {
                     Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("giggopresentdayshipments")]
+        public async Task<IServiceResponse<List<LocationDTO>>> GetPresentDayShipmentLocations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _portalService.GetPresentDayShipmentLocations();
+                return new ServiceResponse<List<LocationDTO>>
+                {
+                    Object = preshipment
                 };
             });
         }

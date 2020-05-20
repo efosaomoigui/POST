@@ -13,6 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using PayStack.Net;
 using System.Configuration;
+using GIGLS.CORE.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -40,7 +41,19 @@ namespace GIGLS.Services.Implementation.Wallet
             var walletPaymentLogView = _uow.WalletPaymentLog.GetWalletPaymentLogs(filterOptionsDto);
             return walletPaymentLogView;
         }
-        
+
+        public Task<List<WalletPaymentLogView>> GetWalletPaymentLogs(DateFilterCriteria baseFilter)
+        {
+            var walletPaymentLogView = _uow.WalletPaymentLog.GetFromWalletPaymentLogView(baseFilter);
+            return walletPaymentLogView;
+        }
+
+        public Task<List<WalletPaymentLogView>> GetFromWalletPaymentLogViewBySearchParameter(string searchItem)
+        {
+            var walletPaymentLogView = _uow.WalletPaymentLog.GetFromWalletPaymentLogViewBySearchParameter(searchItem);
+            return walletPaymentLogView;
+        }
+
         public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
             if (walletPaymentLogDto.UserId == null)

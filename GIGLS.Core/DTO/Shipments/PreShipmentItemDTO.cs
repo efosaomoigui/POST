@@ -14,12 +14,14 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal Price { get; set; }
         public int Quantity { get; set; }
         public int SerialNumber { get; set; }
+        public int? SpecialPackageId { get; set; }
 
         //To handle volumetric weight
         public bool IsVolumetric { get; set; }
         public double Length { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
+
 
         //Foreign key information
         public int PreShipmentId { get; set; }

@@ -470,7 +470,9 @@ namespace GIGLS.Services.Implementation.Messaging
                  {
                      "Sender Name",
                      "WaybillNumber",
-                     "Sender Phone Number"
+                     "Sender Phone Number",
+                     "Group Code"
+
                  };
 
                 var mobileShipmentCreationMessage = (MobileShipmentCreationMessageDTO)obj;
@@ -478,6 +480,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[0] = mobileShipmentCreationMessage.SenderName;
                 strArray[1] = mobileShipmentCreationMessage.WaybillNumber;
                 strArray[2] = mobileShipmentCreationMessage.SenderPhoneNumber;
+                strArray[3] = mobileShipmentCreationMessage.GroupCode;
                 messageDTO.Waybill = mobileShipmentCreationMessage.WaybillNumber;
 
                 //B. decode url parameter

@@ -7,6 +7,7 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure.Persistence.Repository;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,6 +24,10 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
 
         public async Task<List<PartnerTransactionsDTO>> GetPartnerTransactionByDate(BaseFilterCriteria filterCriteria)
         {
+            //Excluding It Test
+            string excludeUserList = ConfigurationManager.AppSettings["excludeUserList"];
+            string[] testUserId = excludeUserList.Split(',').ToArray();
+
             var queryDate = filterCriteria.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
@@ -32,9 +37,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                 startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(-7);
                 endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
             }
-
-            //Excluding It Test
-            string[] testUserId = { "2932eb15-aa30-462c-89f0-7247670f504b", "ab3722d7-57f3-4e6e-a32d-1580315b7da6", "e67d50c2-953a-44b2-bbcd-c38fadef237f" };
            
             var partnersTrans = Context.PartnerTransactions.AsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate
                                 && !testUserId.Contains(s.UserId));
