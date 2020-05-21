@@ -46,5 +46,6 @@ namespace GIGLS.Core.IServices.BankSettlement
 
         Task<List<BankProcessingOrderCodesDTO>> GetBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria);
         Task<IEnumerable<BankDTO>> GetBanks();
+        Task<List<BankProcessingOrderCodesDTO>> GetRegionalBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria);
     }
 }
