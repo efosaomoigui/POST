@@ -15,6 +15,7 @@ using System.Linq;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.Domain.Expenses;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Fleets
 {
@@ -472,7 +473,7 @@ namespace GIGLS.Services.Implementation.Fleets
                 var dispatch = await _uow.Dispatch.GetAsync(s => s.ManifestNumber == manifestStatusDTO.ManifestCode && s.DriverDetail == userId);
                 if(dispatch == null)
                 {
-                    throw new GenericException("This manifest is not assigned to you");
+                    throw new GenericException("This manifest is not assigned to you", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 else
                 {
@@ -481,7 +482,7 @@ namespace GIGLS.Services.Implementation.Fleets
                     {
                         if (pickupManifestObj.ManifestStatus == ManifestStatus.Delivered)
                         {
-                            throw new GenericException($"Manifest {manifestStatusDTO.ManifestCode} has been delivered");
+                            throw new GenericException($"Manifest {manifestStatusDTO.ManifestCode} has been delivered", $"{(int)HttpStatusCode.Forbidden}");
                         }
                         else
                         {
@@ -489,7 +490,7 @@ namespace GIGLS.Services.Implementation.Fleets
                             if (pickupManifestObj.ManifestStatus == ManifestStatus.Accepted &&
                                 (manifestStatusDTO.ManifestStatus == ManifestStatus.Rejected || manifestStatusDTO.ManifestStatus == ManifestStatus.Pending))
                             {
-                                throw new GenericException($"Manifest {manifestStatusDTO.ManifestCode} has been accepted by you");
+                                throw new GenericException($"Manifest {manifestStatusDTO.ManifestCode} has been accepted by you", $"{(int)HttpStatusCode.Forbidden}");
                             }
                             else
                             {

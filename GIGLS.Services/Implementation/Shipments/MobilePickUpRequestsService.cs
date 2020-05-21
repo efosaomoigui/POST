@@ -156,7 +156,6 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //var userId = await _userservice.GetCurrentUserId();
                 var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == PickUpRequest.Waybill && s.UserId == userId && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
                 if (MobilePickupRequests != null)
                 {

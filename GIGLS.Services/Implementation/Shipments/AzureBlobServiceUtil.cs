@@ -49,35 +49,26 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public static async Task<List<Uri>> DisplayAll()
         {
-
             try
-
             {
                 await Init();
 
                 // Gets all Cloud Block Blobs in the blobContainerName and passes them to the view
-
                 List<Uri> allBlobs = new List<Uri>();
 
                 foreach (IListBlobItem blob in blobContainer.ListBlobs())
                 {
                     if (blob.GetType() == typeof(CloudBlockBlob))
                     {
-                        allBlobs.Add(blob.Uri);
-                                                
+                        allBlobs.Add(blob.Uri);                                                
                     }
                 }
-
                 return allBlobs;
-
             }
-
-            catch (Exception ex)
+            catch (Exception)
             {
-                
-                throw ex;
+                throw;
             }
-
         }
                                
         public static async Task<string> UploadAsync(byte[] imageInbytes, string filename)

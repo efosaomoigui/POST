@@ -195,8 +195,7 @@ namespace GIGLS.Services.Business.Tracking
                 }
 
                 //populate the Incident message
-                shipmentTrackingDTO.ScanStatus.Incident =
-                    string.Format(shipmentTrackingDTO.ScanStatus.Incident, strArray);
+                shipmentTrackingDTO.ScanStatus.Incident = string.Format(shipmentTrackingDTO.ScanStatus.Incident, strArray);
             }
             return 0;
         }
