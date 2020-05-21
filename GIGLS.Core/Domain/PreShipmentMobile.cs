@@ -18,8 +18,9 @@ namespace GIGLS.Core.Domain
         [MaxLength(500)]
         public string SenderName { get; set; }
 
-        [MaxLength(500)]
+        [MaxLength(100)]
         public string SenderPhoneNumber { get; set; }
+
         public decimal Value { get; set; }
         public DateTime? DeliveryTime { get; set; }
 
@@ -36,7 +37,7 @@ namespace GIGLS.Core.Domain
         [MaxLength(500)]
         public string ReceiverName { get; set; }
 
-        [MaxLength(500)]
+        [MaxLength(100)]
         public string ReceiverPhoneNumber { get; set; }
 
         [MaxLength(500)]
@@ -51,7 +52,7 @@ namespace GIGLS.Core.Domain
         [MaxLength(500)]
         public string ReceiverState { get; set; }
 
-        [MaxLength(500)]
+        [MaxLength(100)]
         public string ReceiverCountry { get; set; }
 
         [MaxLength(500)]
