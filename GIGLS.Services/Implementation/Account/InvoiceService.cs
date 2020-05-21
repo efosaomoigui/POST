@@ -17,6 +17,7 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Account
@@ -278,7 +279,7 @@ namespace GIGLS.Services.Implementation.Account
 
             if (invoice == null)
             {
-                throw new GenericException("Invoice does not exists");
+                throw new GenericException("Invoice does not exists", $"{(int)HttpStatusCode.NotFound}");
             }
 
             var invoiceDTO = Mapper.Map<InvoiceDTO>(invoice);

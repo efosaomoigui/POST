@@ -233,7 +233,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (wallet == null)
             {
-                throw new GenericException("Wallet does not exist");
+                throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
             var walletTransactionSummary = await _iWalletTransactionService.GetWalletTransactionByWalletId(wallet.WalletId);
@@ -253,11 +253,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<List<CodPayOutList>> GetPaidCODByCustomer()
         {
-
             var userchannelcode = await _userService.GetUserChannelCode();
             var codsValues = await _iBankShipmentSettlementService.GetPaidOutCODListsByCustomer(userchannelcode);
-            //var customersCods = codsValues.Where(s=>s.CustomerCode == userchannelcode).ToList(); 
-
             return codsValues;
         }
 
@@ -272,7 +269,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             var invoicesDto = Mapper.Map<List<InvoiceViewDTO>>(invoices);
 
-            if (invoicesDto.Count() > 0)
+            if (invoicesDto.Any())
             {
                 var countries = _uow.Country.GetAllAsQueryable().Where(x => x.IsActive == true).ToList();
                 var countriesDto = Mapper.Map<List<CountryDTO>>(countries);
@@ -326,7 +323,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             else
             {
-                throw new GenericException("Error: You cannot track this waybill number.");
+                throw new GenericException("Error: You cannot track this waybill number.", $"{(int)HttpStatusCode.NotFound}");
             }
         }
 
@@ -358,7 +355,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             var currentUserId = await _userService.GetCurrentUserId();
             var currentUser = await _userService.GetUserById(currentUserId);
             var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == currentUser.UserChannelCode);
-
             var result = await _iCashOnDeliveryAccountService.GetCashOnDeliveryAccountByWallet(wallet.WalletNumber);
             return result;
         }
@@ -418,7 +414,6 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages()
         {
-
             return Task.FromResult(Mapper.Map<IEnumerable<SpecialDomesticPackage>, IEnumerable<SpecialDomesticPackageDTO>>(_uow.SpecialDomesticPackage.GetAll()));
         }
 
@@ -453,7 +448,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 r.DestinationId == destinationServiceCenter.StationId, "Zone,Destination,Departure");
 
             if (routeZoneMap == null)
-                throw new GenericException("The Mapping of Route to Zone does not exist");
+                throw new GenericException("The Mapping of Route to Zone does not exist", $"{(int)HttpStatusCode.NotFound}");
 
             return Mapper.Map<DomesticRouteZoneMapDTO>(routeZoneMap);
         }
@@ -557,7 +552,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else
                 {
-                    throw new GenericException("Customer could not be created");
+                    throw new GenericException("Customer could not be created", $"{(int)HttpStatusCode.Forbidden}");
                 }
             }
             catch (Exception)
@@ -595,7 +590,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             //check if the SLA has been signed by the user
             var userSla = await _uow.SLASignedUser.FindAsync(x => x.UserId == userId);
-            if (userSla.Count() > 0)
+            if (userSla.Any())
             {
                 sla.IsSigned = true;
             }
@@ -628,7 +623,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (wallet == null)
             {
-                throw new GenericException("Wallet does not exist");
+                throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
             return wallet.WalletId;

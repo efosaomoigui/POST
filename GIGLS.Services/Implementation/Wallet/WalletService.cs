@@ -128,7 +128,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (wallet == null)
             {
-                throw new GenericException("Wallet does not exist");
+                throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
             return wallet;
@@ -169,7 +169,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var wallet = await _uow.Wallet.GetAsync(walletId);
             if (wallet == null)
             {
-                throw new GenericException("Wallet does not exists");
+                throw new GenericException("Wallet does not exists", $"{(int)HttpStatusCode.NotFound}");
             }
 
             //Manage want every customer to be eligible
@@ -198,7 +198,6 @@ namespace GIGLS.Services.Implementation.Wallet
             newWalletTransaction.DateOfEntry = DateTime.Now;
             newWalletTransaction.ServiceCentreId = serviceCenterIds[0];
             newWalletTransaction.UserId = walletTransactionDTO.UserId;
-
             _uow.WalletTransaction.Add(newWalletTransaction);
             await _uow.CompleteAsync();
 
@@ -228,7 +227,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (wall == null)
             {
-                throw new GenericException("Wallet does not exists");
+                throw new GenericException("Wallet does not exists", $"{(int)HttpStatusCode.NotFound}");
             }
 
             _uow.Wallet.Remove(wall);

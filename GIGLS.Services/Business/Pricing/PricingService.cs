@@ -14,6 +14,7 @@ using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices.Shipments;
 using System;
+using System.Net;
 
 namespace GIGLS.Services.Business.Pricing
 {
@@ -93,7 +94,7 @@ namespace GIGLS.Services.Business.Pricing
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 if (serviceCenters.Length > 1)
                 {
-                    throw new GenericException("This user is assign to more than one(1) Service Centre  ");
+                    throw new GenericException("This user is assign to more than one(1) Service Centre  ", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 pricingDto.DepartureServiceCentreId = serviceCenters[0];
             }
@@ -105,9 +106,9 @@ namespace GIGLS.Services.Business.Pricing
             //get the deliveryOptionPrice from an array
             decimal deliveryOptionPriceTemp = 0;
 
-            if (pricingDto.DeliveryOptionIds.Count() == 0)
+            if (!pricingDto.DeliveryOptionIds.Any())
             {
-                throw new GenericException("Delivery Option can not be empty");
+                throw new GenericException("Delivery Option can not be empty", $"{(int)HttpStatusCode.NotFound}");
             }
             else
             {
@@ -134,7 +135,7 @@ namespace GIGLS.Services.Business.Pricing
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 if (serviceCenters.Length > 1)
                 {
-                    throw new GenericException("This user is assign to more than one(1) Service Centre  ");
+                    throw new GenericException("This user is assign to more than one(1) Service Centre  ", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 pricingDto.DepartureServiceCentreId = serviceCenters[0];
             }
@@ -164,9 +165,9 @@ namespace GIGLS.Services.Business.Pricing
             //get the deliveryOptionPrice from an array
             decimal deliveryOptionPriceTemp = 0;
 
-            if (pricingDto.DeliveryOptionIds.Count() == 0)
+            if (!pricingDto.DeliveryOptionIds.Any())
             {
-                throw new GenericException("Delivery Option can not be empty");
+                throw new GenericException("Delivery Option can not be empty", $"{(int)HttpStatusCode.NotFound}");
             }
             else
             {
@@ -353,7 +354,7 @@ namespace GIGLS.Services.Business.Pricing
             var haulage = await _haulageService.GetHaulageById(haulageid);
             if (haulage == null)
             {
-                throw new GenericException("The Tonne specified has not been mapped");
+                throw new GenericException("The Tonne specified has not been mapped", $"{(int)HttpStatusCode.NotFound}");
             }
 
             //ensure departureServiceCentreId is set
@@ -363,7 +364,7 @@ namespace GIGLS.Services.Business.Pricing
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 if (serviceCenters.Length > 1)
                 {
-                    throw new GenericException("This user is assign to more than one(1) Service Centre  ");
+                    throw new GenericException("This user is assign to more than one(1) Service Centre  ", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 departureServiceCentreId = serviceCenters[0];
             }
@@ -412,7 +413,7 @@ namespace GIGLS.Services.Business.Pricing
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 if (serviceCenters.Length > 1)
                 {
-                    throw new GenericException("This user is assign to more than one(1) Service Centre  ");
+                    throw new GenericException("This user is assign to more than one(1) Service Centre  ", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 pricingDto.DepartureServiceCentreId = serviceCenters[0];
             }
@@ -443,7 +444,7 @@ namespace GIGLS.Services.Business.Pricing
 
                 if (serviceCenters.Length > 1)
                 {
-                    throw new GenericException("This user is assign to more than one(1) Service Centre  ");
+                    throw new GenericException("This user is assign to more than one(1) Service Centre  ", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 pricingDto.DepartureServiceCentreId = serviceCenters[0];
             }
@@ -453,9 +454,9 @@ namespace GIGLS.Services.Business.Pricing
             //get the deliveryOptionPrice from an array
             decimal deliveryOptionPriceTemp = 0;
 
-            if (pricingDto.DeliveryOptionIds.Count() == 0)
+            if (!pricingDto.DeliveryOptionIds.Any())
             {
-                throw new GenericException("Delivery Option can not be empty");
+                throw new GenericException("Delivery Option can not be empty", $"{(int)HttpStatusCode.NotFound}");
             }
             else
             {

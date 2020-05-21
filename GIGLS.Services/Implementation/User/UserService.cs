@@ -269,7 +269,7 @@ namespace GIGLS.Services.Implementation.User
 
             if (user == null)
             {
-                throw new GenericException("User does not exist!");
+                throw new GenericException("User does not exist!", $"{(int)HttpStatusCode.NotFound}");
             }
 
             user.IsActive = val;
@@ -299,7 +299,7 @@ namespace GIGLS.Services.Implementation.User
         {
             if (await GetRoleByName(roleDTO.Name) != null)
             {
-                throw new GenericException("Role exist already!");
+                throw new GenericException("Role exist already!", $"{(int)HttpStatusCode.Forbidden}");
             }
 
             var result = await _unitOfWork.User.AddRole(roleDTO.Name);
@@ -368,7 +368,7 @@ namespace GIGLS.Services.Implementation.User
 
             if (user == null)
             {
-                throw new GenericException("User does not exist!");
+                throw new GenericException("User does not exist!", $"{(int)HttpStatusCode.NotFound}");
             }
 
             var userClaims = await GetClaimsAsync(userid);
@@ -401,7 +401,7 @@ namespace GIGLS.Services.Implementation.User
 
             if (user == null)
             {
-                throw new GenericException("User does not exist!");
+                throw new GenericException("User does not exist!", $"{(int)HttpStatusCode.NotFound}");
             }
             var result = await _unitOfWork.User.RemoveClaimAsync(userid, claim);
             await _unitOfWork.CompleteAsync();
@@ -441,7 +441,7 @@ namespace GIGLS.Services.Implementation.User
                 var systemUser = await GetUserById(systemuserid);
                 if (systemUser.UserType != UserType.System)
                 {
-                    throw new GenericException("User is not a System Type!");
+                    throw new GenericException("User is not a System Type!", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 // get the roles and claims
@@ -614,7 +614,7 @@ namespace GIGLS.Services.Implementation.User
 
                 if (claimValue == null)
                 {
-                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 if (claimValue[0] == "Global")
@@ -645,7 +645,7 @@ namespace GIGLS.Services.Implementation.User
                 }
                 else
                 {
-                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.", $"{(int)HttpStatusCode.NotFound}");
                 }
             }
             catch (Exception ex)
@@ -675,7 +675,7 @@ namespace GIGLS.Services.Implementation.User
                 }
                 if (claimValue == null)
                 {
-                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 if (claimValue[0] == "Global")
@@ -705,7 +705,7 @@ namespace GIGLS.Services.Implementation.User
                 }
                 else
                 {
-                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.", $"{(int)HttpStatusCode.NotFound}");
                 }
             }
             catch (Exception)
@@ -739,7 +739,7 @@ namespace GIGLS.Services.Implementation.User
                 }
                 if (claimValue == null)
                 {
-                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 if (claimValue[0] == "Global")
@@ -769,7 +769,7 @@ namespace GIGLS.Services.Implementation.User
                 }
                 else
                 {
-                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
+                    throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.", $"{(int)HttpStatusCode.NotFound}");
                 }
             }
             catch (Exception)
@@ -814,12 +814,12 @@ namespace GIGLS.Services.Implementation.User
             var user = await _unitOfWork.User.GetUserById(userid);
             if (user == null || string.IsNullOrEmpty(newPassword))
             {
-                throw new GenericException("Operation could not complete, kindly supply valid credential");
+                throw new GenericException("Operation could not complete, kindly supply valid credential", $"{(int)HttpStatusCode.Forbidden}");
             }
 
             if (!await _unitOfWork.User.CheckPasswordAsync(user, currentPassword))
             {
-                throw new GenericException("Operation could not complete, kindly supply valid credential");
+                throw new GenericException("Operation could not complete, kindly supply valid credential", $"{(int)HttpStatusCode.Forbidden}");
             }
 
             user.PasswordExpireDate = DateTime.Now;
@@ -833,12 +833,12 @@ namespace GIGLS.Services.Implementation.User
             var user = await _unitOfWork.User.GetUserByEmail(email);
             if (user == null || string.IsNullOrEmpty(newPassword))
             {
-                throw new GenericException("Operation could not complete, kindly supply valid credential");
+                throw new GenericException("Operation could not complete, kindly supply valid credential", $"{(int)HttpStatusCode.Forbidden}");
             }
 
             if (!await _unitOfWork.User.CheckPasswordAsync(user, currentPassword))
             {
-                throw new GenericException("Operation could not complete, kindly supply valid credential");
+                throw new GenericException("Operation could not complete, kindly supply valid credential", $"{(int)HttpStatusCode.Forbidden}");
             }
 
             user.PasswordExpireDate = DateTime.Now;
@@ -1146,7 +1146,7 @@ namespace GIGLS.Services.Implementation.User
 
             if (user == null)
             {
-                throw new GenericException("Phone number does not exist!");
+                throw new GenericException("Phone number does not exist!", $"{(int)HttpStatusCode.NotFound}");
             }
             return Mapper.Map<UserDTO>(user);
         }
@@ -1262,14 +1262,14 @@ namespace GIGLS.Services.Implementation.User
                 var user = await _unitOfWork.User.GetUserById(userid);
                 if (user == null)
                 {
-                    throw new GenericException("User does not exist!");
+                    throw new GenericException("User does not exist!", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 //validate countryId
                 var country = await _unitOfWork.Country.GetAsync(countryId);
                 if (country == null)
                 {
-                    throw new GenericException("Country does not exist!");
+                    throw new GenericException("Country does not exist!", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 //set countryId
@@ -1336,7 +1336,7 @@ namespace GIGLS.Services.Implementation.User
                 else
                 {
                     //throw exception
-                    throw new GenericException($"You have not been assigned an Active Country. Kindly inform the administrator.");
+                    throw new GenericException($"You have not been assigned an Active Country. Kindly inform the administrator.", $"{(int)HttpStatusCode.Forbidden}");
                 }
             }
 
@@ -1362,7 +1362,7 @@ namespace GIGLS.Services.Implementation.User
 
                 if (claimValue == null)
                 {
-                    throw new GenericException($"You have not been assigned a Regional access. Kindly inform the administrator.");
+                    throw new GenericException($"You have not been assigned a Regional access. Kindly inform the administrator.", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 if (claimValue[0] == "Region")
@@ -1377,12 +1377,12 @@ namespace GIGLS.Services.Implementation.User
                 }
                 else
                 {
-                    throw new GenericException($"You have not been assigned a Regional access. Kindly inform the administrator.");
+                    throw new GenericException($"You have not been assigned a Regional access. Kindly inform the administrator.", $"{(int)HttpStatusCode.Forbidden}");
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
 
             return serviceCenterIds;
@@ -1414,7 +1414,7 @@ namespace GIGLS.Services.Implementation.User
 
             if (user == null)
             {
-                throw new GenericException("User does not exist");
+                throw new GenericException("User does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
             return Mapper.Map<UserDTO>(user);
         }

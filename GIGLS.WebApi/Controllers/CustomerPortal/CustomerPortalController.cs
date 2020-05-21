@@ -145,7 +145,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-
         [HttpGet]
         [Route("walletpaymentlog")]
         public async Task<IServiceResponse<List<WalletPaymentLogDTO>>> GetWalletPaymentLogs([FromUri]FilterOptionsDto filterOptionsDto)
@@ -590,7 +589,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpPost]
         [Route("validateotp/{OTP}")]
         public async Task<IServiceResponse<JObject>> IsOTPValid(int OTP)

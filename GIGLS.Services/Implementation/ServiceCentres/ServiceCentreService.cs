@@ -10,6 +10,7 @@ using GIGLS.Infrastructure;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.User;
+using System.Net;
 
 namespace GIGLS.Services.IServices.ServiceCentres
 {
@@ -31,7 +32,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
             {
                 if (!await _uow.Station.ExistAsync(c => c.StationId == service.StationId))
                 {
-                    throw new GenericException("STATION SELECTED DOES NOT EXIST");
+                    throw new GenericException("STATION SELECTED DOES NOT EXIST", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 service.Name = service.Name.Trim();
@@ -41,7 +42,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
 
                 if (await _uow.ServiceCentre.ExistAsync(c => c.Name.ToLower() == service.Name || c.Code.ToLower() == service.Code))
                 {
-                    throw new GenericException($"{service.Name} Service Centre Already Exist");
+                    throw new GenericException($"{service.Name} Service Centre Already Exist", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 service.Name = service.Name.ToUpper();
@@ -66,7 +67,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 var centre = await _uow.ServiceCentre.GetAsync(serviceCentreId);
                 if (centre == null)
                 {
-                    throw new GenericException("Service Centre does not exist");
+                    throw new GenericException("Service Centre does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
                 _uow.ServiceCentre.Remove(centre);
                 _uow.Complete();
@@ -84,7 +85,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 var centre = await _uow.ServiceCentre.GetAsync(s => s.Code == serviceCentreCode, "Station");
                 if (centre == null)
                 {
-                    throw new GenericException("Service Centre does not exist");
+                    throw new GenericException("Service Centre does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 var centreDto = Mapper.Map<ServiceCentreDTO>(centre);
@@ -118,7 +119,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 var centre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == serviceCentreId, "Station");
                 if (centre == null)
                 {
-                    throw new GenericException("Service Centre does not exist");
+                    throw new GenericException("Service Centre does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 var centreDto = Mapper.Map<ServiceCentreDTO>(centre);
@@ -139,7 +140,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 var centre = await _uow.ServiceCentre.GetServiceCentresByIdForInternational(serviceCentreId);
                 if (centre == null)
                 {
-                    throw new GenericException("Service Centre does not exist");
+                    throw new GenericException("Service Centre does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
                 return centre;
             }
@@ -168,7 +169,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 var centre = await _uow.ServiceCentre.GetAsync(s => s.IsDefault == true, "Station");
                 if (centre == null)
                 {
-                    throw new GenericException("Error: A Default Service Center has not been configured on this system. Please see the administrator.");
+                    throw new GenericException("Error: A Default Service Center has not been configured on this system. Please see the administrator.", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 var centreDto = Mapper.Map<ServiceCentreDTO>(centre);
@@ -189,7 +190,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 var centre = await _uow.ServiceCentre.GetAsync(s => s.Code.ToLower() == "giggo", "Station");
                 if (centre == null)
                 {
-                    throw new GenericException("Error: A GIGGO Service Center has not been configured on this system. Please see the administrator.");
+                    throw new GenericException("Error: A GIGGO Service Center has not been configured on this system. Please see the administrator.", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 var centreDto = Mapper.Map<ServiceCentreDTO>(centre);
@@ -247,7 +248,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 var centre = await _uow.ServiceCentre.GetAsync(serviceCentreId);
                 if (centre == null)
                 {
-                    throw new GenericException("Service Centre does not exist");
+                    throw new GenericException("Service Centre does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
                 centre.IsActive = status;
                 _uow.Complete();
@@ -265,7 +266,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 var centre = await _uow.ServiceCentre.GetAsync(serviceCentreId);
                 if (centre == null || serviceCentreId != service.ServiceCentreId)
                 {
-                    throw new GenericException("Service Centre does not exist");
+                    throw new GenericException("Service Centre does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 //1. update the old service centre code to the new one in Number Generator Monitor if they are different
@@ -309,7 +310,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
                 var inputServiceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == serviceCentreId, "Station");
                 if (inputServiceCentre == null)
                 {
-                    throw new GenericException("Service Centre does not exist");
+                    throw new GenericException("Service Centre does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 //Get Service Centre from SuperServiceCentreId
@@ -327,7 +328,8 @@ namespace GIGLS.Services.IServices.ServiceCentres
             }
             catch (Exception)
             {
-                throw new GenericException("ServiceCentreForHomeDelivery has not been configured for the Input Service Centre.");
+                throw;
+                //throw new GenericException("ServiceCentreForHomeDelivery has not been configured for the Input Service Centre.");
             }
         }
 
