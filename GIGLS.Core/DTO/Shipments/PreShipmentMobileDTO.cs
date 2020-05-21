@@ -31,6 +31,7 @@ namespace GIGLS.Core.DTO.Shipments
         public DateTime? DeliveryTime { get; set; }
         public int SenderStationId { get; set; }
         public string InputtedSenderAddress { get; set; }
+        public string SenderLocality { get; set; }
 
         public int ReceiverStationId { get; set; }
 
