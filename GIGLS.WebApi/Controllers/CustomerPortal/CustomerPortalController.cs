@@ -36,6 +36,7 @@ using GIGLS.Core.Domain;
 using EfeAuthen.Models;
 using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.DTO.Fleets;
+using System.Net;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -691,7 +692,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                         if (!responseMessage.IsSuccessStatusCode)
                         {
-                            throw new GenericException("Incorrect Login Details");
+                            throw new GenericException("Incorrect Login Details", $"{(int)System.Net.HttpStatusCode.Forbidden}");
                         }
                         else
                         {
@@ -719,6 +720,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                     return new ServiceResponse<JObject>
                     {
+                        Code = $"{(int)System.Net.HttpStatusCode.BadRequest}",
                         ShortDescription = "User has not been verified",
                         Object = jObject
                     };
@@ -781,7 +783,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                 if (user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
                 {
-                    throw new GenericException("You are not authorized to login on this platform.");
+                    throw new GenericException("You are not authorized to login on this platform.", $"{(int)System.Net.HttpStatusCode.Forbidden}");
                 }
 
                 if (user != null && user.IsActive == true)
@@ -870,6 +872,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                     return new ServiceResponse<JObject>
                     {
+                        Code = $"{(int)System.Net.HttpStatusCode.BadRequest}",
                         ShortDescription = "User has not been verified",
                         Object = jObject
                     };
@@ -1357,6 +1360,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
         [HttpPost]
         [Route("addratings")]
         public async Task<object> Addratings(MobileRatingDTO rating)
@@ -1438,11 +1442,12 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 }
                 else
                 {
-                    throw new GenericException("Information does not exist, kindly provide correct email");
+                    throw new GenericException("Information does not exist, kindly provide correct email", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 return new ServiceResponse<bool>
                 {
+                    Code = $"{(int)HttpStatusCode.OK}",
                     Object = true
                 };
             });
@@ -1591,6 +1596,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
         [HttpPost]
         [Route("updatevehicleprofile")]
         public async Task<IServiceResponse<bool>> updatevehicleprofile(UserDTO user)
@@ -1632,7 +1638,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<AdminReportDTO>
                 {
                     Object = data
-
                 };
             });
         }
@@ -1662,7 +1667,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return response;
             });
         }
-
 
         [HttpPost]
         [Route("cancelshipmentwithnocharge")]

@@ -1506,6 +1506,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.EditProfile(user);
         }
+
         public async Task<object> AddPreShipmentMobile(PreShipmentMobileDTO preShipment)
         {
             var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
@@ -1534,7 +1535,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             if (disableShipmentCreation)
             {
-                throw new GenericException($"App under maintenance. Service currently not available", System.Net.HttpStatusCode.InternalServerError.ToString());
+                throw new GenericException($"App under maintenance. Service currently not available", $"{(int)HttpStatusCode.ServiceUnavailable}");
             }
 
             return await _iWalletTransactionService.GetWalletTransactionsForMobile();
@@ -1638,6 +1639,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _adminReportService.DisplayWebsiteData();
         }
+
         public async Task AddWallet(WalletDTO wallet)
         {
             var exists = await _uow.Wallet.ExistAsync(s => s.CustomerCode == wallet.CustomerCode);
@@ -1844,13 +1846,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             try
             {
-
                 var deliverynumberDto = new List<DeliveryNumberDTO>();
-                //var query = _uow.DeliveryNumber.GetAll();
                 deliverynumberDto = await GenerateDeliveryNumber(count);
-                //query = query.Where(s => s.IsUsed != true);
-                //var deliverynumbers = query.ToList();
-                //deliverynumberDto = Mapper.Map<List<DeliveryNumberDTO>>(deliverynumbers);
                 return await Task.FromResult(deliverynumberDto);
             }
             catch (Exception)
@@ -1898,26 +1895,26 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var preShipmentMobile = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == mobilePickUpRequestsDTO.Waybill);
                 if (preShipmentMobile == null)
                 {
-                    throw new GenericException("This is not a GIGGo Shipment. It can not be updated");
+                    throw new GenericException("This is not a GIGGo Shipment. It can not be updated", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 else
                 {
                     if ((preShipmentMobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString() || preShipmentMobile.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString())
                         && mobilePickUpRequestsDTO.Status == "Shipment created")
                     {
-                        throw new GenericException($"You can not change this shipment status to {mobilePickUpRequestsDTO.Status}");
+                        throw new GenericException($"You can not change this shipment status to {mobilePickUpRequestsDTO.Status}", $"{(int)HttpStatusCode.Forbidden}");
                     }
                     else if (preShipmentMobile.ZoneMapping == 1 && mobilePickUpRequestsDTO.Status == MobilePickUpRequestStatus.OnwardProcessing.ToString())
                     {
-                        throw new GenericException("This is not an Inter-State Shipment");
+                        throw new GenericException("This is not an Inter-State Shipment", $"{(int)HttpStatusCode.Forbidden}");
                     }
                     else if (preShipmentMobile.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString())
                     {
-                        throw new GenericException("This shipment has already been delivered. No further action can be taken");
+                        throw new GenericException("This shipment has already been delivered. No further action can be taken", $"{(int)HttpStatusCode.Forbidden}");
                     }
                     else if (preShipmentMobile.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString())
                     {
-                        throw new GenericException("The GIGGo Shipment has been cancelled. It can not be updated");
+                        throw new GenericException("The GIGGo Shipment has been cancelled. It can not be updated", $"{(int)HttpStatusCode.Forbidden}");
                     }
                     else
                     {
@@ -2013,7 +2010,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         double volume = (shipmentItem.Length * shipmentItem.Height * shipmentItem.Width) / 5000;
                         double Weight = shipmentItem.Weight > volume ? shipmentItem.Weight : volume;
-
                         newPreShipment.ApproximateItemsWeight += Weight;
                     }
                     else
@@ -2025,7 +2021,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 _uow.PreShipment.Add(newPreShipment);
                 await _uow.CompleteAsync();
-
                 return true;
             }
             catch (Exception)
@@ -2084,13 +2079,13 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var existingPreShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == preShipmentDTO.TempCode);
                 if (existingPreShipment == null)
                 {
-                    throw new GenericException("Pre Shipment does not exist");
+                    throw new GenericException("Pre Shipment does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
                 else
                 {
                     if (existingPreShipment.IsProcessed)
                     {
-                        throw new GenericException("Pre Shipment already processed");
+                        throw new GenericException("Pre Shipment already processed", $"{(int)HttpStatusCode.Forbidden}");
                     }
                 }
 
@@ -2164,7 +2159,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 }
                 else
                 {
-                    throw new GenericException($"DropOff with code: {tempCode} does not exist");
+                    throw new GenericException($"DropOff with code: {tempCode} does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
             }
             catch (Exception)

@@ -1401,7 +1401,7 @@ namespace GIGLS.Services.Implementation.User
 
             if (user == null)
             {
-                throw new GenericException("User does not exist!");
+                throw new GenericException("User does not exist!", $"{(int)HttpStatusCode.NotFound}");
             }
 
             return Mapper.Map<UserDTO>(user);
@@ -1426,7 +1426,7 @@ namespace GIGLS.Services.Implementation.User
 
             if (user == null)
             {
-                throw new GenericException("User does not exist");
+                throw new GenericException("User does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
             return Mapper.Map<UserDTO>(user);
         }
@@ -1438,7 +1438,7 @@ namespace GIGLS.Services.Implementation.User
 
             if (user == null)
             {
-                throw new GenericException("User does not exist!");
+                throw new GenericException("User does not exist!", $"{(int)HttpStatusCode.NotFound}");
             }
 
             return Mapper.Map<UserDTO>(user);

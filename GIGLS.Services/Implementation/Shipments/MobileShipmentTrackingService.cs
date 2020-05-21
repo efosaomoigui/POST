@@ -12,6 +12,7 @@ using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.IServices.Business;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -189,7 +190,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipmentTracking = await _uow.MobileShipmentTracking.GetAsync(trackingId);
                 if (shipmentTracking == null || tracking.MobileShipmentTrackingId != trackingId)
                 {
-                    throw new GenericException("MobileShipmentTracking Not Exist");
+                    throw new GenericException("MobileShipmentTracking Not Exist", $"{(int)HttpStatusCode.BadRequest}");
                 }
                 shipmentTracking.Location = shipmentTracking.Location;
                 shipmentTracking.TrackingType = shipmentTracking.TrackingType;

@@ -18,6 +18,7 @@ using GIGLS.Core.IMessageService;
 using GIGLS.Infrastructure;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.IServices.Wallet;
+using System.Net;
 
 namespace GIGLS.Services.Implementation
 {
@@ -97,7 +98,7 @@ namespace GIGLS.Services.Implementation
 
             if (otpbody == null)
             {
-                throw new GenericException("Invalid OTP");
+                throw new GenericException("Invalid OTP", $"{(int)HttpStatusCode.Forbidden}");
             }
             else
             {
@@ -122,7 +123,7 @@ namespace GIGLS.Services.Implementation
                 {
                     _uow.OTP.Remove(otpbody);
                     await _uow.CompleteAsync();
-                    throw new GenericException("OTP has expired!.Kindly Resend OTP.");
+                    throw new GenericException("OTP has expired!.Kindly Resend OTP.", $"{(int)HttpStatusCode.Forbidden}");
                 }
             }
         }
@@ -289,7 +290,7 @@ namespace GIGLS.Services.Implementation
                     }
 
                     var vehicle = await _uow.VehicleType.FindAsync(s => s.Partnercode == registerUser.UserChannelCode);
-                    if (vehicle.Count() > 0)
+                    if (vehicle.Any())
                     {
                         registerUser.VehicleDetails = new List<VehicleTypeDTO>();
                         registerUser.VehicleType = new List<string>();
@@ -315,7 +316,6 @@ namespace GIGLS.Services.Implementation
                 }
 
                 var averageratings = await GetAverageRating(registerUser.UserChannelCode, userchanneltype);
-
                 registerUser.AverageRatings = averageratings;
                 return registerUser;
             }

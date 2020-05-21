@@ -1439,7 +1439,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else
                     {
-                        throw new GenericException($"Shipment with waybill: {waybill} does not exist");
+                        throw new GenericException($"Shipment with waybill: {waybill} does not exist", $"{(int)HttpStatusCode.NotFound}");
                     }
                 }
 
@@ -1462,7 +1462,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var currentUser = await _userService.GetCurrentUserId();
                 var user = await _uow.User.GetUserById(currentUser);
-                var mobileShipment = await _uow.PreShipmentMobile.FindAsync(x => x.CustomerCode.Equals(user.UserChannelCode), "PreShipmentItems,SenderLocation,ReceiverLocation");
+                var mobileShipment = await _uow.PreShipmentMobile.FindAsync(x => x.CustomerCode == user.UserChannelCode, "PreShipmentItems,SenderLocation,ReceiverLocation");
 
                 List<PreShipmentMobileDTO> shipmentDto = (from r in mobileShipment
                                                           select new PreShipmentMobileDTO()
@@ -1552,9 +1552,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 var newlist = shipmentDto.Union(agilityShipment);
                 return await Task.FromResult(newlist.OrderByDescending(x => x.DateCreated).Take(20).ToList());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -1592,7 +1592,8 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw new GenericException("Please an error occured while getting Special Packages");
+                throw;
+                //throw new GenericException("Please an error occured while getting Special Packages");
             }
         }
 
@@ -1605,7 +1606,8 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw new GenericException("Please an error occured while getting categories.Please try again");
+                throw;
+                //throw new GenericException("Please an error occured while getting categories.Please try again");
             }
         }
 
@@ -1618,13 +1620,13 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw new GenericException("Please an error occurred while getting sub-categories.Please try again");
+                throw;
+                //throw new GenericException("Please an error occurred while getting sub-categories.Please try again");
             }
         }
 
         public async Task ScanMobileShipment(ScanDTO scan)
         {
-            // verify the waybill number exists in the system
             try
             {
                 var shipment = await GetMobileShipmentForScan(scan.WaybillNumber);
@@ -1641,7 +1643,8 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw new GenericException("Please an error occurred while trying to scan shipment.");
+                throw;
+                //throw new GenericException("Please an error occurred while trying to scan shipment.");
             }
         }
 
@@ -1652,7 +1655,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipment = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill.Equals(waybill));
                 if (shipment == null)
                 {
-                    throw new GenericException("Waybill does not exist");
+                    throw new GenericException("Waybill does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
                 return shipment;
             }
@@ -1671,7 +1674,8 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw new GenericException("Error: You cannot track this waybill number.");
+                throw;
+                //throw new GenericException("Error: You cannot track this waybill number.");
             }
         }
 
@@ -1681,7 +1685,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 if (pickuprequest == null)
                 {
-                    throw new GenericException("Group does not exist");
+                    throw new GenericException("NULL INPUT");
                 }
 
                 var newPreShipment = new PreShipmentMobileDTO();
@@ -1694,7 +1698,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
                 if (preshipmentmobile == null)
                 {
-                    throw new GenericException("Shipment does not exist");
+                    throw new GenericException("Shipment does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
                 else
                 {
@@ -1726,7 +1730,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else
                     {
-                        throw new GenericException($"Shipment has already been accepted..");
+                        throw new GenericException($"Shipment has already been accepted..", $"{(int)HttpStatusCode.Forbidden}");
                     }
 
                     if (pickuprequest.ServiceCentreId != null)
@@ -1787,7 +1791,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 if (pickuprequest == null)
                 {
-                    throw new GenericException("Group does not exist");
+                    throw new GenericException("NULL INPUT");
                 }
 
                 if (pickuprequest.UserId == null)
@@ -1810,10 +1814,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     List<string> waybillList = waybillHashSet.ToList();
 
-                    //var allpreshipmentmobile = _uow.PreShipmentMobile.GetAllAsQueryable().Where(s => waybillList.Contains(s.Waybill)).ToList();
                     var allpreshipmentmobile = await _uow.PreShipmentMobile.FindAsync(x => waybillList.Contains(x.Waybill), "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
-
-                    //var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation,serviceCentreLocation");
 
                     //map the result 
                     List<PreShipmentMobileDTO> newPreShipmentDTO = Mapper.Map<List<PreShipmentMobileDTO>>(allpreshipmentmobile);
@@ -1909,14 +1910,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else
                     {
-                        throw new GenericException($"Shipment has already been accepted..");
+                        throw new GenericException($"Shipment Already Accepted.", $"{(int)HttpStatusCode.Forbidden}");
                     }
 
                     return newPreShipmentDTO;
                 }
                 else
                 {
-                    throw new GenericException("Group does not exist");
+                    throw new GenericException("Group Code does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
             }
             catch (Exception) { throw; }
@@ -1939,7 +1940,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 if (pickuprequest == null)
                 {
-                    throw new GenericException("Pick Up Request is Null");
+                    throw new GenericException("Null INPUT");
                 }
 
                 var userId = await _userService.GetCurrentUserId();
@@ -1951,13 +1952,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     await ConfirmMobilePickupRequest(pickuprequest, userId);
                 }
-
                 else if (pickuprequest.Status == MobilePickUpRequestStatus.Delivered.ToString())
                 {
                     await DeliveredMobilePickupRequest(pickuprequest, userId);
                     await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OffDelivery);
                 }
-
                 else if (pickuprequest.Status == MobilePickUpRequestStatus.Cancelled.ToString())
                 {
                     await ScanMobileShipment(new ScanDTO
@@ -1967,12 +1966,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     });
 
                     await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OffDelivery);
-
                 }
-
                 else if (pickuprequest.Status == MobilePickUpRequestStatus.Dispute.ToString())
                 {
                     var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
+                    if(preshipmentmobile == null)
+                    {
+                        throw new GenericException($"Waybill {pickuprequest.Waybill} does not exist", $"{(int)HttpStatusCode.NotFound}");
+                    }
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Dispute.ToString();
                     pickuprequest.Status = MobilePickUpRequestStatus.Dispute.ToString();
                     await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
@@ -1981,6 +1982,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 else if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString())
                 {
                     var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
+                    if (preshipmentmobile == null)
+                    {
+                        throw new GenericException($"Waybill {pickuprequest.Waybill} does not exist", $"{(int)HttpStatusCode.NotFound}");
+                    }
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
                     await UpdateActivityStatus(pickuprequest.UserId, ActivityStatus.OffDelivery);
                     await _uow.CompleteAsync();
@@ -1994,9 +1999,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -2006,7 +2011,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 if (pickuprequest == null)
                 {
-                    throw new GenericException("Pick Up Request is Null");
+                    throw new GenericException("NULL INPUT");
                 }
 
                 if (string.IsNullOrEmpty(pickuprequest.GroupCodeNumber))
@@ -2029,7 +2034,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var groupList = await _uow.MobileGroupCodeWaybillMapping.FindAsync(x => x.GroupCodeNumber == pickuprequest.GroupCodeNumber);
                     if (groupList == null)
                     {
-                        throw new GenericException("Group does not exist");
+                        throw new GenericException("Group does not exist", $"{(int)HttpStatusCode.NotFound}");
                     }
                     else
                     {
@@ -2105,7 +2110,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 if (pickuprequest == null)
                 {
-                    throw new GenericException("Pick Up Request is Null");
+                    throw new GenericException("NULL INPUT");
                 }
 
                 if (string.IsNullOrEmpty(pickuprequest.Waybill))
@@ -2161,7 +2166,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
                 if (preshipmentmobile == null)
                 {
-                    throw new GenericException("Shipment item does not exist");
+                    throw new GenericException("Shipment item does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 int destinationServiceCentreId = 0;
@@ -2264,7 +2269,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
                 if (preshipmentmobile == null)
                 {
-                    throw new GenericException("Shipment item does not exist");
+                    throw new GenericException("Shipment item does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 preshipmentmobile.IsDelivered = true;
@@ -2380,7 +2385,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         pickuprequest.Status = MobilePickUpRequestStatus.Confirmed.ToString();
                         await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
-                        throw new GenericException("This is an interstate delivery, drop at assigned service centre!!");
+                        throw new GenericException("This is an interstate delivery, drop at assigned service centre!!", $"{(int)HttpStatusCode.Forbidden}");
                     }
                 }
             }
@@ -2502,8 +2507,6 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                //Get Price
-
                 foreach (var preShipment in preshipmentmobile)
                 {
                     var preshipment = await _uow.PreShipmentItemMobile.GetAsync(s => s.PreShipmentMobileId == preShipment.PreShipmentMobileId && s.PreShipmentItemMobileId == preShipment.PreShipmentItemMobileId);
@@ -2553,7 +2556,8 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw new GenericException("Please an error occurred while trying to get all special packages.");
+                throw;
+                //throw new GenericException("Please an error occurred while trying to get all special packages.");
             }
         }
 
@@ -2596,7 +2600,8 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw new GenericException("Please an error occurred while trying to get the categorization of special packages.");
+                throw;
+                //throw new GenericException("Please an error occurred while trying to get the categorization of special packages.");
             }
         }
 
@@ -2681,7 +2686,8 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw new GenericException("Please an error occurred while trying to get the categorization of special packages.");
+                throw;
+                //throw new GenericException("Please an error occurred while trying to get the categorization of special packages.");
             }
         }
 
@@ -2749,9 +2755,11 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw new GenericException("Please an error occurred while trying to get shipments in dispute.");
+                throw;
+                //throw new GenericException("Please an error occurred while trying to get shipments in dispute.");
             }
         }
+
         public async Task<SummaryTransactionsDTO> GetPartnerWalletTransactions()
         {
             try
@@ -2781,7 +2789,8 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch (Exception)
             {
-                throw new GenericException("Please an error occurred while trying to get partner's transactions.");
+                throw;
+                //throw new GenericException("Please an error occurred while trying to get partner's transactions.");
             }
         }
 
@@ -2793,7 +2802,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (preshipmentmobilegrandtotal.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobilegrandtotal.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString())
                 {
-                    throw new GenericException("This Shipment cannot be placed in Dispute, because it has been" + " " + preshipmentmobilegrandtotal.shipmentstatus);
+                    throw new GenericException("This Shipment cannot be placed in Dispute, because it has been" + " " + preshipmentmobilegrandtotal.shipmentstatus, $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 foreach (var id in preShipment.DeletedItems)
@@ -2839,7 +2848,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var newdiff = Math.Abs((decimal)difference);
                     if (newdiff > updatedwallet.Balance)
                     {
-                        throw new GenericException("Insufficient Wallet Balance");
+                        throw new GenericException("Insufficient Wallet Balance", $"{(int)HttpStatusCode.Forbidden}");
                     }
                 }
 
@@ -2868,7 +2877,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (preshipmentmobilegrandtotal.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobilegrandtotal.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString())
                 {
-                    throw new GenericException("This Shipment cannot be placed in Dispute, because it has been" + " " + preshipmentmobilegrandtotal.shipmentstatus);
+                    throw new GenericException("This Shipment cannot be placed in Dispute, because it has been" + " " + preshipmentmobilegrandtotal.shipmentstatus, $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 foreach (var id in preShipment.DeletedItems)
@@ -2902,7 +2911,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var newdiff = Math.Abs((decimal)difference);
                     if (newdiff > updatedwallet.Balance)
                     {
-                        throw new GenericException("Insufficient Wallet Balance");
+                        throw new GenericException("Insufficient Wallet Balance", $"{(int)HttpStatusCode.Forbidden}");
                     }
                 }
 
@@ -2929,7 +2938,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == Waybill);
                 if (preshipmentmobile == null)
                 {
-                    throw new GenericException("Shipment does not exist");
+                    throw new GenericException("Shipment does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
@@ -2984,7 +2993,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         if (existingrating.IsRatedByCustomer == true)
                         {
-                            throw new GenericException("Customer has rated this Partner already!");
+                            throw new GenericException("Customer has rated this Partner already!", $"{(int)HttpStatusCode.Forbidden}");
                         }
                         existingrating.CustomerCode = partneruser.UserChannelCode;
                         existingrating.PartnerRating = rating.Rating;
@@ -2996,7 +3005,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         if (existingrating.IsRatedByPartner == true)
                         {
-                            throw new GenericException("Partner has rated this Customer already!");
+                            throw new GenericException("Partner has rated this Customer already!", $"{(int)HttpStatusCode.Forbidden}");
                         }
                         existingrating.PartnerCode = partneruser.UserChannelCode;
                         existingrating.CustomerRating = rating.Rating;
@@ -3255,7 +3264,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     Partner.VehicleLicenseNumber = partnerDto.VehicleLicenseNumber;
                     if (!partnerDto.VehicleTypeDetails.Any())
                     {
-                        throw new GenericException("No Vehicle attached to the Partner. Kindly review!!!");
+                        throw new GenericException("No Vehicle attached to the Partner. Kindly review!!!", $"{(int)HttpStatusCode.NotFound}");
                     }
                     foreach (var vehicle in partnerDto.VehicleTypeDetails)
                     {
@@ -3436,9 +3445,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 string filename = images.PartnerFullName + "_" + images.FileType.ToString() + ".png";
                 //Save to AzureBlobStorage
                 var blobname = await AzureBlobServiceUtil.UploadAsync(bytes, filename);
-
                 return await Task.FromResult(blobname);
-
             }
             catch (Exception)
             {
@@ -3465,7 +3472,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var details = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == result.Waybill, "PreShipmentItems");
                     if (details == null)
                     {
-                        throw new GenericException("Shipment cannot be found in PreshipmentMobile");
+                        throw new GenericException("Shipment cannot be found in PreshipmentMobile", $"{(int)HttpStatusCode.NotFound}");
                     }
                     var PreShipmentdto = Mapper.Map<PreShipmentMobileDTO>(details);
                     ShipmentSummaryDetails.shipmentdetails = PreShipmentdto;
@@ -3476,7 +3483,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var details = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == DeliveryNumber, "PreShipmentItems");
                     if (details == null)
                     {
-                        throw new GenericException("Shipment cannot be found in PreshipmentMobile");
+                        throw new GenericException("Shipment cannot be found in PreshipmentMobile", $"{(int)HttpStatusCode.NotFound}");
                     }
                     else
                     {
@@ -3485,11 +3492,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         ShipmentSummaryDetails.shipmentdetails = PreShipmentdto;
                         return ShipmentSummaryDetails;
                     }
-
                 }
                 else
                 {
-                    throw new GenericException("Shipment cannot be found");
+                    throw new GenericException("Shipment cannot be found", $"{(int)HttpStatusCode.NotFound}");
                 }
             }
             catch (Exception)
@@ -3507,13 +3513,13 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (preshipmentmobile == null)
                 {
-                    throw new GenericException($"This shipment {detail.WaybillNumber} does not exist, Kindly confirm the waybill again!!!");
+                    throw new GenericException($"This shipment {detail.WaybillNumber} does not exist, Kindly confirm the waybill again!!!", $"{(int)HttpStatusCode.NotFound}");
                 }
                 else
                 {
                     if (preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString())
                     {
-                        throw new GenericException($"This shipment {detail.WaybillNumber} has been Cancelled. It can not be processed!!!");
+                        throw new GenericException($"This shipment {detail.WaybillNumber} has been Cancelled. It can not be processed!!!", $"{(int)HttpStatusCode.Forbidden}");
                     }
                     else
                     {
@@ -3603,17 +3609,17 @@ namespace GIGLS.Services.Implementation.Shipments
                                 }
                                 else
                                 {
-                                    throw new GenericException("Shipment has already been approved!!!");
+                                    throw new GenericException("Shipment has already been approved!!!", $"{(int)HttpStatusCode.Forbidden}");
                                 }
                             }
                             else
                             {
-                                throw new GenericException($"This shipment {detail.WaybillNumber} has not been marked as Picked Up. Delivery Partner should confirm pick up from his app.");
+                                throw new GenericException($"This shipment {detail.WaybillNumber} has not been marked as Picked Up. Delivery Partner should confirm pick up from his app.", $"{(int)HttpStatusCode.Forbidden}");
                             }
                         }
                         else
                         {
-                            throw new GenericException("This shipment is not an interstate delivery,take to the assigned receiver's location");
+                            throw new GenericException("This shipment is not an interstate delivery,take to the assigned receiver's location", $"{(int)HttpStatusCode.Forbidden}");
                         }
                         return true;
                     }
@@ -3655,7 +3661,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw new GenericException("An error occurred while trying to create company");
+                throw;
             }
         }
 
@@ -3751,7 +3757,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
             catch
             {
-                throw new GenericException("Please an error occurred while updating profile.");
+                throw;
             }
         }
 
@@ -3787,13 +3793,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     var vehicletype = Mapper.Map<VehicleType>(Vehicle);
                     _uow.VehicleType.Add(vehicletype);
                 }
+                await _uow.CompleteAsync();
+                return true;
             }
             catch
             {
-                throw new GenericException("Please an error occurred while updating profile.");
+                throw;
+                //throw new GenericException("Please an error occurred while updating profile.");
             }
-            await _uow.CompleteAsync();
-            return true;
         }
 
         private async Task<bool> WithinProcessingTime(int CountryId)
@@ -3864,7 +3871,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (preshipmentmobile == null)
                 {
-                    throw new GenericException("Shipment cannot be found");
+                    throw new GenericException("Shipment cannot be found", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 if (Userchanneltype == UserChannelType.IndividualCustomer.ToString())
@@ -3898,7 +3905,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else
                     {
-                        throw new GenericException("Shipment cannot be cancelled because it has been processed.");
+                        throw new GenericException("Shipment cannot be cancelled because it has been processed.", $"{(int)HttpStatusCode.Forbidden}");
                     }
                 }
                 //FOR PARTNER TRYING TO CANCEL  A SHIPMENT
@@ -3906,7 +3913,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     //Get user
                     var user = await _userService.GetCurrentUserId();
-
                     //var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.Status == MobilePickUpRequestStatus.Accepted.ToString());
                     var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && s.UserId == user);
 
@@ -3916,7 +3922,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
 
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Processing.ToString();
-
                 }
                 await _uow.CompleteAsync();
                 return new { IsCancelled = true };
@@ -4039,7 +4044,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var shipment = await _uow.Shipment.FindAsync(x => x.CustomerCode.Equals(userChannelCode) && x.IsCancelled == false);
+                var shipment = await _uow.Shipment.FindAsync(x => x.CustomerCode == userChannelCode && x.IsCancelled == false);
 
                 List<PreShipmentMobileDTO> shipmentDto = (from r in shipment
                                                           select new PreShipmentMobileDTO()
@@ -4094,9 +4099,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return await Task.FromResult(shipmentDto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
