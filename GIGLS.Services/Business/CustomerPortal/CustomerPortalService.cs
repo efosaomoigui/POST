@@ -51,6 +51,7 @@ using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.IServices.Fleets;
 using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
+using System.Net;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -669,7 +670,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             //automatic enable Ecommerce eligibility
             user.IsEligible = true;
 
-            if (user.Referrercode != null)
+            if (!string.IsNullOrWhiteSpace(user.Referrercode))
             {
                 user.RegistrationReferrercode = user.Referrercode;
             }
@@ -690,10 +691,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             if (user.UserChannelType == UserChannelType.Ecommerce)
             {
                 string message = await SendRegistrationMessage(user);
-                throw new GenericException($"{message}");
+                throw new GenericException($"{message}", $"{(int)HttpStatusCode.ServiceUnavailable}");
             }
 
-            if (user.Email != null)
+            if (!string.IsNullOrWhiteSpace(user.Email))
             {
                 user.Email = user.Email.Trim().ToLower();
             }
@@ -722,7 +723,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             else
             {
-                throw new GenericException("Customer already exists!!!");
+                throw new GenericException("Customer already exists!!!", $"{(int)HttpStatusCode.Forbidden}");
             }
 
             return result;
@@ -751,7 +752,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<UserDTO> GetCustomerCountryUsingPhoneCode(UserDTO userDTO)
         {
-            if (userDTO.CountryPhoneNumberCode == null)
+            if (string.IsNullOrWhiteSpace(userDTO.CountryPhoneNumberCode))
             {
                 //Get all countries
                 var country = await _uow.Country.FindAsync(x => x.PhoneNumberCode != null);
@@ -823,18 +824,18 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (EmailUser.UserChannelType == UserChannelType.Employee && EmailUser.Email == user.Email)
                 {
-                    throw new GenericException("Employee email not allowed.");
+                    throw new GenericException("Employee email not allowed.", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 else if (EmailUser.IsRegisteredFromMobile == true)
                 {
-                    throw new GenericException("Partner already exists!");
+                    throw new GenericException("Partner already exists!", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 else
                 {
                     var phonepartnerdetails = await _uow.Partner.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber) || s.Email == user.Email);
                     if (phonepartnerdetails != null)
                     {
-                        throw new GenericException("Customer already Exists as a Partner!");
+                        throw new GenericException("Customer already Exists as a Partner!", $"{(int)HttpStatusCode.Forbidden}");
                     }
                     else
                     {
@@ -917,7 +918,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             var phonepartnerdetails = await _uow.Partner.GetAsync(s => s.PhoneNumber.Contains(PhoneNumber) || s.Email == user.Email);
             if (phonepartnerdetails != null)
             {
-                throw new GenericException("Customer details already Exists as a Partner!");
+                throw new GenericException("Customer details already Exists as a Partner!", $"{(int)HttpStatusCode.Forbidden}");
             }
             else
             {
@@ -947,7 +948,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                     UserActiveCountryId = user.UserActiveCountryId,
                     ActivityStatus = ActivityStatus.Idle,
                     ActivityDate = DateTime.Now
-
                 };
                 _uow.Partner.Add(partnerDTO);
 
@@ -993,15 +993,15 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (EmailUser.UserChannelType == UserChannelType.Employee && EmailUser.Email == user.Email)
                 {
-                    throw new GenericException("Employee email not allowed.");
+                    throw new GenericException("Employee email not allowed.", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 else if (EmailUser.UserChannelType == UserChannelType.Ecommerce && EmailUser.IsRegisteredFromMobile != true)
                 {
-                    throw new GenericException("Account Already Exists. Kindly Login!!!");
+                    throw new GenericException("Account Already Exists. Kindly Login!!!", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 else if (EmailUser.IsRegisteredFromMobile == true)
                 {
-                    throw new GenericException("Customer already exists!");
+                    throw new GenericException("Customer already exists!", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 else
                 {
@@ -1010,7 +1010,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         if (emailcustomerdetails.IsRegisteredFromMobile == true)
                         {
-                            throw new GenericException("Customer aready exists!");
+                            throw new GenericException("Customer aready exists!", $"{(int)HttpStatusCode.Forbidden}");
                         }
                         else
                         {
@@ -1115,15 +1115,15 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                 if (EmailUser.UserChannelType == UserChannelType.Employee && EmailUser.Email == user.Email)
                 {
-                    throw new GenericException("Employee email not allowed.");
+                    throw new GenericException("Employee email not allowed.", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 else if (EmailUser.UserChannelType == UserChannelType.Ecommerce && EmailUser.IsRegisteredFromMobile != true)
                 {
-                    throw new GenericException("Account Already Exists. Kindly Login!!!");
+                    throw new GenericException("Account Already Exists. Kindly Login!!!", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 else if (EmailUser.IsRegisteredFromMobile == true)
                 {
-                    throw new GenericException("Customer already exists!");
+                    throw new GenericException("Customer already exists!", $"{(int)HttpStatusCode.Forbidden}");
                 }
                 else
                 {
@@ -1133,11 +1133,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         if (emailcompanydetails.IsRegisteredFromMobile == true)
                         {
-                            throw new GenericException("Email already Exists as Company Customer!");
+                            throw new GenericException("Email already Exists as Company Customer!", $"{(int)HttpStatusCode.Forbidden}");
                         }
                         else if (emailcompanydetails.Name.Equals(user.Organisation, StringComparison.OrdinalIgnoreCase))
                         {
-                            throw new GenericException($"Company Name Already Exists. Kindly provide another one!!!");
+                            throw new GenericException($"Company Name Already Exists. Kindly provide another one!!!", $"{(int)HttpStatusCode.Forbidden}");
                         }
                         else
                         {
@@ -1171,7 +1171,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                             if (checkCompanyName.Any())
                             {
-                                throw new GenericException($"Company Name Already Exists. Kindly provide another one!!!");
+                                throw new GenericException($"Company Name Already Exists. Kindly provide another one!!!", $"{(int)HttpStatusCode.Forbidden}");
                             }
 
                             var customer = new Company
@@ -1700,7 +1700,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
                     if (checkCompanyName.Any())
                     {
-                        throw new GenericException($"Company Name Already Exists. Kindly provide another one!!!");
+                        throw new GenericException($"Company Name Already Exists. Kindly provide another one!!!", $"{(int)HttpStatusCode.Forbidden}");
                     }
 
                     var customerCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.CustomerCodeEcommerce);
