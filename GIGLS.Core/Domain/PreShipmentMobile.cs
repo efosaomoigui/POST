@@ -39,8 +39,10 @@ namespace GIGLS.Core.Domain
         public string ReceiverCity { get; set; }
         public string ReceiverState { get; set; }
         public string ReceiverCountry { get; set; }
+        public string InputtedReceiverAddress { get; set; }
 
         public string SenderAddress { get; set; }
+        public string InputtedSenderAddress { get; set; }
 
         public int SenderStationId { get; set; }
 

@@ -30,6 +30,7 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal Value { get; set; }
         public DateTime? DeliveryTime { get; set; }
         public int SenderStationId { get; set; }
+        public string InputtedSenderAddress { get; set; }
 
         public int ReceiverStationId { get; set; }
 
@@ -47,6 +48,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string ReceiverState { get; set; }
         public string ReceiverCountry { get; set; }
         public string ReceiverStationName { get; set; }
+        public string InputtedReceiverAddress { get; set; }
 
         public LocationDTO SenderLocation { get; set; }      
 
