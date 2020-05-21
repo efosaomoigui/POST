@@ -948,10 +948,8 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var results = await _uow.CashOnDeliveryAccount.GetPaidOutCODListsAsQueryable();
             var resultVals = results.Where(s=>s.CustomerCode == customercode);
-
             return await Task.FromResult(results.ToList());
         }
-
 
         public async Task UpdateCODCustomersWhoNeedPayOut(NewInvoiceViewDTO invoiceviewinfo)
         {

@@ -157,7 +157,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
             }
         }
 
-
         public IQueryable<WalletPaymentLogView> GetAllFromWalletPaymentLogView()
         {
             var walletPaymentLogViews = _GIGLSContextForView.WalletPaymentLogView.AsQueryable();

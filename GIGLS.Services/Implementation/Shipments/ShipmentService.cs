@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
@@ -201,7 +202,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (shipment == null)
                 {
-                    throw new GenericException($"Shipment with waybill: {waybill} does not exist");
+                    throw new GenericException($"Shipment with waybill: {waybill} does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 return await GetShipment(shipment.ShipmentId);
@@ -219,7 +220,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipment = await _uow.Shipment.GetAsync(x => x.ShipmentId == shipmentId, "DeliveryOption, ShipmentItems");
                 if (shipment == null)
                 {
-                    throw new GenericException("Shipment Information does not exist");
+                    throw new GenericException("Shipment Information does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 var shipmentDto = Mapper.Map<ShipmentDTO>(shipment);

@@ -1492,6 +1492,9 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               CalculatedTotal = r.CalculatedTotal,
                                                               CustomerCode = r.CustomerCode,
                                                               VehicleType = r.VehicleType,
+                                                              InputtedSenderAddress = r.InputtedSenderAddress,
+                                                              InputtedReceiverAddress = r.InputtedReceiverAddress,
+                                                              SenderLocality = r.SenderLocality,
                                                               ReceiverLocation = new LocationDTO
                                                               {
                                                                   Longitude = r.ReceiverLocation.Longitude,

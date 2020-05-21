@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using PayStack.Net;
 using System.Configuration;
 using GIGLS.CORE.DTO.Report;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -117,7 +118,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (walletPaymentLog == null)
             {
-                throw new GenericException("Wallet Payment Log Information does not exist");
+                throw new GenericException("Wallet Payment Log Information does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
             return Mapper.Map<WalletPaymentLogDTO>(walletPaymentLog);
         }
@@ -128,7 +129,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (walletPaymentLog == null)
             {
-                throw new GenericException("Wallet Payment Log Information does not exist");
+                throw new GenericException("Wallet Payment Log Information does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
             _uow.WalletPaymentLog.Remove(walletPaymentLog);
             await _uow.CompleteAsync();
@@ -141,7 +142,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (walletPaymentLog == null)
             {
-                throw new GenericException($"Wallet Payment Log Information does not exist for this reference: {reference}.");
+                throw new GenericException($"Wallet Payment Log Information does not exist for this reference: {reference}.", $"{(int)HttpStatusCode.NotFound}");
             }
 
             walletPaymentLog.IsWalletCredited = walletPaymentLogDto.IsWalletCredited;
@@ -155,7 +156,6 @@ namespace GIGLS.Services.Implementation.Wallet
             walletPaymentLog.Wallet = null;
             _uow.WalletPaymentLog.Add(walletPaymentLog);
             await _uow.CompleteAsync();
-
         }
     }
 
