@@ -297,6 +297,21 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("getregionalbankOrderprocessingcodebyDate")]
+        public async Task<IServiceResponse<List<BankProcessingOrderCodesDTO>>> GetRegionalBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var resValue = await _bankprocessingorder.GetRegionalBankOrderProcessingCodeByDate(type, dateFilterCriteria);
+                return new ServiceResponse<List<BankProcessingOrderCodesDTO>>
+                {
+                    Object = resValue
+                };
+            });
+        }
+
 
         //This one searches for all new Paid Out CODs
         [GIGLSActivityAuthorize(Activity = "View")]

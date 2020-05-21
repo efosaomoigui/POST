@@ -915,6 +915,14 @@ namespace GIGLS.Services.Implementation.Wallet
             return await Task.FromResult(result);
         }
 
+        public async Task<List<BankProcessingOrderCodesDTO>> GetRegionalBankOrderProcessingCodeByDate(DepositType type, ShipmentCollectionFilterCriteria dateFilterCriteria)
+        {
+            //var serviceCenters = _userService.GetPriviledgeServiceCenters().Result;
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            var result = await _uow.BankProcessingOrderCodes.GetBankOrderProcessingCodeByDate(type, dateFilterCriteria, serviceCenters);
+            return await Task.FromResult(result);
+        }
+
         //Helps to get bank processing order from bankprocessingorder table
         public async Task<List<BankProcessingOrderForShipmentAndCODDTO>> GetBankProcessingOrderForShipmentAndCOD(DepositType type)
         {
