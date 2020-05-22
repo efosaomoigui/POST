@@ -4329,8 +4329,8 @@ namespace GIGLS.Services.Implementation.Shipments
             var startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
             var endDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1);
 
-            var shipmentsResult = _uow.PreShipmentMobile.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate &&
-                                        !testUserId.Contains(s.UserId));
+            var shipmentsResult = _uow.PreShipmentMobile.GetAllAsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && (s.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString() || s.shipmentstatus == "Shipment created")
+                                                                         && !testUserId.Contains(s.UserId));
 
 
             List<LocationDTO> locationDTOs = (from r in shipmentsResult
