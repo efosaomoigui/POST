@@ -3161,16 +3161,23 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else
                     {
-                        var shipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == detail.WayBill);
+                        var mobileShipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == detail.WayBill);
 
-                        if(shipment == null)
+                        if(mobileShipment == null)
                         {
                             throw new GenericException("Waybill does not exist in Shipments", $"{(int)HttpStatusCode.NotFound}");
                         }
 
+                        var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == detail.WayBill);
+
+                        if(shipment != null)
+                        {
+                            shipment.DeliveryNumber = detail.DeliveryNumber;
+                        }
+
                         number.IsUsed = true;
                         number.UserId = userId;
-                        shipment.DeliveryNumber = detail.DeliveryNumber;
+                        mobileShipment.DeliveryNumber = detail.DeliveryNumber;
                         await _uow.CompleteAsync();
                     }
                 }
