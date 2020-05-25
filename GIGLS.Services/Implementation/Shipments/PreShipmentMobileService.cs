@@ -1739,14 +1739,18 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (pickuprequest.ServiceCentreId != null)
                     {
                         var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickuprequest.ServiceCentreId);
-                        preshipmentmobile.ServiceCentreAddress = DestinationServiceCentreId.Address;
-                        var Locationdto = new LocationDTO
+
+                        if(DestinationServiceCentreId != null)
                         {
-                            Latitude = DestinationServiceCentreId.Latitude,
-                            Longitude = DestinationServiceCentreId.Longitude
-                        };
-                        var LOcation = Mapper.Map<Location>(Locationdto);
-                        preshipmentmobile.serviceCentreLocation = LOcation;
+                            preshipmentmobile.ServiceCentreAddress = DestinationServiceCentreId.Address;
+                            var Locationdto = new LocationDTO
+                            {
+                                Latitude = DestinationServiceCentreId.Latitude,
+                                Longitude = DestinationServiceCentreId.Longitude
+                            };
+                            var LOcation = Mapper.Map<Location>(Locationdto);
+                            preshipmentmobile.serviceCentreLocation = LOcation;
+                        }
                     }
 
                     if (pickuprequest.Status == MobilePickUpRequestStatus.Accepted.ToString())
