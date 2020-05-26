@@ -735,7 +735,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 CustomerEmail = user.Email,
                 CustomerPhoneNumber = user.PhoneNumber,
                 CustomerCompanyName = user.Organisation,
-                EcommerceEmail = ecommerceEmail.Value
+                EcommerceEmail = ecommerceEmail.Value,
+                BusinessNature = user.BusinessNature
             };
 
             await _messageSenderService.SendGenericEmailMessage(MessageType.ENM, email);

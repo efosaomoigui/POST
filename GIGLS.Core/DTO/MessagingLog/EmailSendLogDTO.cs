@@ -21,5 +21,6 @@ namespace GIGLS.Core.DTO.MessagingLog
         public string CustomerPhoneNumber { get; set; }
         public string CustomerCompanyName { get; set; }
         public string EcommerceEmail { get; set; }
+        public string BusinessNature { get; set; }
     }
 }

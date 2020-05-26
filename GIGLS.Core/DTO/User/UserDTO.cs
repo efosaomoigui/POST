@@ -92,5 +92,6 @@ namespace GIGLS.Core.DTO.User
 
         public bool? IsEligible { get; set; }
         public string RegistrationReferrercode { get; set; }
+        public string BusinessNature { get; set; }
     }
 }
