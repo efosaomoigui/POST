@@ -1801,6 +1801,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("NULL INPUT");
                 }
 
+                if (string.IsNullOrEmpty(pickuprequest.GroupCodeNumber))
+                {
+                    throw new GenericException("Group Code can not be null");
+                }
+
                 if (pickuprequest.UserId == null)
                 {
                     pickuprequest.UserId = await _userService.GetCurrentUserId();
@@ -1858,33 +1863,36 @@ namespace GIGLS.Services.Implementation.Shipments
                         {
                             var DestinationServiceCentreId = await _uow.ServiceCentre.GetAsync(s => s.Code == pickuprequest.ServiceCentreId);
 
-                            Location location = new Location
+                            if(DestinationServiceCentreId != null)
                             {
-                                Latitude = DestinationServiceCentreId.Latitude,
-                                Longitude = DestinationServiceCentreId.Longitude
-                            };
-
-                            //update only the shipment going outside the state
-                            foreach (var item in allpreshipmentmobile)
-                            {
-                                if (item.ZoneMapping != 1)
+                                Location location = new Location
                                 {
-                                    item.serviceCentreLocation = location;
+                                    Latitude = DestinationServiceCentreId.Latitude,
+                                    Longitude = DestinationServiceCentreId.Longitude
+                                };
+
+                                //update only the shipment going outside the state
+                                foreach (var item in allpreshipmentmobile)
+                                {
+                                    if (item.ZoneMapping != 1)
+                                    {
+                                        item.serviceCentreLocation = location;
+                                    }
                                 }
-                            }
 
-                            //update the return data
-                            LocationDTO locationDTO = Mapper.Map<LocationDTO>(location);
+                                //update the return data
+                                LocationDTO locationDTO = Mapper.Map<LocationDTO>(location);
 
-                            //update the location for return data
-                            foreach (var item in newPreShipmentDTO)
-                            {
-                                if (item.ZoneMapping != 1)
+                                //update the location for return data
+                                foreach (var item in newPreShipmentDTO)
                                 {
-                                    item.ReceiverAddress = DestinationServiceCentreId.Address;
-                                    item.ReceiverLocation.Latitude = DestinationServiceCentreId.Latitude;
-                                    item.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude;
-                                    item.serviceCentreLocation = locationDTO;
+                                    if (item.ZoneMapping != 1)
+                                    {
+                                        item.ReceiverAddress = DestinationServiceCentreId.Address;
+                                        item.ReceiverLocation.Latitude = DestinationServiceCentreId.Latitude;
+                                        item.ReceiverLocation.Longitude = DestinationServiceCentreId.Longitude;
+                                        item.serviceCentreLocation = locationDTO;
+                                    }
                                 }
                             }
                         }

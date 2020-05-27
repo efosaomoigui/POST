@@ -353,6 +353,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             var walletDTO = Mapper.Map<WalletDTO>(wallet);
+            walletDTO.UserActiveCountryId = user.UserActiveCountryId;
             return walletDTO;
         }
 
