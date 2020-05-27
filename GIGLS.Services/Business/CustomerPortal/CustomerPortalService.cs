@@ -1978,6 +1978,17 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             try
             {
+                if(preShipmentDTO == null)
+                {
+                    throw new GenericException("NULL INPUT");
+                }
+
+                //validate the input
+                if (!preShipmentDTO.PreShipmentItems.Any())
+                {
+                    throw new GenericException("Shipment Items cannot be empty");
+                }
+
                 // get the sender info
                 var currentUserId = await _userService.GetCurrentUserId();
                 preShipmentDTO.SenderUserId = currentUserId;
@@ -2072,6 +2083,17 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             try
             {
+                if (preShipmentDTO == null)
+                {
+                    throw new GenericException("NULL INPUT");
+                }
+
+                //validate the input
+                if (!preShipmentDTO.PreShipmentItems.Any())
+                {
+                    throw new GenericException("Shipment Items cannot be empty");
+                }
+
                 var existingPreShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == preShipmentDTO.TempCode);
                 if (existingPreShipment == null)
                 {
@@ -2081,7 +2103,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 {
                     if (existingPreShipment.IsProcessed)
                     {
-                        throw new GenericException("Pre Shipment already processed", $"{(int)HttpStatusCode.Forbidden}");
+                        throw new GenericException("Shipment already processed", $"{(int)HttpStatusCode.Forbidden}");
                     }
                 }
 
