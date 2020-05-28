@@ -70,8 +70,22 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             var resultSet = new HashSet<string>();
             var result = new List<ManifestWaybillMappingDTO>();
+            int[] serviceIds = null;
 
-            var serviceIds = await _userService.GetPriviledgeServiceCenters();
+            if (dateFilterCriteria.CountryId == 0)
+            {
+                serviceIds = await _userService.GetPriviledgeServiceCenters();
+
+            }
+            else
+            {
+                int[] serviceCenterId = new int[] {
+                    dateFilterCriteria.CountryId
+                };
+                serviceIds = serviceCenterId;
+
+            }
+
             var manifestWaybillMapings = await _uow.ManifestWaybillMapping.GetManifestWaybillMappings(serviceIds, dateFilterCriteria);
 
             foreach (var item in manifestWaybillMapings)
@@ -420,7 +434,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.PickupManifestWaybillMapping.AddRange(newMappingList);
                 }
 
-                foreach(string waybill in newWaybillToMap)
+                foreach (string waybill in newWaybillToMap)
                 {
                     //create a list to add waybill that has not been mapped
                     //then add then using addrange
@@ -436,7 +450,7 @@ namespace GIGLS.Services.Implementation.Shipments
             catch (Exception)
             {
                 throw;
-                
+
             }
         }
         //Get Waybills In Manifest
@@ -1129,7 +1143,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var pickupManifestDTO = await _manifestService.GetPickupManifestByCode(manifestCode);
-                
+
                 return pickupManifestDTO;
 
             }
