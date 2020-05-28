@@ -662,7 +662,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     "User Name",
                     "Login Time",
-                    "Url",
+                    "Url"
                 };
 
                 var userDTO = (UserDTO)obj;
@@ -849,13 +849,15 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     "Email",
                     "PhoneNumber",
-                    "CompanyName"
+                    "CompanyName",
+                    "BusinessNature"
                 };
                 var emailMessageDTO = (EcommerceMessageDTO)obj;
 
                 strArray[0] = emailMessageDTO.CustomerEmail;
                 strArray[1] = emailMessageDTO.CustomerPhoneNumber;
                 strArray[2] = emailMessageDTO.CustomerCompanyName;
+                strArray[3] = emailMessageDTO.BusinessNature;
 
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
                 messageDTO.Subject = string.Format(messageDTO.Subject, strArray);

@@ -296,7 +296,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     // handle Company customers
                     if (CustomerType.Company == item.CustomerType)
                     {
-                        if (companies.Count > 0)
+                        if (companies.Any())
                         {
                             foreach( var company in companies)
                             {
@@ -308,7 +308,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
                     else if (CustomerType.Partner == item.CustomerType)
                     {
-                        if (partners.Count > 0)
+                        if (partners.Any())
                         {
                             foreach (var partner in partners)
                             {
@@ -321,7 +321,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     else
                     {
                         // handle IndividualCustomers
-                        if (individualCustomer.Count > 0)
+                        if (individualCustomer.Any())
                         {
                             foreach (var individual in individualCustomer)
                             {
@@ -353,6 +353,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             var walletDTO = Mapper.Map<WalletDTO>(wallet);
+            walletDTO.UserActiveCountryId = user.UserActiveCountryId;
             return walletDTO;
         }
 

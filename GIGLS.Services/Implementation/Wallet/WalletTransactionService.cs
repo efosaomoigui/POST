@@ -290,10 +290,67 @@ namespace GIGLS.Services.Implementation.Wallet
             };
         }
 
+        private async Task<WalletTransactionSummaryDTO> GetWalletTransactionByWalletIdForMobile()
+        {
+            //get the customer info
+            var currentUser = await _userService.GetCurrentUserId();
+            var customer = await _uow.User.GetUserById(currentUser);
+
+            //get customer country info
+            var country = new CountryDTO();
+            if (customer != null)
+            {
+                if (customer.UserActiveCountryId != 0)
+                {
+                    country = await _countryservice.GetCountryById(customer.UserActiveCountryId);
+                }
+                else
+                {
+                    country = await _countryservice.GetCountryById(1);
+                }
+            }
+
+            //Get Wallet
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customer.UserChannelCode);
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exist", $"{(int)System.Net.HttpStatusCode.NotFound}");
+            }
+
+            var walletTransactions = await _uow.WalletTransaction.FindAsync(s => s.WalletId == wallet.WalletId);
+            if (!walletTransactions.Any())
+            {
+                return new WalletTransactionSummaryDTO
+                {
+                    WalletTransactions = new List<WalletTransactionDTO>(),
+                    CurrencyCode = country.CurrencyCode,
+                    CurrencySymbol = country.CurrencySymbol,
+                    WalletNumber = wallet.WalletNumber,
+                    WalletBalance = wallet.Balance,
+                    WalletOwnerName = customer.FirstName + " " + customer.LastName,
+                    WalletId = wallet.WalletId
+                };
+            }
+
+            var walletTransactionDTOList = Mapper.Map<List<WalletTransactionDTO>>(walletTransactions.OrderByDescending(s => s.DateCreated));
+
+            return new WalletTransactionSummaryDTO
+            {
+                WalletTransactions = walletTransactionDTOList,
+                CurrencyCode = country.CurrencyCode,
+                CurrencySymbol = country.CurrencySymbol,
+                WalletNumber = wallet.WalletNumber,
+                WalletBalance = wallet.Balance,
+                WalletOwnerName = customer.FirstName + " " + customer.LastName,
+                WalletId = wallet.WalletId
+            };
+        }
+
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile()
         {
-            var wallet = await _walletService.GetWalletBalance();
-            return await GetWalletTransactionByWalletIdForMobile(wallet);
+            //var wallet = await _walletService.GetWalletBalance();
+            //return await GetWalletTransactionByWalletIdForMobile(wallet);
+            return await GetWalletTransactionByWalletIdForMobile();
         }
     }
 }
