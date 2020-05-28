@@ -36,7 +36,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                       ScName = processingorderCode.ScName,
                                       FullName = processingorderCode.FullName,
                                       VerifiedBy = processingorderCode.VerifiedBy,
-                                      BankName = processingorderCode.BankName
+                                      BankName = processingorderCode.BankName,
+                                      DateCreated = processingorderCode.DateCreated,
+                                      DateModified = processingorderCode.DateModified
                                   };
 
             return Task.FromResult(processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit).ToList());
@@ -68,7 +70,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                       ScName = processingorderCode.ScName,
                                       FullName = processingorderCode.FullName,
                                       VerifiedBy = processingorderCode.VerifiedBy,
-                                      BankName = processingorderCode.BankName
+                                      BankName = processingorderCode.BankName,
+                                      DateCreated = processingorderCode.DateCreated,
+                                      DateModified = processingorderCode.DateModified
                                   };
 
             return Task.FromResult(processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit).ToList());
@@ -99,7 +103,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                       ScName = processingorderCode.ScName,
                                       FullName = processingorderCode.FullName,
                                       VerifiedBy = processingorderCode.VerifiedBy,
-                                      BankName = processingorderCode.BankName
+                                      BankName = processingorderCode.BankName,
+                                      DateCreated = processingorderCode.DateCreated,
+                                      DateModified = processingorderCode.DateModified
                                   };
 
             return Task.FromResult(processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit).ToList());
@@ -119,7 +125,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                       UserId = processingorderCode.UserId,
                                       Status = processingorderCode.Status,
                                       ServiceCenter = processingorderCode.ServiceCenter,
-                                      BankName = processingorderCode.BankName
+                                      BankName = processingorderCode.BankName,
+                                      DateCreated = processingorderCode.DateCreated,
+                                      DateModified = processingorderCode.DateModified
                                   };
             return processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit);
         }
@@ -140,7 +148,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                UserId = processingorderCode.UserId,
                                Status = processingorderCode.Status,
                                ServiceCenter = processingorderCode.ServiceCenter,
-                               BankName = processingorderCode.BankName
+                               BankName = processingorderCode.BankName,
+                               DateCreated = processingorderCode.DateCreated,
+                               DateModified = processingorderCode.DateModified
                            };
             return Task.FromResult(codorder.ToList());
         }
