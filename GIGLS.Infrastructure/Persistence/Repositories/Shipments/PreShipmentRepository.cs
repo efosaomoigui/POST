@@ -77,7 +77,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                                             Weight = x.Weight,
                                                                             Quantity = x.Quantity,
                                                                             SpecialPackageId = x.SpecialPackageId,
-                                                                            PreShipmentId = x.PreShipmentId
+                                                                            PreShipmentId = x.PreShipmentId,
+                                                                            PreShipmentItemId = x.PreShipmentItemId
                                                                         }).ToList()
                                                 }).ToList();
 
