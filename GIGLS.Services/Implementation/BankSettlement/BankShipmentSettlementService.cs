@@ -570,7 +570,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 if (bkoc.DepositType == DepositType.Shipment)
                 {
-
                     //all shipments from payload JSON
                     var allShipmentsVals = bkoc.ShipmentAndCOD;
                     decimal totalShipment = 0;
@@ -581,20 +580,16 @@ namespace GIGLS.Services.Implementation.Wallet
                         totalShipment += item.GrandTotal;
                     }
 
-
                     //--------------------------Validation Section -------------------------------------------//
-
                     var allprocessingordeforshipment = _uow.BankProcessingOrderForShipmentAndCOD.GetAll().Where(s => s.DepositType == bkoc.DepositType && result.Contains(s.Waybill));
 
                     //var validateInsertWaybills = false;
-                    if (allprocessingordeforshipment.Count() > 0)
+                    if (allprocessingordeforshipment.Any())
                     {
                         throw new GenericException("Error validating one or more waybills, Please try requesting again for a fresh record.");
                     }
 
                     //--------------------------Validation Section -------------------------------------------//
-
-                    //var bankorderforshipmentandcod = Mapper.Map<List<BankProcessingOrderForShipmentAndCOD>>(allShipments);
                     var bankorderforshipmentandcod = allShipmentsVals.Select(s => new BankProcessingOrderForShipmentAndCOD()
                     {
                         Waybill = s.Waybill,
@@ -626,7 +621,6 @@ namespace GIGLS.Services.Implementation.Wallet
                     var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
                     //--------------------------Validation Section -------------------------------------------//
-
                     //all shipments from payload JSON
                     var allprocessingordeforshipment = bkoc.ShipmentAndCOD;
 
@@ -636,7 +630,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     var allprocessingordeforcods = _uow.BankProcessingOrderForShipmentAndCOD.GetAll().Where(s => s.DepositType == bkoc.DepositType && result.Contains(s.Waybill));
 
-                    if (allprocessingordeforcods.Count() > 0)
+                    if (allprocessingordeforcods.Any())
                     {
                         throw new GenericException("Error validating one or more CODs, Please try requesting again for a fresh record.");
                     }
@@ -689,9 +683,9 @@ namespace GIGLS.Services.Implementation.Wallet
                     DateAndTimeOfDeposit = bankordercodes.DateAndTimeOfDeposit
                 };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -711,6 +705,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             //update BankProcessingOrderCodes
             bankorder.Status = DepositStatus.Deposited;
+            bankorder.DateAndTimeOfDeposit = DateTime.Now;
 
             var userActiveCountryId = await _userService.GetUserActiveCountryId();
 
