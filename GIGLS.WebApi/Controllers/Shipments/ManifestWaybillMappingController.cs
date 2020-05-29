@@ -201,12 +201,44 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("manifestforwaybillaccounts/{waybill}")]
+        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetManifestForWaybillForAccounts(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestDTO = await _service.GetManifestForWaybillForAccounts(waybill);
+
+                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                {
+                    Object = manifestDTO
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("activemanifestforwaybill/{waybill}")]
         public async Task<IServiceResponse<ManifestWaybillMappingDTO>> GetActiveManifestForWaybill(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var manifestDTO = await _service.GetActiveManifestForWaybill(waybill);
+
+                return new ServiceResponse<ManifestWaybillMappingDTO>
+                {
+                    Object = manifestDTO
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("activemanifestforwaybillaccounts/{waybill}")]
+        public async Task<IServiceResponse<ManifestWaybillMappingDTO>> GetActiveManifestForWaybillAccounts(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestDTO = await _service.GetActiveManifestForWaybillAccounts(waybill);
 
                 return new ServiceResponse<ManifestWaybillMappingDTO>
                 {

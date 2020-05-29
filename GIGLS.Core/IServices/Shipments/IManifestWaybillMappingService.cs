@@ -30,6 +30,8 @@ namespace GIGLS.Core.IServices.Shipments
         Task RemoveWaybillFromPickupManifest(string manifest, string waybill);
         Task<Tuple<List<PreShipmentMobileDTO>, int>> GetUnMappedWaybillsForPickupManifest(FilterOptionsDto filterOptionsDto, int senderStationId);
         Task<PickupManifestDTO> GetPickupManifest(string manifestCode);
+        Task<ManifestWaybillMappingDTO> GetActiveManifestForWaybillAccounts(string waybill);
+        Task<List<ManifestWaybillMappingDTO>> GetManifestForWaybillForAccounts(string waybill);
     }
 
 
