@@ -1508,12 +1508,39 @@ namespace GIGLS.Services.Business.CustomerPortal
             var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
             bool disableShipmentCreation = bool.Parse(isDisable);
 
+            bool allowTestUser = await AllowTestingUserToCreateShipment();
+
+            if (allowTestUser)
+            {
+                disableShipmentCreation = false;
+            }
+
             if (disableShipmentCreation)
             {
                 string message = ConfigurationManager.AppSettings["DisableShipmentCreationMessage"];
                 throw new GenericException(message, $"{(int)System.Net.HttpStatusCode.ServiceUnavailable}");
             }
             return await _preShipmentMobileService.AddPreShipmentMobile(preShipment);
+        }
+
+
+        //Remove later, quick fix to test live shipment
+        private async Task<bool> AllowTestingUserToCreateShipment()
+        {
+            bool result = false;
+
+            //Excluding It Test
+            string excludeUserList = ConfigurationManager.AppSettings["excludeUserList"];
+            string[] testUserId = excludeUserList.Split(',').ToArray();
+
+            var testUser = await _userService.GetCurrentUserId();
+
+            if (testUserId.Contains(testUser))
+            {
+                result = true;
+            }
+
+            return result;
         }
 
         public async Task<MultipleShipmentOutput> AddMultiplePreShipmentMobile(NewPreShipmentMobileDTO preShipment)
@@ -1528,6 +1555,13 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
             bool disableShipmentCreation = bool.Parse(isDisable);
+
+            bool allowTestUser = await AllowTestingUserToCreateShipment();
+
+            if (allowTestUser)
+            {
+                disableShipmentCreation = false;
+            }
 
             if (disableShipmentCreation)
             {
