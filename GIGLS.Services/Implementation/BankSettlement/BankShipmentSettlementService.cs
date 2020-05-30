@@ -18,6 +18,7 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Wallet
@@ -169,17 +170,6 @@ namespace GIGLS.Services.Implementation.Wallet
             allDemurrages = allDemurrages.Where(s => s.DEMStatusHistory == CODStatushistory.RecievedAtServiceCenter);
             allDemurrages = allDemurrages.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
 
-            //added for GWA and GWARIMPA service centres
-            //{
-            //    if (serviceCenters.Length == 1)
-            //    {
-            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-            //        {
-            //            serviceCenters = new int[] { 4, 294 };
-            //        }
-            //    }
-            //}
-
             var demurrageResults = new List<DemurrageRegisterAccount>();
             if (serviceCenters.Length > 0)
             {
@@ -213,17 +203,6 @@ namespace GIGLS.Services.Implementation.Wallet
             var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
             allCODs = allCODs.Where(s => s.CODStatusHistory == CODStatushistory.RecievedAtServiceCenter || s.CODStatusHistory == CODStatushistory.CollectedByDispatch);
             allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.PaymentType == PaymentType.Cash);
-
-            //added for GWA and GWARIMPA service centres
-            //{
-            //    if (serviceCenters.Length == 1)
-            //    {
-            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-            //        {
-            //            serviceCenters = new int[] { 4, 294 };
-            //        }
-            //    }
-            //}
 
             var codResults = new List<CashOnDeliveryRegisterAccount>();
             if (serviceCenters.Length > 0)
@@ -285,17 +264,6 @@ namespace GIGLS.Services.Implementation.Wallet
             var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrders(type);
             var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == refcode);
 
-            //added for GWA and GWARIMPA service centres
-            //{
-            //    if (serviceCenters.Length == 1)
-            //    {
-            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-            //        {
-            //            serviceCenters = new int[] { 4, 294 };
-            //        }
-            //    }
-            //}
-
             var bankedShipments = new List<BankProcessingOrderForShipmentAndCODDTO>();
             if (serviceCenters.Length > 0)
             {
@@ -351,7 +319,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             var bankedShipments = new List<BankProcessingOrderForShipmentAndCODDTO>();
 
-            bankedShipments = accompanyWaybillsVals.OrderByDescending(s => s.DateCreated).ToList(); // Mapper.Map<List<BankProcessingOrderForShipmentAndCODDTO>>(shipmentResult);
+            bankedShipments = accompanyWaybillsVals.OrderByDescending(s => s.DateCreated).ToList(); 
 
             if (type == DepositType.Shipment)
             {
@@ -382,16 +350,13 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<Tuple<decimal, List<InvoiceViewDTO>>> GetTotalAmountAndShipments(DateTime searchdate, DepositType type)
         {
-
             var enddate = searchdate;
 
             //Generate the refcode
             decimal total = 0;
 
             var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-
             var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
-
             var userActiveCountryId = await _userService.GetUserActiveCountryId();
 
             //Get Bank Deposit Module StartDate
@@ -404,17 +369,6 @@ namespace GIGLS.Services.Implementation.Wallet
             //Filter by deposited code should come here
             allShipments = allShipments.Where(s => s.PaymentMethod == "Cash" && s.PaymentStatus == PaymentStatus.Paid);
             allShipments = allShipments.Where(s => s.DepositStatus == DepositStatus.Unprocessed && s.DateCreated >= globalpropertiesdate);
-
-            //added for GWA and GWARIMPA service centres
-            //{
-            //    if (serviceCenters.Length == 1)
-            //    {
-            //        if (serviceCenters[0] == 4 || serviceCenters[0] == 294)
-            //        {
-            //            serviceCenters = new int[] { 4, 294 };
-            //        }
-            //    }
-            //}
 
             var cashShipments = new List<InvoiceViewDTO>();
             if (serviceCenters.Length > 0)
@@ -482,7 +436,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 var allprocessingordefordemurrage = _uow.BankProcessingOrderForShipmentAndCOD.GetAll().Where(s => s.DepositType == bkoc.DepositType && result.Contains(s.Waybill));
 
-                if (allprocessingordefordemurrage.Count() > 0)
+                if (allprocessingordefordemurrage.Any())
                 {
                     throw new GenericException("Error validating one or more Demurrages, Please try requesting again for a fresh record.");
                 }
@@ -503,7 +457,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     Status = DepositStatus.Pending
                 });
 
-                var nonDepsitedValueunprocessed = demurrageforservicecenter; //n allDemurrages.Where(s => s.DepositStatus == DepositStatus.Unprocessed).ToList();
+                var nonDepsitedValueunprocessed = demurrageforservicecenter; 
 
                 //Collect total shipment unproceessed and its total
                 decimal demurrageTotal = 0;
@@ -529,9 +483,9 @@ namespace GIGLS.Services.Implementation.Wallet
                     DateAndTimeOfDeposit = bankordercodes.DateAndTimeOfDeposit
                 };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -570,7 +524,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 if (bkoc.DepositType == DepositType.Shipment)
                 {
-
                     //all shipments from payload JSON
                     var allShipmentsVals = bkoc.ShipmentAndCOD;
                     decimal totalShipment = 0;
@@ -581,20 +534,16 @@ namespace GIGLS.Services.Implementation.Wallet
                         totalShipment += item.GrandTotal;
                     }
 
-
                     //--------------------------Validation Section -------------------------------------------//
-
                     var allprocessingordeforshipment = _uow.BankProcessingOrderForShipmentAndCOD.GetAll().Where(s => s.DepositType == bkoc.DepositType && result.Contains(s.Waybill));
 
                     //var validateInsertWaybills = false;
-                    if (allprocessingordeforshipment.Count() > 0)
+                    if (allprocessingordeforshipment.Any())
                     {
                         throw new GenericException("Error validating one or more waybills, Please try requesting again for a fresh record.");
                     }
 
                     //--------------------------Validation Section -------------------------------------------//
-
-                    //var bankorderforshipmentandcod = Mapper.Map<List<BankProcessingOrderForShipmentAndCOD>>(allShipments);
                     var bankorderforshipmentandcod = allShipmentsVals.Select(s => new BankProcessingOrderForShipmentAndCOD()
                     {
                         Waybill = s.Waybill,
@@ -626,7 +575,6 @@ namespace GIGLS.Services.Implementation.Wallet
                     var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
                     //--------------------------Validation Section -------------------------------------------//
-
                     //all shipments from payload JSON
                     var allprocessingordeforshipment = bkoc.ShipmentAndCOD;
 
@@ -636,7 +584,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     var allprocessingordeforcods = _uow.BankProcessingOrderForShipmentAndCOD.GetAll().Where(s => s.DepositType == bkoc.DepositType && result.Contains(s.Waybill));
 
-                    if (allprocessingordeforcods.Count() > 0)
+                    if (allprocessingordeforcods.Any())
                     {
                         throw new GenericException("Error validating one or more CODs, Please try requesting again for a fresh record.");
                     }
@@ -689,9 +637,9 @@ namespace GIGLS.Services.Implementation.Wallet
                     DateAndTimeOfDeposit = bankordercodes.DateAndTimeOfDeposit
                 };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -706,11 +654,12 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (bankorder == null)
             {
-                throw new GenericException("Bank Order Request Does not Exist!");
+                throw new GenericException("Bank Order Request Does not Exist!", $"{(int)HttpStatusCode.NotFound}");
             }
 
             //update BankProcessingOrderCodes
             bankorder.Status = DepositStatus.Deposited;
+            bankorder.DateAndTimeOfDeposit = DateTime.Now;
 
             var userActiveCountryId = await _userService.GetUserActiveCountryId();
 
@@ -747,7 +696,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (bankorder == null)
             {
-                throw new GenericException("Bank Order Request Does not Exist!");
+                throw new GenericException("Bank Order Request Does not Exist!", $"{(int)HttpStatusCode.NotFound}");
             }
 
             //update BankProcessingOrderCodes
@@ -787,7 +736,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (bankorder == null)
             {
-                throw new GenericException("Bank Order Request Does not Exist!");
+                throw new GenericException("Bank Order Request Does not Exist!", $"{(int)HttpStatusCode.NotFound}");
             }
 
             var serviceCenters = await _userService.GetPriviledgeServiceCenters();
@@ -804,6 +753,7 @@ namespace GIGLS.Services.Implementation.Wallet
             codsforservicecenter.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
             bankorder.Status = bankrefcode.Status;
             bankorder.BankName = bankrefcode.BankName;
+            bankorder.DateAndTimeOfDeposit = DateTime.Now;
             await _uow.CompleteAsync();
         }
 
@@ -818,7 +768,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (bankorder == null)
             {
-                throw new GenericException("Bank Order Request Does not Exist!");
+                throw new GenericException("Bank Order Request Does not Exist!", $"{(int)HttpStatusCode.NotFound}");
             }
 
             var serviceCenters = await _userService.GetPriviledgeServiceCenters();
@@ -835,6 +785,7 @@ namespace GIGLS.Services.Implementation.Wallet
             codsforservicecenter.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
             bankorder.Status = bankrefcode.Status;
             bankorder.BankName = bankrefcode.BankName;
+            bankorder.DateAndTimeOfDeposit = DateTime.Now;
 
             await _uow.CompleteAsync();
         }
@@ -845,7 +796,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (bankorder == null)
             {
-                throw new GenericException("Bank Order Request Does not Exist!");
+                throw new GenericException("Bank Order Request Does not Exist!", $"{(int)HttpStatusCode.NotFound}");
             }
 
             //Verifield by
@@ -876,7 +827,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (bankorder == null)
             {
-                throw new GenericException("Bank Order Request Does not Exist!");
+                throw new GenericException("Bank Order Request Does not Exist!", $"{(int)HttpStatusCode.NotFound}");
             }
 
             //Verifield by
