@@ -10,6 +10,7 @@ using GIGLS.Core.Enums;
 using AutoMapper;
 using System.Linq;
 using GIGLS.Core.DTO;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -81,7 +82,7 @@ namespace GIGLS.Services.Implementation.Zone
 
                 if (zone == null)
                 {
-                    throw new Exception("Price not yet set for this Zone and Weight");
+                    throw new GenericException("Price not yet set for this Zone and Weight", $"{(int)HttpStatusCode.NotFound}");
                 }
                 return zone.Price;
             }

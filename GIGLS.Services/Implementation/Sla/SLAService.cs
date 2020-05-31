@@ -9,6 +9,7 @@ using GIGLS.Core.Domain.SLA;
 using GIGLS.Infrastructure;
 using System;
 using GIGLS.Core.IServices.User;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Sla
 {
@@ -98,7 +99,7 @@ namespace GIGLS.Services.Implementation.Sla
 
             if (sla == null)
             {
-                throw new GenericException("SLA INFORMATION DOES NOT EXIST");
+                throw new GenericException("SLA INFORMATION DOES NOT EXIST", $"{(int)HttpStatusCode.NotFound}");
             }
 
             //2. add user to signed table

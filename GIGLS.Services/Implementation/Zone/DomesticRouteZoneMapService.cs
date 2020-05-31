@@ -7,6 +7,7 @@ using GIGLS.Infrastructure;
 using GIGLS.Core.DTO.Zone;
 using AutoMapper;
 using GIGLS.Core.IServices.ServiceCentres;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -36,7 +37,9 @@ namespace GIGLS.Services.Implementation.Zone
             var mapExists = await _unitOfWork.DomesticRouteZoneMap.ExistAsync(d => d.DepartureId == routeZoneMap.DepartureId && d.DestinationId == routeZoneMap.DestinationId);
 
             if (mapExists == true)
-                throw new GenericException("The mapping of Route to Zone already exists");
+            {
+                throw new GenericException("The mapping of Route to Zone Already Exists", $"{(int)HttpStatusCode.Forbidden}");
+            }
 
             var Mapping = new DomesticRouteZoneMap
             {
@@ -87,7 +90,7 @@ namespace GIGLS.Services.Implementation.Zone
                 r.DestinationId == destinationServiceCenter.StationId, "Zone,Destination,Departure");
 
             if (routeZoneMap == null)
-                throw new GenericException("The Mapping of Route to Zone does not exist");
+                throw new GenericException("The Mapping of Route to Zone does not exist", $"{(int)HttpStatusCode.NotFound}");
 
             return Mapper.Map<DomesticRouteZoneMapDTO>(routeZoneMap);
         }
@@ -105,7 +108,7 @@ namespace GIGLS.Services.Implementation.Zone
             var zoneMap = _unitOfWork.DomesticRouteZoneMap.Get(routeZoneMapId);
 
             if (zoneMap == null)
-                throw new GenericException("The Mapping of Route to Zone does not exist");
+                throw new GenericException("The Mapping of Route to Zone does not exist", $"{(int)HttpStatusCode.NotFound}");
 
             zoneMap.DepartureId = routeZoneMap.DepartureId;
             zoneMap.DestinationId = routeZoneMap.DestinationId;
@@ -120,7 +123,7 @@ namespace GIGLS.Services.Implementation.Zone
             var zoneMap = _unitOfWork.DomesticRouteZoneMap.Get(routeZoneMapId);
 
             if (zoneMap == null)
-                throw new GenericException("The Mapping of Route to Zone does not exist");
+                throw new GenericException("The Mapping of Route to Zone does not exist", $"{(int)HttpStatusCode.NotFound}");
 
             zoneMap.Status = status;
             await _unitOfWork.CompleteAsync();
@@ -133,7 +136,7 @@ namespace GIGLS.Services.Implementation.Zone
                r.DepartureId == departure && r.DestinationId == destination, "Zone,Destination,Departure");
 
             if (routeZoneMap == null)
-                throw new GenericException("The Mapping of Route to Zone does not exist");
+                throw new GenericException("The Mapping of Route to Zone does not exist", $"{(int)HttpStatusCode.NotFound}");
 
             return Mapper.Map<DomesticRouteZoneMapDTO>(routeZoneMap);
         }

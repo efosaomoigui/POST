@@ -349,6 +349,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 //use to determine sms sender service to use
                 messageDTO.SMSSenderPlatform = mobileMessageDTO.SMSSenderPlatform;
             }
+
             if (obj is WebsiteMessageDTO)
             {
                 var strArray = new string[]
@@ -418,6 +419,7 @@ namespace GIGLS.Services.Implementation.Messaging
                                
                 messageDTO.ToEmail = messageObj.gigMail;
             }
+
             if (obj is AppMessageDTO)
             {
                 var strArray = new string[]
@@ -461,13 +463,16 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 messageDTO.ToEmail = messageObj.Recipient;
             }
+
             if (obj is MobileShipmentCreationMessageDTO)
             {
                 var strArray = new string[]
                  {
                      "Sender Name",
                      "WaybillNumber",
-                     "Sender Phone Number"
+                     "Sender Phone Number",
+                     "Group Code"
+
                  };
 
                 var mobileShipmentCreationMessage = (MobileShipmentCreationMessageDTO)obj;
@@ -475,22 +480,55 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[0] = mobileShipmentCreationMessage.SenderName;
                 strArray[1] = mobileShipmentCreationMessage.WaybillNumber;
                 strArray[2] = mobileShipmentCreationMessage.SenderPhoneNumber;
+                strArray[3] = mobileShipmentCreationMessage.GroupCode;
+                messageDTO.Waybill = mobileShipmentCreationMessage.WaybillNumber;
 
                 //B. decode url parameter
                 messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
 
                 //C. populate the message subject
-                messageDTO.Subject =
-                    string.Format(messageDTO.Subject, strArray);
-
+                messageDTO.Subject =  string.Format(messageDTO.Subject, strArray);
 
                 //populate the message template
-                messageDTO.FinalBody =
-                    string.Format(messageDTO.Body, strArray);
-
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
 
                 messageDTO.To = mobileShipmentCreationMessage.SenderPhoneNumber;
-                //messageDTO.ToEmail = mobileMessageDTO.SenderEmail;
+
+                //Set default country as Nigeria for GIG Go APP
+                //prepare message format base on country code
+                messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
+
+                //use to determine sms sender service to use
+                messageDTO.SMSSenderPlatform = mobileShipmentCreationMessage.SMSSenderPlatform;
+            }
+
+            if (obj is ShipmentDeliveryDelayMessageDTO)
+            {
+                var strArray = new string[]
+                 {
+                     "Sender Name",
+                     "WaybillNumber",
+                     "Sender Phone Number",
+                     "StationName"
+                 };
+
+                var mobileShipmentCreationMessage = (ShipmentDeliveryDelayMessageDTO)obj;
+                //map the array
+                strArray[0] = mobileShipmentCreationMessage.SenderName;
+                strArray[1] = mobileShipmentCreationMessage.WaybillNumber;
+                strArray[2] = mobileShipmentCreationMessage.SenderPhoneNumber;
+                strArray[3] = mobileShipmentCreationMessage.StationName;
+                messageDTO.Waybill = mobileShipmentCreationMessage.WaybillNumber;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject =  string.Format(messageDTO.Subject, strArray);
+
+                //populate the message template
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.To = mobileShipmentCreationMessage.SenderPhoneNumber;
 
                 //Set default country as Nigeria for GIG Go APP
                 //prepare message format base on country code
@@ -624,7 +662,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 {
                     "User Name",
                     "Login Time",
-                    "Url",
+                    "Url"
                 };
 
                 var userDTO = (UserDTO)obj;
@@ -802,6 +840,29 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
                 messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
                 messageDTO.ToEmail = passwordMessageDTO.UserEmail;
+            }
+
+            //5 obj is EcommerceMessageDTO
+            if (obj is EcommerceMessageDTO)
+            {
+                var strArray = new string[]
+                {
+                    "Email",
+                    "PhoneNumber",
+                    "CompanyName",
+                    "BusinessNature"
+                };
+                var emailMessageDTO = (EcommerceMessageDTO)obj;
+
+                strArray[0] = emailMessageDTO.CustomerEmail;
+                strArray[1] = emailMessageDTO.CustomerPhoneNumber;
+                strArray[2] = emailMessageDTO.CustomerCompanyName;
+                strArray[3] = emailMessageDTO.BusinessNature;
+
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.ToEmail = emailMessageDTO.EcommerceEmail;
             }
 
             return await Task.FromResult(verifySendEmail);

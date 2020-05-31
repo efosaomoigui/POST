@@ -18,24 +18,20 @@ namespace GIGLS.Core.DTO.Shipments
         public int CountryId { get; set; }
         public decimal WalletBalance { get; set; }
         public string SenderUserId { get; set; }
-        public string SenderName { get; set; }
-        public string SenderPhoneNumber { get; set; }
         public string SenderCity { get; set; }
 
         public string ReceiverName { get; set; }
         public string ReceiverPhoneNumber { get; set; }
         public string ReceiverAddress { get; set; }
         public string ReceiverCity { get; set; }
-        public string ReceiverState { get; set; }
-        public string ReceiverCountry { get; set; }
         public PickupOptions PickupOptions { get; set; }
 
         public int DepartureStationId { get; set; }
         public int DestinationStationId { get; set; }
+        public decimal Value { get; set; }
 
         //PreShipment Items
         public List<PreShipmentItemDTO> PreShipmentItems { get; set; }
-        public decimal GrandTotal { get; set; }
         public bool IsProcessed { get; set; }
     }
 }

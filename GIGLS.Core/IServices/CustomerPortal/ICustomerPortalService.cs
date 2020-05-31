@@ -144,6 +144,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<PreShipmentDTO> GetDropOffDetail(string tempCode);
         Task<bool> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO);
         Task<bool> UpdateMobilePickupRequestUsingGroupCode(MobilePickUpRequestsDTO pickuprequest);
-        Task<bool> UpdateMobilePickupRequestUsingWaybill(MobilePickUpRequestsDTO pickupRequest);        
+        Task<bool> UpdateMobilePickupRequestUsingWaybill(MobilePickUpRequestsDTO pickupRequest);
+        Task<List<LocationDTO>> GetPresentDayShipmentLocations();
     }
 }

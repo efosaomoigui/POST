@@ -10,15 +10,17 @@ namespace GIGLS.Core.Domain
         [Key]
         public int PreShipmentMobileId { get; set; }
 
-
         [MaxLength(100), MinLength(5)]
         [Index(IsUnique = true)]
         public string Waybill { get; set; }
 
         //Senders' Information
+        [MaxLength(500)]
         public string SenderName { get; set; }
 
+        [MaxLength(100)]
         public string SenderPhoneNumber { get; set; }
+
         public decimal Value { get; set; }
         public DateTime? DeliveryTime { get; set; }
 
@@ -32,15 +34,38 @@ namespace GIGLS.Core.Domain
         public string CustomerCode { get; set; }
 
         //Receivers Information
+        [MaxLength(500)]
         public string ReceiverName { get; set; }
+
+        [MaxLength(100)]
         public string ReceiverPhoneNumber { get; set; }
+
+        [MaxLength(500)]
         public string ReceiverEmail { get; set; }
+
+        [MaxLength(500)]
         public string ReceiverAddress { get; set; }
+
+        [MaxLength(500)]
         public string ReceiverCity { get; set; }
+
+        [MaxLength(500)]
         public string ReceiverState { get; set; }
+
+        [MaxLength(100)]
         public string ReceiverCountry { get; set; }
 
+        [MaxLength(500)]
+        public string InputtedReceiverAddress { get; set; }
+
+        [MaxLength(500)]
+        public string SenderLocality { get; set; }
+
+        [MaxLength(500)]
         public string SenderAddress { get; set; }
+
+        [MaxLength(500)]
+        public string InputtedSenderAddress { get; set; }
 
         public int SenderStationId { get; set; }
 
@@ -66,25 +91,18 @@ namespace GIGLS.Core.Domain
         public decimal? ExpectedAmountToCollect { get; set; }
         public decimal? ActualAmountCollected { get; set; }
 
-
         //General Details comes with role user
         [MaxLength(100)]
         public string UserId { get; set; }
 
         public bool IsdeclaredVal { get; set; }
 
-
         //discount information
-
         public decimal? Total { get; set; }
-
         public decimal? DiscountValue { get; set; }
-
         public decimal? Vat { get; set; }
-
         public decimal? InsuranceValue { get; set; }
         public decimal? DeliveryPrice { get; set; }
-
         public decimal? ShipmentPackagePrice { get; set; }
 
         //from client
@@ -96,28 +114,39 @@ namespace GIGLS.Core.Domain
         public bool IsCancelled { get; set; }
         public bool IsConfirmed { get; set; }
         public bool IsDelivered { get; set; }
+
+        [MaxLength(500)]
         public string DeclinedReason { get; set; }
 
         //Agility Validations
         public double? CalculatedTotal { get; set; } = 0;
 
+        [MaxLength(500)]
         public string shipmentstatus { get; set; }
 
+        [MaxLength(500)]
         public string VehicleType { get; set; }
 
         public int? ZoneMapping { get; set; }
 
+        [MaxLength(500)]
         public string ActualReceiverFirstName { get; set; }
+
+        [MaxLength(500)]
         public string ActualReceiverLastName { get; set; }
+
+        [MaxLength(500)]
         public string ActualReceiverPhoneNumber { get; set; }
 
         public int CountryId { get; set; }
+
+        [MaxLength(500)]
         public string ServiceCentreAddress { get; set; }
         public virtual Location serviceCentreLocation {get;set;}
         public bool? IsApproved { get; set; }
         public decimal ShipmentPickupPrice { get; set; }
 
-
-
+        [MaxLength(20)]
+        public string DeliveryNumber { get; set; }
     }
 }

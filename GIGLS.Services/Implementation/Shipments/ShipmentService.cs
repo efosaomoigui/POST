@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
@@ -201,7 +202,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (shipment == null)
                 {
-                    throw new GenericException($"Shipment with waybill: {waybill} does not exist");
+                    throw new GenericException($"Shipment with waybill: {waybill} does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 return await GetShipment(shipment.ShipmentId);
@@ -219,7 +220,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipment = await _uow.Shipment.GetAsync(x => x.ShipmentId == shipmentId, "DeliveryOption, ShipmentItems");
                 if (shipment == null)
                 {
-                    throw new GenericException("Shipment Information does not exist");
+                    throw new GenericException("Shipment Information does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 var shipmentDto = Mapper.Map<ShipmentDTO>(shipment);
@@ -329,6 +330,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (shipment == null)
                 {
                     throw new GenericException("Pre Shipment Information does not exist");
+                }
+                if (shipment.IsProcessed)
+                {
+                    throw new GenericException($" {code} has been processed already");
                 }
 
                 var shipmentDto = Mapper.Map<PreShipmentDTO>(shipment);
@@ -545,6 +550,18 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                if(shipmentDTO.TempCode != null)
+                {
+                    //check if it has been processed 
+                    var dropoff = await _uow.PreShipment.GetAsync(s => s.TempCode == shipmentDTO.TempCode);
+
+                    if (dropoff.IsProcessed)
+                    {
+                        throw new GenericException($"This drop off {shipmentDTO.TempCode} has already been processed");
+                    }
+                }
+                
+
                 var hashString = await ComputeHash(shipmentDTO);
 
                 var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
@@ -570,7 +587,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     };
                     _uow.ShipmentHash.Add(hasher);
                 }
-
+                                
                 // create the customer, if information does not exist in our record
                 var customerId = await CreateCustomer(shipmentDTO);
 
@@ -584,6 +601,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
+
+                if(shipmentDTO.TempCode != null)
+                {
+                    await UpdateDropOff(newShipment.Waybill, shipmentDTO.TempCode);
+                }
 
                 //scan the shipment for tracking
                 await ScanShipment(new ScanDTO
@@ -695,6 +717,17 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //Update Drop Off
+        private async Task UpdateDropOff (string waybill, string dropOffCode)
+        {
+            var dropOff = await _uow.PreShipment.GetAsync(s => s.TempCode == dropOffCode);
+
+            dropOff.Waybill = waybill;
+            dropOff.IsProcessed = true;
+
+            await _uow.CompleteAsync();
+        }
+
         // Convert an object to a byte array
         private static byte[] ObjectToByteArray(HashSet<ShipmentHashDTO> obj)
         {
@@ -803,6 +836,8 @@ namespace GIGLS.Services.Implementation.Shipments
             var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
             var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
 
+
+
             shipmentDTO.Waybill = waybill;
 
             var newShipment = Mapper.Map<Shipment>(shipmentDTO);
@@ -859,16 +894,17 @@ namespace GIGLS.Services.Implementation.Shipments
             if (newShipment.IsCashOnDelivery == true)
             {
                 //collect the cods and add to CashOnDeliveryRegisterAccount()
-                var cashondeliveryentity = new CashOnDeliveryRegisterAccount();
-                cashondeliveryentity.Amount = newShipment.CashOnDeliveryAmount ?? 0;
-                cashondeliveryentity.CODStatusHistory = CODStatushistory.Created;
-                cashondeliveryentity.Description = "Cod From Sales";
-                //cashondeliveryentity.ServiceCenterCode = newShipment.DepartureServiceCentreId;
-                cashondeliveryentity.ServiceCenterId = 0;
-                cashondeliveryentity.Waybill = newShipment.Waybill;
-                cashondeliveryentity.UserId = newShipment.UserId;
-                cashondeliveryentity.DepartureServiceCenterId = newShipment.DepartureServiceCentreId;
-                cashondeliveryentity.DestinationCountryId = destinationCountry.CountryId;
+                var cashondeliveryentity = new CashOnDeliveryRegisterAccount
+                {
+                    Amount = newShipment.CashOnDeliveryAmount ?? 0,
+                    CODStatusHistory = CODStatushistory.Created,
+                    Description = "Cod From Sales",
+                    ServiceCenterId = 0,
+                    Waybill = newShipment.Waybill,
+                    UserId = newShipment.UserId,
+                    DepartureServiceCenterId = newShipment.DepartureServiceCentreId,
+                    DestinationCountryId = destinationCountry.CountryId
+                };
 
                 _uow.CashOnDeliveryRegisterAccount.Add(cashondeliveryentity);
             }
@@ -2293,9 +2329,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     return true;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 

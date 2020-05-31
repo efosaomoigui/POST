@@ -7,6 +7,7 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.ServiceCentres
@@ -34,7 +35,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 var region = await _uow.Region.GetAsync(regionId);
                 if (region == null)
                 {
-                    throw new GenericException("Region information does not exist");
+                    throw new GenericException("Region information does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 var regionDto = Mapper.Map<RegionDTO>(region);
@@ -54,7 +55,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 var region = await _uow.Region.GetAsync(x => x.RegionName == regionDto.RegionName);
                 if (region != null)
                 {
-                    throw new GenericException("Region information already exist");
+                    throw new GenericException("Region information already exist", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 var newRegion = Mapper.Map<Region>(regionDto);
@@ -76,7 +77,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
 
                 if (region == null || regionDto.RegionId != regionId)
                 {
-                    throw new GenericException("Region information does not exist");
+                    throw new GenericException("Region information does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 region.RegionName = regionDto.RegionName;
@@ -96,7 +97,7 @@ namespace GIGLS.Services.Implementation.ServiceCentres
                 var region = await _uow.Region.GetAsync(regionId);
                 if (region == null)
                 {
-                    throw new GenericException("Region information does not exist");
+                    throw new GenericException("Region information does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
                 _uow.Region.Remove(region);
                 _uow.Complete();

@@ -8,6 +8,7 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Zone
@@ -77,7 +78,7 @@ namespace GIGLS.Services.Implementation.Zone
                 var zone = await _uow.Zone.GetAsync(zoneId);
                 if (zone == null)
                 {
-                    throw new GenericException("Zone information does not exist");
+                    throw new GenericException("Zone information does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 var zoneDTO = Mapper.Map<ZoneDTO>(zone);

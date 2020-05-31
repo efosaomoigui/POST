@@ -9,6 +9,7 @@ using GIGLS.Infrastructure;
 using System.Linq;
 using GIGLS.Core.DTO;
 using AutoMapper;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -179,7 +180,7 @@ namespace GIGLS.Services.Implementation.Zone
                     s.CountryId == countryId);
                 if (specialDomestic == null)
                 {
-                    throw new GenericException("Special Zone Price not yet set for selected parameters");
+                    throw new GenericException("Special Zone Price not yet set for selected parameters", $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 //Calculate Price for Special Shipment whose weight are greater than 30 KG
@@ -187,7 +188,7 @@ namespace GIGLS.Services.Implementation.Zone
                 {
                     if(specialPackage.Weight > weight)
                     {
-                        throw new GenericException("Kindly supply correct weight for the package or select another package");
+                        throw new GenericException("Kindly supply correct weight for the package or select another package", $"{(int)HttpStatusCode.Forbidden}");
                     }
 
                     specialDomestic.Price = specialDomestic.Price * weight;

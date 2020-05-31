@@ -13,6 +13,7 @@ using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Wallet
@@ -99,17 +100,23 @@ namespace GIGLS.Services.Implementation.Wallet
             else if (CustomerType.Partner.Equals(wallet.CustomerType))
             {
                 var partnerDTO = await _uow.Partner.GetPartnerByIdWithCountry(walletDTO.CustomerId);
-                walletDTO.CustomerName = partnerDTO.PartnerName;
-                walletDTO.UserActiveCountryId = partnerDTO.UserActiveCountryId;
-                walletDTO.Country = partnerDTO.Country;
+                if(partnerDTO != null)
+                {
+                    walletDTO.CustomerName = partnerDTO.PartnerName;
+                    walletDTO.UserActiveCountryId = partnerDTO.UserActiveCountryId;
+                    walletDTO.Country = partnerDTO.Country;
+                }
             }
             else
             {
                 // handle IndividualCustomers
                 var individualCustomerDTO = await _uow.IndividualCustomer.GetIndividualCustomerByIdWithCountry(walletDTO.CustomerId);
-                walletDTO.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
-                walletDTO.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
-                walletDTO.Country = individualCustomerDTO.Country;
+                if(individualCustomerDTO != null)
+                {
+                    walletDTO.CustomerName = string.Format($"{individualCustomerDTO.FirstName} " + $"{individualCustomerDTO.LastName}");
+                    walletDTO.UserActiveCountryId = individualCustomerDTO.UserActiveCountryId;
+                    walletDTO.Country = individualCustomerDTO.Country;
+                }
             }
 
             return walletDTO;
@@ -121,7 +128,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (wallet == null)
             {
-                throw new GenericException("Wallet does not exist");
+                throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
             return wallet;
@@ -162,7 +169,7 @@ namespace GIGLS.Services.Implementation.Wallet
             var wallet = await _uow.Wallet.GetAsync(walletId);
             if (wallet == null)
             {
-                throw new GenericException("Wallet does not exists");
+                throw new GenericException("Wallet does not exists", $"{(int)HttpStatusCode.NotFound}");
             }
 
             //Manage want every customer to be eligible
@@ -191,7 +198,6 @@ namespace GIGLS.Services.Implementation.Wallet
             newWalletTransaction.DateOfEntry = DateTime.Now;
             newWalletTransaction.ServiceCentreId = serviceCenterIds[0];
             newWalletTransaction.UserId = walletTransactionDTO.UserId;
-
             _uow.WalletTransaction.Add(newWalletTransaction);
             await _uow.CompleteAsync();
 
@@ -221,7 +227,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
             if (wall == null)
             {
-                throw new GenericException("Wallet does not exists");
+                throw new GenericException("Wallet does not exists", $"{(int)HttpStatusCode.NotFound}");
             }
 
             _uow.Wallet.Remove(wall);
@@ -290,7 +296,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     // handle Company customers
                     if (CustomerType.Company == item.CustomerType)
                     {
-                        if (companies.Count > 0)
+                        if (companies.Any())
                         {
                             foreach( var company in companies)
                             {
@@ -302,7 +308,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     }
                     else if (CustomerType.Partner == item.CustomerType)
                     {
-                        if (partners.Count > 0)
+                        if (partners.Any())
                         {
                             foreach (var partner in partners)
                             {
@@ -315,7 +321,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     else
                     {
                         // handle IndividualCustomers
-                        if (individualCustomer.Count > 0)
+                        if (individualCustomer.Any())
                         {
                             foreach (var individual in individualCustomer)
                             {
@@ -339,26 +345,27 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             var currentUser = await _userService.GetCurrentUserId();
             var user = await _uow.User.GetUserById(currentUser);
-            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
 
-            var walletDTO = Mapper.Map<WalletDTO>(wallet);
             if (wallet == null)
             {
-                throw new GenericException("Wallet does not exist");
+                throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
+            var walletDTO = Mapper.Map<WalletDTO>(wallet);
+            walletDTO.UserActiveCountryId = user.UserActiveCountryId;
             return walletDTO;
         }
 
         public async Task<WalletDTO> GetWalletBalance(string userChannelCode)
         {
             var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(userChannelCode));
-            var walletDTO = Mapper.Map<WalletDTO>(wallet);
             if (wallet == null)
             {
-                throw new GenericException("Wallet does not exist");
+                throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
+            var walletDTO = Mapper.Map<WalletDTO>(wallet);
             return walletDTO;
         }
 

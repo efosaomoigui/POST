@@ -6,6 +6,7 @@ using GIGLS.Core;
 using GIGLS.Infrastructure;
 using GIGLS.Core.Domain;
 using AutoMapper;
+using System.Net;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -63,11 +64,10 @@ namespace GIGLS.Services.Implementation.Zone
             var weight = await _uow.WeightLimit.GetAsync(x => x.Status == true);
             if(weight == null)
             {
-                throw new GenericException("WEIGHT LIMIT HAS NOT BEEN SET");
+                throw new GenericException("WEIGHT LIMIT HAS NOT BEEN SET", $"{(int)HttpStatusCode.NotFound}");
             }
 
             return await Task.FromResult(Mapper.Map<WeightLimitDTO>(weight));
-            //return await Task.FromResult(Mapper.Map<WeightLimitDTO>(_uow.WeightLimit.GetAll().OrderByDescending(x => x.WeightLimitId).First()));
         }
 
         public async Task RemoveWeightLimit(int weightLimitId)

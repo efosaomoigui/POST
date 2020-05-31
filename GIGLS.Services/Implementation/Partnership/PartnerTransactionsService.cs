@@ -85,17 +85,6 @@ namespace GIGLS.Services.Implementation.Partnership
             }
             else
             {
-                //var distance = Convert.ToDecimal(partnerpay.Distance);
-                //var actualdistance = distance / 1000;
-                //var TotalAmountBasedonDistance = actualdistance * 3;
-                //var Time = Convert.ToDecimal(partnerpay.Time);
-                //var actualTimeinMinutes = Convert.ToDecimal(string.Format("{0:F2}", (Time / 60)));
-                //var TotalAmountBasedonTime = actualTimeinMinutes * 2;
-                //var TotalAmountBasedonShipment = partnerpay.ShipmentPrice * 0.05M;
-                //var Totalprice = TotalAmountBasedonDistance + TotalAmountBasedonTime + TotalAmountBasedonShipment;
-                //Totalprice = Convert.ToDecimal(string.Format("{0:F2}", Totalprice));
-                //var Sumofpickupandgooglapicalc =  (Totalprice + partnerpay.ShipmentPrice);
-                //var pickupprice = partnerpay.PickUprice;
                 var TotalAmount = (partnerpay.PickUprice);
                 var amount = (0.8M * TotalAmount);
                 TotalPrice = Convert.ToDecimal(string.Format("{0:F2}", amount));
