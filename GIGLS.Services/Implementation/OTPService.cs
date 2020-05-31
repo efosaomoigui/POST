@@ -93,7 +93,7 @@ namespace GIGLS.Services.Implementation
             otp.EmailAddress = ExtractPhoneNumber(otp.EmailAddress);
 
             //get the otp details using the email 
-            var result = _uow.OTP.GetAllAsQueryable().Where(x => x.Otp == otp.Otp && (x.EmailAddress.ToLower() == otp.EmailAddress.ToLower() || x.PhoneNumber.Contains(otp.EmailAddress))).ToList();
+            var result = _uow.OTP.GetAllAsQueryable().Where(x => x.Otp == otp.Otp && (x.EmailAddress == otp.EmailAddress || x.PhoneNumber.Contains(otp.EmailAddress))).ToList();
             var otpbody = result.LastOrDefault();
 
             if (otpbody == null)
@@ -357,33 +357,41 @@ namespace GIGLS.Services.Implementation
                 var referrercode = await _uow.ReferrerCode.GetAsync(s => s.Referrercode == User.RegistrationReferrercode);
                 if (referrercode != null)
                 {
-                    var bonus = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.ReferrerCodeBonus, User.UserActiveCountryId);
-                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrercode.UserCode);
-                    var ReferrerUser = await _UserService.GetUserByChannelCode(referrercode.UserCode);
-                    if (wallet != null)
-                    {
-                        wallet.Balance = wallet.Balance + Convert.ToDecimal(bonus.Value);
-                    }
-                    var transaction = new WalletTransactionDTO
-                    {
-                        WalletId = wallet.WalletId,
-                        CreditDebitType = CreditDebitType.Credit,
-                        Amount = Convert.ToDecimal(bonus.Value),
-                        ServiceCentreId = 296,
-                        Waybill = "",
-                        Description = "Referral Bonus",
-                        PaymentType = PaymentType.Online,
-                        UserId = ReferrerUser.Id
-                    };
-                    var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
-                    await _uow.CompleteAsync();
-                    var messageExtensionDTO = new MobileMessageDTO()
-                    {
-                        SenderName = ReferrerUser.FirstName + " " + ReferrerUser.LastName,
-                        SenderEmail = ReferrerUser.Email
+                    var bonus = await _uow.GlobalProperty.GetAsync(s => s.Key == GlobalPropertyType.ReferrerCodeBonus.ToString() && s.CountryId == User.UserActiveCountryId);
 
-                    };
-                    await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
+                    if(bonus != null)
+                    {
+                        decimal bonusAmount = Convert.ToDecimal(bonus.Value);
+
+                        var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == referrercode.UserCode);
+                        if (wallet != null)
+                        {
+                            wallet.Balance = wallet.Balance + bonusAmount;
+                        }
+
+                        var ReferrerUser = await _UserService.GetUserByChannelCode(referrercode.UserCode);
+                        var transaction = new WalletTransactionDTO
+                        {
+                            WalletId = wallet.WalletId,
+                            CreditDebitType = CreditDebitType.Credit,
+                            Amount = bonusAmount,
+                            ServiceCentreId = 296,
+                            Waybill = "",
+                            Description = "Referral Bonus",
+                            PaymentType = PaymentType.Online,
+                            UserId = ReferrerUser.Id
+                        };
+                        var walletTransaction = await _iWalletTransactionService.AddWalletTransaction(transaction);
+                        await _uow.CompleteAsync();
+
+                        var messageExtensionDTO = new MobileMessageDTO()
+                        {
+                            SenderName = ReferrerUser.FirstName + " " + ReferrerUser.LastName,
+                            SenderEmail = ReferrerUser.Email
+
+                        };
+                        await _messageSenderService.SendGenericEmailMessage(MessageType.MRB, messageExtensionDTO);
+                    }                   
                 }
             }
 
