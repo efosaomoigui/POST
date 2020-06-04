@@ -3642,7 +3642,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                         else
                         {
-                            throw new GenericException("This shipment is not an interstate delivery,take to the assigned receiver's location", $"{(int)HttpStatusCode.Forbidden}");
+                            throw new GenericException("This shipment is not an interstate delivery, take to the assigned receiver's location", $"{(int)HttpStatusCode.Forbidden}");
                         }
                         return true;
                     }
