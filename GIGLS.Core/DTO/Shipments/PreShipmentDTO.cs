@@ -19,6 +19,8 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal WalletBalance { get; set; }
         public string SenderUserId { get; set; }
         public string SenderCity { get; set; }
+        public string SenderName { get; set; }
+        public string SenderPhoneNumber { get; set; }
 
         public string ReceiverName { get; set; }
         public string ReceiverPhoneNumber { get; set; }
@@ -33,5 +35,6 @@ namespace GIGLS.Core.DTO.Shipments
         //PreShipment Items
         public List<PreShipmentItemDTO> PreShipmentItems { get; set; }
         public bool IsProcessed { get; set; }
+        public bool IsAgent { get; set; }
     }
 }

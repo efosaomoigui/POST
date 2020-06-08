@@ -350,6 +350,130 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<ShipmentDTO> GetDropOffShipmentForProcessing(string code)
+        {
+            try
+            {
+                var shipment = await _uow.PreShipment.GetAsync(x => x.TempCode == code, "PreShipmentItems");
+                if (shipment == null)
+                {
+                    throw new GenericException("Pre Shipment Information does not exist");
+                }
+                if (shipment.IsProcessed)
+                {
+                    throw new GenericException($" {code} has been processed already. The processed waybill for the code  is {shipment.Waybill} ");
+                }
+
+                var shipmentDto = new ShipmentDTO
+                {
+                    //shipment info
+                    TempCode = shipment.TempCode,
+                    Waybill = shipment.Waybill,
+                    PickupOptions = shipment.PickupOptions,
+                    Value = shipment.Value,
+                    ApproximateItemsWeight = shipment.ApproximateItemsWeight,
+                    CompanyType = shipment.CompanyType,
+                    
+                    //reciever info
+                    ReceiverName = shipment.ReceiverName,
+                    ReceiverPhoneNumber = shipment.ReceiverPhoneNumber,
+                    ReceiverAddress = shipment.ReceiverAddress,
+                    ReceiverCity =shipment.ReceiverCity                    
+                };
+
+
+                //Get Customer Details
+                //if (shipment.CompanyType.Contains("Individual"))
+                //{
+                //    shipment.CompanyType = UserChannelType.IndividualCustomer.ToString();
+                //}
+
+                if (shipment.IsAgent)
+                {
+                    shipment.CompanyType = UserChannelType.IndividualCustomer.ToString();
+                    shipmentDto.CustomerDetails = new CustomerDTO
+                    {
+                        PhoneNumber = shipment.SenderPhoneNumber, 
+                        WalletBalance = 0.0M,
+                        Address = shipment.SenderCity
+                    };
+
+                    string[] words = shipment.SenderName.Split(' ');
+                    shipmentDto.CustomerDetails.FirstName = words.FirstOrDefault();
+                    shipmentDto.CustomerDetails.LastName = words.Skip(1).ToString();
+                }
+                else
+                {
+                    shipmentDto.CustomerCode = shipment.CustomerCode;
+
+                    UserChannelType customerType = (UserChannelType)Enum.Parse(typeof(UserChannelType), shipment.CompanyType);
+                    shipmentDto.CustomerDetails = await _customerService.GetCustomer(shipment.CustomerCode, customerType);
+
+                    ////Get the customer wallet balance                
+                    var wallet = await _walletService.GetWalletBalance(shipment.CustomerCode);
+                    shipmentDto.CustomerDetails.WalletBalance = wallet.Balance;
+                }
+
+                shipmentDto.Customer = new List<CustomerDTO>
+                {
+                    shipmentDto.CustomerDetails
+                };  
+
+                shipmentDto.ShipmentItems = new List<ShipmentItemDTO>();
+
+                //Shipment Item
+                foreach (var item in shipment.PreShipmentItems)
+                {
+                    shipmentDto.ShipmentItems.Add(new ShipmentItemDTO
+                    {
+                        Description = item.Description,
+                        ShipmentType = item.ShipmentType,
+                        Height = item.Height,
+                        IsVolumetric = item.IsVolumetric,
+                        Description_s = item.Description_s,
+                        Length = item.Length,
+                        Nature = item.Nature,
+                        Quantity = item.Quantity,
+                        Price = item.Price,
+                        SerialNumber = item.SerialNumber,
+                        Weight = item.Weight,
+                        Width = item.Width
+                    });
+                }
+
+                //Get Departure Service Center and Destination Service centre
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                shipmentDto.DepartureServiceCentreId = serviceCenterIds[0];
+
+                //Get SuperCentre for Home Delivery
+                if (shipmentDto.PickupOptions == PickupOptions.HOMEDELIVERY)
+                {
+                    var station = await _uow.Station.GetAsync(x => x.StationId == shipment.DestinationStationId);
+
+                    if(station == null)
+                    {
+                        shipmentDto.DestinationServiceCentreId = station.SuperServiceCentreId;
+                    }
+                }
+
+                if(shipmentDto.DestinationServiceCentreId == 0)
+                {
+                    var serviceCentres = await _uow.ServiceCentre.GetAsync(x => x.StationId == shipment.DestinationStationId);
+                    
+                    if(serviceCentres != null)
+                    {
+                        shipmentDto.DestinationServiceCentreId = serviceCentres.ServiceCentreId;
+                    }
+                }
+
+                return shipmentDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //get basic shipment details
         public async Task<ShipmentDTO> GetBasicShipmentDetail(string waybill)
         {
@@ -561,7 +685,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
                 
-
                 var hashString = await ComputeHash(shipmentDTO);
 
                 var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
@@ -658,9 +781,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return newShipment;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
