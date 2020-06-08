@@ -350,6 +350,92 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<ShipmentDTO> GetDropOffShipmentForProcessing(string code)
+        {
+            try
+            {
+                var shipment = await _uow.PreShipment.GetAsync(x => x.TempCode == code, "PreShipmentItems");
+                if (shipment == null)
+                {
+                    throw new GenericException("Pre Shipment Information does not exist");
+                }
+                if (shipment.IsProcessed)
+                {
+                    throw new GenericException($" {code} has been processed already. The processed waybill for the code  is {shipment.Waybill} ");
+                }
+
+                var shipmentDto = new ShipmentDTO
+                {
+                    //shipment info
+                    TempCode = shipment.TempCode,
+                    Waybill = shipment.Waybill,
+                    PickupOptions = shipment.PickupOptions,
+                    Value = shipment.Value,
+                    ApproximateItemsWeight = shipment.ApproximateItemsWeight,
+                    CompanyType = shipment.CompanyType,
+                    CustomerCode = shipment.CustomerCode,
+                    
+                    //reciever info
+                    ReceiverName = shipment.ReceiverName,
+                    ReceiverPhoneNumber = shipment.ReceiverPhoneNumber,
+                    ReceiverAddress = shipment.ReceiverAddress,
+                    ReceiverCity =shipment.ReceiverCity                    
+                };
+
+                //Get Customer Details
+                if (shipment.CompanyType.Contains("Individual"))
+                {
+                    shipment.CompanyType = UserChannelType.IndividualCustomer.ToString();
+                }
+
+                UserChannelType customerType = (UserChannelType)Enum.Parse(typeof(UserChannelType), shipment.CompanyType);
+                shipmentDto.CustomerDetails = await _customerService.GetCustomer(shipment.CustomerCode, customerType);
+
+                ////Get the customer wallet balance
+                var wallet = await _walletService.GetWalletBalance(shipment.CustomerCode);
+                shipmentDto.CustomerDetails.WalletBalance = wallet.Balance;
+
+                shipmentDto.Customer = new List<CustomerDTO>
+                {
+                    shipmentDto.CustomerDetails
+                };
+
+                ShipmentType shipmentType = ShipmentType.Regular;
+                if(shipmentDto.CustomerDetails.CompanyType == CompanyType.Ecommerce)
+                {
+                    shipmentType = ShipmentType.Ecommerce;
+                }
+
+                shipmentDto.ShipmentItems = new List<ShipmentItemDTO>();
+
+                //Shipment Item
+                foreach (var item in shipment.PreShipmentItems)
+                {
+                    shipmentDto.ShipmentItems.Add(new ShipmentItemDTO
+                    {
+                        Description = item.Description,
+                        ShipmentType = shipmentType,
+                        Height = item.Height,
+                        IsVolumetric = item.IsVolumetric,
+                        Description_s = item.Description_s,
+                        Length = item.Length,
+                        Nature = item.Nature,
+                        Quantity = item.Quantity,
+                        Price = item.Price,
+                        SerialNumber = item.SerialNumber,
+                        Weight = item.Weight,
+                        Width = item.Width
+                    });
+                }
+
+                return shipmentDto;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //get basic shipment details
         public async Task<ShipmentDTO> GetBasicShipmentDetail(string waybill)
         {
