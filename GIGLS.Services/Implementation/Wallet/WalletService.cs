@@ -302,6 +302,8 @@ namespace GIGLS.Services.Implementation.Wallet
                             {
                                 item.CustomerName = company.Name;
                                 item.Country = company.Country;
+                                item.CustomerPhoneNumber = company.PhoneNumber;
+                                item.CustomerEmail = company.Email;
                                 item.UserActiveCountryId = company.UserActiveCountryId;
                             }                            
                         }
@@ -313,6 +315,8 @@ namespace GIGLS.Services.Implementation.Wallet
                             foreach (var partner in partners)
                             {
                                 item.CustomerName = partner.PartnerName;
+                                item.CustomerPhoneNumber = partner.PhoneNumber;
+                                item.CustomerEmail = partner.Email;
                                 item.Country = partner.Country;
                                 item.UserActiveCountryId = partner.UserActiveCountryId;
                             }
@@ -326,6 +330,8 @@ namespace GIGLS.Services.Implementation.Wallet
                             foreach (var individual in individualCustomer)
                             {
                                 item.CustomerName = string.Format($"{individual.FirstName} " + $"{individual.LastName}");
+                                item.CustomerPhoneNumber = individual.PhoneNumber;
+                                item.CustomerEmail = individual.Email;
                                 item.UserActiveCountryId = individual.UserActiveCountryId;
                                 item.Country = individual.Country;
                             }                            
