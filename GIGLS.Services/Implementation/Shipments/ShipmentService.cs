@@ -398,7 +398,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipmentDto.Customer = new List<CustomerDTO>
                 {
                     shipmentDto.CustomerDetails
-                };
+                };  
 
                 ShipmentType shipmentType = ShipmentType.Regular;
                 if(shipmentDto.CustomerDetails.CompanyType == CompanyType.Ecommerce)
@@ -426,6 +426,31 @@ namespace GIGLS.Services.Implementation.Shipments
                         Weight = item.Weight,
                         Width = item.Width
                     });
+                }
+
+                //Get Departure Service Center and Destination Service centre
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                shipmentDto.DepartureServiceCentreId = serviceCenterIds[0];
+
+                //Get SuperCentre for Home Delivery
+                if (shipmentDto.PickupOptions == PickupOptions.HOMEDELIVERY)
+                {
+                    var station = await _uow.Station.GetAsync(x => x.StationId == shipment.DestinationStationId);
+
+                    if(station == null)
+                    {
+                        shipmentDto.DestinationServiceCentreId = station.SuperServiceCentreId;
+                    }
+                }
+
+                if(shipmentDto.DestinationServiceCentreId == 0)
+                {
+                    var serviceCentres = await _uow.ServiceCentre.GetAsync(x => x.StationId == shipment.DestinationStationId);
+                    
+                    if(serviceCentres != null)
+                    {
+                        shipmentDto.DestinationServiceCentreId = serviceCentres.ServiceCentreId;
+                    }
                 }
 
                 return shipmentDto;
@@ -647,7 +672,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
                 
-
                 var hashString = await ComputeHash(shipmentDTO);
 
                 var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
