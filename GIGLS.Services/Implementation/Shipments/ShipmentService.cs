@@ -400,12 +400,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentDto.CustomerDetails
                 };  
 
-                ShipmentType shipmentType = ShipmentType.Regular;
-                if(shipmentDto.CustomerDetails.CompanyType == CompanyType.Ecommerce)
-                {
-                    shipmentType = ShipmentType.Ecommerce;
-                }
-
                 shipmentDto.ShipmentItems = new List<ShipmentItemDTO>();
 
                 //Shipment Item
@@ -414,7 +408,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentDto.ShipmentItems.Add(new ShipmentItemDTO
                     {
                         Description = item.Description,
-                        ShipmentType = shipmentType,
+                        ShipmentType = item.ShipmentType,
                         Height = item.Height,
                         IsVolumetric = item.IsVolumetric,
                         Description_s = item.Description_s,

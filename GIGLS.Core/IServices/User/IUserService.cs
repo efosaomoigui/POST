@@ -84,5 +84,6 @@ namespace GIGLS.Core.IServices.User
         Task<UserDTO> GetActivatedUserByEmail(string email, bool isActive);
         Task<UserDTO> GetUserUsingCustomerForCustomerPortal(string emailPhoneCode);
         Task<UserDTO> GetUserUsingCustomerForMobileScanner(string emailPhoneCode);
+        Task<bool> IsCustomerHasAgentRole(string userId);
     }
 }

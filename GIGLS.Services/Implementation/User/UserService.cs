@@ -1393,7 +1393,6 @@ namespace GIGLS.Services.Implementation.User
             return await _unitOfWork.User.IsUserHasAdminRole(userId);
         }
 
-
         //use for mobile request
         public async Task<UserDTO> GetUserUsingCustomer(string emailPhoneCode)
         {
@@ -1442,6 +1441,11 @@ namespace GIGLS.Services.Implementation.User
             }
 
             return Mapper.Map<UserDTO>(user);
+        }
+
+        public async Task<bool> IsCustomerHasAgentRole(string userId)
+        {
+            return await _unitOfWork.User.IsCustomerHasAgentRole(userId);
         }
     }
 }

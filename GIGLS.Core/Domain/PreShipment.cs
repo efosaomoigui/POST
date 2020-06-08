@@ -31,8 +31,14 @@ namespace GIGL.GIGLS.Core.Domain
 
         [MaxLength(100)]
         public string SenderCity { get; set; }
-        //Receivers Information
 
+        [MaxLength(100)]
+        public string SenderName { get; set; }
+
+        [MaxLength(100)]
+        public string SenderPhoneNumber { get; set; }
+
+        //Receivers Information
         [MaxLength(100)]
         public string ReceiverName { get; set; }
 
@@ -58,5 +64,6 @@ namespace GIGL.GIGLS.Core.Domain
 
         public decimal GrandTotal { get; set; }
         public bool IsProcessed { get; set; }
+        public bool IsAgent { get; set; }
     }
 }

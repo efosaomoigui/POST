@@ -2026,10 +2026,43 @@ namespace GIGLS.Services.Business.CustomerPortal
                 // get the sender info
                 var currentUserId = await _userService.GetCurrentUserId();
                 preShipmentDTO.SenderUserId = currentUserId;
+                preShipmentDTO.IsAgent = false;
 
+                //Get the role and name of the customer
                 var user = await _userService.GetUserById(currentUserId);
-                preShipmentDTO.CompanyType = user.UserChannelType.ToString();
                 preShipmentDTO.CustomerCode = user.UserChannelCode;
+                preShipmentDTO.CompanyType = user.UserChannelType.ToString();
+
+                //For Agent
+                if (user.SystemUserRole == "FastTrack Agent")
+                {
+                    preShipmentDTO.CompanyType = UserChannelType.IndividualCustomer.ToString();
+                    preShipmentDTO.IsAgent = true;
+                }
+                else
+                {
+                    //Get the customer name
+                    if (user.UserChannelType == UserChannelType.Ecommerce)
+                    {
+                        var customer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+
+                        if(customer != null)
+                        {
+                            preShipmentDTO.SenderName = customer.FirstName + " "+ customer.LastName;
+                            preShipmentDTO.SenderPhoneNumber = customer.PhoneNumber;
+                        }
+                    }
+                    else
+                    {
+                        var customer = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+
+                        if (customer != null)
+                        {
+                            preShipmentDTO.SenderName = customer.Name;
+                            preShipmentDTO.SenderPhoneNumber = customer.PhoneNumber;
+                        }
+                    }
+                }
 
                 var country = await _uow.Country.GetCountryByStationId(preShipmentDTO.DepartureStationId);
                 preShipmentDTO.CountryId = country.CountryId;
@@ -2069,6 +2102,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw;
             }
         }
+
 
         public async Task UpdateServiceCentre(int serviceCentreId, ServiceCentreDTO service)
         {

@@ -310,5 +310,20 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             }
             return await Task.FromResult(user);
         }
+
+        public Task<bool> IsCustomerHasAgentRole(string userId)
+        {
+            bool hasAgentRole = false;
+
+            //FastTrack Agent
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.Id == userId && (x.SystemUserRole == "FastTrack Agent")).FirstOrDefault();
+                   
+            if (user != null)
+            {
+                hasAgentRole = true;
+            }
+
+            return Task.FromResult(hasAgentRole);
+        }
     }
 }

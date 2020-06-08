@@ -54,5 +54,6 @@ namespace GIGLS.Core.IRepositories.User
         Task<GIGL.GIGLS.Core.Domain.User> ActivateUserByEmail(string email, bool isActive);
         Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomerForCustomerPortal(string emailPhoneCode);
         Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomerForMobileScanner(string emailPhoneCode);
+        Task<bool> IsCustomerHasAgentRole(string userId);
     }
 }
