@@ -770,6 +770,32 @@ namespace GIGLS.WebApi.Controllers.User
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPut]
+        [Route("api/user/setmagayauser/{userid}/{setTo}")]
+        public async Task<IServiceResponse<bool>> setmagayauser(string userid, bool setTo)  
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                UserDTO udto = new UserDTO()
+                {
+                    IsMagaya = setTo
+                }; 
+
+                var result = await _userService.UpdateMagayaUser(userid, udto);
+
+                if (!result.Succeeded)
+                {
+                    throw new GenericException("Operation could not complete update successfully");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
 
         [AllowAnonymous]
         [HttpPut]
