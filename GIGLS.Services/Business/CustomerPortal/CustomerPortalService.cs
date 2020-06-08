@@ -2186,7 +2186,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                 existingPreShipment.DepartureStationId = existingPreShipment.DepartureStationId;
                 existingPreShipment.DestinationStationId = existingPreShipment.DestinationStationId;
                 
-
                 //update items
                 foreach (var preShipmentItemDTO in preShipmentDTO.PreShipmentItems)
                 {

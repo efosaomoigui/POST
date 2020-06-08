@@ -373,7 +373,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     Value = shipment.Value,
                     ApproximateItemsWeight = shipment.ApproximateItemsWeight,
                     CompanyType = shipment.CompanyType,
-                    CustomerCode = shipment.CustomerCode,
                     
                     //reciever info
                     ReceiverName = shipment.ReceiverName,
@@ -382,18 +381,38 @@ namespace GIGLS.Services.Implementation.Shipments
                     ReceiverCity =shipment.ReceiverCity                    
                 };
 
+
                 //Get Customer Details
-                if (shipment.CompanyType.Contains("Individual"))
+                //if (shipment.CompanyType.Contains("Individual"))
+                //{
+                //    shipment.CompanyType = UserChannelType.IndividualCustomer.ToString();
+                //}
+
+                if (shipment.IsAgent)
                 {
                     shipment.CompanyType = UserChannelType.IndividualCustomer.ToString();
+                    shipmentDto.CustomerDetails = new CustomerDTO
+                    {
+                        PhoneNumber = shipment.SenderPhoneNumber, 
+                        WalletBalance = 0.0M,
+                        Address = shipment.SenderCity
+                    };
+
+                    string[] words = shipment.SenderName.Split(' ');
+                    shipmentDto.CustomerDetails.FirstName = words.FirstOrDefault();
+                    shipmentDto.CustomerDetails.LastName = words.Skip(1).ToString();
                 }
+                else
+                {
+                    shipmentDto.CustomerCode = shipment.CustomerCode;
 
-                UserChannelType customerType = (UserChannelType)Enum.Parse(typeof(UserChannelType), shipment.CompanyType);
-                shipmentDto.CustomerDetails = await _customerService.GetCustomer(shipment.CustomerCode, customerType);
+                    UserChannelType customerType = (UserChannelType)Enum.Parse(typeof(UserChannelType), shipment.CompanyType);
+                    shipmentDto.CustomerDetails = await _customerService.GetCustomer(shipment.CustomerCode, customerType);
 
-                ////Get the customer wallet balance
-                var wallet = await _walletService.GetWalletBalance(shipment.CustomerCode);
-                shipmentDto.CustomerDetails.WalletBalance = wallet.Balance;
+                    ////Get the customer wallet balance                
+                    var wallet = await _walletService.GetWalletBalance(shipment.CustomerCode);
+                    shipmentDto.CustomerDetails.WalletBalance = wallet.Balance;
+                }
 
                 shipmentDto.Customer = new List<CustomerDTO>
                 {
@@ -762,9 +781,9 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 return newShipment;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
