@@ -67,6 +67,22 @@ namespace GIGLS.WebApi.Controllers.User
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("api/user/customer/{email}")]
+        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetCustomerUsers(string email)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var users = await _userService.GetCustomerUsers(email);
+                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                {
+                    Object = users
+                };
+
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("api/user/customer")]
         public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetCustomerUsers()
         {

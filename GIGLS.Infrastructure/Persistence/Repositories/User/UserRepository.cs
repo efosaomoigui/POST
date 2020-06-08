@@ -57,6 +57,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
         }
 
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers(string email)
+        {
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.Email == email && x.UserType != UserType.System && x.UserChannelType != UserChannelType.Employee).AsEnumerable();
+            return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
+        }
+
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers()
         {
             var user = _userManager.Users.Where(x => x.IsDeleted == false && (x.UserChannelType == UserChannelType.Corporate 

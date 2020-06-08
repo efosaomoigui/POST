@@ -76,6 +76,11 @@ namespace GIGLS.Services.Implementation.User
             return _unitOfWork.User.GetUsers();
         }
 
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers(string email)
+        {
+            return _unitOfWork.User.GetCustomerUsers(email);
+        }
+
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers()
         {
             return _unitOfWork.User.GetCustomerUsers();
@@ -504,8 +509,18 @@ namespace GIGLS.Services.Implementation.User
 
                 //update the user with the system user role
                 var userDTO = await GetUserById(userid);
-                userDTO.SystemUserId = systemuserid;
-                userDTO.SystemUserRole = systemUser.FirstName;
+
+                if (systemUserRoles.Any())
+                {
+                    userDTO.SystemUserId = systemuserid;
+                    userDTO.SystemUserRole = systemUser.FirstName;
+                }
+                else
+                {
+                    userDTO.SystemUserId = "";
+                    userDTO.SystemUserRole = "";
+                }
+
                 await UpdateUser(userid, userDTO);
 
                 // complete transaction if all actions are successful
