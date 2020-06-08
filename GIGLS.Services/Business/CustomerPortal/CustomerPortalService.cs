@@ -2149,6 +2149,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                 existingPreShipment.PickupOptions = preShipmentDTO.PickupOptions;
                 existingPreShipment.SenderCity = existingPreShipment.SenderCity;
                 existingPreShipment.Value = existingPreShipment.Value;
+                existingPreShipment.DepartureStationId = existingPreShipment.DepartureStationId;
+                existingPreShipment.DestinationStationId = existingPreShipment.DestinationStationId;
+                
 
                 //update items
                 foreach (var preShipmentItemDTO in preShipmentDTO.PreShipmentItems)
