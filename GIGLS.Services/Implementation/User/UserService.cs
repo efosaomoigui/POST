@@ -263,6 +263,20 @@ namespace GIGLS.Services.Implementation.User
 
         }
 
+        public async Task<IdentityResult> UpdateMagayaUser(string userid, UserDTO userDto)
+        {
+            var user = await _unitOfWork.User.GetUserById(userid);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist!", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            user.IsMagaya = userDto.IsMagaya;
+            return await _unitOfWork.User.UpdateUser(userid, user);
+
+        }
+
         public async Task<IdentityResult> ActivateUser(string userid, bool val)
         {
             var user = await _unitOfWork.User.GetUserById(userid);
