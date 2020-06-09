@@ -89,9 +89,10 @@ namespace GIGLS.Core.DTO.User
         public bool? IsUniqueInstalled { get; set; }
 
         public string AppType { get; set; }
-
         public bool? IsEligible { get; set; }
         public string RegistrationReferrercode { get; set; }
         public string BusinessNature { get; set; }
+
+        public bool IsMagaya { get; set; }
     }
 }

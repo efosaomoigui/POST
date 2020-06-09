@@ -105,11 +105,9 @@ namespace GIGLS.WebApi.Controllers.Wallet
         {
             return await HandleApiOperationAsync(async () =>
             {
-                //var walletTransaction = await _walletTransactionService.AddWalletTransaction(newWalletTransaction);
                 await _walletTransactionService.AddWalletTransaction(newWalletTransaction);
                 return new ServiceResponse<object>
                 {
-                    //Object = walletTransaction
                     Object = true
                 };
             });

@@ -44,6 +44,7 @@ namespace GIGL.GIGLS.Core.Domain
         public string AppType { get; set; }
         public bool? IsUniqueInstalled { get; set; }
         public string RegistrationReferrercode { get; set; }
+        public bool IsMagaya { get; set; }
 
 
         //public async Task GenerateUserIdentityAsync(Microsoft.AspNet.Identity.UserManager manager)

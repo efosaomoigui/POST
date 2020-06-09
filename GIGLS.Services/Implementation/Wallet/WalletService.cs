@@ -298,21 +298,29 @@ namespace GIGLS.Services.Implementation.Wallet
                     {
                         if (companies.Any())
                         {
-                            foreach( var company in companies)
+                            var company = companies.Where(x => x.CustomerCode == item.CustomerCode).FirstOrDefault();
+
+                            if(company != null)
                             {
                                 item.CustomerName = company.Name;
                                 item.Country = company.Country;
+                                item.CustomerPhoneNumber = company.PhoneNumber;
+                                item.CustomerEmail = company.Email;
                                 item.UserActiveCountryId = company.UserActiveCountryId;
-                            }                            
+                            }
                         }
                     }
                     else if (CustomerType.Partner == item.CustomerType)
                     {
                         if (partners.Any())
                         {
-                            foreach (var partner in partners)
+                            var partner = partners.Where(x => x.PartnerCode == item.CustomerCode).FirstOrDefault();
+
+                            if (partner != null)
                             {
                                 item.CustomerName = partner.PartnerName;
+                                item.CustomerPhoneNumber = partner.PhoneNumber;
+                                item.CustomerEmail = partner.Email;
                                 item.Country = partner.Country;
                                 item.UserActiveCountryId = partner.UserActiveCountryId;
                             }
@@ -323,12 +331,16 @@ namespace GIGLS.Services.Implementation.Wallet
                         // handle IndividualCustomers
                         if (individualCustomer.Any())
                         {
-                            foreach (var individual in individualCustomer)
+                            var individual = individualCustomer.Where(x => x.CustomerCode == item.CustomerCode).FirstOrDefault();
+
+                            if (individual != null)
                             {
                                 item.CustomerName = string.Format($"{individual.FirstName} " + $"{individual.LastName}");
+                                item.CustomerPhoneNumber = individual.PhoneNumber;
+                                item.CustomerEmail = individual.Email;
                                 item.UserActiveCountryId = individual.UserActiveCountryId;
                                 item.Country = individual.Country;
-                            }                            
+                            }
                         }
                     }
                 }
