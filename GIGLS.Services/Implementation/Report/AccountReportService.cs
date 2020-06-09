@@ -68,7 +68,22 @@ namespace GIGLS.Services.Implementation.Report
             var userActiveCountry = await _userService.GetUserActiveCountry();
             accountFilterCriteria.CountryId = userActiveCountry.CountryId;
 
-            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            int[] serviceCenterIds = null;
+
+            if (accountFilterCriteria.ServiceCentreId == 0)
+            {
+                serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+
+            }
+            else
+            {
+                int[] serviceCenterId = new int[] {
+                    accountFilterCriteria.ServiceCentreId
+                };
+                serviceCenterIds = serviceCenterId;
+
+            }
+
             accountFilterCriteria.PaymentServiceType = PaymentServiceType.Demurage;
             var generalLedgerDTO = await _uow.GeneralLedger.GetGeneralLedgersAsync(accountFilterCriteria, serviceCenterIds);
 
