@@ -400,7 +400,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     string[] words = shipment.SenderName.Split(' ');
                     shipmentDto.CustomerDetails.FirstName = words.FirstOrDefault();
-                    shipmentDto.CustomerDetails.LastName = words.Skip(1).ToString();
+                    shipmentDto.CustomerDetails.LastName = words.Skip(1).FirstOrDefault();
                 }
                 else
                 {

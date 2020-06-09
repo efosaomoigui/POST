@@ -44,7 +44,8 @@ namespace GIGLS.Services.Implementation.User
         //Register a new user
         public async Task<IdentityResult> AddUser(UserDTO userDto)
         {
-            if (await _unitOfWork.User.GetUserByEmail(userDto.Email.ToLower()) != null)
+            var userExist = await _unitOfWork.User.GetUserByEmail(userDto.Email);
+            if (userExist != null)
             {
                 throw new GenericException($"User with email: {userDto.Email} already exist", $"{(int)HttpStatusCode.Forbidden}");
             }

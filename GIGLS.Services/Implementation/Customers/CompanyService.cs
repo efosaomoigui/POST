@@ -45,6 +45,14 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
+                //block the registration for APP User
+                var gigGoEmailUser = await _uow.User.GetUserByEmail(company.Email);
+
+                if(gigGoEmailUser != null)
+                {
+                    throw new GenericException($"Email already exist");
+                }
+
                 if (await _uow.Company.ExistAsync(c => c.Name.ToLower() == company.Name.Trim().ToLower() || c.PhoneNumber == company.PhoneNumber || c.Email == company.Email))
                 {
                     throw new GenericException($"{company.Name}, phone number or email detail already exist");
@@ -60,6 +68,14 @@ namespace GIGLS.Services.Implementation.Customers
                 if (company.PhoneNumber.StartsWith("0"))
                 {
                     company.PhoneNumber = await AddCountryCodeToPhoneNumber(company.PhoneNumber, company.UserActiveCountryId);
+                }
+
+                //check phone number existence
+                var gigGoPhoneUser = await _uow.User.GetUserByPhoneNumber(company.PhoneNumber);
+
+                if (gigGoPhoneUser != null)
+                {
+                    throw new GenericException($"Phone Number already exist");
                 }
 
                 var newCompany = Mapper.Map<Company>(company);
@@ -121,6 +137,7 @@ namespace GIGLS.Services.Implementation.Customers
                 {
                     password = newCompany.Password;
                 }
+
                 var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
                 {
                     ConfirmPassword = password,
@@ -134,7 +151,7 @@ namespace GIGLS.Services.Implementation.Customers
                     Password = password,
                     PhoneNumber = newCompany.PhoneNumber,
                     UserType = UserType.Regular,
-                    Username = newCompany.CustomerCode,
+                    Username = newCompany.Email,
                     UserChannelCode = newCompany.CustomerCode,
                     UserChannelPassword = password,
                     UserChannelType = userChannelType,
