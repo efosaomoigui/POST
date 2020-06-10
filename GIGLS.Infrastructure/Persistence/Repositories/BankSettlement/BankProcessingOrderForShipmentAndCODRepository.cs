@@ -84,6 +84,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
             var processingordersvalue = Context.BankProcessingOrderForShipmentAndCOD.AsQueryable();
             processingordersvalue = processingordersvalue.Where(s => s.DepositType == type);
 
+            //DispatchedBy = Context.Users.Where(d => d.Id == p.DispatchedById).Select(x => x.LastName + " " + x.FirstName).FirstOrDefault(),
             var processingorders = from processingorderCode in processingordersvalue
                                    select new BankProcessingOrderForShipmentAndCODDTO
                                    {
@@ -92,6 +93,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                        ServiceCenterId = processingorderCode.ServiceCenterId,
                                        Status = processingorderCode.Status,
                                        Waybill = processingorderCode.Waybill,
+                                       WaybillCreated = Context.Shipment.Where(c => c.Waybill == processingorderCode.Waybill).Select(x => x.DateCreated).FirstOrDefault(),
                                        GrandTotal = processingorderCode.GrandTotal,
                                        CODAmount = processingorderCode.CODAmount ?? 0,
                                        ServiceCenter = processingorderCode.ServiceCenter,
