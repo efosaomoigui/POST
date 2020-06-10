@@ -113,6 +113,14 @@ namespace GIGLS.WebApi.Controllers.Shipments
                     ShipmentDTO.SenderState = ShipmentDTO.Customer[0].State;
                 }
 
+                //set some data to null
+                ShipmentDTO.ShipmentCollection = null;
+                ShipmentDTO.Demurrage = null;
+                ShipmentDTO.Invoice = null;
+                ShipmentDTO.ShipmentCancel = null;
+                ShipmentDTO.ShipmentReroute = null;
+                ShipmentDTO.DeliveryOption = null;
+
                 var shipment = await _service.AddShipment(ShipmentDTO);
                 return new ServiceResponse<ShipmentDTO>
                 {

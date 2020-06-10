@@ -469,7 +469,7 @@ namespace GIGLS.Services.Implementation.Customers
 
                 CompanyDTO companyDto = Mapper.Map<CompanyDTO>(company);
                 companyDto.UserActiveCountryName = companyDto.Country.CountryName;
-
+                companyDto.CurrencySymbol = companyDto.Country.CurrencySymbol;
                 return companyDto;
             }
             catch (Exception)

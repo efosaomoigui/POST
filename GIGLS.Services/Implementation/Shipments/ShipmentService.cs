@@ -373,6 +373,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     Value = shipment.Value,
                     ApproximateItemsWeight = shipment.ApproximateItemsWeight,
                     CompanyType = shipment.CompanyType,
+                    DeclarationOfValueCheck = shipment.Value,
+                    CustomerType = shipment.CompanyType,
                     
                     //reciever info
                     ReceiverName = shipment.ReceiverName,
@@ -390,12 +392,16 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (shipment.IsAgent)
                 {
-                    shipment.CompanyType = UserChannelType.IndividualCustomer.ToString();
+                    shipmentDto.CompanyType = UserChannelType.IndividualCustomer.ToString();
+                    shipmentDto.CustomerType = UserChannelType.IndividualCustomer.ToString();
                     shipmentDto.CustomerDetails = new CustomerDTO
                     {
                         PhoneNumber = shipment.SenderPhoneNumber, 
                         WalletBalance = 0.0M,
-                        Address = shipment.SenderCity
+                        Address = shipment.SenderCity,
+                        CompanyType = CompanyType.Client,
+                        CustomerType = CustomerType.IndividualCustomer,
+                        City = shipment.SenderCity                        
                     };
 
                     string[] words = shipment.SenderName.Split(' ');
@@ -408,7 +414,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     UserChannelType customerType = (UserChannelType)Enum.Parse(typeof(UserChannelType), shipment.CompanyType);
                     shipmentDto.CustomerDetails = await _customerService.GetCustomer(shipment.CustomerCode, customerType);
-
+                    
                     ////Get the customer wallet balance                
                     var wallet = await _walletService.GetWalletBalance(shipment.CustomerCode);
                     shipmentDto.CustomerDetails.WalletBalance = wallet.Balance;
@@ -944,7 +950,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             // get deliveryOptionIds and set the first value in shipment
             var deliveryOptionIds = shipmentDTO.DeliveryOptionIds;
-            if (deliveryOptionIds.Count > 0)
+            if (deliveryOptionIds.Any())
             {
                 shipmentDTO.DeliveryOptionId = deliveryOptionIds[0];
             }
@@ -958,8 +964,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
             var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
             var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
-
-
 
             shipmentDTO.Waybill = waybill;
 

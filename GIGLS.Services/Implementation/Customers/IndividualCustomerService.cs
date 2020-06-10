@@ -288,7 +288,7 @@ namespace GIGLS.Services.Implementation.Customers
         {
             try
             {
-                var customer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode.ToLower() == customerCode.ToLower());
+                var customer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == customerCode);
                 if (customer == null)
                 {
                     return new IndividualCustomerDTO { };
