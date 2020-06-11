@@ -1741,8 +1741,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
-        
+                
         [HttpPost]
         [Route("updatepickupmanifeststatus")]
         public async Task<IServiceResponse<bool>> UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO)

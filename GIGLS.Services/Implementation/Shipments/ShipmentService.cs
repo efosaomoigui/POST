@@ -418,6 +418,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     ////Get the customer wallet balance                
                     var wallet = await _walletService.GetWalletBalance(shipment.CustomerCode);
                     shipmentDto.CustomerDetails.WalletBalance = wallet.Balance;
+                    shipmentDto.CustomerDetails.RowVersion = null;
                 }
 
                 shipmentDto.Customer = new List<CustomerDTO>
