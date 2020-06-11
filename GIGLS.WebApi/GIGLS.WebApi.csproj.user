@@ -17,7 +17,7 @@
     <WebStackScaffolding_IsReferencingScriptLibrariesSelected>True</WebStackScaffolding_IsReferencingScriptLibrariesSelected>
     <WebStackScaffolding_LayoutPageFile />
     <WebStackScaffolding_IsAsyncSelected>False</WebStackScaffolding_IsAsyncSelected>
-    <NameOfLastUsedPublishProfile>agilitysystemapidevm - Web Deploy4</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>agilitysystemapidevm-staging - Web Deploy</NameOfLastUsedPublishProfile>
     <LastActiveSolutionConfig>Release|Any CPU</LastActiveSolutionConfig>
     <ActiveDebugTarget />
   </PropertyGroup>
