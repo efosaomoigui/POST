@@ -189,7 +189,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            //var partners = _context.Partners.AsQueryable().Where(s => s.PartnerType == Core.Enums.PartnerType.DeliveryPartner && s.IsActivated == true);
             var partners = _context.Partners.AsQueryable().Where(s => (s.PartnerType == Core.Enums.PartnerType.DeliveryPartner || s.PartnerType == Core.Enums.PartnerType.InternalDeliveryPartner) && s.IsActivated == true);
 
             var partnerDto = from partner in partners
