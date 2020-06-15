@@ -1303,7 +1303,6 @@ namespace GIGLS.Services.Implementation.Shipments
                 //filter by DestinationServiceCentreId
                 var filter = filterOptionsDto.filter;
                 var filterValue = filterOptionsDto.filterValue;
-                //int destinationSCId = 0;
                 var boolResult = int.TryParse(filterValue, out int destinationSCId);
                 if (!string.IsNullOrEmpty(filter) && !string.IsNullOrEmpty(filterValue))
                 {
