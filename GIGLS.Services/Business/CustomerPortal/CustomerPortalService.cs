@@ -2077,6 +2077,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                 foreach (var shipmentItem in newPreShipment.PreShipmentItems)
                 {
                     shipmentItem.SerialNumber = serialNumber;
+                    shipmentItem.Nature = shipmentItem.Nature.ToUpper();
+
+                    if(shipmentItem.SpecialPackageId == null)
+                    {
+                        shipmentItem.SpecialPackageId = 0;
+                    }
 
                     //sum item weight
                     //check for volumetric weight
@@ -2192,6 +2198,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                     var preshipment = await _uow.PreShipmentItem.GetAsync(s => s.PreShipmentId == preShipmentItemDTO.PreShipmentId && s.PreShipmentItemId == preShipmentItemDTO.PreShipmentItemId);
                     if (preshipment != null)
                     {
+                        if(preShipmentItemDTO.SpecialPackageId == null)
+                        {
+                            preShipmentItemDTO.SpecialPackageId = 0;
+                        }
+
                         preshipment.Description = preShipmentItemDTO.Description;
                         preshipment.Nature = preShipmentItemDTO.Nature;
                         preshipment.Quantity = preShipmentItemDTO.Quantity;

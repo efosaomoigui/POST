@@ -357,11 +357,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipment = await _uow.PreShipment.GetAsync(x => x.TempCode == code, "PreShipmentItems");
                 if (shipment == null)
                 {
-                    throw new GenericException("Pre Shipment Information does not exist");
+                    throw new GenericException("Pre Shipment Information does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
+
                 if (shipment.IsProcessed)
                 {
-                    throw new GenericException($" {code} has been processed already. The processed waybill for the code  is {shipment.Waybill} ");
+                    throw new GenericException($" {code} has been processed already. The processed waybill for the code  is {shipment.Waybill} ", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 var shipmentDto = new ShipmentDTO
@@ -444,7 +445,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         Price = item.Price,
                         SerialNumber = item.SerialNumber,
                         Weight = item.Weight,
-                        Width = item.Width
+                        Width = item.Width,
+                        ShipmentItemId = item.SpecialPackageId == null ? 0 : (int)item.SpecialPackageId  //use special item to represent package id for special shipment
                     });
                 }
 
