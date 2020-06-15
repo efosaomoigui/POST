@@ -274,7 +274,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task UpdateShipmentCollection(ShipmentCollectionDTO shipmentCollectionDto)
         {
-            var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(shipmentCollectionDto.Waybill));
+            var shipmentCollection = await _uow.ShipmentCollection.GetAsync(x => x.Waybill == shipmentCollectionDto.Waybill);
 
             if (shipmentCollection == null)
             {
@@ -427,8 +427,15 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             //update invoice as shipment collected
-            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill.Equals(shipmentCollectionDto.Waybill));
+            var invoice = await _uow.Invoice.GetAsync(x => x.Waybill == shipmentCollectionDto.Waybill);
             invoice.IsShipmentCollected = true;
+
+            //update TransitWaybillNumber to settle some waybill that doesn't pass through process to be remove from grouping again
+            var transitWaybill = await _uow.TransitWaybillNumber.GetAsync(x => x.WaybillNumber == shipmentCollectionDto.Waybill);
+            if(transitWaybill != null)
+            {
+                transitWaybill.IsTransitCompleted = true;
+            }
 
             await _uow.CompleteAsync();
         }
@@ -507,6 +514,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             await UpdateShipmentCollection(shipmentCollection);
+
             //If it is mobile
             if (shipmentCollection.IsComingFromDispatch)
             {
