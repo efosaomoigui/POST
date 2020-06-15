@@ -393,26 +393,52 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (shipment.IsAgent)
                 {
-                    shipmentDto.CompanyType = UserChannelType.IndividualCustomer.ToString();
-                    shipmentDto.CustomerType = UserChannelType.IndividualCustomer.ToString();
-                    shipmentDto.CustomerDetails = new CustomerDTO
-                    {
-                        PhoneNumber = shipment.SenderPhoneNumber, 
-                        WalletBalance = 0.0M,
-                        Address = shipment.SenderCity,
-                        CompanyType = CompanyType.Client,
-                        CustomerType = CustomerType.IndividualCustomer,
-                        City = shipment.SenderCity                        
-                    };
+                    string senderPhoneNumber = string.Empty;
 
-                    string[] words = shipment.SenderName.Split(' ');
-                    shipmentDto.CustomerDetails.FirstName = words.FirstOrDefault();
-                    shipmentDto.CustomerDetails.LastName = words.Skip(1).FirstOrDefault();
+                    if (shipment.SenderPhoneNumber.StartsWith("0"))
+                    {
+                        senderPhoneNumber = shipment.SenderPhoneNumber.Remove(0, 1);
+                    }
+                    else
+                    {
+                        senderPhoneNumber = shipment.SenderPhoneNumber;
+                    }
+
+                    //check if customer information already exist 
+                    var individualCustomer = await _uow.IndividualCustomer.GetAsync(x => x.PhoneNumber.Contains(senderPhoneNumber));
+                    if(individualCustomer != null)
+                    {
+                        IndividualCustomerDTO individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(individualCustomer);
+                        var customerDTO = Mapper.Map<CustomerDTO>(individualCustomerDTO);
+                        customerDTO.CustomerType = CustomerType.IndividualCustomer;
+                        customerDTO.WalletBalance = 0.0M;
+                        customerDTO.RowVersion = null;
+
+                        shipmentDto.CustomerDetails = customerDTO;
+                        shipmentDto.CustomerCode = customerDTO.CustomerCode;
+                    }
+                    else
+                    {
+                        shipmentDto.CompanyType = UserChannelType.IndividualCustomer.ToString();
+                        shipmentDto.CustomerType = UserChannelType.IndividualCustomer.ToString();
+                        shipmentDto.CustomerDetails = new CustomerDTO
+                        {
+                            PhoneNumber = shipment.SenderPhoneNumber,
+                            WalletBalance = 0.0M,
+                            Address = shipment.SenderCity,
+                            CompanyType = CompanyType.Client,
+                            CustomerType = CustomerType.IndividualCustomer,
+                            City = shipment.SenderCity
+                        };
+
+                        string[] words = shipment.SenderName.Split(' ');
+                        shipmentDto.CustomerDetails.FirstName = words.FirstOrDefault();
+                        shipmentDto.CustomerDetails.LastName = words.Skip(1).FirstOrDefault();
+                    }
                 }
                 else
                 {
                     shipmentDto.CustomerCode = shipment.CustomerCode;
-
                     UserChannelType customerType = (UserChannelType)Enum.Parse(typeof(UserChannelType), shipment.CompanyType);
                     shipmentDto.CustomerDetails = await _customerService.GetCustomer(shipment.CustomerCode, customerType);
                     
