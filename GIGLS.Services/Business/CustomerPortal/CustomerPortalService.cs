@@ -2300,7 +2300,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 Waybill = shipment.Waybill,
                 CustomerEmail = customerDetails.Email,
-                CustomerNumber = customerDetails.PhoneNumber
+                CustomerNumber = customerDetails.PhoneNumber,
+                DateCreated = shipment.DateCreated
             };
 
             return shipmentDetail;

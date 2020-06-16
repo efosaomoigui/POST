@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -11,5 +7,6 @@ namespace GIGLS.Core.DTO.Shipments
         public string Waybill { get; set; }
         public string CustomerEmail { get; set; }
         public string CustomerNumber { get; set; }
+        public DateTime DateCreated { get; set; }
     }
 }
