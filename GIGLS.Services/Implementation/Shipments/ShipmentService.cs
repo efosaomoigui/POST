@@ -357,11 +357,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 var shipment = await _uow.PreShipment.GetAsync(x => x.TempCode == code, "PreShipmentItems");
                 if (shipment == null)
                 {
-                    throw new GenericException("Pre Shipment Information does not exist");
+                    throw new GenericException("Pre Shipment Information does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
+
                 if (shipment.IsProcessed)
                 {
-                    throw new GenericException($" {code} has been processed already. The processed waybill for the code  is {shipment.Waybill} ");
+                    throw new GenericException($" {code} has been processed already. The processed waybill for the code  is {shipment.Waybill} ", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 var shipmentDto = new ShipmentDTO
@@ -392,26 +393,52 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (shipment.IsAgent)
                 {
-                    shipmentDto.CompanyType = UserChannelType.IndividualCustomer.ToString();
-                    shipmentDto.CustomerType = UserChannelType.IndividualCustomer.ToString();
-                    shipmentDto.CustomerDetails = new CustomerDTO
-                    {
-                        PhoneNumber = shipment.SenderPhoneNumber, 
-                        WalletBalance = 0.0M,
-                        Address = shipment.SenderCity,
-                        CompanyType = CompanyType.Client,
-                        CustomerType = CustomerType.IndividualCustomer,
-                        City = shipment.SenderCity                        
-                    };
+                    string senderPhoneNumber = string.Empty;
 
-                    string[] words = shipment.SenderName.Split(' ');
-                    shipmentDto.CustomerDetails.FirstName = words.FirstOrDefault();
-                    shipmentDto.CustomerDetails.LastName = words.Skip(1).FirstOrDefault();
+                    if (shipment.SenderPhoneNumber.StartsWith("0"))
+                    {
+                        senderPhoneNumber = shipment.SenderPhoneNumber.Remove(0, 1);
+                    }
+                    else
+                    {
+                        senderPhoneNumber = shipment.SenderPhoneNumber;
+                    }
+
+                    //check if customer information already exist 
+                    var individualCustomer = await _uow.IndividualCustomer.GetAsync(x => x.PhoneNumber.Contains(senderPhoneNumber));
+                    if(individualCustomer != null)
+                    {
+                        IndividualCustomerDTO individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(individualCustomer);
+                        var customerDTO = Mapper.Map<CustomerDTO>(individualCustomerDTO);
+                        customerDTO.CustomerType = CustomerType.IndividualCustomer;
+                        customerDTO.WalletBalance = 0.0M;
+                        customerDTO.RowVersion = null;
+
+                        shipmentDto.CustomerDetails = customerDTO;
+                        shipmentDto.CustomerCode = customerDTO.CustomerCode;
+                    }
+                    else
+                    {
+                        shipmentDto.CompanyType = UserChannelType.IndividualCustomer.ToString();
+                        shipmentDto.CustomerType = UserChannelType.IndividualCustomer.ToString();
+                        shipmentDto.CustomerDetails = new CustomerDTO
+                        {
+                            PhoneNumber = shipment.SenderPhoneNumber,
+                            WalletBalance = 0.0M,
+                            Address = shipment.SenderCity,
+                            CompanyType = CompanyType.Client,
+                            CustomerType = CustomerType.IndividualCustomer,
+                            City = shipment.SenderCity
+                        };
+
+                        string[] words = shipment.SenderName.Split(' ');
+                        shipmentDto.CustomerDetails.FirstName = words.FirstOrDefault();
+                        shipmentDto.CustomerDetails.LastName = words.Skip(1).FirstOrDefault();
+                    }
                 }
                 else
                 {
                     shipmentDto.CustomerCode = shipment.CustomerCode;
-
                     UserChannelType customerType = (UserChannelType)Enum.Parse(typeof(UserChannelType), shipment.CompanyType);
                     shipmentDto.CustomerDetails = await _customerService.GetCustomer(shipment.CustomerCode, customerType);
                     
@@ -444,7 +471,8 @@ namespace GIGLS.Services.Implementation.Shipments
                         Price = item.Price,
                         SerialNumber = item.SerialNumber,
                         Weight = item.Weight,
-                        Width = item.Width
+                        Width = item.Width,
+                        ShipmentItemId = item.SpecialPackageId == null ? 0 : (int)item.SpecialPackageId  //use special item to represent package id for special shipment
                     });
                 }
 

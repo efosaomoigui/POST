@@ -109,6 +109,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     message = "Insufficient Wallet Balance";
                     IsBalanceSufficient = false;
+
+                    throw new GenericException(message, $"{(int)HttpStatusCode.Forbidden}");
                 }
                 else if (newPreShipment.IsEligible == false)
                 {
