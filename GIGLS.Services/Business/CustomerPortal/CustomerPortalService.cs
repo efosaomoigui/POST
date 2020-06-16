@@ -2272,5 +2272,39 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _preShipmentMobileService.GetPresentDayShipmentLocations();
         }
 
+        //Get Shipment Information for Danfo App
+        public async Task<ShipmentDetailDanfoDTO> GetShipmentDetailForDanfo(string waybill)
+        {
+            if (string.IsNullOrEmpty(waybill))
+            {
+                throw new GenericException("Waybill can not be null");
+            }
+
+            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus != ShipmentScanStatus.SSC);
+
+            if (shipment == null)
+            {
+                throw new GenericException($"Waybill {waybill} does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            //get CustomerDetails
+            if (shipment.CustomerType.Contains("Individual"))
+            {
+                shipment.CustomerType = CustomerType.IndividualCustomer.ToString();
+            }
+
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
+            var customerDetails = await _customerService.GetCustomer(shipment.CustomerId, customerType);
+
+            var shipmentDetail = new ShipmentDetailDanfoDTO
+            {
+                Waybill = shipment.Waybill,
+                CustomerEmail = customerDetails.Email,
+                CustomerNumber = customerDetails.PhoneNumber
+            };
+
+            return shipmentDetail;
+        }
+
     }
 }

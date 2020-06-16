@@ -599,5 +599,21 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("danfo/{waybillNumber}")]
+        public async Task<IServiceResponse<ShipmentDetailDanfoDTO>> GetShipmentDetailForDanfo(string waybillNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _thirdPartyAPIService.GetShipmentDetailForDanfo(waybillNumber);
+
+                return new ServiceResponse<ShipmentDetailDanfoDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

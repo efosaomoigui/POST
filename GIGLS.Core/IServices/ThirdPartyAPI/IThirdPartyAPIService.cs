@@ -28,6 +28,7 @@ namespace GIGLS.Core.IServices.ThirdPartyAPI
 
         //pickuprequests
         Task<List<InvoiceViewDTO>> GetShipmentTransactions(ShipmentCollectionFilterCriteria f_Criteria);
+        Task<ShipmentDetailDanfoDTO> GetShipmentDetailForDanfo(string waybill);
 
     }
 }
