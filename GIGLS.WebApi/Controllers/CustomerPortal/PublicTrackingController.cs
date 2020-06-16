@@ -129,7 +129,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpGet]
-        [Route("danfo/{waybillNumber}")]
+        [Route("getwaybill/{waybillNumber}")]
         public async Task<IServiceResponse<ShipmentDetailDanfoDTO>> GetShipmentDetailForDanfo(string waybillNumber)
         {
             return await HandleApiOperationAsync(async () =>
