@@ -836,6 +836,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                  DepartureCountryId = r.DepartureCountryId,
                                                  DestinationCountryId = r.DestinationCountryId,
                                                  CurrencyRatio = r.CurrencyRatio,
+                                                 IsCashOnDelivery = r.IsCashOnDelivery,
+                                                 CashOnDeliveryAmount = r.CashOnDeliveryAmount,
                                                  ShipmentCancel = Context.ShipmentCancel.Where(c => c.Waybill == r.Waybill).Select(x => new ShipmentCancelDTO
                                                  {
                                                      CancelReason = x.CancelReason

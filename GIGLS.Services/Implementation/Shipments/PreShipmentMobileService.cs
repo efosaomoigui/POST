@@ -424,6 +424,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         newPreShipment.CustomerType = "Individual";
                         newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
                     }
+                    newPreShipment.UserId = currentUserId;
                     newPreShipment.IsConfirmed = false;
                     newPreShipment.IsDelivered = false;
                     newPreShipment.shipmentstatus = "Shipment created";
@@ -578,6 +579,8 @@ namespace GIGLS.Services.Implementation.Shipments
         //Generate Waybill for Multiple Shipments Flow NEW
         private async Task<MultipleShipmentOutput> GenerateWaybill(List<PreShipmentMobileDTO> preShipmentDTO, decimal pickupValue)
         {
+            // get the current user info
+            var currentUserId = await _userService.GetCurrentUserId();
             var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
             var numberOfReceiver = preShipmentDTO.Count;
             var individualPickupPrice = pickupValue / numberOfReceiver;
@@ -608,6 +611,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
                 }
 
+                newPreShipment.UserId = currentUserId;
                 newPreShipment.IsConfirmed = false;
                 newPreShipment.IsDelivered = false;
                 newPreShipment.shipmentstatus = "Shipment created";
@@ -1251,15 +1255,12 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (filterOptionsDto.StationId > 0)
                 {
-                    allShipmentsResult = allShipmentsResult.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate &&
-                                            !testUserId.Contains(s.UserId) 
-                                            && s.SenderStationId == filterOptionsDto.StationId);
-
+                    allShipmentsResult = allShipmentsResult.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate 
+                                        && s.SenderStationId == filterOptionsDto.StationId && !testUserId.Contains(s.UserId));
                 }
                 else
                 {
-                    allShipmentsResult = allShipmentsResult.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate &&
-                                            !testUserId.Contains(s.UserId));
+                    allShipmentsResult = allShipmentsResult.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && !testUserId.Contains(s.UserId));
                 }
 
                 List<PreShipmentMobileDTO> shipmentDto = (from r in allShipmentsResult
@@ -3641,7 +3642,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                         else
                         {
-                            throw new GenericException("This shipment is not an interstate delivery,take to the assigned receiver's location", $"{(int)HttpStatusCode.Forbidden}");
+                            throw new GenericException("This shipment is not an interstate delivery, take to the assigned receiver's location", $"{(int)HttpStatusCode.Forbidden}");
                         }
                         return true;
                     }

@@ -691,7 +691,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                         if (!responseMessage.IsSuccessStatusCode)
                         {
-                            throw new GenericException("Incorrect Login Details", $"{(int)System.Net.HttpStatusCode.Forbidden}");
+                            throw new GenericException("Incorrect Login Details", $"{(int)HttpStatusCode.Forbidden}");
                         }
                         else
                         {
@@ -719,7 +719,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                     return new ServiceResponse<JObject>
                     {
-                        Code = $"{(int)System.Net.HttpStatusCode.BadRequest}",
+                        Code = $"{(int)HttpStatusCode.BadRequest}",
                         ShortDescription = "User has not been verified",
                         Object = jObject
                     };
@@ -782,7 +782,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                 if (user.UserChannelType == UserChannelType.Employee && user.SystemUserRole != "Dispatch Rider")
                 {
-                    throw new GenericException("You are not authorized to login on this platform.", $"{(int)System.Net.HttpStatusCode.Forbidden}");
+                    throw new GenericException("You are not authorized to login on this platform.", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 if (user != null && user.IsActive == true)
@@ -871,7 +871,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
                     return new ServiceResponse<JObject>
                     {
-                        Code = $"{(int)System.Net.HttpStatusCode.BadRequest}",
+                        Code = $"{(int)HttpStatusCode.BadRequest}",
                         ShortDescription = "User has not been verified",
                         Object = jObject
                     };
@@ -1741,8 +1741,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
-        
+                
         [HttpPost]
         [Route("updatepickupmanifeststatus")]
         public async Task<IServiceResponse<bool>> UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO)

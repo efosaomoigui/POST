@@ -27,6 +27,7 @@ namespace GIGLS.Core.DTO.BankSettlement
         public string ServiceCenter { get; set; }
         public DepositStatus Status { get; set; }
         public string VerifiedBy { get; set; }
+        public DateTime WaybillCreated { get; set; }
     }
 
     public class BankProcessingOrderCodesDTO : BaseDomain, IAuditable

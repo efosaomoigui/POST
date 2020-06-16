@@ -17,6 +17,7 @@ namespace GIGLS.CORE.DTO.Report
         public bool? IsCashOnDelivery { get; set; } = false;
         public bool? IsCancelled { get; set; } = false;
         public int CountryId { get; set; }
+        public int ServiceCenterId { get; set; }
         public DateTime dateFrom { get; set; } = DateTime.Now.AddDays(-7);
         //public int RegionId { get; set; } 
 

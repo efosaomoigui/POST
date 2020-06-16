@@ -183,13 +183,13 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
             return await Task.FromResult(earnings);
         }
         
-        private Task<IQueryable<ExternalPartnerTransactionsPaymentCacheDTO>> GetExternalPartnerTransactions(ShipmentCollectionFilterCriteria filterCriteria)
+        private Task<IQueryable<ExternalPartnerTransactionsPaymentCacheDTO>> GetPartnerTransactions(ShipmentCollectionFilterCriteria filterCriteria)
         {
             var queryDate = filterCriteria.getStartDateAndEndDate();
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var partners = _context.Partners.AsQueryable().Where(s => s.PartnerType == Core.Enums.PartnerType.DeliveryPartner && s.IsActivated == true);
+            var partners = _context.Partners.AsQueryable().Where(s => (s.PartnerType == Core.Enums.PartnerType.DeliveryPartner || s.PartnerType == Core.Enums.PartnerType.InternalDeliveryPartner) && s.IsActivated == true);
 
             var partnerDto = from partner in partners
                              join transaction in _context.PartnerTransactions on partner.UserId equals transaction.UserId
@@ -208,7 +208,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                  Trips = transaction.PartnerTransactionsID,
                                  BankName = partner.BankName,
                                  AccountName = partner.AccountName,
-                                 AccountNumber = partner.AccountNumber
+                                 AccountNumber = partner.AccountNumber,
+                                 PartnerType = partner.PartnerType.ToString()
                              };
 
             return Task.FromResult(partnerDto.AsQueryable().AsNoTracking());
@@ -216,7 +217,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
 
         public async Task<List<ExternalPartnerTransactionsPaymentDTO>> GetExternalPartnerTransactionsForPayment(ShipmentCollectionFilterCriteria filterCriteria)
         {
-            var partners = await GetExternalPartnerTransactions(filterCriteria);
+            var partners = await GetPartnerTransactions(filterCriteria);
 
             var partnerDto = from partner in partners
                              group partner by partner.PartnerCode into p
@@ -232,7 +233,8 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Partnership
                                  LastName = p.FirstOrDefault().LastName,
                                  BankName = p.FirstOrDefault().BankName,
                                  AccountName = p.FirstOrDefault().AccountName,
-                                 AccountNumber = p.FirstOrDefault().AccountNumber
+                                 AccountNumber = p.FirstOrDefault().AccountNumber,
+                                 PartnerType = p.FirstOrDefault().PartnerType
                              };            
             return await partnerDto.OrderByDescending(s => s.Amount).AsNoTracking().ToListAsync();
         }

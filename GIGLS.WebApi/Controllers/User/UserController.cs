@@ -67,6 +67,22 @@ namespace GIGLS.WebApi.Controllers.User
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("api/user/customer/{email}")]
+        public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetCustomerUsers(string email)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var users = await _userService.GetCustomerUsers(email);
+                return new ServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>
+                {
+                    Object = users
+                };
+
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("api/user/customer")]
         public async Task<IServiceResponse<IEnumerable<GIGL.GIGLS.Core.Domain.User>>> GetCustomerUsers()
         {
@@ -757,6 +773,32 @@ namespace GIGLS.WebApi.Controllers.User
             return await HandleApiOperationAsync(async () =>
             {
                 var result = await _userService.ChangePassword(userid, currentPassword, newPassword);
+
+                if (!result.Succeeded)
+                {
+                    throw new GenericException("Operation could not complete update successfully");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPut]
+        [Route("api/user/setmagayauser/{userid}/{setTo}")]
+        public async Task<IServiceResponse<bool>> setmagayauser(string userid, bool setTo)  
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                UserDTO udto = new UserDTO()
+                {
+                    IsMagaya = setTo
+                }; 
+
+                var result = await _userService.UpdateMagayaUser(userid, udto);
 
                 if (!result.Succeeded)
                 {
