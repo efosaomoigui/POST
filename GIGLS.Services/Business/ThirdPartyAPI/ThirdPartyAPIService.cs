@@ -62,11 +62,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _portalService.CheckDetailsForCustomerPortal(user);
         }
 
-        public async Task<ShipmentDetailDanfoDTO> GetShipmentDetailForDanfo(string waybill)
-        {
-            return await _portalService.GetShipmentDetailForDanfo(waybill);
-        }
-
         //Price API
         //public async Task<decimal> GetPrice2(ThirdPartyPricingDTO thirdPartyPricingDto)
         //{
