@@ -384,13 +384,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     ReceiverCity =shipment.ReceiverCity                    
                 };
 
-
-                //Get Customer Details
-                //if (shipment.CompanyType.Contains("Individual"))
-                //{
-                //    shipment.CompanyType = UserChannelType.IndividualCustomer.ToString();
-                //}
-
                 if (shipment.IsAgent)
                 {
                     string senderPhoneNumber = string.Empty;
@@ -435,6 +428,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         shipmentDto.CustomerDetails.FirstName = words.FirstOrDefault();
                         shipmentDto.CustomerDetails.LastName = words.Skip(1).FirstOrDefault();
                     }
+
+                    shipmentDto.CustomerDetails.Address = shipment.SenderCity;
+                    shipmentDto.CustomerDetails.State = shipment.SenderCity;
                 }
                 else
                 {
@@ -446,6 +442,12 @@ namespace GIGLS.Services.Implementation.Shipments
                     var wallet = await _walletService.GetWalletBalance(shipment.CustomerCode);
                     shipmentDto.CustomerDetails.WalletBalance = wallet.Balance;
                     shipmentDto.CustomerDetails.RowVersion = null;
+                    
+                    if(customerType == UserChannelType.IndividualCustomer)
+                    {
+                        shipmentDto.CustomerDetails.Address = shipment.SenderCity;
+                        shipmentDto.CustomerDetails.State = shipment.SenderCity;
+                    }
                 }
 
                 shipmentDto.Customer = new List<CustomerDTO>
