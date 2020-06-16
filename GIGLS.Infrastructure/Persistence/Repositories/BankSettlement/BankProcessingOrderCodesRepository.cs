@@ -94,7 +94,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                 processingorderCodes = processingorderCodes.Where(s => serviceCenters.Contains(s.ServiceCenter));
             }
 
-            var processingcodes = from processingorderCode in processingorderCodes
+            var processingcodes = (from processingorderCode in processingorderCodes
                                   select new BankProcessingOrderCodesDTO
                                   {
                                       CodeId = processingorderCode.CodeId,
@@ -111,7 +111,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                       BankName = processingorderCode.BankName,
                                       DateCreated = processingorderCode.DateCreated,
                                       DateModified = processingorderCode.DateModified
-                                  };
+                                  }).ToList();
 
             return Task.FromResult(processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit).ToList());
         }
