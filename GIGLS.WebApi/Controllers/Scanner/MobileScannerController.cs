@@ -1,5 +1,6 @@
 ﻿using EfeAuthen.Models;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
@@ -501,6 +502,36 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 return new ServiceResponse<bool>
                 {
                     Object = true
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("dropoffs")]
+        public async Task<IServiceResponse<List<PreShipmentDTO>>> GetDropOffsOfUser(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var dropoffs = await _portalService.GetDropOffsForUser(filterCriteria);
+
+                return new ServiceResponse<List<PreShipmentDTO>>
+                {
+                    Object = dropoffs
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("createdropoff")]
+        public async Task<IServiceResponse<bool>> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipMentMobile = await _portalService.CreateOrUpdateDropOff(preShipmentDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = preshipMentMobile
                 };
             });
         }
