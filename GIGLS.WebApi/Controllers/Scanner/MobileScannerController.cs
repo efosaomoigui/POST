@@ -536,5 +536,20 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
+        [HttpPost]
+        [Route("dropoffprice")]
+        public async Task<IServiceResponse<MobilePriceDTO>> GetPriceForDropOff(PreShipmentMobileDTO PreshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var Price = await _portalService.GetPriceForDropOff(PreshipmentMobile);
+
+                return new ServiceResponse<MobilePriceDTO>
+                {
+                    Object = Price,
+                };
+            });
+        }
+
     }
 }
