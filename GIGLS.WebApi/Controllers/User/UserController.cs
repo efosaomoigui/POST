@@ -772,8 +772,8 @@ namespace GIGLS.WebApi.Controllers.User
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpPut]
-        [Route("api/user/setmagayauser/{userid}/{setTo}")]
-        public async Task<IServiceResponse<bool>> setmagayauser(string userid, bool setTo)  
+        [Route("api/user/setmagayauser/")]
+        public async Task<IServiceResponse<bool>> setmagayauser([FromUri] string userid, [FromUri] bool setTo)  
         {
             return await HandleApiOperationAsync(async () =>
             {

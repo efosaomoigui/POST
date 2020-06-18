@@ -42,7 +42,6 @@ namespace GIGLS.WebApi.Controllers.User
             {
                 using (var client = new HttpClient())
                 {
-
                     //setup client
                     client.BaseAddress = new Uri(apiBaseUri);
                     client.DefaultRequestHeaders.Accept.Clear();

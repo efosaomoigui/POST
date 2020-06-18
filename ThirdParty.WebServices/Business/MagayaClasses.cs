@@ -723,7 +723,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
 
         private Item[] items;
 
-        private MeasurementUnitsType measurementUnits;
+        private MeasurementUnits measurementUnits;
 
         private long creatorNetworkID;
 
@@ -1299,7 +1299,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         }
 
         /// <remarks/>
-        public MeasurementUnitsType MeasurementUnits
+        public MeasurementUnits MeasurementUnits
         {
             get
             {
@@ -5241,46 +5241,49 @@ namespace ThirdParty.WebServices.Magaya.Business.New
 
         private bool versionSpecified;
 
+        //item status : Hold status
         private ItemStatusType status;
 
         private bool statusSpecified;
 
+        //Package Type Field : Box or Bag
         private PackageType package;
 
         private string packageName;
 
+        //Piece field : piece = 1
         private string pieces;
-
+        //(LxWxH)
         private LenghtValue length;
-
+        //(LxWxH)
         private LenghtValue height;
-
+        //(LxWxH)
         private LenghtValue width;
-
+        //unit weight
         private WeightValue pieceWeight;
-
+        //unit volume
         private VolumeValue pieceVolume;
-
+        
         private bool containedPiecesWeightIncluded;
 
         private bool containedPiecesWeightIncludedSpecified;
-
+        //piece x pieceWeight
         private WeightValue weight;
-
+        //piece x pieceVolume
         private VolumeValue volume;
-
+        //unit and value to be collected
         private VolumeWeightValue volumeWeight;
 
         private double pieceQuantity;
 
         private bool pieceQuantitySpecified;
-
+        //input quantity
         private string quantityUnit;
 
         private CurrencyType currency;
 
         private MoneyValue unitaryValue;
-
+        //unitaryvalue x quantityunit
         private MoneyValue totalValue;
 
         private bool isSummarized;
@@ -7870,6 +7873,11 @@ namespace ThirdParty.WebServices.Magaya.Business.New
                 this.unit = value;
             }
         }
+
+        //public void dd()
+        //{
+        //    Unit = VolumeWeightUnitType.vlb;
+        //}
 
         /// <remarks/>
         [System.Xml.Serialization.XmlTextAttribute()]
@@ -12800,7 +12808,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
 
         private MethodType method;
 
-        private MeasurementUnitsType measurementUnits;
+        private MeasurementUnits measurementUnits;
 
         private bool useGrossWeight;
 
@@ -12925,7 +12933,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         }
 
         /// <remarks/>
-        public MeasurementUnitsType MeasurementUnits
+        public MeasurementUnits MeasurementUnits
         {
             get
             {
@@ -13014,13 +13022,15 @@ namespace ThirdParty.WebServices.Magaya.Business.New
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.magaya.com/XMLSchema/V1")]
-    public partial class MeasurementUnitsType
+    [System.Xml.Serialization.XmlRootAttribute("MeasurementUnits", Namespace = "http://www.magaya.com/XMLSchema/V1", IsNullable = false)]
+    public partial class MeasurementUnits
     {
-
+        [XmlElement("lengthUnit", IsNullable = false)]
         private LengthUnitType lengthUnit;
 
         private bool lengthUnitSpecified;
 
+        [XmlElement("volumeUnit")]
         private VolumeUnitType volumeUnit;
 
         private bool volumeUnitSpecified;
@@ -17733,7 +17743,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
 
         private Item[] items;
 
-        private MeasurementUnitsType measurementUnits;
+        private MeasurementUnits measurementUnits;
 
         private long creatorNetworkID;
 
@@ -17989,7 +17999,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         }
 
         /// <remarks/>
-        public MeasurementUnitsType MeasurementUnits
+        public MeasurementUnits MeasurementUnits
         {
             get
             {
@@ -18525,7 +18535,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
 
         private Item[] items;
 
-        private MeasurementUnitsType measurementUnits;
+        private MeasurementUnits measurementUnits;
 
         private long creatorNetworkID;
 
@@ -18908,7 +18918,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         }
 
         /// <remarks/>
-        public MeasurementUnitsType MeasurementUnits
+        public MeasurementUnits MeasurementUnits
         {
             get
             {
@@ -19878,7 +19888,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
 
         private string jobURL;
 
-        private MeasurementUnitsType measurementUnits;
+        private MeasurementUnits measurementUnits;
 
         private ChargeList charges;
 
@@ -20626,7 +20636,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         }
 
         /// <remarks/>
-        public MeasurementUnitsType MeasurementUnits
+        public MeasurementUnits MeasurementUnits
         {
             get
             {
@@ -21328,7 +21338,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
 
         private Item[] items;
 
-        private MeasurementUnitsType measurementUnits;
+        private MeasurementUnits measurementUnits;
 
         private long creatorNetworkID;
 
@@ -21783,7 +21793,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
 
 
         /// <remarks/>
-        public MeasurementUnitsType MeasurementUnits
+        public MeasurementUnits MeasurementUnits
         {
             get
             {
@@ -23866,7 +23876,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
 
         private Item[] items;
 
-        private MeasurementUnitsType measurementUnits;
+        private MeasurementUnits measurementUnits;
 
         private ChargeList charges;
 
@@ -24250,7 +24260,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         }
 
         /// <remarks/>
-        public MeasurementUnitsType MeasurementUnits
+        public MeasurementUnits MeasurementUnits
         {
             get
             {
@@ -30912,7 +30922,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
     public partial class WMSConfigurationType
     {
 
-        private MeasurementUnitsType measurementUnits;
+        private MeasurementUnits measurementUnits;
 
         private bool askUserIdentification;
 
@@ -30941,7 +30951,7 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         private RepackingSettings repackingSettings;
 
         /// <remarks/>
-        public MeasurementUnitsType MeasurementUnits
+        public MeasurementUnits MeasurementUnits
         {
             get
             {
@@ -31598,14 +31608,14 @@ namespace ThirdParty.WebServices.Magaya.Business.New
     public partial class PODConfigurationType
     {
 
-        private MeasurementUnitsType measurementUnits;
+        private MeasurementUnits measurementUnits;
 
         private LanguageType language;
 
         private bool languageSpecified;
 
         /// <remarks/>
-        public MeasurementUnitsType MeasurementUnits
+        public MeasurementUnits MeasurementUnits
         {
             get
             {

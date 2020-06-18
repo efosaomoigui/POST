@@ -50,7 +50,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
         {
             return await HandleApiOperationAsync(async () =>
             {
-
                 //1. initialize the access key variable
                 int access_key = 0;
 
