@@ -21,7 +21,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -29,7 +28,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Scanner
 {
-    [Authorize(Roles = "Shipment, ViewAdmin")]
+    [Authorize(Roles = "Shipment, ViewAdmin, Agent")]
     [RoutePrefix("api/scanner")]
     public class MobileScannerController : BaseWebApiController
     {
@@ -131,10 +130,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-
-        //Scan Status
-        //------------
-        //1. Get all Scan status  --> ScanTrackService --> scanstatus(get all)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("scanstatus")]
@@ -167,9 +162,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //Process Scan
-        //---------------
-        //1. Get Service Centre --> ShipmentsService --> byservicecentre(shipment/ungroupmappingservicecentre) (GET)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("ungroupmappingservicecentre")]
@@ -216,9 +208,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //Manifest Scan
-        //---------------------
-        //1. Get Service centre --> ShipmentsService --> byservicecentre(shipment/unmappedmanifestservicecentre (GET)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("unmappedmanifestservicecentre")]
@@ -288,9 +277,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //Delivery Manifest
-        //------------------
-        //2.Save-- > ShipmentsService-- > ManifestForWaybillsMapping(manifestwaybillmapping / mapmultiplemobile)(POST)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapwaybillstomanifest")]
@@ -306,9 +292,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //Overdue Shipment
-        //-------------------- -
-        //1.Get all Warehouse-- > ShipmentsService-- > Shipment.byWarehouseServicecentre(shipment / warehouseservicecentre)(GET)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("warehouseservicecentre")]
@@ -339,10 +322,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-
-        //Dispatch
-        //------------
-        //1.Get all waybills to be delivered-- > ShipmentsService-- > ManifestForWaybillsMapping / GetManifestForWayBillMobile(manifestwaybillmapping / waybillsinmanifestfordispatch)(GET)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("waybillsinmanifestfordispatch")]
@@ -359,9 +338,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //ReleaseDetails
-        //------------------------
-        //1.Get State : StateService-- > get
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("states")]
@@ -395,8 +371,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //3.DemuragePaymentTypes-- > Enum
-        //[GIGLSActivityAuthorize(Activity = "View")]
         [AllowAnonymous]
         [HttpGet]
         [Route("demuragepaymenttype")]
@@ -405,11 +379,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             return Ok(EnumExtensions.GetValues<PaymentType>());
         }
 
-        //4.ReleasePaymentTypes-- > Enum
-        //5.Signature pad
-
-
-        //6.Release-- > ShipmentsService-- > shipmentcollection.savecollection(shipmentcollection / collected)(PUT)
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("collected")]
@@ -430,11 +399,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //7.Log Visit(Pass Name, Address, PhoneNumber)-- >
-        //Log Visit
-        //---------------- -
-        //1.Get some detail from the previous page
-        //2.Get LogVisitReason-- > ScanTrackService-- > logvisitreason(logvisitreason)(GET)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("getlogvisit")]
