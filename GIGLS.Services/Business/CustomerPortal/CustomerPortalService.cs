@@ -2051,7 +2051,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             else
             {
-                tempCode = await CreateOrUpdateDropOffForAgent(preShipmentDTO);
+                tempCode = await CreateTemporaryShipmentForAgent(preShipmentDTO);
             }
             return tempCode;
         }
