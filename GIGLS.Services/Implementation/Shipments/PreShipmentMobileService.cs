@@ -893,15 +893,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 preShipment.CountryId = country.CountryId;
 
-                //change the quantity of the preshipmentItem if it fall into promo category
-                //preShipment = await ChangePreshipmentItemQuantity(preShipment, zoneid.ZoneId);
-
                 var Price = 0.0M;
                 var amount = 0.0M;
                 var IndividualPrice = 0.0M;
                 decimal DeclaredValue = 0.0M;
 
-                //undo comment when App is updated
                 if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
                 {
                     if (preShipment.ReceiverLocation.Latitude != null && preShipment.SenderLocation.Latitude != null)
@@ -919,7 +915,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (userChannel != null)
                 {
-                    preShipment.Shipmentype = ShipmentType.Ecommerce;
+                    if(userChannel.CompanyType == CompanyType.Ecommerce)
+                    {
+                        preShipment.Shipmentype = ShipmentType.Ecommerce;
+                    }
                 }
 
                 foreach (var preShipmentItem in preShipment.PreShipmentItems)
@@ -969,10 +968,9 @@ namespace GIGLS.Services.Implementation.Shipments
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                         }
-                        //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     }
 
-                    //var vatForPreshipment = (preShipmentItem.CalculatedPrice * 0.05M);
+                    //Get the vat value from Global Property
                     var vatForPreshipment = (preShipmentItem.CalculatedPrice * 0.075M);
 
                     if (!string.IsNullOrWhiteSpace(preShipmentItem.Value))
@@ -1001,12 +999,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     Price += (decimal)preShipmentItem.CalculatedPrice;
                 };
 
-                //var DiscountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountPercentage, preShipment.CountryId);
-                //var Percentage = Convert.ToDecimal(DiscountPercent.Value);
-                //var PercentageTobeUsed = ((100M - Percentage) / 100M);
-
                 decimal EstimatedDeclaredPrice = Convert.ToDecimal(DeclaredValue);
-                //preShipment.DeliveryPrice = Price * PercentageTobeUsed;
                 preShipment.DeliveryPrice = Price;
                 preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
                 preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice);
@@ -1015,34 +1008,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 var discount = Math.Round(Price - (decimal)preShipment.CalculatedTotal);
                 preShipment.DiscountValue = discount;
 
-                //var Pickuprice = await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId, preShipment.UserId);
-                //var PickupValue = Convert.ToDecimal(Pickuprice);
-
-                //var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
-
-                //decimal grandTotal = (decimal)preShipment.CalculatedTotal + PickupValue;
                 decimal grandTotal = (decimal)preShipment.CalculatedTotal;
-
-                //GIG Go Promo Price
-                //var gigGoPromo = await CalculatePromoPrice(preShipment, zoneid.ZoneId, PickupValue);
-                //if (gigGoPromo.GrandTotal > 0)
-                //{
-                //    grandTotal = (decimal)gigGoPromo.GrandTotal;
-                //    discount = (decimal)gigGoPromo.Discount;
-                //    preShipment.DiscountValue = discount;
-                //    preShipment.GrandTotal = grandTotal;
-                //}
 
                 var returnprice = new MobilePriceDTO()
                 {
                     MainCharge = (decimal)preShipment.CalculatedTotal,
-                    //PickUpCharge = PickupValue,
                     InsuranceValue = preShipment.InsuranceValue,
                     GrandTotal = grandTotal,
                     PreshipmentMobile = preShipment,
                     CurrencySymbol = country.CurrencySymbol,
                     CurrencyCode = country.CurrencyCode,
-                    //IsWithinProcessingTime = IsWithinProcessingTime,
                     Discount = discount
                 };
                 return returnprice;
