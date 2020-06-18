@@ -4,6 +4,7 @@ using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Business;
@@ -501,6 +502,50 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 return new ServiceResponse<MobilePriceDTO>
                 {
                     Object = Price,
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getspecialpackagesgiggo")]
+        public async Task<IServiceResponse<SpecialResultDTO>> GetSpecialPackages()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var packages = await _portalService.GetSpecialPackages();
+
+                return new ServiceResponse<SpecialResultDTO>
+                {
+                    Object = packages
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getstationsgiggo")]
+        public async Task<IServiceResponse<List<GiglgoStationDTO>>> GetGostations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stations = await _portalService.GetGoStations();
+
+                return new ServiceResponse<List<GiglgoStationDTO>>
+                {
+                    Object = stations
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("itemtypesgiggo")]
+        public async Task<IServiceResponse<List<string>>> GetItemTypes()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var ItemTypes = await _portalService.GetItemTypes();
+                return new ServiceResponse<List<string>>
+                {
+                    Object = ItemTypes,
                 };
             });
         }
