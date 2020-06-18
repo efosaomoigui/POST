@@ -940,6 +940,15 @@ namespace GIGLS.Services.Implementation.Shipments
                         CountryId = preShipment.CountryId  //Nigeria
                     };
 
+                    if (preShipment.IsHomeDelivery)
+                    {
+                        PriceDTO.DeliveryOptionId = 2;
+                    }
+                    else
+                    {
+                        PriceDTO.DeliveryOptionId = 10;
+                    }
+
                     if (preShipmentItem.ShipmentType == ShipmentType.Special)
                     {
                         if (preShipment.Shipmentype == ShipmentType.Ecommerce)
@@ -947,7 +956,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             PriceDTO.DeliveryOptionId = 4;
                         }
 
-                        preShipmentItem.CalculatedPrice = await _pricingService.GetMobileSpecialPrice(PriceDTO);
+                        preShipmentItem.CalculatedPrice = await _pricingService.GetDropOffSpecialPrice(PriceDTO);
                         preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                         preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     }
@@ -966,7 +975,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                         else
                         {
-                            preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
+                            preShipmentItem.CalculatedPrice = await _pricingService.GetDropOffRegularPriceForIndividual(PriceDTO);
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                         }
