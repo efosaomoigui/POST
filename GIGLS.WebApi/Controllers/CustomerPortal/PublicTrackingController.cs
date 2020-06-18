@@ -127,5 +127,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("getwaybill/{waybillNumber}")]
+        public async Task<IServiceResponse<ShipmentDetailDanfoDTO>> GetShipmentDetailForDanfo(string waybillNumber)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetShipmentDetailForDanfo(waybillNumber);
+
+                return new ServiceResponse<ShipmentDetailDanfoDTO>
+                {
+                    Object = result
+                };
+            });
+        }
     }
 }

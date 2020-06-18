@@ -445,6 +445,11 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                if (groupingData == null || !groupingData.Any())
+                {
+                    throw new GenericException("NULL INPUT");
+                }
+
                 // get the service centres of login user
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
                 if (serviceCenters.Length == 0)
@@ -456,13 +461,14 @@ namespace GIGLS.Services.Implementation.Shipments
                 var currentUserId = await _userService.GetCurrentUserId();
 
                 //validate the ids are in the system
-                string groupWaybillNumber = groupingData[0].GroupWaybillNumber;
+                //string groupWaybillNumber = groupingData[0].GroupWaybillNumber;
+                string groupWaybillNumber = groupingData.FirstOrDefault().GroupWaybillNumber;
 
                 var serviceCenterId = int.Parse(groupWaybillNumber.Substring(1, 3));
                 var serviceCentre = await _centreService.GetServiceCentreById(serviceCenterId);
 
                 //Get GroupWaybill Details
-                var groupwaybillObj = await _uow.GroupWaybillNumber.GetAsync(x => x.GroupWaybillCode.Equals(groupWaybillNumber));
+                var groupwaybillObj = await _uow.GroupWaybillNumber.GetAsync(x => x.GroupWaybillCode == groupWaybillNumber);
 
                 if (groupwaybillObj == null)
                 {

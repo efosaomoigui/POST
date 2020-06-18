@@ -1741,8 +1741,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
-        
+                
         [HttpPost]
         [Route("updatepickupmanifeststatus")]
         public async Task<IServiceResponse<bool>> UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO)
@@ -1812,6 +1811,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 return new ServiceResponse<List<LocationDTO>>
                 {
                     Object = preshipment
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("dropoffprice")]
+        public async Task<IServiceResponse<MobilePriceDTO>> GetPriceForDropOff(PreShipmentMobileDTO PreshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var Price = await _portalService.GetPriceForDropOff(PreshipmentMobile);
+
+                return new ServiceResponse<MobilePriceDTO>
+                {
+                    Object = Price,
                 };
             });
         }

@@ -57,6 +57,12 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
             return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
         }
 
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers(string email)
+        {
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.Email == email && x.UserType != UserType.System && x.UserChannelType != UserChannelType.Employee).AsEnumerable();
+            return Task.FromResult(user.OrderBy(x => x.FirstName).AsEnumerable());
+        }
+
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers()
         {
             var user = _userManager.Users.Where(x => x.IsDeleted == false && (x.UserChannelType == UserChannelType.Corporate 
@@ -309,6 +315,21 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
                 await _userManager.UpdateAsync(user);
             }
             return await Task.FromResult(user);
+        }
+
+        public Task<bool> IsCustomerHasAgentRole(string userId)
+        {
+            bool hasAgentRole = false;
+
+            //FastTrack Agent
+            var user = _userManager.Users.Where(x => x.IsDeleted == false && x.Id == userId && (x.SystemUserRole == "FastTrack Agent")).FirstOrDefault();
+                   
+            if (user != null)
+            {
+                hasAgentRole = true;
+            }
+
+            return Task.FromResult(hasAgentRole);
         }
     }
 }

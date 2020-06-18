@@ -44,7 +44,8 @@ namespace GIGLS.Services.Implementation.User
         //Register a new user
         public async Task<IdentityResult> AddUser(UserDTO userDto)
         {
-            if (await _unitOfWork.User.GetUserByEmail(userDto.Email.ToLower()) != null)
+            var userExist = await _unitOfWork.User.GetUserByEmail(userDto.Email);
+            if (userExist != null)
             {
                 throw new GenericException($"User with email: {userDto.Email} already exist", $"{(int)HttpStatusCode.Forbidden}");
             }
@@ -74,6 +75,11 @@ namespace GIGLS.Services.Implementation.User
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetUsers()
         {
             return _unitOfWork.User.GetUsers();
+        }
+
+        public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers(string email)
+        {
+            return _unitOfWork.User.GetCustomerUsers(email);
         }
 
         public Task<IEnumerable<GIGL.GIGLS.Core.Domain.User>> GetCustomerUsers()
@@ -504,8 +510,18 @@ namespace GIGLS.Services.Implementation.User
 
                 //update the user with the system user role
                 var userDTO = await GetUserById(userid);
-                userDTO.SystemUserId = systemuserid;
-                userDTO.SystemUserRole = systemUser.FirstName;
+
+                if (systemUserRoles.Any())
+                {
+                    userDTO.SystemUserId = systemuserid;
+                    userDTO.SystemUserRole = systemUser.FirstName;
+                }
+                else
+                {
+                    userDTO.SystemUserId = "";
+                    userDTO.SystemUserRole = "";
+                }
+
                 await UpdateUser(userid, userDTO);
 
                 // complete transaction if all actions are successful
@@ -1407,7 +1423,6 @@ namespace GIGLS.Services.Implementation.User
             return await _unitOfWork.User.IsUserHasAdminRole(userId);
         }
 
-
         //use for mobile request
         public async Task<UserDTO> GetUserUsingCustomer(string emailPhoneCode)
         {
@@ -1456,6 +1471,11 @@ namespace GIGLS.Services.Implementation.User
             }
 
             return Mapper.Map<UserDTO>(user);
+        }
+
+        public async Task<bool> IsCustomerHasAgentRole(string userId)
+        {
+            return await _unitOfWork.User.IsCustomerHasAgentRole(userId);
         }
     }
 }

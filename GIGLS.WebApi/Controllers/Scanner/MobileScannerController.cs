@@ -1,5 +1,6 @@
 ﻿using EfeAuthen.Models;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.ShipmentScan;
@@ -20,7 +21,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -28,7 +28,7 @@ using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.Scanner
 {
-    [Authorize(Roles = "Shipment, ViewAdmin")]
+    [Authorize(Roles = "Shipment, ViewAdmin, Agent")]
     [RoutePrefix("api/scanner")]
     public class MobileScannerController : BaseWebApiController
     {
@@ -130,10 +130,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-
-        //Scan Status
-        //------------
-        //1. Get all Scan status  --> ScanTrackService --> scanstatus(get all)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("scanstatus")]
@@ -150,7 +146,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //2. Submit the waybills with the status selected -->ScanTrackService  --> scan/multiple(POST)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("scanmultiple")]
@@ -167,9 +162,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //Process Scan
-        //---------------
-        //1. Get Service Centre --> ShipmentsService --> byservicecentre(shipment/ungroupmappingservicecentre) (GET)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("ungroupmappingservicecentre")]
@@ -185,7 +177,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //2. Generate GroupWaybill --> ShipmentsService --> groupwaybill/generategroupwaybillnumber(GET)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpGet]
         [Route("generategroupwaybillnumber/{serviceCentreCode}")]
@@ -202,7 +193,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //3. Save --> ShipmentsService --> groupwaybillnumbermapping/mapmultiple(POST)        
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapwaybillstogroup")]
@@ -218,9 +208,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //Manifest Scan
-        //---------------------
-        //1. Get Service centre --> ShipmentsService --> byservicecentre(shipment/unmappedmanifestservicecentre (GET)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("unmappedmanifestservicecentre")]
@@ -236,8 +223,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-
-        //2. Generate Manifest --> ShipmentsService --> GenerateMaifestCode(manifest/generateMaifestCode)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpGet]
         [Route("generateManifestcode")]
@@ -255,7 +240,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //3. Save --> ShipmentsService --> manifestgroupwaybillnumbermapping(manifestgroupwaybillnumbermapping/mapmultiple)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapgroupwaybilltomanifest")]
@@ -293,9 +277,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //Delivery Manifest
-        //------------------
-        //2.Save-- > ShipmentsService-- > ManifestForWaybillsMapping(manifestwaybillmapping / mapmultiplemobile)(POST)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapwaybillstomanifest")]
@@ -311,9 +292,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //Overdue Shipment
-        //-------------------- -
-        //1.Get all Warehouse-- > ShipmentsService-- > Shipment.byWarehouseServicecentre(shipment / warehouseservicecentre)(GET)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("warehouseservicecentre")]
@@ -329,7 +307,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //3.Save-- > ShipmentsService-- > groupwaybillnumbermappingForOverdue(groupwaybillnumbermapping / mapmultipleForOverdue)(POST)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapwaybillstogroupforoverdue")]
@@ -345,10 +322,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-
-        //Dispatch
-        //------------
-        //1.Get all waybills to be delivered-- > ShipmentsService-- > ManifestForWaybillsMapping / GetManifestForWayBillMobile(manifestwaybillmapping / waybillsinmanifestfordispatch)(GET)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("waybillsinmanifestfordispatch")]
@@ -365,9 +338,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //ReleaseDetails
-        //------------------------
-        //1.Get State : StateService-- > get
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("states")]
@@ -386,7 +356,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //2.Get Shipment Detail-- > ShipmentsService-- > getShipmentbyWaybill(shipment / waybillNumber / waybill)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("waybill/{waybill}")]
@@ -402,8 +371,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //3.DemuragePaymentTypes-- > Enum
-        //[GIGLSActivityAuthorize(Activity = "View")]
         [AllowAnonymous]
         [HttpGet]
         [Route("demuragepaymenttype")]
@@ -412,11 +379,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             return Ok(EnumExtensions.GetValues<PaymentType>());
         }
 
-        //4.ReleasePaymentTypes-- > Enum
-        //5.Signature pad
-
-
-        //6.Release-- > ShipmentsService-- > shipmentcollection.savecollection(shipmentcollection / collected)(PUT)
         [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("collected")]
@@ -437,11 +399,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //7.Log Visit(Pass Name, Address, PhoneNumber)-- >
-        //Log Visit
-        //---------------- -
-        //1.Get some detail from the previous page
-        //2.Get LogVisitReason-- > ScanTrackService-- > logvisitreason(logvisitreason)(GET)
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("getlogvisit")]
@@ -458,7 +415,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //3.Save-- > ShipmentsService-- > manifestvisitmonitoring(manifestvisitmonitoring)(POST)
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("logwaybillvisit")]
@@ -474,7 +430,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
-        //HUb Manifest
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("hubservicecentres")]
@@ -501,6 +456,51 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 return new ServiceResponse<bool>
                 {
                     Object = true
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("dropoffs")]
+        public async Task<IServiceResponse<List<PreShipmentDTO>>> GetDropOffsOfUser(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var dropoffs = await _portalService.GetDropOffsForUser(filterCriteria);
+
+                return new ServiceResponse<List<PreShipmentDTO>>
+                {
+                    Object = dropoffs
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("createdropoff")]
+        public async Task<IServiceResponse<bool>> CreateOrUpdateDropOff(PreShipmentDTO preShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipMentMobile = await _portalService.CreateOrUpdateDropOff(preShipmentDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = preshipMentMobile
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("dropoffprice")]
+        public async Task<IServiceResponse<MobilePriceDTO>> GetPriceForDropOff(PreShipmentMobileDTO preshipmentMobile)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var Price = await _portalService.GetPriceForDropOff(preshipmentMobile);
+
+                return new ServiceResponse<MobilePriceDTO>
+                {
+                    Object = Price,
                 };
             });
         }

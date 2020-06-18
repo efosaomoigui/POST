@@ -454,11 +454,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 
                 //1a. Get all the Regional Managers assigned to the ServiceCentre where Scan took place including the departure and destination
                 var departureRegionalManagers = await GetAllRegionalManagersForServiceCentre(tracking.DepartureServiceCentreId);
-                var destinationRegionalManagers = await GetAllRegionalManagersForServiceCentre(tracking.DestinationServiceCentreId);
+                //var destinationRegionalManagers = await GetAllRegionalManagersForServiceCentre(tracking.DestinationServiceCentreId);
                 var currentRegionalManagers = await GetAllRegionalManagersForServiceCentre(tracking.ServiceCentreId);
 
                 allRegionalManagers.AddRange(departureRegionalManagers);
-                allRegionalManagers.AddRange(destinationRegionalManagers);
+               // allRegionalManagers.AddRange(destinationRegionalManagers);
                 allRegionalManagers.AddRange(currentRegionalManagers);
                 
                 var userDTO = await _userService.GetUserById(tracking.User);

@@ -1574,6 +1574,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.GetPrice(preShipment);
         }
+        public async Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment)
+        {
+            return await _preShipmentMobileService.GetPriceForDropOff(preShipment);
+        }
         public async Task<MultipleMobilePriceDTO> GetPriceForMultipleShipments(NewPreShipmentMobileDTO preShipment)
         {
             return await _preShipmentMobileService.GetPriceForMultipleShipments(preShipment);
@@ -2026,10 +2030,43 @@ namespace GIGLS.Services.Business.CustomerPortal
                 // get the sender info
                 var currentUserId = await _userService.GetCurrentUserId();
                 preShipmentDTO.SenderUserId = currentUserId;
+                preShipmentDTO.IsAgent = false;
 
+                //Get the role and name of the customer
                 var user = await _userService.GetUserById(currentUserId);
-                preShipmentDTO.CompanyType = user.UserChannelType.ToString();
                 preShipmentDTO.CustomerCode = user.UserChannelCode;
+                preShipmentDTO.CompanyType = user.UserChannelType.ToString();
+
+                //For Agent
+                if (user.SystemUserRole == "FastTrack Agent")
+                {
+                    preShipmentDTO.CompanyType = UserChannelType.IndividualCustomer.ToString();
+                    preShipmentDTO.IsAgent = true;
+                }
+                else
+                {
+                    //Get the customer name
+                    if (user.UserChannelType == UserChannelType.Ecommerce)
+                    {
+                        var customer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+
+                        if(customer != null)
+                        {
+                            preShipmentDTO.SenderName = customer.FirstName + " "+ customer.LastName;
+                            preShipmentDTO.SenderPhoneNumber = customer.PhoneNumber;
+                        }
+                    }
+                    else
+                    {
+                        var customer = await _uow.Company.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+
+                        if (customer != null)
+                        {
+                            preShipmentDTO.SenderName = customer.Name;
+                            preShipmentDTO.SenderPhoneNumber = customer.PhoneNumber;
+                        }
+                    }
+                }
 
                 var country = await _uow.Country.GetCountryByStationId(preShipmentDTO.DepartureStationId);
                 preShipmentDTO.CountryId = country.CountryId;
@@ -2044,6 +2081,12 @@ namespace GIGLS.Services.Business.CustomerPortal
                 foreach (var shipmentItem in newPreShipment.PreShipmentItems)
                 {
                     shipmentItem.SerialNumber = serialNumber;
+                    shipmentItem.Nature = shipmentItem.Nature.ToUpper();
+
+                    if(shipmentItem.SpecialPackageId == null)
+                    {
+                        shipmentItem.SpecialPackageId = 0;
+                    }
 
                     //sum item weight
                     //check for volumetric weight
@@ -2069,6 +2112,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw;
             }
         }
+
 
         public async Task UpdateServiceCentre(int serviceCentreId, ServiceCentreDTO service)
         {
@@ -2149,13 +2193,20 @@ namespace GIGLS.Services.Business.CustomerPortal
                 existingPreShipment.PickupOptions = preShipmentDTO.PickupOptions;
                 existingPreShipment.SenderCity = existingPreShipment.SenderCity;
                 existingPreShipment.Value = existingPreShipment.Value;
-
+                existingPreShipment.DepartureStationId = existingPreShipment.DepartureStationId;
+                existingPreShipment.DestinationStationId = existingPreShipment.DestinationStationId;
+                
                 //update items
                 foreach (var preShipmentItemDTO in preShipmentDTO.PreShipmentItems)
                 {
                     var preshipment = await _uow.PreShipmentItem.GetAsync(s => s.PreShipmentId == preShipmentItemDTO.PreShipmentId && s.PreShipmentItemId == preShipmentItemDTO.PreShipmentItemId);
                     if (preshipment != null)
                     {
+                        if(preShipmentItemDTO.SpecialPackageId == null)
+                        {
+                            preShipmentItemDTO.SpecialPackageId = 0;
+                        }
+
                         preshipment.Description = preShipmentItemDTO.Description;
                         preshipment.Nature = preShipmentItemDTO.Nature;
                         preshipment.Quantity = preShipmentItemDTO.Quantity;
@@ -2223,6 +2274,41 @@ namespace GIGLS.Services.Business.CustomerPortal
         public async Task<List<LocationDTO>> GetPresentDayShipmentLocations()
         {
             return await _preShipmentMobileService.GetPresentDayShipmentLocations();
+        }
+
+        //Get Shipment Information for Danfo App
+        public async Task<ShipmentDetailDanfoDTO> GetShipmentDetailForDanfo(string waybill)
+        {
+            if (string.IsNullOrEmpty(waybill))
+            {
+                throw new GenericException("Waybill can not be null");
+            }
+
+            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill && x.ShipmentScanStatus != ShipmentScanStatus.SSC);
+
+            if (shipment == null)
+            {
+                throw new GenericException($"Waybill {waybill} does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            //get CustomerDetails
+            if (shipment.CustomerType.Contains("Individual"))
+            {
+                shipment.CustomerType = CustomerType.IndividualCustomer.ToString();
+            }
+
+            CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
+            var customerDetails = await _customerService.GetCustomer(shipment.CustomerId, customerType);
+
+            var shipmentDetail = new ShipmentDetailDanfoDTO
+            {
+                Waybill = shipment.Waybill,
+                CustomerEmail = customerDetails.Email,
+                CustomerNumber = customerDetails.PhoneNumber,
+                DateCreated = shipment.DateCreated
+            };
+
+            return shipmentDetail;
         }
 
     }

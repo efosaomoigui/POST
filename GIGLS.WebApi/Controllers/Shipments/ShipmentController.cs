@@ -113,6 +113,14 @@ namespace GIGLS.WebApi.Controllers.Shipments
                     ShipmentDTO.SenderState = ShipmentDTO.Customer[0].State;
                 }
 
+                //set some data to null
+                ShipmentDTO.ShipmentCollection = null;
+                ShipmentDTO.Demurrage = null;
+                ShipmentDTO.Invoice = null;
+                ShipmentDTO.ShipmentCancel = null;
+                ShipmentDTO.ShipmentReroute = null;
+                ShipmentDTO.DeliveryOption = null;
+
                 var shipment = await _service.AddShipment(ShipmentDTO);
                 return new ServiceResponse<ShipmentDTO>
                 {
@@ -603,15 +611,30 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        //[GIGLSActivityAuthorize(Activity = "View")]
+        //[HttpGet]
+        //[Route("{code}/preshipment")]
+        //public async Task<IServiceResponse<PreShipmentDTO>> GetTempShipment(string code)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var shipment = await _service.GetTempShipment(code);
+        //        return new ServiceResponse<PreShipmentDTO>
+        //        {
+        //            Object = shipment
+        //        };
+        //    });
+        //}
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{code}/preshipment")]
-        public async Task<IServiceResponse<PreShipmentDTO>> GetTempShipment(string code)
+        public async Task<IServiceResponse<ShipmentDTO>> GetDropOffShipment(string code)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var shipment = await _service.GetTempShipment(code);
-                return new ServiceResponse<PreShipmentDTO>
+                var shipment = await _service.GetDropOffShipmentForProcessing(code);
+                return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment
                 };
