@@ -521,5 +521,34 @@ namespace GIGLS.WebApi.Controllers.Scanner
             });
         }
 
+        [HttpGet]
+        [Route("getstationsgiggo")]
+        public async Task<IServiceResponse<List<GiglgoStationDTO>>> GetGostations()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var stations = await _portalService.GetGoStations();
+
+                return new ServiceResponse<List<GiglgoStationDTO>>
+                {
+                    Object = stations
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("itemtypesgiggo")]
+        public async Task<IServiceResponse<List<string>>> GetItemTypes()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var ItemTypes = await _portalService.GetItemTypes();
+                return new ServiceResponse<List<string>>
+                {
+                    Object = ItemTypes,
+                };
+            });
+        }
+
     }
 }
