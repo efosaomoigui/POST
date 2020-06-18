@@ -53,7 +53,6 @@
         EcommerceNoCodAmount,
         GIGGOPromo,
         GiglgoMaxNumShipment,
-        RegistrationMessage,
-        GiglgoVat
+        RegistrationMessage
     }
 }

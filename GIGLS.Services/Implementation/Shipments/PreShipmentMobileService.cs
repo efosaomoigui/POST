@@ -792,8 +792,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     }
 
-                    var vatPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GiglgoVat, preShipment.CountryId);
-                    decimal vat = (vatPercent != null) ? (Convert.ToDecimal(vatPercent.Value) / 100) : (7 / 100);
+                    //Get the vat value from Global Property
+                    var vatDTO = await _uow.VAT.GetVATByCountry(preShipment.CountryId);
+                    decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
                     var vatForPreshipment = (preShipmentItem.CalculatedPrice * vat);
 
                     if (!string.IsNullOrWhiteSpace(preShipmentItem.Value))
@@ -983,7 +984,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     //Get the vat value from Global Property
                     var vatDTO = await _uow.VAT.GetVATByCountry(preShipment.CountryId);
-                    decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7/100);
+                    decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M/100);
                     var vatForPreshipment = (preShipmentItem.CalculatedPrice * vat);
                     
 
