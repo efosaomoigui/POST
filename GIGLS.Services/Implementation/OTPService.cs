@@ -220,6 +220,21 @@ namespace GIGLS.Services.Implementation
                 throw;
             }
         }
+
+        //Check Details for Fast Track Agent App  
+        public async Task<UserDTO> CheckDetailsForAgentApp(string user)
+        {
+            try
+            {
+                var registerUser = await _UserService.GetUserUsingCustomerForAgentApp(user);
+                return registerUser;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<double> GetAverageRating(string CustomerCode, string usertype)
         {
             if (usertype == UserChannelType.Partner.ToString())
