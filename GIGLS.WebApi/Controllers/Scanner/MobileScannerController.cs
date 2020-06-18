@@ -507,7 +507,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
         [HttpGet]
-        [Route("getspecialpackagesgiggo")]
+        [Route("getspecialpackages")]
         public async Task<IServiceResponse<SpecialResultDTO>> GetSpecialPackages()
         {
             return await HandleApiOperationAsync(async () =>
@@ -522,7 +522,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
         [HttpGet]
-        [Route("getstationsgiggo")]
+        [Route("getstations")]
         public async Task<IServiceResponse<List<GiglgoStationDTO>>> GetGostations()
         {
             return await HandleApiOperationAsync(async () =>
@@ -537,7 +537,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
         [HttpGet]
-        [Route("itemtypesgiggo")]
+        [Route("itemtypes")]
         public async Task<IServiceResponse<List<string>>> GetItemTypes()
         {
             return await HandleApiOperationAsync(async () =>
