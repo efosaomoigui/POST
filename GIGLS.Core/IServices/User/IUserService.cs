@@ -88,5 +88,6 @@ namespace GIGLS.Core.IServices.User
 
         Task<IdentityResult> UpdateMagayaUser(string userid, UserDTO userDto);
         Task<bool> IsCustomerHasAgentRole(string userId);
+        Task<UserDTO> GetUserUsingCustomerForAgentApp(string emailPhoneCode);
     }
 }
