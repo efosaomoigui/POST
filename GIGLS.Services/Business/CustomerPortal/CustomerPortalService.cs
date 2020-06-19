@@ -2027,15 +2027,28 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             bool tempCode;
 
-            var existingPreShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == preShipmentDTO.TempCode);
-            if (existingPreShipment != null)
+            if (preShipmentDTO == null)
             {
-                tempCode = await UpdateTemporaryShipment(preShipmentDTO);
+                throw new GenericException("NULL INPUT");
             }
-            else
+
+            if (string.IsNullOrWhiteSpace(preShipmentDTO.TempCode))
             {
                 tempCode = await CreateTemporaryShipment(preShipmentDTO);
             }
+            else
+            {
+                var existingPreShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == preShipmentDTO.TempCode);
+                if (existingPreShipment != null)
+                {
+                    tempCode = await UpdateTemporaryShipment(preShipmentDTO);
+                }
+                else
+                {
+                    tempCode = await CreateTemporaryShipment(preShipmentDTO);
+                }
+            }
+
             return tempCode;
         }
 
@@ -2240,7 +2253,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                 throw;
             }
         }
-
 
         public async Task UpdateServiceCentre(int serviceCentreId, ServiceCentreDTO service)
         {

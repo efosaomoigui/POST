@@ -77,18 +77,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
         [Route("login")]
         public async Task<IServiceResponse<JObject>> Login(UserloginDetailsModel userLoginModel)
         {
-            //var user = await _portalService.CheckDetailsForMobileScanner(userLoginModel.username);
-
-            //if (user.Username != null)
-            //{
-            //    user.Username = user.Username.Trim();
-            //}
-
-            //if (userLoginModel.Password != null)
-            //{
-            //    userLoginModel.Password = userLoginModel.Password.Trim();
-            //}
-
             string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
             string getTokenResponse;
 
@@ -136,18 +124,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
         [Route("agentlogin")]
         public async Task<IServiceResponse<JObject>> LoginForAgentApp(UserloginDetailsModel userLoginModel)
         {
-            //var user = await _portalService.CheckDetailsForAgentApp(userLoginModel.username);
-
-            //if (user.Username != null)
-            //{
-            //    user.Username = user.Username.Trim();
-            //}
-
-            //if (userLoginModel.Password != null)
-            //{
-            //    userLoginModel.Password = userLoginModel.Password.Trim();
-            //}
-
             string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
             string getTokenResponse;
 
@@ -608,6 +584,5 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 };
             });
         }
-
     }
 }

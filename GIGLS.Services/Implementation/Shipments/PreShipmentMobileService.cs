@@ -981,7 +981,6 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
 
-                    //Get the vat value from Global Property
                     var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == preShipment.CountryId);
                     decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M/100);
                     var vatForPreshipment = (preShipmentItem.CalculatedPrice * vat);
