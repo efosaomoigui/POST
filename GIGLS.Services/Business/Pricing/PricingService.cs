@@ -886,6 +886,40 @@ namespace GIGLS.Services.Business.Pricing
             return PackagePrice + deliveryOptionPrice;
         }
 
+        public async Task<decimal> GetDropOffRegularPriceForIndividual(PricingDTO pricingDto)
+        {
+
+            var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
+
+            //get the deliveryOptionPrice from an array
+
+            decimal deliveryOptionPriceTemp = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
+
+            decimal deliveryOptionPrice = deliveryOptionPriceTemp;
+
+            //check for volumetric weight
+            if (pricingDto.IsVolumetric)
+            {
+                decimal volume = (pricingDto.Length * pricingDto.Height * pricingDto.Width) / 5000;
+                pricingDto.Weight = pricingDto.Weight > volume ? pricingDto.Weight : volume;
+            }
+
+            //This is our limit weight.
+            var activeWeightLimit = await _weightLimit.GetActiveWeightLimits();
+
+            decimal PackagePrice;
+
+            if (pricingDto.Weight > activeWeightLimit.Weight)
+            {
+                PackagePrice = await GetRegularPriceOverflow(pricingDto.Weight, activeWeightLimit.Weight, zone.ZoneId, pricingDto.CountryId);
+            }
+            else
+            {
+                PackagePrice = await GetNormalRegularPrice(pricingDto.Weight, zone.ZoneId, pricingDto.CountryId);
+            }
+            return PackagePrice + deliveryOptionPrice;
+        }
+
         public async Task<decimal> GetMobileEcommercePrice(PricingDTO pricingDto)
         {
             decimal deliveryOptionPriceTemp = 0;
@@ -950,6 +984,25 @@ namespace GIGLS.Services.Business.Pricing
                 }
             }
 
+            decimal PackagePrice = await _special.GetSpecialZonePrice(pricingDto.SpecialPackageId, zone.ZoneId, pricingDto.CountryId, pricingDto.Weight);
+
+            //get the deliveryOptionPrice from an array
+            deliveryOptionPriceTemp = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
+
+
+            decimal deliveryOptionPrice = deliveryOptionPriceTemp;
+
+            decimal shipmentTotalPrice = deliveryOptionPrice + PackagePrice;
+
+            return shipmentTotalPrice;
+        }
+
+        public async Task<decimal> GetDropOffSpecialPrice(PricingDTO pricingDto)
+        {
+            decimal deliveryOptionPriceTemp = 0;
+
+            var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
+            
             decimal PackagePrice = await _special.GetSpecialZonePrice(pricingDto.SpecialPackageId, zone.ZoneId, pricingDto.CountryId, pricingDto.Weight);
 
             //get the deliveryOptionPrice from an array

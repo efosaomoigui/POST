@@ -789,10 +789,12 @@ namespace GIGLS.Services.Implementation.Shipments
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                         }
-                        //preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     }
 
-                    var vatForPreshipment = (preShipmentItem.CalculatedPrice * 0.05M);
+                    //Get the vat value from Global Property
+                    var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == preShipment.CountryId);
+                    decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
+                    var vatForPreshipment = (preShipmentItem.CalculatedPrice * vat);
 
                     if (!string.IsNullOrWhiteSpace(preShipmentItem.Value))
                     {
@@ -938,6 +940,15 @@ namespace GIGLS.Services.Implementation.Shipments
                         CountryId = preShipment.CountryId  //Nigeria
                     };
 
+                    if (preShipment.IsHomeDelivery)
+                    {
+                        PriceDTO.DeliveryOptionId = 2;
+                    }
+                    else
+                    {
+                        PriceDTO.DeliveryOptionId = 10;
+                    }
+
                     if (preShipmentItem.ShipmentType == ShipmentType.Special)
                     {
                         if (preShipment.Shipmentype == ShipmentType.Ecommerce)
@@ -945,7 +956,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             PriceDTO.DeliveryOptionId = 4;
                         }
 
-                        preShipmentItem.CalculatedPrice = await _pricingService.GetMobileSpecialPrice(PriceDTO);
+                        preShipmentItem.CalculatedPrice = await _pricingService.GetDropOffSpecialPrice(PriceDTO);
                         preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                         preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                     }
@@ -964,15 +975,16 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                         else
                         {
-                            preShipmentItem.CalculatedPrice = await _pricingService.GetMobileRegularPrice(PriceDTO);
+                            preShipmentItem.CalculatedPrice = await _pricingService.GetDropOffRegularPriceForIndividual(PriceDTO);
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                         }
                     }
 
-                    //Get the vat value from Global Property
-                    var vatForPreshipment = (preShipmentItem.CalculatedPrice * 0.075M);
-
+                    var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == preShipment.CountryId);
+                    decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M/100);
+                    var vatForPreshipment = (preShipmentItem.CalculatedPrice * vat);
+                    
                     if (!string.IsNullOrWhiteSpace(preShipmentItem.Value))
                     {
                         DeclaredValue += Convert.ToDecimal(preShipmentItem.Value);

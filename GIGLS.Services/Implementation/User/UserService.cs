@@ -1460,6 +1460,18 @@ namespace GIGLS.Services.Implementation.User
             return Mapper.Map<UserDTO>(user);
         }
 
+        //used for Fast Track Agent App
+        public async Task<UserDTO> GetUserUsingCustomerForAgentApp(string emailPhoneCode)
+        {
+            var user = await _unitOfWork.User.GetUserUsingCustomerForAgentApp(emailPhoneCode);
+
+            if (user == null)
+            {
+                throw new GenericException("User does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+            return Mapper.Map<UserDTO>(user);
+        }
+
 
         public async Task<UserDTO> GetActivatedUserByEmail(string email, bool isActive)
         {

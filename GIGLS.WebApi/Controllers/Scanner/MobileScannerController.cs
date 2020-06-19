@@ -77,18 +77,6 @@ namespace GIGLS.WebApi.Controllers.Scanner
         [Route("login")]
         public async Task<IServiceResponse<JObject>> Login(UserloginDetailsModel userLoginModel)
         {
-            var user = await _portalService.CheckDetailsForMobileScanner(userLoginModel.username);
-
-            if (user.Username != null)
-            {
-                user.Username = user.Username.Trim();
-            }
-
-            if (userLoginModel.Password != null)
-            {
-                userLoginModel.Password = userLoginModel.Password.Trim();
-            }
-
             string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
             string getTokenResponse;
 
@@ -105,7 +93,54 @@ namespace GIGLS.WebApi.Controllers.Scanner
                     var formContent = new FormUrlEncodedContent(new[]
                     {
                          new KeyValuePair<string, string>("grant_type", "password"),
-                         new KeyValuePair<string, string>("Username", user.Username),
+                         new KeyValuePair<string, string>("Username", userLoginModel.username),
+                         new KeyValuePair<string, string>("Password", userLoginModel.Password),
+                     });
+
+                    //setup login data
+                    HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
+
+                    if (!responseMessage.IsSuccessStatusCode)
+                    {
+                        throw new GenericException("Incorrect Login Details");
+                    }
+
+                    //get access token from response body
+                    var responseJson = await responseMessage.Content.ReadAsStringAsync();
+                    var jObject = JObject.Parse(responseJson);
+
+                    getTokenResponse = jObject.GetValue("access_token").ToString();
+
+                    return new ServiceResponse<JObject>
+                    {
+                        Object = jObject
+                    };
+                }
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("agentlogin")]
+        public async Task<IServiceResponse<JObject>> LoginForAgentApp(UserloginDetailsModel userLoginModel)
+        {
+            string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+            string getTokenResponse;
+
+            return await HandleApiOperationAsync(async () =>
+            {
+                using (var client = new HttpClient())
+                {
+                    //setup client
+                    client.BaseAddress = new Uri(apiBaseUri);
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    //setup login data
+                    var formContent = new FormUrlEncodedContent(new[]
+                    {
+                         new KeyValuePair<string, string>("grant_type", "password"),
+                         new KeyValuePair<string, string>("Username", userLoginModel.username),
                          new KeyValuePair<string, string>("Password", userLoginModel.Password),
                      });
 
@@ -482,7 +517,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var preshipMentMobile = await _portalService.CreateOrUpdateDropOff(preShipmentDTO);
+                var preshipMentMobile = await _portalService.CreateOrUpdateDropOffForAgent(preShipmentDTO);
 
                 return new ServiceResponse<bool>
                 {
@@ -549,6 +584,5 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 };
             });
         }
-
     }
 }
