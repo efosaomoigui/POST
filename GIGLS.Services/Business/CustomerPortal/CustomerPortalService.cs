@@ -2044,15 +2044,28 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             bool tempCode;
 
-            var existingPreShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == preShipmentDTO.TempCode);
-            if (existingPreShipment != null)
+            if(preShipmentDTO == null)
             {
-                tempCode = await UpdateTemporaryShipment(preShipmentDTO);
+                throw new GenericException("NULL INPUT");
+            }
+
+            if (string.IsNullOrWhiteSpace(preShipmentDTO.TempCode))
+            {
+                tempCode = await CreateTemporaryShipmentForAgent(preShipmentDTO);                
             }
             else
             {
-                tempCode = await CreateTemporaryShipmentForAgent(preShipmentDTO);
+                var existingPreShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == preShipmentDTO.TempCode);
+                if (existingPreShipment != null)
+                {
+                    tempCode = await UpdateTemporaryShipment(preShipmentDTO);
+                }
+                else
+                {
+                    tempCode = await CreateTemporaryShipmentForAgent(preShipmentDTO);
+                }
             }
+
             return tempCode;
         }
 
