@@ -309,8 +309,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.User
         //get User using Customer - For Fast Track Agent App Only
         public Task<GIGL.GIGLS.Core.Domain.User> GetUserUsingCustomerForAgentApp(string emailPhoneCode)
         {
-            var user = _userManager.Users.Where(x => (x.Email.Equals(emailPhoneCode) ||
-            x.UserChannelCode.Equals(emailPhoneCode) || x.PhoneNumber.Contains(emailPhoneCode)) && (x.UserChannelType == UserChannelType.Employee && x.SystemUserRole == "FastTrack Agent")).FirstOrDefault();
+            //var user = _userManager.Users.Where(x => (x.Email.Equals(emailPhoneCode) ||
+            //x.UserChannelCode.Equals(emailPhoneCode) || x.PhoneNumber.Contains(emailPhoneCode)) && (x.UserChannelType == UserChannelType.Employee && x.SystemUserRole == "FastTrack Agent")).FirstOrDefault();
+
+            var user = _userManager.Users.Where(x => x.Email == emailPhoneCode || x.UserChannelCode == emailPhoneCode || x.PhoneNumber.Contains(emailPhoneCode)).FirstOrDefault();
             return Task.FromResult(user);
         }
 

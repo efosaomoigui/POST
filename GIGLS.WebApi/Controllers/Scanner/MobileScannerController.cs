@@ -77,6 +77,18 @@ namespace GIGLS.WebApi.Controllers.Scanner
         [Route("login")]
         public async Task<IServiceResponse<JObject>> Login(UserloginDetailsModel userLoginModel)
         {
+            var user = await _portalService.CheckDetailsForMobileScanner(userLoginModel.username);
+
+            if (user.Username != null)
+            {
+                user.Username = user.Username.Trim();
+            }
+
+            if (userLoginModel.Password != null)
+            {
+                userLoginModel.Password = userLoginModel.Password.Trim();
+            }
+
             string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
             string getTokenResponse;
 
@@ -93,7 +105,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
                     var formContent = new FormUrlEncodedContent(new[]
                     {
                          new KeyValuePair<string, string>("grant_type", "password"),
-                         new KeyValuePair<string, string>("Username", userLoginModel.username),
+                         new KeyValuePair<string, string>("Username", user.Username),
                          new KeyValuePair<string, string>("Password", userLoginModel.Password),
                      });
 
@@ -124,6 +136,23 @@ namespace GIGLS.WebApi.Controllers.Scanner
         [Route("agentlogin")]
         public async Task<IServiceResponse<JObject>> LoginForAgentApp(UserloginDetailsModel userLoginModel)
         {
+            var user = await _portalService.CheckDetailsForAgentApp(userLoginModel.username);
+
+            if (user.Username != null)
+            {
+                user.Username = user.Username.Trim();
+            }
+
+            if (userLoginModel.Password != null)
+            {
+                userLoginModel.Password = userLoginModel.Password.Trim();
+            }
+
+            if (user.SystemUserRole != "FastTrack Agent")
+            {
+                throw new GenericException("You are not authorized to use this application. You can download the GIGGO customer app and make shipment request", $"{(int)System.Net.HttpStatusCode.Forbidden}");
+            }
+
             string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
             string getTokenResponse;
 
@@ -140,7 +169,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
                     var formContent = new FormUrlEncodedContent(new[]
                     {
                          new KeyValuePair<string, string>("grant_type", "password"),
-                         new KeyValuePair<string, string>("Username", userLoginModel.username),
+                         new KeyValuePair<string, string>("Username", user.Username),
                          new KeyValuePair<string, string>("Password", userLoginModel.Password),
                      });
 
