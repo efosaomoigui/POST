@@ -1448,7 +1448,7 @@ namespace GIGLS.Services.Implementation.User
             return Mapper.Map<UserDTO>(user);
         }
 
-        //used for Mobile Scanner
+        //used for Mobile Scanner login
         public async Task<UserDTO> GetUserUsingCustomerForMobileScanner(string emailPhoneCode)
         {
             var user = await _unitOfWork.User.GetUserUsingCustomerForMobileScanner(emailPhoneCode);
@@ -1460,7 +1460,7 @@ namespace GIGLS.Services.Implementation.User
             return Mapper.Map<UserDTO>(user);
         }
 
-        //used for Fast Track Agent App
+        //used for Fast Track Agent App login
         public async Task<UserDTO> GetUserUsingCustomerForAgentApp(string emailPhoneCode)
         {
             var user = await _unitOfWork.User.GetUserUsingCustomerForAgentApp(emailPhoneCode);
