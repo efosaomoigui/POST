@@ -491,6 +491,17 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
         {
+            if(shipmentCollection == null)
+            {
+                throw new GenericException($"NULL INPUT");
+            }
+
+            if (string.IsNullOrWhiteSpace(shipmentCollection.Name) || string.IsNullOrWhiteSpace(shipmentCollection.PhoneNumber) 
+                || string.IsNullOrWhiteSpace(shipmentCollection.Address) || string.IsNullOrWhiteSpace(shipmentCollection.State))
+            {
+                throw new GenericException("Kndly enter Receiver Name, Phone number, Address and State");
+            }
+
             //check if the shipment has not been collected
             var shipmentCollected = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(shipmentCollection.Waybill) && x.ShipmentScanStatus == shipmentCollection.ShipmentScanStatus);
 
