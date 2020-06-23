@@ -137,15 +137,8 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        private async Task SendSMSForMobileShipmentCreation(PreShipmentMobileDTO preShipmentMobile)
+        private async Task SendSMSForMobileShipmentCreation(MobileShipmentCreationMessageDTO smsMessageExtensionDTO)
         {
-            var smsMessageExtensionDTO = new MobileShipmentCreationMessageDTO()
-            {
-                SenderName = preShipmentMobile.SenderName,
-                WaybillNumber = preShipmentMobile.Waybill,
-                SenderPhoneNumber = preShipmentMobile.SenderPhoneNumber
-            };
-
             await _messageSenderService.SendMessage(MessageType.MCS, EmailSmsType.SMS, smsMessageExtensionDTO);
             //await SendSMSForShipmentDeliveryNotification(preShipmentMobile);
         }
@@ -416,15 +409,23 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
 
+                    var message = new MobileShipmentCreationMessageDTO
+                    {
+                        SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber,
+                        WaybillNumber = preShipmentDTO.Waybill
+                    };
+
                     if (user.UserChannelType == UserChannelType.Ecommerce)
                     {
                         newPreShipment.CustomerType = CustomerType.Company.ToString();
                         newPreShipment.CompanyType = CompanyType.Ecommerce.ToString();
+                        message.SenderName = customer.Name;
                     }
                     else
                     {
                         newPreShipment.CustomerType = "Individual";
                         newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
+                        message.SenderName = preShipmentDTO.SenderName;
                     }
                     newPreShipment.UserId = currentUserId;
                     newPreShipment.IsConfirmed = false;
@@ -471,7 +472,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         ShipmentScanStatus = ShipmentScanStatus.MCRT
                     });
 
-                    await SendSMSForMobileShipmentCreation(preShipmentDTO);
+                    await SendSMSForMobileShipmentCreation(message);
                     return preShipmentDTO;
                 }
                 else
