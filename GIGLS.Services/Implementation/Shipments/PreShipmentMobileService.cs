@@ -421,6 +421,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         newPreShipment.CompanyType = CompanyType.Ecommerce.ToString();
                         message.SenderName = customer.Name;
                     }
+                    else if (user.UserChannelType == UserChannelType.Corporate)
+                    {
+                        message.SenderName = customer.Name;
+                    }
                     else
                     {
                         newPreShipment.CustomerType = "Individual";
