@@ -449,11 +449,15 @@ namespace GIGLS.WebApi.Controllers.Scanner
         [Route("collected")]
         public async Task<IServiceResponse<bool>> ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
         {
-            shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKT;
-            if (shipmentCollection.IsComingFromDispatch)
-            {
-                shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKC;
-            }
+            //shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKT;
+            //if (shipmentCollection.IsComingFromDispatch)
+            //{
+            //    shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKC;
+            //}
+
+            //Set Request from this endpoint as from Dispatch Rider
+            shipmentCollection.IsComingFromDispatch = true;
+            shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKC;
 
             return await HandleApiOperationAsync(async () => {
                 await _collectionservice.ReleaseShipmentForCollection(shipmentCollection);
