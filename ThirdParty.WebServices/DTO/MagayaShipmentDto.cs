@@ -64,7 +64,7 @@ namespace ThirdParty.WebServices.Magaya.DTO
 
         private Item[] items;
 
-        private MeasurementUnitsType measurementUnits;
+        private MeasurementUnits measurementUnits;
 
         private long creatorNetworkID;
 
@@ -521,7 +521,7 @@ namespace ThirdParty.WebServices.Magaya.DTO
         }
 
         /// <remarks/>
-        public MeasurementUnitsType MeasurementUnits
+        public MeasurementUnits MeasurementUnits
         {
             get
             {

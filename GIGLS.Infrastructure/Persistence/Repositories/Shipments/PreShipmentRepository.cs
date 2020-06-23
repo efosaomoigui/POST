@@ -69,6 +69,9 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
                                                     CustomerCode = r.CustomerCode,
                                                     PickupOptions = r.PickupOptions,
                                                     SenderCity = r.SenderCity,
+                                                    SenderName = r.SenderName,
+                                                    SenderPhoneNumber = r.SenderPhoneNumber,
+                                                    IsAgent = r.IsAgent,                                                    
                                                     DepartureStationId = r.DepartureStationId,
                                                     DestinationStationId = r.DestinationStationId,
                                                     PreShipmentItems = _context.PreShipmentItem.Where(s => s.PreShipmentId == r.PreShipmentId)
@@ -86,7 +89,5 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
 
             return Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
         }
-
-
     }
 }

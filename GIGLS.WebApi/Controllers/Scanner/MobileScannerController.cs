@@ -148,6 +148,11 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 userLoginModel.Password = userLoginModel.Password.Trim();
             }
 
+            if (user.SystemUserRole != "FastTrack Agent")
+            {
+                throw new GenericException("You are not authorized to use this application. You can download the GIGGO customer app and make shipment request", $"{(int)System.Net.HttpStatusCode.Forbidden}");
+            }
+
             string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
             string getTokenResponse;
 
@@ -608,6 +613,5 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 };
             });
         }
-
     }
 }

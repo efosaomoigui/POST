@@ -743,6 +743,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipment.Shipmentype = ShipmentType.Ecommerce;
                 }
 
+                //Get the vat value from VAT
+                var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == preShipment.CountryId);
+                decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
+
                 foreach (var preShipmentItem in preShipment.PreShipmentItems)
                 {
                     if (preShipmentItem.Quantity == 0)
@@ -792,9 +796,6 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
 
-                    //Get the vat value from Global Property
-                    var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == preShipment.CountryId);
-                    decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
                     var vatForPreshipment = (preShipmentItem.CalculatedPrice * vat);
 
                     if (!string.IsNullOrWhiteSpace(preShipmentItem.Value))
@@ -924,6 +925,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
+                //Get VAT
+                var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == preShipment.CountryId);
+                decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M / 100);
+
                 foreach (var preShipmentItem in preShipment.PreShipmentItems)
                 {
                     if (preShipmentItem.Quantity == 0)
@@ -982,9 +987,6 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
 
-                    //Get the vat value from Global Property
-                    var vatDTO = await _uow.VAT.GetAsync(x => x.CountryId == preShipment.CountryId);
-                    decimal vat = (vatDTO != null) ? (vatDTO.Value / 100) : (7.5M/100);
                     var vatForPreshipment = (preShipmentItem.CalculatedPrice * vat);
                     
                     if (!string.IsNullOrWhiteSpace(preShipmentItem.Value))
