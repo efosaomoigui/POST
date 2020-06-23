@@ -496,8 +496,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw new GenericException($"NULL INPUT");
             }
 
-            if (string.IsNullOrWhiteSpace(shipmentCollection.Name) || string.IsNullOrWhiteSpace(shipmentCollection.PhoneNumber) 
-                || string.IsNullOrWhiteSpace(shipmentCollection.Address) || string.IsNullOrWhiteSpace(shipmentCollection.State))
+            if (string.IsNullOrWhiteSpace(shipmentCollection.Name) || string.IsNullOrWhiteSpace(shipmentCollection.PhoneNumber) || string.IsNullOrWhiteSpace(shipmentCollection.Address))
             {
                 throw new GenericException("Kndly enter Receiver Name, Phone number, Address and State");
             }
