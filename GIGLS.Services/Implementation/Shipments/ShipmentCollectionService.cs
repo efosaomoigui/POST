@@ -533,6 +533,52 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task ReleaseShipmentForCollectionOnScanner(ShipmentCollectionDTO shipmentCollection)
+        {
+            if (shipmentCollection == null)
+            {
+                throw new GenericException($"NULL INPUT");
+            }
+
+            var demurrage = new DemurrageDTO
+            {
+                Amount = 0,
+                DayCount = 0,
+                WaybillNumber = shipmentCollection.Waybill,
+                AmountPaid = 0
+            };
+
+            shipmentCollection.Demurrage = demurrage;
+
+            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == shipmentCollection.Waybill, "DeliveryOption, ShipmentItems");
+            if (shipment == null)
+            {
+                throw new GenericException("Shipment Information does not exist", $"{(int)System.Net.HttpStatusCode.NotFound}");
+            }
+
+            shipmentCollection.IsCashOnDelivery = shipment.IsCashOnDelivery;
+            shipmentCollection.CashOnDeliveryAmount = shipment.CashOnDeliveryAmount;
+            shipmentCollection.Name = shipment.ReceiverName;
+            shipmentCollection.PhoneNumber = shipment.ReceiverPhoneNumber;
+            shipmentCollection.Address = shipment.ReceiverAddress;
+            shipmentCollection.Email = shipment.ReceiverEmail;
+            shipmentCollection.City = shipment.ReceiverCity;
+            shipmentCollection.State = shipment.ReceiverState;
+            shipmentCollection.IsComingFromDispatch = true;
+            shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKC;
+            shipmentCollection.PaymentType = PaymentType.Cash;
+            shipmentCollection.Description = shipment.Description;
+            shipmentCollection.ReceiverArea = shipment.ReceiverAddress;
+            
+            var customerWallet = _uow.Wallet.SingleOrDefault(s => s.CustomerCode == shipment.CustomerCode);
+            if(customerWallet != null)
+            {
+                shipmentCollection.WalletNumber = customerWallet?.WalletNumber;
+            }
+
+            await ReleaseShipmentForCollection(shipmentCollection);
+        }
+
         public async Task<Tuple<List<ShipmentCollectionDTO>, int>> GetOverDueShipments(FilterOptionsDto filterOptionsDto)
         {
             try
