@@ -567,7 +567,6 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKC;
             shipmentCollection.PaymentType = PaymentType.Cash;
             shipmentCollection.Description = shipment.Description;
-            shipmentCollection.ReceiverArea = shipment.ReceiverAddress;
             
             var customerWallet = _uow.Wallet.SingleOrDefault(s => s.CustomerCode == shipment.CustomerCode);
             if(customerWallet != null)
