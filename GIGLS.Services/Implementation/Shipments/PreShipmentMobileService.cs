@@ -2463,6 +2463,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Shipment item does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
+                if(preshipmentmobile.shipmentstatus != MobilePickUpRequestStatus.PickedUp.ToString() 
+                    || preshipmentmobile.shipmentstatus != MobilePickUpRequestStatus.OnwardProcessing.ToString())
+                {
+                    pickuprequest.Status = MobilePickUpRequestStatus.Confirmed.ToString();
+                    await _mobilepickuprequestservice.UpdateMobilePickUpRequests(pickuprequest, userId);
+                    throw new GenericException("Shipment has not been porcessed", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
                 preshipmentmobile.IsDelivered = true;
 
                 if (preshipmentmobile.ZoneMapping == 1)
@@ -2490,17 +2498,6 @@ namespace GIGLS.Services.Implementation.Shipments
                         wallet.Balance = wallet.Balance + price;
                     }
 
-                    var partnertransactions = new PartnerTransactionsDTO
-                    {
-                        Destination = preshipmentmobile.ReceiverAddress,
-                        Departure = preshipmentmobile.SenderAddress,
-                        AmountReceived = price,
-                        Waybill = preshipmentmobile.Waybill
-                    };
-
-                    await _uow.CompleteAsync();
-
-                    var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
                     var defaultServiceCenter = await _userService.GetGIGGOServiceCentre();
                     var transaction = new WalletTransactionDTO
                     {
@@ -2514,6 +2511,18 @@ namespace GIGLS.Services.Implementation.Shipments
                         UserId = userId
                     };
                     var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
+
+                    var partnertransactions = new PartnerTransactionsDTO
+                    {
+                        Destination = preshipmentmobile.ReceiverAddress,
+                        Departure = preshipmentmobile.SenderAddress,
+                        AmountReceived = price,
+                        Waybill = preshipmentmobile.Waybill
+                    };
+
+                    var id = await _partnertransactionservice.AddPartnerPaymentLog(partnertransactions);
+
+                    await _uow.CompleteAsync();
 
                     await ScanMobileShipment(new ScanDTO
                     {
@@ -3678,10 +3687,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else if (result == null)
                 {
-                    var details = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == DeliveryNumber, "PreShipmentItems");
+                    var details = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == DeliveryNumber || s.DeliveryNumber == DeliveryNumber, "PreShipmentItems");
                     if (details == null)
                     {
-                        throw new GenericException("Shipment cannot be found in PreshipmentMobile", $"{(int)HttpStatusCode.NotFound}");
+                        throw new GenericException("Shipment Detail not found", $"{(int)HttpStatusCode.NotFound}");
                     }
                     else
                     {

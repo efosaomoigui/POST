@@ -498,7 +498,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
             if (string.IsNullOrWhiteSpace(shipmentCollection.Name) || string.IsNullOrWhiteSpace(shipmentCollection.PhoneNumber) || string.IsNullOrWhiteSpace(shipmentCollection.Address))
             {
-                throw new GenericException("Kndly enter Receiver Name, Phone number, Address and State");
+                throw new GenericException("Kindly enter Receiver Name, Phone number, Address and State");
             }
 
             //check if the shipment has not been collected
