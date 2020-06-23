@@ -526,7 +526,7 @@ namespace GIGLS.Services.Implementation.Shipments
             await UpdateShipmentCollection(shipmentCollection);
 
             //If it is mobile
-            if (shipmentCollection.IsComingFromDispatch)
+            if (shipmentCollection.IsComingFromDispatch && !string.IsNullOrWhiteSpace(shipmentCollection.ReceiverArea))
             {
                 await AddRiderToDeliveryTable(shipmentCollection);
             }
