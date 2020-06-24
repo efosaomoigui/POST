@@ -2309,19 +2309,19 @@ namespace GIGLS.Services.Business.CustomerPortal
                 //validate the input
                 if (!preShipmentDTO.PreShipmentItems.Any())
                 {
-                    throw new GenericException("Shipment Items cannot be empty");
+                    throw new GenericException("Items cannot be empty");
                 }
 
                 var existingPreShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == preShipmentDTO.TempCode);
                 if (existingPreShipment == null)
                 {
-                    throw new GenericException("Pre Shipment does not exist", $"{(int)HttpStatusCode.NotFound}");
+                    throw new GenericException("Drop off Shipment does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
                 else
                 {
                     if (existingPreShipment.IsProcessed)
                     {
-                        throw new GenericException("Shipment already processed", $"{(int)HttpStatusCode.Forbidden}");
+                        throw new GenericException("Drop off Shipment already processed", $"{(int)HttpStatusCode.Forbidden}");
                     }
                 }
 
