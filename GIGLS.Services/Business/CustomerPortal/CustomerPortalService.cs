@@ -1550,6 +1550,26 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _preShipmentMobileService.AddPreShipmentMobile(preShipment);
         }
 
+        public async Task<object> AddPreShipmentMobileForThirdParty(PreShipmentMobileDTO preShipment)
+        {
+            var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
+            bool disableShipmentCreation = bool.Parse(isDisable);
+
+            bool allowTestUser = await AllowTestingUserToCreateShipment();
+
+            if (allowTestUser)
+            {
+                disableShipmentCreation = false;
+            }
+
+            if (disableShipmentCreation)
+            {
+                string message = ConfigurationManager.AppSettings["DisableShipmentCreationMessage"];
+                throw new GenericException(message, $"{(int)System.Net.HttpStatusCode.ServiceUnavailable}");
+            }
+            return await _preShipmentMobileService.AddPreShipmentMobileThirdParty(preShipment);
+        }
+
 
         //Remove later, quick fix to test live shipment
         private async Task<bool> AllowTestingUserToCreateShipment()

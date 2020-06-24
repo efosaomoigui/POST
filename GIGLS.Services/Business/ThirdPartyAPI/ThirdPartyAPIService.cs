@@ -24,7 +24,7 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<object> CreatePreShipment(PreShipmentMobileDTO preShipmentDTO)
         {
-            return await _portalService.AddPreShipmentMobile(preShipmentDTO);
+            return await _portalService.AddPreShipmentMobileForThirdParty(preShipmentDTO);
         }
 
         public async Task<IEnumerable<StationDTO>> GetInternationalStations()
