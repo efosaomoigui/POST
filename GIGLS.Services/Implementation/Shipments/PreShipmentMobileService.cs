@@ -429,7 +429,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     {
                         newPreShipment.CustomerType = "Individual";
                         newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
-                        message.SenderName = preShipmentDTO.SenderName;
+
+                        string[] words = preShipmentDTO.SenderName.Split(' ');
+                        message.SenderName = words.FirstOrDefault();
                     }
                     newPreShipment.UserId = currentUserId;
                     newPreShipment.IsConfirmed = false;
