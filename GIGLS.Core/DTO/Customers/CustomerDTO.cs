@@ -7,6 +7,7 @@ namespace GIGLS.Core.DTO.Customers
     {
         //CustomerDTO
         public CustomerType CustomerType { get; set; }
+
         public string CustomerName
         {
             get
