@@ -26,8 +26,8 @@ namespace GIGLS.Services.Business.Magaya.Shipment
 
         public MagayaService(INumberGeneratorMonitorService numberGeneratorMonitorService)
         {
-            //1. initialize the magaya web service object
-            var _webServiceUrl = "http://35652.magayacloud.com:3691/Invoke?Handler=CSSoapService";
+            string magayaUri = ConfigurationManager.AppSettings["MagayaUrl"];
+            var _webServiceUrl = magayaUri;
             var remoteAddress = new System.ServiceModel.EndpointAddress(_webServiceUrl);
             cs = new CSSoapServiceSoapClient(new System.ServiceModel.BasicHttpBinding(), remoteAddress);
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
@@ -72,6 +72,70 @@ namespace GIGLS.Services.Business.Magaya.Shipment
 
         }
 
+        public double CalVolumentricWeight(double volume, double grossWeight)
+        {
+            var volumetricWeight = volume / 166; // in lb
+            return (volumetricWeight > grossWeight) ? volumetricWeight : grossWeight;
+        }
+
+        public CurrencyType retCurrencyType()
+        {
+            return  new CurrencyType()
+            {
+                Code = "USD",
+                DecimalPlaces = 2,
+                ExchangeRate = 1.00,
+                IsHomeCurrency = true,
+                Name = "United States Dollar",
+                Symbol = "",
+                DecimalPlacesSpecified = true,
+                ExchangeRateSpecified = true,
+                IsHomeCurrencySpecified = true,
+            };
+        }
+
+        public GUIDItem retNewGuiItem(WarehouseReceipt magayaShipmentDTO)
+        {
+            return new GUIDItem()
+            {
+                GUID = Guid.NewGuid().ToString(),
+                Number = magayaShipmentDTO.Number,
+                Type = TransactionType.WarehouseReceipt
+            };
+        }
+
+        public MeasurementUnits newMeasurementUnits() 
+        {
+            return new MeasurementUnits()
+            {
+                LengthUnit = LengthUnitType.@in,
+                LengthUnitSpecified = true,
+                VolumeUnit = VolumeUnitType.ft3,
+                VolumeUnitSpecified = true,
+                WeightUnit = WeightUnitType.lb,
+                WeightUnitSpecified = true,
+                VolumeWeightUnit = VolumeWeightUnitType.vlb,
+                VolumeWeightUnitSpecified = true,
+                LengthPrecision = 2,
+                LengthPrecisionSpecified = true,
+                VolumePrecision = 2,
+                VolumePrecisionSpecified = true,
+                WeightPrecision = 2,
+                WeightPrecisionSpecified = true,
+                VolumeWeightPrecision = 2,
+                VolumeWeightPrecisionSpecified = true,
+                AreaPrecision = 2,
+                AreaPrecisionSpecified = true,
+                VolumeWeightFactor = 166,
+                VolumeWeightFactorSpecified = true
+            };
+        }
+
+        //public Item[] retWarehouseItem(WarehouseReceipt magayaShipmentDTO)
+        //{
+
+        //}
+
         //For creating shipment in Magaya
         public api_session_error SetTransactions(int access_key, WarehouseReceipt magayaShipmentDTO)
         {
@@ -91,61 +155,118 @@ namespace GIGLS.Services.Business.Magaya.Shipment
             magayaShipmentDTO.Carrier = null;
             magayaShipmentDTO.CreatedOn = DateTime.Now;
 
-            var cc = new CurrencyType()
-            {
-                Code = "",
-                DecimalPlaces = 2,
-                DecimalPlacesSpecified = true,
-                ExchangeRate = 0,
-                ExchangeRateSpecified = false,
-                IsHomeCurrency = true,
-                IsHomeCurrencySpecified = true,
-                Name = "",
-                Symbol = ""
-            };
+            var cc = retCurrencyType();
 
-            var gui = new GUIDItem()
+            magayaShipmentDTO.Charges.UseSequenceOrder = false;
+            var todaysDate = DateTime.Now;
+            var totalPiece = 0.00;
+            var totalVolume = 0.00;
+            var totalWeight = 0.00;
+
+            for (int i = 0; i < magayaShipmentDTO.Items.Length; i++)
             {
-                GUID = guid.ToString(),
-                Number = "",
-                Type = TransactionType.WarehouseReceipt
-            };
+                magayaShipmentDTO.Items[i].GUID = Guid.NewGuid().ToString();
+                magayaShipmentDTO.Items[i].Status = ItemStatusType.OnHand;
+                magayaShipmentDTO.Items[i].IsSummarized = false;
+                magayaShipmentDTO.Items[i].WarehouseReceiptGUID = guid.ToString();
+                magayaShipmentDTO.Items[i].PackageName = magayaShipmentDTO.Items[i].Package.Name;
+                magayaShipmentDTO.Items[i].LocationCode = magayaShipmentDTO.Items[i].Location.Code;
+                magayaShipmentDTO.Items[i].Length = new LenghtValue() { Unit = LengthUnitType.@in, Value = magayaShipmentDTO.Items[i].Length.Value };
+                magayaShipmentDTO.Items[i].Width = new LenghtValue() { Unit = LengthUnitType.@in, Value = magayaShipmentDTO.Items[i].Width.Value };
+                magayaShipmentDTO.Items[i].Height = new LenghtValue() { Unit = LengthUnitType.@in, Value = magayaShipmentDTO.Items[i].Height.Value };
+                magayaShipmentDTO.Items[i].Weight = new WeightValue() { Unit = WeightUnitType.lb, Value = magayaShipmentDTO.Items[i].Length.Value };
+                magayaShipmentDTO.Items[i].ContainedPiecesWeightIncluded = true;
+                var volume = magayaShipmentDTO.Items[i].Length.Value * magayaShipmentDTO.Items[i].Width.Value * magayaShipmentDTO.Items[i].Height.Value;
+                magayaShipmentDTO.Items[i].VolumeWeight = new VolumeWeightValue()
+                {
+                    Unit = VolumeWeightUnitType.vlb,
+                    Value = CalVolumentricWeight(volume, magayaShipmentDTO.Items[i].Weight.Value)
+                };
+
+                magayaShipmentDTO.Items[i].Package = magayaShipmentDTO.Items[i].Package;
+                magayaShipmentDTO.Items[i].OutShipmentGUID = guid.ToString();
+                magayaShipmentDTO.Items[i].Location = magayaShipmentDTO.Items[i].Location;
+                magayaShipmentDTO.Items[i].IncludeInSED = true;
+                magayaShipmentDTO.Items[i].IsContainer = false;
+                magayaShipmentDTO.Items[i].OutDate = todaysDate;
+                magayaShipmentDTO.Items[i].WarehouseReceiptNumber = magayaShipmentDTO.Number;
+                magayaShipmentDTO.Items[i].IsPallet = false;
+                magayaShipmentDTO.Items[i].IsOverstock = false;
+                magayaShipmentDTO.Items[i].NotLoaded = false;
+                magayaShipmentDTO.Items[i].EntryDate = todaysDate;
+
+                totalPiece += Convert.ToDouble(magayaShipmentDTO.Items[i].Pieces);
+                totalWeight += magayaShipmentDTO.Items[i].Weight.Value;
+                totalVolume += magayaShipmentDTO.Items[i].Volume.Value;
+            }
+
+            magayaShipmentDTO.MeasurementUnits = newMeasurementUnits();
 
             for (int i = 0; i < magayaShipmentDTO.Charges.Charge.Length; i++)
             {
                 magayaShipmentDTO.Charges.Charge[i].TaxDefinition = null;
                 magayaShipmentDTO.Charges.Charge[i].TaxAmount = new MoneyValue() { Value = 0, Currency = "USD" };
-                magayaShipmentDTO.Charges.Charge[i].Price = new MoneyValue() { Value = 0, Currency = "USD" };
-                magayaShipmentDTO.Charges.Charge[i].Amount = new MoneyValue() { Value = 0, Currency = "USD" };
+                magayaShipmentDTO.Charges.Charge[i].Price = new MoneyValue()
+                {
+                    Value = (magayaShipmentDTO.Charges.Charge[i].Price != null)? magayaShipmentDTO.Charges.Charge[i].Price.Value : 0,
+                    Currency = "USD"
+                };
+                magayaShipmentDTO.Charges.Charge[i].Amount = new MoneyValue()
+                { 
+                    Value = (magayaShipmentDTO.Charges.Charge[i].Amount != null) ? magayaShipmentDTO.Charges.Charge[i].Amount.Value: 0.00, 
+                    Currency = "USD" 
+                };
                 magayaShipmentDTO.Charges.Charge[i].RetentionAmount = new MoneyValue() { Value = 0, Currency = "USD" };
-                //magayaShipmentDTO.Charges.Charge[i].RetentionAmount.Currency = new MoneyValue().Currency ="USD";   
+                magayaShipmentDTO.Charges.Charge[i].Entity = magayaShipmentDTO.BillingClient;
+                magayaShipmentDTO.Charges.Charge[i].ExchangeRate = 1.00;
                 magayaShipmentDTO.Charges.Charge[i].HomeCurrency = cc;
                 magayaShipmentDTO.Charges.Charge[i].Currency = cc;
-                magayaShipmentDTO.Charges.Charge[i].PriceInCurrency = new MoneyValue() { Value = 0, Currency = "USD" };
-                //magayaShipmentDTO.Charges.Charge[i].PriceInCurrency.Currency = new MoneyValue().Currency = "USD";
-                magayaShipmentDTO.Charges.Charge[i].AmountInCurrency= new MoneyValue() { Value = 0, Currency = "USD" }; ;
-                //magayaShipmentDTO.Charges.Charge[i].AmountInCurrency.Currency = new MoneyValue().Currency = "USD";
-                magayaShipmentDTO.Charges.Charge[i].TaxAmountInCurrency = new MoneyValue() { Value = 0, Currency = "USD" }; ;
-                //magayaShipmentDTO.Charges.Charge[i].TaxAmountInCurrency.Currency = new MoneyValue().Currency = "USD";
-                magayaShipmentDTO.Charges.Charge[i].RetentionAmountInCurrency = new MoneyValue() { Value = 0, Currency = "USD" }; ;
-                //magayaShipmentDTO.Charges.Charge[i].RetentionAmountInCurrency.Currency = new MoneyValue().Currency = "USD";
-                magayaShipmentDTO.Charges.Charge[i].IsThirdPartyCharge = true;
+
+                magayaShipmentDTO.Charges.Charge[i].PriceInCurrency = new MoneyValue()
+                {
+                    Value = (magayaShipmentDTO.Charges.Charge[i].Price != null) ? magayaShipmentDTO.Charges.Charge[i].Price.Value : 0,
+                    Currency = "USD"
+                };
+
+                magayaShipmentDTO.Charges.Charge[i].AmountInCurrency = new MoneyValue()
+                {
+                    Value = (magayaShipmentDTO.Charges.Charge[i].Amount != null) ? magayaShipmentDTO.Charges.Charge[i].Amount.Value : 0.00,
+                    Currency = "USD"
+                };
+
+                magayaShipmentDTO.Charges.Charge[i].TaxAmountInCurrency = new MoneyValue() { Value = 0, Currency = "USD" }; 
+                magayaShipmentDTO.Charges.Charge[i].RetentionAmountInCurrency = new MoneyValue() { Value = 0, Currency = "USD" };
+                magayaShipmentDTO.Charges.Charge[i].IsThirdPartyCharge = false;
                 magayaShipmentDTO.Charges.Charge[i].Status = ChargeStatusType.Open;
                 magayaShipmentDTO.Charges.Charge[i].Notes = "";
                 magayaShipmentDTO.Charges.Charge[i].Units = "";
-                magayaShipmentDTO.Charges.Charge[i].IsCredit = true;
-                magayaShipmentDTO.Charges.Charge[i].LiquidatedAt = gui;
-                magayaShipmentDTO.Charges.Charge[i].CreatedAt = gui;
-                magayaShipmentDTO.Charges.Charge[i].Parent = gui;
-                magayaShipmentDTO.Charges.Charge[i].SalesOrder = gui;
-                magayaShipmentDTO.Charges.Charge[i].PurchaseOrder = gui;
-                magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo = null;
+                magayaShipmentDTO.Charges.Charge[i].IsCredit = false;
+                magayaShipmentDTO.Charges.Charge[i].IsPrepaid = true;
+                magayaShipmentDTO.Charges.Charge[i].Quantity = totalWeight;
+                magayaShipmentDTO.Charges.Charge[i].Type = ChargeDesc.Freight;
+                magayaShipmentDTO.Charges.Charge[i].ShowInDocuments = true;
+                magayaShipmentDTO.Charges.Charge[i].ShowInDocumentsSpecified = true;
+
+                magayaShipmentDTO.Charges.Charge[i].CreatedAt = retNewGuiItem(magayaShipmentDTO);
+
+                magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo = new FreightCharge()
+                {
+                    Pieces = totalPiece,
+                    Weight = new WeightValue() { Unit = WeightUnitType.lb, Value = totalWeight },
+                    Volume = new VolumeValue() { Unit = VolumeUnitType.ft3, Value = totalVolume },
+                    ChargeableWeight = new WeightValue() { Unit = WeightUnitType.lb, Value = ((totalVolume * 1728) < totalWeight)?totalWeight: totalVolume * 1728 },
+                    UseGrossWeight = false,
+                    Flags = ChargeFlagsType.Rate,
+                    ApplyBy = ApplyByType.Weight,
+                    Method = MethodType.Air,
+                    MeasurementUnits = magayaShipmentDTO.MeasurementUnits
+                };
                 magayaShipmentDTO.Charges.Charge[i].Customs = null;
                 magayaShipmentDTO.Charges.Charge[i].IsFromSegment = false;
-                magayaShipmentDTO.Charges.Charge[i].ModeOfTransportation = null;
+                magayaShipmentDTO.Charges.Charge[i].ModeOfTransportation = magayaShipmentDTO.ModeOfTransportation;
                 magayaShipmentDTO.Charges.Charge[i].PointOfOrigin = magayaShipmentDTO.OriginPort;
                 magayaShipmentDTO.Charges.Charge[i].PointOfDestination = magayaShipmentDTO.DestinationPort;
-            }         
+            }
 
             //4. initilize the variables to hold some parameters and return values
             string trans_xml = string.Empty;
@@ -235,7 +356,6 @@ namespace GIGLS.Services.Business.Magaya.Shipment
             Serializer sr = new Serializer();
 
             //5. serialize object to xml from class warehousereceipt
-            WarehouseReceipt shipmentdata = new WarehouseReceipt();
             var xmlobject = Mapper.Map<WarehouseReceipt>(magayaShipmentDTO);
 
             api_session_error result = api_session_error.no_error;
@@ -549,7 +669,7 @@ namespace GIGLS.Services.Business.Magaya.Shipment
         /// <param name="access_key"></param>
         /// <param name="querydto"></param>
         /// <returns></returns>
-        public TransactionResults LargeQueryLog(int access_key, QuerylogDt0 querydto) 
+        public TransactionResults LargeQueryLog(int access_key, QuerylogDt0 querydto)
         {
             //call query log and retrieve the transactions GUIDs
             var listOfResults = QueryLog(access_key, querydto);
@@ -604,9 +724,9 @@ namespace GIGLS.Services.Business.Magaya.Shipment
 
             var tran_result = new TransactionResults()
             {
-                warehousereceipt = new WarehouseReceiptList() {  WarehouseReceipt = listOfWarehousereceipt.Select(s => s).ToArray() },
+                warehousereceipt = new WarehouseReceiptList() { WarehouseReceipt = listOfWarehousereceipt.Select(s => s).ToArray() },
                 shipmentlist = new ShipmentList() { Items = listOfShipment.Select(s => s).ToArray() },
-                invoicelist  = new InvoiceList() { Items = listOfInvoice.Select(s => s).ToArray() },
+                invoicelist = new InvoiceList() { Items = listOfInvoice.Select(s => s).ToArray() },
                 paymentlist = new PaymentList() { Items = listOfPayment.Select(s => s).ToArray() },
             };
             return tran_result;
@@ -636,7 +756,7 @@ namespace GIGLS.Services.Business.Magaya.Shipment
             return listOftransactions;
         }
 
-        public Tuple<WarehouseReceiptList, ShipmentList, InvoiceList, PaymentList> GetFirstTransbyDate(int access_key, QuerylogDt0 querydto, out string 
+        public Tuple<WarehouseReceiptList, ShipmentList, InvoiceList, PaymentList> GetFirstTransbyDate(int access_key, QuerylogDt0 querydto, out string
             customcookie, out int more_result)
         {
             //2. initilize the variables to hold some parameters and return values
@@ -648,12 +768,12 @@ namespace GIGLS.Services.Business.Magaya.Shipment
             //initialize the serializer object
             Serializer sr = new Serializer();
             api_session_error result = api_session_error.no_error;
-            querydto.end_date = (String.IsNullOrEmpty(querydto.end_date))? DateTime.Now.ToString("yyyy-MM-dd"): querydto.end_date;
+            querydto.end_date = (String.IsNullOrEmpty(querydto.end_date)) ? DateTime.Now.ToString("yyyy-MM-dd") : querydto.end_date;
 
             try
             {
 
-                result = cs.GetFirstTransbyDate(access_key, querydto.trans_type, querydto.start_date, querydto.end_date, querydto.flags, querydto.record_quatity, 
+                result = cs.GetFirstTransbyDate(access_key, querydto.trans_type, querydto.start_date, querydto.end_date, querydto.flags, querydto.record_quatity,
                     querydto.backwards_order, out string cookies, out more_result);
                 string xmlTransList;
                 customcookie = cookies;
@@ -688,7 +808,7 @@ namespace GIGLS.Services.Business.Magaya.Shipment
             return TupleResult;
         }
 
-        public bool GetFirstTransByDate(int access_key, QuerylogDt0 querydto, out string  cookie, out int more_results)
+        public bool GetFirstTransByDate(int access_key, QuerylogDt0 querydto, out string cookie, out int more_results)
         {
             try
             {
@@ -696,7 +816,7 @@ namespace GIGLS.Services.Business.Magaya.Shipment
                 cookie = cookies;
                 more_results = more_res;
                 return result == api_session_error.no_error;
-               
+
             }
             catch
             {
@@ -726,7 +846,7 @@ namespace GIGLS.Services.Business.Magaya.Shipment
             }
         }
 
-        public Tuple<WarehouseReceiptList, ShipmentList, InvoiceList, PaymentList> GetNextTransByDate2(int access_key, out int more_results,  ref string cookie,  string type)
+        public Tuple<WarehouseReceiptList, ShipmentList, InvoiceList, PaymentList> GetNextTransByDate2(int access_key, out int more_results, ref string cookie, string type)
         {
             var listOfWarehousereceipt = new WarehouseReceiptList();
             var listOfShipment = new ShipmentList();
@@ -760,7 +880,7 @@ namespace GIGLS.Services.Business.Magaya.Shipment
                         break;
                 }
 
-                var TupleResult = Tuple.Create<WarehouseReceiptList, ShipmentList, InvoiceList, PaymentList>(listOfWarehousereceipt, 
+                var TupleResult = Tuple.Create<WarehouseReceiptList, ShipmentList, InvoiceList, PaymentList>(listOfWarehousereceipt,
                     listOfShipment, listOfInvoice, listOfPayment);
                 return TupleResult;
             }

@@ -18,7 +18,8 @@ namespace GIGLS.CORE.IServices.Shipments
         Task AddShipmentCollection(ShipmentCollectionDTO shipmentCollection);
         Task UpdateShipmentCollection(ShipmentCollectionDTO shipmentCollection);
         Task UpdateShipmentCollectionForReturn(ShipmentCollectionDTO shipmentCollection);
-        Task ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection);        
+        Task ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection);
+        Task ReleaseShipmentForCollectionOnScanner(ShipmentCollectionDTO shipmentCollection);
         Task RemoveShipmentCollection(string waybill);
         Task CheckShipmentCollection(string waybill);
         Task<Tuple<List<ShipmentCollectionDTO>, int>> GetOverDueShipments(FilterOptionsDto filterOptionsDto);

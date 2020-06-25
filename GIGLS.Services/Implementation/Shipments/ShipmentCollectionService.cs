@@ -491,6 +491,16 @@ namespace GIGLS.Services.Implementation.Shipments
 
         public async Task ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
         {
+            if(shipmentCollection == null)
+            {
+                throw new GenericException($"NULL INPUT");
+            }
+
+            if (string.IsNullOrWhiteSpace(shipmentCollection.Name) || string.IsNullOrWhiteSpace(shipmentCollection.PhoneNumber) || string.IsNullOrWhiteSpace(shipmentCollection.Address))
+            {
+                throw new GenericException("Kindly enter Receiver Name, Phone number, Address and State");
+            }
+
             //check if the shipment has not been collected
             var shipmentCollected = await _uow.ShipmentCollection.GetAsync(x => x.Waybill.Equals(shipmentCollection.Waybill) && x.ShipmentScanStatus == shipmentCollection.ShipmentScanStatus);
 
@@ -516,10 +526,55 @@ namespace GIGLS.Services.Implementation.Shipments
             await UpdateShipmentCollection(shipmentCollection);
 
             //If it is mobile
-            if (shipmentCollection.IsComingFromDispatch)
+            if (shipmentCollection.IsComingFromDispatch && !string.IsNullOrWhiteSpace(shipmentCollection.ReceiverArea))
             {
                 await AddRiderToDeliveryTable(shipmentCollection);
             }
+        }
+
+        public async Task ReleaseShipmentForCollectionOnScanner(ShipmentCollectionDTO shipmentCollection)
+        {
+            if (shipmentCollection == null)
+            {
+                throw new GenericException($"NULL INPUT");
+            }
+
+            var demurrage = new DemurrageDTO
+            {
+                Amount = 0,
+                DayCount = 0,
+                WaybillNumber = shipmentCollection.Waybill,
+                AmountPaid = 0
+            };
+
+            shipmentCollection.Demurrage = demurrage;
+
+            var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == shipmentCollection.Waybill, "DeliveryOption, ShipmentItems");
+            if (shipment == null)
+            {
+                throw new GenericException("Shipment Information does not exist", $"{(int)System.Net.HttpStatusCode.NotFound}");
+            }
+
+            shipmentCollection.IsCashOnDelivery = shipment.IsCashOnDelivery;
+            shipmentCollection.CashOnDeliveryAmount = shipment.CashOnDeliveryAmount;
+            shipmentCollection.Name = shipment.ReceiverName;
+            shipmentCollection.PhoneNumber = shipment.ReceiverPhoneNumber;
+            shipmentCollection.Address = shipment.ReceiverAddress;
+            shipmentCollection.Email = shipment.ReceiverEmail;
+            shipmentCollection.City = shipment.ReceiverCity;
+            shipmentCollection.State = shipment.ReceiverState;
+            shipmentCollection.IsComingFromDispatch = true;
+            shipmentCollection.ShipmentScanStatus = ShipmentScanStatus.OKC;
+            shipmentCollection.PaymentType = PaymentType.Cash;
+            shipmentCollection.Description = shipment.Description;
+            
+            var customerWallet = _uow.Wallet.SingleOrDefault(s => s.CustomerCode == shipment.CustomerCode);
+            if(customerWallet != null)
+            {
+                shipmentCollection.WalletNumber = customerWallet?.WalletNumber;
+            }
+
+            await ReleaseShipmentForCollection(shipmentCollection);
         }
 
         public async Task<Tuple<List<ShipmentCollectionDTO>, int>> GetOverDueShipments(FilterOptionsDto filterOptionsDto)

@@ -86,10 +86,15 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var processingorderCodes = Context.BankProcessingOrderCodes.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.DepositType == type
-                            && serviceCenters.Contains(s.ServiceCenter)).AsQueryable();
+            var processingorderCodes = Context.BankProcessingOrderCodes.AsQueryable().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.DepositType == type);
 
-            var processingcodes = from processingorderCode in processingorderCodes
+            //filter by service center of the login user
+            if (serviceCenters.Length > 0)
+            {
+                processingorderCodes = processingorderCodes.Where(s => serviceCenters.Contains(s.ServiceCenter));
+            }
+
+            var processingcodes = (from processingorderCode in processingorderCodes
                                   select new BankProcessingOrderCodesDTO
                                   {
                                       CodeId = processingorderCode.CodeId,
@@ -106,7 +111,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                       BankName = processingorderCode.BankName,
                                       DateCreated = processingorderCode.DateCreated,
                                       DateModified = processingorderCode.DateModified
-                                  };
+                                  }).ToList();
 
             return Task.FromResult(processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit).ToList());
         }

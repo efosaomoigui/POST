@@ -508,19 +508,19 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
         [Route("login")]
         public async Task<IServiceResponse<JObject>> Login(UserloginDetailsModel userLoginModel)
         {
-            var user = await _thirdPartyAPIService.CheckDetailsForLogin(userLoginModel.username);
-
-            //trim
-            if (user.Username != null)
-            {
-                user.Username = user.Username.Trim();
-            }
-
-            string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
-            string getTokenResponse;
-
             return await HandleApiOperationAsync(async () =>
             {
+                var user = await _thirdPartyAPIService.CheckDetailsForLogin(userLoginModel.username);
+
+                //trim
+                if (user.Username != null)
+                {
+                    user.Username = user.Username.Trim();
+                }
+
+                string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+                string getTokenResponse;
+
                 using (var client = new HttpClient())
                 {
                     //setup client
@@ -579,6 +579,7 @@ namespace GIGLS.WebApi.Controllers.ThirdPartyAPI
                 };
             });
         }
+
         /// <summary>
         /// This api is used to track shipments created by the user
         /// </summary>

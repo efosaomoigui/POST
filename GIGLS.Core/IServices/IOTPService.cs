@@ -14,5 +14,6 @@ namespace GIGLS.Core.IServices
         Task<UserDTO> GenerateReferrerCode(UserDTO user);
         Task<UserDTO> CheckDetailsForCustomerPortal(string user);
         Task<UserDTO> CheckDetailsForMobileScanner(string user);
+        Task<UserDTO> CheckDetailsForAgentApp(string user);
     }
 }
