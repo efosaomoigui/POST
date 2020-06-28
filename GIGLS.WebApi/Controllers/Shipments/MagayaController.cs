@@ -301,11 +301,11 @@ namespace GIGLS.WebApi.Controllers.Shipments
         /// <returns></returns>
         [HttpGet]
         [Route("GetDescriptions")]
-        public async Task<IServiceResponse<Description>> GetDescriptions()
+        public async Task<IServiceResponse<Description>> GetDescriptions(string description = " ")
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var _result = _service.CommodityDescription();
+                var _result = _service.CommodityDescription(description);
 
                 return new ServiceResponse<Description>()
                 {

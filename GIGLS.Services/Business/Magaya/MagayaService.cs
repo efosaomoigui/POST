@@ -633,7 +633,7 @@ namespace GIGLS.Services.Business.Magaya.Shipment
             return listofitemstatus;
         }
 
-        public Description CommodityDescription()
+        public Description CommodityDescription(string description)
         {
             //1. initilize the variables to hold some parameters and return values
             string entity_xml = string.Empty;
@@ -652,6 +652,15 @@ namespace GIGLS.Services.Business.Magaya.Shipment
 
                 var xmlInputData = File.ReadAllText(path);
                 var objectOfXml = sr.Deserialize<Description>(xmlInputData);
+
+                if (!String.IsNullOrEmpty(description))
+                {
+                    var Dtype = new DescriptionType();
+                    Dtype.Description = description;
+                    Dtype.ItemNo = "29";
+                    objectOfXml.DescriptionType.Add(Dtype);
+                }
+
                 listOfDescription = objectOfXml;
             }
             catch (Exception ex)

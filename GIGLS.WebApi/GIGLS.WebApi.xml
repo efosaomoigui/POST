@@ -83,7 +83,7 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetDescriptions">
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetDescriptions(System.String)">
             <summary>
             
             </summary>

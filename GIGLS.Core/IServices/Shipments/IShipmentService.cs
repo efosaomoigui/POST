@@ -82,7 +82,7 @@ namespace GIGLS.Core.IServices.Shipments
         LocationList GetLocations();
         ChargeDefinitionList GetChargeDefinitionList(int access_key);
         List<string> GetItemStatus();
-        Description CommodityDescription();
+        Description CommodityDescription(string description);
         GUIDItemList QueryLog(int access_key, QuerylogDt0 qdto);
         TransactionTypes TransactionTypes();
         WarehouseReceiptList GetWarehouseReceiptRangeByDate(int access_key, QuerylogDt0 querydto);
