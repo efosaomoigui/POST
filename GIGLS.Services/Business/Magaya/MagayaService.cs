@@ -80,7 +80,7 @@ namespace GIGLS.Services.Business.Magaya.Shipment
 
         public CurrencyType retCurrencyType()
         {
-            return  new CurrencyType()
+            return new CurrencyType()
             {
                 Code = "USD",
                 DecimalPlaces = 2,
@@ -104,7 +104,7 @@ namespace GIGLS.Services.Business.Magaya.Shipment
             };
         }
 
-        public MeasurementUnits newMeasurementUnits() 
+        public MeasurementUnits newMeasurementUnits()
         {
             return new MeasurementUnits()
             {
@@ -208,13 +208,13 @@ namespace GIGLS.Services.Business.Magaya.Shipment
                 magayaShipmentDTO.Charges.Charge[i].TaxAmount = new MoneyValue() { Value = 0, Currency = "USD" };
                 magayaShipmentDTO.Charges.Charge[i].Price = new MoneyValue()
                 {
-                    Value = (magayaShipmentDTO.Charges.Charge[i].Price != null)? magayaShipmentDTO.Charges.Charge[i].Price.Value : 0,
+                    Value = (magayaShipmentDTO.Charges.Charge[i].Price != null) ? magayaShipmentDTO.Charges.Charge[i].Price.Value : 0,
                     Currency = "USD"
                 };
                 magayaShipmentDTO.Charges.Charge[i].Amount = new MoneyValue()
-                { 
-                    Value = (magayaShipmentDTO.Charges.Charge[i].Amount != null) ? magayaShipmentDTO.Charges.Charge[i].Amount.Value: 0.00, 
-                    Currency = "USD" 
+                {
+                    Value = (magayaShipmentDTO.Charges.Charge[i].Amount != null) ? magayaShipmentDTO.Charges.Charge[i].Amount.Value : 0.00,
+                    Currency = "USD"
                 };
                 magayaShipmentDTO.Charges.Charge[i].RetentionAmount = new MoneyValue() { Value = 0, Currency = "USD" };
                 magayaShipmentDTO.Charges.Charge[i].Entity = magayaShipmentDTO.BillingClient;
@@ -234,7 +234,7 @@ namespace GIGLS.Services.Business.Magaya.Shipment
                     Currency = "USD"
                 };
 
-                magayaShipmentDTO.Charges.Charge[i].TaxAmountInCurrency = new MoneyValue() { Value = 0, Currency = "USD" }; 
+                magayaShipmentDTO.Charges.Charge[i].TaxAmountInCurrency = new MoneyValue() { Value = 0, Currency = "USD" };
                 magayaShipmentDTO.Charges.Charge[i].RetentionAmountInCurrency = new MoneyValue() { Value = 0, Currency = "USD" };
                 magayaShipmentDTO.Charges.Charge[i].IsThirdPartyCharge = false;
                 magayaShipmentDTO.Charges.Charge[i].Status = ChargeStatusType.Open;
@@ -254,7 +254,7 @@ namespace GIGLS.Services.Business.Magaya.Shipment
                     Pieces = totalPiece,
                     Weight = new WeightValue() { Unit = WeightUnitType.lb, Value = totalWeight },
                     Volume = new VolumeValue() { Unit = VolumeUnitType.ft3, Value = totalVolume },
-                    ChargeableWeight = new WeightValue() { Unit = WeightUnitType.lb, Value = ((totalVolume * 1728) < totalWeight)?totalWeight: totalVolume * 1728 },
+                    ChargeableWeight = new WeightValue() { Unit = WeightUnitType.lb, Value = ((totalVolume * 1728) < totalWeight) ? totalWeight : totalVolume * 1728 },
                     UseGrossWeight = false,
                     Flags = ChargeFlagsType.Rate,
                     ApplyBy = ApplyByType.Weight,
@@ -377,6 +377,19 @@ namespace GIGLS.Services.Business.Magaya.Shipment
             return errval;
         }
 
+        public EntityList GetEntityObect()
+        {
+            Entity[] items = new Entity[1];
+            items[0] = new Entity()
+            {
+                GUID = Guid.NewGuid().ToString()
+            };
+            return new EntityList()
+            {
+                Items = items
+            };
+        }
+
         //Get customers, forwarding agents, employees etc 
         public EntityList GetEntities(int access_key, string startwithstring)
         {
@@ -398,6 +411,49 @@ namespace GIGLS.Services.Business.Magaya.Shipment
                 result = cs.GetEntities(access_key, flags, startwithstring, out error_code);
                 var objectOfXml = sr.Deserialize<EntityList>(error_code);
                 errval = objectOfXml;
+
+                if (errval.Items != null)
+                {
+                    var resObj = errval.Items.ToList();
+                    resObj.Add(new Entity()
+                    {
+                        GUID = Guid.NewGuid().ToString(),
+                        Name = startwithstring,
+                        CreatedOn = DateTime.Now,
+                        CreatedOnSpecified = true,
+                        Address = new Address()
+                        {
+                            Street = new string[1]
+                        },
+                        BillingAddress = new Address()
+                        {
+                            Street = new string[1]
+                        },
+                    }); ;
+                    errval.Items = resObj.ToArray();
+                }
+                else
+                {
+                    Entity[] itemsVals = new Entity[1];
+                    itemsVals[0] = new Entity()
+                    {
+                        GUID = Guid.NewGuid().ToString(),
+                        Name = startwithstring,
+                        CreatedOn = DateTime.Now,
+                        CreatedOnSpecified = true,
+                        Address = new Address()
+                        {
+                            Street = new string[1]
+                        },
+                        BillingAddress = new Address()
+                        {
+                            Street = new string[1]
+                        },
+                    };
+
+                    errval.Items = itemsVals;
+                }
+
             }
             catch (Exception ex)
             {

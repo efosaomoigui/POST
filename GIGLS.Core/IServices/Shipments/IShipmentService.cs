@@ -92,8 +92,8 @@ namespace GIGLS.Core.IServices.Shipments
         //ShipmentList GetShipmentRangeByDate(int access_key, QuerylogDt0 querydto);
         Tuple<WarehouseReceiptList, ShipmentList, InvoiceList, PaymentList> GetNextTransByDate2(int access_key, out int more_results,  ref string cookie,  string type);
         TransactionResults LargeQueryLog(int access_key, QuerylogDt0 querydto);
-
         Task<string> GetMagayaWayBillNumber();
+        EntityList GetEntityObect();
     }
 
 
