@@ -124,6 +124,23 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [HttpGet]
+        [Route("GetEntitiesObject")]
+        public async Task<IServiceResponse<EntityList>> GetEntitiesObject()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //3. Call the Magaya SetTransaction Method from MagayaService
+                var result = _service.GetEntityObect();
+
+                //3. Pass the return to the view or caller
+                return new ServiceResponse<EntityList>()
+                {
+                    Object = result
+                };
+            });
+        }
+
         [HttpPost]
         [Route("QueryLog")]
         public async Task<IServiceResponse<GUIDItemList>> QueryLog(QuerylogDt0 querydto)
@@ -284,11 +301,11 @@ namespace GIGLS.WebApi.Controllers.Shipments
         /// <returns></returns>
         [HttpGet]
         [Route("GetDescriptions")]
-        public async Task<IServiceResponse<Description>> GetDescriptions()
+        public async Task<IServiceResponse<Description>> GetDescriptions(string description = " ")
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var _result = _service.CommodityDescription();
+                var _result = _service.CommodityDescription(description);
 
                 return new ServiceResponse<Description>()
                 {
