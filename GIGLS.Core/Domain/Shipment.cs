@@ -152,5 +152,7 @@ namespace GIGL.GIGLS.Core.Domain
         [MaxLength(20)]
         public string DeliveryNumber { get; set; }
         public bool IsFromMobile { get; set; }
+
+        public bool isInternalShipment { get; set; }
     }
 }

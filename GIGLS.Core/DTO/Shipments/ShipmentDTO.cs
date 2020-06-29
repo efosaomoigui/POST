@@ -130,6 +130,7 @@ namespace GIGLS.Core.DTO.Shipments
         public ShipmentRerouteDTO ShipmentReroute { get; set; }
 
         public bool IsFromMobile { get; set; }
+        public bool isInternalShipment { get; set; }
 
         //Country info
         public int DepartureCountryId { get; set; }

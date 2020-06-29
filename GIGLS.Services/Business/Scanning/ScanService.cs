@@ -143,6 +143,7 @@ namespace GIGLS.Services.Business.Scanning
                             DateTime = DateTime.Now,
                             Status = scanStatus,
                             Waybill = scan.WaybillNumber,
+                            isInternalShipment = shipment.isInternalShipment
                         }, scan.ShipmentScanStatus);
                         return true;
                     }

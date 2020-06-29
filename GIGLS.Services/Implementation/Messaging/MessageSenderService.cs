@@ -225,9 +225,9 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[15] = country.ContactNumber;
                     strArray[16] = country.CurrencyCode;
 
-
+                   
                     //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
-                    if (messageDTO.MessageType == MessageType.ARF &&  invoice.PickupOptions == PickupOptions.HOMEDELIVERY)
+                    if (messageDTO.MessageType == MessageType.ARF &&  invoice.PickupOptions == PickupOptions.HOMEDELIVERY && !invoice.isInternalShipment)
                     {
                         MessageDTO homeDeliveryMessageDTO = null;
                         if (messageDTO.EmailSmsType == EmailSmsType.SMS)
@@ -272,6 +272,26 @@ namespace GIGLS.Services.Implementation.Messaging
                         }
                     }
 
+                    //C. added for Email sent for Store Keeper Shipment when scan is ArrivedFinalDestination
+                    if(messageDTO.MessageType == MessageType.ARF && invoice.isInternalShipment)
+                    {
+                        MessageDTO storeMessageDTO = null;
+                        //email
+                        var emailMessages = await _messageService.GetEmailAsync();
+                        storeMessageDTO = emailMessages.FirstOrDefault(s => s.MessageType == MessageType.ARFS);
+
+                        if (storeMessageDTO != null)
+                        {
+                            var storeKeeper = customerObj.FirstName + " " + customerObj.LastName;
+                            strArray[7] = storeKeeper;
+                            strArray[0] = storeKeeper;
+                            messageDTO.Body = storeMessageDTO.Body;
+                            messageDTO.To = storeMessageDTO.To;
+                        }
+
+                        
+                    }
+
                     //B. decode url parameter
                     messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
 
@@ -297,6 +317,12 @@ namespace GIGLS.Services.Implementation.Messaging
                         messageDTO.To = invoice.ReceiverPhoneNumber;
                         messageDTO.ToEmail = invoice.ReceiverEmail;
                         messageDTO.ReceiverName = invoice.ReceiverName;
+                    }
+                    else if ("STORE" == messageDTO.To.Trim())
+                    {
+                        messageDTO.To = customerObj.Email;
+                        messageDTO.ToEmail = customerObj.Email;
+                        messageDTO.ReceiverName = customerObj.FirstName + " " + customerObj.LastName; 
                     }
                     else
                     {
