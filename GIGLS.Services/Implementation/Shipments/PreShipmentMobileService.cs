@@ -157,8 +157,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
                 preShipment.ZoneMapping = zoneid.ZoneId;
                 var newPreShipment = await CreatePreShipmentThirdParty(preShipment);
+
+                bool IsBalanceSufficient = true;
                 string message = "Shipment created successfully";
-                if (newPreShipment.IsEligible == false)
+                if (newPreShipment.IsBalanceSufficient == false)
+                {
+                    message = "Insufficient Wallet Balance";
+                    IsBalanceSufficient = false;
+
+                    throw new GenericException(message, $"{(int)HttpStatusCode.Forbidden}");
+                }
+                else if (newPreShipment.IsEligible == false)
                 {
                     var carPickUprice = new GlobalPropertyDTO();
                     if (newPreShipment.IsCodNeeded == false)
@@ -175,7 +184,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     throw new GenericException(message, $"{(int)HttpStatusCode.Forbidden}");
                 }
-                return new { waybill = newPreShipment.Waybill, message = message, Zone = zoneid.ZoneId };
+                return new { waybill = newPreShipment.Waybill, message = message, IsBalanceSufficient, Zone = zoneid.ZoneId };
             }
             catch (Exception)
             {
@@ -188,7 +197,7 @@ namespace GIGLS.Services.Implementation.Shipments
             await _messageSenderService.SendMessage(MessageType.MCS, EmailSmsType.SMS, smsMessageExtensionDTO);
             //await SendSMSForShipmentDeliveryNotification(preShipmentMobile);
         }
-
+                
         private async Task SendSMSForShipmentDeliveryNotification(PreShipmentMobileDTO preShipmentMobile)
         {
             string stationList = ConfigurationManager.AppSettings["stationDelayList"];
@@ -610,70 +619,116 @@ namespace GIGLS.Services.Implementation.Shipments
                 decimal shipmentGrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
                 var wallet = await _walletService.GetWalletBalance();
 
-                var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
-
-                //generate waybill
-                var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, gigGOServiceCenter.Code);
-                preShipmentDTO.Waybill = waybill;
-
-                var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
-
-                if (user.UserChannelType == UserChannelType.Ecommerce)
+                if (wallet.Balance < shipmentGrandTotal && user.UserChannelType != UserChannelType.Corporate)
                 {
-                    newPreShipment.CustomerType = CustomerType.Company.ToString();
-                    newPreShipment.CompanyType = CompanyType.Ecommerce.ToString();
+                    preShipmentDTO.IsBalanceSufficient = false;
+                    return preShipmentDTO;
                 }
                 else
                 {
-                    newPreShipment.CustomerType = "Individual";
-                    newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
+                    var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
+                    var newPreShipment = await ProcessWaybill(preShipmentDTO, gigGOServiceCenter.Code, user.UserChannelType);
+
+                    var message = new MobileShipmentCreationMessageDTO
+                    {
+                        SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber,
+                        WaybillNumber = newPreShipment.Waybill
+                    };
+
+                    if (user.UserChannelType == UserChannelType.Ecommerce || user.UserChannelType == UserChannelType.Corporate)
+                    {
+                        message.SenderName = customer.Name;
+                    }
+                    else
+                    {
+                        string[] words = preShipmentDTO.SenderName.Split(' ');
+                        message.SenderName = words.FirstOrDefault();
+                    }
+
+                    newPreShipment.UserId = currentUserId;
+                    newPreShipment.GrandTotal = shipmentGrandTotal;
+                    preShipmentDTO.IsBalanceSufficient = true;
+                    preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
+                    newPreShipment.ShipmentPickupPrice = (decimal)(PreshipmentPriceDTO.PickUpCharge == null ? 0.0M : PreshipmentPriceDTO.PickUpCharge);
+                    _uow.PreShipmentMobile.Add(newPreShipment);
+
+                    //process payment
+                    var transaction = new WalletTransactionDTO
+                    {
+                        WalletId = wallet.WalletId,
+                        CreditDebitType = CreditDebitType.Debit,
+                        Amount = newPreShipment.GrandTotal,
+                        ServiceCentreId = gigGOServiceCenter.ServiceCentreId,
+                        Waybill = newPreShipment.Waybill,
+                        Description = "Payment for Shipment",
+                        PaymentType = (user.UserChannelType == UserChannelType.Corporate) ? PaymentType.Wallet : PaymentType.Online,
+                        UserId = newPreShipment.UserId
+                    };
+
+                    //update wallet
+                    var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
+
+                    //double check in case something is wrong with the server before complete the transaction
+                    if (updatedwallet.Balance < shipmentGrandTotal && user.UserChannelType != UserChannelType.Corporate)
+                    {
+                        preShipmentDTO.IsBalanceSufficient = false;
+                        return preShipmentDTO;
+                    }
+                    decimal price = updatedwallet.Balance - shipmentGrandTotal;
+                    updatedwallet.Balance = price;
+                    var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
+
+                    await _uow.CompleteAsync();
+
+                    await ScanMobileShipment(new ScanDTO
+                    {
+                        WaybillNumber = newPreShipment.Waybill,
+                        ShipmentScanStatus = ShipmentScanStatus.MCRT
+                    });
+
+                    await SendSMSForMobileShipmentCreation(message);
+                    return preShipmentDTO;
+
                 }
-                newPreShipment.UserId = currentUserId;
-                newPreShipment.IsConfirmed = false;
-                newPreShipment.IsDelivered = false;
-                newPreShipment.shipmentstatus = "Shipment created";
-                newPreShipment.DateCreated = DateTime.Now;
-                newPreShipment.GrandTotal = shipmentGrandTotal;
-                preShipmentDTO.IsBalanceSufficient = true;
-                preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
-                newPreShipment.ShipmentPickupPrice = (decimal)(PreshipmentPriceDTO.PickUpCharge == null ? 0.0M : PreshipmentPriceDTO.PickUpCharge);
-                _uow.PreShipmentMobile.Add(newPreShipment);
 
-                //process payment
-                var transaction = new WalletTransactionDTO
-                {
-                    WalletId = wallet.WalletId,
-                    CreditDebitType = CreditDebitType.Debit,
-                    Amount = newPreShipment.GrandTotal,
-                    ServiceCentreId = gigGOServiceCenter.ServiceCentreId,
-                    Waybill = waybill,
-                    Description = "Payment for Shipment",
-                    PaymentType = PaymentType.Online,
-                    UserId = newPreShipment.UserId
-                };
-
-                //update wallet
-                var updatedwallet = await _uow.Wallet.GetAsync(wallet.WalletId);
-
-                decimal price = updatedwallet.Balance - shipmentGrandTotal;
-                updatedwallet.Balance = price;
-                var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
-                await _uow.CompleteAsync();
-
-                await ScanMobileShipment(new ScanDTO
-                {
-                    WaybillNumber = newPreShipment.Waybill,
-                    ShipmentScanStatus = ShipmentScanStatus.MCRT
-                });
-
-                //await SendSMSForMobileShipmentCreation(preShipmentDTO);
-                return preShipmentDTO;
-                
             }
             catch
             {
                 throw;
             }
+        }
+
+        private async Task<PreShipmentMobile> ProcessWaybill(PreShipmentMobileDTO preShipmentDTO, string gigGOServiceCentercode, UserChannelType userChannelType)
+        {
+            //generate waybill
+            var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, gigGOServiceCentercode);
+            preShipmentDTO.Waybill = waybill;
+
+            var newPreShipment = Mapper.Map<PreShipmentMobile>(preShipmentDTO);
+
+            newPreShipment.IsConfirmed = false;
+            newPreShipment.IsDelivered = false;
+            newPreShipment.shipmentstatus = "Shipment created";
+            newPreShipment.DateCreated = DateTime.Now;
+
+            if (userChannelType == UserChannelType.Ecommerce)
+            {
+                newPreShipment.CustomerType = CustomerType.Company.ToString();
+                newPreShipment.CompanyType = CompanyType.Ecommerce.ToString();
+            }
+            else if (userChannelType == UserChannelType.Corporate)
+            {
+                newPreShipment.CustomerType = CustomerType.Company.ToString();
+                newPreShipment.CompanyType = CompanyType.Corporate.ToString();
+            }
+            else
+            {
+                newPreShipment.CustomerType = "Individual";
+                newPreShipment.CompanyType = CustomerType.IndividualCustomer.ToString();
+            }
+
+            return newPreShipment;
+
         }
 
         //Extract Sender's Information
