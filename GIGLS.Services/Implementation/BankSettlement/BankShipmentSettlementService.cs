@@ -78,6 +78,7 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<Tuple<string, List<InvoiceViewDTO>, decimal>> GetBankProcessingOrderForShipment(DepositType type)
         {
             var userActiveCountryId = await _userService.GetUserActiveCountryId();
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
             //Get Bank Deposit Module StartDate
             var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate, userActiveCountryId);
@@ -86,8 +87,6 @@ namespace GIGLS.Services.Implementation.Wallet
             var globalpropertiesdate = DateTime.MinValue;
             bool success = DateTime.TryParse(globalpropertiesdateStr, out globalpropertiesdate);
             
-            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-
             var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments();
 
             allShipments = allShipments.Where(s => s.PaymentMethod == "Cash" && s.PaymentStatus == PaymentStatus.Paid);
@@ -493,6 +492,49 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             try
             {
+                if(bkoc == null)
+                {
+                    throw new GenericException("NULL INPUT");
+                }
+
+                if (!bkoc.ShipmentAndCOD.Any())
+                {
+                    throw new GenericException("Processing Information Not Found");
+                }
+
+                if (string.IsNullOrWhiteSpace(bkoc.Code))
+                {
+                    throw new GenericException("Ref Code can not be empty");
+                }
+                else
+                {
+                    //Validate the code if it follow the code format
+                    string getCode = bkoc.Code.Length > 2 ? bkoc.Code.Substring(0, 2) : "0";
+
+                    if(int.TryParse(getCode, out int numCode))
+                    {
+                        int enumShipment = (int)NumberGeneratorType.BankProcessingOrderForShipment;
+                        int enumCod = (int)NumberGeneratorType.BankProcessingOrderForCOD;
+                        int enumDemurage = (int)NumberGeneratorType.BankProcessingOrderForDemurrage;
+
+                        if (numCode != enumShipment && numCode != enumCod && numCode != enumDemurage)
+                        {
+                            throw new GenericException("Ref Code not accepted, Contact IT", $"{(int)HttpStatusCode.Forbidden}");
+                        }
+                    }
+                    else
+                    {
+                        throw new GenericException("Ref Code not accepted, Contact IT", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+                }
+
+                //Validate if the code already exist
+                var dataExist = await _uow.BankProcessingOrderForShipmentAndCOD.ExistAsync(x => x.RefCode == bkoc.Code);
+                if (dataExist)
+                {
+                    throw new GenericException("Ref Code Already exist, Contact IT", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
                 //1. get the current service user
                 var user = await _userService.retUser();
                 bkoc.UserId = user.Id;
