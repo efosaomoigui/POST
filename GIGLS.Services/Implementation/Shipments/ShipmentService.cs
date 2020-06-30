@@ -386,15 +386,14 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (shipment.IsAgent)
                 {
-                    string senderPhoneNumber = string.Empty;
+                    string senderPhoneNumber = shipment.SenderPhoneNumber;
 
-                    if (shipment.SenderPhoneNumber.StartsWith("0"))
+                    if (!string.IsNullOrWhiteSpace(shipment.SenderPhoneNumber))
                     {
-                        senderPhoneNumber = shipment.SenderPhoneNumber.Remove(0, 1);
-                    }
-                    else
-                    {
-                        senderPhoneNumber = shipment.SenderPhoneNumber;
+                        if (shipment.SenderPhoneNumber.StartsWith("0"))
+                        {
+                            senderPhoneNumber = shipment.SenderPhoneNumber.Remove(0, 1);
+                        }
                     }
 
                     //check if customer information already exist 
