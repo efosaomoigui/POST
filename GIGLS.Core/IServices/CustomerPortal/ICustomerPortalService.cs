@@ -104,6 +104,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> EditProfile(UserDTO user);
         Task<object> AddPreShipmentMobile(PreShipmentMobileDTO preShipment);
         Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser();
+        Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser(ShipmentCollectionFilterCriteria filterCriteria);
         Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile();
         Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment);
         Task<WalletDTO> GetWalletBalance();

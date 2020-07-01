@@ -1598,6 +1598,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.GetPreShipmentForUser();
         }
+        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await _preShipmentMobileService.GetPreShipmentForUser(filterCriteria);
+        }
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile()
         {
             var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];

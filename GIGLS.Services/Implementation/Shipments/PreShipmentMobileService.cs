@@ -35,6 +35,7 @@ using Audit.Core;
 using System.Configuration;
 using System.Net;
 using System.Net.Http;
+using GIGLS.Core.DTO.Report;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -2026,6 +2027,80 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var newlist = shipmentDto.Union(agilityShipment);
                 return await Task.FromResult(newlist.OrderByDescending(x => x.DateCreated).Take(20).ToList());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            try
+            {
+                var currentUser = await _userService.GetCurrentUserId();
+                var user = await _uow.User.GetUserById(currentUser);
+                var shipmentDto = new List<PreShipmentMobileDTO>();
+
+                var mobileShipment = _uow.PreShipmentMobile.GetPreShipmentForUser(user.UserChannelCode);
+
+                if(filterCriteria.StartDate == null && filterCriteria.EndDate == null)
+                {
+                    shipmentDto = mobileShipment.OrderByDescending(x => x.DateCreated).Take(20).ToList();
+                }
+                else
+                {
+                    //get startDate and endDate
+                    var queryDate = filterCriteria.getStartDateAndEndDate();
+                    var startDate = queryDate.Item1;
+                    var endDate = queryDate.Item2;
+
+                    shipmentDto = mobileShipment.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).OrderByDescending(x => x.DateCreated).ToList();
+                }
+                
+                var agilityShipment = await GetPreShipmentForEcommerce(user.UserChannelCode, filterCriteria);
+
+                //added agility shipment to Giglgo list of shipments.
+                foreach (var shipment in shipmentDto)
+                {
+
+                    if (agilityShipment.Exists(s => s.Waybill == shipment.Waybill))
+                    {
+                        var s = agilityShipment.Where(x => x.Waybill == shipment.Waybill).FirstOrDefault();
+                        agilityShipment.Remove(s);
+                    }
+
+                    var partnerId = await _uow.MobilePickUpRequests.GetAsync(r => r.Waybill == shipment.Waybill && r.Status == MobilePickUpRequestStatus.Delivered.ToString());
+                    if (partnerId != null)
+                    {
+                        var partneruser = await _uow.User.GetUserById(partnerId.UserId);
+                        if (partneruser != null)
+                        {
+                            shipment.PartnerFirstName = partneruser.FirstName;
+                            shipment.PartnerLastName = partneruser.LastName;
+                            shipment.PartnerImageUrl = partneruser.PictureUrl;
+                        }
+                    }
+
+                    shipment.IsRated = false;
+
+                    var rating = await _uow.MobileRating.GetAsync(j => j.Waybill == shipment.Waybill);
+                    if (rating != null)
+                    {
+                        shipment.IsRated = rating.IsRatedByCustomer;
+                    }
+
+                    var country = await _uow.Country.GetCountryByStationId(shipment.SenderStationId);
+                    if (country != null)
+                    {
+                        shipment.CurrencyCode = country.CurrencyCode;
+                        shipment.CurrencySymbol = country.CurrencySymbol;
+                    }
+
+                }
+
+                var newlist = shipmentDto.Union(agilityShipment);
+                return await Task.FromResult(newlist.OrderByDescending(x => x.DateCreated).ToList());
             }
             catch (Exception)
             {
@@ -4578,6 +4653,61 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               CountryId = r.DepartureCountryId
                                                           }).OrderByDescending(x => x.DateCreated).Take(20).ToList();
 
+                foreach (var shipments in shipmentDto)
+                {
+                    var country = await _uow.Country.GetAsync(shipments.CountryId);
+
+                    if (country != null)
+                    {
+                        shipments.CurrencyCode = country.CurrencyCode;
+                        shipments.CurrencySymbol = country.CurrencySymbol;
+                    }
+
+                    if (shipments.CustomerType == "Individual")
+                    {
+                        shipments.CustomerType = CustomerType.IndividualCustomer.ToString();
+                    }
+
+                    if (shipments.SenderAddress == null)
+                    {
+                        CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipments.CustomerType);
+                        var CustomerDetails = await _customerService.GetCustomer(shipments.CustomerId, customerType);
+                        shipments.SenderAddress = CustomerDetails.Address;
+                        shipments.SenderName = CustomerDetails.Name;
+                    }
+                }
+
+                return await Task.FromResult(shipmentDto);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForEcommerce(string userChannelCode, ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            try
+            {
+                var shipmentDto = new List<PreShipmentMobileDTO>();
+
+                var mobileShipment = _uow.PreShipmentMobile.GetPreShipmentForUser(userChannelCode);
+
+                if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
+                {
+                    shipmentDto = mobileShipment.OrderByDescending(x => x.DateCreated).Take(20).ToList();
+                }
+                else
+                {
+                    //get startDate and endDate
+                    var queryDate = filterCriteria.getStartDateAndEndDate();
+                    var startDate = queryDate.Item1;
+                    var endDate = queryDate.Item2;
+
+                    shipmentDto = mobileShipment.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).OrderByDescending(x => x.DateCreated).ToList();
+                }
+
+                
                 foreach (var shipments in shipmentDto)
                 {
                     var country = await _uow.Country.GetAsync(shipments.CountryId);

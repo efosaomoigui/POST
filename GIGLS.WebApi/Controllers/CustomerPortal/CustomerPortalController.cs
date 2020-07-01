@@ -1014,14 +1014,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
        
-        [HttpGet]
+        [HttpPost]
         [Route("getwallettransactionandpreshipmenthistory")]
-        public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactionAndPreshipmentHistory()
+        public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactionAndPreshipmentHistory(ShipmentCollectionFilterCriteria filterCriteria)
         {
             return await HandleApiOperationAsync(async () =>
             {
                 var Transactionhistory = await _portalService.GetWalletTransactionsForMobile();
-                var preshipments = await _portalService.GetPreShipmentForUser();
+                var preshipments = await _portalService.GetPreShipmentForUser(filterCriteria);
                 Transactionhistory.Shipments = preshipments;
                 return new ServiceResponse<WalletTransactionSummaryDTO>
                 {
