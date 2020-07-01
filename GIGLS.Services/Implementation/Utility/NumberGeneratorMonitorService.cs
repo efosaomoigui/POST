@@ -4,6 +4,7 @@ using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Utility;
 using GIGLS.Infrastructure;
 using System;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace GIGLS.Services.Implementation.Utility
@@ -40,17 +41,17 @@ namespace GIGLS.Services.Implementation.Utility
                 //2. Increment lastcode to get the next available numberCode by 1
                 var number = 0L;
                 var numberStr = "";
-                if (numberGeneratorType != NumberGeneratorType.MagayaWb)
-                {
-                    number = long.Parse(numberCode) + 1;
-                    numberStr = number.ToString("000000");
-                }
-                else if (numberGeneratorType == NumberGeneratorType.MagayaWb)
+
+                if(numberGeneratorType == NumberGeneratorType.MagayaWb)
                 {
                     number = long.Parse(numberCode) + 1;
                     numberStr = number.ToString("00");
                 }
-
+                else
+                {
+                    number = long.Parse(numberCode) + 1;
+                    numberStr = number.ToString("000000");
+                }
 
                 //Add or update the NumberGeneratorMonitor Table for the Service Centre and numberGeneratorType
                 if (monitor != null)
@@ -73,7 +74,6 @@ namespace GIGLS.Services.Implementation.Utility
                 {
                     numberGenerated = "AWR-"+ResolvePrefixFromNumberGeneratorType(numberGeneratorType)  + numberStr;
                 }
-
 
                 if (numberGeneratorType == NumberGeneratorType.CustomerCodeIndividual || numberGeneratorType == NumberGeneratorType.CustomerCodeCorporate ||
                     numberGeneratorType == NumberGeneratorType.CustomerCodeEcommerce   ||  numberGeneratorType == NumberGeneratorType.Wallet ||
@@ -126,7 +126,7 @@ namespace GIGLS.Services.Implementation.Utility
 
                 if (monitor == null)
                 {
-                    throw new GenericException("NumberGeneratorMonitor failed to update!");
+                    throw new GenericException("Number Generator Monitor failed to update!", $"{(int)HttpStatusCode.NotFound}");
                 }
                 monitor.Number = number;
                 await _uow.CompleteAsync();

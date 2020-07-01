@@ -746,7 +746,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+            var allShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false);
             var serviceCentreShipments = allShipmentsQueryable.Where(s => serviceCenterId == s.DepartureServiceCentreId);
 
             // get shipment ordered
@@ -792,7 +792,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false);
             var serviceCentreShipments = allShipments.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId));
 
             //set for TargetAmount and TargetOrder
@@ -845,7 +845,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
-            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+            var allShipments = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false);
             var serviceCentreShipments = allShipments.Where(s => serviceCenterIds.Contains(s.DepartureServiceCentreId));
 
             //set for TargetAmount and TargetOrder
@@ -890,7 +890,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             var endDate = queryDate.Item2;
 
             int[] serviceCenterIds = { };   // empty array
-            var serviceCentreShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+            var serviceCentreShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false);
 
             //filter by country
             var TotalShipmentDeliveredQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s =>

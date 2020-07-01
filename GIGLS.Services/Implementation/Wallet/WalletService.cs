@@ -172,6 +172,26 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Wallet does not exists", $"{(int)HttpStatusCode.NotFound}");
             }
 
+            //verify second time to reduce multiple credit of account
+            if (!string.IsNullOrWhiteSpace(walletTransactionDTO.PaymentTypeReference))
+            {
+                var walletTrans = await _uow.WalletTransaction.GetAsync(x => x.PaymentTypeReference == walletTransactionDTO.PaymentTypeReference);
+
+                if(walletTrans != null)
+                {
+                    //update wallet payment log
+                    var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == walletTransactionDTO.PaymentTypeReference);
+                    if(paymentLog != null)
+                    {
+                        paymentLog.IsWalletCredited = true;
+                        await _uow.CompleteAsync();
+                    }
+
+                    throw new GenericException("Account Already Credited, Kindly check your wallet", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
+            }
+
             //Manage want every customer to be eligible
             //await CheckIfEcommerceIsEligible(wallet, walletTransactionDTO.Amount);
 

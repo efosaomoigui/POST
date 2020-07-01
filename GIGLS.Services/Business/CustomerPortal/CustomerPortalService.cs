@@ -2132,6 +2132,17 @@ namespace GIGLS.Services.Business.CustomerPortal
                 {
                     preShipmentDTO.CompanyType = UserChannelType.IndividualCustomer.ToString();
                     preShipmentDTO.IsAgent = true;
+
+                    //Validate sender name & phone number
+                    if (string.IsNullOrWhiteSpace(preShipmentDTO.SenderName))
+                    {
+                        throw new GenericException("Sender Name can not be empty");
+                    }
+
+                    if (string.IsNullOrWhiteSpace(preShipmentDTO.SenderPhoneNumber))
+                    {
+                        throw new GenericException("Sender Phone Number can not be empty");
+                    }
                 }
                 else
                 {
@@ -2217,6 +2228,16 @@ namespace GIGLS.Services.Business.CustomerPortal
                 if (!preShipmentDTO.PreShipmentItems.Any())
                 {
                     throw new GenericException("Shipment Items cannot be empty");
+                }
+
+                if (string.IsNullOrWhiteSpace(preShipmentDTO.SenderName))
+                {
+                    throw new GenericException("Sender Name can not be empty");
+                }
+
+                if (string.IsNullOrWhiteSpace(preShipmentDTO.SenderPhoneNumber))
+                {
+                    throw new GenericException("Sender Phone Number can not be empty");
                 }
 
                 // get the sender info
@@ -2345,6 +2366,16 @@ namespace GIGLS.Services.Business.CustomerPortal
                     }
                 }
 
+                if (string.IsNullOrWhiteSpace(preShipmentDTO.SenderName))
+                {
+                    throw new GenericException("Sender Name can not be empty");
+                }
+
+                if (string.IsNullOrWhiteSpace(preShipmentDTO.SenderPhoneNumber))
+                {
+                    throw new GenericException("Sender Phone Number can not be empty");
+                }
+
                 // update receiver
                 existingPreShipment.ReceiverAddress = preShipmentDTO.ReceiverAddress;
                 existingPreShipment.ReceiverCity = preShipmentDTO.ReceiverCity;
@@ -2355,6 +2386,8 @@ namespace GIGLS.Services.Business.CustomerPortal
                 existingPreShipment.Value = existingPreShipment.Value;
                 existingPreShipment.DepartureStationId = existingPreShipment.DepartureStationId;
                 existingPreShipment.DestinationStationId = existingPreShipment.DestinationStationId;
+                existingPreShipment.SenderName = preShipmentDTO.SenderName;
+                existingPreShipment.SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber;
                 
                 //update items
                 foreach (var preShipmentItemDTO in preShipmentDTO.PreShipmentItems)
