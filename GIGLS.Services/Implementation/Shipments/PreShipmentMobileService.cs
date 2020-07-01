@@ -2273,6 +2273,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     else if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString())
                     {
                         pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
+                        preshipmentmobile.TimePickedUp = DateTime.Now;
                         await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequests(pickuprequest);
 
                         //Update Activity Status
@@ -2837,6 +2838,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.PickedUp.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString())
                 {
                     preshipmentmobile.IsDelivered = true;
+                    preshipmentmobile.TimeDelivered = DateTime.Now;
 
                     if (preshipmentmobile.ZoneMapping == 1)
                     {
