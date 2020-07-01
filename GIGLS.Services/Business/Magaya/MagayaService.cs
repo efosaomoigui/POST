@@ -141,7 +141,8 @@ namespace GIGLS.Services.Business.Magaya.Shipment
         {
             //2. initialize type of shipment and flag
             string type = "WH";
-            int flags = 0x00001000;
+            //int flags = 0x00000800;
+            int flags = 0x00000800 | 0x00000001;
             Guid guid = Guid.NewGuid();
 
             //3. replace some important variables
@@ -162,6 +163,7 @@ namespace GIGLS.Services.Business.Magaya.Shipment
             var totalPiece = 0.00;
             var totalVolume = 0.00;
             var totalWeight = 0.00;
+            var totalVolumeWeight = 0.00;
 
             for (int i = 0; i < magayaShipmentDTO.Items.Length; i++)
             {
@@ -177,10 +179,11 @@ namespace GIGLS.Services.Business.Magaya.Shipment
                 magayaShipmentDTO.Items[i].Weight = new WeightValue() { Unit = WeightUnitType.lb, Value = magayaShipmentDTO.Items[i].Length.Value };
                 magayaShipmentDTO.Items[i].ContainedPiecesWeightIncluded = true;
                 var volume = magayaShipmentDTO.Items[i].Length.Value * magayaShipmentDTO.Items[i].Width.Value * magayaShipmentDTO.Items[i].Height.Value;
+
                 magayaShipmentDTO.Items[i].VolumeWeight = new VolumeWeightValue()
                 {
                     Unit = VolumeWeightUnitType.vlb,
-                    Value = CalVolumentricWeight(volume, magayaShipmentDTO.Items[i].Weight.Value)
+                    Value = volume/166 * Convert.ToDouble (magayaShipmentDTO.Items[i].Pieces)
                 };
 
                 magayaShipmentDTO.Items[i].Package = magayaShipmentDTO.Items[i].Package;
@@ -196,8 +199,9 @@ namespace GIGLS.Services.Business.Magaya.Shipment
                 magayaShipmentDTO.Items[i].EntryDate = todaysDate;
 
                 totalPiece += Convert.ToDouble(magayaShipmentDTO.Items[i].Pieces);
-                totalWeight += magayaShipmentDTO.Items[i].Weight.Value;
-                totalVolume += magayaShipmentDTO.Items[i].Volume.Value;
+                totalWeight += magayaShipmentDTO.Items[i].PieceWeight.Value;
+                totalVolume += volume;
+                totalVolumeWeight += magayaShipmentDTO.Items[i].VolumeWeight.Value;
             }
 
             magayaShipmentDTO.MeasurementUnits = newMeasurementUnits();
@@ -253,9 +257,9 @@ namespace GIGLS.Services.Business.Magaya.Shipment
                 {
                     Pieces = totalPiece,
                     Weight = new WeightValue() { Unit = WeightUnitType.lb, Value = totalWeight },
-                    Volume = new VolumeValue() { Unit = VolumeUnitType.ft3, Value = totalVolume },
-                    ChargeableWeight = new WeightValue() { Unit = WeightUnitType.lb, Value = ((totalVolume * 1728) < totalWeight) ? totalWeight : totalVolume * 1728 },
-                    UseGrossWeight = false,
+                    Volume = new VolumeValue() { Unit = VolumeUnitType.ft3, Value = totalVolume/1738},
+                    ChargeableWeight = new WeightValue() { Unit = WeightUnitType.lb, Value = CalVolumentricWeight(totalVolumeWeight, totalWeight) },
+                    UseGrossWeight = true,
                     Flags = ChargeFlagsType.Rate,
                     ApplyBy = ApplyByType.Weight,
                     Method = MethodType.Air,
