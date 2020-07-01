@@ -15,7 +15,7 @@ namespace GIGLS.Core.IServices.Shipments
     public interface IPreShipmentMobileService : IServiceDependencyMarker
     {
         Task<object> AddPreShipmentMobile(PreShipmentMobileDTO preShipment);
-        Task<object> AddPreShipmentMobileThirdParty(PreShipmentMobileDTO preShipment);
+        Task<object> AddPreShipmentMobileThirdParty(CreatePreShipmentMobileDTO preShipment);
         Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment);
         Task<List<PreShipmentMobileDTO>> GetShipments(BaseFilterCriteria filterOptionsDto);
         Task<PreShipmentMobileDTO> GetShipmentByWaybill(string waybill);

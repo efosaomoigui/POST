@@ -150,6 +150,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment);
         Task<bool> CreateOrUpdateDropOffForAgent(PreShipmentDTO preShipmentDTO);
         Task<UserDTO> CheckDetailsForAgentApp(string user);
-        Task<object> AddPreShipmentMobileForThirdParty(PreShipmentMobileDTO preShipment);
+        Task<object> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment);
     }
 }

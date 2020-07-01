@@ -22,7 +22,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _uow = uow;
         }
 
-        public async Task<object> CreatePreShipment(PreShipmentMobileDTO preShipmentDTO)
+        public async Task<object> CreatePreShipment(CreatePreShipmentMobileDTO preShipmentDTO)
         {
             return await _portalService.AddPreShipmentMobileForThirdParty(preShipmentDTO);
         }

@@ -137,10 +137,12 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<object> AddPreShipmentMobileThirdParty(PreShipmentMobileDTO preShipment)
+        public async Task<object> AddPreShipmentMobileThirdParty(CreatePreShipmentMobileDTO preShipments)
         {
             try
             {
+                var preShipment = Mapper.Map<PreShipmentMobileDTO>(preShipments);
+
                 //null DateCreated
                 preShipment.DateCreated = DateTime.Now;
 

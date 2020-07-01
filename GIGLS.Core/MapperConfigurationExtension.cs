@@ -420,6 +420,9 @@ namespace GIGLS.Core
                 config.CreateMap<PartnerPayout, PartnerPayoutDTO>();
                 config.CreateMap<PartnerPayoutDTO, PartnerPayout>();
 
+                config.CreateMap<CreatePreShipmentMobileDTO, PreShipmentMobileDTO>();
+                config.CreateMap<PreShipmentMobileDTO, CreatePreShipmentMobileDTO>();
+
             });
 
             isInit = true;
