@@ -395,6 +395,7 @@
     <Compile Include="DTO\ShipmentScan\ScanStatusDTO.cs" />
     <Compile Include="DTO\ShipmentScan\ScanStatusReportDTO.cs" />
     <Compile Include="DTO\Shipments\CreatePreShipmentMobileDTO.cs" />
+    <Compile Include="DTO\Shipments\CreateShipmentNodeDTO.cs" />
     <Compile Include="DTO\Shipments\DemurrageDTO.cs" />
     <Compile Include="DTO\Shipments\FilterOptionsDto.cs" />
     <Compile Include="DTO\Shipments\GIGGoDashboardDTO.cs" />
@@ -409,6 +410,7 @@
     <Compile Include="DTO\Shipments\MessageExtensionDTO.cs" />
     <Compile Include="DTO\Shipments\MobilePriceDTO.cs" />
     <Compile Include="DTO\Shipments\MobileShipmentTrackingHistoryDTO.cs" />
+    <Compile Include="DTO\Shipments\NodeLocationDTO.cs" />
     <Compile Include="DTO\Shipments\OverdueShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\PickupManifestDTO.cs" />
     <Compile Include="DTO\Shipments\PickupManifestWaybillMappingDTO.cs" />

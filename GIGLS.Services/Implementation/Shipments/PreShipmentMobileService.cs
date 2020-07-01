@@ -34,6 +34,7 @@ using GIGLS.Core.DTO.Utility;
 using Audit.Core;
 using System.Configuration;
 using System.Net;
+using System.Net.Http;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -199,7 +200,7 @@ namespace GIGLS.Services.Implementation.Shipments
             await _messageSenderService.SendMessage(MessageType.MCS, EmailSmsType.SMS, smsMessageExtensionDTO);
             //await SendSMSForShipmentDeliveryNotification(preShipmentMobile);
         }
-                
+
         private async Task SendSMSForShipmentDeliveryNotification(PreShipmentMobileDTO preShipmentMobile)
         {
             string stationList = ConfigurationManager.AppSettings["stationDelayList"];
@@ -570,6 +571,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var currentUserId = await _userService.GetCurrentUserId();
                 preShipmentDTO.UserId = currentUserId;
                 var user = await _userService.GetUserById(currentUserId);
+                preShipmentDTO.CustomerCode = user.UserChannelCode;
 
                 var country = await _uow.Country.GetCountryByStationId(preShipmentDTO.SenderStationId);
                 if (country == null)
@@ -680,6 +682,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     updatedwallet.Balance = price;
                     var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
 
+                    await NodeApiCreateShipment(newPreShipment);
+
                     await _uow.CompleteAsync();
 
                     await ScanMobileShipment(new ScanDTO
@@ -730,6 +734,51 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             return newPreShipment;
+
+        }
+
+        private async Task<Uri> NodeApiCreateShipment(PreShipmentMobile newPreShipment)
+        {
+            try
+            {
+                var nodePayload = new CreateShipmentNodeDTO()
+                {
+                    waybillNumber = newPreShipment.Waybill,
+                    customerId = newPreShipment.CustomerCode,
+                    locality = newPreShipment.SenderLocality,
+                    receiverAddress = newPreShipment.ReceiverAddress,
+                    vehicleType = newPreShipment.VehicleType,
+                    value = newPreShipment.Value,
+                    zone = newPreShipment.ZoneMapping,
+                    receiverLocation = new NodeLocationDTO()
+                    {
+                        lng = newPreShipment.ReceiverLocation.Longitude,
+                        lat = newPreShipment.ReceiverLocation.Latitude
+                    },
+                    senderAddress = newPreShipment.SenderAddress,
+                    senderLocation = new NodeLocationDTO()
+                    {
+                        lng = newPreShipment.SenderLocation.Longitude,
+                        lat = newPreShipment.SenderLocation.Latitude
+                    }
+
+                };
+
+                HttpClient client = new HttpClient();
+                
+                var nodeURL = ConfigurationManager.AppSettings["NodeTestUrl"];
+                nodeURL = nodeURL + "shipment";
+
+                HttpResponseMessage response = await client.PostAsJsonAsync(nodeURL, nodePayload);
+                response.EnsureSuccessStatusCode();
+
+                // return URI of the created resource.
+                return response.Headers.Location;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
 
         }
 

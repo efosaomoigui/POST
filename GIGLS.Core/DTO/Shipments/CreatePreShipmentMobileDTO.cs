@@ -21,6 +21,7 @@ namespace GIGLS.Core.DTO.Shipments
         [Required]
         public int SenderStationId { get; set; }
         public string InputtedSenderAddress { get; set; }
+        [Required]
         public string SenderLocality { get; set; }
 
         [Required]
