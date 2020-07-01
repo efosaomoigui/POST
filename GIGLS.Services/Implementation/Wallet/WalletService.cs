@@ -179,8 +179,17 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 if(walletTrans != null)
                 {
+                    //update wallet payment log
+                    var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == walletTransactionDTO.PaymentTypeReference);
+                    if(paymentLog != null)
+                    {
+                        paymentLog.IsWalletCredited = true;
+                        await _uow.CompleteAsync();
+                    }
+
                     throw new GenericException("Account Already Credited, Kindly check your wallet", $"{(int)HttpStatusCode.Forbidden}");
                 }
+
             }
 
             //Manage want every customer to be eligible
