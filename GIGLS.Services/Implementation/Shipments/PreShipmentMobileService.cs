@@ -815,7 +815,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 HttpClient client = new HttpClient();
 
-                var nodeURL = ConfigurationManager.AppSettings["NodeTestUrl"];
+                var nodeURL = ConfigurationManager.AppSettings["NodeBaseUrl"];
                 var nodePostShipment = ConfigurationManager.AppSettings["NodePostShipment"];
                 nodeURL = nodeURL + nodePostShipment;
                 client.PostAsJsonAsync(nodeURL, nodePayload);
