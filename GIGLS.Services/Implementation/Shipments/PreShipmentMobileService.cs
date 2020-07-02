@@ -2316,7 +2316,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     else if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Processing.ToString())
                     {
                         pickuprequest.Status = MobilePickUpRequestStatus.Accepted.ToString();
-                        preshipmentmobile.TimePickedUp = DateTime.Now;
+                        preshipmentmobile.TimeAssigned = DateTime.Now;
                         await _mobilepickuprequestservice.AddOrUpdateMobilePickUpRequests(pickuprequest);
 
                         //Update Activity Status
