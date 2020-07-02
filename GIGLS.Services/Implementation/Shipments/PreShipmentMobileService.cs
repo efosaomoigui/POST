@@ -566,8 +566,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Shipment Items cannot be empty");
                 }
 
-                var PreshipmentPriceDTO = new MobilePriceDTO();
-
                 // get the current user info
                 var currentUserId = await _userService.GetCurrentUserId();
                 preShipmentDTO.UserId = currentUserId;
@@ -594,34 +592,42 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
 
+                var preshipmentPriceDTO = new MobilePriceDTO();
+
                 if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Truck.ToString().ToLower())
                 {
-                    PreshipmentPriceDTO = await GetHaulagePrice(new HaulagePriceDTO
+                    preshipmentPriceDTO = await GetHaulagePrice(new HaulagePriceDTO
                     {
                         Haulageid = (int)preShipmentDTO.Haulageid,
                         DepartureStationId = preShipmentDTO.SenderStationId,
                         DestinationStationId = preShipmentDTO.ReceiverStationId
                     });
-                    preShipmentDTO.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
+
+                    preShipmentDTO.GrandTotal = (decimal)preshipmentPriceDTO.GrandTotal;
+
                     if (preShipmentDTO.PreShipmentItems.Any())
                     {
                         foreach (var shipment in preShipmentDTO.PreShipmentItems)
                         {
-                            shipment.CalculatedPrice = PreshipmentPriceDTO.GrandTotal;
+                            shipment.CalculatedPrice = preshipmentPriceDTO.GrandTotal;
                         }
                     }
                 }
                 else
-                {
-                    if (user.UserChannelType == UserChannelType.Ecommerce || customer != null)
+                {                    
+                    if(customer != null)
                     {
-                        preShipmentDTO.Shipmentype = ShipmentType.Ecommerce;
+                        if(customer.CompanyType == CompanyType.Ecommerce)
+                        {
+                            preShipmentDTO.Shipmentype = ShipmentType.Ecommerce;
+                        }
                     }
+
                     preShipmentDTO.IsFromShipment = true;
-                    PreshipmentPriceDTO = await GetPrice(preShipmentDTO);
+                    preshipmentPriceDTO = await GetPrice(preShipmentDTO);
                 }
 
-                decimal shipmentGrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
+                decimal shipmentGrandTotal = (decimal)preshipmentPriceDTO.GrandTotal;
                 var wallet = await _walletService.GetWalletBalance();
 
                 if (wallet.Balance < shipmentGrandTotal && user.UserChannelType != UserChannelType.Corporate)
@@ -653,8 +659,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     newPreShipment.UserId = currentUserId;
                     newPreShipment.GrandTotal = shipmentGrandTotal;
                     preShipmentDTO.IsBalanceSufficient = true;
-                    preShipmentDTO.DiscountValue = PreshipmentPriceDTO.Discount;
-                    newPreShipment.ShipmentPickupPrice = (decimal)(PreshipmentPriceDTO.PickUpCharge == null ? 0.0M : PreshipmentPriceDTO.PickUpCharge);
+                    preShipmentDTO.DiscountValue = preshipmentPriceDTO.Discount;
+                    newPreShipment.ShipmentPickupPrice = (decimal)(preshipmentPriceDTO.PickUpCharge == null ? 0.0M : preshipmentPriceDTO.PickUpCharge);
                     _uow.PreShipmentMobile.Add(newPreShipment);
 
                     //process payment
@@ -683,21 +689,21 @@ namespace GIGLS.Services.Implementation.Shipments
                     updatedwallet.Balance = price;
                     var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
 
-                    await NodeApiCreateShipment(newPreShipment);
-
                     await _uow.CompleteAsync();
-
                     await ScanMobileShipment(new ScanDTO
                     {
                         WaybillNumber = newPreShipment.Waybill,
                         ShipmentScanStatus = ShipmentScanStatus.MCRT
                     });
 
-                    await SendSMSForMobileShipmentCreation(message);
+                    //Fire and forget
+                    //Send the Payload to Partner Cloud Handler 
+                    NodeApiCreateShipment(newPreShipment);
+
+                    //We will send SMS & Email
+                    //await SendSMSForMobileShipmentCreation(message);
                     return preShipmentDTO;
-
                 }
-
             }
             catch
             {
@@ -738,7 +744,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
         }
 
-        private async Task<Uri> NodeApiCreateShipment(PreShipmentMobile newPreShipment)
+        private async Task<Uri> NodeApiCreateShipmentOld(PreShipmentMobile newPreShipment)
         {
             try
             {
@@ -762,7 +768,6 @@ namespace GIGLS.Services.Implementation.Shipments
                         lng = newPreShipment.SenderLocation.Longitude,
                         lat = newPreShipment.SenderLocation.Latitude
                     }
-
                 };
 
                 HttpClient client = new HttpClient();
@@ -776,11 +781,49 @@ namespace GIGLS.Services.Implementation.Shipments
                 // return URI of the created resource.
                 return response.Headers.Location;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
+        }
 
+        private void NodeApiCreateShipment(PreShipmentMobile newPreShipment)
+        {
+            try
+            {
+                var nodePayload = new CreateShipmentNodeDTO()
+                {
+                    waybillNumber = newPreShipment.Waybill,
+                    customerId = newPreShipment.CustomerCode,
+                    locality = newPreShipment.SenderLocality,
+                    receiverAddress = newPreShipment.ReceiverAddress,
+                    vehicleType = newPreShipment.VehicleType,
+                    value = newPreShipment.Value,
+                    zone = newPreShipment.ZoneMapping,
+                    receiverLocation = new NodeLocationDTO()
+                    {
+                        lng = newPreShipment.ReceiverLocation.Longitude,
+                        lat = newPreShipment.ReceiverLocation.Latitude
+                    },
+                    senderAddress = newPreShipment.SenderAddress,
+                    senderLocation = new NodeLocationDTO()
+                    {
+                        lng = newPreShipment.SenderLocation.Longitude,
+                        lat = newPreShipment.SenderLocation.Latitude
+                    }
+                };
+
+                HttpClient client = new HttpClient();
+
+                var nodeURL = ConfigurationManager.AppSettings["NodeTestUrl"];
+                var nodePostShipment = ConfigurationManager.AppSettings["NodePostShipment"];
+                nodeURL = nodeURL + nodePostShipment;
+                client.PostAsJsonAsync(nodeURL, nodePayload);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         //Extract Sender's Information
