@@ -1013,7 +1013,22 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-       
+        [HttpGet]
+        [Route("getwallettransactionandpreshipmenthistory")]
+        public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactionAndPreshipmentHistory()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var Transactionhistory = await _portalService.GetWalletTransactionsForMobile();
+                var preshipments = await _portalService.GetPreShipmentForUser();
+                Transactionhistory.Shipments = preshipments;
+                return new ServiceResponse<WalletTransactionSummaryDTO>
+                {
+                    Object = Transactionhistory
+                };
+            });
+        }
+
         [HttpPost]
         [Route("getwallettransactionandpreshipmenthistory")]
         public async Task<IServiceResponse<WalletTransactionSummaryDTO>> GetWalletTransactionAndPreshipmentHistory(ShipmentCollectionFilterCriteria filterCriteria)
