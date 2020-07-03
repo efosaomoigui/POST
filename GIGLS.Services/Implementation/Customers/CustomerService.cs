@@ -127,13 +127,13 @@ namespace GIGLS.Services.Implementation.Customers
         }
 
         //Get Store Keeper as Corporate Customer
-        public async Task<CustomerDTO> GetStoreKeeperAccount()
+        public async Task<CustomerDTO> GetGIGLCorporateAccount()
         {
             try
             {
-                string storeKeeperCode = ConfigurationManager.AppSettings["storeKeeperCorporateAccount"];
+                string accountCode = ConfigurationManager.AppSettings["GIGLCorporateAccount"];
 
-                var customerDTO = await GetCustomer(storeKeeperCode, UserChannelType.Corporate);
+                var customerDTO = await GetCustomer(accountCode, UserChannelType.Corporate);
 
                 return customerDTO;
 

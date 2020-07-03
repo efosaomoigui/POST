@@ -828,7 +828,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 
-                var customerId = await GetStoreCustomer(shipmentDTO);
+                var customerId = await GetGIGLCorporateAccount(shipmentDTO);
                 shipmentDTO.Customer = new List<CustomerDTO>();
                 shipmentDTO.Customer.Add(customerId);
 
@@ -1026,7 +1026,7 @@ namespace GIGLS.Services.Implementation.Shipments
             return createdObject;
         }
 
-        private async Task<CustomerDTO> GetStoreCustomer(ShipmentDTO shipmentDTO)
+        private async Task<CustomerDTO> GetGIGLCorporateAccount(ShipmentDTO shipmentDTO)
         {
             var customerDTO = new CustomerDTO();
             customerDTO.CustomerType = CustomerType.Company;
@@ -1034,12 +1034,13 @@ namespace GIGLS.Services.Implementation.Shipments
 
             customerDTO.RowVersion = null;
 
-            var storeAccount = await _customerService.GetStoreKeeperAccount();
-            shipmentDTO.CustomerId = storeAccount.CompanyId;
+            var giglAccount = await _customerService.GetGIGLCorporateAccount();
+            shipmentDTO.CustomerId = giglAccount.CompanyId;
             shipmentDTO.CompanyType = CompanyType.Corporate.ToString();
-            shipmentDTO.CustomerCode = storeAccount.CustomerCode;
+            shipmentDTO.CustomerCode = giglAccount.CustomerCode;
 
-            return storeAccount;
+
+            return giglAccount;
         }
 
         private async Task<ShipmentDTO> CreateShipment(ShipmentDTO shipmentDTO)
