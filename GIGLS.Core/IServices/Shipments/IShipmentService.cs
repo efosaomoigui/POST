@@ -26,7 +26,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<ShipmentDTO> GetShipment(string waybill);
         Task<ShipmentDTO> GetBasicShipmentDetail(string waybill);
         Task<ShipmentDTO> AddShipment(ShipmentDTO shipment);
-        Task<ShipmentDTO> AddStoreShipment(ShipmentDTO shipmentDTO);
+        Task<ShipmentDTO> AddShipmentForPaymentWaiver(ShipmentDTO shipmentDTO);
         Task UpdateShipment(int shipmentId, ShipmentDTO shipment);
         Task UpdateShipment(string waybill, ShipmentDTO shipment);
         Task DeleteShipment(int shipmentId);
