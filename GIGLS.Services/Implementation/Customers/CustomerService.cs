@@ -7,6 +7,7 @@ using AutoMapper;
 using GIGLS.Core.Enums;
 using System.Collections.Generic;
 using GIGLS.CORE.Enums;
+using System.Configuration;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -125,51 +126,17 @@ namespace GIGLS.Services.Implementation.Customers
             }
         }
 
-        //Create Store Keeper as Individual Customer
-        public async Task<CustomerDTO> CreateStoreKeeperCustomer(CustomerDTO customerDTO)
+        //Get Store Keeper as Corporate Customer
+        public async Task<CustomerDTO> GetStoreKeeperAccount()
         {
             try
             {
-                // handle IndividualCustomers
-                if (CustomerType.IndividualCustomer.Equals(customerDTO.CustomerType))
-                {
-                    int individualCustomerId = 0;
-                    string phoneNumber = null;
+                string storeKeeperCode = ConfigurationManager.AppSettings["storeKeeperCorporateAccount"];
 
-                    if (customerDTO.PhoneNumber.StartsWith("0"))
-                    {
-                        phoneNumber = await AddCountryCodeToPhoneNumber(customerDTO.PhoneNumber, customerDTO.UserActiveCountryId);
-                    }
-                    var individualCustomerByPhone = await _uow.IndividualCustomer.GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber || c.CustomerCode == customerDTO.CustomerCode || c.PhoneNumber == phoneNumber);
-
-                    if (individualCustomerByPhone != null)
-                    {
-                        individualCustomerId = individualCustomerByPhone.IndividualCustomerId;
-                    }
-
-                    if (individualCustomerId > 0)
-                    {
-                        // update
-                        customerDTO.IndividualCustomerId = individualCustomerId;
-                        var individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(customerDTO);
-                        await _individualCustomerService.UpdateCustomer(individualCustomerId, individualCustomerDTO);
-                    }
-                    else
-                    {
-                        if (customerDTO.PhoneNumber.StartsWith("0"))
-                        {
-                            customerDTO.PhoneNumber = await AddCountryCodeToPhoneNumber(customerDTO.PhoneNumber, customerDTO.UserActiveCountryId);
-                        }
-
-                        // create new
-                        var individualCustomerDTO = Mapper.Map<IndividualCustomerDTO>(customerDTO);
-                        var createdCustomer = await _individualCustomerService.AddCustomer(individualCustomerDTO);
-                        customerDTO.IndividualCustomerId = createdCustomer.IndividualCustomerId;
-                        customerDTO.CustomerCode = createdCustomer.CustomerCode;
-                    }
-                }
+                var customerDTO = await GetCustomer(storeKeeperCode, UserChannelType.Corporate);
 
                 return customerDTO;
+
             }
             catch (Exception ex)
             {

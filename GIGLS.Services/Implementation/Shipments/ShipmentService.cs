@@ -827,6 +827,11 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
+                
+                var customerId = await GetStoreCustomer(shipmentDTO);
+                shipmentDTO.Customer = new List<CustomerDTO>();
+                shipmentDTO.Customer.Add(customerId);
+
                 var hashString = await ComputeHash(shipmentDTO);
 
                 var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
@@ -853,8 +858,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.ShipmentHash.Add(hasher);
                 }
 
-                // create the customer, if information does not exist in our record
-                var customerId = await CreateStoreCustomer(shipmentDTO);
+               
 
                 // create the shipment and shipmentItems
                 var newShipment = await CreateStoreShipment(shipmentDTO);
@@ -1022,33 +1026,20 @@ namespace GIGLS.Services.Implementation.Shipments
             return createdObject;
         }
 
-        private async Task<CustomerDTO> CreateStoreCustomer(ShipmentDTO shipmentDTO)
+        private async Task<CustomerDTO> GetStoreCustomer(ShipmentDTO shipmentDTO)
         {
-            var customerDTO = shipmentDTO.Customer[0];
+            var customerDTO = new CustomerDTO();
+            customerDTO.CustomerType = CustomerType.Company;
             var customerType = shipmentDTO.CustomerType;
 
-            if (customerDTO.UserActiveCountryId == 0)
-            {
-                customerDTO.UserActiveCountryId = await GetUserCountryId();
-            }
-
-            //reset rowversion
             customerDTO.RowVersion = null;
 
-            // individualCustomer
-            customerDTO.CustomerType = CustomerType.IndividualCustomer;
+            var storeAccount = await _customerService.GetStoreKeeperAccount();
+            shipmentDTO.CustomerId = storeAccount.CompanyId;
+            shipmentDTO.CompanyType = CompanyType.Corporate.ToString();
+            shipmentDTO.CustomerCode = storeAccount.CustomerCode;
 
-            var createdObject = await _customerService.CreateStoreKeeperCustomer(customerDTO);
-            // individualCustomer
-            customerDTO.CustomerType = CustomerType.IndividualCustomer;
-            shipmentDTO.CustomerId = createdObject.IndividualCustomerId;
-            shipmentDTO.CompanyType = CustomerType.IndividualCustomer.ToString();
-
-            //set the customerCode in the shipment
-            var currentCustomerObject = await _customerService.GetCustomer(shipmentDTO.CustomerId, customerDTO.CustomerType);
-            shipmentDTO.CustomerCode = currentCustomerObject.CustomerCode;
-
-            return createdObject;
+            return storeAccount;
         }
 
         private async Task<ShipmentDTO> CreateShipment(ShipmentDTO shipmentDTO)
