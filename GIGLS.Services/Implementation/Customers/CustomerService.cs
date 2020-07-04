@@ -132,15 +132,12 @@ namespace GIGLS.Services.Implementation.Customers
             try
             {
                 string accountCode = ConfigurationManager.AppSettings["GIGLCorporateAccount"];
-
                 var customerDTO = await GetCustomer(accountCode, UserChannelType.Corporate);
-
                 return customerDTO;
-
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
         }
 
