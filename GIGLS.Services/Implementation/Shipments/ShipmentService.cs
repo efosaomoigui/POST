@@ -831,7 +831,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if(customerDto.CompanyId < 1)
                 {
-                    throw new GenericException("Corporate Acoount does not exist.",  $"{(int)HttpStatusCode.NotFound}");
+                    throw new GenericException("Corporate Acount does not exist.",  $"{(int)HttpStatusCode.NotFound}");
                 }
 
                 shipmentDTO.Customer = new List<CustomerDTO>

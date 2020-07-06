@@ -598,7 +598,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     preshipmentPriceDTO = await GetHaulagePrice(new HaulagePriceDTO
                     {
-                        Haulageid = (int)preShipmentDTO.Haulageid,
+                        Haulageid = (preShipmentDTO.Haulageid != null) ? (int)preShipmentDTO.Haulageid : 0,
                         DepartureStationId = preShipmentDTO.SenderStationId,
                         DestinationStationId = preShipmentDTO.ReceiverStationId
                     });
