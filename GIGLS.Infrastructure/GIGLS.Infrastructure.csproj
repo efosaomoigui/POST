@@ -132,6 +132,7 @@
     <Compile Include="Persistence\Repositories\CountryRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\CompanyContactPersonRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\CompanyRepository.cs" />
+    <Compile Include="Persistence\Repositories\Customers\EcommerceAgreementRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\IndividualCustomerRepository.cs" />
     <Compile Include="Persistence\Repositories\DeliveryLocationRepository.cs" />
     <Compile Include="Persistence\Repositories\DeliveryNumberRepository.cs" />

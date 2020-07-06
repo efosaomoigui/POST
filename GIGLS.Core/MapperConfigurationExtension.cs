@@ -423,6 +423,9 @@ namespace GIGLS.Core
                 config.CreateMap<CreatePreShipmentMobileDTO, PreShipmentMobileDTO>();
                 config.CreateMap<PreShipmentMobileDTO, CreatePreShipmentMobileDTO>();
 
+                config.CreateMap<EcommerceAgreement, EcommerceAgreementDTO>();
+                config.CreateMap<EcommerceAgreementDTO, EcommerceAgreement>();
+
             });
 
             isInit = true;

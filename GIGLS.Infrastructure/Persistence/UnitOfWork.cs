@@ -460,6 +460,9 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IPartnerPayoutRepository PartnerPayout { get; set; }
 
+        [Inject]
+        public IEcommerceAgreementRepository EcommerceAgreement { get; set; }
+
         public int Complete()
         {
             return _context.SaveChanges();
