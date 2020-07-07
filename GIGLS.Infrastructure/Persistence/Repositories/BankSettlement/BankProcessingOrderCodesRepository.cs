@@ -22,7 +22,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
         {
             var processingorderCodes = Context.BankProcessingOrderCodes.AsQueryable();
             processingorderCodes = processingorderCodes.Where(s => s.DepositType == type);
-            var processingcodes = from processingorderCode in processingorderCodes
+            var processingcodes = (from processingorderCode in processingorderCodes
                                   select new BankProcessingOrderCodesDTO
                                   {
                                       CodeId = processingorderCode.CodeId,
@@ -39,7 +39,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                       BankName = processingorderCode.BankName,
                                       DateCreated = processingorderCode.DateCreated,
                                       DateModified = processingorderCode.DateModified
-                                  };
+                                  }).ToList();
 
             return Task.FromResult(processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit).ToList());
         }
@@ -56,7 +56,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
             var processingorderCodes = Context.BankProcessingOrderCodes.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.DepositType == type).AsQueryable();                       
 
             
-            var processingcodes = from processingorderCode in processingorderCodes
+            var processingcodes = (from processingorderCode in processingorderCodes
                                   select new BankProcessingOrderCodesDTO
                                   {
                                       CodeId = processingorderCode.CodeId,
@@ -73,7 +73,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.BankSettlement
                                       BankName = processingorderCode.BankName,
                                       DateCreated = processingorderCode.DateCreated,
                                       DateModified = processingorderCode.DateModified
-                                  };
+                                  }).ToList();
 
             return Task.FromResult(processingcodes.OrderByDescending(s => s.DateAndTimeOfDeposit).ToList());
         }
