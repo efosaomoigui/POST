@@ -329,6 +329,7 @@
     <Compile Include="DTO\Fleets\FleetPartInventoryHistoryDTO.cs" />
     <Compile Include="DTO\Fleets\FleetTripDTO.cs" />
     <Compile Include="DTO\Fleets\ManifestStatusDTO.cs" />
+    <Compile Include="DTO\GIGGO\TransactionPreShipmentDTO.cs" />
     <Compile Include="DTO\GiglgoStationDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDistanceMappingPriceDTO.cs" />
