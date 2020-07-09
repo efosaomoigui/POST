@@ -14,7 +14,5 @@ namespace GIGLS.Core.DTO.Shipments
         public string PartnerFirstName { get; set; }
         public string PartnerLastName { get; set; }
         public string PartnerImageUrl { get; set; }
-        public bool IsRated { get; set; }
-
     }
 }
