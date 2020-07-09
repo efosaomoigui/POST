@@ -15,11 +15,9 @@ namespace GIGLS.Core.DTO.Shipments
         public string shipmentstatus { get; set; }
         public decimal GrandTotal { get; set; }
         public string CurrencySymbol { get; set; }
-
+        public bool IsRated { get; set; }
         public string PartnerFirstName { get; set; }
-
         public string PartnerLastName { get; set; }
-
         public string PartnerImageUrl { get; set; }
                                
     }

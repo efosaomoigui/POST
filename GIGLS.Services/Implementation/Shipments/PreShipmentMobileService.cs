@@ -614,10 +614,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                 }
                 else
-                {                    
-                    if(customer != null)
+                {
+                    if (customer != null)
                     {
-                        if(customer.CompanyType == CompanyType.Ecommerce)
+                        if (customer.CompanyType == CompanyType.Ecommerce)
                         {
                             preShipmentDTO.Shipmentype = ShipmentType.Ecommerce;
                         }
@@ -771,7 +771,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 };
 
                 HttpClient client = new HttpClient();
-                
+
                 var nodeURL = ConfigurationManager.AppSettings["NodeTestUrl"];
                 nodeURL = nodeURL + "shipment";
 
@@ -2085,7 +2085,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var mobileShipment = _uow.PreShipmentMobile.GetPreShipmentForUser(user.UserChannelCode);
 
-                if(filterCriteria.StartDate == null && filterCriteria.EndDate == null)
+                if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
                 {
                     shipmentDto = mobileShipment.OrderByDescending(x => x.DateCreated).Take(20).ToList();
                 }
@@ -2098,7 +2098,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     shipmentDto = mobileShipment.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).ToList();
                 }
-                
+
                 var agilityShipment = await GetShipments(user.UserChannelCode, filterCriteria);
 
                 //added agility shipment to Giglgo list of shipments.
@@ -2120,6 +2120,13 @@ namespace GIGLS.Services.Implementation.Shipments
                             shipment.PartnerFirstName = partneruser.FirstName;
                             shipment.PartnerLastName = partneruser.LastName;
                             shipment.PartnerImageUrl = partneruser.PictureUrl;
+                        }
+
+                        shipment.IsRated = false;
+                        var rating = await _uow.MobileRating.GetAsync(j => j.Waybill == shipment.Waybill);
+                        if (rating != null)
+                        {
+                            shipment.IsRated = rating.IsRatedByCustomer;
                         }
                     }
                 }
@@ -4739,7 +4746,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     shipmentDto = mobileShipment.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).ToList();
                 }
-                                
+
                 foreach (var shipments in shipmentDto)
                 {
                     if (shipments.CustomerType == "Individual")
@@ -4752,7 +4759,6 @@ namespace GIGLS.Services.Implementation.Shipments
                         CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipments.CustomerType);
                         var CustomerDetails = await _customerService.GetCustomer(shipments.CustomerId, customerType);
                         shipments.SenderAddress = CustomerDetails.Address;
-                        shipments.SenderName = CustomerDetails.Name;
                     }
                 }
 
