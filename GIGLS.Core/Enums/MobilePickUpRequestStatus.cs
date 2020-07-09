@@ -18,7 +18,6 @@
         OnwardProcessing,
         Processing,
         TimedOut,
-        Missed,
-        ShipmentCreated,
+        Missed
     }
 }
