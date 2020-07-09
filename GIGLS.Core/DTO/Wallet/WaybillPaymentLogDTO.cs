@@ -95,4 +95,32 @@ namespace GIGLS.Core.DTO.Wallet
         public bool use_access { get; set; } = true;
     }
 
+
+    public class USSDResponse
+    {
+        public USSDResponse()
+        {
+            data = new USSDResponseData();
+        }
+        public string Status { get; set; }
+        public string Order_Reference { get; set; }
+        public string Dialing_Code { get; set; }
+        public USSDResponseData data { get; set; }
+    }
+
+    public class USSDResponseData
+    {
+        public string Message { get; set; }
+        public string Order_Id { get; set; }
+    }
+
+    public class USSDDTO
+    {
+        public int amount { get; set; }
+        public string msisdn { get; set; }
+        public string desc { get; set; }
+        public string reference { get; set; }
+        public string country_code { get; set; } = "NG";
+        public string child_merchant_id { get; set; }
+    }
 }

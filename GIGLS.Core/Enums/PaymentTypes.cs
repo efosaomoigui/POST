@@ -21,6 +21,7 @@
     {
         Paystack,
         TheTeller,
-        Flutterwave
+        Flutterwave,
+        USSD
     }
 }
