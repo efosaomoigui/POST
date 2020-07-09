@@ -101,7 +101,7 @@ namespace GIGLS.Services.Implementation.Partnership
             return new { id = walletPaymentLog.PartnerTransactionsID };
         }
 
-        public string Encrypt(string clearText)
+        public async Task<string> Encrypt(string clearText)
         {
             string EncryptionKey = "abc123";
             byte[] clearBytes = Encoding.Unicode.GetBytes(clearText);

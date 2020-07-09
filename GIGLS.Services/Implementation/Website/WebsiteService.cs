@@ -79,13 +79,12 @@ namespace GIGLS.Services.Implementation.Website
         {
             try
             {
-                //Valid all compulsory parameter from the top here.
-
-
-                if (ecommerceAgreementDTO.BusinessEmail != null)
+                if(ecommerceAgreementDTO.BusinessEmail == null)
                 {
-                    ecommerceAgreementDTO.BusinessEmail = ecommerceAgreementDTO.BusinessEmail.Replace(" ", string.Empty);
+                    throw new GenericException("Business email field can not be empty", $"{(int)HttpStatusCode.Forbidden}");
                 }
+
+                ecommerceAgreementDTO.BusinessEmail = ecommerceAgreementDTO.BusinessEmail.Replace(" ", string.Empty);
 
                 string natureOfBusiness = string.Empty;
                 string ecommerceSignature = string.Empty;

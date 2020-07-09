@@ -5,8 +5,11 @@ using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.Website;
+using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -150,12 +153,30 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _websiteService.AddEcommerceAgreement(ecommerceAgreementDTO);
-
-                return new ServiceResponse<object>
+                var response = new ServiceResponse<object>();
+                var request = Request;
+                var headers = request.Headers;
+                var result = new object();
+                if (headers.Contains("api_key"))
                 {
-                    Object = result
-                };
+                    
+                    var key = await _portalService.EncryptWebsiteKey();
+                    string token = headers.GetValues("api_key").FirstOrDefault();
+                    if (token == key)
+                    {
+                        result = await _websiteService.AddEcommerceAgreement(ecommerceAgreementDTO);
+                        response.Object = result;
+                    }
+                    else
+                    {
+                        throw new GenericException("Invalid key", $"{(int)HttpStatusCode.Unauthorized}");
+                    }
+                }
+                else
+                {
+                    throw new GenericException("Unauthorized", $"{(int)HttpStatusCode.Unauthorized}");
+                }
+                return response;
             });
         }
     }
