@@ -1598,9 +1598,9 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.GetPreShipmentForUser();
         }
-        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser(ShipmentCollectionFilterCriteria filterCriteria)
+        public async Task<List<TransactionPreShipmentDTO>> GetPreShipmentForUser(UserDTO user, ShipmentCollectionFilterCriteria filterCriteria)
         {
-            return await _preShipmentMobileService.GetPreShipmentForUser(filterCriteria);
+            return await _preShipmentMobileService.GetPreShipmentForUser(user,filterCriteria);
         }
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile()
         {
@@ -1620,6 +1620,33 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
 
             return await _iWalletTransactionService.GetWalletTransactionsForMobile();
+        }
+
+        public async Task<ModifiedWalletTransactionSummaryDTO> GetWalletTransactionsForMobile(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
+            bool disableShipmentCreation = bool.Parse(isDisable);
+            bool allowTestUser = await AllowTestingUserToCreateShipment();
+
+            if (allowTestUser)
+            {
+                disableShipmentCreation = false;
+            }
+
+            if (disableShipmentCreation)
+            {
+                throw new GenericException($"App under maintenance. Service currently not available", $"{(int)HttpStatusCode.ServiceUnavailable}");
+            }
+            var transactionSummary = new WalletTransactionSummaryDTO();
+            var currentUser = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(currentUser);
+            var userDTO = Mapper.Map<UserDTO>(user);
+
+            transactionSummary = await _iWalletTransactionService.GetWalletTransactionsForMobile(userDTO, filterCriteria);
+            var preshipments = await GetPreShipmentForUser(userDTO,filterCriteria);
+            var result = Mapper.Map<ModifiedWalletTransactionSummaryDTO>(transactionSummary);
+            result.Shipments = preshipments;
+            return result;
         }
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
@@ -1913,6 +1940,12 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var GoogleApiKey = ConfigurationManager.AppSettings["DistanceApiKey"];
             return await _partnertransactionservice.Decrypt(GoogleApiKey);
+        }
+
+        public async Task<string> EncryptWebsiteKey()
+        {
+            var apiKey = ConfigurationManager.AppSettings["WebsiteKey"];
+            return await _partnertransactionservice.Encrypt(apiKey);
         }
         public async Task<object> CancelShipmentWithNoCharge(CancelShipmentDTO shipment)
         {

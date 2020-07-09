@@ -140,30 +140,17 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                    InputtedSenderAddress = r.InputtedSenderAddress,
                                    InputtedReceiverAddress = r.InputtedReceiverAddress,
                                    SenderLocality = r.SenderLocality,
-                                   ReceiverLocation = new LocationDTO
-                                   {
-                                       Longitude = r.ReceiverLocation.Longitude,
-                                       Latitude = r.ReceiverLocation.Latitude,
-                                       Name = r.ReceiverLocation.Name,
-                                       FormattedAddress = r.ReceiverLocation.FormattedAddress
-                                   },
-                                   SenderLocation = new LocationDTO
-                                   {
-                                       Longitude = r.SenderLocation.Longitude,
-                                       Latitude = r.SenderLocation.Latitude,
-                                       Name = r.ReceiverLocation.Name,
-                                       FormattedAddress = r.ReceiverLocation.FormattedAddress
-                                   }
                                });
 
             return shipmentDto;
         }
 
-        public IQueryable<PreShipmentMobileDTO> GetPreShipmentForEcommerce(string userChannelCode)
+        public IQueryable<PreShipmentMobileDTO> GetShipments(string userChannelCode)
         {
             var preShipments = Context.Shipment.AsQueryable().Where(x => x.CustomerCode == userChannelCode && x.IsCancelled == false);
 
             var shipmentDto = (from r in preShipments
+                               join co in _context.Country on r.DepartureCountryId equals co.CountryId
                                select new PreShipmentMobileDTO()
                                {
                                    PreShipmentMobileId = r.ShipmentId,
@@ -187,7 +174,9 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                    shipmentstatus = "Shipment",
                                    CustomerId = r.CustomerId,
                                    CustomerType = r.CustomerType,
-                                   CountryId = r.DepartureCountryId
+                                   CountryId = r.DepartureCountryId,
+                                   CurrencyCode = co.CurrencyCode,
+                                   CurrencySymbol = co.CurrencySymbol
                                });
 
             return shipmentDto;
