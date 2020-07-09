@@ -16,7 +16,8 @@ namespace GIGLS.Core.DTO.Wallet
         public string CurrencySymbol { get; set; }
         public string CurrencyCode { get; set; }
     }
-    public class ModifiedWalletTransactionSummaryDTO : BaseDomainDTO
+
+    public class ModifiedWalletTransactionSummaryDTO
     {
         public int WalletId { get; set; }
         public string WalletOwnerName { get; set; }
