@@ -145,7 +145,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             return shipmentDto;
         }
 
-        public IQueryable<PreShipmentMobileDTO> GetShipmentForEcommerce(string userChannelCode)
+        public IQueryable<PreShipmentMobileDTO> GetShipments(string userChannelCode)
         {
             var preShipments = Context.Shipment.AsQueryable().Where(x => x.CustomerCode == userChannelCode && x.IsCancelled == false);
 

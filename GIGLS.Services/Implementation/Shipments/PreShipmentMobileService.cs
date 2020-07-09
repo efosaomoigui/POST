@@ -2099,7 +2099,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     shipmentDto = mobileShipment.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).ToList();
                 }
                 
-                var agilityShipment = await GetPreShipmentForEcommerce(user.UserChannelCode, filterCriteria);
+                var agilityShipment = await GetShipments(user.UserChannelCode, filterCriteria);
 
                 //added agility shipment to Giglgo list of shipments.
                 foreach (var shipment in shipmentDto)
@@ -4718,13 +4718,13 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForEcommerce(string userChannelCode, ShipmentCollectionFilterCriteria filterCriteria)
+        public async Task<List<PreShipmentMobileDTO>> GetShipments(string userChannelCode, ShipmentCollectionFilterCriteria filterCriteria)
         {
             try
             {
                 var shipmentDto = new List<PreShipmentMobileDTO>();
 
-                var mobileShipment = _uow.PreShipmentMobile.GetShipmentForEcommerce(userChannelCode);
+                var mobileShipment = _uow.PreShipmentMobile.GetShipments(userChannelCode);
 
                 if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
                 {
