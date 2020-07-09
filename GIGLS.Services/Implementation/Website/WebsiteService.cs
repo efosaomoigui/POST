@@ -79,6 +79,9 @@ namespace GIGLS.Services.Implementation.Website
         {
             try
             {
+                //Valid all compulsory parameter from the top here.
+
+
                 if (ecommerceAgreementDTO.BusinessEmail != null)
                 {
                     ecommerceAgreementDTO.BusinessEmail = ecommerceAgreementDTO.BusinessEmail.Replace(" ", string.Empty);
@@ -97,7 +100,7 @@ namespace GIGLS.Services.Implementation.Website
                     ecommerceSignature = ecommerceAgreementDTO.EcommerceSignature.EcommerceSignatureName + ecommerceAgreementDTO.EcommerceSignature.EcommerceSignatureAddress;
                 }
 
-                if (await _uow.EcommerceAgreement.ExistAsync(c => c.BusinessEmail.ToLower() == ecommerceAgreementDTO.BusinessEmail))
+                if (await _uow.EcommerceAgreement.ExistAsync(c => c.BusinessEmail == ecommerceAgreementDTO.BusinessEmail))
                 {
                     throw new GenericException("Ecommerce information already exist", $"{(int)HttpStatusCode.Forbidden}");
                 }
@@ -107,8 +110,7 @@ namespace GIGLS.Services.Implementation.Website
                 ecommerceAgreement.EcommerceSignature = ecommerceSignature;
                 _uow.EcommerceAgreement.Add(ecommerceAgreement);
                 await _uow.CompleteAsync();
-                return HttpStatusCode.Created;
-           
+                return HttpStatusCode.Created;           
             }
             catch (Exception)
             {
