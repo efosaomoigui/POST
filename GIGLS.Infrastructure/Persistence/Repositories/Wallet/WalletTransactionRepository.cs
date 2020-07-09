@@ -150,7 +150,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                 var startDate = queryDate.Item1;
                 var endDate = queryDate.Item2;
 
-                walletTransactionContext = walletTransactionContext.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).OrderByDescending(x => x.DateCreated);
+                walletTransactionContext = walletTransactionContext.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
             }
 
             List<WalletTransactionDTO> walletTransactionDTO = (from w in walletTransactionContext
@@ -173,7 +173,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                                                                        Name = x.Name
                                                                    }).FirstOrDefault(),
                                                                    WalletId = w.WalletId,
-                                                               }).OrderByDescending(s => s.DateOfEntry).ToList();
+                                                               }).ToList();
 
             return Task.FromResult(walletTransactionDTO.OrderByDescending(s => s.DateOfEntry).ToList());
         }
