@@ -1,5 +1,6 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Admin;
+using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.CustomerPortal;
@@ -137,6 +138,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 var result = await _portalService.GetShipmentDetailForDanfo(waybillNumber);
 
                 return new ServiceResponse<ShipmentDetailDanfoDTO>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("ecommerceagreement")]
+        public async Task<IServiceResponse<object>> AddEcommerceAgreement(EcommerceAgreementDTO ecommerceAgreementDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _websiteService.AddEcommerceAgreement(ecommerceAgreementDTO);
+
+                return new ServiceResponse<object>
                 {
                     Object = result
                 };

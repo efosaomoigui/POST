@@ -2077,12 +2077,10 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser(ShipmentCollectionFilterCriteria filterCriteria)
+        public async Task<List<TransactionPreShipmentDTO>> GetPreShipmentForUser(UserDTO user, ShipmentCollectionFilterCriteria filterCriteria)
         {
             try
             {
-                var currentUser = await _userService.GetCurrentUserId();
-                var user = await _uow.User.GetUserById(currentUser);
                 var shipmentDto = new List<PreShipmentMobileDTO>();
 
                 var mobileShipment = _uow.PreShipmentMobile.GetPreShipmentForUser(user.UserChannelCode);
@@ -2098,7 +2096,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var startDate = queryDate.Item1;
                     var endDate = queryDate.Item2;
 
-                    shipmentDto = mobileShipment.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).OrderByDescending(x => x.DateCreated).ToList();
+                    shipmentDto = mobileShipment.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).ToList();
                 }
                 
                 var agilityShipment = await GetPreShipmentForEcommerce(user.UserChannelCode, filterCriteria);
@@ -2124,26 +2122,16 @@ namespace GIGLS.Services.Implementation.Shipments
                             shipment.PartnerImageUrl = partneruser.PictureUrl;
                         }
                     }
-
-                    shipment.IsRated = false;
-
-                    var rating = await _uow.MobileRating.GetAsync(j => j.Waybill == shipment.Waybill);
-                    if (rating != null)
-                    {
-                        shipment.IsRated = rating.IsRatedByCustomer;
-                    }
-
-                    var country = await _uow.Country.GetCountryByStationId(shipment.SenderStationId);
-                    if (country != null)
-                    {
-                        shipment.CurrencyCode = country.CurrencyCode;
-                        shipment.CurrencySymbol = country.CurrencySymbol;
-                    }
-
                 }
 
                 var newlist = shipmentDto.Union(agilityShipment);
-                return await Task.FromResult(newlist.OrderByDescending(x => x.DateCreated).ToList());
+                var result = Mapper.Map<IEnumerable<TransactionPreShipmentDTO>>(newlist);
+
+                if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
+                {
+                    return await Task.FromResult(result.OrderByDescending(x => x.DateCreated).Take(20).ToList());
+                }
+                return await Task.FromResult(result.OrderByDescending(x => x.DateCreated).ToList());
             }
             catch (Exception)
             {
@@ -4736,7 +4724,7 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var shipmentDto = new List<PreShipmentMobileDTO>();
 
-                var mobileShipment = _uow.PreShipmentMobile.GetPreShipmentForUser(userChannelCode);
+                var mobileShipment = _uow.PreShipmentMobile.GetShipmentForEcommerce(userChannelCode);
 
                 if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
                 {
@@ -4749,20 +4737,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     var startDate = queryDate.Item1;
                     var endDate = queryDate.Item2;
 
-                    shipmentDto = mobileShipment.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).OrderByDescending(x => x.DateCreated).ToList();
+                    shipmentDto = mobileShipment.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).ToList();
                 }
-
-                
+                                
                 foreach (var shipments in shipmentDto)
                 {
-                    var country = await _uow.Country.GetAsync(shipments.CountryId);
-
-                    if (country != null)
-                    {
-                        shipments.CurrencyCode = country.CurrencyCode;
-                        shipments.CurrencySymbol = country.CurrencySymbol;
-                    }
-
                     if (shipments.CustomerType == "Individual")
                     {
                         shipments.CustomerType = CustomerType.IndividualCustomer.ToString();

@@ -1,4 +1,5 @@
 ﻿using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.CORE.DTO.Report;
 using System.Collections.Generic;
@@ -17,5 +18,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task RemoveWalletTransaction(int walletTransactionId);
         Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile();
         Task<IEnumerable<WalletTransactionDTO>> GetWalletTransactionsByDate(ShipmentCollectionFilterCriteria dateFilter);
+        Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile(UserDTO customer, ShipmentCollectionFilterCriteria filterCriteria);
     }
 }

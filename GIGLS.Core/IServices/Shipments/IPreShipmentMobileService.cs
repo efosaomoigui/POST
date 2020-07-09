@@ -22,7 +22,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<PreShipmentMobileDTO> GetShipmentByWaybill(string waybill);
         Task<PreShipmentMobileDTO> GetPreShipmentDetail(string waybill);
         Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser();
-        Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser(ShipmentCollectionFilterCriteria filterCriteria);
+        Task<List<TransactionPreShipmentDTO>> GetPreShipmentForUser(UserDTO user, ShipmentCollectionFilterCriteria filterCriteria);
         Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
         Task<MobileShipmentTrackingHistoryDTO> TrackShipment(string waybillNumber);
         Task<PreShipmentMobileDTO> AddMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest);
