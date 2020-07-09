@@ -110,6 +110,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.CustomerCode == userChannelCode);
 
             var shipmentDto = (from r in preShipments
+                               join co in _context.Country on r.CountryId equals co.CountryId
                                select new PreShipmentMobileDTO()
                                {
                                    PreShipmentMobileId = r.PreShipmentMobileId,
@@ -140,6 +141,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                    InputtedSenderAddress = r.InputtedSenderAddress,
                                    InputtedReceiverAddress = r.InputtedReceiverAddress,
                                    SenderLocality = r.SenderLocality,
+                                   CurrencySymbol = co.CurrencySymbol
                                });
 
             return shipmentDto;

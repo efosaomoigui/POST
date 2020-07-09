@@ -12,7 +12,9 @@ namespace GIGLS.Core.DTO.Shipments
         public string Waybill { get; set; }
         public string SenderAddress { get; set; }
         public string ReceiverAddress { get; set; }
-        public string Shipmentstatus { get; set; }
+        public string shipmentstatus { get; set; }
+        public decimal GrandTotal { get; set; }
+        public string CurrencySymbol { get; set; }
 
         public string PartnerFirstName { get; set; }
 
