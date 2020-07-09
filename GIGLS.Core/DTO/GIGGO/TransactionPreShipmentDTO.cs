@@ -1,9 +1,4 @@
 ﻿using GIGLS.CORE.DTO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GIGLS.Core.DTO.Shipments
 {
@@ -19,6 +14,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string PartnerFirstName { get; set; }
         public string PartnerLastName { get; set; }
         public string PartnerImageUrl { get; set; }
-                               
+        public bool IsRated { get; set; }
+
     }
 }
