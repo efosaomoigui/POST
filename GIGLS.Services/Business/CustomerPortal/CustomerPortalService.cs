@@ -1626,7 +1626,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
             bool disableShipmentCreation = bool.Parse(isDisable);
-
             bool allowTestUser = await AllowTestingUserToCreateShipment();
 
             if (allowTestUser)

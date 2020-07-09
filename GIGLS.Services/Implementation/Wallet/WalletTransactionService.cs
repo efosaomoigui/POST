@@ -347,7 +347,7 @@ namespace GIGLS.Services.Implementation.Wallet
             };
         }
 
-        private async Task<WalletTransactionSummaryDTO> GetWalletTransactionByWalletIdForMobile(UserDTO customer,ShipmentCollectionFilterCriteria filterCriteria)
+        private async Task<WalletTransactionSummaryDTO> GetWalletTransactionByWalletIdForMobile(UserDTO customer, ShipmentCollectionFilterCriteria filterCriteria)
         {
             //get customer country info
             var country = new CountryDTO();
@@ -392,7 +392,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile(UserDTO customer,ShipmentCollectionFilterCriteria filterCriteria)
         {
-            return await GetWalletTransactionByWalletIdForMobile(customer,filterCriteria);
+            return await GetWalletTransactionByWalletIdForMobile(customer, filterCriteria);
         }
     }
 }

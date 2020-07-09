@@ -2096,7 +2096,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     var startDate = queryDate.Item1;
                     var endDate = queryDate.Item2;
 
-                    shipmentDto = mobileShipment.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).OrderByDescending(x => x.DateCreated).ToList();
+                    shipmentDto = mobileShipment.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).ToList();
                 }
                 
                 var agilityShipment = await GetPreShipmentForEcommerce(user.UserChannelCode, filterCriteria);
@@ -4737,10 +4737,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     var startDate = queryDate.Item1;
                     var endDate = queryDate.Item2;
 
-                    shipmentDto = mobileShipment.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).OrderByDescending(x => x.DateCreated).ToList();
+                    shipmentDto = mobileShipment.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate).ToList();
                 }
-
-                
+                                
                 foreach (var shipments in shipmentDto)
                 {
                     if (shipments.CustomerType == "Individual")
