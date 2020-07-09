@@ -115,6 +115,14 @@ namespace GIGLS.WebApi.Providers
                     context.Options.AccessTokenExpireTimeSpan = TimeSpan.FromDays(5);
                 }
 
+                if(user.UserChannelType == UserChannelType.Ecommerce || user.UserChannelType == UserChannelType.Corporate)
+                {
+                    var ecommerce = await _repo._companyProperty.GetAsync(x => x.CustomerCode == user.UserChannelCode);
+                    user.Organisation = ecommerce.Name;
+                    user.FirstName = ecommerce.Name;
+                    user.LastName = ecommerce.Name;
+                }
+
                 ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(userManager, "JWT");
 
                 //preparing AuthenticationProperties Dictionary object
