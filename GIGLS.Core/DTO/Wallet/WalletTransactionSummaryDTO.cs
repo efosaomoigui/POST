@@ -24,6 +24,7 @@ namespace GIGLS.Core.DTO.Wallet
         public decimal WalletBalance { get; set; }
         public List<WalletTransactionDTO> WalletTransactions { get; set; }
         public List<TransactionPreShipmentDTO> Shipments { get; set; }
+        public List<string> Status { get; set; }
         public string CurrencySymbol { get; set; }
         public string CurrencyCode { get; set; }
     }

@@ -52,6 +52,7 @@ using GIGLS.Core.IServices.Fleets;
 using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
 using System.Net;
+using GIGLS.Services.Implementation.Utility;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -1644,8 +1645,13 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             transactionSummary = await _iWalletTransactionService.GetWalletTransactionsForMobile(userDTO, filterCriteria);
             var preshipments = await GetPreShipmentForUser(userDTO,filterCriteria);
+
+            var statusList = EnumExtensions.GetValues<MobilePickUpRequestStatus>();
+            List<string> status = statusList.Select(x => x.Name.ToString()).ToList();
+
             var result = Mapper.Map<ModifiedWalletTransactionSummaryDTO>(transactionSummary);
             result.Shipments = preshipments;
+            result.Status = status;
             return result;
         }
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
