@@ -13,6 +13,6 @@ namespace GIGLS.Core.IRepositories.Wallet
         Task<List<WalletTransactionDTO>> GetWalletTransactionAsync(int[] serviceCentreIds);
         Task<List<WalletTransactionDTO>> GetWalletTransactionCreditAsync(int[] serviceCentreIds, AccountFilterCriteria accountFilterCriteria);
         Task<List<WalletTransactionDTO>> GetWalletTransactionDateAsync(int[] serviceCentreIds, ShipmentCollectionFilterCriteria dateFilter);
-        Task<List<WalletTransactionDTO>> GetWalletTransactionMobile(int walletId, ShipmentCollectionFilterCriteria filterCriteria);
+        Task<List<ModifiedWalletTransactionDTO>> GetWalletTransactionMobile(int walletId, ShipmentCollectionFilterCriteria filterCriteria);
     }
 }

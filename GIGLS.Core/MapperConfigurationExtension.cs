@@ -425,10 +425,7 @@ namespace GIGLS.Core
 
                 config.CreateMap<EcommerceAgreement, EcommerceAgreementDTO>();
                 config.CreateMap<EcommerceAgreementDTO, EcommerceAgreement>();
-
-                config.CreateMap<WalletTransactionSummaryDTO, ModifiedWalletTransactionSummaryDTO>();
-                config.CreateMap<ModifiedWalletTransactionSummaryDTO, WalletTransactionSummaryDTO>();
-
+               
             });
 
             isInit = true;

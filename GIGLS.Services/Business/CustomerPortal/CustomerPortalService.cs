@@ -1638,19 +1638,17 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException($"App under maintenance. Service currently not available", $"{(int)HttpStatusCode.ServiceUnavailable}");
             }
-            var transactionSummary = new WalletTransactionSummaryDTO();
             var currentUser = await _userService.GetCurrentUserId();
             var user = await _uow.User.GetUserById(currentUser);
             var userDTO = Mapper.Map<UserDTO>(user);
 
-            transactionSummary = await _iWalletTransactionService.GetWalletTransactionsForMobile(userDTO, filterCriteria);
+            var transactionSummary = await _iWalletTransactionService.GetWalletTransactionsForMobile(userDTO, filterCriteria);
             var preshipments = await GetPreShipmentForUser(userDTO, filterCriteria);
             var status = await GetShipmentStatus();
 
-            var result = Mapper.Map<ModifiedWalletTransactionSummaryDTO>(transactionSummary);
-            result.Shipments = preshipments;
-            result.Status = status;
-            return result;
+            transactionSummary.Shipments = preshipments;
+            transactionSummary.Status = status;
+            return transactionSummary;
         }
 
 

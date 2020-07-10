@@ -18,6 +18,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task RemoveWalletTransaction(int walletTransactionId);
         Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile();
         Task<IEnumerable<WalletTransactionDTO>> GetWalletTransactionsByDate(ShipmentCollectionFilterCriteria dateFilter);
-        Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile(UserDTO customer, ShipmentCollectionFilterCriteria filterCriteria);
+        Task<ModifiedWalletTransactionSummaryDTO> GetWalletTransactionsForMobile(UserDTO customer, ShipmentCollectionFilterCriteria filterCriteria);
     }
 }
