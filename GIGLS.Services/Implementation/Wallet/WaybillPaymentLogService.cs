@@ -479,13 +479,18 @@ namespace GIGLS.Services.Implementation.Wallet
             var ussdResponse = await ProcessPaymentForUSSD(waybillPaymentLog);
 
             //3. Add record to waybill payment log with the order id
+            var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
+            newPaymentLog.NetworkProvider = ussdResponse.data.Order_Id;
+            _uow.WaybillPaymentLog.Add(newPaymentLog);
+            await _uow.CompleteAsync();
+
             //4. Send SMS to the customer phone number
+
+
             //5. Return the response to the user
 
 
-
-
-            string refCode = await GenerateWaybillReferenceCode(waybillPaymentLog.Waybill);
+            //string refCode = await GenerateWaybillReferenceCode(waybillPaymentLog.Waybill);
 
             throw new NotImplementedException();
         }
@@ -514,7 +519,7 @@ namespace GIGLS.Services.Implementation.Wallet
             };
 
             string countryCode = waybillPaymentLog.Currency.Length <= 2 ? waybillPaymentLog.Currency : waybillPaymentLog.Currency.Substring(0, 2);
-            string pay01Url = baseUrl + merchantId + "/pay/" + merchantId + "/pay/" + countryCode;
+            string pay01Url = baseUrl + merchantId + "/pay/" + countryCode;
 
             using (var client = new HttpClient())
             {
@@ -547,5 +552,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
             return publicKey;
         }
+
     }
 }
