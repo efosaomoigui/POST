@@ -110,36 +110,18 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.CustomerCode == userChannelCode);
 
             var shipmentDto = (from r in preShipments
+                               join co in _context.Country on r.CountryId equals co.CountryId
                                select new PreShipmentMobileDTO()
                                {
                                    PreShipmentMobileId = r.PreShipmentMobileId,
                                    Waybill = r.Waybill,
-                                   ActualDateOfArrival = r.ActualDateOfArrival,
                                    DateCreated = r.DateCreated,
                                    DateModified = r.DateModified,
-                                   ExpectedDateOfArrival = r.ExpectedDateOfArrival,
                                    ReceiverAddress = r.ReceiverAddress,
                                    SenderAddress = r.SenderAddress,
-                                   SenderPhoneNumber = r.SenderPhoneNumber,
-                                   ReceiverCountry = r.ReceiverCountry,
-                                   SenderStationId = r.SenderStationId,
-                                   ReceiverStationId = r.ReceiverStationId,
-                                   ReceiverEmail = r.ReceiverEmail,
-                                   ReceiverName = r.ReceiverName,
-                                   ReceiverPhoneNumber = r.ReceiverPhoneNumber,
-                                   ReceiverState = r.ReceiverState,
-                                   SenderName = r.SenderName,
-                                   UserId = r.UserId,
-                                   Value = r.Value,
                                    shipmentstatus = r.shipmentstatus,
                                    GrandTotal = r.GrandTotal,
-                                   DeliveryPrice = r.DeliveryPrice,
-                                   CalculatedTotal = r.CalculatedTotal,
-                                   CustomerCode = r.CustomerCode,
-                                   VehicleType = r.VehicleType,
-                                   InputtedSenderAddress = r.InputtedSenderAddress,
-                                   InputtedReceiverAddress = r.InputtedReceiverAddress,
-                                   SenderLocality = r.SenderLocality,
+                                   CurrencySymbol = co.CurrencySymbol
                                });
 
             return shipmentDto;
@@ -155,28 +137,15 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                {
                                    PreShipmentMobileId = r.ShipmentId,
                                    Waybill = r.Waybill,
-                                   ActualDateOfArrival = r.ActualDateOfArrival,
                                    DateCreated = r.DateCreated,
                                    DateModified = r.DateModified,
-                                   ExpectedDateOfArrival = r.ExpectedDateOfArrival,
                                    ReceiverAddress = r.ReceiverAddress,
                                    SenderAddress = r.SenderAddress,
-                                   ReceiverCountry = r.ReceiverCountry,
-                                   ReceiverEmail = r.ReceiverEmail,
-                                   ReceiverName = r.ReceiverName,
-                                   ReceiverPhoneNumber = r.ReceiverPhoneNumber,
-                                   ReceiverState = r.ReceiverState,
-                                   UserId = r.UserId,
-                                   Value = r.Value,
                                    GrandTotal = r.GrandTotal,
-                                   CustomerCode = r.CustomerCode,
-                                   DepartureServiceCentreId = r.DepartureServiceCentreId,
                                    shipmentstatus = "Shipment",
-                                   CustomerId = r.CustomerId,
+                                   CurrencySymbol = co.CurrencySymbol,
                                    CustomerType = r.CustomerType,
-                                   CountryId = r.DepartureCountryId,
-                                   CurrencyCode = co.CurrencyCode,
-                                   CurrencySymbol = co.CurrencySymbol
+                                   CustomerId = r.CustomerId
                                });
 
             return shipmentDto;

@@ -134,7 +134,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
             return Task.FromResult(walletTransactionDTO.OrderByDescending(s => s.DateOfEntry).ToList());
         }
 
-        public Task<List<WalletTransactionDTO>> GetWalletTransactionMobile(int walletId, ShipmentCollectionFilterCriteria filterCriteria)
+        public Task<List<ModifiedWalletTransactionDTO>> GetWalletTransactionMobile(int walletId, ShipmentCollectionFilterCriteria filterCriteria)
         {
             //filter by service center
             var walletTransactionContext = _context.WalletTransactions.Where(x => x.WalletId == walletId).AsQueryable();
@@ -153,25 +153,17 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
                 walletTransactionContext = walletTransactionContext.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
             }
 
-            List<WalletTransactionDTO> walletTransactionDTO = (from w in walletTransactionContext
-                                                               select new WalletTransactionDTO()
+            List<ModifiedWalletTransactionDTO> walletTransactionDTO = (from w in walletTransactionContext
+                                                               select new ModifiedWalletTransactionDTO()
                                                                {
                                                                    WalletTransactionId = w.WalletTransactionId,
                                                                    Waybill = w.Waybill,
-                                                                   PaymentTypeReference = w.PaymentTypeReference,
                                                                    DateOfEntry = w.DateOfEntry,
                                                                    Amount = w.Amount,
                                                                    CreditDebitType = w.CreditDebitType,
                                                                    Description = w.Description,
                                                                    IsDeferred = w.IsDeferred,
                                                                    PaymentType = w.PaymentType,
-                                                                   UserId = w.UserId,
-                                                                   ServiceCentreId = w.ServiceCentreId,
-                                                                   ServiceCentre = Context.ServiceCentre.Where(s => s.ServiceCentreId == w.ServiceCentreId).Select(x => new ServiceCentreDTO
-                                                                   {
-                                                                       Code = x.Code,
-                                                                       Name = x.Name
-                                                                   }).FirstOrDefault(),
                                                                    WalletId = w.WalletId,
                                                                }).ToList();
 
