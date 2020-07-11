@@ -148,7 +148,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 ShipmentDTO.ShipmentReroute = null;
                 ShipmentDTO.DeliveryOption = null;
 
-                var shipment = await _service.AddStoreShipment(ShipmentDTO);
+                var shipment = await _service.AddShipmentForPaymentWaiver(ShipmentDTO);
                 return new ServiceResponse<ShipmentDTO>
                 {
                     Object = shipment

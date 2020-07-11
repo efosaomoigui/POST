@@ -160,6 +160,7 @@
     <Compile Include="Domain\DispatchActivity.cs" />
     <Compile Include="Domain\DomesticRouteZoneMap.cs" />
     <Compile Include="Domain\DomesticZonePrice.cs" />
+    <Compile Include="Domain\EcommerceAgreement.cs" />
     <Compile Include="Domain\Expenses\Expenditure.cs" />
     <Compile Include="Domain\Expenses\ExpenseType.cs" />
     <Compile Include="Domain\Fleet.cs" />
@@ -309,6 +310,7 @@
     <Compile Include="DTO\Customers\CompanySearchDTO.cs" />
     <Compile Include="DTO\Customers\CustomerDTO.cs" />
     <Compile Include="DTO\Customers\CustomerSearchOption.cs" />
+    <Compile Include="DTO\Customers\EcommerceAgreementDTO.cs" />
     <Compile Include="DTO\Customers\IndividualCustomerDTO.cs" />
     <Compile Include="DTO\Dashboard\DashboardDTO.cs" />
     <Compile Include="DTO\Dashboard\GraphDataDTO.cs" />
@@ -329,6 +331,7 @@
     <Compile Include="DTO\Fleets\FleetPartInventoryHistoryDTO.cs" />
     <Compile Include="DTO\Fleets\FleetTripDTO.cs" />
     <Compile Include="DTO\Fleets\ManifestStatusDTO.cs" />
+    <Compile Include="DTO\GIGGO\TransactionPreShipmentDTO.cs" />
     <Compile Include="DTO\GiglgoStationDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDTO.cs" />
     <Compile Include="DTO\Haulage\HaulageDistanceMappingPriceDTO.cs" />
@@ -564,6 +567,7 @@
     <Compile Include="IRepositories\Client\IClientNodeRepository.cs" />
     <Compile Include="IRepositories\Customers\ICompanyContactPersonRepository.cs" />
     <Compile Include="IRepositories\Customers\ICompanyRepository.cs" />
+    <Compile Include="IRepositories\Customers\IEcommerceAgreementRepository.cs" />
     <Compile Include="IRepositories\Customers\IIndividualCustomerRepository.cs" />
     <Compile Include="IRepositories\Devices\IDeviceManagementRepository.cs" />
     <Compile Include="IRepositories\Devices\IDeviceRepository.cs" />

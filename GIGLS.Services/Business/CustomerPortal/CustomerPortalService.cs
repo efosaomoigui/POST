@@ -52,6 +52,7 @@ using GIGLS.Core.IServices.Fleets;
 using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
 using System.Net;
+using GIGLS.Services.Implementation.Utility;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -1598,9 +1599,9 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _preShipmentMobileService.GetPreShipmentForUser();
         }
-        public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser(ShipmentCollectionFilterCriteria filterCriteria)
+        public async Task<List<TransactionPreShipmentDTO>> GetPreShipmentForUser(UserDTO user, ShipmentCollectionFilterCriteria filterCriteria)
         {
-            return await _preShipmentMobileService.GetPreShipmentForUser(filterCriteria);
+            return await _preShipmentMobileService.GetPreShipmentForUser(user, filterCriteria);
         }
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile()
         {
@@ -1621,6 +1622,36 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return await _iWalletTransactionService.GetWalletTransactionsForMobile();
         }
+
+        public async Task<ModifiedWalletTransactionSummaryDTO> GetWalletTransactionsForMobile(ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            var isDisable = ConfigurationManager.AppSettings["DisableShipmentCreation"];
+            bool disableShipmentCreation = bool.Parse(isDisable);
+            bool allowTestUser = await AllowTestingUserToCreateShipment();
+
+            if (allowTestUser)
+            {
+                disableShipmentCreation = false;
+            }
+
+            if (disableShipmentCreation)
+            {
+                throw new GenericException($"App under maintenance. Service currently not available", $"{(int)HttpStatusCode.ServiceUnavailable}");
+            }
+            var currentUser = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(currentUser);
+            var userDTO = Mapper.Map<UserDTO>(user);
+
+            var transactionSummary = await _iWalletTransactionService.GetWalletTransactionsForMobile(userDTO, filterCriteria);
+            var preshipments = await GetPreShipmentForUser(userDTO, filterCriteria);
+            var status = await GetShipmentStatus();
+
+            transactionSummary.Shipments = preshipments;
+            transactionSummary.Status = status;
+            return transactionSummary;
+        }
+
+
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
             return await _preShipmentMobileService.GetPrice(preShipment);
@@ -1914,6 +1945,12 @@ namespace GIGLS.Services.Business.CustomerPortal
             var GoogleApiKey = ConfigurationManager.AppSettings["DistanceApiKey"];
             return await _partnertransactionservice.Decrypt(GoogleApiKey);
         }
+
+        public async Task<string> EncryptWebsiteKey()
+        {
+            var apiKey = ConfigurationManager.AppSettings["WebsiteKey"];
+            return await _partnertransactionservice.Encrypt(apiKey);
+        }
         public async Task<object> CancelShipmentWithNoCharge(CancelShipmentDTO shipment)
         {
             return await _preShipmentMobileService.CancelShipmentWithNoCharge(shipment.Waybill, shipment.Userchanneltype);
@@ -2081,14 +2118,14 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             bool tempCode;
 
-            if(preShipmentDTO == null)
+            if (preShipmentDTO == null)
             {
                 throw new GenericException("NULL INPUT");
             }
 
             if (string.IsNullOrWhiteSpace(preShipmentDTO.TempCode))
             {
-                tempCode = await CreateTemporaryShipmentForAgent(preShipmentDTO);                
+                tempCode = await CreateTemporaryShipmentForAgent(preShipmentDTO);
             }
             else
             {
@@ -2110,7 +2147,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             try
             {
-                if(preShipmentDTO == null)
+                if (preShipmentDTO == null)
                 {
                     throw new GenericException("NULL INPUT");
                 }
@@ -2155,9 +2192,9 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         var customer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == user.UserChannelCode);
 
-                        if(customer != null)
+                        if (customer != null)
                         {
-                            preShipmentDTO.SenderName = customer.FirstName + " "+ customer.LastName;
+                            preShipmentDTO.SenderName = customer.FirstName + " " + customer.LastName;
                             preShipmentDTO.SenderPhoneNumber = customer.PhoneNumber;
                         }
                     }
@@ -2188,7 +2225,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     shipmentItem.SerialNumber = serialNumber;
                     shipmentItem.Nature = shipmentItem.Nature.ToUpper();
 
-                    if(shipmentItem.SpecialPackageId == null)
+                    if (shipmentItem.SpecialPackageId == null)
                     {
                         shipmentItem.SpecialPackageId = 0;
                     }
@@ -2253,7 +2290,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 preShipmentDTO.CustomerCode = user.UserChannelCode;
                 preShipmentDTO.CompanyType = UserChannelType.IndividualCustomer.ToString();
                 preShipmentDTO.IsAgent = true;
-                                              
+
                 var country = await _uow.Country.GetCountryByStationId(preShipmentDTO.DepartureStationId);
                 preShipmentDTO.CountryId = country.CountryId;
 
@@ -2392,14 +2429,14 @@ namespace GIGLS.Services.Business.CustomerPortal
                 existingPreShipment.DestinationStationId = existingPreShipment.DestinationStationId;
                 existingPreShipment.SenderName = preShipmentDTO.SenderName;
                 existingPreShipment.SenderPhoneNumber = preShipmentDTO.SenderPhoneNumber;
-                
+
                 //update items
                 foreach (var preShipmentItemDTO in preShipmentDTO.PreShipmentItems)
                 {
                     var preshipment = await _uow.PreShipmentItem.GetAsync(s => s.PreShipmentId == preShipmentItemDTO.PreShipmentId && s.PreShipmentItemId == preShipmentItemDTO.PreShipmentItemId);
                     if (preshipment != null)
                     {
-                        if(preShipmentItemDTO.SpecialPackageId == null)
+                        if (preShipmentItemDTO.SpecialPackageId == null)
                         {
                             preShipmentItemDTO.SpecialPackageId = 0;
                         }
@@ -2506,6 +2543,24 @@ namespace GIGLS.Services.Business.CustomerPortal
             };
 
             return shipmentDetail;
+        }
+
+        private async Task<List<string>> GetShipmentStatus()
+        {
+            List<string> status = new List<string>
+            {
+                "Shipment created",
+                "Assigned for Pickup",
+                "Processing",
+                "Cancelled",
+                "Dispute",
+                "Delivered",
+                "Visited",
+                "Resolved",
+                "OnwardProcessing"
+            };
+
+            return await Task.FromResult(status);
         }
 
     }

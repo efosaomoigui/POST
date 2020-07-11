@@ -813,10 +813,22 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<ShipmentDTO> AddStoreShipment(ShipmentDTO shipmentDTO)
+        public async Task<ShipmentDTO> AddShipmentForPaymentWaiver(ShipmentDTO shipmentDTO)
         {
             try
-            {
+            {                
+                var customerDto = await GetGIGLCorporateAccount(shipmentDTO);
+
+                if(customerDto.CompanyId < 1)
+                {
+                    throw new GenericException("Corporate Acount does not exist.",  $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                shipmentDTO.Customer = new List<CustomerDTO>
+                {
+                    customerDto
+                };
+
                 var hashString = await ComputeHash(shipmentDTO);
 
                 var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
@@ -843,20 +855,16 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.ShipmentHash.Add(hasher);
                 }
 
-                // create the customer, if information does not exist in our record
-                var customerId = await CreateStoreCustomer(shipmentDTO);
-
                 // create the shipment and shipmentItems
-                var newShipment = await CreateStoreShipment(shipmentDTO);
+                var newShipment = await CreateShipmentForPaymentWaiver(shipmentDTO);
                 shipmentDTO.DepartureCountryId = newShipment.DepartureCountryId;
 
                 // create the Invoice and GeneralLedger
-                await CreateStoreInvoice(shipmentDTO);
-                CreateGeneralLedgerForStoreShipment(shipmentDTO);
+                await CreateInvoiceForPaymentWaiver(shipmentDTO);
+                CreateGeneralLedgerForPaymentWaiverShipment(shipmentDTO);
 
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
-
 
                 //scan the shipment for tracking
                 await ScanShipment(new ScanDTO
@@ -1012,33 +1020,13 @@ namespace GIGLS.Services.Implementation.Shipments
             return createdObject;
         }
 
-        private async Task<CustomerDTO> CreateStoreCustomer(ShipmentDTO shipmentDTO)
+        private async Task<CustomerDTO> GetGIGLCorporateAccount(ShipmentDTO shipmentDTO)
         {
-            var customerDTO = shipmentDTO.Customer[0];
-            var customerType = shipmentDTO.CustomerType;
-
-            if (customerDTO.UserActiveCountryId == 0)
-            {
-                customerDTO.UserActiveCountryId = await GetUserCountryId();
-            }
-
-            //reset rowversion
-            customerDTO.RowVersion = null;
-
-            // individualCustomer
-            customerDTO.CustomerType = CustomerType.IndividualCustomer;
-
-            var createdObject = await _customerService.CreateStoreKeeperCustomer(customerDTO);
-            // individualCustomer
-            customerDTO.CustomerType = CustomerType.IndividualCustomer;
-            shipmentDTO.CustomerId = createdObject.IndividualCustomerId;
-            shipmentDTO.CompanyType = CustomerType.IndividualCustomer.ToString();
-
-            //set the customerCode in the shipment
-            var currentCustomerObject = await _customerService.GetCustomer(shipmentDTO.CustomerId, customerDTO.CustomerType);
-            shipmentDTO.CustomerCode = currentCustomerObject.CustomerCode;
-
-            return createdObject;
+            var giglAccount = await _customerService.GetGIGLCorporateAccount();
+            shipmentDTO.CustomerId = giglAccount.CompanyId;
+            shipmentDTO.CompanyType = CompanyType.Corporate.ToString();
+            shipmentDTO.CustomerCode = giglAccount.CustomerCode;
+            return giglAccount;
         }
 
         private async Task<ShipmentDTO> CreateShipment(ShipmentDTO shipmentDTO)
@@ -1171,7 +1159,7 @@ namespace GIGLS.Services.Implementation.Shipments
             return shipmentDTO;
         }
 
-        private async Task<ShipmentDTO> CreateStoreShipment(ShipmentDTO shipmentDTO)
+        private async Task<ShipmentDTO> CreateShipmentForPaymentWaiver(ShipmentDTO shipmentDTO)
         {
             await _deliveryService.GetDeliveryOptionById(shipmentDTO.DeliveryOptionId);
             var destinationSC = await _centreService.GetServiceCentreById(shipmentDTO.DestinationServiceCentreId);
@@ -1257,7 +1245,6 @@ namespace GIGLS.Services.Implementation.Shipments
             var departureCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DepartureServiceCentreId);
             var destinationCountry = await _uow.Country.GetCountryByServiceCentreId(shipmentDTO.DestinationServiceCentreId);
 
-
             newShipment.DepartureCountryId = departureCountry.CountryId;
             newShipment.DestinationCountryId = destinationCountry.CountryId;
             newShipment.CurrencyRatio = departureCountry.CurrencyRatio;
@@ -1333,14 +1320,13 @@ namespace GIGLS.Services.Implementation.Shipments
             return invoiceNo;
         }
 
-        private async Task<string> CreateStoreInvoice(ShipmentDTO shipmentDTO)
+        private async Task CreateInvoiceForPaymentWaiver(ShipmentDTO shipmentDTO)
         {
-            var invoice = new Invoice();
             var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
             var invoiceNo = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.Invoice, departureServiceCentre.Code);
 
             var settlementPeriod = 0;
-            invoice = new Invoice()
+            var invoice = new Invoice()
             {
                 InvoiceNo = invoiceNo,
                 Amount = shipmentDTO.GrandTotal,
@@ -1354,7 +1340,6 @@ namespace GIGLS.Services.Implementation.Shipments
             };
 
             _uow.Invoice.Add(invoice);
-            return invoiceNo;
         }
 
         private void CreateGeneralLedger(ShipmentDTO shipmentDTO)
@@ -1377,7 +1362,7 @@ namespace GIGLS.Services.Implementation.Shipments
             _uow.GeneralLedger.Add(generalLedger);
         }
 
-        private void CreateGeneralLedgerForStoreShipment(ShipmentDTO shipmentDTO)
+        private void CreateGeneralLedgerForPaymentWaiverShipment(ShipmentDTO shipmentDTO)
         {
             var generalLedger = new GeneralLedger()
             {

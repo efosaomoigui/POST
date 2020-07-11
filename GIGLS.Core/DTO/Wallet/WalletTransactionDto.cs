@@ -28,4 +28,17 @@ namespace GIGLS.Core.DTO.Wallet
         public PaymentType PaymentType { get; set; }
         public string PaymentTypeReference { get; set; }
     }
+
+    public class ModifiedWalletTransactionDTO
+    {
+        public int WalletTransactionId { get; set; }
+        public DateTime DateOfEntry { get; set; }
+        public int WalletId { get; set; }
+        public decimal Amount { get; set; }
+        public CreditDebitType CreditDebitType { get; set; }
+        public string Description { get; set; }
+        public bool IsDeferred { get; set; }
+        public string Waybill { get; set; }
+        public PaymentType PaymentType { get; set; }
+    }
 }

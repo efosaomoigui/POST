@@ -7,6 +7,7 @@ using GIGLS.Infrastructure;
 using GIGLS.Core.Domain;
 using AutoMapper;
 using System.Net;
+using System.Linq;
 
 namespace GIGLS.Services.Implementation.Zone
 {
@@ -80,6 +81,13 @@ namespace GIGLS.Services.Implementation.Zone
         public Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages()
         {
             return Task.FromResult( Mapper.Map<IEnumerable<SpecialDomesticPackage>, IEnumerable<SpecialDomesticPackageDTO>>(_uow.SpecialDomesticPackage.GetAll()));
+        }
+
+        public Task<IEnumerable<SpecialDomesticPackageDTO>> GetActiveSpecialDomesticPackages()
+        {
+            var activePackages = _uow.SpecialDomesticPackage.GetAllAsQueryable().Where(x => x.Status == true).ToList();
+            var activePackagesDto = Mapper.Map<IEnumerable<SpecialDomesticPackage>, IEnumerable<SpecialDomesticPackageDTO>>(activePackages);
+            return Task.FromResult(activePackagesDto);
         }
 
         public async Task UpdateSpecialDomesticPackage(int specialDomesticPackageId, SpecialDomesticPackageDTO specialDomestic)

@@ -283,8 +283,6 @@ namespace GIGLS.Services.Implementation.Messaging
                         if (storeMessageDTO != null)
                         {
                             var storeKeeper = customerObj.FirstName + " " + customerObj.LastName;
-                            strArray[7] = storeKeeper;
-                            strArray[0] = storeKeeper;
                             messageDTO.Body = storeMessageDTO.Body;
                             messageDTO.To = storeMessageDTO.To;
                         }
@@ -317,12 +315,6 @@ namespace GIGLS.Services.Implementation.Messaging
                         messageDTO.To = invoice.ReceiverPhoneNumber;
                         messageDTO.ToEmail = invoice.ReceiverEmail;
                         messageDTO.ReceiverName = invoice.ReceiverName;
-                    }
-                    else if ("STORE" == messageDTO.To.Trim())
-                    {
-                        messageDTO.To = customerObj.Email;
-                        messageDTO.ToEmail = customerObj.Email;
-                        messageDTO.ReceiverName = customerObj.FirstName + " " + customerObj.LastName; 
                     }
                     else
                     {

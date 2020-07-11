@@ -3,6 +3,7 @@ using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
@@ -346,11 +347,52 @@ namespace GIGLS.Services.Implementation.Wallet
             };
         }
 
+        private async Task<ModifiedWalletTransactionSummaryDTO> GetWalletTransactionByWalletIdForMobile(UserDTO customer, ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            //get customer country info
+            var country = new CountryDTO();
+            if (customer != null)
+            {
+                if (customer.UserActiveCountryId != 0)
+                {
+                    country = await _countryservice.GetCountryById(customer.UserActiveCountryId);
+                }
+                else
+                {
+                    country = await _countryservice.GetCountryById(1);
+                }
+            }
+
+            //Get Wallet
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customer.UserChannelCode);
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exist", $"{(int)System.Net.HttpStatusCode.NotFound}");
+            }
+
+            var walletTransactionDTOList = await _uow.WalletTransaction.GetWalletTransactionMobile(wallet.WalletId, filterCriteria);
+            return new ModifiedWalletTransactionSummaryDTO
+            {
+                WalletTransactions = walletTransactionDTOList,
+                CurrencyCode = country.CurrencyCode,
+                CurrencySymbol = country.CurrencySymbol,
+                WalletNumber = wallet.WalletNumber,
+                WalletBalance = wallet.Balance,
+                WalletOwnerName = customer.FirstName + " " + customer.LastName,
+                WalletId = wallet.WalletId
+            };
+        }
+
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile()
         {
             //var wallet = await _walletService.GetWalletBalance();
             //return await GetWalletTransactionByWalletIdForMobile(wallet);
             return await GetWalletTransactionByWalletIdForMobile();
+        }
+
+        public async Task<ModifiedWalletTransactionSummaryDTO> GetWalletTransactionsForMobile(UserDTO customer,ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            return await GetWalletTransactionByWalletIdForMobile(customer, filterCriteria);
         }
     }
 }

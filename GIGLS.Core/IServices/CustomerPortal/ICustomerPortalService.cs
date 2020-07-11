@@ -104,8 +104,9 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> EditProfile(UserDTO user);
         Task<object> AddPreShipmentMobile(PreShipmentMobileDTO preShipment);
         Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser();
-        Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser(ShipmentCollectionFilterCriteria filterCriteria);
+        Task<List<TransactionPreShipmentDTO>> GetPreShipmentForUser(UserDTO user, ShipmentCollectionFilterCriteria filterCriteria);
         Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile();
+        Task<ModifiedWalletTransactionSummaryDTO> GetWalletTransactionsForMobile(ShipmentCollectionFilterCriteria filterCriteria);
         Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment);
         Task<WalletDTO> GetWalletBalance();
         Task<SpecialResultDTO> GetSpecialPackages();
@@ -124,6 +125,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task AddWallet(WalletDTO wallet);
         Task<UserDTO> GenerateReferrerCode(UserDTO user);
         Task<string> Decrypt();
+        Task<string> EncryptWebsiteKey();
         Task<object> CancelShipmentWithNoCharge(CancelShipmentDTO shipment);
 
         Task SendPickUpRequestMessage(string userId);
