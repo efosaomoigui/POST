@@ -62,7 +62,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 //4. Pass the return to the view or caller
                 return new ServiceResponse<api_session_error>()
                 {
-                    Object = result
+                    Object = await result
                 };
             });
         }

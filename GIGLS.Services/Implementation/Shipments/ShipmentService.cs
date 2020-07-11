@@ -710,7 +710,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                if (shipmentDTO.TempCode != null)
+                if (!string.IsNullOrEmpty(shipmentDTO.TempCode))
                 {
                     //check if it has been processed 
                     var dropoff = await _uow.PreShipment.GetAsync(s => s.TempCode == shipmentDTO.TempCode);
@@ -722,8 +722,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 var hashString = await ComputeHash(shipmentDTO);
-
                 var checkForHash = await _uow.ShipmentHash.GetAsync(x => x.HashedShipment == hashString);
+
                 if (checkForHash != null)
                 {
                     DateTime dateTime = DateTime.Now.AddMinutes(-30);
@@ -761,7 +761,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
 
-                if (shipmentDTO.TempCode != null)
+                if (!string .IsNullOrEmpty(shipmentDTO.TempCode))
                 {
                     await UpdateDropOff(newShipment.Waybill, shipmentDTO.TempCode);
                 }
@@ -805,19 +805,9 @@ namespace GIGLS.Services.Implementation.Shipments
                         });
                     }
                 }
-
-                //implement customer week function here
-                //var result = await ProcessPaymentForCustomerWeek(newShipment);
-
-                //if (result)
-                //{
-                //    newShipment.GrandTotal = 0;
-                //    newShipment.SealNumber = "";
-                //}
-
                 return newShipment;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -1072,7 +1062,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
             var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
 
-            shipmentDTO.Waybill = waybill;
+            shipmentDTO.Waybill = (shipmentDTO.Waybill.Contains("AWR")) ? shipmentDTO.Waybill: waybill;
 
             var newShipment = Mapper.Map<Shipment>(shipmentDTO);
 

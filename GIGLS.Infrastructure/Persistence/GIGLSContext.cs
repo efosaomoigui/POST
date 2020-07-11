@@ -80,7 +80,9 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<ManifestGroupWaybillNumberMapping> ManifestGroupWaybillNumberMapping { get; set; }
 
         public DbSet<Shipment> Shipment { get; set; }
+        public DbSet<MagayaShipmentAgility> MagayaShipment { get; set; }
         public DbSet<ShipmentItem> ShipmentItem { get; set; }
+        public DbSet<MagayaShipmentItem> MagayaShipmentItem { get; set; }
         public DbSet<ShipmentTracking> ShipmentTracking { get; set; }
         public DbSet<ShipmentCollection> ShipmentCollection { get; set; }
         public DbSet<ShipmentReturn> ShipmentReturn { get; set; }
