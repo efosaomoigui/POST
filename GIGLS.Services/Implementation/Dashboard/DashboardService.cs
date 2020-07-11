@@ -688,6 +688,7 @@ namespace GIGLS.Services.Implementation.Dashboard
                         claimValue = claim.Value.Split(':');   // format stringName:stringValue
                     }
                 }
+
                 if (claimValue == null)
                 {
                     throw new GenericException($"User {currentUser.Username} does not have a priviledge claim.");
@@ -729,13 +730,70 @@ namespace GIGLS.Services.Implementation.Dashboard
             return dashboardDTO;
         }
 
-        private async Task<DashboardDTO> GetDashboardForServiceCentre(int serviceCenterId, DashboardFilterCriteria dashboardFilterCriteria)
+        private async Task<DashboardDTO> GetDashboardForServiceCentreSC(int serviceCenterId, DashboardFilterCriteria dashboardFilterCriteria) 
         {
             var dashboardDTO = new DashboardDTO();
 
             int[] serviceCenterIds = new int[] { serviceCenterId };
             // get the service centre
             var serviceCentre = await _serviceCenterService.GetServiceCentreById(serviceCenterId);
+
+            //set for TargetAmount and TargetOrder
+            dashboardDTO.TargetOrder = serviceCentre.TargetOrder;
+            dashboardDTO.TargetAmount = serviceCentre.TargetAmount;
+
+            //get startDate and endDate
+            var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
+            var allShipmentsQueryable = _uow.MagayaShipment.GetAll().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false);
+            var serviceCentreShipments = allShipmentsQueryable.Where(s => serviceCenterId == s.ServiceCenterId);
+
+            // get shipment ordered
+            var shipmentsOrderedByServiceCenter = serviceCentreShipments.ToList().AsQueryable();
+            dashboardDTO.MagayaShipmentOrdered = shipmentsOrderedByServiceCenter;
+
+            // set properties
+            dashboardDTO.ServiceCentre = serviceCentre;
+
+            dashboardDTO.TotalShipmentDelivered = _uow.MagayaShipment.GetAll().
+                Where(s => s.IsShipmentCollected == true && serviceCenterId == s.ServiceCenterId && 
+                s.DateCreated >= startDate && s.DateCreated < endDate).Count();
+
+            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
+
+            //get customer 
+            int accountCustomer = 0;
+            int individualCustomer = 0;
+            dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
+
+            // MostRecentOrder
+            dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
+
+            // populate graph data
+            await PopulateGraphDataByDateInMagaya(dashboardDTO); 
+
+            // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
+            dashboardDTO.ShipmentsOrderedByServiceCenter = null;
+
+            return dashboardDTO;
+        }
+
+        private async Task<DashboardDTO> GetDashboardForServiceCentre(int serviceCenterId, DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            var dashboardDTO = new DashboardDTO();
+
+            int[] serviceCenterIds = new int[] { serviceCenterId };
+
+            // get the service centre
+            var serviceCentre = await _serviceCenterService.GetServiceCentreById(serviceCenterId);
+
+            ///////// do getDash if USA
+            if(serviceCentre.CountryId == 207)
+            {
+                return await GetDashboardForServiceCentreSC(serviceCenterId, dashboardFilterCriteria); 
+            }
 
             //set for TargetAmount and TargetOrder
             dashboardDTO.TargetOrder = serviceCentre.TargetOrder;
@@ -786,6 +844,13 @@ namespace GIGLS.Services.Implementation.Dashboard
             // get the service centre
             var serviceCentres = await _serviceCenterService.GetServiceCentresByStationId(stationId);
             int[] serviceCenterIds = serviceCentres.Select(s => s.ServiceCentreId).ToArray();
+            //int[] countryIds = serviceCentres.Select(s => s.CountryId).ToArray();
+
+            ///////// do getDash if USA
+            //if (countryIds.Contains("United States Of America"))
+            //{
+            //    return await GetDashboardForMagaya(dashboardFilterCriteria);
+            //}
 
             //get startDate and endDate
             var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
@@ -880,7 +945,7 @@ namespace GIGLS.Services.Implementation.Dashboard
             return dashboardDTO;
         }
 
-        private async Task<DashboardDTO> GetDashboardForGlobal(DashboardFilterCriteria dashboardFilterCriteria)
+        private async Task<DashboardDTO> GetDashboardForMagaya(DashboardFilterCriteria dashboardFilterCriteria) 
         {
             var dashboardDTO = new DashboardDTO();
 
@@ -889,14 +954,82 @@ namespace GIGLS.Services.Implementation.Dashboard
             var startDate = queryDate.Item1;
             var endDate = queryDate.Item2;
 
+            var magayaShipmentsQueryable = _uow.MagayaShipment.GetAll().Where(s =>
+                    s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false);
+
+            var TotalShipmentDeliveredQueryable = _uow.MagayaShipment.GetAll().Where(s =>
+                    s.IsShipmentCollected == true && s.DateCreated >= startDate && s.DateCreated < endDate);
+
+            if (dashboardFilterCriteria.ActiveCountryId != null && dashboardFilterCriteria.ActiveCountryId > 0)
+            {
+                magayaShipmentsQueryable = magayaShipmentsQueryable.Where(s =>
+                    s.ServiceCenterCountryId == dashboardFilterCriteria.ActiveCountryId);
+
+                TotalShipmentDeliveredQueryable = TotalShipmentDeliveredQueryable.Where(s =>
+                    s.ServiceCenterCountryId == dashboardFilterCriteria.ActiveCountryId);
+
+                //customers
+                int accountCustomer = 0;
+                int individualCustomer = 0;
+                dashboardDTO.TotalCustomers = accountCustomer + individualCustomer;
+
+                //Update the ActiveCountryId in the User entity
+                string currentUserId = await _userService.GetCurrentUserId();
+                var userEntity = await _uow.User.GetUserById(currentUserId);
+                userEntity.UserActiveCountryId = (int)dashboardFilterCriteria.ActiveCountryId;
+                _uow.Complete();
+            }
+
+            //set for TargetAmount and TargetOrder
+            var serviceCentres = await _serviceCenterService.GetServiceCentres();
+            dashboardDTO.TargetOrder = serviceCentres.Sum(s => s.TargetOrder);
+            dashboardDTO.TargetAmount = serviceCentres.Sum(s => s.TargetAmount);
+
+            // get shipment ordered
+            var shipmentsOrderedByServiceCenter = magayaShipmentsQueryable.ToList().AsQueryable();
+            dashboardDTO.MagayaShipmentOrdered = shipmentsOrderedByServiceCenter;
+
+            // set properties
+            dashboardDTO.TotalShipmentDelivered = TotalShipmentDeliveredQueryable.Count();
+            dashboardDTO.TotalShipmentOrdered = shipmentsOrderedByServiceCenter.Count();
+
+            // MostRecentOrder
+            dashboardDTO.MostRecentOrder = new List<ShipmentOrderDTO> { };
+
+            // populate graph data
+            await PopulateGraphDataByDateInMagaya(dashboardDTO); 
+
+            // reset the dashboardDTO.ShipmentsOrderedByServiceCenter
+            dashboardDTO.ShipmentsOrderedByServiceCenter = null;
+
+            return dashboardDTO;
+
+        }
+
+        private async Task<DashboardDTO> GetDashboardForGlobal(DashboardFilterCriteria dashboardFilterCriteria)
+        {
+            if (dashboardFilterCriteria.ActiveCountryId == 207)
+            {
+                return await GetDashboardForMagaya(dashboardFilterCriteria);
+            }
+
+            var dashboardDTO = new DashboardDTO();
+
+            //get startDate and endDate
+            var queryDate = dashboardFilterCriteria.getStartDateAndEndDate();
+            var startDate = queryDate.Item1;
+            var endDate = queryDate.Item2;
+
             int[] serviceCenterIds = { };   // empty array
-            var serviceCentreShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false);
+            var serviceCentreShipmentsQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s => 
+            s.DateCreated >= startDate && s.DateCreated < endDate && s.IsFromMobile == false);
 
             //filter by country
             var TotalShipmentDeliveredQueryable = _uow.Invoice.GetAllFromInvoiceAndShipments().Where(s =>
                 s.IsShipmentCollected == true
                 && s.DateCreated >= startDate
                 && s.DateCreated < endDate);
+
             if (dashboardFilterCriteria.ActiveCountryId != null && dashboardFilterCriteria.ActiveCountryId > 0)
             {
                 serviceCentreShipmentsQueryable = serviceCentreShipmentsQueryable.Where(s =>
@@ -988,6 +1121,7 @@ namespace GIGLS.Services.Implementation.Dashboard
                     TotalSalesByMonth = (from a in thisMonthShipments
                                          select a.GrandTotal).DefaultIfEmpty(0).Sum()
                 };
+
                 graphDataList.Add(graphData);
 
                 // set the current month graphData
@@ -998,7 +1132,60 @@ namespace GIGLS.Services.Implementation.Dashboard
             }
 
             dashboardDTO.GraphData = graphDataList;
+            await Task.FromResult(0);
 
+        }
+
+        private async Task PopulateGraphDataByDateInMagaya(DashboardDTO dashboardDTO) 
+        {
+            var graphDataList = new List<GraphDataDTO>();
+            var shipmentsOrderedByServiceCenter =  dashboardDTO.MagayaShipmentOrdered;
+            int currentMonth = DateTime.Now.Month;
+
+            //month we have not launch agility that will be empty
+            int year = 2018;
+
+            // fill GraphDataDTO by month
+            for (int month = 1; month <= 12; month++)
+            {
+                var thisMonthShipments = shipmentsOrderedByServiceCenter.Where(
+                    s => s.DateCreated.Month == month && s.IsFromMobile == false);
+
+                var firstDataToGetYear = thisMonthShipments.FirstOrDefault();
+
+                if (firstDataToGetYear != null)
+                {
+                    year = firstDataToGetYear.DateCreated.Year;
+                }
+                else if (dashboardDTO.ServiceCentre != null && firstDataToGetYear == null)
+                {
+                    year = dashboardDTO.ServiceCentre.DateCreated.Year;
+                }
+                else if (dashboardDTO.Station != null && dashboardDTO.ServiceCentre == null && firstDataToGetYear == null)
+                {
+                    year = dashboardDTO.Station.DateCreated.Year;
+                }
+
+                var graphData = new GraphDataDTO
+                {
+                    CalculationDay = 1,
+                    ShipmentMonth = month,
+                    ShipmentYear = year,
+                    TotalShipmentByMonth = thisMonthShipments.Count(),
+                    TotalSalesByMonth = (from a in thisMonthShipments
+                         select a.GrandTotal).DefaultIfEmpty(0).Sum()
+                };
+
+                graphDataList.Add(graphData);
+
+                // set the current month graphData
+                if (currentMonth == month)
+                {
+                    dashboardDTO.CurrentMonthGraphData = graphData;
+                }
+            }
+
+            dashboardDTO.GraphData = graphDataList;
             await Task.FromResult(0);
         }
     }

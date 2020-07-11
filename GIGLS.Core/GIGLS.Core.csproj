@@ -208,9 +208,11 @@
     <Compile Include="Domain\Region.cs" />
     <Compile Include="Domain\RegionServiceCentreMapping.cs" />
     <Compile Include="Domain\RiderDelivery.cs" />
+    <Compile Include="Domain\MagayaShipmentAgility.cs" />
     <Compile Include="Domain\ShipmentDeliveryOptionMapping.cs" />
     <Compile Include="Domain\PreShipmentItem.cs" />
     <Compile Include="Domain\ShipmentHash.cs" />
+    <Compile Include="Domain\MagayaShipmentItem.cs" />
     <Compile Include="Domain\ShipmentPackagePrice.cs" />
     <Compile Include="Domain\PackingList .cs" />
     <Compile Include="Domain\IndividualCustomer.cs" />
@@ -338,6 +340,8 @@
     <Compile Include="DTO\JobCards\JobCardManagementDTO.cs" />
     <Compile Include="DTO\JobCards\JobCardManagementPartDTO.cs" />
     <Compile Include="DTO\LocationDTO.cs" />
+    <Compile Include="DTO\Magaya\MagayaShipmentAgilityDTO.cs" />
+    <Compile Include="DTO\Magaya\MagayaShipmentItemDTO.cs" />
     <Compile Include="DTO\MessageDTO.cs" />
     <Compile Include="DTO\MessagingLog\EmailSendLogDTO.cs" />
     <Compile Include="DTO\MessagingLog\MessageFilterOption.cs" />
@@ -591,6 +595,7 @@
     <Compile Include="IRepositories\IOTPRepository.cs" />
     <Compile Include="IRepositories\IReferrerCodeRepository.cs" />
     <Compile Include="IRepositories\IRiderDeliveryRepository.cs" />
+    <Compile Include="IRepositories\Magaya\IMagayaShipmentItemRepository.cs" />
     <Compile Include="IRepositories\Partnership\IFleetPartnerRepository.cs" />
     <Compile Include="IRepositories\Partnership\IPartnerPayoutRepository.cs" />
     <Compile Include="IRepositories\Partnership\IPartnerTransactionsRepository.cs" />
@@ -647,6 +652,7 @@
     <Compile Include="IRepositories\Shipments\IMissingShipmentRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentPackagePriceRepository.cs" />
     <Compile Include="IRepositories\Shipments\IPreShipmentRepository.cs" />
+    <Compile Include="IRepositories\Magaya\IMagayaShipmentRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentRerouteRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentReturnRepository.cs" />

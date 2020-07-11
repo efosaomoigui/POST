@@ -88,7 +88,8 @@ namespace GIGLS.Services.Implementation.Customers
                 if (CustomerType.IndividualCustomer.Equals(customerDTO.CustomerType))
                 {
                     int individualCustomerId = 0;
-                    var individualCustomerByPhone = await _uow.IndividualCustomer.GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber || c.CustomerCode == customerDTO.CustomerCode);
+                    var individualCustomerByPhone = await _uow.IndividualCustomer.
+                        GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber || c.CustomerCode == customerDTO.CustomerCode);
 
                     if(individualCustomerByPhone != null)
                     {

@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="Business\MagayaClasses.cs" />
     <Compile Include="Business\Serializer.cs" />
+    <Compile Include="Business\Warehousereceipt.cs" />
     <Compile Include="Business\wh.cs" />
     <Compile Include="Connected Services\Magaya.Services\Reference.cs">
       <AutoGen>True</AutoGen>
