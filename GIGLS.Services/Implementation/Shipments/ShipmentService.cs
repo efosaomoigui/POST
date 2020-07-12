@@ -1308,6 +1308,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     InvoiceNo = invoiceNo,
                     Amount = shipmentDTO.GrandTotal,
                     PaymentStatus = (shipmentDTO.PaymentStatus == PaymentStatus.Paid) ? shipmentDTO.PaymentStatus : PaymentStatus.Pending,
+                    PaymentMethod = (string.IsNullOrEmpty(shipmentDTO.PaymentMethod)) ? "":  shipmentDTO.PaymentMethod,
                     Waybill = shipmentDTO.Waybill,
                     PaymentDate = DateTime.Now,
                     DueDate = DateTime.Now.AddDays(settlementPeriod),
