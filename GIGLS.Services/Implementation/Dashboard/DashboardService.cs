@@ -790,10 +790,10 @@ namespace GIGLS.Services.Implementation.Dashboard
             var serviceCentre = await _serviceCenterService.GetServiceCentreById(serviceCenterId);
 
             ///////// do getDash if USA
-            if(serviceCentre.CountryId == 207)
-            {
-                return await GetDashboardForServiceCentreSC(serviceCenterId, dashboardFilterCriteria); 
-            }
+            //if(serviceCentre.CountryId == 207)
+            //{
+            //    return await GetDashboardForServiceCentreSC(serviceCenterId, dashboardFilterCriteria); 
+            //}
 
             //set for TargetAmount and TargetOrder
             dashboardDTO.TargetOrder = serviceCentre.TargetOrder;
@@ -1008,10 +1008,10 @@ namespace GIGLS.Services.Implementation.Dashboard
 
         private async Task<DashboardDTO> GetDashboardForGlobal(DashboardFilterCriteria dashboardFilterCriteria)
         {
-            if (dashboardFilterCriteria.ActiveCountryId == 207)
-            {
-                return await GetDashboardForMagaya(dashboardFilterCriteria);
-            }
+            //if (dashboardFilterCriteria.ActiveCountryId == 207)
+            //{
+            //    return await GetDashboardForMagaya(dashboardFilterCriteria);
+            //}
 
             var dashboardDTO = new DashboardDTO();
 

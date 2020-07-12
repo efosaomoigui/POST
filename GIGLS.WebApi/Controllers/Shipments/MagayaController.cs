@@ -9,6 +9,9 @@ using ThirdParty.WebServices.Magaya.DTO;
 using ThirdParty.WebServices.Magaya.Business.New;
 using ThirdParty.WebServices.Magaya.Services;   
 using System.ServiceModel;
+using System.Web.Http.ModelBinding;
+using Newtonsoft.Json.Linq;
+using GIGLS.WebApi.Models;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -46,7 +49,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         /// <returns></returns>
         [HttpPost]
         [Route("AddShipment")]
-        public async Task<IServiceResponse<api_session_error>> AddShipment(WarehouseReceipt MagayaShipmentDTO)
+        public async Task<IServiceResponse<api_session_error>> AddShipment(TheWarehouseReceiptCombo MagayaShipmentDTO)   
         {
             return await HandleApiOperationAsync(async () =>
             {

@@ -291,8 +291,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return;
         }
 
-        public async Task<api_session_error>  SetTransactions(int access_key, WarehouseReceipt magayaShipmentDTO)
+        public async Task<api_session_error>  SetTransactions(int access_key, TheWarehouseReceiptCombo mDto)
         {
+            var magayaShipmentDTO   = mDto.WarehouseReceipt;
             //2. initialize type of shipment and flag
             string type = "WH";
 
@@ -331,15 +332,14 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             {
                 //serialize to xml for the magaya request
                 trans_xml = sr.Serialize<WarehouseReceipt>(xmlobject);
-
                 string error_code = "";
 
-                //result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
-                result = api_session_error.no_error;
+                result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
+                //result = api_session_error.no_error;
 
                 if (result == api_session_error.no_error)
                 {
-                    await CreateMagayaShipmentInAgilityAsync(magayaShipmentDTO);
+                    await CreateMagayaShipmentInAgilityAsync(mDto);
                 }
 
                 errval = error_code;
@@ -393,8 +393,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return cd;
         }
 
-        public async Task CreateMagayaShipmentInAgilityAsync(WarehouseReceipt magayaShipmentDTO)
+        public async Task CreateMagayaShipmentInAgilityAsync(TheWarehouseReceiptCombo mDto)
         {
+            var magayaShipmentDTO = mDto.WarehouseReceipt;
             try
             {
                 Serializer sr = new Serializer();
@@ -419,105 +420,95 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 var serviceCenter = await _centreService.GetServiceCentreById(int.Parse(claimValue[1]));
                 var shipmentItems = getShipmentItems(magayaShipmentDTO);
 
-                var shipmentDTO = new ShipmentDTO()
-                {
-                    Waybill = magayaShipmentDTO.Number,
-                    Value = 0,
-                    DeliveryTime = DateTime.Now,
-                    PaymentStatus = PaymentStatus.Paid,
-                    CustomerType = CustomerType.IndividualCustomer.ToString(),
-                    CustomerCode = "",
+                var shipmentDTO = new ShipmentDTO();
+                shipmentDTO.Waybill = magayaShipmentDTO.Number;
+                shipmentDTO.Value = 0;
+                shipmentDTO.DeliveryTime = DateTime.Now;
+                shipmentDTO.PaymentStatus = PaymentStatus.Paid;
+                shipmentDTO.CustomerType = CustomerType.IndividualCustomer.ToString();
+                shipmentDTO.CustomerCode = "";
 
-                    //Departure and Destination Details
-                    DepartureServiceCentreId = int.Parse(claimValue[1]),
-                    DepartureServiceCentre = serviceCenter,
-                    DestinationServiceCentreId = destinationSc.ServiceCentreId,
-                    DestinationServiceCentre = destinationSc,
+                //Departure and Destination Details
+                shipmentDTO.DepartureServiceCentreId = int.Parse(claimValue[1]);
+                shipmentDTO.DepartureServiceCentre = serviceCenter;
+                shipmentDTO.DestinationServiceCentreId = destinationSc.ServiceCentreId;
+                shipmentDTO.DestinationServiceCentre = destinationSc;
 
-                    //Receivers Details
-                    ReceiverName = magayaShipmentDTO.ConsigneeAddress.ContactName,
-                    ReceiverPhoneNumber = magayaShipmentDTO.ConsigneeAddress.Street[0],
-                    ReceiverEmail = magayaShipmentDTO.ConsigneeAddress.ContactEmail,
-                    ReceiverAddress = magayaShipmentDTO.ConsigneeAddress.Street[0],
-                    ReceiverCity = magayaShipmentDTO.ConsigneeAddress.City,
-                    ReceiverState = magayaShipmentDTO.ConsigneeAddress.State,
-                    ReceiverCountry = magayaShipmentDTO.ConsigneeAddress.Country.Value,
+                //Receivers Details
+                shipmentDTO.ReceiverName = magayaShipmentDTO.ConsigneeAddress.ContactName;
+                shipmentDTO.ReceiverPhoneNumber = magayaShipmentDTO.ConsigneeAddress.Street[0];
+                shipmentDTO.ReceiverEmail = magayaShipmentDTO.ConsigneeAddress.ContactEmail;
+                shipmentDTO.ReceiverAddress = magayaShipmentDTO.ConsigneeAddress.Street[0];
+                shipmentDTO.ReceiverCity = magayaShipmentDTO.ConsigneeAddress.City;
+                shipmentDTO.ReceiverState = magayaShipmentDTO.ConsigneeAddress.State;
+                shipmentDTO.ReceiverCountry = magayaShipmentDTO.ConsigneeAddress.Country.Value;
 
-                    //Delivery Options
-                    DeliveryOptionId = 1,
+                //Delivery Options
+                shipmentDTO.DeliveryOptionId = 1;
 
-                    //PickUp Options
-                    PickupOptions = PickupOptions.HOMEDELIVERY,
+                //PickUp Options
+                shipmentDTO.PickupOptions = PickupOptions.HOMEDELIVERY;
 
-                    //Shipment Items
-                    ShipmentItems = shipmentItems,
+                //Shipment Items
+                shipmentDTO.ShipmentItems = shipmentItems;
+                shipmentDTO.ApproximateItemsWeight = magayaShipmentDTO.TotalWeight.Value;
+                shipmentDTO.GrandTotal = (decimal)totalChargeAmount;
 
-                    ApproximateItemsWeight = magayaShipmentDTO.TotalWeight.Value,
+                //Invoice parameters: Helps generate invoice for ecomnerce customers  by customerType
+                shipmentDTO.IsCashOnDelivery = false;
+                shipmentDTO.CashOnDeliveryAmount = 0;
+                shipmentDTO.ExpectedAmountToCollect = (mDto.ExpectedAmountToCollect ==null) ? 0 : decimal.Parse(mDto.ExpectedAmountToCollect);
+                shipmentDTO.ActualAmountCollected = (mDto.ActualAmountCollected == null) ? 0 : decimal.Parse(mDto.ActualAmountCollected);
 
-                    GrandTotal = (decimal)totalChargeAmount,
+                //General Details comes with role user
+                shipmentDTO.UserId = currentUserId;
 
-                    //Invoice parameters: Helps generate invoice for ecomnerce customers  by customerType
-                    IsCashOnDelivery = false,
-                    CashOnDeliveryAmount = 0,
-
-                    ExpectedAmountToCollect = decimal.Parse(magayaShipmentDTO.ExpectedAmountToCollect),
-                    ActualAmountCollected = decimal.Parse(magayaShipmentDTO.ActualAmountCollected),
-
-                    //General Details comes with role user
-                    UserId = currentUserId,
-
-                    Customer = new List<CustomerDTO>()
+                shipmentDTO.Customer = new List<CustomerDTO>()
                     {
                          tetCustomerDetails(magayaShipmentDTO)
-                    },
+                    };
 
-                    CustomerDetails = tetCustomerDetails(magayaShipmentDTO),
+                shipmentDTO.CustomerDetails = tetCustomerDetails(magayaShipmentDTO);
+                shipmentDTO.IsdeclaredVal = false;
+                shipmentDTO.DeclarationOfValueCheck = 0;
 
-                    IsdeclaredVal = false,
-                    DeclarationOfValueCheck = 0,
+                //discount information
+                shipmentDTO.AppliedDiscount = 0;
+                shipmentDTO.DiscountValue = 0;
 
-                    //discount information
-                    AppliedDiscount = 0,
-                    DiscountValue = 0,
+                shipmentDTO.Insurance = 0;
+                shipmentDTO.Vat = 0;
+                shipmentDTO.Total = (decimal)totalChargeAmount;
+                shipmentDTO.ShipmentPackagePrice = 0;
+                shipmentDTO.ShipmentPickupPrice = 0;
 
-                    Insurance = 0,
-                    Vat = 0,
-                    Total = (decimal)totalChargeAmount,
-                    ShipmentPackagePrice = 0,
-                    ShipmentPickupPrice = 0,
+                //from client
+                shipmentDTO.vatvalue_display = 0;
+                shipmentDTO.InvoiceDiscountValue_display = 0;
+                shipmentDTO.offInvoiceDiscountvalue_display = 0;
 
-                    //from client
-                    vatvalue_display = 0,
-                    InvoiceDiscountValue_display = 0,
-                    offInvoiceDiscountvalue_display = 0,
+                //payment method
+                shipmentDTO.PaymentMethod = mDto.MagayaPaymentType;
 
-                    //payment method
-                    PaymentMethod = "",
+                //ShipmentCollection
+                shipmentDTO.ShipmentCollection = new ShipmentCollectionDTO();
+                shipmentDTO.IsCancelled = false;
+                shipmentDTO.IsInternational = true;
+                shipmentDTO.Description = "";
 
-                    //ShipmentCollection
-                    ShipmentCollection = new ShipmentCollectionDTO(),
+                //Sender's Address - added for the special case of corporate customers
+                shipmentDTO.SenderAddress = magayaShipmentDTO.ShipperAddress.Street[0];
+                shipmentDTO.SenderState = magayaShipmentDTO.ShipperAddress.State;
+                shipmentDTO.IsFromMobile = false;
+                shipmentDTO.isInternalShipment = true;
 
-                    IsCancelled = false,
-                    IsInternational = true,
-                    Description = "",
+                //Country info
+                shipmentDTO.DepartureCountryId = currentUser.UserActiveCountryId;
+                shipmentDTO.DestinationCountryId = currentUser.UserActiveCountryId;
+                shipmentDTO.ShipmentHash = "";
 
-                    //Sender's Address - added for the special case of corporate customers
-                    SenderAddress = magayaShipmentDTO.ShipperAddress.Street[0],
-                    SenderState = magayaShipmentDTO.ShipperAddress.State,
-
-                    IsFromMobile = false,
-                    isInternalShipment = true,
-
-                    //Country info
-                    DepartureCountryId = currentUser.UserActiveCountryId,
-                    DestinationCountryId = currentUser.UserActiveCountryId,
-
-
-                    ShipmentHash = "",
-
-                    //Drop Off
-                    TempCode = "",
-                };
+                //Drop Off
+                shipmentDTO.TempCode = "";
 
                 await _shipmentService.AddShipment(shipmentDTO);
 

@@ -1283,6 +1283,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var company = await _companyService.GetCompanyById(shipmentDTO.CustomerId);
                 settlementPeriod = company.SettlementPeriod;
             }
+
             //added this check for Mobile Shipments
             if (shipmentDTO.IsFromMobile == true)
             {
@@ -1306,7 +1307,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     InvoiceNo = invoiceNo,
                     Amount = shipmentDTO.GrandTotal,
-                    PaymentStatus = PaymentStatus.Pending,
+                    PaymentStatus = (shipmentDTO.PaymentStatus == PaymentStatus.Paid) ? shipmentDTO.PaymentStatus : PaymentStatus.Pending,
                     Waybill = shipmentDTO.Waybill,
                     PaymentDate = DateTime.Now,
                     DueDate = DateTime.Now.AddDays(settlementPeriod),

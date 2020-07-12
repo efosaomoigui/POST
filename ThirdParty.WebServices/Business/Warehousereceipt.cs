@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ThirdParty.WebServices.Magaya.Business.New
 {
-    public partial class WarehouseReceipt
+    public partial class WarehouseReceipt2 
     {
         private string actualAmountCollected;
         private string expectedAmountToCollect;
