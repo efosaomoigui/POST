@@ -1,4 +1,5 @@
-﻿using GIGLS.CORE.DTO;
+﻿using GIGLS.Core.Enums;
+using GIGLS.CORE.DTO;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -34,7 +35,10 @@ namespace GIGLS.Core.DTO.Customers
         public DateTime? AgreementDate { get; set; }
         [Required]
         public List<string> NatureOfBusiness { get; set; }
+
         public string Industry { get; set; }
+
+        public EcommerceAgreementStatus Status { get; set; }
     }
 
 }

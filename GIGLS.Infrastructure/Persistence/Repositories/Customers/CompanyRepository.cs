@@ -157,7 +157,6 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                 var companiesDto = from c in companies
                                    select new EcommerceAgreementDTO
                                    {
-                                       //CompanyId = c.CompanyId,
                                        EcommerceAgreementId = c.EcommerceAgreementId,
                                        BusinessEmail = c.BusinessEmail,
                                        BusinessOwnerName = c.BusinessOwnerName,
@@ -166,9 +165,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        ContactEmail = c.ContactEmail,
                                        ContactPhoneNumber = c.ContactPhoneNumber,
                                        AgreementDate = c.AgreementDate,
-                                       
-                                       //EcommerceSignature = c.EcommerceSignature,
-                                       //NatureOfBusiness = c.NatureOfBusiness,
+                                       Status = c.Status,
                                        City = c.City,
                                        State = c.State,
                                        CountryId = c.CountryId,
