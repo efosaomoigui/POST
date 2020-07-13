@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GIGLS.Core.Enums;
+using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace GIGLS.Core.Domain
 {
@@ -21,6 +23,8 @@ namespace GIGLS.Core.Domain
         [MaxLength(50)]
         public string State { get; set; }
 
+        public int CountryId { get; set; }
+
         [MaxLength(200)]
         public string ContactName { get; set; }
 
@@ -30,11 +34,18 @@ namespace GIGLS.Core.Domain
         [MaxLength(100)]
         public string ContactEmail { get; set; }
 
+        [MaxLength(100)]
+        public string ContactPhoneNumber { get; set; }
+
+        public DateTime? AgreementDate { get; set; }
+
         [MaxLength(500)]
         public string EcommerceSignature { get; set; }
 
         [MaxLength(500)]
         public string NatureOfBusiness { get; set; }
+
+        public EcommerceAgreementStatus Status { get; set; }
 
 
     }

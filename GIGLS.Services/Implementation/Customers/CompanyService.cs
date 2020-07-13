@@ -16,6 +16,7 @@ using GIGLS.Core.IServices.User;
 using GIGLS.CORE.DTO.Report;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.IMessageService;
+using GIGLS.Core.Domain;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -138,6 +139,11 @@ namespace GIGLS.Services.Implementation.Customers
                     password = newCompany.Password;
                 }
 
+                if(company.EcommerceAgreementId != 0)
+                {
+                    var pendingRequest = await CheckEcommerceAgreement(company.EcommerceAgreementId);
+                }
+
                 var result = await _userService.AddUser(new Core.DTO.User.UserDTO()
                 {
                     ConfirmPassword = password,
@@ -187,6 +193,21 @@ namespace GIGLS.Services.Implementation.Customers
             {
                 throw;
             }
+        }
+
+        private async Task<EcommerceAgreement> CheckEcommerceAgreement(int companyId)
+        {
+            var company = await _uow.EcommerceAgreement.GetAsync(x => x.EcommerceAgreementId == companyId);
+
+            if(company.Status == EcommerceAgreementStatus.Pending)
+            {
+                company.Status = EcommerceAgreementStatus.Registerd;
+            }
+            else
+            {
+                throw new GenericException("Customer already Registered");
+            }
+            return company;
         }
 
         public async Task<string> AddCountryCodeToPhoneNumber(string phoneNumber, int countryId)
@@ -249,6 +270,11 @@ namespace GIGLS.Services.Implementation.Customers
         public Task<List<CompanyDTO>> GetCompanies(BaseFilterCriteria filterCriteria)
         {
             return _uow.Company.GetCompanies(filterCriteria);
+        }
+
+        public async Task<List<EcommerceAgreementDTO>> GetPendingEcommerceRequest(BaseFilterCriteria filterCriteria)
+        {
+            return await _uow.Company.GetPendingEcommerceRequest(filterCriteria);
         }
 
         public Task<List<CompanyDTO>> GetCompaniesWithoutWallet()
@@ -501,6 +527,27 @@ namespace GIGLS.Services.Implementation.Customers
             try
             {
                 return _uow.Company.GetCompanyByEmail(email);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<EcommerceAgreementDTO> GetCustomerPendingRequestsById(int companyId)
+        {
+            try
+            {
+                var company = await _uow.Company.GetPendingEcommerceRequestById(companyId);
+
+                if (company == null)
+                {
+                    throw new GenericException("Company information does not exist");
+                }
+
+                var companyDto = Mapper.Map<EcommerceAgreementDTO>(company);
+
+                return companyDto;
             }
             catch (Exception)
             {

@@ -25,7 +25,7 @@ namespace GIGLS.Services.Implementation.Website
             _uow = uow;
         }
 
-        public async Task<bool> SendSchedulePickupMail (WebsiteMessageDTO obj)
+        public async Task<bool> SendSchedulePickupMail(WebsiteMessageDTO obj)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace GIGLS.Services.Implementation.Website
         {
             try
             {
-                if(ecommerceAgreementDTO.BusinessEmail == null)
+                if (ecommerceAgreementDTO.BusinessEmail == null)
                 {
                     throw new GenericException("Business email field can not be empty", $"{(int)HttpStatusCode.Forbidden}");
                 }
@@ -93,23 +93,29 @@ namespace GIGLS.Services.Implementation.Website
                 {
                     natureOfBusiness = string.Join(",", ecommerceAgreementDTO.NatureOfBusiness);
                 }
-                
-                if (ecommerceAgreementDTO.EcommerceSignature != null)
-                {
-                    ecommerceSignature = ecommerceAgreementDTO.EcommerceSignature.EcommerceSignatureName + ecommerceAgreementDTO.EcommerceSignature.EcommerceSignatureAddress;
-                }
+
+                ecommerceSignature = ecommerceAgreementDTO.EcommerceSignatureName + ecommerceAgreementDTO.EcommerceSignatureAddress;
 
                 if (await _uow.EcommerceAgreement.ExistAsync(c => c.BusinessEmail == ecommerceAgreementDTO.BusinessEmail))
                 {
                     throw new GenericException("Ecommerce information already exist", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
+                var state = await _uow.State.GetAsync(x => x.StateName.ToLower() == ecommerceAgreementDTO.State.ToLower());
+                if(state == null)
+                {
+                    throw new GenericException("Invalid State Name", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
                 var ecommerceAgreement = Mapper.Map<EcommerceAgreement>(ecommerceAgreementDTO);
                 ecommerceAgreement.NatureOfBusiness = natureOfBusiness;
                 ecommerceAgreement.EcommerceSignature = ecommerceSignature;
+                ecommerceAgreement.State = state.StateName;
+                ecommerceAgreement.CountryId = state.CountryId;
+                ecommerceAgreement.Status = EcommerceAgreementStatus.Pending;
                 _uow.EcommerceAgreement.Add(ecommerceAgreement);
                 await _uow.CompleteAsync();
-                return HttpStatusCode.Created;           
+                return HttpStatusCode.Created;
             }
             catch (Exception)
             {
@@ -117,7 +123,7 @@ namespace GIGLS.Services.Implementation.Website
             }
         }
 
-       
+
 
     }
 }

@@ -24,5 +24,7 @@ namespace GIGLS.Core.IServices.Customers
         Task<List<CompanyDTO>> GetCompanies(BaseFilterCriteria filterCriteria);
         Task<List<CompanyDTO>> GetCompanyByEmail(string email);
         Task<string> AddCountryCodeToPhoneNumber(string phoneNumber, int countryId);
+        Task<List<EcommerceAgreementDTO>> GetPendingEcommerceRequest(BaseFilterCriteria filterCriteria);
+        Task<EcommerceAgreementDTO> GetCustomerPendingRequestsById(int companyId);
     }
 }
