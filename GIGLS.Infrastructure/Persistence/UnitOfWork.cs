@@ -29,6 +29,7 @@ using GIGLS.Core.IRepositories.BankSettlement;
 using GIGLS.Core.IRepositories.InternationalRequest;
 using GIGLS.Core.IRepositories.Sla;
 using GIGLS.Core.IRepositories.Expenses;
+using GIGLS.Core.IRepositories.Magaya;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -75,6 +76,12 @@ namespace GIGLS.Infrastructure.Persistence
 
         [Inject]
         public IShipmentRepository Shipment { get; set; }
+
+        [Inject]
+        public IMagayaShipmentRepository MagayaShipment { get; set; } 
+
+        [Inject]
+        public IMagayaShipmentItemRepository MagayaShipmentItem { get; set; } 
 
         [Inject]
         public IShipmentTrackingRepository ShipmentTracking { get; set; }

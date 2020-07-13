@@ -71,7 +71,7 @@ namespace GIGLS.Core.IServices.Shipments
     {
         bool OpenConnection(out int access_key); 
         string CloseConnection(int access_key);
-        api_session_error SetTransactions(int access_key, WarehouseReceipt magayaShipmentDTO);
+        Task<api_session_error> SetTransactions(int access_key, TheWarehouseReceiptCombo magayaShipmentDTO);
         string GetTransactions(int access_key, WarehouseReceipt magayaShipmentDTO);
         string SetEntity(int access_key, EntityDto entitydto);
         EntityList GetEntities(int access_key, string startwithstring);

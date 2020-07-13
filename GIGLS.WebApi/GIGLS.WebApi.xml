@@ -38,7 +38,7 @@
             <param name="service"></param>
             <param name="userService"></param>
         </member>
-        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.AddShipment(ThirdParty.WebServices.Magaya.Business.New.WarehouseReceipt)">
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.AddShipment(ThirdParty.WebServices.Magaya.Business.New.TheWarehouseReceiptCombo)">
             <summary>
             
             </summary>

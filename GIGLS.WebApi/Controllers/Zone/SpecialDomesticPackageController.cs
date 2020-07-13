@@ -39,6 +39,22 @@ namespace GIGLS.WebApi.Controllers.Zone
 
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
+        [Route("active")]
+        public async Task<IServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>> GetActiveSpecialDomesticPackages()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var packages = await _specialPackageService.GetActiveSpecialDomesticPackages();
+
+                return new ServiceResponse<IEnumerable<SpecialDomesticPackageDTO>>
+                {
+                    Object = packages
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
         [Route("{specialDomesticPackageId:int}")]
         public async Task<IServiceResponse<SpecialDomesticPackageDTO>> GetSpecialDomesticPackage(int specialDomesticPackageId)
         {
@@ -105,7 +121,6 @@ namespace GIGLS.WebApi.Controllers.Zone
         [Route("{specialDomesticPackageId:int}")]
         public async Task<IServiceResponse<bool>> DeleteSpecialDomesticZonePrice(int specialDomesticPackageId)
         {
-
             return await HandleApiOperationAsync(async () =>
             {
                 await _specialPackageService.DeleteSpecialDomesticPackage(specialDomesticPackageId);
@@ -114,8 +129,6 @@ namespace GIGLS.WebApi.Controllers.Zone
                     Object = true
                 };
             });
-
         }
-
     }
 }

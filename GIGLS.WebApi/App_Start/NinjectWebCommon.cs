@@ -19,7 +19,7 @@ namespace GIGLS.WebApi.App_Start
     using Core.IServices;
     using INFRASTRUCTURE.Persistence.Repositories.User;
     using GIGLS.Core.IServices.Shipments;
-    using GIGLS.Services.Business.Magaya.Shipment;
+    using GIGLS.Services.Business.Magaya.Shipments;
 
     //using Hangfire;
     //using GlobalConfiguration = Hangfire.GlobalConfiguration;

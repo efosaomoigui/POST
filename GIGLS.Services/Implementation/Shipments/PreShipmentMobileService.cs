@@ -423,7 +423,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         preShipmentDTO.IsEligible = false;
                         preShipmentDTO.IsCodNeeded = customer.isCodNeeded;
                         preShipmentDTO.CurrencySymbol = country.CurrencySymbol;
-                        preShipmentDTO.CurrentWalletAmount = (decimal)customer.WalletAmount;
+                        preShipmentDTO.CurrentWalletAmount = customer.WalletAmount != null ? (decimal)customer.WalletAmount : 0;
                         return preShipmentDTO;
                     }
                 }

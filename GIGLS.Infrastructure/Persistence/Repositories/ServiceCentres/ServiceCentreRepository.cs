@@ -43,8 +43,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                     StationName = sc.StationName,
                                     StationCode = sc.StationCode,
                                     IsDefault = s.IsDefault,
+                                    SupperServiceCentreId = sc.SuperServiceCentreId,
                                     IsHUB = s.IsHUB
                                 };
+
                 return Task.FromResult(centreDto.OrderBy(x => x.Name).ToList());
             }
             catch (Exception)
@@ -311,7 +313,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.ServiceCentres
                                 };
                 return Task.FromResult(centreDto.FirstOrDefault());
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
