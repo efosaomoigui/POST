@@ -4249,18 +4249,18 @@ namespace GIGLS.Services.Implementation.Shipments
                             {
                                 if (preshipmentmobile.IsApproved != true)
                                 {
-                                    var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-
                                     int customerid = 0;
-                                    if (CustomerId != null)
+                                    var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+                                    if(companyid != null)
                                     {
-                                        customerid = CustomerId.IndividualCustomerId;
+                                        customerid = companyid.CompanyId;
                                     }
                                     else
                                     {
-                                        var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                                        customerid = companyid.CompanyId;
+                                        var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+                                        customerid = CustomerId.IndividualCustomerId;
                                     }
+
                                     int departureCountryId = await GetCountryByServiceCentreId(detail.SenderServiceCentreId);
                                     int destinationCountryId = await GetCountryByServiceCentreId(detail.ReceiverServiceCentreId);
                                     var user = await _userService.GetCurrentUserId();
