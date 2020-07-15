@@ -28270,6 +28270,88 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         }
     }
 
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.0.30319.33440")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.magaya.com/XMLSchema/V1")]
+    [System.Xml.Serialization.XmlRootAttribute("TheWarehouseReceiptCombo", Namespace = "http://www.magaya.com/XMLSchema/V1", IsNullable = false)]
+    public partial class TheWarehouseReceiptCombo 
+    { 
+
+        private WarehouseReceipt warehouseReceipt;
+        private string actualAmountCollected;
+        private string expectedAmountToCollect;
+        private string magayaPaymentOption;
+        private string magayaPaymentType;
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute("WarehouseReceipt", IsNullable = false)]
+        public WarehouseReceipt WarehouseReceipt
+        {
+            get
+            {
+                return this.warehouseReceipt;
+            }
+            set
+            {
+                this.warehouseReceipt = value;
+            }
+        }
+
+        [System.Xml.Serialization.XmlElementAttribute("ActualAmountCollected")]
+        public string ActualAmountCollected
+        {
+            get 
+            {
+                return this.actualAmountCollected; 
+            }
+            set 
+            { 
+                this.actualAmountCollected = value; 
+            }
+        }
+
+        [System.Xml.Serialization.XmlElementAttribute("ExpectedAmountToCollect")]
+        public string ExpectedAmountToCollect
+        {
+            get 
+            { 
+                return expectedAmountToCollect; 
+            }
+            set 
+            { 
+                expectedAmountToCollect = value; 
+            }
+        }
+
+        [System.Xml.Serialization.XmlElementAttribute("MagayaPaymentOption")]
+        public string MagayaPaymentOption
+        {
+            get 
+            { 
+                return magayaPaymentOption; 
+            }
+            set 
+            { 
+                magayaPaymentOption = value; 
+            }
+        }
+
+        [System.Xml.Serialization.XmlElementAttribute("MagayaPaymentType")]
+        public string MagayaPaymentType
+        {
+            get 
+            { 
+                return magayaPaymentType; 
+            }
+            set 
+            { 
+                magayaPaymentType = value; 
+            }
+        }
+    }
+
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.0.30319.33440")]
     [System.SerializableAttribute()]

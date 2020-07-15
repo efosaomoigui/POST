@@ -134,7 +134,26 @@ namespace GIGLS.Services.Implementation.ServiceCentres
             }
         }
 
-        public async Task<IEnumerable<StationDTO>> GetStations()
+        public async Task<List<StationDTO>> GetStationsByStationName(string name)
+        {
+            List<StationDTO> stationDto = new List<StationDTO>();
+            var st = _uow.Station.GetAll().Where(s => s.StationName == name).FirstOrDefault();
+
+            stationDto.Add(new StationDTO
+            {
+                StationId = st.StationId,
+                StationCode = st.StationCode,
+                StationName = st.StationName,
+                StateId = st.StateId,
+                StateName = st.State.StateName,
+                SuperServiceCentreId = st.SuperServiceCentreId,
+                StationPickupPrice = st.StationPickupPrice,
+                GIGGoActive = st.GIGGoActive
+            });
+            return stationDto;
+        }
+
+            public async Task<IEnumerable<StationDTO>> GetStations()
         {
             var stations = await _uow.Station.GetStationsAsync();
 

@@ -54,5 +54,8 @@ namespace GIGLS.Core.DTO.Customers
         //added this for Giglgo customers
         public decimal? WalletAmount { get; set; }
         public bool? IsEligible { get; set; }
+
+        //For EcommerceAgreement
+        public int EcommerceAgreementId { get; set; }
     }
 }

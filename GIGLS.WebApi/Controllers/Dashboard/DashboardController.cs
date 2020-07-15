@@ -54,7 +54,7 @@ namespace GIGLS.WebApi.Controllers.Dashboard
                 var countries = await _userService.GetPriviledgeCountrys();
                 if (countries.Count == 1)
                 {
-                    userActiveCountry = countries[0];
+                    userActiveCountry = countries[0]; 
                 }
                 else
                 {
