@@ -1062,7 +1062,14 @@ namespace GIGLS.Services.Implementation.Shipments
             var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
             var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
 
-            shipmentDTO.Waybill = (shipmentDTO.Waybill.Contains("AWR")) ? shipmentDTO.Waybill: waybill;
+            if(shipmentDTO.Waybill == null)
+            {
+                shipmentDTO.Waybill = waybill;
+            }
+            else
+            {
+                shipmentDTO.Waybill = (shipmentDTO.Waybill.Contains("AWR")) ? shipmentDTO.Waybill : waybill;
+            }
 
             var newShipment = Mapper.Map<Shipment>(shipmentDTO);
 
