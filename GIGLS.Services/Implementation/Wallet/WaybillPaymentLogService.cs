@@ -61,8 +61,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 response.Status = false;
                 response.Message = $"There was successful transaction for the waybill {waybillPaymentLog.Waybill}";
                 response.data.Message = $"There was successful transaction for the waybill {waybillPaymentLog.Waybill}";
-                response.data.Status = "failed";
-                
+                response.data.Status = "failed";                
                 return response;
             }
             else
@@ -469,6 +468,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
         private async Task<PaystackWebhookDTO> AddWaybillPaymentLogForUSSD(WaybillPaymentLogDTO waybillPaymentLog)
         {
+            var response = new PaystackWebhookDTO();
+
             //1. Generate Ref Code
             waybillPaymentLog.Reference = await GenerateWaybillReferenceCode(waybillPaymentLog.Waybill);
 
@@ -478,64 +479,89 @@ namespace GIGLS.Services.Implementation.Wallet
             //3. Send reguest to Oga USSD 
             var ussdResponse = await ProcessPaymentForUSSD(waybillPaymentLog);
 
-            //3. Add record to waybill payment log with the order id
-            var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
-            newPaymentLog.NetworkProvider = ussdResponse.data.Order_Id;
-            _uow.WaybillPaymentLog.Add(newPaymentLog);
-            await _uow.CompleteAsync();
+            if(ussdResponse.Status == "success")
+            {
+                //3. Add record to waybill payment log with the order id
+                var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
 
-            //4. Send SMS to the customer phone number
+                //Network Provider represent OrderId
+                newPaymentLog.NetworkProvider = ussdResponse.data.Order_Id;
+                _uow.WaybillPaymentLog.Add(newPaymentLog);
+                await _uow.CompleteAsync();
+
+                //4. Send SMS to the customer phone number
 
 
-            //5. Return the response to the user
+                //return response
+                response.Status = true;
+                response.Message = ussdResponse.data.Message;
+                response.data.Message = ussdResponse.data.Message;
+                response.data.Reference = ussdResponse.Order_Reference;
+                response.data.Status = ussdResponse.Status;
+                response.data.Display_Text = ussdResponse.Dialing_Code;
+            }
+            else
+            {
+                response.Status = false;
+                response.Message = ussdResponse.Message;
+                response.data.Message = ussdResponse.Message;
 
+                //       "status": "error",
+                //      "message": "I lost my glasses so I am finding it hard to find your credentials on the list of authorised users. Help look for my glasses."
 
-            //string refCode = await GenerateWaybillReferenceCode(waybillPaymentLog.Waybill);
+            }
 
-            throw new NotImplementedException();
+            return response;
         }
 
         private async Task<USSDResponse> ProcessPaymentForUSSD(WaybillPaymentLogDTO waybillPaymentLog)
         {
-            var responseResult = new USSDResponse();
-
-            //1. Get Token  
-            string token = ConfigurationManager.AppSettings["UssdToken"];
-            string privateKey = ConfigurationManager.AppSettings["UssdPrivateKey"];
-
-            string merchantId = ConfigurationManager.AppSettings["UssdMerchantID"];
-            string baseUrl = ConfigurationManager.AppSettings["UssdOgaranyaAPI"];
-
-            //2. Encrypt token and private_key to generate public key 
-            string publicKey = GetPublicKey(token, privateKey);
-
-            //3.Post the data
-            var ussdData = new USSDDTO
+            try
             {
-                amount = (int)waybillPaymentLog.Amount,
-                msisdn = waybillPaymentLog.PhoneNumber,
-                desc = waybillPaymentLog.Waybill,
-                reference = waybillPaymentLog.Reference                
-            };
+                var responseResult = new USSDResponse();
 
-            string countryCode = waybillPaymentLog.Currency.Length <= 2 ? waybillPaymentLog.Currency : waybillPaymentLog.Currency.Substring(0, 2);
-            string pay01Url = baseUrl + merchantId + "/pay/" + countryCode;
+                //1. Get Token  
+                string token = ConfigurationManager.AppSettings["UssdToken"];
+                string privateKey = ConfigurationManager.AppSettings["UssdPrivateKey"];
 
-            using (var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("token", token);
-                client.DefaultRequestHeaders.Add("publickey", publicKey);
+                string merchantId = ConfigurationManager.AppSettings["UssdMerchantID"];
+                string baseUrl = ConfigurationManager.AppSettings["UssdOgaranyaAPI"];
 
-                var ussdDataInJson = JsonConvert.SerializeObject(ussdData);
-                var data = new StringContent(ussdDataInJson, Encoding.UTF8, "application/json");
-                var response = await client.PostAsync(pay01Url, data);
-                string result = await response.Content.ReadAsStringAsync();
+                //2. Encrypt token and private_key to generate public key 
+                string publicKey = GetPublicKey(token, privateKey);
 
-                responseResult = JsonConvert.DeserializeObject<USSDResponse>(result);
+                //3.Post the data
+                var ussdData = new USSDDTO
+                {
+                    amount = (int)waybillPaymentLog.Amount,
+                    msisdn = waybillPaymentLog.PhoneNumber,
+                    desc = waybillPaymentLog.Waybill,
+                    reference = waybillPaymentLog.Reference
+                };
+
+                string countryCode = waybillPaymentLog.Currency.Length <= 2 ? waybillPaymentLog.Currency : waybillPaymentLog.Currency.Substring(0, 2);
+                string pay01Url = baseUrl + merchantId + "/pay/" + countryCode;
+
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Add("token", token);
+                    client.DefaultRequestHeaders.Add("publickey", publicKey);
+
+                    var ussdDataInJson = JsonConvert.SerializeObject(ussdData);
+                    var data = new StringContent(ussdDataInJson, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(pay01Url, data);
+                    string result = await response.Content.ReadAsStringAsync();
+
+                    responseResult = JsonConvert.DeserializeObject<USSDResponse>(result);
+                }
+                return responseResult;
             }
-            return responseResult;
+            catch(Exception ex)
+            {
+                throw ex;
+            }
         }
 
         private string GetPublicKey(string token, string privateKey)

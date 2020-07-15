@@ -105,6 +105,7 @@ namespace GIGLS.Core.DTO.Wallet
         public string Status { get; set; }
         public string Order_Reference { get; set; }
         public string Dialing_Code { get; set; }
+        public string Message { get; set; }
         public USSDResponseData data { get; set; }
     }
 
