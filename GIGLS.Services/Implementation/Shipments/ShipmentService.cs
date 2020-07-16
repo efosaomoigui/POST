@@ -1696,6 +1696,40 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<List<ServiceCentreDTO>> GetUnmappedManifestForGateway()
+        {
+            try
+            {
+                // get groupedWaybills that have not been mapped to a manifest for that Service Centre
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var groupwaybills = _uow.GroupWaybillNumber.GetAllAsQueryable().Where(x => x.HasManifest == false);
+
+                //get all manifest with scan status of 'arrived in transit
+
+                //get all manifest that has been dispatched
+
+                if (serviceCenters.Length > 0)
+                {
+                    groupwaybills = groupwaybills.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                }
+
+                //Filter the service centre details using the destination of the waybill
+                var allServiceCenters = _uow.ServiceCentre.GetAllAsQueryable();
+                var result = allServiceCenters.Where(s => groupwaybills.Any(x => x.ServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
+
+                //Fetch all Service Centre including their Station Detail into Memory
+                var allServiceCenterDTOs = await _centreService.GetServiceCentres();
+
+                var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => result.Any(r => r == s.ServiceCentreId));
+
+                return unmappedGroupServiceCentres.ToList();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<DomesticRouteZoneMapDTO> GetZone(int destinationServiceCentre)
         {
             // use currentUser login servicecentre
