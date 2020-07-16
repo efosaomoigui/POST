@@ -115,7 +115,7 @@ namespace GIGLS.Services.Implementation.Website
                 //Check if it is already an E-commerce Customer
                 if (await _uow.Company.ExistAsync(c => c.PhoneNumber.Contains(ecommerceAgreementDTO.ContactPhoneNumber) || c.Email == ecommerceAgreementDTO.BusinessEmail || c.Name.ToLower() == ecommerceAgreementDTO.BusinessOwnerName.Trim().ToLower()) )
                 {
-                    throw new GenericException($"{ecommerceAgreementDTO.ContactPhoneNumber}, or {ecommerceAgreementDTO.BusinessEmail} or name already exists as Ecommerce Customer", $"{(int)HttpStatusCode.Forbidden}");
+                    throw new GenericException($"{ecommerceAgreementDTO.ContactPhoneNumber}, or {ecommerceAgreementDTO.BusinessEmail} or {ecommerceAgreementDTO.BusinessOwnerName} already exists as Ecommerce Customer", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 //Check if the state is valid
