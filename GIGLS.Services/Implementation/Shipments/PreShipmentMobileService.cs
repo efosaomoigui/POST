@@ -1241,15 +1241,27 @@ namespace GIGLS.Services.Implementation.Shipments
                 var IndividualPrice = 0.0M;
                 decimal DeclaredValue = 0.0M;
 
-                if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
-                {
-                    if (preShipment.ReceiverLocation.Latitude != null && preShipment.SenderLocation.Latitude != null)
-                    {
-                        int ShipmentCount = preShipment.PreShipmentItems.Count;
+                //No need for Drop off
+                //if (zoneid.ZoneId == 1 && preShipment.ReceiverLocation != null && preShipment.SenderLocation != null)
+                //{
+                //    if (preShipment.ReceiverLocation.Latitude != null && preShipment.SenderLocation.Latitude != null)
+                //    {
+                //        int ShipmentCount = preShipment.PreShipmentItems.Count;
 
-                        amount = await CalculateGeoDetailsBasedonLocation(preShipment);
-                        IndividualPrice = (amount / ShipmentCount);
-                    }
+                //        amount = await CalculateGeoDetailsBasedonLocation(preShipment);
+                //        IndividualPrice = (amount / ShipmentCount);
+                //    }
+                //}
+
+                int deliveryOption = 0;
+
+                if (preShipment.IsHomeDelivery)
+                {
+                    deliveryOption = 2;
+                }
+                else
+                {
+                    deliveryOption = 10;
                 }
 
                 //Get the customer Type
@@ -1260,6 +1272,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     if (userChannel.CompanyType == CompanyType.Ecommerce)
                     {
+                        deliveryOption = 4;
                         preShipment.Shipmentype = ShipmentType.Ecommerce;
                     }
                 }
@@ -1282,17 +1295,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         Weight = preShipmentItem.Weight,
                         SpecialPackageId = (int)preShipmentItem.SpecialPackageId,
                         ShipmentType = preShipmentItem.ShipmentType,
+                        DeliveryOptionId = deliveryOption,
                         CountryId = preShipment.CountryId  //Nigeria
                     };
 
-                    if (preShipment.IsHomeDelivery)
-                    {
-                        PriceDTO.DeliveryOptionId = 2;
-                    }
-                    else
-                    {
-                        PriceDTO.DeliveryOptionId = 10;
-                    }
 
                     if (preShipmentItem.ShipmentType == ShipmentType.Special)
                     {
@@ -1314,7 +1320,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                         if (preShipment.Shipmentype == ShipmentType.Ecommerce)
                         {
-                            preShipmentItem.CalculatedPrice = await _pricingService.GetMobileEcommercePrice(PriceDTO);
+                            preShipmentItem.CalculatedPrice = await _pricingService.GetEcommerceDropOffPrice(PriceDTO);
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice * preShipmentItem.Quantity;
                             preShipmentItem.CalculatedPrice = preShipmentItem.CalculatedPrice + IndividualPrice;
                         }
