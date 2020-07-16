@@ -507,6 +507,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.DestinationCountryId = currentUser.UserActiveCountryId;
                 shipmentDTO.ShipmentHash = "";
 
+
                 //Drop Off
                 shipmentDTO.TempCode = "";
 
