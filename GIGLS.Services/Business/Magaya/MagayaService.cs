@@ -334,13 +334,17 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 trans_xml = sr.Serialize<WarehouseReceipt>(xmlobject);
                 string error_code = "";
 
+                try
+                {
+                        await CreateMagayaShipmentInAgilityAsync(mDto);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error Creating Shipment: "+ex.Message);
+                }
+
                 result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
                 //result = api_session_error.no_error;
-
-                if (result == api_session_error.no_error)
-                {
-                    await CreateMagayaShipmentInAgilityAsync(mDto);
-                }
 
                 errval = error_code;
             }
@@ -506,6 +510,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.DepartureCountryId = currentUser.UserActiveCountryId;
                 shipmentDTO.DestinationCountryId = currentUser.UserActiveCountryId;
                 shipmentDTO.ShipmentHash = "";
+
 
                 //Drop Off
                 shipmentDTO.TempCode = "";

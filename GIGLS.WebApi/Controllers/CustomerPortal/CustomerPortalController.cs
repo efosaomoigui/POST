@@ -1439,6 +1439,11 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
+                if (string.IsNullOrWhiteSpace(user.Email))
+                {
+                    throw new GenericException("NULL INPUT", $"{(int)HttpStatusCode.BadRequest}");
+                }
+
                 string password = await _portalService.Generate(6);
                 var User = await _portalService.ForgotPassword(user.Email, password);
 
