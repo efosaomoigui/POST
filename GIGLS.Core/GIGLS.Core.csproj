@@ -500,6 +500,7 @@
     <Compile Include="Enums\CustomerType.cs" />
     <Compile Include="Enums\DebitCreditFlag.cs" />
     <Compile Include="Enums\DispatchCategory.cs" />
+    <Compile Include="Enums\EcommerceAgreementStatus.cs" />
     <Compile Include="Enums\EmailSmsType.cs" />
     <Compile Include="Enums\FilterCustomerType.cs" />
     <Compile Include="Enums\FleetType.cs" />
