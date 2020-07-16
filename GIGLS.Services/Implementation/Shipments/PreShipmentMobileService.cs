@@ -2790,17 +2790,31 @@ namespace GIGLS.Services.Implementation.Shipments
                     destinationServiceCentreId = DestinationStation.SuperServiceCentreId;
                 }
 
-                var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+                //var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+
+                //int customerid = 0;
+                //if (CustomerId != null)
+                //{
+                //    customerid = CustomerId.IndividualCustomerId;
+                //}
+                //else
+                //{
+                //    var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+                //    customerid = companyid.CompanyId;
+                //}
+
+
+                var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
 
                 int customerid = 0;
-                if (CustomerId != null)
+                if (companyid != null)
                 {
-                    customerid = CustomerId.IndividualCustomerId;
+                    customerid = companyid.CompanyId;
                 }
                 else
                 {
-                    var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                    customerid = companyid.CompanyId;
+                    var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+                    customerid = CustomerId.IndividualCustomerId;
                 }
 
                 if (preshipmentmobile.IsApproved != true && preshipmentmobile.ZoneMapping != 1)
