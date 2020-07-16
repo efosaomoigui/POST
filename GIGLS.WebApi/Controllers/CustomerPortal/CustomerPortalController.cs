@@ -498,8 +498,28 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
-       // [AllowAnonymous]
+
+        [HttpPost]
+        [Route("changepassword")]
+        public async Task<IServiceResponse<bool>> ChangePassword(ChangePasswordDTO passwordDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ChangePassword(passwordDTO);
+
+                if (!result.Succeeded)
+                {
+                    throw new GenericException("Operation could not complete successfully");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        // [AllowAnonymous]
         [HttpPost]
         [Route("register")]
         public async Task<IServiceResponse<UserDTO>> Register(UserDTO user)

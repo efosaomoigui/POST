@@ -190,6 +190,10 @@ namespace GIGLS.WebApi.Controllers.Partnership
         {
             return await HandleApiOperationAsync(async () =>
             {
+                if (string.IsNullOrWhiteSpace(user.Email))
+                {
+                    throw new GenericException("Email Field is Null", $"{(int)HttpStatusCode.BadRequest}");
+                }
                 string password = await _portalService.Generate(6);
                 var User = await _portalService.ForgotPassword(user.Email, password);
 
@@ -216,13 +220,13 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
-        [HttpPut]
-        [Route("changepassword/{userid}/{currentPassword}/{newPassword}")]
-        public async Task<IServiceResponse<bool>> ChangePassword(string userid, string currentPassword, string newPassword)
+        [HttpPost]
+        [Route("changepassword")]
+        public async Task<IServiceResponse<bool>> ChangePassword(ChangePasswordDTO passwordDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var result = await _portalService.ChangePassword(userid, currentPassword, newPassword);
+                var result = await _portalService.ChangePassword(passwordDTO);
 
                 if (!result.Succeeded)
                 {

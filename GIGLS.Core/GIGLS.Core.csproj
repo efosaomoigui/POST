@@ -303,6 +303,7 @@
     <Compile Include="DTO\BaseDomainDTO.cs" />
     <Compile Include="DTO\CancelShipmentDTO.cs" />
     <Compile Include="DTO\CategoryDTO.cs" />
+    <Compile Include="DTO\ChangePasswordDTO.cs" />
     <Compile Include="DTO\Client\ClientNodeDTO.cs" />
     <Compile Include="DTO\CountryDTO.cs" />
     <Compile Include="DTO\Customers\CompanyContactPersonDTO.cs" />
