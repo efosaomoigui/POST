@@ -118,6 +118,12 @@ namespace GIGLS.Services.Implementation.Website
                     throw new GenericException($"{ecommerceAgreementDTO.ContactPhoneNumber}, or {ecommerceAgreementDTO.BusinessEmail} or {ecommerceAgreementDTO.BusinessOwnerName} already exists as Ecommerce Customer", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
+                //Check if it is already a GIGGo Individual customer 
+                if (await _uow.IndividualCustomer.ExistAsync(c => (c.PhoneNumber.Contains(ecommerceAgreementDTO.ContactPhoneNumber) || c.Email == ecommerceAgreementDTO.BusinessEmail) && (c.IsRegisteredFromMobile)))
+                {
+                    throw new GenericException($"{ecommerceAgreementDTO.ContactPhoneNumber}, or {ecommerceAgreementDTO.BusinessEmail}  already exists as an Individual GIGGO Customer", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
                 //Check if the state is valid
                 var state = await _uow.State.GetAsync(x => x.StateName.ToLower() == ecommerceAgreementDTO.State.ToLower());
                 if(state == null)
