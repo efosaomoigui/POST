@@ -28285,6 +28285,15 @@ namespace ThirdParty.WebServices.Magaya.Business.New
         private string magayaPaymentOption;
         private string magayaPaymentType;
 
+        private int serviceCenterId;
+
+        public int ServiceCenterId 
+        {
+            get { return serviceCenterId; }
+            set { serviceCenterId = value; }
+        }
+
+
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute("WarehouseReceipt", IsNullable = false)]
         public WarehouseReceipt WarehouseReceipt

@@ -18,5 +18,6 @@ namespace GIGLS.Core.IServices.Business
         Task<int> GetUserCountryId();
         Task<decimal> GetDropOffRegularPriceForIndividual(PricingDTO pricingDto);
         Task<decimal> GetDropOffSpecialPrice(PricingDTO pricingDto);
+        Task<decimal> GetEcommerceDropOffPrice(PricingDTO pricingDto);
     }
 }

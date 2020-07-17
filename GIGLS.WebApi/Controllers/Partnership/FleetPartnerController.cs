@@ -1,8 +1,12 @@
 ﻿using EfeAuthen.Models;
 using GIGLS.Core.DTO;
+using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Report;
+using GIGLS.Core.DTO.User;
+using GIGLS.Core.Enums;
 using GIGLS.Core.IServices;
+using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.Partnership;
 using GIGLS.Infrastructure;
 using GIGLS.Services.Implementation;
@@ -10,6 +14,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -22,9 +27,12 @@ namespace GIGLS.WebApi.Controllers.Partnership
     public class FleetPartnerController : BaseWebApiController
     {
         private readonly IFleetPartnerService _fleetPartnerService;
-        public FleetPartnerController(IFleetPartnerService fleetPartnerService) : base(nameof(FleetPartnerController))
+        private readonly ICustomerPortalService _portalService;
+
+        public FleetPartnerController(IFleetPartnerService fleetPartnerService, ICustomerPortalService portalService) : base(nameof(FleetPartnerController))
         {
             _fleetPartnerService = fleetPartnerService;
+            _portalService = portalService;
         }
 
         [HttpGet]
@@ -175,5 +183,61 @@ namespace GIGLS.WebApi.Controllers.Partnership
             });
         }
 
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("forgotpassword")]
+        public async Task<IServiceResponse<bool>> ForgotPassword(UserDTO user)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                if (string.IsNullOrWhiteSpace(user.Email))
+                {
+                    throw new GenericException("Email Field is Null", $"{(int)HttpStatusCode.BadRequest}");
+                }
+                string password = await _portalService.Generate(6);
+                var User = await _portalService.ForgotPassword(user.Email, password);
+
+                if (User.Succeeded)
+                {
+                    var passwordMessage = new PasswordMessageDTO()
+                    {
+                        Password = password,
+                        UserEmail = user.Email
+                    };
+
+                    await _portalService.SendGenericEmailMessage(MessageType.PEmail, passwordMessage);
+                }
+                else
+                {
+                    throw new GenericException("Information does not exist, kindly provide correct email", $"{(int)HttpStatusCode.NotFound}");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Code = $"{(int)HttpStatusCode.OK}",
+                    Object = true
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("changepassword")]
+        public async Task<IServiceResponse<bool>> ChangePassword(ChangePasswordDTO passwordDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ChangePassword(passwordDTO);
+
+                if (!result.Succeeded)
+                {
+                    throw new GenericException("Operation could not complete successfully");
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
     }
 }

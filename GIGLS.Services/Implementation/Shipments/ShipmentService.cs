@@ -1060,9 +1060,24 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentDTO.UserId = currentUserId;
 
             var departureServiceCentre = await _centreService.GetServiceCentreById(shipmentDTO.DepartureServiceCentreId);
-            var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
 
-            shipmentDTO.Waybill = (shipmentDTO.Waybill.Contains("AWR")) ? shipmentDTO.Waybill: waybill;
+            if(shipmentDTO.Waybill == null)
+            {
+                var waybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
+                shipmentDTO.Waybill = waybill;
+            }
+            else
+            {
+                if (shipmentDTO.Waybill.Contains("AWR"))
+                {
+                    //Do nothing
+                }
+                else
+                {
+                    var newWaybill = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.WaybillNumber, departureServiceCentre.Code);
+                    shipmentDTO.Waybill = newWaybill;
+                }
+            }
 
             var newShipment = Mapper.Map<Shipment>(shipmentDTO);
 
