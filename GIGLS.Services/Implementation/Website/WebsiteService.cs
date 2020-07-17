@@ -5,6 +5,7 @@ using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.Website;
 using GIGLS.Infrastructure;
 using System;
@@ -18,11 +19,13 @@ namespace GIGLS.Services.Implementation.Website
     {
         private readonly IMessageSenderService _messageSenderService;
         private readonly IUnitOfWork _uow;
+        private readonly ICompanyService _companyService; 
 
-        public WebsiteService(IMessageSenderService messageSenderService, IUnitOfWork uow)
+        public WebsiteService(IMessageSenderService messageSenderService, IUnitOfWork uow, ICompanyService companyService)
         {
             _messageSenderService = messageSenderService;
             _uow = uow;
+            _companyService = companyService;
         }
 
         public async Task<bool> SendSchedulePickupMail(WebsiteMessageDTO obj)
@@ -81,7 +84,7 @@ namespace GIGLS.Services.Implementation.Website
             {
                 if (ecommerceAgreementDTO.BusinessEmail == null)
                 {
-                    throw new GenericException("Business email field can not be empty", $"{(int)HttpStatusCode.Forbidden}");
+                    throw new GenericException("Business email field can not be empty", $"{(int)HttpStatusCode.BadRequest}");
                 }
 
                 ecommerceAgreementDTO.BusinessEmail = ecommerceAgreementDTO.BusinessEmail.Replace(" ", string.Empty);
@@ -94,19 +97,55 @@ namespace GIGLS.Services.Implementation.Website
                     natureOfBusiness = string.Join(",", ecommerceAgreementDTO.NatureOfBusiness);
                 }
 
-                ecommerceSignature = ecommerceAgreementDTO.EcommerceSignatureName + ecommerceAgreementDTO.EcommerceSignatureAddress;
 
+                //Check if it is in Pending Requests 
                 if (await _uow.EcommerceAgreement.ExistAsync(c => c.BusinessEmail == ecommerceAgreementDTO.BusinessEmail))
                 {
-                    throw new GenericException("Ecommerce information already exist", $"{(int)HttpStatusCode.Forbidden}");
+                    throw new GenericException("Ecommerce Pending Request information already exists", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
+                //block the registration for GIGGO Users using the Email
+                var gigGoEmailUser = await _uow.User.GetUserByEmail(ecommerceAgreementDTO.BusinessEmail);
+
+                if (gigGoEmailUser != null)
+                {
+                    throw new GenericException($"{ecommerceAgreementDTO.BusinessEmail} already exists as Customer", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
+                //Check if it is already an E-commerce Customer
+                if (await _uow.Company.ExistAsync(c => c.PhoneNumber.Contains(ecommerceAgreementDTO.ContactPhoneNumber) || c.Email == ecommerceAgreementDTO.BusinessEmail || c.Name.ToLower() == ecommerceAgreementDTO.BusinessOwnerName.Trim().ToLower()) )
+                {
+                    throw new GenericException($"{ecommerceAgreementDTO.ContactPhoneNumber}, or {ecommerceAgreementDTO.BusinessEmail} or {ecommerceAgreementDTO.BusinessOwnerName} already exists as Ecommerce Customer", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
+                //Check if it is already a GIGGo Individual customer 
+                if (await _uow.IndividualCustomer.ExistAsync(c => (c.PhoneNumber.Contains(ecommerceAgreementDTO.ContactPhoneNumber) || c.Email == ecommerceAgreementDTO.BusinessEmail) && (c.IsRegisteredFromMobile)))
+                {
+                    throw new GenericException($"{ecommerceAgreementDTO.ContactPhoneNumber}, or {ecommerceAgreementDTO.BusinessEmail}  already exists as an Individual GIGGO Customer", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
+                //Check if the state is valid
                 var state = await _uow.State.GetAsync(x => x.StateName.ToLower() == ecommerceAgreementDTO.State.ToLower());
                 if(state == null)
                 {
                     throw new GenericException("Invalid State Name", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
+                //update the customer phone number to have country code added to it
+                if (ecommerceAgreementDTO.ContactPhoneNumber.StartsWith("0"))
+                {
+                    ecommerceAgreementDTO.ContactPhoneNumber = await _companyService.AddCountryCodeToPhoneNumber(ecommerceAgreementDTO.ContactPhoneNumber, state.CountryId);
+                }
+
+                //check phone number existence 
+                var gigGoPhoneUser = await _uow.User.GetUserByPhoneNumber(ecommerceAgreementDTO.ContactPhoneNumber);
+
+                if (gigGoPhoneUser != null)
+                {
+                    throw new GenericException($"{ecommerceAgreementDTO.ContactPhoneNumber} already exists", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
+                ecommerceSignature = ecommerceAgreementDTO.EcommerceSignatureName + ecommerceAgreementDTO.EcommerceSignatureAddress;
                 var ecommerceAgreement = Mapper.Map<EcommerceAgreement>(ecommerceAgreementDTO);
                 ecommerceAgreement.NatureOfBusiness = natureOfBusiness;
                 ecommerceAgreement.EcommerceSignature = ecommerceSignature;

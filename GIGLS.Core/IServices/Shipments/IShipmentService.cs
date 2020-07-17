@@ -95,6 +95,7 @@ namespace GIGLS.Core.IServices.Shipments
         TransactionResults LargeQueryLog(int access_key, QuerylogDt0 querydto);
         Task<string> GetMagayaWayBillNumber();
         EntityList GetEntityObect();
+        Task<List<ServiceCentreDTO>> GetDestinationServiceCenters();
     }
 
 

@@ -964,6 +964,39 @@ namespace GIGLS.Services.Business.Pricing
             return PackagePrice + deliveryOptionPrice;
         }
 
+        public async Task<decimal> GetEcommerceDropOffPrice(PricingDTO pricingDto)
+        {
+            decimal deliveryOptionPriceTemp = 0;
+            var zone = await _routeZone.GetZoneMobile(pricingDto.DepartureStationId, pricingDto.DestinationStationId);
+           
+            deliveryOptionPriceTemp = await _optionPrice.GetDeliveryOptionPrice(pricingDto.DeliveryOptionId, zone.ZoneId, pricingDto.CountryId);
+            decimal deliveryOptionPrice = deliveryOptionPriceTemp;
+
+            //check for volumetric weight
+            if (pricingDto.IsVolumetric)
+            {
+                decimal volume = (pricingDto.Length * pricingDto.Height * pricingDto.Width) / 5000;
+                pricingDto.Weight = pricingDto.Weight > volume ? pricingDto.Weight : volume;
+            }
+
+            //Get Ecommerce limit weight from GlobalProperty
+            var ecommerceWeightLimitObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceWeightLimit, pricingDto.CountryId);
+            decimal weightLimit = decimal.Parse(ecommerceWeightLimitObj.Value);
+
+            decimal PackagePrice;
+
+            if (pricingDto.Weight > weightLimit)
+            {
+                PackagePrice = await GetEcommercePriceOverflow(pricingDto.Weight, weightLimit, zone.ZoneId, pricingDto.CountryId);
+            }
+            else
+            {
+                PackagePrice = await _regular.GetDomesticZonePrice(zone.ZoneId, pricingDto.Weight, RegularEcommerceType.Ecommerce, pricingDto.CountryId);
+            }
+
+            return PackagePrice + deliveryOptionPrice;
+        }
+
         public async Task<decimal> GetMobileSpecialPrice(PricingDTO pricingDto)
         {
             decimal deliveryOptionPriceTemp = 0;
