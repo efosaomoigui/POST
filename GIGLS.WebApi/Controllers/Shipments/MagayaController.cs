@@ -12,6 +12,7 @@ using System.ServiceModel;
 using System.Web.Http.ModelBinding;
 using Newtonsoft.Json.Linq;
 using GIGLS.WebApi.Models;
+using GIGLS.Core.DTO.ServiceCentres;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -241,6 +242,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 var _result = _service.GetPorts();
 
                 return new ServiceResponse<PortList>()
+                {
+                    Object = _result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("GetDestinationServiceCenters")]
+        public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetDestinationServiceCenters()  
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var _result = await _service.GetDestinationServiceCenters();
+
+                return new ServiceResponse<List<ServiceCentreDTO>>()
                 {
                     Object = _result
                 };

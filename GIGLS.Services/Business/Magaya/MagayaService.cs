@@ -3,6 +3,7 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.ServiceCentres;
@@ -203,7 +204,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 totalVolume += volume;
                 totalVolumeWeight += magayaShipmentDTO.Items[i].VolumeWeight.Value;
             }
-            magayaShipmentDTO.TotalWeight = new WeightValue() { Unit = WeightUnitType.lb, Value = totalWeight }; 
+            magayaShipmentDTO.TotalWeight = new WeightValue() { Unit = WeightUnitType.lb, Value = totalWeight };
             return;
         }
 
@@ -239,7 +240,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 };
 
                 magayaShipmentDTO.Charges.Charge[i].Amount.Value = (magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Maximum ||
-                    magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Minimum) ? 
+                    magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags == ChargeFlagsType.Minimum) ?
                     magayaShipmentDTO.Charges.Charge[i].Price.Value : totalWeight * magayaShipmentDTO.Charges.Charge[i].Price.Value;
 
                 totalChargeAmount += magayaShipmentDTO.Charges.Charge[i].Amount.Value;
@@ -291,9 +292,9 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return;
         }
 
-        public async Task<api_session_error>  SetTransactions(int access_key, TheWarehouseReceiptCombo mDto)
+        public async Task<api_session_error> SetTransactions(int access_key, TheWarehouseReceiptCombo mDto)
         {
-            var magayaShipmentDTO   = mDto.WarehouseReceipt;
+            var magayaShipmentDTO = mDto.WarehouseReceipt;
             //2. initialize type of shipment and flag
             string type = "WH";
 
@@ -334,17 +335,18 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 trans_xml = sr.Serialize<WarehouseReceipt>(xmlobject);
                 string error_code = "";
 
-                try
-                {
-                        await CreateMagayaShipmentInAgilityAsync(mDto);
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception("Error Creating Shipment: "+ex.Message);
-                }
-
+                //Magaya Request for Shipment Creation
                 result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
-                //result = api_session_error.no_error;
+
+                if (result == api_session_error.no_error)
+                {
+                    var shipmentDto = await CreateMagayaShipmentInAgilityAsync(mDto);
+                    await _shipmentService.AddShipment(shipmentDto);
+                }
+                else
+                {
+                    throw new Exception("Error Creating Shipment: ");
+                }
 
                 errval = error_code;
             }
@@ -376,7 +378,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             };
             return ShipmentItems;
         }
-        public CustomerDTO tetCustomerDetails(WarehouseReceipt magayaShipmentDTO) 
+        public CustomerDTO tetCustomerDetails(WarehouseReceipt magayaShipmentDTO)
         {
             CustomerDTO cd = new CustomerDTO();
             cd.FirstName = magayaShipmentDTO.IssuedByName.Split(' ')[0];
@@ -397,7 +399,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             return cd;
         }
 
-        public async Task CreateMagayaShipmentInAgilityAsync(TheWarehouseReceiptCombo mDto)
+        public async Task<ShipmentDTO> CreateMagayaShipmentInAgilityAsync(TheWarehouseReceiptCombo mDto)
         {
             var magayaShipmentDTO = mDto.WarehouseReceipt;
             try
@@ -409,7 +411,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 var scs = await _centreService.GetServiceCentres();
 
-                var destinationSc = scs.Where(s => s.StationName.Contains(magayaShipmentDTO.DestinationPort.Name.ToUpper())).FirstOrDefault();
+                var destinationSc = scs.Where(s => s.ServiceCentreId == mDto.ServiceCenterId).FirstOrDefault();
                 //var spSC = destinationSc.SupperServiceCentreId;
 
                 string[] claimValue = null;
@@ -461,7 +463,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 //Invoice parameters: Helps generate invoice for ecomnerce customers  by customerType
                 shipmentDTO.IsCashOnDelivery = false;
                 shipmentDTO.CashOnDeliveryAmount = 0;
-                shipmentDTO.ExpectedAmountToCollect = (mDto.ExpectedAmountToCollect ==null) ? 0 : decimal.Parse(mDto.ExpectedAmountToCollect);
+                shipmentDTO.ExpectedAmountToCollect = (mDto.ExpectedAmountToCollect == null) ? 0 : decimal.Parse(mDto.ExpectedAmountToCollect);
                 shipmentDTO.ActualAmountCollected = (mDto.ActualAmountCollected == null) ? 0 : decimal.Parse(mDto.ActualAmountCollected);
 
                 //General Details comes with role user
@@ -515,43 +517,13 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 //Drop Off
                 shipmentDTO.TempCode = "";
 
-                await _shipmentService.AddShipment(shipmentDTO);
+                return shipmentDTO;
 
-                //var magayaShipment = new MagayaShipmentAgility()
-                //{
-                //    Waybill = magayaShipmentDTO?.Number,
-                //    DateCreated = magayaShipmentDTO.CreatedOn,
-                //    ShipmentGUID = Guid.NewGuid(),
-                //    ShipperName = magayaShipmentDTO.IssuedByName,
-                //    ShipperAddress = magayaShipmentDTO.ShipperAddress.Street[0],
-                //    ShipperPhoneNumber = magayaShipmentDTO.ShipperAddress.ContactPhone,
-                //    ShipperCity = magayaShipmentDTO.ShipperAddress.City,
-                //    ShipperState = magayaShipmentDTO.ShipperAddress.State,
-                //    ShipperEmail = magayaShipmentDTO.ShipperAddress.ContactEmail,
-                //    ShipperCountry = magayaShipmentDTO.ShipperAddress.Country.Value,
-                //    ConsigneeName = magayaShipmentDTO.ConsigneeAddress.ContactName,
-                //    ConsigneeAddress = magayaShipmentDTO.ConsigneeAddress.Street[0],
-                //    ConsigneePhoneNumber = magayaShipmentDTO.ConsigneeAddress.ContactPhone,
-                //    ConsigneeCity = magayaShipmentDTO.ConsigneeAddress.City,
-                //    ConsigneeState = magayaShipmentDTO.ConsigneeAddress.State,
-                //    ConsigneeCountry = magayaShipmentDTO.ConsigneeAddress.Country.Value,
-                //    ConsigneeEmail = magayaShipmentDTO.ConsigneeAddress.ContactEmail,
-                //    OriginPort = magayaShipmentDTO.OriginPort.Code,
-                //    DestinationPort = magayaShipmentDTO.DestinationPort.Code,
-                //    MagayaShipmentItemsXml = sr.Serialize<Item[]>(magayaShipmentDTO.Items),
-                //    ShipmentType = magayaShipmentDTO.Type,
-                //    GrandTotal = (decimal)totalChargeAmount,
-                //    ServiceCenterCountryId = currentUser.UserActiveCountryId,
-                //    ServiceCenterId = int.Parse(claimValue[1])
-                //};
-                //_uow.MagayaShipment.Add(magayaShipment);
-                //await _uow.CompleteAsync();
             }
             catch (Exception ex)
             {
-                throw;
+                throw; 
             }
-
         }
 
         public async Task<string> GetMagayaWayBillNumber()
@@ -782,6 +754,13 @@ namespace GIGLS.Services.Business.Magaya.Shipments
             }
 
             return listofPorts;
+        }
+
+        //Get Magaya ports called routes in Agility
+        public async Task<List<ServiceCentreDTO>> GetDestinationServiceCenters()  
+        {
+            var result = await _centreService.GetServiceCentres();
+            return result.ToList();
         }
 
         //Get Magaya packages list called  special shipment or so in  Agility
