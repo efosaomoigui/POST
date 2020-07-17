@@ -1,38 +1,40 @@
-﻿using GIGLS.Core.Domain;
-using GIGLS.Core.Enums;
+﻿using GIGLS.Core.Enums;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace GIGL.GIGLS.Core.Domain
+namespace GIGLS.Core.Domain
 {
-    public class Manifest : BaseDomain
+    public class SuperManifest : BaseDomain
     {
-        public int ManifestId { get; set; }
+        public int SuperManifestId { get; set; }
 
         [MaxLength(100), MinLength(5)]
         [Index(IsUnique = true)]
-        public string ManifestCode { get; set; }
+        public string SuperManifestCode { get; set; }
         public DateTime DateTime { get; set; }
 
-        public int? ShipmentId { get; set; }
-        public Shipment Shipment { get; set; }
+        //public int? ShipmentId { get; set; }
+        //public Shipment Shipment { get; set; }
 
         public string DispatchedById { get; set; }
 
         public string ReceiverById { get; set; }
 
-        public int? FleetTripId { get; set; }
-        public virtual FleetTrip FleetTrip { get; set; }
+        //public int? FleetTripId { get; set; }
+        //public virtual FleetTrip FleetTrip { get; set; }
 
         public bool IsDispatched { get; set; }
         public bool IsReceived { get; set; }
         public int ServiceCentreId { get; set; }
-        public ManifestType ManifestType { get; set; }
+        //public ManifestType ManifestType { get; set; }
 
         public int DepartureServiceCentreId { get; set; }
         public int DestinationServiceCentreId { get; set; }
-
-        public bool HasSuperManifest { get; set; }
+       
     }
 }

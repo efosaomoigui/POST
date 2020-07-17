@@ -289,6 +289,79 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //map Manifest to Super Manifest
+        public async Task MappingSuperManifestToManifest(string superManifest, List<string> manifestList)
+        {
+            try
+            {
+                var userId = await _userService.GetCurrentUserId();
+
+                var manifestObj = await _uow.SuperManifest.GetAsync(x => x.SuperManifestCode.Equals(superManifest));
+
+                //validate the ids are in the system
+                if (manifestObj == null)
+                {
+                    var newManifest = new SuperManifest
+                    {
+                        DateTime = DateTime.Now,
+                        SuperManifestCode = superManifest
+                    };
+                    _uow.SuperManifest.Add(newManifest);
+                }
+                else
+                {
+                    //ensure that the Super Manifest containing the Manifest has not been dispatched
+                    if (manifestObj.IsDispatched)
+                    {
+                        throw new GenericException($"Error: The Super Manifest: {manifestObj.SuperManifestCode} assigned to this Manifest has already been dispatched.");
+                    }
+                }
+
+                //convert the list to HashSet to remove duplicate
+                var newManifestList = new HashSet<string>(manifestList);
+
+                foreach (var manifestCode in newManifestList)
+                {
+                    var manifestDTO = await _manifestService.GetManifestByCode(manifestCode);
+
+                    if (manifestDTO == null)
+                    {
+                        throw new GenericException($"No Manifest exists for this number: {manifestCode}");
+                    }
+
+
+                    //check if Manifest has not been added to Super Manifest 
+                    var isManifestMapped = await _uow.SuperManifestToManifestMapping.ExistAsync(x => x.SuperManifestCode == superManifest && x.Manifest == manifestCode);
+
+                    //if the manifest has not been added to super manifest, add it
+                    if (!isManifestMapped)
+                    {
+                        
+                        //Add new Mapping
+                        var newMapping = new SuperManifestToManifestMapping
+                        {
+                            SuperManifestCode = superManifest,
+                            Manifest = manifestDTO.ManifestCode,
+                            IsActive = true,
+                            DateMapped = DateTime.Now
+                        };
+
+                        _uow.SuperManifestToManifestMapping.Add(newMapping);
+
+                        //Update The Manifest HasuperManifest to True
+                        var manifest = await _uow.Manifest.GetAsync(manifestDTO.ManifestId);
+                        manifest.HasSuperManifest = true;
+
+                    }
+                }
+                await _uow.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //remove groupWaybillNumber from manifest
         public async Task RemoveGroupWaybillNumberFromManifest(string manifest, string groupWaybillNumber)
         {

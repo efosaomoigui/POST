@@ -425,7 +425,13 @@ namespace GIGLS.Core
 
                 config.CreateMap<EcommerceAgreement, EcommerceAgreementDTO>();
                 config.CreateMap<EcommerceAgreementDTO, EcommerceAgreement>();
-               
+
+                config.CreateMap<SuperManifest, SuperManifestDTO>();
+                config.CreateMap<SuperManifestDTO, SuperManifest>();
+
+                config.CreateMap<SuperManifestToManifestMapping, SuperManifestToManifestMappingDTO>();
+                config.CreateMap<SuperManifestToManifestMappingDTO, SuperManifestToManifestMapping>();
+
             });
 
             isInit = true;

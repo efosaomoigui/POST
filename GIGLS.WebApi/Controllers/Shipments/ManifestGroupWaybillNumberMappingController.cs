@@ -70,6 +70,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("mapsupermanifest")]
+        public async Task<IServiceResponse<bool>> MappingManifestToGroupWaybillNumber(SuperManifestToManifestMappingDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.MappingSuperManifestToManifest(data.SuperManifestCode, data.ManifestCodes);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("manifestforgroupwaybillnumber/id/{groupwaybillNumberId}")]

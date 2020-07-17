@@ -20,5 +20,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<ManifestWaybillMappingDTO>> GetWaybillsInListOfManifest(string captainId);
         Task<List<ManifestWaybillMappingDTO>> GetAllWaybillsinListOfManifest(string captainId, DateFilterCriteria dateFilterCriteria);
         Task<string> MoveManifestDetailToNewManifest(string manifestCode);
+        Task MappingSuperManifestToManifest(string superManifest, List<string> manifestList);
     }
 }
