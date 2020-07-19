@@ -148,5 +148,8 @@ namespace GIGLS.Core.Domain
 
         [MaxLength(20)]
         public string DeliveryNumber { get; set; }
+        public DateTime? TimeAssigned { get; set; }
+        public DateTime? TimePickedUp { get; set; }
+        public DateTime? TimeDelivered { get; set; }
     }
 }

@@ -53,6 +53,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<decimal> GetHaulagePrice(HaulagePricingDTO pricingDto);
         Task<CustomerDTO> GetCustomer(string userId);
         Task<IdentityResult> ChangePassword(string userid, string currentPassword, string newPassword);
+        Task<IdentityResult> ChangePassword(ChangePasswordDTO passwordDTO);
         Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO);
         Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO);
         Task<object> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO);
@@ -104,7 +105,9 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> EditProfile(UserDTO user);
         Task<object> AddPreShipmentMobile(PreShipmentMobileDTO preShipment);
         Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser();
+        Task<List<TransactionPreShipmentDTO>> GetPreShipmentForUser(UserDTO user, ShipmentCollectionFilterCriteria filterCriteria);
         Task<WalletTransactionSummaryDTO> GetWalletTransactionsForMobile();
+        Task<ModifiedWalletTransactionSummaryDTO> GetWalletTransactionsForMobile(ShipmentCollectionFilterCriteria filterCriteria);
         Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment);
         Task<WalletDTO> GetWalletBalance();
         Task<SpecialResultDTO> GetSpecialPackages();
@@ -123,6 +126,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task AddWallet(WalletDTO wallet);
         Task<UserDTO> GenerateReferrerCode(UserDTO user);
         Task<string> Decrypt();
+        Task<string> EncryptWebsiteKey();
         Task<object> CancelShipmentWithNoCharge(CancelShipmentDTO shipment);
 
         Task SendPickUpRequestMessage(string userId);
@@ -150,5 +154,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment);
         Task<bool> CreateOrUpdateDropOffForAgent(PreShipmentDTO preShipmentDTO);
         Task<UserDTO> CheckDetailsForAgentApp(string user);
+        Task<object> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment);
     }
 }

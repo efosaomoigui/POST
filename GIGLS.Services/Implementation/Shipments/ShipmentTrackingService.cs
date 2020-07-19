@@ -100,7 +100,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     //send sms and email
                     if (!scanStatus.Equals(ShipmentScanStatus.CRT))
                     {
-                        await sendSMSEmail(tracking, scanStatus);
+                        if (tracking.isInternalShipment)
+                        {
+                            await SendEmailToStoreKeeper(tracking, scanStatus);
+                        }
+                        else
+                        {
+                            await sendSMSEmail(tracking, scanStatus);
+                        }
                     }
                 }
 
@@ -147,6 +154,25 @@ namespace GIGLS.Services.Implementation.Shipments
 
             //send message
             await _messageSenderService.SendMessage(messageType, EmailSmsType.All, tracking);
+
+            return true;
+        }
+
+        //Send email to store keeper when the shipment has arrived final destination
+        private async Task<bool> SendEmailToStoreKeeper(ShipmentTrackingDTO tracking, ShipmentScanStatus scanStatus)
+        {
+            var messageType = MessageType.ShipmentCreation;
+            foreach (var item in Enum.GetValues(typeof(MessageType)).Cast<MessageType>())
+            {
+                if (item.ToString() == scanStatus.ToString())
+                {
+                    messageType = (MessageType)Enum.Parse(typeof(MessageType), scanStatus.ToString());
+                    break;
+                }
+            }
+
+            //send message
+            await _messageSenderService.SendMessage(messageType, EmailSmsType.Email, tracking);
 
             return true;
         }

@@ -38,7 +38,7 @@
             <param name="service"></param>
             <param name="userService"></param>
         </member>
-        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.AddShipment(ThirdParty.WebServices.Magaya.Business.New.WarehouseReceipt)">
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.AddShipment(ThirdParty.WebServices.Magaya.Business.New.TheWarehouseReceiptCombo)">
             <summary>
             
             </summary>
@@ -83,7 +83,7 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetDescriptions">
+        <member name="M:GIGLS.WebApi.Controllers.Shipments.MagayaController.GetDescriptions(System.String)">
             <summary>
             
             </summary>
@@ -114,7 +114,7 @@
             <param name="thirdPartyPricingDto"></param>
             <returns></returns>
         </member>
-        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.CreateShipment(GIGLS.Core.DTO.Shipments.PreShipmentMobileDTO)">
+        <member name="M:GIGLS.WebApi.Controllers.ThirdPartyAPI.ThirdPartyAPIController.CreateShipment(GIGLS.Core.DTO.Shipments.CreatePreShipmentMobileDTO)">
             <summary>
             This api is used to register a shipment
             </summary>

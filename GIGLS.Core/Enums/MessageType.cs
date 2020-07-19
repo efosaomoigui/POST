@@ -48,6 +48,7 @@
         MCS, //Message for Mobile Create Shipment
         ENM, //ECOMMERCE NOTIFICATION  MESSAGE FOR GIGGO CUSTOMER REGISTRATION
         DLD,  //DELAYED DELIVERY	
-        MMCS //Message for Multiple Mobile Create Shipment
+        MMCS, //Message for Multiple Mobile Create Shipment
+        ARFS // WHEN GIGL STORE SHIPMENT ARRIVES FINAL DESTINATION
     } 
 }

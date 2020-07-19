@@ -9,6 +9,10 @@ using ThirdParty.WebServices.Magaya.DTO;
 using ThirdParty.WebServices.Magaya.Business.New;
 using ThirdParty.WebServices.Magaya.Services;   
 using System.ServiceModel;
+using System.Web.Http.ModelBinding;
+using Newtonsoft.Json.Linq;
+using GIGLS.WebApi.Models;
+using GIGLS.Core.DTO.ServiceCentres;
 
 namespace GIGLS.WebApi.Controllers.Shipments
 {
@@ -46,7 +50,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         /// <returns></returns>
         [HttpPost]
         [Route("AddShipment")]
-        public async Task<IServiceResponse<api_session_error>> AddShipment(WarehouseReceipt MagayaShipmentDTO)
+        public async Task<IServiceResponse<api_session_error>> AddShipment(TheWarehouseReceiptCombo MagayaShipmentDTO)   
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -62,7 +66,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 //4. Pass the return to the view or caller
                 return new ServiceResponse<api_session_error>()
                 {
-                    Object = result
+                    Object = await result
                 };
             });
         }
@@ -115,6 +119,23 @@ namespace GIGLS.WebApi.Controllers.Shipments
 
                 //3. Call the Magaya SetTransaction Method from MagayaService
                 var result = _service.GetEntities(access_key, startwithstring);
+
+                //3. Pass the return to the view or caller
+                return new ServiceResponse<EntityList>()
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("GetEntitiesObject")]
+        public async Task<IServiceResponse<EntityList>> GetEntitiesObject()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //3. Call the Magaya SetTransaction Method from MagayaService
+                var result = _service.GetEntityObect();
 
                 //3. Pass the return to the view or caller
                 return new ServiceResponse<EntityList>()
@@ -227,6 +248,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [HttpGet]
+        [Route("GetDestinationServiceCenters")]
+        public async Task<IServiceResponse<List<ServiceCentreDTO>>> GetDestinationServiceCenters()  
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var _result = await _service.GetDestinationServiceCenters();
+
+                return new ServiceResponse<List<ServiceCentreDTO>>()
+                {
+                    Object = _result
+                };
+            });
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -284,11 +320,11 @@ namespace GIGLS.WebApi.Controllers.Shipments
         /// <returns></returns>
         [HttpGet]
         [Route("GetDescriptions")]
-        public async Task<IServiceResponse<Description>> GetDescriptions()
+        public async Task<IServiceResponse<Description>> GetDescriptions(string description = " ")
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var _result = _service.CommodityDescription();
+                var _result = _service.CommodityDescription(description);
 
                 return new ServiceResponse<Description>()
                 {

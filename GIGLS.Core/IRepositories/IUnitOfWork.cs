@@ -27,6 +27,7 @@ using GIGLS.Core.IRepositories.BankSettlement;
 using GIGLS.Core.IRepositories.InternationalRequest;
 using GIGLS.Core.IRepositories.Sla;
 using GIGLS.Core.IRepositories.Expenses;
+using GIGLS.Core.IRepositories.Magaya;
 
 namespace GIGLS.Core
 {
@@ -43,7 +44,9 @@ namespace GIGLS.Core
         IManifestRepository Manifest { get; set; }
         IManifestGroupWaybillNumberMappingRepository ManifestGroupWaybillNumberMapping { get; set; }
         IShipmentItemRepository ShipmentPackage { get; set; }
+        IMagayaShipmentItemRepository MagayaShipmentItem { get; set; } 
         IShipmentRepository Shipment { get; set; }
+        IMagayaShipmentRepository MagayaShipment { get; set; }
         IShipmentTrackingRepository ShipmentTracking { get; set; }
         IStockRequestPartRepository StockRequestPart { get; set; }
         IStockRequestRepository StockRequest { get; set; }
@@ -181,6 +184,7 @@ namespace GIGLS.Core
         IFleetPartnerRepository FleetPartner { get; set; }
         IMobileGroupCodeWaybillMappingRepository MobileGroupCodeWaybillMapping { get; set; }
         IPartnerPayoutRepository PartnerPayout { get; set; }
+        IEcommerceAgreementRepository EcommerceAgreement { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

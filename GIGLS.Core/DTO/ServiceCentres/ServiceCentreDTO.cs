@@ -22,6 +22,7 @@ namespace GIGLS.Core.DTO.ServiceCentres
         public bool IsActive { get; set; }
         public int StationId { get; set; }
         public string StationName { get; set; }
+        public int SupperServiceCentreId { get; set; } 
         public string StationCode { get; set; }
         public int CountryId { get; set; }
         public string Country { get; set; }

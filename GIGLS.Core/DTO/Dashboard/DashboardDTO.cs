@@ -1,4 +1,5 @@
-﻿using GIGLS.Core.DTO.ServiceCentres;
+﻿using GIGL.GIGLS.Core.Domain;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.View;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,7 @@ namespace GIGLS.Core.DTO.Dashboard
         public List<GraphDataDTO> GraphData { get; set; }
         public GraphDataDTO CurrentMonthGraphData { get; set; }
         public IQueryable<InvoiceView> ShipmentsOrderedByServiceCenter { get; set; }
+        public IQueryable<MagayaShipmentAgility> MagayaShipmentOrdered { get; set; }  
         public decimal TargetAmount { get; set; }
         public int TargetOrder { get; set; }
         public decimal WalletBalance { get; set; }

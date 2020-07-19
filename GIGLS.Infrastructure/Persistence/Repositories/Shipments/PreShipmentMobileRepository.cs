@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 {
@@ -103,5 +104,53 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
 
             return Task.FromResult(preShipmentDto);
         }
+
+        public IQueryable<PreShipmentMobileDTO> GetPreShipmentForUser(string userChannelCode)
+        {
+            var preShipments = Context.PresShipmentMobile.AsQueryable().Where(s => s.CustomerCode == userChannelCode);
+
+            var shipmentDto = (from r in preShipments
+                               join co in _context.Country on r.CountryId equals co.CountryId
+                               select new PreShipmentMobileDTO()
+                               {
+                                   PreShipmentMobileId = r.PreShipmentMobileId,
+                                   Waybill = r.Waybill,
+                                   DateCreated = r.DateCreated,
+                                   DateModified = r.DateModified,
+                                   ReceiverAddress = r.ReceiverAddress,
+                                   SenderAddress = r.SenderAddress,
+                                   shipmentstatus = r.shipmentstatus,
+                                   GrandTotal = r.GrandTotal,
+                                   CurrencySymbol = co.CurrencySymbol
+                               });
+
+            return shipmentDto;
+        }
+
+        public IQueryable<PreShipmentMobileDTO> GetShipments(string userChannelCode)
+        {
+            var preShipments = Context.Shipment.AsQueryable().Where(x => x.CustomerCode == userChannelCode && x.IsCancelled == false);
+
+            var shipmentDto = (from r in preShipments
+                               join co in _context.Country on r.DepartureCountryId equals co.CountryId
+                               select new PreShipmentMobileDTO()
+                               {
+                                   PreShipmentMobileId = r.ShipmentId,
+                                   Waybill = r.Waybill,
+                                   DateCreated = r.DateCreated,
+                                   DateModified = r.DateModified,
+                                   ReceiverAddress = r.ReceiverAddress,
+                                   SenderAddress = r.SenderAddress,
+                                   GrandTotal = r.GrandTotal,
+                                   shipmentstatus = "Shipment",
+                                   CurrencySymbol = co.CurrencySymbol,
+                                   CustomerType = r.CustomerType,
+                                   CustomerId = r.CustomerId
+                               });
+
+            return shipmentDto;
+        }
+
+
     }
 }

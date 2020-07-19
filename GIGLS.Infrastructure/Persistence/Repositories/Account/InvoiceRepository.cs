@@ -694,7 +694,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Account
                               PickupOptions = s.PickupOptions,
                               IsCancelled = s.IsCancelled,
                               DepartureCountryId = s.DepartureCountryId,
-                              DestinationCountryId = s.DestinationCountryId
+                              DestinationCountryId = s.DestinationCountryId,
+                              isInternalShipment = s.isInternalShipment
                           });
             return result;
         }

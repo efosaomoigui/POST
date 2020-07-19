@@ -7,6 +7,7 @@ using AutoMapper;
 using GIGLS.Core.Enums;
 using System.Collections.Generic;
 using GIGLS.CORE.Enums;
+using System.Configuration;
 
 namespace GIGLS.Services.Implementation.Customers
 {
@@ -88,7 +89,8 @@ namespace GIGLS.Services.Implementation.Customers
                 if (CustomerType.IndividualCustomer.Equals(customerDTO.CustomerType))
                 {
                     int individualCustomerId = 0;
-                    var individualCustomerByPhone = await _uow.IndividualCustomer.GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber || c.CustomerCode == customerDTO.CustomerCode);
+                    var individualCustomerByPhone = await _uow.IndividualCustomer.
+                        GetAsync(c => c.PhoneNumber == customerDTO.PhoneNumber || c.CustomerCode == customerDTO.CustomerCode);
 
                     if(individualCustomerByPhone != null)
                     {
@@ -122,6 +124,21 @@ namespace GIGLS.Services.Implementation.Customers
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+
+        //Get Store Keeper as Corporate Customer
+        public async Task<CustomerDTO> GetGIGLCorporateAccount()
+        {
+            try
+            {
+                string accountCode = ConfigurationManager.AppSettings["GIGLCorporateAccount"];
+                var customerDTO = await GetCustomer(accountCode, UserChannelType.Corporate);
+                return customerDTO;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 

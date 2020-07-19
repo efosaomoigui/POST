@@ -132,6 +132,7 @@
     <Compile Include="Persistence\Repositories\CountryRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\CompanyContactPersonRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\CompanyRepository.cs" />
+    <Compile Include="Persistence\Repositories\Customers\EcommerceAgreementRepository.cs" />
     <Compile Include="Persistence\Repositories\Customers\IndividualCustomerRepository.cs" />
     <Compile Include="Persistence\Repositories\DeliveryLocationRepository.cs" />
     <Compile Include="Persistence\Repositories\DeliveryNumberRepository.cs" />
@@ -157,6 +158,7 @@
     <Compile Include="Persistence\Repositories\JobCards\JobCardManagementPartRepository.cs" />
     <Compile Include="Persistence\Repositories\JobCards\JobCardManagementRepository.cs" />
     <Compile Include="Persistence\Repositories\JobCards\JobCardRepository.cs" />
+    <Compile Include="Persistence\Repositories\Magaya\MagayaShipmentItemRepository.cs" />
     <Compile Include="Persistence\Repositories\MessageRepository.cs" />
     <Compile Include="Persistence\Repositories\MessagingLog\EmailSendLogRepository.cs" />
     <Compile Include="Persistence\Repositories\MessagingLog\SmsSendLogRepository.cs" />
@@ -212,6 +214,7 @@
     <Compile Include="Persistence\Repositories\Shipments\ShipmentItemRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentPackagePriceRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\PreShipmentRepository.cs" />
+    <Compile Include="Persistence\Repositories\Magaya\MagayaShipmentRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentRerouteRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentReturnRepository.cs" />

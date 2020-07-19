@@ -152,14 +152,19 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task UpdateMobilePickUpRequests(MobilePickUpRequestsDTO PickUpRequest, string userId)
+        public async Task UpdateMobilePickUpRequests(MobilePickUpRequestsDTO pickUpRequest, string userId)
         {
             try
             {
-                var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == PickUpRequest.Waybill && s.UserId == userId && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
+                var MobilePickupRequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == pickUpRequest.Waybill && s.UserId == userId && s.Status != MobilePickUpRequestStatus.Rejected.ToString());
                 if (MobilePickupRequests != null)
                 {
-                    MobilePickupRequests.Status = PickUpRequest.Status;
+                    MobilePickupRequests.Status = pickUpRequest.Status;
+                    if(pickUpRequest.Status == MobilePickUpRequestStatus.EnrouteToPickUp.ToString())
+                    {
+                        var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickUpRequest.Waybill);
+                        preshipmentmobile.TimePickedUp = DateTime.Now;
+                    }
                     await _uow.CompleteAsync();
                 }
             }

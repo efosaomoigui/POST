@@ -150,6 +150,10 @@ namespace GIGLS.Core.DTO.Shipments
         public decimal ShipmentPickupPrice { get; set; }
         public PartnerDTO partnerDTO { get; set; }
 
+        public DateTime? TimeAssigned { get; set; }
+        public DateTime? TimePickedUp { get; set; }
+        public DateTime? TimeDelivered { get; set; }
+
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
     {

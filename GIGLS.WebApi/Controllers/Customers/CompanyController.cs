@@ -29,8 +29,9 @@ namespace GIGLS.WebApi.Controllers.Customers
         [Route("")]
         public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompanies()
         {
-            return await HandleApiOperationAsync(async () => {
-                var companies = await _service.GetCompanies();                
+            return await HandleApiOperationAsync(async () =>
+            {
+                var companies = await _service.GetCompanies();
                 return new ServiceResponse<IEnumerable<CompanyDTO>>
                 {
                     Object = companies
@@ -43,7 +44,8 @@ namespace GIGLS.WebApi.Controllers.Customers
         [Route("search")]
         public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompanies(BaseFilterCriteria filterCriteria)
         {
-            return await HandleApiOperationAsync(async () => {
+            return await HandleApiOperationAsync(async () =>
+            {
                 var companies = await _service.GetCompanies(filterCriteria);
                 return new ServiceResponse<IEnumerable<CompanyDTO>>
                 {
@@ -57,7 +59,8 @@ namespace GIGLS.WebApi.Controllers.Customers
         [Route("withoutwallet")]
         public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCompaniesWithoutWallet()
         {
-            return await HandleApiOperationAsync(async () => {
+            return await HandleApiOperationAsync(async () =>
+            {
                 var companies = await _service.GetCompaniesWithoutWallet();
                 return new ServiceResponse<IEnumerable<CompanyDTO>>
                 {
@@ -71,7 +74,8 @@ namespace GIGLS.WebApi.Controllers.Customers
         [Route("ecommerce")]
         public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetEcommerceWithoutWallet()
         {
-            return await HandleApiOperationAsync(async () => {
+            return await HandleApiOperationAsync(async () =>
+            {
                 var companies = await _service.GetEcommerceWithoutWallet();
                 return new ServiceResponse<IEnumerable<CompanyDTO>>
                 {
@@ -85,7 +89,8 @@ namespace GIGLS.WebApi.Controllers.Customers
         [Route("corporate")]
         public async Task<IServiceResponse<IEnumerable<CompanyDTO>>> GetCorporateWithoutWallet()
         {
-            return await HandleApiOperationAsync(async () => {
+            return await HandleApiOperationAsync(async () =>
+            {
                 var companies = await _service.GetCorporateWithoutWallet();
                 return new ServiceResponse<IEnumerable<CompanyDTO>>
                 {
@@ -99,7 +104,8 @@ namespace GIGLS.WebApi.Controllers.Customers
         [Route("{companyId:int}/getwallet")]
         public async Task<IServiceResponse<EcommerceWalletDTO>> GettWalletDetailsForCompany(int companyId)
         {
-            return await HandleApiOperationAsync(async () => {
+            return await HandleApiOperationAsync(async () =>
+            {
                 var company = await _service.GetECommerceWalletById(companyId);
                 return new ServiceResponse<EcommerceWalletDTO>
                 {
@@ -151,7 +157,7 @@ namespace GIGLS.WebApi.Controllers.Customers
                 {
                     Object = true
                 };
-            }); 
+            });
         }
 
         [GIGLSActivityAuthorize(Activity = "Update")]
@@ -160,14 +166,14 @@ namespace GIGLS.WebApi.Controllers.Customers
         public async Task<IServiceResponse<bool>> UpdateCustomer(int companyId, CompanyDTO companyDto)
         {
 
-            return await HandleApiOperationAsync( async () =>
-            {
-                await _service.UpdateCompany(companyId, companyDto);
-                return new ServiceResponse<bool>
-                {
-                    Object = true
-                };
-            });         
+            return await HandleApiOperationAsync(async () =>
+           {
+               await _service.UpdateCompany(companyId, companyDto);
+               return new ServiceResponse<bool>
+               {
+                   Object = true
+               };
+           });
         }
 
         [GIGLSActivityAuthorize(Activity = "Update")]
@@ -184,7 +190,7 @@ namespace GIGLS.WebApi.Controllers.Customers
                     Object = true
                 };
 
-            });           
+            });
         }
 
         [GIGLSActivityAuthorize(Activity = "View")]
@@ -199,6 +205,36 @@ namespace GIGLS.WebApi.Controllers.Customers
                 return new ServiceResponse<IEnumerable<CompanyDTO>>
                 {
                     Object = company
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("pendingrequests")]
+        public async Task<IServiceResponse<IEnumerable<EcommerceAgreementDTO>>> GetPendingEcommerceRequest(BaseFilterCriteria filterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var companies = await _service.GetPendingEcommerceRequest(filterCriteria);
+                return new ServiceResponse<IEnumerable<EcommerceAgreementDTO>>
+                {
+                    Object = companies
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("{companyId:int}/pendingrequests")]
+        public async Task<IServiceResponse<EcommerceAgreementDTO>> GetPendingEcommerceRequestById(int companyId)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var companies = await _service.GetCustomerPendingRequestsById(companyId);
+                return new ServiceResponse<EcommerceAgreementDTO>
+                {
+                    Object = companies
                 };
             });
         }

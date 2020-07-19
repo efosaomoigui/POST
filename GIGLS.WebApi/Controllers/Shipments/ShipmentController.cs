@@ -129,6 +129,33 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("capturestoreshipment")]
+        public async Task<IServiceResponse<ShipmentDTO>> AddStoreShipment(ShipmentDTO ShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                //Update SenderAddress for corporate customers
+                ShipmentDTO.SenderAddress = null;
+                ShipmentDTO.SenderState = null;
+
+                //set some data to null
+                ShipmentDTO.ShipmentCollection = null;
+                ShipmentDTO.Demurrage = null;
+                ShipmentDTO.Invoice = null;
+                ShipmentDTO.ShipmentCancel = null;
+                ShipmentDTO.ShipmentReroute = null;
+                ShipmentDTO.DeliveryOption = null;
+
+                var shipment = await _service.AddShipmentForPaymentWaiver(ShipmentDTO);
+                return new ServiceResponse<ShipmentDTO>
+                {
+                    Object = shipment
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("{ShipmentId:int}")]

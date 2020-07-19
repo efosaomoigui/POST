@@ -132,7 +132,7 @@ namespace GIGLS.Services.Implementation.Customers
                 
                 return Mapper.Map<IndividualCustomerDTO>(newCustomer);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }

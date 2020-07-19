@@ -133,5 +133,41 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Wallet
 
             return Task.FromResult(walletTransactionDTO.OrderByDescending(s => s.DateOfEntry).ToList());
         }
+
+        public Task<List<ModifiedWalletTransactionDTO>> GetWalletTransactionMobile(int walletId, ShipmentCollectionFilterCriteria filterCriteria)
+        {
+            //filter by service center
+            var walletTransactionContext = _context.WalletTransactions.Where(x => x.WalletId == walletId).AsQueryable();
+
+            if (filterCriteria.StartDate == null && filterCriteria.EndDate == null)
+            {
+                walletTransactionContext = walletTransactionContext.OrderByDescending(x => x.DateCreated).Take(20);
+            }
+            else
+            {
+                //get startDate and endDate
+                var queryDate = filterCriteria.getStartDateAndEndDate();
+                var startDate = queryDate.Item1;
+                var endDate = queryDate.Item2;
+
+                walletTransactionContext = walletTransactionContext.Where(s => s.DateCreated >= startDate && s.DateCreated < endDate);
+            }
+
+            List<ModifiedWalletTransactionDTO> walletTransactionDTO = (from w in walletTransactionContext
+                                                               select new ModifiedWalletTransactionDTO()
+                                                               {
+                                                                   WalletTransactionId = w.WalletTransactionId,
+                                                                   Waybill = w.Waybill,
+                                                                   DateOfEntry = w.DateOfEntry,
+                                                                   Amount = w.Amount,
+                                                                   CreditDebitType = w.CreditDebitType,
+                                                                   Description = w.Description,
+                                                                   IsDeferred = w.IsDeferred,
+                                                                   PaymentType = w.PaymentType,
+                                                                   WalletId = w.WalletId,
+                                                               }).ToList();
+
+            return Task.FromResult(walletTransactionDTO.OrderByDescending(s => s.DateOfEntry).ToList());
+        }
     }
 }

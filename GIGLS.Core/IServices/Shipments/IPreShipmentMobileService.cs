@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.PaymentTransactions;
+using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Utility;
@@ -15,11 +16,13 @@ namespace GIGLS.Core.IServices.Shipments
     public interface IPreShipmentMobileService : IServiceDependencyMarker
     {
         Task<object> AddPreShipmentMobile(PreShipmentMobileDTO preShipment);
+        Task<object> AddPreShipmentMobileThirdParty(CreatePreShipmentMobileDTO preShipment);
         Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment);
         Task<List<PreShipmentMobileDTO>> GetShipments(BaseFilterCriteria filterOptionsDto);
         Task<PreShipmentMobileDTO> GetShipmentByWaybill(string waybill);
         Task<PreShipmentMobileDTO> GetPreShipmentDetail(string waybill);
         Task<List<PreShipmentMobileDTO>> GetPreShipmentForUser();
+        Task<List<TransactionPreShipmentDTO>> GetPreShipmentForUser(UserDTO user, ShipmentCollectionFilterCriteria filterCriteria);
         Task<IEnumerable<SpecialDomesticPackageDTO>> GetSpecialDomesticPackages();
         Task<MobileShipmentTrackingHistoryDTO> TrackShipment(string waybillNumber);
         Task<PreShipmentMobileDTO> AddMobilePickupRequest(MobilePickUpRequestsDTO pickuprequest);

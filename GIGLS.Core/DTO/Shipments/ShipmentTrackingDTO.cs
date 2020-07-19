@@ -33,6 +33,7 @@ namespace GIGLS.Core.DTO.Shipments
         public string DeliveryOptions { get; set; }
 
         public int ServiceCentreId { get; set; }
+        public bool isInternalShipment { get; set; }
 
         //Manifest Visit Monitoring
         public IEnumerable<ManifestVisitMonitoringDTO> ManifestVisitMonitorings { get; set; }

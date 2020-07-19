@@ -26,6 +26,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task<ShipmentDTO> GetShipment(string waybill);
         Task<ShipmentDTO> GetBasicShipmentDetail(string waybill);
         Task<ShipmentDTO> AddShipment(ShipmentDTO shipment);
+        Task<ShipmentDTO> AddShipmentForPaymentWaiver(ShipmentDTO shipmentDTO);
         Task UpdateShipment(int shipmentId, ShipmentDTO shipment);
         Task UpdateShipment(string waybill, ShipmentDTO shipment);
         Task DeleteShipment(int shipmentId);
@@ -70,7 +71,7 @@ namespace GIGLS.Core.IServices.Shipments
     {
         bool OpenConnection(out int access_key); 
         string CloseConnection(int access_key);
-        api_session_error SetTransactions(int access_key, WarehouseReceipt magayaShipmentDTO);
+        Task<api_session_error> SetTransactions(int access_key, TheWarehouseReceiptCombo magayaShipmentDTO);
         string GetTransactions(int access_key, WarehouseReceipt magayaShipmentDTO);
         string SetEntity(int access_key, EntityDto entitydto);
         EntityList GetEntities(int access_key, string startwithstring);
@@ -82,7 +83,7 @@ namespace GIGLS.Core.IServices.Shipments
         LocationList GetLocations();
         ChargeDefinitionList GetChargeDefinitionList(int access_key);
         List<string> GetItemStatus();
-        Description CommodityDescription();
+        Description CommodityDescription(string description);
         GUIDItemList QueryLog(int access_key, QuerylogDt0 qdto);
         TransactionTypes TransactionTypes();
         WarehouseReceiptList GetWarehouseReceiptRangeByDate(int access_key, QuerylogDt0 querydto);
@@ -92,8 +93,9 @@ namespace GIGLS.Core.IServices.Shipments
         //ShipmentList GetShipmentRangeByDate(int access_key, QuerylogDt0 querydto);
         Tuple<WarehouseReceiptList, ShipmentList, InvoiceList, PaymentList> GetNextTransByDate2(int access_key, out int more_results,  ref string cookie,  string type);
         TransactionResults LargeQueryLog(int access_key, QuerylogDt0 querydto);
-
         Task<string> GetMagayaWayBillNumber();
+        EntityList GetEntityObect();
+        Task<List<ServiceCentreDTO>> GetDestinationServiceCenters();
     }
 
 
