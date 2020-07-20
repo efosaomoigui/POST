@@ -187,6 +187,7 @@ namespace GIGLS.Core
         IEcommerceAgreementRepository EcommerceAgreement { get; set; }
         ISuperManifestRepository SuperManifest { get; set; }
         ISuperManifestToManifestMappingRepository SuperManifestToManifestMapping { get; set; }
+        ITransitManifestRepository TransitManifest { get; set; }
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

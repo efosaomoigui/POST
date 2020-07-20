@@ -32,6 +32,7 @@ namespace GIGLS.Services.Business.Scanning
         private readonly IManifestWaybillMappingService _manifestWaybillService;
         private readonly IHUBManifestWaybillMappingService _hubmanifestWaybillService;
         private readonly IUnitOfWork _uow;
+        private readonly ITransitManifestService _transitManifestService;
 
 
         public ScanService(IShipmentService shipmentService, IShipmentTrackingService shipmentTrackingService,
@@ -39,7 +40,7 @@ namespace GIGLS.Services.Business.Scanning
             IManifestService manifestService, IManifestGroupWaybillNumberMappingService groupManifest,
             IUserService userService, IScanStatusService scanService, IDispatchService dispatchService,
             ITransitWaybillNumberService transitWaybillNumberService, IManifestWaybillMappingService manifestWaybillService,
-            IHUBManifestWaybillMappingService hubmanifestWaybillService, IUnitOfWork uow)
+            IHUBManifestWaybillMappingService hubmanifestWaybillService, IUnitOfWork uow, ITransitManifestService transitManifestService)
         {
             _shipmentService = shipmentService;
             _shipmentTrackingService = shipmentTrackingService;
@@ -54,6 +55,7 @@ namespace GIGLS.Services.Business.Scanning
             _manifestWaybillService = manifestWaybillService;
             _hubmanifestWaybillService = hubmanifestWaybillService;
             _uow = uow;
+            _transitManifestService = transitManifestService;
         }
 
         public async Task<bool> ScanMultipleShipment(List<ScanDTO> scanList)
@@ -96,7 +98,7 @@ namespace GIGLS.Services.Business.Scanning
             var cashondeliveryinfo = new List<CashOnDeliveryRegisterAccount>();
 
             //block scanning if the waybill has been collected
-            if(scan.ShipmentScanStatus != ShipmentScanStatus.SMIM)
+            if (scan.ShipmentScanStatus != ShipmentScanStatus.SMIM)
             {
                 await BlockAnyScanOnCollectedShipment(scan.WaybillNumber, scan);
             }
@@ -391,8 +393,8 @@ namespace GIGLS.Services.Business.Scanning
                         {
                             waybills.Add(hubManifest.Waybill);
                             await BlockAnyScanOnCollectedShipment(hubManifest.Waybill, scan);
-                        }                      
-                        
+                        }
+
                         //if the shipment scan status is shipment arrive HUB then
                         //update Dispatch Receiver and manifest receiver id
                         if (scan.ShipmentScanStatus == ShipmentScanStatus.ARP)
@@ -439,6 +441,9 @@ namespace GIGLS.Services.Business.Scanning
 
             //5. Update the waybill to show transit waybill has complete transit process when it arrived Final Destination in TransitWaybill
             await CompleteTransitWaybillProcess(scan, waybillsInGroupWaybill, waybillsInManifest);
+
+            //Create Entries for Scan status with ACC
+            await CheckAndCreateManifestEntriesForSuperManifest(scan, manifest);
 
             cashondeliveryinfo.ForEach(a => a.ServiceCenterId = currentCenter);
             await _uow.CompleteAsync();
@@ -817,6 +822,59 @@ namespace GIGLS.Services.Business.Scanning
 
                 throw new GenericException($"Shipment with waybill: {newScan.WaybillNumber} already collected, no further scan is required!");
             }
+        }
+
+        private async Task<bool> CheckAndCreateManifestEntriesForSuperManifest(ScanDTO scan, Manifest manifest)
+        {
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            var currentUserSercentreId = serviceCenters.Length > 0 ? serviceCenters[0] : 0;
+            var currentUserId = await _userService.GetCurrentUserId();
+            var groupWaybillsInManifest = new HashSet<string>();
+
+            //1. Only scan for manifest with status "Arrived Collation Center"
+            if (manifest != null)
+            {
+                if (manifest.ManifestType == ManifestType.Transit && scan.ShipmentScanStatus == ShipmentScanStatus.ACC)
+                {
+                    //3. Create new entries in TransitManifest or update existing entries
+                    //3a. check if entry exist
+                    var transitManifest = await _uow.TransitManifest.GetAsync(s => s.ManifestCode == manifest.ManifestCode);
+
+                    var dispatch = await _uow.Dispatch.GetAsync(s => s.ManifestNumber == manifest.ManifestCode);
+                    if(dispatch == null)
+                    {
+                        throw new GenericException("Manifest has not been dispatched");
+                    }
+
+                    if (transitManifest == null)
+                    {
+                        //3b. create new entry
+                        await _transitManifestService.AddTransitManifest(
+                            new TransitManifestDTO
+                            {
+                                ManifestCode = manifest.ManifestCode,
+                                ServiceCentreId = currentUserSercentreId,
+                                UserId = currentUserId,
+                                ManifestType = manifest.ManifestType,
+                                DepartureServiceCentreId = currentUserSercentreId,
+                                DestinationServiceCentreId = dispatch.DestinationServiceCenterId
+                            }
+                        );
+                    }
+                    else
+                    {
+                        if (transitManifest.HasSuperManifest)
+                        {
+                            throw new GenericException("Invalid Scan!, This Manifest is already part of a Super Manifest");
+                        }
+                    }
+                    await _uow.CompleteAsync();
+                    //Should they be able to update? ASK
+
+                }
+            }
+
+            return true;
         }
     }
 }

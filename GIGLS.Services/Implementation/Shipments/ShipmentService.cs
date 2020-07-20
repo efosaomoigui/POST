@@ -1681,6 +1681,47 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<List<TransitManifestDTO>> GetUnmappedManifestListForServiceCentre(FilterOptionsDto filterOptionsDto)
+        {
+            try
+            {
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+
+                //Get transit manifest not yet added to super manifest for the login user
+                var transitManifestBySc = _uow.TransitManifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false);
+
+                if (serviceCenters.Length > 0)
+                {
+                    transitManifestBySc = transitManifestBySc.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                }
+
+                //Filter it by the destination service centre send from filter option
+                var filter = filterOptionsDto.filter;
+                int filterValue = Convert.ToInt32(filterOptionsDto.filterValue);
+                if (!string.IsNullOrEmpty(filter) && filterValue > 0)
+                {
+                    transitManifestBySc = transitManifestBySc.Where(s => s.DestinationServiceCentreId == filterValue);
+                }
+
+                var result = transitManifestBySc.ToList();
+
+                var resultDTO = Mapper.Map<List<TransitManifestDTO>>(result);
+
+                var DestinationServiceCentre = await _uow.ServiceCentre.GetAsync(filterValue);
+
+                foreach (var item in resultDTO)
+                {
+                    item.DestinationServiceCentre = DestinationServiceCentre;
+                }
+
+                return resultDTO;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentres()
         {
             try
@@ -1715,29 +1756,27 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                // get groupedWaybills that have not been mapped to a manifest for that Service Centre
+                // get manifests in TransitManifest Table that have not been mapped to a super manifest
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var groupwaybills = _uow.GroupWaybillNumber.GetAllAsQueryable().Where(x => x.HasManifest == false);
+                var transitManifests = _uow.TransitManifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false);
 
-                //get all manifest with scan status of 'arrived in transit
 
-                //get all manifest that has been dispatched
-
+                //get all manifest that for that service center
                 if (serviceCenters.Length > 0)
                 {
-                    groupwaybills = groupwaybills.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                    transitManifests = transitManifests.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
                 }
 
-                //Filter the service centre details using the destination of the waybill
+                //Filter the service centre details using the destination of the manifest
                 var allServiceCenters = _uow.ServiceCentre.GetAllAsQueryable();
-                var result = allServiceCenters.Where(s => groupwaybills.Any(x => x.ServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
+                var result = allServiceCenters.Where(s => transitManifests.Any(x => x.DestinationServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
 
                 //Fetch all Service Centre including their Station Detail into Memory
                 var allServiceCenterDTOs = await _centreService.GetServiceCentres();
 
-                var unmappedGroupServiceCentres = allServiceCenterDTOs.Where(s => result.Any(r => r == s.ServiceCentreId));
+                var unmappedManifests = allServiceCenterDTOs.Where(s => result.Any(r => r == s.ServiceCentreId));
 
-                return unmappedGroupServiceCentres.ToList();
+                return unmappedManifests.ToList();
             }
             catch (Exception)
             {

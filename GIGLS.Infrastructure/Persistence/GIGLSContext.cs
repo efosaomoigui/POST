@@ -281,6 +281,7 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<EcommerceAgreement> EcommerceAgreement { get; set; }
         public DbSet<SuperManifest> SuperManifest { get; set; }
         public DbSet<SuperManifestToManifestMapping> SuperManifestToManifestMapping { get; set; }
+        public DbSet<TransitManifest> TransitManifest { get; set; }
 
 
         #endregion

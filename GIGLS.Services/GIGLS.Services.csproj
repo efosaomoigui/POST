@@ -278,6 +278,7 @@
     <Compile Include="Implementation\Shipments\ShipmentService.cs" />
     <Compile Include="Implementation\Shipments\ShipmentTrackingService.cs" />
     <Compile Include="Implementation\Shipments\SuperManifestService.cs" />
+    <Compile Include="Implementation\Shipments\TransitManifestService.cs" />
     <Compile Include="Implementation\Shipments\TransitWaybillNumberService.cs" />
     <Compile Include="Implementation\Shipments\WaybillNumberService.cs" />
     <Compile Include="Implementation\Sla\SLAService.cs" />

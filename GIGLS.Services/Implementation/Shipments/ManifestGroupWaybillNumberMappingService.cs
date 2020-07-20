@@ -352,6 +352,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         var manifest = await _uow.Manifest.GetAsync(manifestDTO.ManifestId);
                         manifest.HasSuperManifest = true;
 
+                        //Update The Transit Manifest HasSuperManifest to True
+                        var transitManifest = await _uow.TransitManifest.GetAsync(x => x.ManifestCode == manifestDTO.ManifestCode);
+                        transitManifest.HasSuperManifest = true;
+
                     }
                 }
                 await _uow.CompleteAsync();
