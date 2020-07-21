@@ -3551,9 +3551,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (preShipment.PreShipmentItems.Any())
                 {
+                    int[] PreShipmentItemMobileIds = preShipment.PreShipmentItems.Select(i => i.PreShipmentItemMobileId).ToArray();
+
                     //fetch all items from DB at once & update them in the memory
                     var preShipmentMobileItemToBeUpdated = _uow.PreShipmentItemMobile.GetAllAsQueryable()
-                        .Where(x => preShipment.PreShipmentItems.Select(i => i.PreShipmentItemMobileId).Contains(x.PreShipmentItemMobileId) && x.PreShipmentMobileId == preShipment.PreShipmentMobileId).ToList();
+                        .Where(x => PreShipmentItemMobileIds.Contains(x.PreShipmentItemMobileId) && x.PreShipmentMobileId == preShipment.PreShipmentMobileId).ToList();
 
                     if (preShipmentMobileItemToBeUpdated.Any())
                     {
