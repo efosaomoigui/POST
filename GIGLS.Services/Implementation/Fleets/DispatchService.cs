@@ -96,8 +96,19 @@ namespace GIGLS.Services.Implementation.Fleets
                     dispatchId = newDispatch.DispatchId;
                 }
 
+                Manifest manifestObj = null;
                 // update manifest
-                var manifestObj = _uow.Manifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
+
+                if (dispatchDTO.IsSuperManifest)
+                {
+                    manifestObj = _uow.Manifest.SingleOrDefault(s => s.SuperManifestCode == dispatchDTO.ManifestNumber);
+                }
+                else
+                {
+                    manifestObj = _uow.Manifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
+                }
+               
+                
                 if (manifestObj == null)
                 {
                     var pickupManifestObj = _uow.PickupManifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
@@ -116,6 +127,11 @@ namespace GIGLS.Services.Implementation.Fleets
                     manifestEntity.DispatchedById = currentUserId;
                     manifestEntity.IsDispatched = true;
                     manifestEntity.ManifestType = dispatchDTO.ManifestType;
+
+                    if (dispatchDTO.IsSuperManifest)
+                    {
+                        manifestEntity.SuperManifestStatus = SuperManifestStatus.Dispatched;
+                    }
                 }
 
                 ////--start--///Set the DepartureCountryId
