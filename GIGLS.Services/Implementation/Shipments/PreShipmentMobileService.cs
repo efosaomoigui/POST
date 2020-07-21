@@ -2296,6 +2296,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
+
+                    if (preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString())
+                    {
+                        throw new GenericException($"Error processing shipment. This Shipment has already been cancelled", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+
                     if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString()
                        || pickuprequest.Status == MobilePickUpRequestStatus.Missed.ToString())
                     {
@@ -2548,6 +2554,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (pickuprequest == null)
                 {
                     throw new GenericException("Null INPUT");
+                }
+
+                //Block Process for any cancelled shipment
+                var shipmentCancelled = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == pickuprequest.Waybill && x.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString());
+                if(shipmentCancelled != null)
+                {
+                    throw new GenericException($"Error processing shipment. This Shipment has already been cancelled", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 var userId = await _userService.GetCurrentUserId();
