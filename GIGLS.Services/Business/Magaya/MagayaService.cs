@@ -212,6 +212,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         private void setMagayaShipmentCharges(WarehouseReceipt magayaShipmentDTO)
         {
             var cc = retCurrencyType();
+            totalWeight = (totalWeight > totalVolumeWeight) ? totalWeight : totalVolumeWeight;
 
             for (int i = 0; i < magayaShipmentDTO.Charges.Charge.Length; i++)
             {
@@ -274,7 +275,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                     ChargeableWeight = new WeightValue()
                     {
                         Unit = WeightUnitType.lb,
-                        Value = CalVolumentricWeight(totalVolumeWeight, totalWeight)
+                        Value = (totalWeight > totalVolumeWeight)? totalWeight: totalVolumeWeight
                     },
                     UseGrossWeight = false,
                     Flags = magayaShipmentDTO.Charges.Charge[i].FreightChargeInfo.Flags,
@@ -366,7 +367,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 ShipmentItems.Add(
                         new ShipmentItemDTO()
                         {
-                            Description = magayaShipmentDTO.Items[i].Description,
+                            Description = magayaShipmentDTO.Items[i].Description, 
                             ShipmentType = ShipmentType.Regular,
                             Weight = magayaShipmentDTO.TotalWeight.Value,
                             Nature = "Normal",
