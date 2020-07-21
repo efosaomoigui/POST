@@ -4674,7 +4674,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else
                     {
-                        throw new GenericException("Shipment cannot be cancelled because it has been processed.", $"{(int)HttpStatusCode.Forbidden}");
+                        throw new GenericException($"Shipment cannot be cancelled because it has a current status of {preshipmentmobile.shipmentstatus}.", $"{(int)HttpStatusCode.Forbidden}");
                     }
                 }
                 //FOR PARTNER TRYING TO CANCEL  A SHIPMENT
