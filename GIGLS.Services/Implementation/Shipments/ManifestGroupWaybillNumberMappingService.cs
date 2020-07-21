@@ -3,6 +3,7 @@ using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Fleets;
+using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IServices.Shipments;
@@ -147,7 +148,16 @@ namespace GIGLS.Services.Implementation.Shipments
                 var manifestMappingList = await _uow.Manifest.FindAsync(x => x.SuperManifestCode == superManifestCode);
 
                 var manifestDTOs = Mapper.Map<List<ManifestDTO>>(manifestMappingList);
+                foreach(var manifest in manifestDTOs)
+                {
+                    var departureServiceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == manifest.DepartureServiceCentreId);
+                    var destinationServiceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == manifest.DestinationServiceCentreId);
 
+                    manifest.DepartureServiceCentre = Mapper.Map<ServiceCentreDTO>(departureServiceCentre);
+                    manifest.DestinationServiceCentre = Mapper.Map<ServiceCentreDTO>(destinationServiceCentre);
+                }
+
+                
                 return manifestDTOs;
             }
             catch (Exception)
