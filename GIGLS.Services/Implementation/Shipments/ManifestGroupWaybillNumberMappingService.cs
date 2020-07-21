@@ -381,6 +381,29 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //remove manifest from super manifest
+        public async Task RemoveManifestFromSuperManifest(string superManifest, string manifest)
+        {
+            try
+            {
+                var manifestObj = _uow.Manifest.SingleOrDefault(x => x.ManifestCode == manifest && x.SuperManifestCode == superManifest);
+
+                if (manifestObj != null)
+                {
+                    manifestObj.HasSuperManifest = false;
+                    manifestObj.SuperManifestCode = null;
+                    manifestObj.SuperManifestStatus = SuperManifestStatus.ArrivedScan;
+                }
+
+                _uow.CompleteAsync();
+                
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<ManifestGroupWaybillNumberMappingDTO>> GetAllManifestGroupWayBillNumberMappings()
         {
             try
@@ -424,9 +447,18 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestSuperManifestMappings(serviceCenters, dateFilterCriteria);
-                
-                return manifestGroupWaybillMapings;
+                var manifestSuperManifestMappings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestSuperManifestMappings(serviceCenters, dateFilterCriteria);
+
+                //group the result by manifest                
+                var resultGroup = manifestSuperManifestMappings.GroupBy(x => x.SuperManifestCode).ToList();
+                var result = new List<ManifestDTO>();
+
+                foreach (var resultGrp in resultGroup)
+                {
+                    result.Add(resultGrp.FirstOrDefault());
+                }
+
+                return result;
             }
             catch (Exception)
             {

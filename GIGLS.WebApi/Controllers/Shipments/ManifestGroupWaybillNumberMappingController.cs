@@ -233,6 +233,21 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "Delete")]
+        [HttpDelete]
+        [Route("removemanifestfromsupermanifest/{superManifest}/{manifest}")]
+        public async Task<IServiceResponse<bool>> RemoveManifestFromSuperManifest(string superManifest, string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.RemoveManifestFromSuperManifest(superManifest, manifest);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("getmanifestforwaybill/{waybill}")]
