@@ -139,6 +139,23 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //Get Manifests attached to Super Manifest
+        public async Task<List<ManifestDTO>> GetManifestsInSuperManifest(string superManifestCode)
+        {
+            try
+            {
+                var manifestMappingList = await _uow.Manifest.FindAsync(x => x.SuperManifestCode == superManifestCode);
+
+                var manifestDTOs = Mapper.Map<List<ManifestDTO>>(manifestMappingList);
+
+                return manifestDTOs;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         //Get  30 Waybills in a list of objects containing manifests for Riders Delivery Progress Page
         public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInListOfManifest(string captainId)
         {
@@ -146,11 +163,11 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var baselineDate = DateTime.Today.AddDays(-30);
 
-                
+
                 //1. get all dispatch for that captain -- update this to get the data from the database instead of app memory
                 var dispatchResult = _uow.Dispatch.GetAll().Where(x => x.DriverDetail.Equals(captainId) && x.DateCreated >= baselineDate)
                                                             .ToList();
-                                                                    
+
                 var dispatchResultDTO = Mapper.Map<List<DispatchDTO>>(dispatchResult);
 
                 //2. get the manifest waybill mapping
@@ -167,7 +184,7 @@ namespace GIGLS.Services.Implementation.Shipments
         public async Task<List<ManifestWaybillMappingDTO>> GetAllWaybillsinListOfManifest(string captainId, DateFilterCriteria dateFilterCriteria)
         {
             try
-            {                                
+            {
                 var dispatchresult = await _uow.ManifestWaybillMapping.GetWaybillsinManifestMappings(captainId, dateFilterCriteria);
 
                 //2. get the manifest waybill mapping
@@ -185,7 +202,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 List<ManifestWaybillMappingDTO> finalResult = new List<ManifestWaybillMappingDTO>();
-                
+
                 foreach (var dispatch in dispatchList)
                 {
                     //for only delivery manifest
@@ -246,7 +263,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException($"Error: The Manifest: {manifestObj.ManifestCode} assigned to this Group Waybill has already been dispatched.");
                     }
                 }
-                
+
                 //convert the list to HashSet to remove duplicate
                 var newGroupWaybillNumberList = new HashSet<string>(groupWaybillNumberList);
 
@@ -296,26 +313,6 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 var userId = await _userService.GetCurrentUserId();
 
-                var manifestObj = await _uow.SuperManifest.GetAsync(x => x.SuperManifestCode.Equals(superManifest));
-
-                //validate the ids are in the system
-                if (manifestObj == null)
-                {
-                    var newManifest = new SuperManifest
-                    {
-                        DateTime = DateTime.Now,
-                        SuperManifestCode = superManifest
-                    };
-                    _uow.SuperManifest.Add(newManifest);
-                }
-                else
-                {
-                    //ensure that the Super Manifest containing the Manifest has not been dispatched
-                    if (manifestObj.IsDispatched)
-                    {
-                        throw new GenericException($"Error: The Super Manifest: {manifestObj.SuperManifestCode} assigned to this Manifest has already been dispatched.");
-                    }
-                }
 
                 //convert the list to HashSet to remove duplicate
                 var newManifestList = new HashSet<string>(manifestList);
@@ -329,34 +326,17 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException($"No Manifest exists for this number: {manifestCode}");
                     }
 
-
-                    //check if Manifest has not been added to Super Manifest 
-                    var isManifestMapped = await _uow.SuperManifestToManifestMapping.ExistAsync(x => x.SuperManifestCode == superManifest && x.Manifest == manifestCode);
-
-                    //if the manifest has not been added to super manifest, add it
-                    if (!isManifestMapped)
+                    if(manifestDTO.SuperManifestStatus == SuperManifestStatus.Dispatched)
                     {
-                        
-                        //Add new Mapping
-                        var newMapping = new SuperManifestToManifestMapping
-                        {
-                            SuperManifestCode = superManifest,
-                            Manifest = manifestDTO.ManifestCode,
-                            IsActive = true,
-                            DateMapped = DateTime.Now
-                        };
-
-                        _uow.SuperManifestToManifestMapping.Add(newMapping);
-
-                        //Update The Manifest HasuperManifest to True
-                        var manifest = await _uow.Manifest.GetAsync(manifestDTO.ManifestId);
-                        manifest.HasSuperManifest = true;
-
-                        //Update The Transit Manifest HasSuperManifest to True
-                        var transitManifest = await _uow.TransitManifest.GetAsync(x => x.ManifestCode == manifestDTO.ManifestCode);
-                        transitManifest.HasSuperManifest = true;
-
+                        throw new GenericException($"Error: The Super Manifest: {manifestDTO.SuperManifestCode} assigned to this {manifestDTO.ManifestCode} has already been dispatched.");
                     }
+
+                    //Update The Manifest 
+                    var manifest = await _uow.Manifest.GetAsync(manifestDTO.ManifestId);
+                    manifest.HasSuperManifest = true;
+                    manifest.SuperManifestCode = superManifest;
+                    manifest.SuperManifestStatus = SuperManifestStatus.AssignedSuperManifest;
+
                 }
                 await _uow.CompleteAsync();
             }
@@ -439,6 +419,22 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<IEnumerable<ManifestDTO>> GetAllManifestSuperManifestMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            try
+            {
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var manifestGroupWaybillMapings = await _uow.ManifestGroupWaybillNumberMapping.GetManifestSuperManifestMappings(serviceCenters, dateFilterCriteria);
+                
+                return manifestGroupWaybillMapings;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
         //Get Manifest For GroupWaybillNumber
         public async Task<ManifestGroupWaybillNumberMappingDTO> GetManifestForWaybill(string waybill)
         {
@@ -502,7 +498,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        
+
         public async Task<string> MoveManifestDetailToNewManifest(string manifestCode)
         {
             string newManifestCode = null;
@@ -522,7 +518,7 @@ namespace GIGLS.Services.Implementation.Shipments
             //Get ManifestGroupWaybill Detail
             var manifestGroupWaybills = await _uow.ManifestGroupWaybillNumberMapping.FindAsync(x => x.ManifestCode == manifestCode);
 
-            if(manifestGroupWaybills.Any())
+            if (manifestGroupWaybills.Any())
             {
                 var arrGrpWaybills = manifestGroupWaybills.Select(x => x.GroupWaybillNumber).ToArray();
 
@@ -547,14 +543,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     ManifestCode = newManifestCode,
                     DateTime = DateTime.Now
                 };
-                _uow.Manifest.Add(newManifest);                
+                _uow.Manifest.Add(newManifest);
 
                 //add tracking history
                 var arrWaybills = groupWaybillMapping.Select(x => x.WaybillNumber).ToList();
                 await ProcessScanning(arrWaybills, serviceCenters[0]);
-            }  
-            
-            if(newManifestCode == null)
+            }
+
+            if (newManifestCode == null)
             {
                 throw new GenericException($"No Waybill was attached to the Manifest {manifestCode}");
             }
@@ -566,9 +562,9 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             var currentUserId = await _userService.GetCurrentUserId();
             var serviceCenterDetail = await _uow.ServiceCentre.GetAsync(serviceCentre);
-            
+
             List<ShipmentTracking> data = new List<ShipmentTracking>();
-            
+
             foreach (var waybill in waybills)
             {
                 var newShipmentTracking = new ShipmentTracking

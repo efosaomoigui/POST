@@ -55,6 +55,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("supermanifestbydate")]
+        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetAllManifestSuperManifestMappings(DateFilterCriteria dateFilterCriteria)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestSuperManifestMappings = await _service.GetAllManifestSuperManifestMappings(dateFilterCriteria);
+
+                return new ServiceResponse<IEnumerable<ManifestDTO>>
+                {
+                    Object = manifestSuperManifestMappings
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapmultiple")]
@@ -73,7 +89,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapsupermanifest")]
-        public async Task<IServiceResponse<bool>> MappingManifestToGroupWaybillNumber(SuperManifestToManifestMappingDTO data)
+        public async Task<IServiceResponse<bool>> MappingManifestToGroupWaybillNumber(ManifestDTO data)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -147,6 +163,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 return new ServiceResponse<List<GroupWaybillNumberDTO>>
                 {
                     Object = groupWaybillNumbersInManifest
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("manifestsinsupermanifest/code/{manifest}")]
+        public async Task<IServiceResponse<List<ManifestDTO>>> GetManifestInSuperManifest(string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifestsInSuperManifest = await _service.GetManifestsInSuperManifest(manifest);
+
+                return new ServiceResponse<List<ManifestDTO>>
+                {
+                    Object = manifestsInSuperManifest
                 };
             });
         }

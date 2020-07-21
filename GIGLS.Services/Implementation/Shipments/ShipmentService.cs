@@ -1681,18 +1681,18 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task<List<TransitManifestDTO>> GetUnmappedManifestListForServiceCentre(FilterOptionsDto filterOptionsDto)
+        public async Task<List<ManifestDTO>> GetUnmappedManifestListForServiceCentre(FilterOptionsDto filterOptionsDto)
         {
             try
             {
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
-                //Get transit manifest not yet added to super manifest for the login user
-                var transitManifestBySc = _uow.TransitManifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false);
+                //Get manifest not yet added to super manifest for the login user
+                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false && x.SuperManifestStatus == SuperManifestStatus.ArrivedScan);
 
                 if (serviceCenters.Length > 0)
                 {
-                    transitManifestBySc = transitManifestBySc.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                    manifestBySc = manifestBySc.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
                 }
 
                 //Filter it by the destination service centre send from filter option
@@ -1700,18 +1700,19 @@ namespace GIGLS.Services.Implementation.Shipments
                 int filterValue = Convert.ToInt32(filterOptionsDto.filterValue);
                 if (!string.IsNullOrEmpty(filter) && filterValue > 0)
                 {
-                    transitManifestBySc = transitManifestBySc.Where(s => s.DestinationServiceCentreId == filterValue);
+                    manifestBySc = manifestBySc.Where(s => s.DestinationServiceCentreId == filterValue);
                 }
 
-                var result = transitManifestBySc.ToList();
+                var result = manifestBySc.ToList();
 
-                var resultDTO = Mapper.Map<List<TransitManifestDTO>>(result);
+                var resultDTO = Mapper.Map<List<ManifestDTO>>(result);
 
-                var DestinationServiceCentre = await _uow.ServiceCentre.GetAsync(filterValue);
+                var destinationServiceCentre = await _uow.ServiceCentre.GetAsync(filterValue);
+                var destServiceCentreDTO = Mapper.Map<ServiceCentreDTO>(destinationServiceCentre);
 
                 foreach (var item in resultDTO)
                 {
-                    item.DestinationServiceCentre = DestinationServiceCentre;
+                    item.DestinationServiceCentre = destServiceCentreDTO;
                 }
 
                 return resultDTO;
@@ -1756,20 +1757,20 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                // get manifests in TransitManifest Table that have not been mapped to a super manifest
+                // get manifests that have not been mapped to a super manifest
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-                var transitManifests = _uow.TransitManifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false);
+                var manifests = _uow.Manifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false && x.SuperManifestStatus == SuperManifestStatus.ArrivedScan);
 
 
                 //get all manifest that for that service center
                 if (serviceCenters.Length > 0)
                 {
-                    transitManifests = transitManifests.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                    manifests = manifests.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
                 }
 
                 //Filter the service centre details using the destination of the manifest
                 var allServiceCenters = _uow.ServiceCentre.GetAllAsQueryable();
-                var result = allServiceCenters.Where(s => transitManifests.Any(x => x.DestinationServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
+                var result = allServiceCenters.Where(s => manifests.Any(x => x.DestinationServiceCentreId == s.ServiceCentreId)).Select(p => p.ServiceCentreId).ToList();
 
                 //Fetch all Service Centre including their Station Detail into Memory
                 var allServiceCenterDTOs = await _centreService.GetServiceCentres();

@@ -219,9 +219,6 @@
     <Compile Include="Persistence\Repositories\Shipments\ShipmentRerouteRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentReturnRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\ShipmentTrackingRepository.cs" />
-    <Compile Include="Persistence\Repositories\Shipments\SuperManifestRepository.cs" />
-    <Compile Include="Persistence\Repositories\Shipments\SuperManifestToManifestMappingRepository.cs" />
-    <Compile Include="Persistence\Repositories\Shipments\TransitManifestRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\TransitWaybillNumberRepository.cs" />
     <Compile Include="Persistence\Repositories\Shipments\WaybillNumberRepository.cs" />
     <Compile Include="Persistence\Repositories\Sla\SLARepository.cs" />

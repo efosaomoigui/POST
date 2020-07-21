@@ -258,9 +258,6 @@
     <Compile Include="Domain\SubCategory.cs" />
     <Compile Include="Domain\SubNav.cs" />
     <Compile Include="Domain\SubSubNav.cs" />
-    <Compile Include="Domain\SuperManifest.cs" />
-    <Compile Include="Domain\SuperManifestToManifestMapping.cs" />
-    <Compile Include="Domain\TransitManifest.cs" />
     <Compile Include="Domain\TransitWaybillNumber.cs" />
     <Compile Include="Domain\User.cs" />
     <Compile Include="Domain\UserLoginEmail.cs" />
@@ -429,8 +426,6 @@
     <Compile Include="DTO\Shipments\PreShipmentMobileDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentDetailDanfoDTO.cs" />
     <Compile Include="DTO\Shipments\ShipmentHashDTO.cs" />
-    <Compile Include="DTO\Shipments\SuperManifestDTO.cs" />
-    <Compile Include="DTO\Shipments\SuperManifestToManifestMappingDTO.cs" />
     <Compile Include="DTO\Shipments\ThirdPartyPreShipmentItemDTO.cs" />
     <Compile Include="DTO\Shipments\ThirdPartyPreShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\PreShipmentManifestMappingDTO.cs" />
@@ -450,7 +445,6 @@
     <Compile Include="DTO\Shipments\ShipmentTrackingDTO.cs" />
     <Compile Include="DTO\Shipments\ThirdPartyShipmentDTO.cs" />
     <Compile Include="DTO\Shipments\ThirdPartyShipmentItemsDTO.cs" />
-    <Compile Include="DTO\Shipments\TransitManifestDTO.cs" />
     <Compile Include="DTO\Shipments\TransitWaybillNumberDTO.cs" />
     <Compile Include="DTO\Shipments\WaybillNumberDTO.cs" />
     <Compile Include="DTO\SignResponseDTO.cs" />
@@ -549,6 +543,7 @@
     <Compile Include="Enums\StockRequestDestinationType.cs" />
     <Compile Include="Enums\StockRequestSourceType.cs" />
     <Compile Include="Enums\StockRequestStatus.cs" />
+    <Compile Include="Enums\SuperManifestStatus.cs" />
     <Compile Include="Enums\TrackingType.cs" />
     <Compile Include="Enums\UserChannelType.cs" />
     <Compile Include="Enums\UserStatus.cs" />
@@ -669,9 +664,6 @@
     <Compile Include="IRepositories\Shipments\IShipmentRerouteRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentReturnRepository.cs" />
     <Compile Include="IRepositories\Shipments\IShipmentTrackingRepository.cs" />
-    <Compile Include="IRepositories\Shipments\ISuperManifestRepository.cs" />
-    <Compile Include="IRepositories\Shipments\ISuperManifestToManifestMappingRepository.cs" />
-    <Compile Include="IRepositories\Shipments\ITransitManifestRepository.cs" />
     <Compile Include="IRepositories\Shipments\ITransitWaybillNumberRepository.cs" />
     <Compile Include="IRepositories\Shipments\IWaybillNumberRepository.cs" />
     <Compile Include="IRepositories\Sla\ISLARepository.cs" />
@@ -812,7 +804,6 @@
     <Compile Include="IServices\Shipments\IShipmentService.cs" />
     <Compile Include="IServices\Shipments\IShipmentTrackingService.cs" />
     <Compile Include="IServices\Shipments\ISuperManifestService.cs" />
-    <Compile Include="IServices\Shipments\ITransitManifestService.cs" />
     <Compile Include="IServices\Shipments\ITransitWaybillNumberService.cs" />
     <Compile Include="IServices\Shipments\IWaybillNumberService.cs" />
     <Compile Include="IServices\Sla\ISLAService.cs" />

@@ -316,15 +316,15 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("unmappedmanifestlistforservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<TransitManifestDTO>>> GetUnmappedManifestListForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestListForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var unmappedGroupWaybills = await _service.GetUnmappedManifestListForServiceCentre(filterOptionsDto);
-                return new ServiceResponse<IEnumerable<TransitManifestDTO>>
+                var unmappedManifest = await _service.GetUnmappedManifestListForServiceCentre(filterOptionsDto);
+                return new ServiceResponse<IEnumerable<ManifestDTO>>
                 {
-                    Object = unmappedGroupWaybills,
-                    Total = unmappedGroupWaybills.Count
+                    Object = unmappedManifest,
+                    Total = unmappedManifest.Count
                 };
             });
         }

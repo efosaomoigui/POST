@@ -470,15 +470,6 @@ namespace GIGLS.Infrastructure.Persistence
         [Inject]
         public IEcommerceAgreementRepository EcommerceAgreement { get; set; }
 
-        [Inject]
-        public ISuperManifestRepository SuperManifest { get; set; }
-
-        [Inject]
-        public ISuperManifestToManifestMappingRepository SuperManifestToManifestMapping { get; set; }
-
-        [Inject]
-        public ITransitManifestRepository TransitManifest { get; set; }
-
         public int Complete()
         {
             return _context.SaveChanges();
