@@ -443,7 +443,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
 
                 //Receivers Details
                 shipmentDTO.ReceiverName = magayaShipmentDTO.ConsigneeAddress.ContactName;
-                shipmentDTO.ReceiverPhoneNumber = magayaShipmentDTO.ConsigneeAddress.Street[0];
+                shipmentDTO.ReceiverPhoneNumber = magayaShipmentDTO.ConsigneeAddress.ContactPhone;
                 shipmentDTO.ReceiverEmail = magayaShipmentDTO.ConsigneeAddress.ContactEmail;
                 shipmentDTO.ReceiverAddress = magayaShipmentDTO.ConsigneeAddress.Street[0];
                 shipmentDTO.ReceiverCity = magayaShipmentDTO.ConsigneeAddress.City;
