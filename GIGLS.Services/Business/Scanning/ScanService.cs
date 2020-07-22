@@ -435,8 +435,7 @@ namespace GIGLS.Services.Business.Scanning
             if (result.WaybillsInManifest.Any())
             {
                 waybillsInManifest = result.WaybillsInManifest;
-            }
-                
+            }                
 
             if (shipment == null && groupWaybill == null && manifest == null && (!result.ListOfManifests.Any()))
             {
@@ -447,6 +446,7 @@ namespace GIGLS.Services.Business.Scanning
             {
                 if (result.ListOfManifests.Any())
                 {
+                    //do multiple entry at once, I mentioned that yesterday
                     foreach(var manifestEntity in result.ListOfManifests)
                     {
                         //Create Entries for Scan status with ACC
@@ -457,8 +457,7 @@ namespace GIGLS.Services.Business.Scanning
                 {
                     //Create Entries for Scan status with ACC
                     await CheckAndCreateManifestEntriesForSuperManifest(scan, manifest);
-                }
-                
+                }                
             }
             else
             {
@@ -483,12 +482,14 @@ namespace GIGLS.Services.Business.Scanning
 
             var listOfManifests = listOfManifestsinSuperManifest.Where(p => p.IsDispatched == true && p.ManifestType == ManifestType.Transit).ToList();
 
+            //check this code, you already filter by true status on line 484, how can false happen???
             if(listOfManifestsinSuperManifest.Any(p => p.IsDispatched == false))
             {
                 throw new GenericException($"Manifest: was not dispatched. Kindly inform your Regional Manager");
             }
 
-            if(listOfManifestsinSuperManifest.Any(p => p.ManifestType == ManifestType.Transit))
+            //check this code, you already filter by manifest type on line 484, how can this will happen???
+            if (listOfManifestsinSuperManifest.Any(p => p.ManifestType == ManifestType.Transit))
             {
                 foreach(var manifest in listOfManifestsinSuperManifest)
                 {
@@ -574,12 +575,12 @@ namespace GIGLS.Services.Business.Scanning
                             }
                         }
 
+                        //The code only execute if the scan status is ACC, trace your code to see what you are doing wrong & fix it
                         //Create Entries for Scan status with ACC
                         await CheckAndCreateManifestEntriesForSuperManifest(scan, manifest);
                     }
                 }
             }
-
             else
             {
                 throw new GenericException($"Manifest: is not a Transit Manifest");
