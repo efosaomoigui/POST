@@ -2296,6 +2296,12 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
+
+                    if (preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString())
+                    {
+                        throw new GenericException($"Error processing shipment. This Shipment has already been cancelled", $"{(int)HttpStatusCode.Forbidden}");
+                    }
+
                     if (pickuprequest.Status == MobilePickUpRequestStatus.Rejected.ToString() || pickuprequest.Status == MobilePickUpRequestStatus.TimedOut.ToString()
                        || pickuprequest.Status == MobilePickUpRequestStatus.Missed.ToString())
                     {
@@ -2548,6 +2554,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 if (pickuprequest == null)
                 {
                     throw new GenericException("Null INPUT");
+                }
+
+                //Block Process for any cancelled shipment
+                var shipmentCancelled = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == pickuprequest.Waybill && x.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString());
+                if(shipmentCancelled != null)
+                {
+                    throw new GenericException($"Error processing shipment. This Shipment has already been cancelled", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 var userId = await _userService.GetCurrentUserId();
@@ -3538,9 +3551,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 if (preShipment.PreShipmentItems.Any())
                 {
+                    int[] PreShipmentItemMobileIds = preShipment.PreShipmentItems.Select(i => i.PreShipmentItemMobileId).ToArray();
+
                     //fetch all items from DB at once & update them in the memory
                     var preShipmentMobileItemToBeUpdated = _uow.PreShipmentItemMobile.GetAllAsQueryable()
-                        .Where(x => preShipment.PreShipmentItems.Select(i => i.PreShipmentItemMobileId).Contains(x.PreShipmentItemMobileId) && x.PreShipmentMobileId == preShipment.PreShipmentMobileId).ToList();
+                        .Where(x => PreShipmentItemMobileIds.Contains(x.PreShipmentItemMobileId) && x.PreShipmentMobileId == preShipment.PreShipmentMobileId).ToList();
 
                     if (preShipmentMobileItemToBeUpdated.Any())
                     {
@@ -3674,13 +3689,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Shipment does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
-                var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-
                 var pickuprequests = await _uow.MobilePickUpRequests.GetAsync(s => s.Waybill == preshipmentmobile.Waybill && (s.Status != MobilePickUpRequestStatus.Rejected.ToString() || s.Status != MobilePickUpRequestStatus.TimedOut.ToString()));
                 if (pickuprequests != null)
                 {
                     var pickuprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId, preshipmentmobile.UserId = null);
-                    updatedwallet.Balance = ((updatedwallet.Balance + preshipmentmobile.GrandTotal) - Convert.ToDecimal(pickuprice));
                     var Partnersprice = (0.4M * Convert.ToDecimal(pickuprice));
 
                     var rider = await _userService.GetUserById(pickuprequests.UserId);
@@ -3689,6 +3701,10 @@ namespace GIGLS.Services.Implementation.Shipments
 
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
                     pickuprequests.Status = MobilePickUpRequestStatus.Cancelled.ToString();
+
+                    //update wallet transaction for customer 
+                    decimal amount = preshipmentmobile.GrandTotal - Convert.ToDecimal(pickuprice);
+                    await UpdateCustomerWalletForCancelledShipment(preshipmentmobile.CustomerCode, preshipmentmobile.Waybill, amount);
 
                     var partnertransactions = new PartnerTransactionsDTO
                     {
@@ -3702,7 +3718,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 else
                 {
                     preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
-                    updatedwallet.Balance = ((updatedwallet.Balance + preshipmentmobile.GrandTotal));
+                    await UpdateCustomerWalletForCancelledShipment(preshipmentmobile.CustomerCode, preshipmentmobile.Waybill, preshipmentmobile.GrandTotal);
                 }
                 await _uow.CompleteAsync();
                 return new { IsCancelled = true };
@@ -3711,6 +3727,50 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+        public async Task UpdateCustomerWalletForCancelledShipment(string customerCode,  string waybill, decimal amount)
+        {
+            var user = await _userService.GetCurrentUserId();
+            var defaultServiceCenter = await _userService.GetGIGGOServiceCentre();
+            var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == customerCode);
+
+            if (updatedwallet == null)
+            {
+                throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            //Add wallet transaction
+            var transaction = new WalletTransactionDTO
+            {
+                WalletId = updatedwallet.WalletId,
+                CreditDebitType = CreditDebitType.Credit,
+                Amount = amount,
+                ServiceCentreId = defaultServiceCenter.ServiceCentreId,
+                Waybill = waybill,
+                Description = "Cancelled Shipment",
+                PaymentType = PaymentType.Online,
+                UserId = user
+            };
+            var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
+
+            //Compute wallete transactions for the customer and update the wallet
+            var walletTransactionHistory = await _uow.WalletTransaction.FindAsync(s => s.WalletId == updatedwallet.WalletId);
+            decimal balance = 0;
+            foreach (var item in walletTransactionHistory)
+            {
+                if (item.CreditDebitType == CreditDebitType.Credit)
+                {
+                    balance += item.Amount;
+                }
+                else
+                {
+                    balance -= item.Amount;
+                }
+            }
+
+            updatedwallet.Balance = balance;
+            await _uow.CompleteAsync();
         }
 
         public async Task<object> AddRatings(MobileRatingDTO rating)
@@ -4619,24 +4679,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (preshipmentmobile.shipmentstatus == "Shipment created" || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Rejected.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.TimedOut.ToString())
                     {
                         preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.Cancelled.ToString();
+                        await UpdateCustomerWalletForCancelledShipment(preshipmentmobile.CustomerCode, preshipmentmobile.Waybill, preshipmentmobile.GrandTotal);
 
-                        var defaultServiceCenter = await _userService.GetGIGGOServiceCentre();
-                        var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                        updatedwallet.Balance = ((updatedwallet.Balance + preshipmentmobile.GrandTotal));
-
-                        var transaction = new WalletTransactionDTO
-                        {
-                            WalletId = updatedwallet.WalletId,
-                            CreditDebitType = CreditDebitType.Credit,
-                            Amount = preshipmentmobile.GrandTotal,
-                            ServiceCentreId = defaultServiceCenter.ServiceCentreId,
-                            Waybill = preshipmentmobile.Waybill,
-                            Description = "Cancelled Shipment",
-                            PaymentType = PaymentType.Online,
-                            UserId = preshipmentmobile.UserId
-                        };
-
-                        var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
                         await ScanMobileShipment(new ScanDTO
                         {
                             WaybillNumber = Waybill,
@@ -4645,7 +4689,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     else
                     {
-                        throw new GenericException("Shipment cannot be cancelled because it has been processed.", $"{(int)HttpStatusCode.Forbidden}");
+                        throw new GenericException($"Shipment cannot be cancelled because it has a current status of {preshipmentmobile.shipmentstatus}.", $"{(int)HttpStatusCode.Forbidden}");
                     }
                 }
                 //FOR PARTNER TRYING TO CANCEL  A SHIPMENT
