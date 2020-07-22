@@ -275,7 +275,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 if (paymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
                 {
-                    response = await _flutterwavePaymentService.VerifyAndValidateMobilePayment(paymentLog.Reference);
+                    response = await _ussdService.VerifyAndValidatePayment(paymentLog.Reference);
                 }
 
                 return response;
@@ -546,6 +546,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw ex;
             }
         }
+
 
         //private async Task<USSDResponse> ProcessPaymentForUSSDOld(WaybillPaymentLogDTO waybillPaymentLog)
         //{

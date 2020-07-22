@@ -29,5 +29,8 @@ namespace GIGLS.Core.Domain.Wallet
         public OnlinePaymentType OnlinePaymentType { get; set; }
 
         public int PaymentCountryId { get; set; }
+
+        [MaxLength(100)]
+        public string ExternalReference { get; set; }
     }
 }

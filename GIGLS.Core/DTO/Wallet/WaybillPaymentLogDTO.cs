@@ -113,6 +113,7 @@ namespace GIGLS.Core.DTO.Wallet
     {
         public string Message { get; set; }
         public string Order_Id { get; set; }
+        public string Status { get; set; }
     }
 
     public class USSDDTO
