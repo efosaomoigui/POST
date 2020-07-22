@@ -31,15 +31,17 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IPasswordGenerator _passwordGenerator;
         private readonly IPaystackPaymentService _paystackService;
         private readonly IFlutterwavePaymentService _flutterwavePaymentService;
+        private readonly IUssdService _ussdService;
 
         public WaybillPaymentLogService(IUnitOfWork uow, IUserService userService, IPasswordGenerator passwordGenerator,
-            IPaystackPaymentService paystackService, IFlutterwavePaymentService flutterwavePaymentService)
+            IPaystackPaymentService paystackService, IFlutterwavePaymentService flutterwavePaymentService, IUssdService ussdService)
         {
             _uow = uow;
             _userService = userService;
             _passwordGenerator = passwordGenerator;
             _paystackService = paystackService;
             _flutterwavePaymentService = flutterwavePaymentService;
+            _ussdService = ussdService;
             MapperConfig.Initialize();
         }
 
@@ -270,6 +272,12 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     response = await _flutterwavePaymentService.VerifyAndValidateMobilePayment(paymentLog.Reference);
                 }
+
+                if (paymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
+                {
+                    response = await _flutterwavePaymentService.VerifyAndValidateMobilePayment(paymentLog.Reference);
+                }
+
                 return response;
             }
                         
@@ -505,6 +513,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 response.Status = false;
                 response.Message = ussdResponse.Message;
                 response.data.Message = ussdResponse.Message;
+                response.data.Status = ussdResponse.Status;
 
                 //       "status": "error",
                 //      "message": "I lost my glasses so I am finding it hard to find your credentials on the list of authorised users. Help look for my glasses."
@@ -518,66 +527,90 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             try
             {
-                var responseResult = new USSDResponse();
+                string countryCode = waybillPaymentLog.Currency.Length <= 2 ? waybillPaymentLog.Currency : waybillPaymentLog.Currency.Substring(0, 2);
 
-                //1. Get Token  
-                string token = ConfigurationManager.AppSettings["UssdToken"];
-                string privateKey = ConfigurationManager.AppSettings["UssdPrivateKey"];
-
-                string merchantId = ConfigurationManager.AppSettings["UssdMerchantID"];
-                string baseUrl = ConfigurationManager.AppSettings["UssdOgaranyaAPI"];
-
-                //2. Encrypt token and private_key to generate public key 
-                string publicKey = GetPublicKey(token, privateKey);
-
-                //3.Post the data
                 var ussdData = new USSDDTO
                 {
                     amount = (int)waybillPaymentLog.Amount,
                     msisdn = waybillPaymentLog.PhoneNumber,
                     desc = waybillPaymentLog.Waybill,
-                    reference = waybillPaymentLog.Reference
+                    reference = waybillPaymentLog.Reference,
+                    country_code = countryCode
                 };
 
-                string countryCode = waybillPaymentLog.Currency.Length <= 2 ? waybillPaymentLog.Currency : waybillPaymentLog.Currency.Substring(0, 2);
-                string pay01Url = baseUrl + merchantId + "/pay/" + countryCode;
-
-                using (var client = new HttpClient())
-                {
-                    client.DefaultRequestHeaders.Accept.Clear();
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    client.DefaultRequestHeaders.Add("token", token);
-                    client.DefaultRequestHeaders.Add("publickey", publicKey);
-
-                    var ussdDataInJson = JsonConvert.SerializeObject(ussdData);
-                    var data = new StringContent(ussdDataInJson, Encoding.UTF8, "application/json");
-                    var response = await client.PostAsync(pay01Url, data);
-                    string result = await response.Content.ReadAsStringAsync();
-
-                    responseResult = JsonConvert.DeserializeObject<USSDResponse>(result);
-                }
+                var responseResult = await _ussdService.ProcessPaymentForUSSD(ussdData);
                 return responseResult;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw ex;
             }
         }
 
-        private string GetPublicKey(string token, string privateKey)
-        {
-            string publicKey = string.Empty;
+        //private async Task<USSDResponse> ProcessPaymentForUSSDOld(WaybillPaymentLogDTO waybillPaymentLog)
+        //{
+        //    try
+        //    {
+        //        var responseResult = new USSDResponse();
 
-            var bytes = Encoding.UTF8.GetBytes(token + privateKey);
+        //        //1. Get Token  
+        //        string token = ConfigurationManager.AppSettings["UssdToken"];
+        //        string privateKey = ConfigurationManager.AppSettings["UssdPrivateKey"];
 
-            using(var hash = new SHA512Managed())
-            {
-                var hashedData =  hash.ComputeHash(bytes);
-                publicKey = BitConverter.ToString(hashedData).Replace("-", "").ToLower();
-            }
+        //        string merchantId = ConfigurationManager.AppSettings["UssdMerchantID"];
+        //        string baseUrl = ConfigurationManager.AppSettings["UssdOgaranyaAPI"];
 
-            return publicKey;
-        }
+        //        //2. Encrypt token and private_key to generate public key 
+        //        string publicKey = GetPublicKey(token, privateKey);
+
+        //        //3.Post the data
+        //        var ussdData = new USSDDTO
+        //        {
+        //            amount = (int)waybillPaymentLog.Amount,
+        //            msisdn = waybillPaymentLog.PhoneNumber,
+        //            desc = waybillPaymentLog.Waybill,
+        //            reference = waybillPaymentLog.Reference
+        //        };
+
+        //        string countryCode = waybillPaymentLog.Currency.Length <= 2 ? waybillPaymentLog.Currency : waybillPaymentLog.Currency.Substring(0, 2);
+        //        string pay01Url = baseUrl + merchantId + "/pay/" + countryCode;
+
+        //        using (var client = new HttpClient())
+        //        {
+        //            client.DefaultRequestHeaders.Accept.Clear();
+        //            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        //            client.DefaultRequestHeaders.Add("token", token);
+        //            client.DefaultRequestHeaders.Add("publickey", publicKey);
+
+        //            var ussdDataInJson = JsonConvert.SerializeObject(ussdData);
+        //            var data = new StringContent(ussdDataInJson, Encoding.UTF8, "application/json");
+        //            var response = await client.PostAsync(pay01Url, data);
+        //            string result = await response.Content.ReadAsStringAsync();
+
+        //            responseResult = JsonConvert.DeserializeObject<USSDResponse>(result);
+        //        }
+        //        return responseResult;
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //}
+
+        //private string GetPublicKey(string token, string privateKey)
+        //{
+        //    string publicKey = string.Empty;
+
+        //    var bytes = Encoding.UTF8.GetBytes(token + privateKey);
+
+        //    using(var hash = new SHA512Managed())
+        //    {
+        //        var hashedData =  hash.ComputeHash(bytes);
+        //        publicKey = BitConverter.ToString(hashedData).Replace("-", "").ToLower();
+        //    }
+
+        //    return publicKey;
+        //}
 
     }
 }
