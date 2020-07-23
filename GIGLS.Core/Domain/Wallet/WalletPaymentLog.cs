@@ -30,7 +30,10 @@ namespace GIGLS.Core.Domain.Wallet
 
         public int PaymentCountryId { get; set; }
 
-        [MaxLength(100)]
+        [MaxLength(50)]
         public string ExternalReference { get; set; }
+
+        [MaxLength(20)]
+        public string PhoneNumber { get; set; }
     }
 }

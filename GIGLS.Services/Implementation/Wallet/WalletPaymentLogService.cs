@@ -15,6 +15,7 @@ using PayStack.Net;
 using System.Configuration;
 using GIGLS.CORE.DTO.Report;
 using System.Net;
+using GIGLS.Core.Enums;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -22,10 +23,12 @@ namespace GIGLS.Services.Implementation.Wallet
     {
         private readonly IUserService _userService;
         private readonly IUnitOfWork _uow;
+        private readonly IUssdService _ussdService;
 
-        public WalletPaymentLogService(IUserService userService, IUnitOfWork uow)
+        public WalletPaymentLogService(IUserService userService, IUnitOfWork uow, IUssdService ussdService)
         {
             _userService = userService;
+            _ussdService = ussdService;
             _uow = uow;
             MapperConfig.Initialize();
         }
@@ -55,7 +58,7 @@ namespace GIGLS.Services.Implementation.Wallet
             return walletPaymentLogView;
         }
 
-        public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
+        public async Task<object> AddWalletPaymentLogOld(WalletPaymentLogDTO walletPaymentLogDto)
         {
             if (walletPaymentLogDto.UserId == null)
             {
@@ -81,6 +84,108 @@ namespace GIGLS.Services.Implementation.Wallet
             _uow.WalletPaymentLog.Add(walletPaymentLog);
             await _uow.CompleteAsync();
             return new { id = walletPaymentLog.WalletPaymentLogId };
+        }
+
+        public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
+        {
+            if (walletPaymentLogDto.UserId == null)
+            {
+                walletPaymentLogDto.UserId = await _userService.GetCurrentUserId();
+            }
+
+            string customerCode = string.Empty;
+
+            //Get the Customer Activity country
+            if (walletPaymentLogDto.PaymentCountryId == 0)
+            {
+                //use the current user id to get the country of the user
+                var user = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
+                walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
+                customerCode = user.UserChannelCode;
+
+                //set Nigeria as default country if no country assign for the customer
+                if (walletPaymentLogDto.PaymentCountryId == 0)
+                {
+                    walletPaymentLogDto.PaymentCountryId = 1;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(customerCode))
+            {
+                var customer = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
+                customerCode = customer.UserChannelCode;
+            }
+
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customerCode);
+            if (wallet != null)
+            {
+                walletPaymentLogDto.WalletId = wallet.WalletId;
+            }
+
+            var walletPaymentLog = Mapper.Map<WalletPaymentLog>(walletPaymentLogDto);
+            walletPaymentLog.Wallet = null;
+            _uow.WalletPaymentLog.Add(walletPaymentLog);
+            await _uow.CompleteAsync();
+            return new { id = walletPaymentLog.WalletPaymentLogId };
+        }
+
+        public async Task<USSDResponse> InitiatePaymentUsingUSSD(WalletPaymentLogDTO walletPaymentLogDto)
+        {
+            walletPaymentLogDto.OnlinePaymentType = OnlinePaymentType.USSD;
+            string phoneNumber = string.Empty;
+
+            //1. Get the country of the user
+            if (walletPaymentLogDto.UserId == null)
+            {
+                walletPaymentLogDto.UserId = await _userService.GetCurrentUserId();
+            }
+
+            //Get the Customer Activity country
+            if (walletPaymentLogDto.PaymentCountryId == 0)
+            {
+                //use the current user id to get the country of the user
+                var user = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
+                walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
+                phoneNumber = user.PhoneNumber;
+
+                //set Nigeria as default country if no country assign for the customer
+                if (walletPaymentLogDto.PaymentCountryId == 0)
+                {
+                    walletPaymentLogDto.PaymentCountryId = 1;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(walletPaymentLogDto.PhoneNumber))
+            {
+                if (string.IsNullOrWhiteSpace(phoneNumber))
+                {
+                    var user = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
+                    phoneNumber = user.PhoneNumber;
+                }
+
+                walletPaymentLogDto.PhoneNumber = phoneNumber;
+            }
+
+            //3. Send reguest to Oga USSD 
+            var ussdResponse = await ProcessPaymentForUSSD(walletPaymentLogDto);
+
+            if (ussdResponse.Status == "success")
+            {
+                if(ussdResponse.data != null)
+                {
+                    walletPaymentLogDto.ExternalReference = ussdResponse.data.Order_Id;
+                }
+
+                //3. Add record to waybill payment log with the order id
+                var newPaymentLog = Mapper.Map<WalletPaymentLog>(walletPaymentLogDto);
+                newPaymentLog.Wallet = null;
+                _uow.WalletPaymentLog.Add(newPaymentLog);
+                await _uow.CompleteAsync();
+
+                //4. Send SMS to the customer phone number
+            }
+
+            return ussdResponse;
         }
 
         public async Task PaystackPaymentService(WalletPaymentLogDTO WalletPaymentInfo)
@@ -156,6 +261,36 @@ namespace GIGLS.Services.Implementation.Wallet
             walletPaymentLog.Wallet = null;
             _uow.WalletPaymentLog.Add(walletPaymentLog);
             await _uow.CompleteAsync();
+        }
+
+        private async Task<USSDResponse> ProcessPaymentForUSSD(WalletPaymentLogDTO walletPaymentLogDto)
+        {
+            try
+            {
+                string countryCode = string.Empty;
+
+                var country = await _uow.Country.GetAsync(x => x.CountryId == walletPaymentLogDto.PaymentCountryId);
+                if (country != null)
+                {
+                    countryCode = country.CurrencyCode.Length <= 2 ? country.CurrencyCode : country.CurrencyCode.Substring(0, 2);
+                }
+
+                var ussdData = new USSDDTO
+                {
+                    amount = (int)walletPaymentLogDto.Amount,
+                    msisdn = walletPaymentLogDto.PhoneNumber,
+                    desc = walletPaymentLogDto.UserId,
+                    reference = walletPaymentLogDto.Reference,
+                    country_code = countryCode
+                };
+
+                var responseResult = await _ussdService.ProcessPaymentForUSSD(ussdData);
+                return responseResult;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 

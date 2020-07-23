@@ -43,7 +43,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 string token = ConfigurationManager.AppSettings["UssdToken"];
 
                 //2. Encrypt token and private_key to generate public key 
-                string publicKey = GetPublicKey();
+                string publicKey = GetPublicKey(token);
 
                 ussdDto.country_code = ussdDto.country_code.Length <= 2 ? ussdDto.country_code : ussdDto.country_code.Substring(0, 2);
                 string pay01Url = GetBaseUrl() + "/pay/" + ussdDto.country_code;
@@ -62,6 +62,9 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     responseResult = JsonConvert.DeserializeObject<USSDResponse>(result);
                 }
+
+                //4. Send SMS to the customer phone number
+
                 return responseResult;
             }
             catch (Exception ex)
@@ -80,7 +83,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 string token = ConfigurationManager.AppSettings["UssdToken"];                
 
                 //2. Encrypt token and private_key to generate public key 
-                string publicKey = GetPublicKey();
+                string publicKey = GetPublicKey(token);
 
                 ussdDto.country_code = ussdDto.country_code.Length <= 2 ? ussdDto.country_code : ussdDto.country_code.Substring(0, 2);
 
@@ -109,10 +112,8 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
-        private string GetPublicKey()
-        {
-            //1. Get Token  
-            string token = ConfigurationManager.AppSettings["UssdToken"];
+        private string GetPublicKey(string token)
+        {           
             string privateKey = ConfigurationManager.AppSettings["UssdPrivateKey"];
 
             string publicKey = string.Empty;

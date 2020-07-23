@@ -177,6 +177,12 @@ namespace GIGLS.Services.Business.CustomerPortal
             return walletPaymentLog;
         }
 
+        public async Task<USSDResponse> InitiatePaymentUsingUSSD(WalletPaymentLogDTO walletPaymentLogDto)
+        {
+            var walletPaymentLog = await _wallepaymenttlogService.InitiatePaymentUsingUSSD(walletPaymentLogDto);
+            return walletPaymentLog;
+        }
+
         public async Task<object> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
             //1.check to prevent multiple entries
@@ -781,7 +787,6 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return userDTO;
         }
-
 
         private async Task<bool> CheckRegistrationAccess(UserDTO user)
         {

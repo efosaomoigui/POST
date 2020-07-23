@@ -98,6 +98,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpPost]
+        [Route("initiatepaymentusingussd")]
+        public async Task<IServiceResponse<USSDResponse>> InitiatePaymentUsingUSSD(WalletPaymentLogDTO walletPaymentLogDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var walletPaymentLog = await _portalService.InitiatePaymentUsingUSSD(walletPaymentLogDTO);
+
+                return new ServiceResponse<USSDResponse>
+                {
+                    Object = walletPaymentLog
+                };
+            });
+        }
 
         [HttpPost]
         [Route("paywithpaystack")]
