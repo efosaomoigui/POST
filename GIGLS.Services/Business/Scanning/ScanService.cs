@@ -428,8 +428,6 @@ namespace GIGLS.Services.Business.Scanning
                 }
             }
 
-            //Move this to a method 
-            //The Manifest in Line 205 will not be empty, Look at your code to fix the bug
             /////////////////////////3. Super Manifest
             var result = await ScanWithSuperManifest(scan.WaybillNumber, scan, scanStatus);
             if (result.WaybillsInManifest.Any())
@@ -439,7 +437,7 @@ namespace GIGLS.Services.Business.Scanning
 
             if (shipment == null && groupWaybill == null && manifest == null && (!result.ListOfManifests.Any()))
             {
-                throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} does not exist");
+                throw new GenericException($"Information does not exist for  {scan.WaybillNumber} ");
             }
 
             if (scan.ShipmentScanStatus == ShipmentScanStatus.ACC)
@@ -480,11 +478,6 @@ namespace GIGLS.Services.Business.Scanning
             var waybillsInManifest = new HashSet<string>();
 
             var listOfManifests = listOfManifestsinSuperManifest.Where(p => p.IsDispatched == true && p.ManifestType == ManifestType.Transit).ToList();
-
-            if (!listOfManifestsinSuperManifest.All(listOfManifests.Contains))
-            {
-                throw new GenericException($"Manifest: is not a Transit Manifest or has not been dispatched");
-            }
 
             foreach (var manifest in listOfManifests)
             {
@@ -572,7 +565,6 @@ namespace GIGLS.Services.Business.Scanning
                 }
             }
 
-
             var result = new SuperManifestScanDTO
             {
                 ListOfManifests = listOfManifests,
@@ -580,14 +572,12 @@ namespace GIGLS.Services.Business.Scanning
             };
 
             return result;
-
         }
 
         private async Task<bool> SendEmailOnAttemptedScanOfCancelledShipment(ScanDTO scan)
         {
             //send emails
             var result = await _shipmentTrackingService.SendEmailForAttemptedScanOfCancelledShipments(scan);
-
             return result;
         }
 
@@ -710,6 +700,11 @@ namespace GIGLS.Services.Business.Scanning
                             _uow.GroupWaybillNumber.Remove(groupwaybill);
                             await _uow.CompleteAsync();
                         }
+
+                        //update the manifest to default to suolve super manifest issue
+                        var updateManifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifest.ManifestCode);
+                        updateManifest.SuperManifestStatus = SuperManifestStatus.Pending;
+                        await _uow.CompleteAsync();
                     }
                 }
             }
@@ -1005,8 +1000,6 @@ namespace GIGLS.Services.Business.Scanning
             }
 
             await _uow.CompleteAsync();
-
-
             return true;
         }
     }
