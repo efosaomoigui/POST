@@ -264,6 +264,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("getsupermanifestformanifest/{manifest}")]
+        public async Task<IServiceResponse<ManifestDTO>> GetSuperManifestForManifest(string manifest)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var supermanifestforManifest = await _service.GetSuperManifestForManifest(manifest);
+
+                return new ServiceResponse<ManifestDTO>
+                {
+                    Object = supermanifestforManifest
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity ="View")]
         [HttpGet]
         [Route("getmanifestsearch/{manifestCode}")]

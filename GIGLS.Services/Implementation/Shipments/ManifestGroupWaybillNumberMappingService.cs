@@ -148,7 +148,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var manifestMappingList = await _uow.Manifest.FindAsync(x => x.SuperManifestCode == superManifestCode);
 
                 var manifestDTOs = Mapper.Map<List<ManifestDTO>>(manifestMappingList);
-                foreach(var manifest in manifestDTOs)
+                foreach (var manifest in manifestDTOs)
                 {
                     var departureServiceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == manifest.DepartureServiceCentreId);
                     var destinationServiceCentre = await _uow.ServiceCentre.GetAsync(s => s.ServiceCentreId == manifest.DestinationServiceCentreId);
@@ -157,7 +157,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     manifest.DestinationServiceCentre = Mapper.Map<ServiceCentreDTO>(destinationServiceCentre);
                 }
 
-                
+
                 return manifestDTOs;
             }
             catch (Exception)
@@ -336,7 +336,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException($"No Manifest exists for this number: {manifestCode}");
                     }
 
-                    if(manifestDTO.SuperManifestStatus == SuperManifestStatus.Dispatched)
+                    if (manifestDTO.SuperManifestStatus == SuperManifestStatus.Dispatched)
                     {
                         throw new GenericException($"Error: The Super Manifest: {manifestDTO.SuperManifestCode} assigned to this {manifestDTO.ManifestCode} has already been dispatched.");
                     }
@@ -406,7 +406,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
 
                 _uow.CompleteAsync();
-                
+
             }
             catch (Exception)
             {
@@ -511,6 +511,36 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             return manifestGroupWaybillMapings;
+        }
+
+        //Get Super Manifest For Manifest
+        public async Task<ManifestDTO> GetSuperManifestForManifest(string manifest)
+        {
+            //1. Get manifest in a Super Manifest 
+            var manifestMapping = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifest && x.HasSuperManifest == true);
+            if (manifestMapping == null)
+            {
+                throw new GenericException($"No Super Manifest exists for this Manifest: {manifest}");
+            }
+
+            //check if the user is at the service centre
+            var serviceCentreIds = await _userService.GetPriviledgeServiceCenters();
+            ManifestDTO manifestDTO = null;
+
+            if (serviceCentreIds.Length > 0)
+            {
+                if (serviceCentreIds.Contains(manifestMapping.DepartureServiceCentreId))
+                {
+                    manifestDTO = Mapper.Map<ManifestDTO>(manifestMapping);
+                    
+                }
+                else
+                {
+                    throw new GenericException($"No Manifest exists for this Waybill in your service centre: {manifest}");
+                }
+            }
+            return manifestDTO;
+
         }
 
         //Search For Manifest
