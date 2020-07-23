@@ -15,6 +15,7 @@ using GIGLS.Core.IServices.MessagingLog;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Utility;
 using System;
+using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -883,6 +884,29 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.ToEmail = emailMessageDTO.EcommerceEmail;
             }
 
+            //4. obj is BankDepositMessageDTO
+            if (obj is BankDepositMessageDTO)
+            {
+                var strArray = new string[]
+                {
+                    "DepositorName",
+                    "ServiceCenter",
+                    "TotalAmount",
+                    "AmountInputted"
+                };
+                var bankDepositMessageDTO = (BankDepositMessageDTO)obj;
+
+                strArray[0] = bankDepositMessageDTO.DepositorName;
+                strArray[1] = bankDepositMessageDTO.ServiceCenter;
+                strArray[2] = bankDepositMessageDTO.TotalAmount.ToString();
+                strArray[3] = bankDepositMessageDTO.AmountInputted.ToString();
+
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.ToEmail = bankDepositMessageDTO.Email;
+            }
+
             return await Task.FromResult(verifySendEmail);
         }
 
@@ -980,5 +1004,43 @@ namespace GIGLS.Services.Implementation.Messaging
 
             await _sMSService.SendVoiceMessageAsync(phoneNumber);
         }
+
+        //Sends generic email message
+        //public async Task SendGenericEmailMessageToMultipleAccountants(MessageType messageType, BankDepositMessageDTO obj)
+        //{
+        //    var messageDTO = new MessageDTO();
+        //    var result = "";
+
+        //    try
+        //    {
+        //        var emailMessages = await _messageService.GetEmailAsync();
+        //        messageDTO = emailMessages.FirstOrDefault(s => s.MessageType == messageType);
+
+        //        if (messageDTO != null)
+        //        {
+        //            //Tell accountants
+        //            string mailList = ConfigurationManager.AppSettings["accountEmails"];
+        //            string[] emails = mailList.Split(',').ToArray();
+
+        //            foreach (var email in emails)
+        //            {
+        //                obj.Email = email;
+                        
+        //                //prepare generic message finalBody
+        //                bool verifySendEmail = await PrepareGenericMessageFinalBody(messageDTO, obj);
+        //                if (verifySendEmail)
+        //                {
+        //                    result = await _emailService.SendAsync(messageDTO);
+        //                    await LogEmailMessage(messageDTO, result);
+        //                }
+        //            }
+                   
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        await LogEmailMessage(messageDTO, result, ex.Message);
+        //    }
+        //}
     }
 }
