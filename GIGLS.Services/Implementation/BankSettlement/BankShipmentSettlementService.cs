@@ -5,9 +5,12 @@ using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.BankSettlement;
+using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Core.IServices.User;
@@ -17,6 +20,7 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -32,9 +36,10 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IInvoiceService _invoiceService;
         private readonly IBankService _bankService;
+        private readonly IMessageSenderService _messageSenderService;
 
         public BankShipmentSettlementService(IUnitOfWork uow, IWalletService walletService, IUserService userService, INumberGeneratorMonitorService service, IGlobalPropertyService globalPropertyService, 
-            IInvoiceService invoiceservice, IBankService bankService)
+            IInvoiceService invoiceservice, IBankService bankService, IMessageSenderService messageSenderService)
         {
             _uow = uow;
             _walletService = walletService;
@@ -42,6 +47,7 @@ namespace GIGLS.Services.Implementation.Wallet
             _service = service;
             _invoiceService = invoiceservice;
             _bankService = bankService;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
             _globalPropertyService = globalPropertyService;
         }
@@ -729,7 +735,35 @@ namespace GIGLS.Services.Implementation.Wallet
             nonDepsitedValue.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
             bankorder.BankName = bankrefcode.BankName;
 
+            if(bankorder.TotalAmount - bankrefcode.AmountInputted > 2000)
+            {
+                var message = new BankDepositMessageDTO()
+                {
+                    DepositorName = bankorder.FullName,
+                    ServiceCenter = bankorder.ScName,
+                    TotalAmount = bankorder.TotalAmount,
+                    AmountInputted = bankrefcode.AmountInputted,
+                };
+                await SendMailToAccountants(message);
+
+            }
+
             await _uow.CompleteAsync();
+        }
+
+        private async Task SendMailToAccountants(BankDepositMessageDTO messageDTO)
+        {
+            //Tell accountants
+            string mailList = ConfigurationManager.AppSettings["accountEmails"];
+            string[] emails = mailList.Split(',').ToArray();
+           
+            foreach (var email in emails)
+            {
+                messageDTO.Email = email;
+               await _messageSenderService.SendGenericEmailMessage(MessageType.DBDO, messageDTO);
+            }
+            //await _messageSenderService.SendGenericEmailMessageToMultipleAccountants(MessageType.DBDO, messageDTO);
+
         }
 
         public async Task MarkAsVerified(BankProcessingOrderCodesDTO bankrefcode)
