@@ -378,18 +378,12 @@ namespace GIGLS.WebApi.Controllers.Scanner
         //Super Manifest
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
-        [Route("unmappedmanifestlistforservicecentre/{serviceCentreId}")]
-        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestListForServiceCentre(int serviceCentreId)
+        [Route("unmappedmanifestlistforservicecentre")]
+        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestListForServiceCentre()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                FilterOptionsDto filterOptionsDto = new FilterOptionsDto
-                {
-                    filterValue = serviceCentreId.ToString(),
-                    filter = "DestinationServiceCentreId"
-                };
-
-                var unmappedManifests = await _shipmentService.GetUnmappedManifestListForServiceCentre(filterOptionsDto);
+                var unmappedManifests = await _shipmentService.GetUnmappedManifestListForServiceCentre();
                 return new ServiceResponse<IEnumerable<ManifestDTO>>
                 {
                     Object = unmappedManifests,

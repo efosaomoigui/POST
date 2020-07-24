@@ -89,7 +89,7 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapsupermanifest")]
-        public async Task<IServiceResponse<bool>> MappingManifestToGroupWaybillNumber(ManifestDTO data)
+        public async Task<IServiceResponse<bool>> MappingSuperManifestToManifest(ManifestDTO data)
         {
             return await HandleApiOperationAsync(async () =>
             {

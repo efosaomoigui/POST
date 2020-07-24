@@ -316,11 +316,11 @@ namespace GIGLS.WebApi.Controllers.Shipments
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("unmappedmanifestlistforservicecentre")]
-        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestListForServiceCentre([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestListForServiceCentre()
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var unmappedManifest = await _service.GetUnmappedManifestListForServiceCentre(filterOptionsDto);
+                var unmappedManifest = await _service.GetUnmappedManifestListForServiceCentre();
                 return new ServiceResponse<IEnumerable<ManifestDTO>>
                 {
                     Object = unmappedManifest,
@@ -337,21 +337,6 @@ namespace GIGLS.WebApi.Controllers.Shipments
             return await HandleApiOperationAsync(async () =>
             {
                 var centres = await _service.GetUnmappedManifestServiceCentres();
-                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
-                {
-                    Object = centres
-                };
-            });
-        }
-
-        [GIGLSActivityAuthorize(Activity = "View")]
-        [HttpGet]
-        [Route("unmappedmanifestforsupermanifest")]
-        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetUnmappedManifestForSuperManifest()
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var centres = await _service.GetUnmappedManifestForGateway();
                 return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
                 {
                     Object = centres

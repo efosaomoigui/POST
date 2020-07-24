@@ -322,27 +322,49 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var userId = await _userService.GetCurrentUserId();
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
+                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false
+                && x.SuperManifestStatus == SuperManifestStatus.ArrivedScan && manifestList.Contains(x.ManifestCode) && serviceCenters.Contains(x.DepartureServiceCentreId));
+
+                var manifestByScList = manifestBySc.Select(x => x.ManifestCode).Distinct().ToList();
+
+                
+                int manifestByScListCount = manifestByScList.Count; 
+                if (manifestByScListCount == 0)
+                {
+                    throw new GenericException($"No manifest available for Processing");
+                }
+
+                if (manifestByScListCount != manifestList.Count)
+                {
+                    var result = manifestList.Where(x => !manifestByScList.Contains(x));
+
+                    if (result.Any())
+                    {
+                        throw new GenericException($"Error: Super Manifest cannot be created. " +
+                            $"The following manifests [{string.Join(", ", result.ToList())}] are not available for Processing");
+                    }
+                }
 
                 //convert the list to HashSet to remove duplicate
                 var newManifestList = new HashSet<string>(manifestList);
 
                 foreach (var manifestCode in newManifestList)
                 {
-                    var manifestDTO = await _manifestService.GetManifestByCode(manifestCode);
+                    var manifest = await _uow.Manifest.GetAsync(x =>x.ManifestCode == manifestCode);
 
-                    if (manifestDTO == null)
+                    if (manifest == null)
                     {
                         throw new GenericException($"No Manifest exists for this number: {manifestCode}");
                     }
 
-                    if (manifestDTO.SuperManifestStatus == SuperManifestStatus.Dispatched)
+                    if (manifest.SuperManifestStatus == SuperManifestStatus.Dispatched)
                     {
-                        throw new GenericException($"Error: The Super Manifest: {manifestDTO.SuperManifestCode} assigned to this {manifestDTO.ManifestCode} has already been dispatched.");
+                        throw new GenericException($"Error: The Super Manifest: {manifest.SuperManifestCode} assigned to this {manifest.ManifestCode} has already been dispatched.");
                     }
 
                     //Update The Manifest 
-                    var manifest = await _uow.Manifest.GetAsync(manifestDTO.ManifestId);
                     manifest.HasSuperManifest = true;
                     manifest.SuperManifestCode = superManifest;
                     manifest.SuperManifestStatus = SuperManifestStatus.AssignedSuperManifest;
