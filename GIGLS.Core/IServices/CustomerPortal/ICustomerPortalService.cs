@@ -7,6 +7,7 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Haulage;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Report;
@@ -156,5 +157,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> CreateOrUpdateDropOffForAgent(PreShipmentDTO preShipmentDTO);
         Task<UserDTO> CheckDetailsForAgentApp(string user);
         Task<object> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment);
+        Task<PaymentResponse> VerifyAndValidatePayment(string referenceCode);
     }
 }

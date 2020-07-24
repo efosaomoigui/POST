@@ -53,6 +53,7 @@ using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
 using System.Net;
 using GIGLS.Services.Implementation.Utility;
+using GIGLS.Core.DTO.OnlinePayment;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -83,6 +84,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IMobileGroupCodeWaybillMappingService _groupCodeWaybillMappingService;
         private readonly IDispatchService _dispatchService;
         private readonly IManifestWaybillMappingService _manifestWaybillMappingService;
+        private readonly IPaystackPaymentService _paystackPaymentService;
+        private readonly IUssdService _ussdService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -91,9 +94,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService,
-            ICountryService countryService, IAdminReportService adminReportService,
-            IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
-            IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService)
+            ICountryService countryService, IAdminReportService adminReportService, IPartnerTransactionsService partnertransactionservice,
+            IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService, IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService,
+            IPaystackPaymentService paystackPaymentService, IUssdService ussdService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -120,6 +123,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             _groupCodeWaybillMappingService = groupCodeWaybillMappingService;
             _dispatchService = dispatchService;
             _manifestWaybillMappingService = manifestWaybillMappingService;
+            _paystackPaymentService = paystackPaymentService;
+            _ussdService = ussdService;
             MapperConfig.Initialize();
         }
 
@@ -229,6 +234,47 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             await _wallepaymenttlogService.UpdateWalletPaymentLog(walletPaymentLogDto.Reference, walletPaymentLogDto);
             return walletPaymentLogDto;
+        }
+
+        public async Task<PaymentResponse> VerifyAndValidatePayment(string referenceCode)
+        {
+            PaymentResponse result = new PaymentResponse();
+
+            //1. Get PaymentLog
+            var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+            if (paymentLog != null)
+            {
+                if(paymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
+                {
+                    result = await VerifyAndValidateUSSDPayment(referenceCode);
+                }
+                else
+                {
+                    result = await _paystackPaymentService.VerifyAndProcessPayment(referenceCode);
+                }
+            }
+            else
+            {
+                result.Result = false;
+                result.Message = "";
+                result.GatewayResponse = "Wallet Payment Log Information does not exist";
+            }
+
+            return result;
+        }
+
+        private async Task<PaymentResponse> VerifyAndValidateUSSDPayment(string referenceCode)
+        {
+            PaymentResponse response = new PaymentResponse();
+
+            var result = await _ussdService.VerifyAndValidatePayment(referenceCode);
+
+            response.Result = result.Status;
+            response.Status = result.data.Status;
+            response.Message = result.Message;
+            response.GatewayResponse = result.data.Gateway_Response;
+            return response;
         }
 
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactions()
