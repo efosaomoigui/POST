@@ -734,8 +734,9 @@ namespace GIGLS.Services.Implementation.Wallet
             //update Shipment
             nonDepsitedValue.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
             bankorder.BankName = bankrefcode.BankName;
+            await _uow.CompleteAsync();
 
-            if(bankorder.TotalAmount - bankrefcode.AmountInputted > 2000)
+            if (bankorder.TotalAmount - bankrefcode.AmountInputted > 2000)
             {
                 var message = new BankDepositMessageDTO()
                 {
@@ -745,10 +746,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     AmountInputted = bankrefcode.AmountInputted,
                 };
                 await SendMailToAccountants(message);
-
             }
-
-            await _uow.CompleteAsync();
         }
 
         private async Task SendMailToAccountants(BankDepositMessageDTO messageDTO)
