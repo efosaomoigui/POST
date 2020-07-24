@@ -133,6 +133,7 @@ namespace GIGLS.Services.Implementation.Wallet
         {
             walletPaymentLogDto.OnlinePaymentType = OnlinePaymentType.USSD;
             string phoneNumber = string.Empty;
+            string customerCode = string.Empty;
 
             //1. Get the country of the user
             if (walletPaymentLogDto.UserId == null)
@@ -146,7 +147,8 @@ namespace GIGLS.Services.Implementation.Wallet
                 //use the current user id to get the country of the user
                 var user = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
                 walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
-                phoneNumber = user.PhoneNumber;
+                phoneNumber = user.PhoneNumber; 
+                customerCode = user.UserChannelCode;
 
                 //set Nigeria as default country if no country assign for the customer
                 if (walletPaymentLogDto.PaymentCountryId == 0)
@@ -161,6 +163,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 {
                     var user = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
                     phoneNumber = user.PhoneNumber;
+                    customerCode = user.UserChannelCode;
                 }
 
                 walletPaymentLogDto.PhoneNumber = phoneNumber;
@@ -174,6 +177,18 @@ namespace GIGLS.Services.Implementation.Wallet
                 if(ussdResponse.data != null)
                 {
                     walletPaymentLogDto.ExternalReference = ussdResponse.data.Order_Id;
+                }
+
+                if (string.IsNullOrWhiteSpace(customerCode))
+                {
+                    var customer = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
+                    customerCode = customer.UserChannelCode;
+                }
+
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customerCode);
+                if (wallet != null)
+                {
+                    walletPaymentLogDto.WalletId = wallet.WalletId;
                 }
 
                 //3. Add record to waybill payment log with the order id
