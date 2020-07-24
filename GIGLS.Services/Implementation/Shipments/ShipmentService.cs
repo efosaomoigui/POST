@@ -2567,7 +2567,8 @@ namespace GIGLS.Services.Implementation.Shipments
                     CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
 
                     //return the actual amount collected in case shipment departure and destination country is different
-                    var wallet = _uow.Wallet.SingleOrDefault(s => s.CustomerId == shipment.CustomerId && s.CustomerType == customerType);
+                   // var wallet = _uow.Wallet.SingleOrDefault(s => s.CustomerId == shipment.CustomerId && s.CustomerType == customerType);
+                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == shipment.CustomerCode);
 
                     decimal amountToCredit = invoice.Amount;
                     amountToCredit = await GetActualAmountToCredit(shipment, amountToCredit);
