@@ -734,8 +734,13 @@ namespace GIGLS.Services.Implementation.Wallet
             //update Shipment
             nonDepsitedValue.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
             bankorder.BankName = bankrefcode.BankName;
+            await _uow.CompleteAsync();
 
-            if(bankorder.TotalAmount - bankrefcode.AmountInputted > 2000)
+            string maxDiff = ConfigurationManager.AppSettings["maxDiffBDO"];
+            var decimalVal = Convert.ToDecimal(maxDiff);
+
+
+            if (bankorder.TotalAmount - bankrefcode.AmountInputted > decimalVal)
             {
                 var message = new BankDepositMessageDTO()
                 {
@@ -745,10 +750,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     AmountInputted = bankrefcode.AmountInputted,
                 };
                 await SendMailToAccountants(message);
-
             }
-
-            await _uow.CompleteAsync();
         }
 
         private async Task SendMailToAccountants(BankDepositMessageDTO messageDTO)
@@ -762,8 +764,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 messageDTO.Email = email;
                await _messageSenderService.SendGenericEmailMessage(MessageType.DBDO, messageDTO);
             }
-            //await _messageSenderService.SendGenericEmailMessageToMultipleAccountants(MessageType.DBDO, messageDTO);
-
+           
         }
 
         public async Task MarkAsVerified(BankProcessingOrderCodesDTO bankrefcode)
