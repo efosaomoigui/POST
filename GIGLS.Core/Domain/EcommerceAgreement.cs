@@ -47,6 +47,17 @@ namespace GIGLS.Core.Domain
 
         public EcommerceAgreementStatus Status { get; set; }
 
+        public bool IsCod { get; set; }
+
+        [MaxLength(500)]
+        public string AccountName { get; set; }
+
+        [MaxLength(100)]
+        public string AccountNumber { get; set; }
+
+        [MaxLength(100)]
+        public string BankName { get; set; }
+
 
     }
 }

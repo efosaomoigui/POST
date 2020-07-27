@@ -279,6 +279,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        Industry =c.NatureOfBusiness,
                                        DateCreated = c.DateCreated,
                                        DateModified = c.DateModified,
+                                       IsCod = c.IsCod,
+                                       BankName = c.BankName,
+                                       AccountName = c.AccountName,
+                                       AccountNumber = c.AccountNumber
                                    };
 
                 return await Task.FromResult(companiesDto.FirstOrDefault());
