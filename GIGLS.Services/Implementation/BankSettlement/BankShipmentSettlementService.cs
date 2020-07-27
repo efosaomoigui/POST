@@ -705,6 +705,29 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Bank Order Request Does not Exist!", $"{(int)HttpStatusCode.NotFound}");
             }
 
+            string maxDiff = ConfigurationManager.AppSettings["maxDiffBDO"];
+            var decimalVal = Convert.ToDecimal(maxDiff);
+            var throwError = false;
+            var done = false;
+
+            if (bankorder.TotalAmount - bankrefcode.AmountInputted > decimalVal)
+            {
+                throwError = true;
+                var message = new BankDepositMessageDTO()
+                {
+                    DepositorName = bankorder.FullName,
+                    ServiceCenter = bankorder.ScName,
+                    TotalAmount = bankorder.TotalAmount,
+                    AmountInputted = bankrefcode.AmountInputted,
+                };
+                done = await SendMailToAccountants(message);
+            }
+
+            if (throwError)
+            {
+                throw new GenericException($"Amount Deposited {bankrefcode.AmountInputted} is lower than the Actual Bank Deposit {bankorder.TotalAmount}", $"{(int)HttpStatusCode.Forbidden}");
+                
+            }
             //update BankProcessingOrderCodes
             bankorder.Status = DepositStatus.Deposited;
             bankorder.DateAndTimeOfDeposit = DateTime.Now;
@@ -735,25 +758,9 @@ namespace GIGLS.Services.Implementation.Wallet
             nonDepsitedValue.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
             bankorder.BankName = bankrefcode.BankName;
             await _uow.CompleteAsync();
-
-            string maxDiff = ConfigurationManager.AppSettings["maxDiffBDO"];
-            var decimalVal = Convert.ToDecimal(maxDiff);
-
-
-            if (bankorder.TotalAmount - bankrefcode.AmountInputted > decimalVal)
-            {
-                var message = new BankDepositMessageDTO()
-                {
-                    DepositorName = bankorder.FullName,
-                    ServiceCenter = bankorder.ScName,
-                    TotalAmount = bankorder.TotalAmount,
-                    AmountInputted = bankrefcode.AmountInputted,
-                };
-                await SendMailToAccountants(message);
-            }
         }
 
-        private async Task SendMailToAccountants(BankDepositMessageDTO messageDTO)
+        private async Task<bool> SendMailToAccountants(BankDepositMessageDTO messageDTO)
         {
             //Tell accountants
             string mailList = ConfigurationManager.AppSettings["accountEmails"];
@@ -764,6 +771,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 messageDTO.Email = email;
                await _messageSenderService.SendGenericEmailMessage(MessageType.DBDO, messageDTO);
             }
+            return true;
            
         }
 
