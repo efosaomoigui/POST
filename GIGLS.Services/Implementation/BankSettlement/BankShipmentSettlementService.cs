@@ -5,9 +5,12 @@ using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.Domain.Wallet;
 using GIGLS.Core.DTO.Account;
 using GIGLS.Core.DTO.BankSettlement;
+using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.Wallet;
 using GIGLS.Core.Enums;
+using GIGLS.Core.IMessageService;
+using GIGLS.Core.IServices;
 using GIGLS.Core.IServices.Account;
 using GIGLS.Core.IServices.BankSettlement;
 using GIGLS.Core.IServices.User;
@@ -17,6 +20,7 @@ using GIGLS.CORE.DTO.Report;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -32,9 +36,10 @@ namespace GIGLS.Services.Implementation.Wallet
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IInvoiceService _invoiceService;
         private readonly IBankService _bankService;
+        private readonly IMessageSenderService _messageSenderService;
 
         public BankShipmentSettlementService(IUnitOfWork uow, IWalletService walletService, IUserService userService, INumberGeneratorMonitorService service, IGlobalPropertyService globalPropertyService, 
-            IInvoiceService invoiceservice, IBankService bankService)
+            IInvoiceService invoiceservice, IBankService bankService, IMessageSenderService messageSenderService)
         {
             _uow = uow;
             _walletService = walletService;
@@ -42,6 +47,7 @@ namespace GIGLS.Services.Implementation.Wallet
             _service = service;
             _invoiceService = invoiceservice;
             _bankService = bankService;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
             _globalPropertyService = globalPropertyService;
         }
@@ -699,37 +705,75 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Bank Order Request Does not Exist!", $"{(int)HttpStatusCode.NotFound}");
             }
 
-            //update BankProcessingOrderCodes
-            bankorder.Status = DepositStatus.Deposited;
-            bankorder.DateAndTimeOfDeposit = DateTime.Now;
+            string maxDiff = ConfigurationManager.AppSettings["maxDiffBDO"];
+            var decimalVal = Convert.ToDecimal(maxDiff);
+            var throwError = false;
+            var done = false;
+            decimal diff = bankorder.TotalAmount - bankrefcode.AmountInputted;
 
-            var userActiveCountryId = await _userService.GetUserActiveCountryId();
+            if (diff > decimalVal)
+            {
+                throwError = true;
+                var message = new BankDepositMessageDTO()
+                {
+                    DepositorName = bankorder.FullName,
+                    ServiceCenter = bankorder.ScName,
+                    TotalAmount = bankorder.TotalAmount,
+                    AmountInputted = bankrefcode.AmountInputted,
+                };
+                
+                await SendMailToAccountants(message);
+                throw new GenericException($"Amount Deposited {bankrefcode.AmountInputted} is lower than the Actual Bank Deposit {bankorder.TotalAmount}", $"{(int)HttpStatusCode.Forbidden}");
+            }
 
-            //Get Bank Deposit Module StartDate
-            var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate, userActiveCountryId);
-            string globalpropertiesdateStr = globalpropertiesdateObj?.Value;
+            else
+            {
+                //update BankProcessingOrderCodes
+                bankorder.Status = DepositStatus.Deposited;
+                bankorder.DateAndTimeOfDeposit = DateTime.Now;
 
-            var globalpropertiesdate = DateTime.MinValue;
-            bool success = DateTime.TryParse(globalpropertiesdateStr, out globalpropertiesdate);
+                var userActiveCountryId = await _userService.GetUserActiveCountryId();
 
-            var serviceCenters = await _userService.GetCurrentServiceCenter();
-            var currentCenter = serviceCenters[0].ServiceCentreId;
-            var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
+                //Get Bank Deposit Module StartDate
+                var globalpropertiesdateObj = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BankDepositModuleStartDate, userActiveCountryId);
+                string globalpropertiesdateStr = globalpropertiesdateObj?.Value;
 
-            //update BankProcessingOrderForShipmentAndCOD
-            var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == bankrefcode.Code).ToList();
-            accompanyWaybillsVals.ForEach(a => a.Status = DepositStatus.Deposited);
+                var globalpropertiesdate = DateTime.MinValue;
+                bool success = DateTime.TryParse(globalpropertiesdateStr, out globalpropertiesdate);
 
-            var arrWaybills = accompanyWaybillsVals.Select(x => x.Waybill).ToArray();
+                var serviceCenters = await _userService.GetCurrentServiceCenter();
+                var currentCenter = serviceCenters[0].ServiceCentreId;
+                var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
 
-            var nonDepsitedValueQ = _uow.Shipment.GetAll().Where(x => x.DepositStatus == DepositStatus.Pending && x.DepartureServiceCentreId == currentCenter && x.DateCreated >= globalpropertiesdate);
-            var nonDepsitedValue = nonDepsitedValueQ.Where(x => arrWaybills.Contains(x.Waybill)).ToList();
+                //update BankProcessingOrderForShipmentAndCOD
+                var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == bankrefcode.Code).ToList();
+                accompanyWaybillsVals.ForEach(a => a.Status = DepositStatus.Deposited);
 
-            //update Shipment
-            nonDepsitedValue.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
-            bankorder.BankName = bankrefcode.BankName;
+                var arrWaybills = accompanyWaybillsVals.Select(x => x.Waybill).ToArray();
 
-            await _uow.CompleteAsync();
+                var nonDepsitedValueQ = _uow.Shipment.GetAll().Where(x => x.DepositStatus == DepositStatus.Pending && x.DepartureServiceCentreId == currentCenter && x.DateCreated >= globalpropertiesdate);
+                var nonDepsitedValue = nonDepsitedValueQ.Where(x => arrWaybills.Contains(x.Waybill)).ToList();
+
+                //update Shipment
+                nonDepsitedValue.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
+                bankorder.BankName = bankrefcode.BankName;
+                await _uow.CompleteAsync();
+            }           
+        }
+
+        private async Task<bool> SendMailToAccountants(BankDepositMessageDTO messageDTO)
+        {
+            //Tell accountants
+            string mailList = ConfigurationManager.AppSettings["accountEmails"];
+            string[] emails = mailList.Split(',').ToArray();
+           
+            foreach (var email in emails)
+            {
+                messageDTO.Email = email;
+               await _messageSenderService.SendGenericEmailMessage(MessageType.DBDO, messageDTO);
+            }
+            return true;
+           
         }
 
         public async Task MarkAsVerified(BankProcessingOrderCodesDTO bankrefcode)
