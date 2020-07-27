@@ -548,71 +548,9 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
-
-        //private async Task<USSDResponse> ProcessPaymentForUSSDOld(WaybillPaymentLogDTO waybillPaymentLog)
-        //{
-        //    try
-        //    {
-        //        var responseResult = new USSDResponse();
-
-        //        //1. Get Token  
-        //        string token = ConfigurationManager.AppSettings["UssdToken"];
-        //        string privateKey = ConfigurationManager.AppSettings["UssdPrivateKey"];
-
-        //        string merchantId = ConfigurationManager.AppSettings["UssdMerchantID"];
-        //        string baseUrl = ConfigurationManager.AppSettings["UssdOgaranyaAPI"];
-
-        //        //2. Encrypt token and private_key to generate public key 
-        //        string publicKey = GetPublicKey(token, privateKey);
-
-        //        //3.Post the data
-        //        var ussdData = new USSDDTO
-        //        {
-        //            amount = (int)waybillPaymentLog.Amount,
-        //            msisdn = waybillPaymentLog.PhoneNumber,
-        //            desc = waybillPaymentLog.Waybill,
-        //            reference = waybillPaymentLog.Reference
-        //        };
-
-        //        string countryCode = waybillPaymentLog.Currency.Length <= 2 ? waybillPaymentLog.Currency : waybillPaymentLog.Currency.Substring(0, 2);
-        //        string pay01Url = baseUrl + merchantId + "/pay/" + countryCode;
-
-        //        using (var client = new HttpClient())
-        //        {
-        //            client.DefaultRequestHeaders.Accept.Clear();
-        //            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        //            client.DefaultRequestHeaders.Add("token", token);
-        //            client.DefaultRequestHeaders.Add("publickey", publicKey);
-
-        //            var ussdDataInJson = JsonConvert.SerializeObject(ussdData);
-        //            var data = new StringContent(ussdDataInJson, Encoding.UTF8, "application/json");
-        //            var response = await client.PostAsync(pay01Url, data);
-        //            string result = await response.Content.ReadAsStringAsync();
-
-        //            responseResult = JsonConvert.DeserializeObject<USSDResponse>(result);
-        //        }
-        //        return responseResult;
-        //    }
-        //    catch(Exception ex)
-        //    {
-        //        throw ex;
-        //    }
-        //}
-
-        //private string GetPublicKey(string token, string privateKey)
-        //{
-        //    string publicKey = string.Empty;
-
-        //    var bytes = Encoding.UTF8.GetBytes(token + privateKey);
-
-        //    using(var hash = new SHA512Managed())
-        //    {
-        //        var hashedData =  hash.ComputeHash(bytes);
-        //        publicKey = BitConverter.ToString(hashedData).Replace("-", "").ToLower();
-        //    }
-
-        //    return publicKey;
-        //}
-
+        public async Task<GatewayCodeResponse> GetGatewayCode()
+        {
+            return await _ussdService.GetGatewayCode();
+        }
     }
 }
