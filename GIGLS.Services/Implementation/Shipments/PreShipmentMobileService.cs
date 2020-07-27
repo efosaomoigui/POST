@@ -2975,6 +2975,9 @@ namespace GIGLS.Services.Implementation.Shipments
                             SenderPhoneNumber = preshipmentmobile.ReceiverPhoneNumber
                         };
                         await _messageSenderService.SendMessage(MessageType.OKC, EmailSmsType.SMS, messageextensionDTO);
+
+                        preshipmentmobile.IndentificationUrl = pickuprequest.IndentificationUrl;
+                        preshipmentmobile.DeliveryAddressImageUrl = pickuprequest.DeliveryAddressImageUrl;
                     }
                     else
                     {
