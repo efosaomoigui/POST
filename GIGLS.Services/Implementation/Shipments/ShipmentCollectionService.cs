@@ -295,7 +295,7 @@ namespace GIGLS.Services.Implementation.Shipments
             shipmentCollection.IndentificationUrl = shipmentCollectionDto.IndentificationUrl;
             shipmentCollection.ShipmentScanStatus = shipmentCollectionDto.ShipmentScanStatus;
             shipmentCollection.UserId = shipmentCollectionDto.UserId;
-            shipmentCollection.SignatureImageUrl = shipmentCollectionDto.SignatureImageUrl;
+            shipmentCollection.IndentificationUrl = shipmentCollectionDto.IndentificationUrl;
             shipmentCollection.DeliveryAddressImageUrl = shipmentCollectionDto.DeliveryAddressImageUrl;
             
             //Add Collected Scan to Scan History

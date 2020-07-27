@@ -44,8 +44,6 @@ namespace GIGLS.CORE.Domain
         public string UserId { get; set; }
 
         [MaxLength(500)]
-        public string SignatureImageUrl { get; set; }
-        [MaxLength(500)]
         public string DeliveryAddressImageUrl { get; set; }
     }
 }
