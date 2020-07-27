@@ -246,7 +246,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            CurrencySymbol = x.CurrencySymbol,
                                            CurrencyCode = x.CurrencyCode,
                                            PhoneNumberCode = x.PhoneNumberCode
-                                       }).FirstOrDefault()
+                                       }).FirstOrDefault(),
+                                       AccountName = c.AccountName,
+                                       AccountNumber = c.AccountNumber,
+                                       BankName = c.BankName
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
             }
