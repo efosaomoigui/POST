@@ -99,7 +99,7 @@ namespace GIGLS.Services.Implementation.Wallet
 
                     var ussdDataInJson = JsonConvert.SerializeObject(ussdDto);
                     var data = new StringContent(ussdDataInJson, Encoding.UTF8, "application/json");
-                    var response = await client.PostAsync(pay01Url, data);
+                    var response = await client.GetAsync(pay01Url);
                     string result = await response.Content.ReadAsStringAsync();
 
                     responseResult = JsonConvert.DeserializeObject<USSDResponse>(result);

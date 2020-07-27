@@ -16,6 +16,7 @@ using System.Configuration;
 using GIGLS.CORE.DTO.Report;
 using System.Net;
 using GIGLS.Core.Enums;
+using GIGLS.Core.DTO.OnlinePayment;
 
 namespace GIGLS.Services.Implementation.Wallet
 {
@@ -23,11 +24,13 @@ namespace GIGLS.Services.Implementation.Wallet
     {
         private readonly IUserService _userService;
         private readonly IUnitOfWork _uow;
+        private readonly IPaystackPaymentService _paystackPaymentService;
         private readonly IUssdService _ussdService;
 
-        public WalletPaymentLogService(IUserService userService, IUnitOfWork uow, IUssdService ussdService)
+        public WalletPaymentLogService(IUserService userService, IUnitOfWork uow, IPaystackPaymentService paystackPaymentService, IUssdService ussdService)
         {
             _userService = userService;
+            _paystackPaymentService = paystackPaymentService;
             _ussdService = ussdService;
             _uow = uow;
             MapperConfig.Initialize();
@@ -270,6 +273,7 @@ namespace GIGLS.Services.Implementation.Wallet
             walletPaymentLogDto.TransactionResponse = walletPaymentLogDto.TransactionResponse;
             await _uow.CompleteAsync();
         }
+        
         public async Task AddWalletPaymentLogMobile(WalletPaymentLogDTO walletPaymentLogDto)
         {
             var walletPaymentLog = Mapper.Map<WalletPaymentLog>(walletPaymentLogDto);
@@ -307,6 +311,46 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw ex;
             }
         }
-    }
 
+        public async Task<PaymentResponse> VerifyAndValidatePayment(string referenceCode)
+        {
+            PaymentResponse result = new PaymentResponse();
+
+            //1. Get PaymentLog
+            var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+            if (paymentLog != null)
+            {
+                if (paymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
+                {
+                    result = await VerifyAndValidateUSSDPayment(referenceCode);
+                }
+                else
+                {
+                    result = await _paystackPaymentService.VerifyAndProcessPayment(referenceCode);
+                }
+            }
+            else
+            {
+                result.Result = false;
+                result.Message = "";
+                result.GatewayResponse = "Wallet Payment Log Information does not exist";
+            }
+
+            return result;
+        }
+
+        private async Task<PaymentResponse> VerifyAndValidateUSSDPayment(string referenceCode)
+        {
+            PaymentResponse response = new PaymentResponse();
+
+            var result = await _ussdService.VerifyAndValidatePayment(referenceCode);
+
+            response.Result = result.Status;
+            response.Status = result.data.Status;
+            response.Message = result.Message;
+            response.GatewayResponse = result.data.Gateway_Response;
+            return response;
+        }
+    }
 }
