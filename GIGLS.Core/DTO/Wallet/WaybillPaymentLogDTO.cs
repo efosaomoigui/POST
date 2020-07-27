@@ -15,9 +15,7 @@ namespace GIGLS.Core.DTO.Wallet
         public int WaybillPaymentLogId { get; set; }
 
         public string Waybill { get; set; }
-
         public string Reference { get; set; }
-
         public decimal Amount { get; set; }
         public string TransactionStatus { get; set; }
         public string TransactionResponse { get; set; }
@@ -33,6 +31,7 @@ namespace GIGLS.Core.DTO.Wallet
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
         public string NetworkProvider { get; set; }
+        public string GatewayCode { get; set; }
 
         public FlutterWaveDTO FlutterWaveData { get; set; }
     }
@@ -104,8 +103,6 @@ namespace GIGLS.Core.DTO.Wallet
             data = new USSDResponseData();
         }
         public string Status { get; set; }
-        public string Order_Reference { get; set; }
-        public string Dialing_Code { get; set; }
         public string Message { get; set; }
         public USSDResponseData data { get; set; }
     }
@@ -113,7 +110,6 @@ namespace GIGLS.Core.DTO.Wallet
     public class USSDResponseData
     {
         public string Message { get; set; }
-        public string Order_Id { get; set; }
         public string Status { get; set; }
         public string Order_Reference { get; set; }
         public string Dialing_Code { get; set; }

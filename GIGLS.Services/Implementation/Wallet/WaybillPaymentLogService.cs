@@ -493,7 +493,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 var newPaymentLog = Mapper.Map<WaybillPaymentLog>(waybillPaymentLog);
 
                 //Network Provider represent OrderId
-                newPaymentLog.NetworkProvider = ussdResponse.data.Order_Id;
+                newPaymentLog.NetworkProvider = ussdResponse.data.Order_Reference;
                 _uow.WaybillPaymentLog.Add(newPaymentLog);
                 await _uow.CompleteAsync();
 
@@ -504,9 +504,9 @@ namespace GIGLS.Services.Implementation.Wallet
                 response.Status = true;
                 response.Message = ussdResponse.data.Message;
                 response.data.Message = ussdResponse.data.Message;
-                response.data.Reference = ussdResponse.Order_Reference;
+                response.data.Reference = ussdResponse.data.Order_Reference;
                 response.data.Status = ussdResponse.Status;
-                response.data.Display_Text = ussdResponse.Dialing_Code;
+                response.data.Display_Text = ussdResponse.data.Dialing_Code;
             }
             else
             {
@@ -535,7 +535,8 @@ namespace GIGLS.Services.Implementation.Wallet
                     msisdn = waybillPaymentLog.PhoneNumber,
                     desc = waybillPaymentLog.Waybill,
                     reference = waybillPaymentLog.Reference,
-                    country_code = countryCode
+                    country_code = countryCode,
+                    gateway_code = waybillPaymentLog.GatewayCode
                 };
 
                 var responseResult = await _ussdService.ProcessPaymentForUSSD(ussdData);
