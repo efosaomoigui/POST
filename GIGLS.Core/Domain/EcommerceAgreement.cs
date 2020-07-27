@@ -58,6 +58,8 @@ namespace GIGLS.Core.Domain
         [MaxLength(100)]
         public string BankName { get; set; }
 
+        public bool IsApi { get; set; }
+
 
     }
 }

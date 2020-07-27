@@ -282,7 +282,8 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        IsCod = c.IsCod,
                                        BankName = c.BankName,
                                        AccountName = c.AccountName,
-                                       AccountNumber = c.AccountNumber
+                                       AccountNumber = c.AccountNumber,
+                                       IsApi = c.IsApi
                                    };
 
                 return await Task.FromResult(companiesDto.FirstOrDefault());
