@@ -337,7 +337,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 string error_code = "";
 
                 //Magaya Request for Shipment Creation
-                result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
+                //result = cs.SetTransaction(access_key, type, flags, trans_xml, out error_code);
+                result = api_session_error.no_error;
 
                 if (result == api_session_error.no_error)
                 {
@@ -382,9 +383,8 @@ namespace GIGLS.Services.Business.Magaya.Shipments
         public CustomerDTO tetCustomerDetails(WarehouseReceipt magayaShipmentDTO)
         {
             CustomerDTO cd = new CustomerDTO();
-            cd.FirstName = magayaShipmentDTO.IssuedByName.Split(' ')[0];
-            cd.FirstName = magayaShipmentDTO.IssuedByName.Split(' ')[0];
-            cd.LastName = magayaShipmentDTO.IssuedByName.Split(' ')[1];
+            cd.FirstName = magayaShipmentDTO.ShipperName.Split(' ')[0];
+            cd.LastName = magayaShipmentDTO.ShipperName.Split(' ')[1];
             cd.Email = magayaShipmentDTO.ShipperAddress.ContactEmail;
             cd.Address = magayaShipmentDTO.ShipperAddress.Street[0];
             cd.PhoneNumber = magayaShipmentDTO.ShipperAddress.ContactPhone;
@@ -442,13 +442,13 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 shipmentDTO.DestinationServiceCentre = destinationSc;
 
                 //Receivers Details
-                shipmentDTO.ReceiverName = magayaShipmentDTO.ConsigneeAddress.ContactName;
-                shipmentDTO.ReceiverPhoneNumber = magayaShipmentDTO.ConsigneeAddress.ContactPhone;
-                shipmentDTO.ReceiverEmail = magayaShipmentDTO.ConsigneeAddress.ContactEmail;
+                shipmentDTO.ReceiverName = magayaShipmentDTO.ConsigneeName;
+                shipmentDTO.ReceiverPhoneNumber = magayaShipmentDTO.Consignee.Phone;
+                shipmentDTO.ReceiverEmail = magayaShipmentDTO.Consignee.Email;
                 shipmentDTO.ReceiverAddress = magayaShipmentDTO.ConsigneeAddress.Street[0];
                 shipmentDTO.ReceiverCity = magayaShipmentDTO.ConsigneeAddress.City;
                 shipmentDTO.ReceiverState = magayaShipmentDTO.ConsigneeAddress.State;
-                shipmentDTO.ReceiverCountry = magayaShipmentDTO.ConsigneeAddress.Country.Value;
+                shipmentDTO.ReceiverCountry = magayaShipmentDTO.ConsigneeAddress.Country?.Value;
 
                 //Delivery Options
                 shipmentDTO.DeliveryOptionId = 1;
