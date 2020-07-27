@@ -1,6 +1,7 @@
 ﻿using GIGLS.Core.DTO.User;
 using GIGLS.Core.Enums;
 using GIGLS.CORE.DTO;
+using System.Collections.Generic;
 
 namespace GIGLS.Core.DTO.Wallet
 {
@@ -114,6 +115,8 @@ namespace GIGLS.Core.DTO.Wallet
         public string Message { get; set; }
         public string Order_Id { get; set; }
         public string Status { get; set; }
+        public string Order_Reference { get; set; }
+        public string Dialing_Code { get; set; }
     }
 
     public class USSDDTO
@@ -124,5 +127,24 @@ namespace GIGLS.Core.DTO.Wallet
         public string reference { get; set; }
         public string country_code { get; set; } = "NG";
         public string child_merchant_id { get; set; }
+        public string gateway_code { get; set; }
+    }
+
+    public class GatewayCodeResponse
+    {
+        public GatewayCodeResponse()
+        {
+            data = new List<GateWayCode>();
+        }
+
+        public string Status { get; set; }
+
+        public List<GateWayCode> data { get; set; }
+    }
+
+    public class GateWayCode {
+        public string gateway_code { get; set; }
+        public string gateway_name { get; set; }
+        public string gateway_description { get; set; }
     }
 }

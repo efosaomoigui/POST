@@ -161,6 +161,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpGet]
+        [Route("gatewaycode")]
+        public async Task<IServiceResponse<GatewayCodeResponse>> GetGatewayCode()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.GetGatewayCode();
+                return new ServiceResponse<GatewayCodeResponse>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
         [Route("walletpaymentlog")]
         public async Task<IServiceResponse<List<WalletPaymentLogDTO>>> GetWalletPaymentLogs([FromUri]FilterOptionsDto filterOptionsDto)
         {

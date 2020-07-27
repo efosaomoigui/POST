@@ -277,6 +277,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             return response;
         }
 
+        public async Task<GatewayCodeResponse> GetGatewayCode()
+        {
+            return await _ussdService.GetGatewayCode();
+        }
+
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactions()
         {
             //get the current login user 

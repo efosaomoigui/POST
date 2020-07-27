@@ -9,10 +9,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task<USSDResponse> ProcessPaymentForUSSD(USSDDTO ussdDto);
         Task<USSDResponse> GetPaymentStatus(USSDDTO ussdDto);
         Task<PaystackWebhookDTO> VerifyAndValidatePayment(string reference);
-
-
-        //Task VerifyAndValidatePayment(FlutterWebhookDTO webhook);
-        //Task<string> GetSecurityKey();
-        //Task<PaystackWebhookDTO> ProcessPaymentForWaybillUsingOTP(WaybillPaymentLog paymentLog, string otp);
+        Task<GatewayCodeResponse> GetGatewayCode();
     }
 }

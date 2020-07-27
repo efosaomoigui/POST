@@ -46,7 +46,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 string publicKey = GetPublicKey(token);
 
                 ussdDto.country_code = ussdDto.country_code.Length <= 2 ? ussdDto.country_code : ussdDto.country_code.Substring(0, 2);
-                string pay01Url = GetBaseUrl() + "/pay/" + ussdDto.country_code;
+                string pay01Url = GetBaseUrl() + "/pay/" + ussdDto.country_code + "/" + ussdDto.gateway_code;
 
                 using (var client = new HttpClient())
                 {
@@ -103,6 +103,43 @@ namespace GIGLS.Services.Implementation.Wallet
                     string result = await response.Content.ReadAsStringAsync();
 
                     responseResult = JsonConvert.DeserializeObject<USSDResponse>(result);
+                }
+                return responseResult;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<GatewayCodeResponse> GetGatewayCode()
+        {
+            try
+            {
+                var responseResult = new GatewayCodeResponse();
+
+                //1. Get Token  
+                string token = ConfigurationManager.AppSettings["UssdToken"];
+
+                //2. Encrypt token and private_key to generate public key 
+                string publicKey = GetPublicKey(token);
+
+                //reference represent order_reference
+                string pay01Url = GetBaseUrl() + "/payment/gateway";
+
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Add("token", token);
+                    client.DefaultRequestHeaders.Add("publickey", publicKey);
+
+                    //var ussdDataInJson = JsonConvert.SerializeObject();
+                    //var data = new StringContent(Encoding.UTF8, "application/json");
+                    var response = await client.GetAsync(pay01Url);
+                    string result = await response.Content.ReadAsStringAsync();
+
+                    responseResult = JsonConvert.DeserializeObject<GatewayCodeResponse>(result);
                 }
                 return responseResult;
             }

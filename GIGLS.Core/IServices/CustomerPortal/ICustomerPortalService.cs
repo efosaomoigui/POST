@@ -158,5 +158,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<UserDTO> CheckDetailsForAgentApp(string user);
         Task<object> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment);
         Task<PaymentResponse> VerifyAndValidatePayment(string referenceCode);
+        Task<GatewayCodeResponse> GetGatewayCode();
     }
 }

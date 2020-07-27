@@ -179,7 +179,7 @@ namespace GIGLS.Services.Implementation.Wallet
             {
                 if(ussdResponse.data != null)
                 {
-                    walletPaymentLogDto.ExternalReference = ussdResponse.data.Order_Id;
+                    walletPaymentLogDto.ExternalReference = ussdResponse.data.Order_Reference;
                 }
 
                 if (string.IsNullOrWhiteSpace(customerCode))
@@ -300,7 +300,8 @@ namespace GIGLS.Services.Implementation.Wallet
                     msisdn = walletPaymentLogDto.PhoneNumber,
                     desc = walletPaymentLogDto.UserId,
                     reference = walletPaymentLogDto.Reference,
-                    country_code = countryCode
+                    country_code = countryCode,
+                    gateway_code = walletPaymentLogDto.GatewayCode
                 };
 
                 var responseResult = await _ussdService.ProcessPaymentForUSSD(ussdData);
