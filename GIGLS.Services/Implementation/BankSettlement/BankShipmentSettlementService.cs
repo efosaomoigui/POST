@@ -709,8 +709,9 @@ namespace GIGLS.Services.Implementation.Wallet
             var decimalVal = Convert.ToDecimal(maxDiff);
             var throwError = false;
             var done = false;
+            decimal diff = bankorder.TotalAmount - bankrefcode.AmountInputted;
 
-            if (bankorder.TotalAmount - bankrefcode.AmountInputted > decimalVal)
+            if (diff > decimalVal)
             {
                 throwError = true;
                 var message = new BankDepositMessageDTO()
@@ -721,14 +722,10 @@ namespace GIGLS.Services.Implementation.Wallet
                     AmountInputted = bankrefcode.AmountInputted,
                 };
                 
-                SendMailToAccountants(message);
+                await SendMailToAccountants(message);
                 throw new GenericException($"Amount Deposited {bankrefcode.AmountInputted} is lower than the Actual Bank Deposit {bankorder.TotalAmount}", $"{(int)HttpStatusCode.Forbidden}");
             }
 
-            //if (throwError)
-            //{
-            //    throw new GenericException($"Amount Deposited {bankrefcode.AmountInputted} is lower than the Actual Bank Deposit {bankorder.TotalAmount}", $"{(int)HttpStatusCode.Forbidden}");
-            //}
             else
             {
                 //update BankProcessingOrderCodes
