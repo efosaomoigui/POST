@@ -246,7 +246,10 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                            CurrencySymbol = x.CurrencySymbol,
                                            CurrencyCode = x.CurrencyCode,
                                            PhoneNumberCode = x.PhoneNumberCode
-                                       }).FirstOrDefault()
+                                       }).FirstOrDefault(),
+                                       AccountName = c.AccountName,
+                                       AccountNumber = c.AccountNumber,
+                                       BankName = c.BankName
                                    };
                 return Task.FromResult(companiesDto.FirstOrDefault());
             }
@@ -279,6 +282,11 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Customers
                                        Industry =c.NatureOfBusiness,
                                        DateCreated = c.DateCreated,
                                        DateModified = c.DateModified,
+                                       IsCod = c.IsCod,
+                                       BankName = c.BankName,
+                                       AccountName = c.AccountName,
+                                       AccountNumber = c.AccountNumber,
+                                       IsApi = c.IsApi
                                    };
 
                 return await Task.FromResult(companiesDto.FirstOrDefault());

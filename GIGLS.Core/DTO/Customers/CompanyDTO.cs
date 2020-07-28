@@ -57,5 +57,12 @@ namespace GIGLS.Core.DTO.Customers
 
         //For EcommerceAgreement
         public int EcommerceAgreementId { get; set; }
+
+        public string AccountName { get; set; }
+
+        public string AccountNumber { get; set; }
+
+        public string BankName { get; set; }
+
     }
 }
