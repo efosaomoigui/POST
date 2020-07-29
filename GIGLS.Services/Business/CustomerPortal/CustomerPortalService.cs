@@ -53,6 +53,7 @@ using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
 using System.Net;
 using GIGLS.Services.Implementation.Utility;
+using GIGLS.Core.IServices.Zone;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -83,6 +84,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IMobileGroupCodeWaybillMappingService _groupCodeWaybillMappingService;
         private readonly IDispatchService _dispatchService;
         private readonly IManifestWaybillMappingService _manifestWaybillMappingService;
+        private readonly IDomesticRouteZoneMapService _domesticroutezonemapservice;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -93,7 +95,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService,
             ICountryService countryService, IAdminReportService adminReportService,
             IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
-            IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService)
+            IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService, IDomesticRouteZoneMapService domesticRouteZoneMapService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -120,6 +122,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             _groupCodeWaybillMappingService = groupCodeWaybillMappingService;
             _dispatchService = dispatchService;
             _manifestWaybillMappingService = manifestWaybillMappingService;
+            _domesticroutezonemapservice = domesticRouteZoneMapService;
             MapperConfig.Initialize();
         }
 
@@ -1669,7 +1672,17 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
-            return await _preShipmentMobileService.GetPrice(preShipment);
+            var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
+            preShipment.ZoneMapping = zoneid.ZoneId;
+
+            if (preShipment.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipment.ZoneMapping == 1)
+            {
+                return await _preShipmentMobileService.GetPriceForBike(preShipment);
+            }
+            else
+            {
+                return await _preShipmentMobileService.GetPrice(preShipment);
+            }
         }
         public async Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment)
         {

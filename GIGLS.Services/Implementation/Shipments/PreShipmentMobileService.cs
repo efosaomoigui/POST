@@ -445,6 +445,10 @@ namespace GIGLS.Services.Implementation.Shipments
                         }
                     }
                 }
+                else if (preShipmentDTO.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipmentDTO.ZoneMapping == 1)
+                {
+                    PreshipmentPriceDTO = await GetPriceForBike(preShipmentDTO);
+                }
                 else
                 {
                     if (user.UserChannelType == UserChannelType.Ecommerce || customer != null)
@@ -1204,6 +1208,73 @@ namespace GIGLS.Services.Implementation.Shipments
                     CurrencyCode = country.CurrencyCode,
                     IsWithinProcessingTime = IsWithinProcessingTime,
                     Discount = discount
+                };
+                return returnprice;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //Get Price for Bike Shipments within a city
+        public async Task<MobilePriceDTO> GetPriceForBike(PreShipmentMobileDTO preShipment)
+        {
+            try
+            {
+                if (preShipment == null)
+                {
+                    throw new GenericException("Invalid Data");
+                }
+
+                var zoneid = preShipment.ZoneMapping != null ? (int)preShipment.ZoneMapping : 0;
+
+                var country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
+                if (country == null)
+                {
+                    throw new GenericException("Sender Station Country Not Found", $"{(int)HttpStatusCode.NotFound}");
+                }
+                preShipment.CountryId = country.CountryId;
+
+                var basePriceBike = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BikeBasePrice, preShipment.CountryId);
+                var basePriceBikeValue = Convert.ToDecimal(basePriceBike.Value);
+
+                //change the quantity of the preshipmentItem if it fall into promo category
+                preShipment = await ChangePreshipmentItemQuantity(preShipment, zoneid);
+
+                var discount = 0.0M;
+                var amount = await CalculateBikePriceBasedonLocation(preShipment);
+                           
+                var pickuprice = await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId, preShipment.UserId);
+                var pickupValue = Convert.ToDecimal(pickuprice);
+
+                var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
+
+                decimal grandTotal = basePriceBikeValue + amount;
+
+                //GIG Go Promo Price
+                var gigGoPromo = await CalculatePromoPrice(preShipment, zoneid, pickupValue);
+                if (gigGoPromo.GrandTotal > 0)
+                {
+                    grandTotal = (decimal)gigGoPromo.GrandTotal;
+                    discount = (decimal)gigGoPromo.Discount;
+                    preShipment.DiscountValue = discount;
+                    preShipment.GrandTotal = grandTotal;
+                }
+
+                var returnprice = new MobilePriceDTO()
+                {
+                    MainCharge = (decimal)grandTotal,
+                    DeliveryPrice = 0.0M,
+                    Vat = 0.0M,
+                    PickUpCharge = 0.0M,
+                    InsuranceValue = 0.0M,
+                    GrandTotal = grandTotal,
+                    PreshipmentMobile = preShipment,
+                    CurrencySymbol = country.CurrencySymbol,
+                    CurrencyCode = country.CurrencyCode,
+                    IsWithinProcessingTime = IsWithinProcessingTime,
+                    Discount = 0.0M
                 };
                 return returnprice;
             }
@@ -4822,6 +4893,42 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             return amount;
+        }
+
+        private async Task<decimal> CalculateBikePriceBasedonLocation(PreShipmentMobileDTO item)
+        {
+            var Location = new LocationDTO
+            {
+                DestinationLatitude = (double)item.ReceiverLocation.Latitude,
+                DestinationLongitude = (double)item.ReceiverLocation.Longitude,
+                OriginLatitude = (double)item.SenderLocation.Latitude,
+                OriginLongitude = (double)item.SenderLocation.Longitude
+            };
+
+            RootObject details = await _partnertransactionservice.GetGeoDetails(Location);
+            var distance = (details.rows[0].elements[0].distance.value / 1000);
+            decimal price = 0.0M;
+
+            if (distance <= 25)
+            {
+                var priceFor25AndBelowkm = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BikePrice25KM, item.CountryId);
+                var priceFor25AndBelowkmValue = Convert.ToDecimal(priceFor25AndBelowkm.Value);
+                price = distance * priceFor25AndBelowkmValue;
+            }
+            else if (distance > 25 && distance <= 35)
+            {
+                var priceFor25To35km = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BikePrice26TO35KM, item.CountryId);
+                var priceFor25To35kmValue = Convert.ToDecimal(priceFor25To35km.Value);
+                price = distance * priceFor25To35kmValue;
+            }
+            else if (distance > 35)
+            {
+                var priceFor36Above = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.BikePrice36KM, item.CountryId);
+                var priceFor36AboveValue = Convert.ToDecimal(priceFor36Above.Value);
+                price = distance * priceFor36AboveValue;
+            }
+
+            return price;
         }
 
         public async Task<List<PreShipmentMobileDTO>> GetPreShipmentForEcommerce(string userChannelCode)
