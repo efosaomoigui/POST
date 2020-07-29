@@ -53,6 +53,7 @@
         EcommerceNoCodAmount,
         GIGGOPromo,
         GiglgoMaxNumShipment,
-        RegistrationMessage
+        RegistrationMessage,
+        BikeBasePrice
     }
 }
