@@ -154,6 +154,9 @@ namespace GIGLS.Core.DTO.Shipments
         public DateTime? TimePickedUp { get; set; }
         public DateTime? TimeDelivered { get; set; }
 
+        public string IndentificationUrl { get; set; }
+        public string DeliveryAddressImageUrl { get; set; }
+
     }
     public class NewPreShipmentMobileDTO : BaseDomainDTO
     {
