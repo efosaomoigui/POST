@@ -2910,6 +2910,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     preshipmentmobile.IsDelivered = true;
                     preshipmentmobile.TimeDelivered = DateTime.Now;
+                    preshipmentmobile.IndentificationUrl = pickuprequest.IndentificationUrl;
+                    preshipmentmobile.DeliveryAddressImageUrl = pickuprequest.DeliveryAddressImageUrl;
 
                     if (preshipmentmobile.ZoneMapping == 1)
                     {
@@ -2975,6 +2977,7 @@ namespace GIGLS.Services.Implementation.Shipments
                             SenderPhoneNumber = preshipmentmobile.ReceiverPhoneNumber
                         };
                         await _messageSenderService.SendMessage(MessageType.OKC, EmailSmsType.SMS, messageextensionDTO);
+
                     }
                     else
                     {
