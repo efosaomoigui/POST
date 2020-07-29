@@ -144,7 +144,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var bankshipmentprocessingorders =  _bankprocessingorder.UpdateBankOrderProcessingCode(bkoc);
+                await _bankprocessingorder.UpdateBankOrderProcessingCode(bkoc);
                 return new ServiceResponse<object>
                 {
                 };
@@ -158,7 +158,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var bankshipmentprocessingorders = _bankprocessingorder.UpdateBankOrderProcessingCode_cod(bkoc); 
+                await _bankprocessingorder.UpdateBankOrderProcessingCode_cod(bkoc); 
                 return new ServiceResponse<object>
                 {
                 };
@@ -172,7 +172,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var bankshipmentprocessingorders = _bankprocessingorder.UpdateBankOrderProcessingCode_demurrage(bkoc);
+                await _bankprocessingorder.UpdateBankOrderProcessingCode_demurrage(bkoc);
                 return new ServiceResponse<object>
                 {
                 };
@@ -187,7 +187,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var bankshipmentprocessingorders = _bankprocessingorder.MarkAsVerified_cod(bkoc);
+                await _bankprocessingorder.MarkAsVerified_cod(bkoc);
                 return new ServiceResponse<object>
                 {
                 };
@@ -201,7 +201,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var bankshipmentprocessingorders = _bankprocessingorder.MarkAsVerified_demurrage(bkoc); 
+                await _bankprocessingorder.MarkAsVerified_demurrage(bkoc); 
                 return new ServiceResponse<object>
                 {
                 };
@@ -215,7 +215,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var bankshipmentprocessingorders = _bankprocessingorder.MarkAsVerified(bkoc);
+                await _bankprocessingorder.MarkAsVerified(bkoc);
                 return new ServiceResponse<object>
                 {
                 };
@@ -229,7 +229,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var bankshipmentprocessingorders = await _bankprocessingorder.AddBankProcessingOrderCode(bkoc);
+                await _bankprocessingorder.AddBankProcessingOrderCode(bkoc);
                 return new ServiceResponse<object>
                 {
                 };
@@ -243,7 +243,7 @@ namespace GIGLS.WebApi.Controllers.BankSettlement
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var bankshipmentprocessingorders = await _bankprocessingorder.AddBankProcessingOrderCodeDemurrageOnly(bkoc);
+                await _bankprocessingorder.AddBankProcessingOrderCodeDemurrageOnly(bkoc);
                 return new ServiceResponse<object>
                 {
                 };

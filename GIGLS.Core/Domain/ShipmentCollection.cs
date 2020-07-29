@@ -42,5 +42,8 @@ namespace GIGLS.CORE.Domain
         //Who processed the collection
         [MaxLength(128)]
         public string UserId { get; set; }
+
+        [MaxLength(500)]
+        public string DeliveryAddressImageUrl { get; set; }
     }
 }

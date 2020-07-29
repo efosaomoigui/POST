@@ -574,6 +574,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 await _centreService.GetServiceCentreById(shipmentDto.DestinationServiceCentreId);
 
                 var shipment = await _uow.Shipment.GetAsync(shipmentId);
+                var customer = await _uow.IndividualCustomer.GetAsync(shipmentDto.CustomerId);
+
                 if (shipment == null || shipmentId != shipment.ShipmentId)
                 {
                     throw new GenericException("Shipment Information does not exist");
@@ -585,6 +587,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.ReceiverState = shipmentDto.ReceiverState;
                 shipment.ReceiverPhoneNumber = shipmentDto.ReceiverPhoneNumber;
                 shipment.ReceiverName = shipmentDto.ReceiverName;
+                shipment.ReceiverEmail = shipmentDto.ReceiverEmail;
                 shipment.ReceiverCountry = shipmentDto.ReceiverCountry;
                 shipment.ReceiverCity = shipmentDto.ReceiverCity;
                 shipment.PaymentStatus = shipmentDto.PaymentStatus;
@@ -596,10 +599,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.CustomerType = shipmentDto.CustomerType;
                 shipment.CustomerId = shipmentDto.CustomerId;
                 shipment.ActualDateOfArrival = shipmentDto.ActualDateOfArrival;
+                shipment.GrandTotal = shipmentDto.GrandTotal;
+                shipment.Total = shipmentDto.Total;
+
+                customer.Email = shipmentDto.CustomerDetails.Email;
+                customer.FirstName = shipmentDto.CustomerDetails.FirstName;
+                customer.LastName = shipmentDto.CustomerDetails.LastName;
+                customer.PhoneNumber = shipmentDto.CustomerDetails.PhoneNumber;
 
                 await _uow.CompleteAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }
