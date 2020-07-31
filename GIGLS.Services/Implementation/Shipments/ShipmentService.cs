@@ -607,6 +607,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 customer.FirstName = shipmentDto.CustomerDetails.FirstName;
                 customer.LastName = shipmentDto.CustomerDetails.LastName;
                 customer.PhoneNumber = shipmentDto.CustomerDetails.PhoneNumber;
+                customer.Address = shipmentDto.CustomerDetails.Address;
 
                 await _uow.CompleteAsync();
             }
