@@ -1,4 +1,5 @@
-﻿using GIGL.GIGLS.Core.Repositories;
+﻿using GIGL.GIGLS.Core.Domain;
+using GIGL.GIGLS.Core.Repositories;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO.Shipments;
 using GIGLS.CORE.DTO.Report;
@@ -13,5 +14,6 @@ namespace GIGLS.Core.IRepositories.Shipments
         Task<ManifestGroupWaybillNumberMappingDTO> GetManifestGroupWaybillNumberMappingsUsingGroupWaybill(string groupWaybill);
         Task<List<ManifestGroupWaybillNumberMappingDTO>> GetManifestGroupWaybillNumberMappings(int[] serviceCentreIds, DateFilterCriteria dateFilterCriteria);
         Task<List<ManifestDTO>> GetManifestSuperManifestMappings(int[] serviceCentreIds, DateFilterCriteria dateFilterCriteria);
+        Task<List<ManifestDTO>> GetManifestGroupWaybillNumberMappingsForSuperManifest(int[] serviceCentreIds);
     }
 }

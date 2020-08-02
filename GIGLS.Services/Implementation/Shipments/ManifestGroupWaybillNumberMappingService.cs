@@ -254,16 +254,22 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //var manifestDTO = await _manifestService.GetManifestByCode(manifest);
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
+                var newManifest = new Manifest();
 
                 //validate the ids are in the system
                 if (manifestObj == null)
                 {
-                    var newManifest = new Manifest
+                    //var newManifest = new Manifest
+                    //{
+                    //    DateTime = DateTime.Now,
+                    //    ManifestCode = manifest
+                    //};
+                    newManifest = new Manifest
                     {
                         DateTime = DateTime.Now,
                         ManifestCode = manifest
                     };
-                    _uow.Manifest.Add(newManifest);
+                    //_uow.Manifest.Add(newManifest);
                 }
                 else
                 {
@@ -306,6 +312,13 @@ namespace GIGLS.Services.Implementation.Shipments
                         //Update The Group Waybill HasManifest to True
                         var groupWaybill = await _uow.GroupWaybillNumber.GetAsync(groupWaybillNumberDTO.GroupWaybillNumberId);
                         groupWaybill.HasManifest = true;
+
+                        if (manifestObj == null)
+                        {
+                            newManifest.DepartureServiceCentreId = groupWaybillNumberDTO.DepartureServiceCentreId;
+                            _uow.Manifest.Add(newManifest);
+                        }
+                       
                     }
                 }
                 await _uow.CompleteAsync();
@@ -324,8 +337,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var userId = await _userService.GetCurrentUserId();
                 var serviceCenters = await _userService.GetPriviledgeServiceCenters();
 
-                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false
-                && x.SuperManifestStatus == SuperManifestStatus.ArrivedScan && manifestList.Contains(x.ManifestCode) && serviceCenters.Contains(x.DepartureServiceCentreId));
+                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false && manifestList.Contains(x.ManifestCode) && serviceCenters.Contains(x.DepartureServiceCentreId));
 
                 var manifestByScList = manifestBySc.Select(x => x.ManifestCode).Distinct().ToList();
 
