@@ -1244,13 +1244,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var discount = 0.0M;
                 var amount = await CalculateBikePriceBasedonLocation(preShipment);
-                           
+
                 var pickuprice = await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId, preShipment.UserId);
                 var pickupValue = Convert.ToDecimal(pickuprice);
 
-                var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
-
-                decimal grandTotal = basePriceBikeValue + amount;
+                decimal grandTotal = basePriceBikeValue + amount + pickuprice;
 
                 //GIG Go Promo Price
                 var gigGoPromo = await CalculatePromoPrice(preShipment, zoneid, pickupValue);
@@ -1262,12 +1260,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipment.GrandTotal = grandTotal;
                 }
 
+                var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
                 var returnprice = new MobilePriceDTO()
                 {
                     MainCharge = (decimal)grandTotal,
                     DeliveryPrice = 0.0M,
                     Vat = 0.0M,
-                    PickUpCharge = 0.0M,
+                    PickUpCharge = pickuprice,
                     InsuranceValue = 0.0M,
                     GrandTotal = grandTotal,
                     PreshipmentMobile = preShipment,
