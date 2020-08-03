@@ -3620,8 +3620,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 preShipment.SenderLocation = senderLocation;
                 preShipment.ReceiverLocation = receiverLocation;
 
-                var PreshipmentPriceDTO = await GetPrice(preShipment);
-                var difference = (preshipmentmobilegrandtotal.GrandTotal - PreshipmentPriceDTO.GrandTotal);
+                var preshipmentPriceDTO = new MobilePriceDTO();
+
+                if (preshipmentmobilegrandtotal.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preshipmentmobilegrandtotal.ZoneMapping == 1)
+                {
+                    preshipmentPriceDTO = await GetPriceForBike(preShipment);
+                }
+                else
+                {
+                    preshipmentPriceDTO =  await GetPrice(preShipment);
+                }
+
+                var difference = (preshipmentmobilegrandtotal.GrandTotal - preshipmentPriceDTO.GrandTotal);
 
                 if (preShipment.PreShipmentItems.Any())
                 {
@@ -3646,7 +3656,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                 item.ImageUrl = preshipmentitemmobile.ImageUrl;
                                 item.ItemName = preshipmentitemmobile.ItemName;
                                 item.Length = preshipmentitemmobile.Length;
-                                item.CalculatedPrice = PreshipmentPriceDTO.PreshipmentMobile.PreShipmentItems.Where(x => x.PreShipmentItemMobileId == item.PreShipmentItemMobileId).Select(y => y.CalculatedPrice).FirstOrDefault();
+                                item.CalculatedPrice = preshipmentPriceDTO.PreshipmentMobile.PreShipmentItems.Where(x => x.PreShipmentItemMobileId == item.PreShipmentItemMobileId).Select(y => y.CalculatedPrice).FirstOrDefault();
                                 if (!string.IsNullOrEmpty(preshipmentitemmobile.Value))
                                 {
                                     preshipmentmobilegrandtotal.Value = preshipmentmobilegrandtotal.Value + decimal.Parse(preshipmentitemmobile.Value);
@@ -3658,11 +3668,11 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //update shipment information
                 preshipmentmobilegrandtotal.shipmentstatus = MobilePickUpRequestStatus.Resolved.ToString();
-                preshipmentmobilegrandtotal.GrandTotal = (decimal)PreshipmentPriceDTO.GrandTotal;
-                preshipmentmobilegrandtotal.InsuranceValue = PreshipmentPriceDTO.PreshipmentMobile.InsuranceValue;
-                preshipmentmobilegrandtotal.DiscountValue = PreshipmentPriceDTO.PreshipmentMobile.DiscountValue;
-                preshipmentmobilegrandtotal.DeliveryPrice = PreshipmentPriceDTO.PreshipmentMobile.DeliveryPrice;
-                preshipmentmobilegrandtotal.CalculatedTotal = PreshipmentPriceDTO.PreshipmentMobile.CalculatedTotal;
+                preshipmentmobilegrandtotal.GrandTotal = (decimal)preshipmentPriceDTO.GrandTotal;
+                preshipmentmobilegrandtotal.InsuranceValue = preshipmentPriceDTO.PreshipmentMobile.InsuranceValue;
+                preshipmentmobilegrandtotal.DiscountValue = preshipmentPriceDTO.PreshipmentMobile.DiscountValue;
+                preshipmentmobilegrandtotal.DeliveryPrice = preshipmentPriceDTO.PreshipmentMobile.DeliveryPrice;
+                preshipmentmobilegrandtotal.CalculatedTotal = preshipmentPriceDTO.PreshipmentMobile.CalculatedTotal;
 
                 var updatedwallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == preShipment.CustomerCode);
                 if (difference < 0.00M)
