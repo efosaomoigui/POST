@@ -1248,7 +1248,17 @@ namespace GIGLS.Services.Implementation.Shipments
                 var pickuprice = await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId, preShipment.UserId);
                 var pickupValue = Convert.ToDecimal(pickuprice);
 
-                decimal grandTotal = basePriceBikeValue + amount + pickuprice;
+                decimal mainCharge = basePriceBikeValue + amount;
+
+                var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountBikePercentage, preShipment.CountryId);
+                var percentage = Convert.ToDecimal(discountPercent.Value);
+                var percentageTobeUsed = ((100M - percentage) / 100M);
+
+                var calculatedTotal = (double)(mainCharge * percentageTobeUsed);
+                calculatedTotal = Math.Round(calculatedTotal);
+               
+                discount = Math.Round(mainCharge - (decimal)calculatedTotal);
+                decimal grandTotal = (decimal)calculatedTotal + pickupValue;
 
                 //GIG Go Promo Price
                 var gigGoPromo = await CalculatePromoPrice(preShipment, zoneid, pickupValue);
@@ -1263,7 +1273,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
                 var returnprice = new MobilePriceDTO()
                 {
-                    MainCharge = (decimal)grandTotal,
+                    MainCharge = (decimal)calculatedTotal,
                     DeliveryPrice = 0.0M,
                     Vat = 0.0M,
                     PickUpCharge = pickuprice,
@@ -1273,7 +1283,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     CurrencySymbol = country.CurrencySymbol,
                     CurrencyCode = country.CurrencyCode,
                     IsWithinProcessingTime = IsWithinProcessingTime,
-                    Discount = 0.0M
+                    Discount = discount
                 };
                 return returnprice;
             }
