@@ -8,7 +8,8 @@
         Wallet,
         Transfer,
         Partial,
-        Waiver
+        Waiver,
+        USSD
     }
 
     public enum CODPaidOutStatus 

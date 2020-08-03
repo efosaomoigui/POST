@@ -9,6 +9,7 @@ using GIGLS.Core.IServices.Wallet;
 using Newtonsoft.Json;
 using System;
 using System.Configuration;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
@@ -38,6 +39,9 @@ namespace GIGLS.Services.Implementation.Wallet
             try
             {
                 var responseResult = new USSDResponse();
+
+                //remove + on the msidn
+                ussdDto.msisdn = ussdDto.msisdn.Split('+').Last();
 
                 //1. Get Token  
                 string token = ConfigurationManager.AppSettings["UssdToken"];
@@ -241,7 +245,7 @@ namespace GIGLS.Services.Implementation.Wallet
                                 Amount = paymentLog.Amount,
                                 CreditDebitType = CreditDebitType.Credit,
                                 Description = "Funding made through online payment",
-                                PaymentType = PaymentType.Online,
+                                PaymentType = PaymentType.USSD,
                                 PaymentTypeReference = paymentLog.Reference,
                                 UserId = customerId
                             }, false);
@@ -295,7 +299,7 @@ namespace GIGLS.Services.Implementation.Wallet
                             PaymentTransactionDTO paymentTransaction = new PaymentTransactionDTO
                             {
                                 Waybill = paymentLog.Waybill,
-                                PaymentType = PaymentType.Online,
+                                PaymentType = PaymentType.USSD,
                                 TransactionCode = paymentLog.Reference,
                                 UserId = paymentLog.UserId
                             };

@@ -38,7 +38,7 @@ namespace GIGLS.Core.Domain.Wallet
 
         //NetworkProvider for Ghana Payment
         // //use NetworkProvide to represent flutter flwRef -- security code for otp confirmation
-        //Network Provider represent OrderId for USSD 
+        //Network Provider represent Order_Reference for USSD 
         [MaxLength(50)]
         public string NetworkProvider { get; set; }
     }
