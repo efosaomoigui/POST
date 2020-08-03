@@ -444,7 +444,7 @@ namespace GIGLS.Services.Business.Magaya.Shipments
                 //Receivers Details
                 shipmentDTO.ReceiverName = magayaShipmentDTO.ConsigneeName;
                 shipmentDTO.ReceiverPhoneNumber = magayaShipmentDTO.Consignee.Phone;
-                shipmentDTO.ReceiverEmail = magayaShipmentDTO.Consignee.Email;
+                shipmentDTO.ReceiverEmail = (magayaShipmentDTO.Consignee.Email != " ") ? magayaShipmentDTO.Consignee.Email: magayaShipmentDTO.ConsigneeAddress.ContactEmail;
                 shipmentDTO.ReceiverAddress = magayaShipmentDTO.ConsigneeAddress.Street[0];
                 shipmentDTO.ReceiverCity = magayaShipmentDTO.ConsigneeAddress.City;
                 shipmentDTO.ReceiverState = magayaShipmentDTO.ConsigneeAddress.State;
