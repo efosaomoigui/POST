@@ -57,6 +57,7 @@ using GIGLS.Core.IServices.Zone;
 using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.CORE.IServices.Shipments;
+using GIGLS.Core.DTO.OnlinePayment;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -93,6 +94,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IShipmentCollectionService _collectionservice;
         private readonly ILogVisitReasonService _logService;
         private readonly IManifestVisitMonitoringService _visitService;
+        private readonly IPaystackPaymentService _paystackPaymentService;
+        private readonly IUssdService _ussdService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -105,6 +108,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
             IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService)
+            ICountryService countryService, IAdminReportService adminReportService, IPartnerTransactionsService partnertransactionservice,
+            IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService, IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService,
+            IPaystackPaymentService paystackPaymentService, IUssdService ussdService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -137,6 +143,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             _collectionservice = collectionService;
             _logService = logService;
             _visitService = visitService;
+            _paystackPaymentService = paystackPaymentService;
+            _ussdService = ussdService;
             MapperConfig.Initialize();
         }
 
@@ -194,6 +202,12 @@ namespace GIGLS.Services.Business.CustomerPortal
             return walletPaymentLog;
         }
 
+        public async Task<USSDResponse> InitiatePaymentUsingUSSD(WalletPaymentLogDTO walletPaymentLogDto)
+        {
+            var walletPaymentLog = await _wallepaymenttlogService.InitiatePaymentUsingUSSD(walletPaymentLogDto);
+            return walletPaymentLog;
+        }
+
         public async Task<object> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
             //1.check to prevent multiple entries
@@ -240,6 +254,52 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             await _wallepaymenttlogService.UpdateWalletPaymentLog(walletPaymentLogDto.Reference, walletPaymentLogDto);
             return walletPaymentLogDto;
+        }
+
+        public async Task<PaymentResponse> VerifyAndValidatePayment(string referenceCode)
+        {
+            PaymentResponse result = new PaymentResponse();
+
+            //1. Get PaymentLog
+            var paymentLog = await _uow.WalletPaymentLog.GetAsync(x => x.Reference == referenceCode);
+
+            if (paymentLog != null)
+            {
+                if(paymentLog.OnlinePaymentType == OnlinePaymentType.USSD)
+                {
+                    result = await VerifyAndValidateUSSDPayment(referenceCode);
+                }
+                else
+                {
+                    result = await _paystackPaymentService.VerifyAndProcessPayment(referenceCode);
+                }
+            }
+            else
+            {
+                result.Result = false;
+                result.Message = "";
+                result.GatewayResponse = "Wallet Payment Log Information does not exist";
+            }
+
+            return result;
+        }
+
+        private async Task<PaymentResponse> VerifyAndValidateUSSDPayment(string referenceCode)
+        {
+            PaymentResponse response = new PaymentResponse();
+
+            var result = await _ussdService.VerifyAndValidatePayment(referenceCode);
+
+            response.Result = result.Status;
+            response.Status = result.data.Status;
+            response.Message = result.Message;
+            response.GatewayResponse = result.data.Gateway_Response;
+            return response;
+        }
+
+        public async Task<GatewayCodeResponse> GetGatewayCode()
+        {
+            return await _ussdService.GetGatewayCode();
         }
 
         public async Task<WalletTransactionSummaryDTO> GetWalletTransactions()
@@ -798,7 +858,6 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return userDTO;
         }
-
 
         private async Task<bool> CheckRegistrationAccess(UserDTO user)
         {

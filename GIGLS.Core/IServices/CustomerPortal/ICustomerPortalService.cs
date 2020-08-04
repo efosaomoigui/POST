@@ -7,6 +7,7 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Dashboard;
 using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.Haulage;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Report;
@@ -57,6 +58,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<IdentityResult> ChangePassword(ChangePasswordDTO passwordDTO);
         Task UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO);
         Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO);
+        Task<USSDResponse> InitiatePaymentUsingUSSD(WalletPaymentLogDTO walletPaymentLogDto);
         Task<object> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO);
 
         //Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto);
@@ -162,5 +164,7 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task ReleaseShipmentForCollectionOnScanner(ShipmentCollectionDTO shipmentCollection);
         Task<List<LogVisitReasonDTO>> GetLogVisitReasons();
         Task<object> AddManifestVisitMonitoring(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO);
+        Task<PaymentResponse> VerifyAndValidatePayment(string referenceCode);
+        Task<GatewayCodeResponse> GetGatewayCode();
     }
 }

@@ -19,5 +19,6 @@ namespace GIGLS.Core.IServices.Wallet
         Task<PaystackWebhookDTO> VerifyAndValidateWaybill(string waybill);
         //Task<PaystackWebhookDTO> VerifyAndValidateWaybillForVodafoneMobilePayment(string waybill, string pin);
         Task<PaystackWebhookDTO> VerifyAndValidatePaymentUsingOTP(string waybill, string pin);
+        Task<GatewayCodeResponse> GetGatewayCode();
     }
 }
