@@ -1,6 +1,4 @@
-﻿
-
-using GIGLS.Core.DTO;
+﻿using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Haulage;
 using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.DTO.PaymentTransactions;
