@@ -588,6 +588,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 shipment.ReceiverPhoneNumber = shipmentDto.ReceiverPhoneNumber;
                 shipment.ReceiverName = shipmentDto.ReceiverName;
                 shipment.ReceiverEmail = shipmentDto.ReceiverEmail;
+                shipment.ReceiverAddress = shipmentDto.ReceiverAddress;
                 shipment.ReceiverCountry = shipmentDto.ReceiverCountry;
                 shipment.ReceiverCity = shipmentDto.ReceiverCity;
                 shipment.PaymentStatus = shipmentDto.PaymentStatus;
@@ -606,6 +607,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 customer.FirstName = shipmentDto.CustomerDetails.FirstName;
                 customer.LastName = shipmentDto.CustomerDetails.LastName;
                 customer.PhoneNumber = shipmentDto.CustomerDetails.PhoneNumber;
+                customer.Address = shipmentDto.CustomerDetails.Address;
 
                 await _uow.CompleteAsync();
             }
