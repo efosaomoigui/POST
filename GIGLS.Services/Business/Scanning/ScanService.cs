@@ -981,23 +981,23 @@ namespace GIGLS.Services.Business.Scanning
             var serviceCenters = await _userService.GetPriviledgeServiceCenters();
             var currentUserSercentreId = serviceCenters.Length > 0 ? serviceCenters[0] : 0;
 
-            var arrManifests = manifests.Select(x => x.ManifestCode).ToArray();
-            var dispatch = _uow.Dispatch.GetAllAsQueryable().Where(s => arrManifests.Contains(s.ManifestNumber));
+            //var arrManifests = manifests.Select(x => x.ManifestCode).ToArray();
+            //var dispatch = _uow.Dispatch.GetAllAsQueryable().Where(s => arrManifests.Contains(s.ManifestNumber));
 
-            if (dispatch.Any())
-            {
+            //if (dispatch.Any())
+            //{
                 manifests.ForEach(x => x.DepartureServiceCentreId = currentUserSercentreId);
                 manifests.ForEach(x => x.SuperManifestStatus = SuperManifestStatus.ArrivedScan);
                 manifests.ForEach(x => x.IsDispatched = false);
                 manifests.ForEach(x => x.DispatchedById = null);
                 manifests.ForEach(x => x.HasSuperManifest = false);
 
-                foreach (var item in dispatch)
-                {
-                    var manifest = manifests.Where(x => x.ManifestCode == item.ManifestNumber).FirstOrDefault();
-                    manifest.DestinationServiceCentreId = item.DestinationServiceCenterId;
-                }
-            }
+                //foreach (var item in dispatch)
+                //{
+                //    var manifest = manifests.Where(x => x.ManifestCode == item.ManifestNumber).FirstOrDefault();
+                //    //manifest.DestinationServiceCentreId = item.DestinationServiceCenterId;
+                //}
+            //}
 
             await _uow.CompleteAsync();
             return true;
