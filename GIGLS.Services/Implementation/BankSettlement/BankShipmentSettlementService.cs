@@ -707,13 +707,10 @@ namespace GIGLS.Services.Implementation.Wallet
 
             string maxDiff = ConfigurationManager.AppSettings["maxDiffBDO"];
             var decimalVal = Convert.ToDecimal(maxDiff);
-            var throwError = false;
-            var done = false;
             decimal diff = bankorder.TotalAmount - bankrefcode.AmountInputted;
 
             if (diff > decimalVal)
             {
-                throwError = true;
                 var message = new BankDepositMessageDTO()
                 {
                     DepositorName = bankorder.FullName,
@@ -825,22 +822,43 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Bank Order Request Does not Exist!", $"{(int)HttpStatusCode.NotFound}");
             }
 
-            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-            var allDemurrages = _uow.DemurrageRegisterAccount.GetDemurrageAsQueryable();
-            allDemurrages = allDemurrages.Where(s => s.DepositStatus == DepositStatus.Pending);
-            var codsforservicecenter = allDemurrages.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
+            string maxDiff = ConfigurationManager.AppSettings["maxDiffBDO"];
+            var decimalVal = Convert.ToDecimal(maxDiff);
+            decimal diff = bankorder.TotalAmount - bankrefcode.AmountInputted;
 
-            var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
+            if (diff > decimalVal)
+            {
+                var message = new BankDepositMessageDTO()
+                {
+                    DepositorName = bankorder.FullName,
+                    ServiceCenter = bankorder.ScName,
+                    TotalAmount = bankorder.TotalAmount,
+                    AmountInputted = bankrefcode.AmountInputted,
+                };
 
-            //update BankProcessingOrderForShipmentAndCOD
-            var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == bankrefcode.Code).ToList();
-            accompanyWaybillsVals.ForEach(a => a.Status = DepositStatus.Deposited);
+                await SendMailToAccountants(message);
+                throw new GenericException($"Amount Deposited {bankrefcode.AmountInputted} is lower than the Actual Bank Deposit {bankorder.TotalAmount}", $"{(int)HttpStatusCode.Forbidden}");
+            }
 
-            codsforservicecenter.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
-            bankorder.Status = bankrefcode.Status;
-            bankorder.BankName = bankrefcode.BankName;
-            bankorder.DateAndTimeOfDeposit = DateTime.Now;
-            await _uow.CompleteAsync();
+            else
+            {
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var allDemurrages = _uow.DemurrageRegisterAccount.GetDemurrageAsQueryable();
+                allDemurrages = allDemurrages.Where(s => s.DepositStatus == DepositStatus.Pending);
+                var codsforservicecenter = allDemurrages.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
+
+                var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
+
+                //update BankProcessingOrderForShipmentAndCOD
+                var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == bankrefcode.Code).ToList();
+                accompanyWaybillsVals.ForEach(a => a.Status = DepositStatus.Deposited);
+
+                codsforservicecenter.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
+                bankorder.Status = bankrefcode.Status;
+                bankorder.BankName = bankrefcode.BankName;
+                bankorder.DateAndTimeOfDeposit = DateTime.Now;
+                await _uow.CompleteAsync();
+            }
         }
 
         /// <summary>
@@ -857,23 +875,44 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Bank Order Request Does not Exist!", $"{(int)HttpStatusCode.NotFound}");
             }
 
-            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
-            var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
-            allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Pending);
-            var codsforservicecenter = allCODs.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
+            string maxDiff = ConfigurationManager.AppSettings["maxDiffBDO"];
+            var decimalVal = Convert.ToDecimal(maxDiff);
+            decimal diff = bankorder.TotalAmount - bankrefcode.AmountInputted;
 
-            var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
+            if (diff > decimalVal)
+            {
+                var message = new BankDepositMessageDTO()
+                {
+                    DepositorName = bankorder.FullName,
+                    ServiceCenter = bankorder.ScName,
+                    TotalAmount = bankorder.TotalAmount,
+                    AmountInputted = bankrefcode.AmountInputted,
+                };
 
-            //update BankProcessingOrderForShipmentAndCOD
-            var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == bankrefcode.Code).ToList();
-            accompanyWaybillsVals.ForEach(a => a.Status = DepositStatus.Deposited);
+                await SendMailToAccountants(message);
+                throw new GenericException($"Amount Deposited {bankrefcode.AmountInputted} is lower than the Actual Bank Deposit {bankorder.TotalAmount}", $"{(int)HttpStatusCode.Forbidden}");
+            }
+            else
+            {
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+                var allCODs = _uow.CashOnDeliveryRegisterAccount.GetCODAsQueryable();
+                allCODs = allCODs.Where(s => s.DepositStatus == DepositStatus.Pending);
+                var codsforservicecenter = allCODs.Where(s => serviceCenters.Contains(s.ServiceCenterId)).ToList();
 
-            codsforservicecenter.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
-            bankorder.Status = bankrefcode.Status;
-            bankorder.BankName = bankrefcode.BankName;
-            bankorder.DateAndTimeOfDeposit = DateTime.Now;
+                var accompanyWaybills = await _uow.BankProcessingOrderForShipmentAndCOD.GetAllWaybillsForBankProcessingOrdersAsQueryable(bankrefcode.DepositType);
 
-            await _uow.CompleteAsync();
+                //update BankProcessingOrderForShipmentAndCOD
+                var accompanyWaybillsVals = accompanyWaybills.Where(s => s.RefCode == bankrefcode.Code).ToList();
+                accompanyWaybillsVals.ForEach(a => a.Status = DepositStatus.Deposited);
+
+                codsforservicecenter.ForEach(a => a.DepositStatus = DepositStatus.Deposited);
+                bankorder.Status = bankrefcode.Status;
+                bankorder.BankName = bankrefcode.BankName;
+                bankorder.DateAndTimeOfDeposit = DateTime.Now;
+
+                await _uow.CompleteAsync();
+            }
+
         }
 
         public async Task MarkAsVerified_demurrage(BankProcessingOrderCodesDTO bankrefcode)
