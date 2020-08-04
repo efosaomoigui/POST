@@ -15,12 +15,10 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Http;
 
 namespace GIGLS.WebApi.Controllers.GIGGo
@@ -59,6 +57,7 @@ namespace GIGLS.WebApi.Controllers.GIGGo
         {
             return await HandleApiOperationAsync(async () =>
             {
+                logindetail.UserChannelType = UserChannelType.Partner.ToString();
                 var user = await _portalService.CheckDetails(logindetail.UserDetail, logindetail.UserChannelType);
 
                 if (user.RequiresCod == null)
@@ -639,8 +638,5 @@ namespace GIGLS.WebApi.Controllers.GIGGo
                 };
             });
         }
-
-
     }
-
 }
