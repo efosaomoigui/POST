@@ -33,7 +33,6 @@ namespace GIGLS.Services.Business.Scanning
         private readonly IHUBManifestWaybillMappingService _hubmanifestWaybillService;
         private readonly IUnitOfWork _uow;
 
-
         public ScanService(IShipmentService shipmentService, IShipmentTrackingService shipmentTrackingService,
             IGroupWaybillNumberMappingService groupService, IGroupWaybillNumberService groupWaybill,
             IManifestService manifestService, IManifestGroupWaybillNumberMappingService groupManifest,
@@ -96,7 +95,7 @@ namespace GIGLS.Services.Business.Scanning
             var cashondeliveryinfo = new List<CashOnDeliveryRegisterAccount>();
 
             //block scanning if the waybill has been collected
-            if(scan.ShipmentScanStatus != ShipmentScanStatus.SMIM)
+            if (scan.ShipmentScanStatus != ShipmentScanStatus.SMIM)
             {
                 await BlockAnyScanOnCollectedShipment(scan.WaybillNumber, scan);
             }
@@ -391,8 +390,8 @@ namespace GIGLS.Services.Business.Scanning
                         {
                             waybills.Add(hubManifest.Waybill);
                             await BlockAnyScanOnCollectedShipment(hubManifest.Waybill, scan);
-                        }                      
-                        
+                        }
+
                         //if the shipment scan status is shipment arrive HUB then
                         //update Dispatch Receiver and manifest receiver id
                         if (scan.ShipmentScanStatus == ShipmentScanStatus.ARP)
@@ -429,13 +428,39 @@ namespace GIGLS.Services.Business.Scanning
                 }
             }
 
-            if (shipment == null && groupWaybill == null && manifest == null)
+            /////////////////////////3. Super Manifest
+            var result = await ScanWithSuperManifest(scan.WaybillNumber, scan, scanStatus);
+            if (result.WaybillsInManifest.Any())
             {
-                throw new GenericException($"Shipment with waybill: {scan.WaybillNumber} does not exist");
+                waybillsInManifest = result.WaybillsInManifest;
             }
 
-            //////////////////////4. Check and Create Entries for Transit Manifest
-            await CheckAndCreateEntriesForTransitManifest(scan, manifest, waybillsInManifest);
+            if (shipment == null && groupWaybill == null && manifest == null && (!result.ListOfManifests.Any()))
+            {
+                throw new GenericException($"Information does not exist for  {scan.WaybillNumber} ");
+            }
+
+            if (scan.ShipmentScanStatus == ShipmentScanStatus.ACC)
+            {
+                if (result.ListOfManifests.Any())
+                {
+                    await CheckAndCreateManifestEntriesForSuperManifest(result.ListOfManifests);
+                }
+                else if (manifest != null)
+                {
+                    if (manifest.ManifestType == ManifestType.Transit && manifest.IsDispatched == true)
+                    {
+                        //Create Entries for Scan status with ACC
+                        await CheckAndCreateManifestEntriesForSuperManifest(manifest);
+                    }
+
+                }
+            }
+            else
+            {
+                //////////////////////4. Check and Create Entries for Transit M0anifest
+                await CheckAndCreateEntriesForTransitManifest(scan, manifest, waybillsInManifest);
+            }
 
             //5. Update the waybill to show transit waybill has complete transit process when it arrived Final Destination in TransitWaybill
             await CompleteTransitWaybillProcess(scan, waybillsInGroupWaybill, waybillsInManifest);
@@ -446,11 +471,113 @@ namespace GIGLS.Services.Business.Scanning
             return true;
         }
 
+        private async Task<SuperManifestScanDTO> ScanWithSuperManifest(string superManifest, ScanDTO scan, string scanStatus)
+        {
+            // check if the manifest number exists in the system
+            var listOfManifestsinSuperManifest = _uow.Manifest.GetAllAsQueryable().Where(x => x.SuperManifestCode == superManifest && x.SuperManifestStatus == SuperManifestStatus.Dispatched);
+            var waybillsInManifest = new HashSet<string>();
+
+            var listOfManifests = listOfManifestsinSuperManifest.Where(p => p.IsDispatched == true && p.ManifestType == ManifestType.Transit).ToList();
+
+            foreach (var manifest in listOfManifests)
+            {
+                var groupWaybillInManifestList = await _groupManifest.GetGroupWaybillNumbersInManifest(manifest.ManifestId);
+
+                //In case no shipment attached to the manifest  
+                if (groupWaybillInManifestList.Any())
+                {
+                    //block scanning if any of the waybill has been collected
+                    foreach (var groupShipment in groupWaybillInManifestList)
+                    {
+                        if (groupShipment.WaybillNumbers.Any())
+                        {
+                            foreach (var waybill in groupShipment.WaybillNumbers)
+                            {
+                                await BlockAnyScanOnCollectedShipment(waybill, scan);
+                            }
+                        }
+                    }
+
+                    foreach (var groupShipment in groupWaybillInManifestList)
+                    {
+                        if (groupShipment.WaybillNumbers.Any())
+                        {
+                            ////// ManifestCheck  - CheckIfUserIsAtShipmentFinalDestination
+                            if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
+                            {
+                                foreach (var waybill in groupShipment.WaybillNumbers)
+                                {
+                                    var shipmentItem = await _shipmentService.GetShipmentForScan(waybill);
+                                    // For Shipment Check if user has rights to this action
+                                    await CheckIfUserIsAtShipmentFinalDestination(scan, shipmentItem.DestinationServiceCentreId);
+                                }
+                            }
+
+                            foreach (var waybill in groupShipment.WaybillNumbers)
+                            {
+                                //All Transit scan to exist for different service centre
+                                //check already scanned manifest
+                                var checkTrack = await _shipmentTrackingService.CheckShipmentTracking(waybill, scanStatus);
+
+                                if (!checkTrack || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AD) || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.AST)
+                                    || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.ARP) || scan.ShipmentScanStatus.Equals(ShipmentScanStatus.APT))
+                                {
+                                    await _shipmentTrackingService.AddShipmentTracking(new ShipmentTrackingDTO
+                                    {
+                                        DateTime = DateTime.Now,
+                                        Status = scanStatus,
+                                        Waybill = waybill,
+                                    }, scan.ShipmentScanStatus);
+                                }
+
+                                //if the shipment scan status is shipment arrive final destination then
+                                //update Dispatch Receiver and manifest receiver id
+                                if (scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
+                                {
+                                    var dispatch = await _dispatchService.GetDispatchManifestCode(scan.WaybillNumber);
+                                    if (dispatch != null)
+                                    {
+                                        //get the user that login
+                                        var userId = await _userService.GetCurrentUserId();
+                                        var user = await _userService.GetUserById(userId);
+
+                                        string reciever = user.FirstName + " " + user.LastName;
+                                        dispatch.ReceivedBy = reciever;
+
+                                        //update manifest also
+                                        var manifestObj = await _manifestService.GetManifestByCode(scan.WaybillNumber);
+                                        if (manifestObj != null)
+                                        {
+                                            manifestObj.IsReceived = true;
+                                            manifestObj.ReceiverBy = userId;
+                                            await _manifestService.UpdateManifest(manifestObj.ManifestId, manifestObj);
+                                        }
+
+                                        await _dispatchService.UpdateDispatch(dispatch.DispatchId, dispatch);
+                                    }
+                                }
+
+                                //add to waybillsInManifest
+                                waybillsInManifest.Add(waybill);
+                            }
+                        }
+                    }
+                }
+            }
+
+            var result = new SuperManifestScanDTO
+            {
+                ListOfManifests = listOfManifests,
+                WaybillsInManifest = waybillsInManifest
+            };
+
+            return result;
+        }
+
         private async Task<bool> SendEmailOnAttemptedScanOfCancelledShipment(ScanDTO scan)
         {
             //send emails
             var result = await _shipmentTrackingService.SendEmailForAttemptedScanOfCancelledShipments(scan);
-
             return result;
         }
 
@@ -573,6 +700,11 @@ namespace GIGLS.Services.Business.Scanning
                             _uow.GroupWaybillNumber.Remove(groupwaybill);
                             await _uow.CompleteAsync();
                         }
+
+                        //update the manifest to default to suolve super manifest issue
+                        var updateManifest = await _uow.Manifest.GetAsync(x => x.ManifestCode == manifest.ManifestCode);
+                        updateManifest.SuperManifestStatus = SuperManifestStatus.Pending;
+                        await _uow.CompleteAsync();
                     }
                 }
             }
@@ -817,6 +949,58 @@ namespace GIGLS.Services.Business.Scanning
 
                 throw new GenericException($"Shipment with waybill: {newScan.WaybillNumber} already collected, no further scan is required!");
             }
+        }
+
+        private async Task<bool> CheckAndCreateManifestEntriesForSuperManifest(Manifest manifest)
+        {
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            var currentUserSercentreId = serviceCenters.Length > 0 ? serviceCenters[0] : 0;
+
+            //1. Only scan for manifest with status "Arrived Collation Center"
+
+            var dispatch = await _uow.Dispatch.GetAsync(s => s.ManifestNumber == manifest.ManifestCode);
+            if (dispatch == null)
+            {
+                throw new GenericException("Manifest has not been dispatched");
+            }
+
+            manifest.DepartureServiceCentreId = currentUserSercentreId;
+            manifest.DestinationServiceCentreId = dispatch.DestinationServiceCenterId;
+            manifest.SuperManifestStatus = SuperManifestStatus.ArrivedScan;
+            manifest.IsDispatched = false;
+            manifest.DispatchedById = null;
+            manifest.HasSuperManifest = false;
+
+            await _uow.CompleteAsync();
+
+            return true;
+        }
+
+        private async Task<bool> CheckAndCreateManifestEntriesForSuperManifest(List<Manifest> manifests)
+        {
+            var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+            var currentUserSercentreId = serviceCenters.Length > 0 ? serviceCenters[0] : 0;
+
+            var arrManifests = manifests.Select(x => x.ManifestCode).ToArray();
+            var dispatch = _uow.Dispatch.GetAllAsQueryable().Where(s => arrManifests.Contains(s.ManifestNumber));
+
+            if (dispatch.Any())
+            {
+                manifests.ForEach(x => x.DepartureServiceCentreId = currentUserSercentreId);
+                manifests.ForEach(x => x.SuperManifestStatus = SuperManifestStatus.ArrivedScan);
+                manifests.ForEach(x => x.IsDispatched = false);
+                manifests.ForEach(x => x.DispatchedById = null);
+                manifests.ForEach(x => x.HasSuperManifest = false);
+
+                foreach (var item in dispatch)
+                {
+                    var manifest = manifests.Where(x => x.ManifestCode == item.ManifestNumber).FirstOrDefault();
+                    manifest.DestinationServiceCentreId = item.DestinationServiceCenterId;
+                }
+            }
+
+            await _uow.CompleteAsync();
+            return true;
         }
     }
 }

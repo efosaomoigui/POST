@@ -96,8 +96,20 @@ namespace GIGLS.Services.Implementation.Fleets
                     dispatchId = newDispatch.DispatchId;
                 }
 
+                Manifest manifestObj = null;
+                List<Manifest> manifestObjs = null;
                 // update manifest
-                var manifestObj = _uow.Manifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
+
+                if (dispatchDTO.IsSuperManifest)
+                {
+                    manifestObjs =  _uow.Manifest.GetAllAsQueryable().Where(s => s.SuperManifestCode == dispatchDTO.ManifestNumber).ToList();
+                }
+                else
+                {
+                    manifestObj = _uow.Manifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
+                }
+               
+                
                 if (manifestObj == null)
                 {
                     var pickupManifestObj = _uow.PickupManifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
@@ -116,6 +128,20 @@ namespace GIGLS.Services.Implementation.Fleets
                     manifestEntity.DispatchedById = currentUserId;
                     manifestEntity.IsDispatched = true;
                     manifestEntity.ManifestType = dispatchDTO.ManifestType;
+
+                    if (dispatchDTO.IsSuperManifest)
+                    {
+                        manifestEntity.SuperManifestStatus = SuperManifestStatus.Dispatched;
+                    }
+                }
+
+                //Update for Super Manifest
+                if (manifestObjs != null)
+                {
+                    manifestObjs.ForEach(x => x.DispatchedById = currentUserId);
+                    manifestObjs.ForEach(x => x.IsDispatched = true);
+                    manifestObjs.ForEach(x => x.ManifestType = dispatchDTO.ManifestType);
+                    manifestObjs.ForEach(x => x.SuperManifestStatus = SuperManifestStatus.Dispatched);
                 }
 
                 ////--start--///Set the DepartureCountryId
@@ -357,12 +383,19 @@ namespace GIGLS.Services.Implementation.Fleets
 
                 //get the ManifestType
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
-                if (manifestObj == null)
+                if (manifestObj == null && !dispatch.IsSuperManifest)
                 {
                     var pickupManifestObject = await _uow.PickupManifest.GetAsync(x => x.ManifestCode.Equals(manifest));
                     dispatchDTO.ManifestType = pickupManifestObject.ManifestType;
                 }
-                else
+                else if (dispatch.IsSuperManifest)
+                {
+                    var manifestObjs = await _uow.Manifest.FindAsync(x => x.SuperManifestCode.Equals(manifest));
+                    manifestObj = manifestObjs.FirstOrDefault();
+                    dispatchDTO.ManifestType = manifestObj.ManifestType;
+
+                }
+                else 
                 {
                     dispatchDTO.ManifestType = manifestObj.ManifestType;
                 }
