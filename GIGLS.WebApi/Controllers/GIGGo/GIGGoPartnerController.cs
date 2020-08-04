@@ -59,6 +59,7 @@ namespace GIGLS.WebApi.Controllers.GIGGo
         {
             return await HandleApiOperationAsync(async () =>
             {
+                logindetail.UserChannelType = UserChannelType.Partner.ToString();
                 var user = await _portalService.CheckDetails(logindetail.UserDetail, logindetail.UserChannelType);
 
                 if (user.RequiresCod == null)
