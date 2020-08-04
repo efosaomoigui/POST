@@ -107,9 +107,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             ICountryService countryService, IAdminReportService adminReportService,
             IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
             IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
-            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService)
-            ICountryService countryService, IAdminReportService adminReportService, IPartnerTransactionsService partnertransactionservice,
-            IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService, IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService,
+            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,            
             IPaystackPaymentService paystackPaymentService, IUssdService ussdService)
         {
             _invoiceService = invoiceService;
