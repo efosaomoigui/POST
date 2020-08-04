@@ -54,6 +54,9 @@ using GIGLS.Core.DTO.MessagingLog;
 using System.Net;
 using GIGLS.Services.Implementation.Utility;
 using GIGLS.Core.IServices.Zone;
+using GIGLS.Core.IServices.ShipmentScan;
+using GIGLS.Core.DTO.ShipmentScan;
+using GIGLS.CORE.IServices.Shipments;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -85,6 +88,11 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IDispatchService _dispatchService;
         private readonly IManifestWaybillMappingService _manifestWaybillMappingService;
         private readonly IDomesticRouteZoneMapService _domesticroutezonemapservice;
+        private readonly IScanStatusService _scanStatusService;
+        private readonly IScanService _scanService;
+        private readonly IShipmentCollectionService _collectionservice;
+        private readonly ILogVisitReasonService _logService;
+        private readonly IManifestVisitMonitoringService _visitService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -95,7 +103,8 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService,
             ICountryService countryService, IAdminReportService adminReportService,
             IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
-            IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService, IDomesticRouteZoneMapService domesticRouteZoneMapService)
+            IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
+            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -123,6 +132,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             _dispatchService = dispatchService;
             _manifestWaybillMappingService = manifestWaybillMappingService;
             _domesticroutezonemapservice = domesticRouteZoneMapService;
+            _scanStatusService = scanStatusService;
+            _scanService = scanService;
+            _collectionservice = collectionService;
+            _logService = logService;
+            _visitService = visitService;
             MapperConfig.Initialize();
         }
 
@@ -2590,6 +2604,37 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             return await Task.FromResult(status);
         }
+
+        public async Task<IEnumerable<ScanStatusDTO>> GetScanStatus()
+        {
+            return await _scanStatusService.GetNonHiddenScanStatus();
+        }
+
+        public async Task<bool> ScanMultipleShipment(List<ScanDTO> scanList)
+        {
+            return await _scanService.ScanMultipleShipment(scanList);
+        }
+
+        public async Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch()
+        {
+            return await _manifestWaybillMappingService.GetWaybillsInManifestForDispatch();
+        }
+
+        public async Task ReleaseShipmentForCollectionOnScanner(ShipmentCollectionDTO shipmentCollection)
+        {
+             await _collectionservice.ReleaseShipmentForCollectionOnScanner(shipmentCollection);
+        }
+
+        public async Task<List<LogVisitReasonDTO>> GetLogVisitReasons()
+        {
+            return await _logService.GetLogVisitReasons();
+        }
+
+        public async Task<object> AddManifestVisitMonitoring(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO)
+        {
+            return await _visitService.AddManifestVisitMonitoring(manifestVisitMonitoringDTO);
+        }
+
 
     }
 }

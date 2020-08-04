@@ -37,6 +37,7 @@ using EfeAuthen.Models;
 using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.DTO.Fleets;
 using System.Net;
+using GIGLS.Core.DTO.ShipmentScan;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -1867,5 +1868,93 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("scanstatus")]
+        public async Task<IServiceResponse<IEnumerable<ScanStatusDTO>>> GetScanStatus()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var scanStatus = await _portalService.GetScanStatus();
+
+                return new ServiceResponse<IEnumerable<ScanStatusDTO>>
+                {
+                    Object = scanStatus
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("scanmultiple")]
+        public async Task<IServiceResponse<bool>> ScanMultipleShipment(List<ScanDTO> scanList)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ScanMultipleShipment(scanList);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("waybillsinmanifestfordispatch")]
+        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetWaybillsInManifestForDispatch()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var groupWaybillNumbersInManifest = await _portalService.GetWaybillsInManifestForDispatch();
+
+                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                {
+                    Object = groupWaybillNumbersInManifest
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("collected")]
+        public async Task<IServiceResponse<bool>> ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
+        {
+            return await HandleApiOperationAsync(async () => {
+                await _portalService.ReleaseShipmentForCollectionOnScanner(shipmentCollection);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getlogvisit")]
+        public async Task<IServiceResponse<List<LogVisitReasonDTO>>> GetLogVisitReasons()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var logVisitReasons = await _portalService.GetLogVisitReasons();
+
+                return new ServiceResponse<List<LogVisitReasonDTO>>
+                {
+                    Object = logVisitReasons
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("logwaybillvisit")]
+        public async Task<IServiceResponse<object>> AddManifest(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifest = await _portalService.AddManifestVisitMonitoring(manifestVisitMonitoringDTO);
+                return new ServiceResponse<object>
+                {
+                    Object = manifest
+                };
+            });
+        }
+
     }
 }

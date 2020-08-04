@@ -12,6 +12,7 @@ using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.DTO.SLA;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Utility;
@@ -155,5 +156,11 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> CreateOrUpdateDropOffForAgent(PreShipmentDTO preShipmentDTO);
         Task<UserDTO> CheckDetailsForAgentApp(string user);
         Task<object> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment);
+        Task<IEnumerable<ScanStatusDTO>> GetScanStatus();
+        Task<bool> ScanMultipleShipment(List<ScanDTO> scanList);
+        Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch();
+        Task ReleaseShipmentForCollectionOnScanner(ShipmentCollectionDTO shipmentCollection);
+        Task<List<LogVisitReasonDTO>> GetLogVisitReasons();
+        Task<object> AddManifestVisitMonitoring(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO);
     }
 }
