@@ -1721,7 +1721,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var manifestByScList = manifestBySc.ToList();
                 var resultDTO = await _uow.Manifest.GetManifest(manifestByScList);
 
-                var finalResult = result.Union(resultDTO).ToList();
+                var finalResult = result.Union(resultDTO).OrderByDescending(x => x.DateModified).ToList();
 
                 return finalResult;
             }
