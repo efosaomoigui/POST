@@ -107,5 +107,54 @@ namespace GIGLS.Services.Implementation.Shipments
                 throw;
             }
         }
+
+        public async Task UpdateShipmentPackageQuantity(int shipmentPackagePriceId, ShipmentPackagePriceDTO shipmentPackagePriceDto)
+        {
+            try
+            {
+                var shipmentPackagePrice = await _uow.ShipmentPackagePrice.GetAsync(shipmentPackagePriceId);
+                if (shipmentPackagePrice == null || shipmentPackagePriceDto.ShipmentPackagePriceId != shipmentPackagePriceId)
+                {
+                    throw new GenericException("Shipment Package does not exist");
+                }
+
+                shipmentPackagePrice.Balance += shipmentPackagePriceDto.QuantityToBeAdded;
+               
+                _uow.Complete();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        //Inventory Management
+        public async Task<object> AddShipmentPackage(ShipmentPackagePriceDTO shipmentPackagePriceDto)
+        {
+            try
+            {
+                var package = await _uow.ShipmentPackagePrice.GetAsync(x => x.Description.ToLower().Trim() == shipmentPackagePriceDto.Description.ToLower().Trim());
+                if (package != null)
+                {
+                    throw new GenericException("Package information already exists");
+                }
+               
+                var newshipmentPackagePrice = new ShipmentPackagePrice
+                {
+                    Description = shipmentPackagePriceDto.Description.ToUpper(),
+                    Balance = shipmentPackagePriceDto.Balance,
+                    CountryId = shipmentPackagePriceDto.CountryId,
+                };
+
+                _uow.ShipmentPackagePrice.Add(newshipmentPackagePrice);
+                await _uow.CompleteAsync();
+                return new { Id = newshipmentPackagePrice.ShipmentPackagePriceId };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

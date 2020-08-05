@@ -116,5 +116,37 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPut]
+        [Route("packagetopup/{shipmentPackagePriceId:int}")]
+        public async Task<IServiceResponse<bool>> UpdateShipmentPackageQuantity(int shipmentPackagePriceId, ShipmentPackagePriceDTO shipmentPackagePriceDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _packagePriceService.UpdateShipmentPackageQuantity(shipmentPackagePriceId, shipmentPackagePriceDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpPost]
+        [Route("addpackage")]
+        public async Task<IServiceResponse<object>> AddShipmentPackage(ShipmentPackagePriceDTO shipmentPackagePriceDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var shipmentPackagePrice = await _packagePriceService.AddShipmentPackage(shipmentPackagePriceDTO);
+
+                return new ServiceResponse<object>
+                {
+                    Object = shipmentPackagePrice
+                };
+            });
+        }
+
     }
 }

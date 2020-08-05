@@ -12,5 +12,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task UpdateShipmentPackagePrice(int shipmentPackagePriceId, ShipmentPackagePriceDTO shipmentPackagePriceDto);
         Task DeleteShipmentPackagePrice(int shipmentPackagePriceId);
         Task<List<ShipmentPackagePriceDTO>> GetShipmentPackagePriceByCountry();
+        Task UpdateShipmentPackageQuantity(int shipmentPackagePriceId, ShipmentPackagePriceDTO shipmentPackagePriceDto);
+        Task<object> AddShipmentPackage(ShipmentPackagePriceDTO shipmentPackagePriceDto);
     }
 }
