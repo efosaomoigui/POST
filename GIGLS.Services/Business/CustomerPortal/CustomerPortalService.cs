@@ -1686,6 +1686,11 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
+            if (string.IsNullOrEmpty(preShipment.VehicleType))
+            {
+                throw new GenericException($"Please select a vehicle type", $"{(int)HttpStatusCode.Forbidden}");
+            }
+            
             var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
             preShipment.ZoneMapping = zoneid.ZoneId;
 
