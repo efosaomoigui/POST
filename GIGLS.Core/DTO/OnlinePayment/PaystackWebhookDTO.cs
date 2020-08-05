@@ -72,4 +72,15 @@
     {
         public string Instruction { get; set; }
     }
+
+    public class USSDWebhook
+    {
+        public string Status { get; set; }
+        public decimal Amount { get; set; }
+        public string MSISDN { get; set; }
+        public string Order_Reference { get; set; }
+        public string Transaction_Ref { get; set; }
+    }
+    
+
 }

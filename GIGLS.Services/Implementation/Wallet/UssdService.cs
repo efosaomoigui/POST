@@ -44,10 +44,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 ussdDto.msisdn = ussdDto.msisdn.Split('+').Last();
 
                 //1. Get Token  
-                string token = ConfigurationManager.AppSettings["UssdToken"];
+                string token = GetToken();
 
                 //2. Encrypt token and private_key to generate public key 
-                string publicKey = GetPublicKey(token);
+                string publicKey = GetPublicKey();
 
                 ussdDto.country_code = ussdDto.country_code.Length <= 2 ? ussdDto.country_code : ussdDto.country_code.Substring(0, 2);
                 string pay01Url = GetBaseUrl() + "/pay/" + ussdDto.country_code + "/" + ussdDto.gateway_code;
@@ -84,10 +84,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 var responseResult = new USSDResponse();
 
                 //1. Get Token  
-                string token = ConfigurationManager.AppSettings["UssdToken"];                
+                string token = GetToken();          
 
                 //2. Encrypt token and private_key to generate public key 
-                string publicKey = GetPublicKey(token);
+                string publicKey = GetPublicKey();
 
                 ussdDto.country_code = ussdDto.country_code.Length <= 2 ? ussdDto.country_code : ussdDto.country_code.Substring(0, 2);
 
@@ -123,10 +123,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 var responseResult = new GatewayCodeResponse();
 
                 //1. Get Token  
-                string token = ConfigurationManager.AppSettings["UssdToken"];
+                string token = GetToken();
 
                 //2. Encrypt token and private_key to generate public key 
-                string publicKey = GetPublicKey(token);
+                string publicKey = GetPublicKey();
 
                 //reference represent order_reference
                 string pay01Url = GetBaseUrl() + "/payment/gateway";
@@ -153,8 +153,9 @@ namespace GIGLS.Services.Implementation.Wallet
             }
         }
 
-        private string GetPublicKey(string token)
-        {           
+        public string GetPublicKey()
+        {
+            string token = GetToken();
             string privateKey = ConfigurationManager.AppSettings["UssdPrivateKey"];
 
             string publicKey = string.Empty;
@@ -175,6 +176,12 @@ namespace GIGLS.Services.Implementation.Wallet
             string merchantId = ConfigurationManager.AppSettings["UssdMerchantID"];
             string baseUrl = ConfigurationManager.AppSettings["UssdOgaranyaAPI"];
             return baseUrl + merchantId;
+        }
+
+        public string GetToken()
+        {
+            string token = ConfigurationManager.AppSettings["UssdToken"];
+            return token;
         }
 
         public async Task<PaystackWebhookDTO> VerifyAndValidatePayment(string reference)

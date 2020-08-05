@@ -6,7 +6,7 @@ using GIGLS.WebApi.Filters;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace GIGLS.WebApi.Controllers.CustomerPortal
+namespace GIGLS.WebApi.Controllers.PaymentWebhook
 {
     [RoutePrefix("api/paystack")]
     [IPFilter]

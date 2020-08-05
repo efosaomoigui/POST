@@ -10,5 +10,7 @@ namespace GIGLS.Core.IServices.Wallet
         Task<USSDResponse> GetPaymentStatus(USSDDTO ussdDto);
         Task<PaystackWebhookDTO> VerifyAndValidatePayment(string reference);
         Task<GatewayCodeResponse> GetGatewayCode();
+        string GetToken();
+        string GetPublicKey();
     }
 }
