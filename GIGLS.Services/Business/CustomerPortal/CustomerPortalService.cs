@@ -686,11 +686,11 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
 
             //validate email
-            //bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
-            //if (!isEmail)
-            //{
-            //    throw new GenericException("Customer already exists!!!", $"{(int)HttpStatusCode.Forbidden}");
-            //}
+            bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            if (!isEmail)
+            {
+                throw new GenericException("Invalid Email Address", $"{(int)HttpStatusCode.Forbidden}");
+            }
 
             //use to handle multiple this kind of value +234+2349022736119
             user.PhoneNumber = "+" + user.PhoneNumber.Split('+').Last();
@@ -2609,7 +2609,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _visitService.AddManifestVisitMonitoring(manifestVisitMonitoringDTO);
         }
-
 
     }
 }
