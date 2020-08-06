@@ -653,6 +653,18 @@ namespace GIGLS.Services.Business.CustomerPortal
                 user.IsUniqueInstalled = false;
             }
 
+            if (!string.IsNullOrWhiteSpace(user.Email))
+            {
+                user.Email = user.Email.Trim().ToLower();
+            }
+
+            //validate email
+            bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9_]+(?:\.[a-z0-9_]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            if (!isEmail)
+            {
+                throw new GenericException("Invalid Email Address", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
             //automatic enable Ecommerce eligibility
             user.IsEligible = true;
 
@@ -678,18 +690,6 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 string message = await SendRegistrationMessage(user);
                 throw new GenericException($"{message}", $"{(int)HttpStatusCode.ServiceUnavailable}");
-            }
-
-            if (!string.IsNullOrWhiteSpace(user.Email))
-            {
-                user.Email = user.Email.Trim().ToLower();
-            }
-
-            //validate email
-            bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
-            if (!isEmail)
-            {
-                throw new GenericException("Invalid Email Address", $"{(int)HttpStatusCode.Forbidden}");
             }
 
             //use to handle multiple this kind of value +234+2349022736119
@@ -1257,7 +1257,8 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<UserDTO> CheckUser(UserDTO user)
         {
-            bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+           // bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9_]+(?:\.[a-z0-9_]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
             if (isEmail)
             {
                 user.Email.Trim();
@@ -1418,7 +1419,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             string emailPhone = "";
 
-            bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            //bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9_]+(?:\.[a-z0-9_]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
             if (isEmail)
             {
                 emailPhone = user;
@@ -1442,7 +1444,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             string emailPhone = "";
 
-            bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            //bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9_]+(?:\.[a-z0-9_]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
             if (isEmail)
             {
                 emailPhone = user;
@@ -1467,7 +1470,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             string emailPhone = "";
 
-            bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            //bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            bool isEmail = Regex.IsMatch(user, @"\A(?:[a-z0-9_]+(?:\.[a-z0-9_]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
             if (isEmail)
             {
                 emailPhone = user;
@@ -1944,6 +1948,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                 FinalUser.UserName = username;
                 var u = await _uow.User.RegisterUser(FinalUser, user.Password);
                 user.Id = FinalUser.Id;
+
+                if (!u.Succeeded)
+                {
+                    throw new GenericException($"{string.Join(", ", u.Errors.ToList())}", $"{(int)HttpStatusCode.BadRequest}");
+                }
 
                 return user;
             }
