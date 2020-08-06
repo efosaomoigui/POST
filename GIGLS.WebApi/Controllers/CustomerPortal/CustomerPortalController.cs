@@ -640,73 +640,73 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         //[AllowAnonymous]
-        [HttpPost]
-        [Route("validateotp/{OTP}")]
-        public async Task<IServiceResponse<JObject>> IsOTPValid(int OTP)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var Otp = await _portalService.IsOTPValid(OTP);
-                if (Otp != null && Otp.IsActive == true)
-                {
-                    string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
-                    string getTokenResponse;
+        //[HttpPost]
+        //[Route("validateotp/{OTP}")]
+        //public async Task<IServiceResponse<JObject>> IsOTPValid(int OTP)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var Otp = await _portalService.IsOTPValid(OTP);
+        //        if (Otp != null && Otp.IsActive == true)
+        //        {
+        //            string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+        //            string getTokenResponse;
 
-                    using (var client = new HttpClient())
-                    {
-                        //setup client
-                        client.BaseAddress = new Uri(apiBaseUri);
-                        client.DefaultRequestHeaders.Accept.Clear();
-                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        //            using (var client = new HttpClient())
+        //            {
+        //                //setup client
+        //                client.BaseAddress = new Uri(apiBaseUri);
+        //                client.DefaultRequestHeaders.Accept.Clear();
+        //                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                        //setup login data
-                        var formContent = new FormUrlEncodedContent(new[]
-                            {
-                         new KeyValuePair<string, string>("grant_type", "password"),
-                         new KeyValuePair<string, string>("Username", Otp.Username),
-                         new KeyValuePair<string, string>("Password", Otp.UserChannelPassword),
-                         });
+        //                //setup login data
+        //                var formContent = new FormUrlEncodedContent(new[]
+        //                    {
+        //                 new KeyValuePair<string, string>("grant_type", "password"),
+        //                 new KeyValuePair<string, string>("Username", Otp.Username),
+        //                 new KeyValuePair<string, string>("Password", Otp.UserChannelPassword),
+        //                 });
 
-                        //setup login data
-                        HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
+        //                //setup login data
+        //                HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
 
-                        if (!responseMessage.IsSuccessStatusCode)
-                        {
-                            throw new GenericException("Incorrect Login Details");
-                        }
-                        else
-                        {
-                            Otp = await _portalService.GenerateReferrerCode(Otp);
-                        }
+        //                if (!responseMessage.IsSuccessStatusCode)
+        //                {
+        //                    throw new GenericException("Incorrect Login Details");
+        //                }
+        //                else
+        //                {
+        //                    Otp = await _portalService.GenerateReferrerCode(Otp);
+        //                }
 
-                        //get access token from response body
-                        var responseJson = await responseMessage.Content.ReadAsStringAsync();
-                        var jObject = JObject.Parse(responseJson);
+        //                //get access token from response body
+        //                var responseJson = await responseMessage.Content.ReadAsStringAsync();
+        //                var jObject = JObject.Parse(responseJson);
 
-                        getTokenResponse = jObject.GetValue("access_token").ToString();
+        //                getTokenResponse = jObject.GetValue("access_token").ToString();
 
-                        return new ServiceResponse<JObject>
-                        {
-                            Object = jObject,
-                            ReferrerCode = Otp.Referrercode
-                        };
-                    }
+        //                return new ServiceResponse<JObject>
+        //                {
+        //                    Object = jObject,
+        //                    ReferrerCode = Otp.Referrercode
+        //                };
+        //            }
 
-                }
-                else
-                {
-                    var data = new { IsActive = false };
+        //        }
+        //        else
+        //        {
+        //            var data = new { IsActive = false };
 
-                    var jObject = JObject.FromObject(data);
+        //            var jObject = JObject.FromObject(data);
 
-                    return new ServiceResponse<JObject>
-                    {
-                        ShortDescription = "User has not been verified",
-                        Object = jObject
-                    };
-                }
-            });
-        }
+        //            return new ServiceResponse<JObject>
+        //            {
+        //                ShortDescription = "User has not been verified",
+        //                Object = jObject
+        //            };
+        //        }
+        //    });
+        //}
 
         [AllowAnonymous]
         [HttpPost]

@@ -553,46 +553,9 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<IdentityResult> ChangePassword(ChangePasswordDTO passwordDTO)
         {
-            if (string.IsNullOrEmpty(passwordDTO.UserId.Trim()))
-            {
-                throw new GenericException("Operation could not complete, kindly supply valid credential", $"{(int)HttpStatusCode.Forbidden}");
-            }
-
-            return await _userService.ChangePassword(passwordDTO.UserId, passwordDTO.CurrentPassword, passwordDTO.NewPassword);
+            var user = await _userService.GetCurrentUserId();
+            return await _userService.ChangePassword(user, passwordDTO.CurrentPassword, passwordDTO.NewPassword);
         }
-
-        //public async Task<List<PreShipmentDTO>> GetPreShipments(FilterOptionsDto filterOptionsDto)
-        //{
-        //    try
-        //    {
-        //        //get the current login user 
-        //        var currentUserId = await _userService.GetCurrentUserId();
-
-        //        var preShipmentsQuery = _uow.PreShipment.PreShipmentsAsQueryable();
-        //        preShipmentsQuery = preShipmentsQuery.Where(s => s.UserId == currentUserId);
-        //        var preShipments = preShipmentsQuery.ToList();
-        //        var preShipmentsDTO = Mapper.Map<List<PreShipmentDTO>>(preShipments);
-        //        return preShipmentsDTO;
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
-
-        //public async Task<PreShipmentDTO> GetPreShipment(string waybill)
-        //{
-        //    try
-        //    {
-        //        var preShipmentDTO = await _preShipmentService.GetPreShipment(waybill);
-        //        return preShipmentDTO;
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-
-        //}
 
         public async Task<UserDTO> Register(UserDTO user)
         {
@@ -778,6 +741,13 @@ namespace GIGLS.Services.Business.CustomerPortal
             if (!string.IsNullOrWhiteSpace(user.Email))
             {
                 user.Email = user.Email.Trim().ToLower();
+            }
+
+            //validate email
+            bool isEmail = Regex.IsMatch(user.Email, @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z", RegexOptions.IgnoreCase);
+            if (!isEmail)
+            {
+                throw new GenericException("Invalid Email Address", $"{(int)HttpStatusCode.Forbidden}");
             }
 
             //use to handle multiple this kind of value +234+2349022736119
@@ -2701,7 +2671,6 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _visitService.AddManifestVisitMonitoring(manifestVisitMonitoringDTO);
         }
-
 
     }
 }
