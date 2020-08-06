@@ -230,11 +230,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 var destinationServiceCentre = await _centreService.GetServiceCentreById(shipment.DestinationServiceCentreId);
 
                 //Change the Service Centre Code to country name if the shipment is International shipment
-                if (shipmentDto.IsInternational)
-                {
-                    departureServiceCentre.Code = departureServiceCentre.Country;
-                    destinationServiceCentre.Code = destinationServiceCentre.Country;
-                }
+                //if (shipmentDto.IsInternational)
+                //{
+                //    departureServiceCentre.Code = departureServiceCentre.Country;
+                //    destinationServiceCentre.Code = destinationServiceCentre.Country;
+                //}
 
                 shipmentDto.DepartureServiceCentre = departureServiceCentre;
                 shipmentDto.DestinationServiceCentre = destinationServiceCentre;

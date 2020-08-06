@@ -28,6 +28,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankDepositJob", "BankDepositJob\BankDepositJob.csproj", "{805AD254-D3AB-4144-99BA-AF3631BAEE31}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,6 +76,10 @@ Global
 		{03529607-E784-45A7-B684-158EA13FB5E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{03529607-E784-45A7-B684-158EA13FB5E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{03529607-E784-45A7-B684-158EA13FB5E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{805AD254-D3AB-4144-99BA-AF3631BAEE31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{805AD254-D3AB-4144-99BA-AF3631BAEE31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{805AD254-D3AB-4144-99BA-AF3631BAEE31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{805AD254-D3AB-4144-99BA-AF3631BAEE31}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
