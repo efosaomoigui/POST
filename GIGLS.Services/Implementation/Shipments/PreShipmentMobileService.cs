@@ -3485,7 +3485,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var user = await _userService.GetCurrentUserId();
-                var shipments = await _uow.PreShipmentMobile.FindAsync(s => s.UserId == user && s.shipmentstatus == MobilePickUpRequestStatus.Dispute.ToString(), "PreShipmentItems");
+                var shipments = await _uow.PreShipmentMobile.FindAsync(s => s.UserId == user && s.shipmentstatus == MobilePickUpRequestStatus.Dispute.ToString(), "PreShipmentItems,SenderLocation,ReceiverLocation");
                 var shipment = shipments.OrderByDescending(s => s.DateCreated);
                 var newPreShipment = Mapper.Map<List<PreShipmentMobileDTO>>(shipment);
                 foreach (var Shipment in newPreShipment)

@@ -1726,7 +1726,9 @@ namespace GIGLS.Services.Business.CustomerPortal
             var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
             preShipment.ZoneMapping = zoneid.ZoneId;
 
-            if (preShipment.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipment.ZoneMapping == 1)
+            if (preShipment.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipment.ZoneMapping == 1
+                && preShipment.SenderLocation.Latitude != null && preShipment.SenderLocation.Longitude != null 
+                && preShipment.ReceiverLocation.Latitude != null && preShipment.ReceiverLocation.Longitude!= null)
             {
                 return await _preShipmentMobileService.GetPriceForBike(preShipment);
             }
