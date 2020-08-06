@@ -1690,7 +1690,12 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException($"Please select a vehicle type", $"{(int)HttpStatusCode.Forbidden}");
             }
-            
+
+            if (!preShipment.PreShipmentItems.Any())
+            {
+                throw new GenericException($"Shipment Items cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
             var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
             preShipment.ZoneMapping = zoneid.ZoneId;
 
