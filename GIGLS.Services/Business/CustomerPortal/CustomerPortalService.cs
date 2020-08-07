@@ -1664,11 +1664,18 @@ namespace GIGLS.Services.Business.CustomerPortal
             {
                 throw new GenericException($"Please select a vehicle type", $"{(int)HttpStatusCode.Forbidden}");
             }
-            
+
+            if (!preShipment.PreShipmentItems.Any())
+            {
+                throw new GenericException($"Shipment Items cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
+            }
+
             var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
             preShipment.ZoneMapping = zoneid.ZoneId;
 
-            if (preShipment.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipment.ZoneMapping == 1)
+            if (preShipment.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipment.ZoneMapping == 1
+                && preShipment.SenderLocation.Latitude != null && preShipment.SenderLocation.Longitude != null 
+                && preShipment.ReceiverLocation.Latitude != null && preShipment.ReceiverLocation.Longitude!= null)
             {
                 return await _preShipmentMobileService.GetPriceForBike(preShipment);
             }

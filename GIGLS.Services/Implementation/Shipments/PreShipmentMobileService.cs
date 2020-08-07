@@ -1227,6 +1227,11 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Invalid Data");
                 }
 
+                if (!preShipment.PreShipmentItems.Any())
+                {
+                    throw new GenericException($"Shipment Items cannot be empty", $"{(int)HttpStatusCode.Forbidden}");
+                }
+
                 var zoneid = preShipment.ZoneMapping != null ? (int)preShipment.ZoneMapping : 0;
 
                 var country = await _uow.Country.GetCountryByStationId(preShipment.SenderStationId);
@@ -1269,6 +1274,15 @@ namespace GIGLS.Services.Implementation.Shipments
                     preShipment.DiscountValue = discount;
                     preShipment.GrandTotal = grandTotal;
                 }
+
+                var countOfItems = preShipment.PreShipmentItems.Count();
+                var individualPrice = grandTotal / countOfItems;
+
+                foreach (var preShipmentItem in preShipment.PreShipmentItems)
+                {
+                    preShipmentItem.CalculatedPrice = individualPrice;
+
+                };
 
                 var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
                 var returnprice = new MobilePriceDTO()
@@ -3471,7 +3485,7 @@ namespace GIGLS.Services.Implementation.Shipments
             try
             {
                 var user = await _userService.GetCurrentUserId();
-                var shipments = await _uow.PreShipmentMobile.FindAsync(s => s.UserId == user && s.shipmentstatus == MobilePickUpRequestStatus.Dispute.ToString(), "PreShipmentItems");
+                var shipments = await _uow.PreShipmentMobile.FindAsync(s => s.UserId == user && s.shipmentstatus == MobilePickUpRequestStatus.Dispute.ToString(), "PreShipmentItems,SenderLocation,ReceiverLocation");
                 var shipment = shipments.OrderByDescending(s => s.DateCreated);
                 var newPreShipment = Mapper.Map<List<PreShipmentMobileDTO>>(shipment);
                 foreach (var Shipment in newPreShipment)
