@@ -380,6 +380,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     manifest.HasSuperManifest = true;
                     manifest.SuperManifestCode = superManifest;
                     manifest.SuperManifestStatus = SuperManifestStatus.AssignedSuperManifest;
+                    manifest.IsDispatched = true;
 
                 }
                 await _uow.CompleteAsync();
