@@ -863,6 +863,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 await CreateInvoiceForPaymentWaiver(shipmentDTO);
                 CreateGeneralLedgerForPaymentWaiverShipment(shipmentDTO);
 
+                await UpdateShipmentPackage(newShipment);
+                
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
 
@@ -946,25 +948,20 @@ namespace GIGLS.Services.Implementation.Shipments
         }
 
         //Update Shipment Package
-        private async Task UpdateShipmentPackage(Shipment newShipment)
+        private async Task UpdateShipmentPackage(ShipmentDTO newShipment)
         {
-            //var dropOff = await _uow.PreShipment.GetAsync(s => s.TempCode == dropOffCode);
-
-            //dropOff.Waybill = waybill;
-            //dropOff.IsProcessed = true;
-
             foreach (var shipmentItem in newShipment.ShipmentItems)
             {
                 if (shipmentItem.ShipmentType == ShipmentType.Store)
                 {
-                    var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.ShipmentPackagePriceId == shipmentItem.ShipmentItemId);
+                    var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.Description == shipmentItem.Description);
                     if (shipmentPackage.Balance < shipmentItem.Quantity)
                     {
                         throw new GenericException($"The quantity {shipmentItem.Quantity} being dispatched is more than the available stock .  {shipmentPackage.Description} has {shipmentPackage.Balance} currently in store", $"{(int)HttpStatusCode.Forbidden}");
                     }
                     shipmentPackage.Balance -= shipmentItem.Quantity;
                 }
-               
+
             }
 
             await _uow.CompleteAsync();
@@ -1137,21 +1134,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     newShipment.ApproximateItemsWeight += shipmentItem.Weight;
                 }
-
-                if(shipmentItem.ShipmentType == ShipmentType.Store)
-                {
-                    var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.ShipmentPackagePriceId == shipmentItem.ShipmentItemId);
-                    if(shipmentPackage.Balance < shipmentItem.Quantity)
-                    {
-                        throw new GenericException($"The quantity {shipmentItem.Quantity} being dispatched is more than the available stock .  {shipmentPackage.Description} has {shipmentPackage.Balance} currently in store", $"{(int)HttpStatusCode.Forbidden}");
-                    }
-                    shipmentPackage.Balance -= shipmentItem.Quantity;
-
-
-                    
-
-                    
-                }
+                
                 serialNumber++;
             }
 
