@@ -19,6 +19,10 @@ namespace GIGLS.Services.IServices.ServiceCentres
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IUnitOfWork _uow;
 
+        public ServiceCentreService()
+        {
+
+        }
         public ServiceCentreService(IGlobalPropertyService globalPropertyService, IUnitOfWork uow)
         {
             _globalPropertyService = globalPropertyService;
@@ -156,7 +160,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
             {
                 return await _uow.ServiceCentre.GetServiceCentres();
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 throw;
             }
@@ -211,7 +215,7 @@ namespace GIGLS.Services.IServices.ServiceCentres
             {
                 return await _uow.ServiceCentre.GetLocalServiceCentres();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }

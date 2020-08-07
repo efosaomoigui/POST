@@ -13,6 +13,7 @@ using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.Report;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.Core.DTO.SLA;
 using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Utility;
@@ -23,7 +24,6 @@ using GIGLS.CORE.DTO.Shipments;
 using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace GIGLS.Core.IServices.CustomerPortal
@@ -159,5 +159,11 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment);
         Task<PaymentResponse> VerifyAndValidatePayment(string referenceCode);
         Task<GatewayCodeResponse> GetGatewayCode();
+        Task<IEnumerable<ScanStatusDTO>> GetScanStatus();
+        Task<bool> ScanMultipleShipment(List<ScanDTO> scanList);
+        Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch();
+        Task ReleaseShipmentForCollectionOnScanner(ShipmentCollectionDTO shipmentCollection);
+        Task<List<LogVisitReasonDTO>> GetLogVisitReasons();
+        Task<object> AddManifestVisitMonitoring(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO);
     }
 }

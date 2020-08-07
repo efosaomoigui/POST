@@ -73,5 +73,6 @@ namespace GIGLS.Core.IServices.Shipments
         Task<List<PreShipmentMobileDTO>> AddMobilePickupRequestMultipleShipment(MobilePickUpRequestsDTO pickuprequest);
         Task<List<LocationDTO>> GetPresentDayShipmentLocations();
         Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment);
+        Task<MobilePriceDTO> GetPriceForBike(PreShipmentMobileDTO preShipment);
     }
 }
