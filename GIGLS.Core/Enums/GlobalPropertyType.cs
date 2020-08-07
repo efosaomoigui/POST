@@ -53,6 +53,11 @@
         EcommerceNoCodAmount,
         GIGGOPromo,
         GiglgoMaxNumShipment,
-        RegistrationMessage
+        RegistrationMessage,
+        BikeBasePrice,
+        BikePrice25KM,
+        BikePrice26TO35KM,
+        BikePrice36KM,
+        DiscountBikePercentage
     }
 }
