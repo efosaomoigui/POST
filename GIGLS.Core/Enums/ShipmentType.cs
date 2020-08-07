@@ -4,6 +4,7 @@
     {
         Special,
         Regular,
-        Ecommerce
+        Ecommerce,
+        Store
     }
 }
