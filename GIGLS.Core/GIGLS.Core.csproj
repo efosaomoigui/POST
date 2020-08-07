@@ -713,6 +713,7 @@
     <Compile Include="IServices\Business\IShipmentTrackService.cs" />
     <Compile Include="IServices\Client\IClientNodeService.cs" />
     <Compile Include="IServices\CustomerPortal\ICustomerPortalService.cs" />
+    <Compile Include="IServices\CustomerPortal\IPartnerPortalService.cs" />
     <Compile Include="IServices\Customers\ICompanyContactPersonService.cs" />
     <Compile Include="IServices\Customers\ICompanyService.cs" />
     <Compile Include="IServices\Customers\ICustomerService.cs" />

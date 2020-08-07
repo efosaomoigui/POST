@@ -27,9 +27,9 @@ namespace GIGLS.WebApi.Controllers.GIGGo
     [RoutePrefix("api/giggopartner")]
     public class GIGGoPartnerController : BaseWebApiController
     {
-        private readonly ICustomerPortalService _portalService;
+        private readonly IPartnerPortalService _portalService;
 
-        public GIGGoPartnerController(ICustomerPortalService portalService) : base(nameof(GIGGoPartnerController))
+        public GIGGoPartnerController(IPartnerPortalService portalService) : base(nameof(GIGGoPartnerController))
         {
             _portalService = portalService;
         }
