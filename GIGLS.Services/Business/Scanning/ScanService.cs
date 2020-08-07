@@ -477,7 +477,7 @@ namespace GIGLS.Services.Business.Scanning
             var listOfManifestsinSuperManifest = _uow.Manifest.GetAllAsQueryable().Where(x => x.SuperManifestCode == superManifest && x.SuperManifestStatus == SuperManifestStatus.Dispatched);
             var waybillsInManifest = new HashSet<string>();
 
-            var listOfManifests = listOfManifestsinSuperManifest.Where(p =>p.ManifestType == ManifestType.Transit).ToList();
+            var listOfManifests = listOfManifestsinSuperManifest.Where(p => p.IsDispatched == true && p.ManifestType == ManifestType.Transit).ToList();
 
             foreach (var manifest in listOfManifests)
             {
