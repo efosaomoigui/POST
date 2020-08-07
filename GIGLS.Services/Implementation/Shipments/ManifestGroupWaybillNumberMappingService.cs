@@ -381,6 +381,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     manifest.SuperManifestCode = superManifest;
                     manifest.SuperManifestStatus = SuperManifestStatus.AssignedSuperManifest;
                     manifest.IsDispatched = true;
+                    manifest.DispatchedById = userId;
 
                 }
                 await _uow.CompleteAsync();
