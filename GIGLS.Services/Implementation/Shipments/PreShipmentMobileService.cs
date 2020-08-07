@@ -1261,7 +1261,8 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var calculatedTotal = (double)(mainCharge * percentageTobeUsed);
                 calculatedTotal = Math.Round(calculatedTotal);
-               
+                preShipment.DeliveryPrice = (decimal)calculatedTotal;
+
                 discount = Math.Round(mainCharge - (decimal)calculatedTotal);
                 decimal grandTotal = (decimal)calculatedTotal + pickupValue;
 
@@ -1281,14 +1282,13 @@ namespace GIGLS.Services.Implementation.Shipments
                 foreach (var preShipmentItem in preShipment.PreShipmentItems)
                 {
                     preShipmentItem.CalculatedPrice = individualPrice;
-
                 };
 
                 var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
                 var returnprice = new MobilePriceDTO()
                 {
                     MainCharge = (decimal)calculatedTotal,
-                    DeliveryPrice = 0.0M,
+                    DeliveryPrice = preShipment.DeliveryPrice,
                     Vat = 0.0M,
                     PickUpCharge = pickuprice,
                     InsuranceValue = 0.0M,
