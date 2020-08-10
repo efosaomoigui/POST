@@ -2578,28 +2578,32 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
 
-                    //return the actual amount collected in case shipment departure and destination country is different
-                   // var wallet = _uow.Wallet.SingleOrDefault(s => s.CustomerId == shipment.CustomerId && s.CustomerType == customerType);
-                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == shipment.CustomerCode);
-
-                    decimal amountToCredit = invoice.Amount;
-                    amountToCredit = await GetActualAmountToCredit(shipment, amountToCredit);
-                    wallet.Balance = wallet.Balance + amountToCredit;
-
-                    //2.4.2 Update customers wallet's Transaction (credit)
-                    var newWalletTransaction = new WalletTransaction
+                    //only add the money to wallet if the customer is company
+                    if(customerType == CustomerType.Company)
                     {
-                        WalletId = wallet.WalletId,
-                        Amount = amountToCredit,
-                        DateOfEntry = DateTime.Now,
-                        ServiceCentreId = shipment.DepartureServiceCentreId,
-                        UserId = currentUserId,
-                        CreditDebitType = CreditDebitType.Credit,
-                        PaymentType = PaymentType.Wallet,
-                        Waybill = waybill,
-                        Description = "Credit for Shipment Cancellation"
-                    };
-                    _uow.WalletTransaction.Add(newWalletTransaction);
+                        //return the actual amount collected in case shipment departure and destination country is different
+                        // var wallet = _uow.Wallet.SingleOrDefault(s => s.CustomerId == shipment.CustomerId && s.CustomerType == customerType);
+                        var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == shipment.CustomerCode);
+
+                        decimal amountToCredit = invoice.Amount;
+                        amountToCredit = await GetActualAmountToCredit(shipment, amountToCredit);
+                        wallet.Balance = wallet.Balance + amountToCredit;
+
+                        //2.4.2 Update customers wallet's Transaction (credit)
+                        var newWalletTransaction = new WalletTransaction
+                        {
+                            WalletId = wallet.WalletId,
+                            Amount = amountToCredit,
+                            DateOfEntry = DateTime.Now,
+                            ServiceCentreId = shipment.DepartureServiceCentreId,
+                            UserId = currentUserId,
+                            CreditDebitType = CreditDebitType.Credit,
+                            PaymentType = PaymentType.Wallet,
+                            Waybill = waybill,
+                            Description = "Credit for Shipment Cancellation"
+                        };
+                        _uow.WalletTransaction.Add(newWalletTransaction);
+                    }
                 }
 
                 //2.2 Update Invoice PaymentStatus to cancelled
