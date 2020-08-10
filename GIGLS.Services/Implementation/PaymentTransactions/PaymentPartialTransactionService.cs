@@ -11,6 +11,7 @@ using System;
 using GIGLS.Core.IServices.User;
 using GIGLS.Core.IServices.Wallet;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.IMessageService;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -19,12 +20,14 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private readonly IUnitOfWork _uow;
         private readonly IUserService _userService;
         private readonly IWalletService _walletService;
+        private readonly IMessageSenderService _messageSenderService;
 
-        public PaymentPartialTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService)
+        public PaymentPartialTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService, IMessageSenderService messageSenderService)
         {
             _uow = uow;
             _userService = userService;
             _walletService = walletService;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
 
@@ -79,7 +82,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
         public async Task<bool> ProcessPaymentPartialTransaction(PaymentPartialTransactionProcessDTO paymentPartialTransactionProcessDTO)
         {
-
             var result = false;
                              
             if (paymentPartialTransactionProcessDTO == null)
@@ -204,7 +206,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                         transfer += item.Amount;
                         transferType = item.PaymentType.ToString();
                     }
-
                 }
                                 
                 // update GeneralLedger
@@ -226,6 +227,32 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             await _uow.CompleteAsync();
             result = true;
+
+            /////2.  When payment is complete and balance is 0, send sms to customer
+            if (balanceAmount == 0)
+            {
+                var shipment = await _uow.Shipment.GetAsync(x => x.Waybill == waybill);
+
+                if(shipment != null)
+                {
+                    //send sms to the customer
+                    var smsData = new Core.DTO.Shipments.ShipmentTrackingDTO
+                    {
+                        Waybill = invoiceEntity.Waybill
+                    };
+
+                    if (shipment.DepartureServiceCentreId == 309)
+                    {
+                        await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
+                        await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, smsData);
+                    }
+                    else
+                    {
+                        await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
+                    }
+                }
+            }
+
             return result;
         }
     }

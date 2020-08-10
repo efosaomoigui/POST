@@ -91,35 +91,19 @@ namespace GIGLS.Services.Implementation.Wallet
 
         public async Task<object> AddWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDto)
         {
-            if (walletPaymentLogDto.UserId == null)
-            {
-                walletPaymentLogDto.UserId = await _userService.GetCurrentUserId();
-            }
-
-            string customerCode = string.Empty;
+            walletPaymentLogDto.UserId = await _userService.GetCurrentUserId();
 
             //Get the Customer Activity country
+            var user = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
+            walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
+
+            //set Nigeria as default country if no country assign for the customer
             if (walletPaymentLogDto.PaymentCountryId == 0)
             {
-                //use the current user id to get the country of the user
-                var user = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
-                walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
-                customerCode = user.UserChannelCode;
-
-                //set Nigeria as default country if no country assign for the customer
-                if (walletPaymentLogDto.PaymentCountryId == 0)
-                {
-                    walletPaymentLogDto.PaymentCountryId = 1;
-                }
+                walletPaymentLogDto.PaymentCountryId = 1;
             }
-
-            if (string.IsNullOrWhiteSpace(customerCode))
-            {
-                var customer = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
-                customerCode = customer.UserChannelCode;
-            }
-
-            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customerCode);
+                       
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
             if (wallet != null)
             {
                 walletPaymentLogDto.WalletId = wallet.WalletId;
@@ -135,41 +119,23 @@ namespace GIGLS.Services.Implementation.Wallet
         public async Task<USSDResponse> InitiatePaymentUsingUSSD(WalletPaymentLogDTO walletPaymentLogDto)
         {
             walletPaymentLogDto.OnlinePaymentType = OnlinePaymentType.USSD;
-            string phoneNumber = string.Empty;
-            string customerCode = string.Empty;
 
             //1. Get the country of the user
-            if (walletPaymentLogDto.UserId == null)
-            {
-                walletPaymentLogDto.UserId = await _userService.GetCurrentUserId();
-            }
+            walletPaymentLogDto.UserId = await _userService.GetCurrentUserId();
 
             //Get the Customer Activity country
+            var user = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
+            walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
+
+            //set Nigeria as default country if no country assign for the customer
             if (walletPaymentLogDto.PaymentCountryId == 0)
             {
-                //use the current user id to get the country of the user
-                var user = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
-                walletPaymentLogDto.PaymentCountryId = user.UserActiveCountryId;
-                phoneNumber = user.PhoneNumber; 
-                customerCode = user.UserChannelCode;
-
-                //set Nigeria as default country if no country assign for the customer
-                if (walletPaymentLogDto.PaymentCountryId == 0)
-                {
-                    walletPaymentLogDto.PaymentCountryId = 1;
-                }
+                walletPaymentLogDto.PaymentCountryId = 1;
             }
 
             if (string.IsNullOrWhiteSpace(walletPaymentLogDto.PhoneNumber))
             {
-                if (string.IsNullOrWhiteSpace(phoneNumber))
-                {
-                    var user = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
-                    phoneNumber = user.PhoneNumber;
-                    customerCode = user.UserChannelCode;
-                }
-
-                walletPaymentLogDto.PhoneNumber = phoneNumber;
+                walletPaymentLogDto.PhoneNumber = user.PhoneNumber;
             }
 
             //3. Send reguest to Oga USSD 
@@ -182,13 +148,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     walletPaymentLogDto.ExternalReference = ussdResponse.data.Order_Reference;
                 }
 
-                if (string.IsNullOrWhiteSpace(customerCode))
-                {
-                    var customer = await _uow.User.GetUserById(walletPaymentLogDto.UserId);
-                    customerCode = customer.UserChannelCode;
-                }
-
-                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == customerCode);
+                var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode == user.UserChannelCode);
                 if (wallet != null)
                 {
                     walletPaymentLogDto.WalletId = wallet.WalletId;

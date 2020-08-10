@@ -157,13 +157,14 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<bool> CreateOrUpdateDropOffForAgent(PreShipmentDTO preShipmentDTO);
         Task<UserDTO> CheckDetailsForAgentApp(string user);
         Task<object> AddPreShipmentMobileForThirdParty(CreatePreShipmentMobileDTO preShipment);
+        Task<PaymentResponse> VerifyAndValidatePayment(string referenceCode);
+        Task<GatewayCodeResponse> GetGatewayCode();
         Task<IEnumerable<ScanStatusDTO>> GetScanStatus();
         Task<bool> ScanMultipleShipment(List<ScanDTO> scanList);
         Task<List<ManifestWaybillMappingDTO>> GetWaybillsInManifestForDispatch();
         Task ReleaseShipmentForCollectionOnScanner(ShipmentCollectionDTO shipmentCollection);
         Task<List<LogVisitReasonDTO>> GetLogVisitReasons();
         Task<object> AddManifestVisitMonitoring(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO);
-        Task<PaymentResponse> VerifyAndValidatePayment(string referenceCode);
-        Task<GatewayCodeResponse> GetGatewayCode();
+>>>>>>>>> Temporary merge branch 2
     }
 }

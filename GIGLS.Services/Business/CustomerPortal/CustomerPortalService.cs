@@ -52,11 +52,12 @@ using GIGLS.Core.IServices.Fleets;
 using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
 using System.Net;
+using GIGLS.Services.Implementation.Utility;
+using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.IServices.Zone;
 using GIGLS.Core.IServices.ShipmentScan;
 using GIGLS.Core.DTO.ShipmentScan;
 using GIGLS.CORE.IServices.Shipments;
-using GIGLS.Core.DTO.OnlinePayment;
 
 namespace GIGLS.Services.Business.CustomerPortal
 {
@@ -87,14 +88,14 @@ namespace GIGLS.Services.Business.CustomerPortal
         private readonly IMobileGroupCodeWaybillMappingService _groupCodeWaybillMappingService;
         private readonly IDispatchService _dispatchService;
         private readonly IManifestWaybillMappingService _manifestWaybillMappingService;
+        private readonly IPaystackPaymentService _paystackPaymentService;
+        private readonly IUssdService _ussdService;
         private readonly IDomesticRouteZoneMapService _domesticroutezonemapservice;
         private readonly IScanStatusService _scanStatusService;
         private readonly IScanService _scanService;
         private readonly IShipmentCollectionService _collectionservice;
         private readonly ILogVisitReasonService _logService;
         private readonly IManifestVisitMonitoringService _visitService;
-        private readonly IPaystackPaymentService _paystackPaymentService;
-        private readonly IUssdService _ussdService;
 
 
         public CustomerPortalService(IUnitOfWork uow, IInvoiceService invoiceService,
@@ -103,11 +104,10 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPreShipmentService preShipmentService, IWalletService walletService, IWalletPaymentLogService wallepaymenttlogService,
             ISLAService slaService, IOTPService otpService, IBankShipmentSettlementService iBankShipmentSettlementService, INumberGeneratorMonitorService numberGeneratorMonitorService,
             IPasswordGenerator codegenerator, IGlobalPropertyService globalPropertyService, IPreShipmentMobileService preShipmentMobileService, IMessageSenderService messageSenderService,
-            ICountryService countryService, IAdminReportService adminReportService,
-            IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
-            IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
-            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,            
-            IPaystackPaymentService paystackPaymentService, IUssdService ussdService)
+            ICountryService countryService, IAdminReportService adminReportService, IPartnerTransactionsService partnertransactionservice,
+            IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService, IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService,
+            IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
+            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
@@ -134,14 +134,14 @@ namespace GIGLS.Services.Business.CustomerPortal
             _groupCodeWaybillMappingService = groupCodeWaybillMappingService;
             _dispatchService = dispatchService;
             _manifestWaybillMappingService = manifestWaybillMappingService;
+            _paystackPaymentService = paystackPaymentService;
+            _ussdService = ussdService;
             _domesticroutezonemapservice = domesticRouteZoneMapService;
             _scanStatusService = scanStatusService;
             _scanService = scanService;
             _collectionservice = collectionService;
             _logService = logService;
             _visitService = visitService;
-            _paystackPaymentService = paystackPaymentService;
-            _ussdService = ussdService;
             MapperConfig.Initialize();
         }
 
