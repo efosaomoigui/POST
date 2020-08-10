@@ -165,6 +165,5 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task ReleaseShipmentForCollectionOnScanner(ShipmentCollectionDTO shipmentCollection);
         Task<List<LogVisitReasonDTO>> GetLogVisitReasons();
         Task<object> AddManifestVisitMonitoring(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO);
->>>>>>>>> Temporary merge branch 2
     }
 }
