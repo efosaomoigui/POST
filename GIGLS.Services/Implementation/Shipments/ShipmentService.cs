@@ -2578,8 +2578,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
 
-                    //only add the money to wallet if the customer is company
-                    if(customerType == CustomerType.Company)
+                    //only add the money to wallet if the payment type is by wallet
+                    var walletTransaction = await _uow.WalletTransaction.GetAsync(x => x.Waybill == waybill && x.CreditDebitType == CreditDebitType.Debit && x.PaymentType == PaymentType.Wallet);
+                    
+                    if(walletTransaction != null)
                     {
                         //return the actual amount collected in case shipment departure and destination country is different
                         // var wallet = _uow.Wallet.SingleOrDefault(s => s.CustomerId == shipment.CustomerId && s.CustomerType == customerType);
