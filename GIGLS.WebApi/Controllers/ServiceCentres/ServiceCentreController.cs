@@ -41,6 +41,21 @@ namespace GIGLS.WebApi.Controllers.ServiceCentres
             });
         }
 
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("jobs")]
+        public async Task<IServiceResponse<IEnumerable<ServiceCentreDTO>>> GetServiceCentresJobs() 
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var centres = await _service.GetServiceCentres();
+                return new ServiceResponse<IEnumerable<ServiceCentreDTO>>
+                {
+                    Object = centres
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("hubs")]

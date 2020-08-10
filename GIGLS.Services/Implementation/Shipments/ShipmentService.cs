@@ -230,11 +230,11 @@ namespace GIGLS.Services.Implementation.Shipments
                 var destinationServiceCentre = await _centreService.GetServiceCentreById(shipment.DestinationServiceCentreId);
 
                 //Change the Service Centre Code to country name if the shipment is International shipment
-                if (shipmentDto.IsInternational)
-                {
-                    departureServiceCentre.Code = departureServiceCentre.Country;
-                    destinationServiceCentre.Code = destinationServiceCentre.Country;
-                }
+                //if (shipmentDto.IsInternational)
+                //{
+                //    departureServiceCentre.Code = departureServiceCentre.Country;
+                //    destinationServiceCentre.Code = destinationServiceCentre.Country;
+                //}
 
                 shipmentDto.DepartureServiceCentre = departureServiceCentre;
                 shipmentDto.DestinationServiceCentre = destinationServiceCentre;
@@ -2616,28 +2616,34 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), shipment.CustomerType);
 
-                    //return the actual amount collected in case shipment departure and destination country is different
-                   // var wallet = _uow.Wallet.SingleOrDefault(s => s.CustomerId == shipment.CustomerId && s.CustomerType == customerType);
-                    var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == shipment.CustomerCode);
-
-                    decimal amountToCredit = invoice.Amount;
-                    amountToCredit = await GetActualAmountToCredit(shipment, amountToCredit);
-                    wallet.Balance = wallet.Balance + amountToCredit;
-
-                    //2.4.2 Update customers wallet's Transaction (credit)
-                    var newWalletTransaction = new WalletTransaction
+                    //only add the money to wallet if the payment type is by wallet
+                    var walletTransaction = await _uow.WalletTransaction.GetAsync(x => x.Waybill == waybill && x.CreditDebitType == CreditDebitType.Debit && x.PaymentType == PaymentType.Wallet);
+                    
+                    if(walletTransaction != null)
                     {
-                        WalletId = wallet.WalletId,
-                        Amount = amountToCredit,
-                        DateOfEntry = DateTime.Now,
-                        ServiceCentreId = shipment.DepartureServiceCentreId,
-                        UserId = currentUserId,
-                        CreditDebitType = CreditDebitType.Credit,
-                        PaymentType = PaymentType.Wallet,
-                        Waybill = waybill,
-                        Description = "Credit for Shipment Cancellation"
-                    };
-                    _uow.WalletTransaction.Add(newWalletTransaction);
+                        //return the actual amount collected in case shipment departure and destination country is different
+                        // var wallet = _uow.Wallet.SingleOrDefault(s => s.CustomerId == shipment.CustomerId && s.CustomerType == customerType);
+                        var wallet = await _uow.Wallet.GetAsync(s => s.CustomerCode == shipment.CustomerCode);
+
+                        decimal amountToCredit = invoice.Amount;
+                        amountToCredit = await GetActualAmountToCredit(shipment, amountToCredit);
+                        wallet.Balance = wallet.Balance + amountToCredit;
+
+                        //2.4.2 Update customers wallet's Transaction (credit)
+                        var newWalletTransaction = new WalletTransaction
+                        {
+                            WalletId = wallet.WalletId,
+                            Amount = amountToCredit,
+                            DateOfEntry = DateTime.Now,
+                            ServiceCentreId = shipment.DepartureServiceCentreId,
+                            UserId = currentUserId,
+                            CreditDebitType = CreditDebitType.Credit,
+                            PaymentType = PaymentType.Wallet,
+                            Waybill = waybill,
+                            Description = "Credit for Shipment Cancellation"
+                        };
+                        _uow.WalletTransaction.Add(newWalletTransaction);
+                    }
                 }
 
                 //2.2 Update Invoice PaymentStatus to cancelled
