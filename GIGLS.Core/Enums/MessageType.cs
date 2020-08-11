@@ -50,7 +50,6 @@
         DLD,  //DELAYED DELIVERY	
         MMCS, //Message for Multiple Mobile Create Shipment
         ARFS, // WHEN GIGL STORE SHIPMENT ARRIVES FINAL DESTINATION
-        DBDO, // When discrepancy has been identified during confirmation of bank deposit
-        CANCEL //Cancel shipment message
+        DBDO // When discrepancy has been identified during confirmation of bank deposit
     } 
 }

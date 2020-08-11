@@ -11,6 +11,7 @@ using System;
 using GIGL.GIGLS.Core.Domain;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.Enums;
+using GIGLS.Core.DTO;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -109,8 +110,27 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 await _uow.CompleteAsync();
 
+                string customertype = shipment.CustomerType;
+
+                //get CustomerDetails
+                if (customertype.Contains("Individual"))
+                {
+                    customertype = CustomerType.IndividualCustomer.ToString();
+                }
+                CustomerType customerType = (CustomerType)Enum.Parse(typeof(CustomerType), customertype);                
+                var customer = await _shipmentService.GetCustomer(shipment.CustomerId, customerType);
+
+                var cancelMessage = new ShipmentCancelMessageDTO
+                {
+                    Reason = cancelReason,
+                    WaybillNumber = shipment.Waybill,
+                    SenderEmail = customer.Email,
+                    SenderPhoneNumber = customer.PhoneNumber,
+                    SenderName = customer.CustomerName
+                };
+
                 //send message
-                await _messageSenderService.SendMessage(MessageType.CANCEL, EmailSmsType.All, shipment.Waybill);
+                await _messageSenderService.SendMessage(MessageType.SSC, EmailSmsType.All, cancelMessage);
             }
             return new { waybill = newCancel.Waybill };
         }
