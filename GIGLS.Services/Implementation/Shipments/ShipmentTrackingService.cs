@@ -96,9 +96,9 @@ namespace GIGLS.Services.Implementation.Shipments
                     _uow.ShipmentTracking.Add(newShipmentTracking);
 
                     Id = newShipmentTracking.ShipmentTrackingId;
-                    
+
                     //send sms and email
-                    if (!scanStatus.Equals(ShipmentScanStatus.CRT))
+                    if (!(scanStatus.Equals(ShipmentScanStatus.CRT) || scanStatus.Equals(ShipmentScanStatus.SSC)))
                     {
                         if (tracking.isInternalShipment)
                         {
