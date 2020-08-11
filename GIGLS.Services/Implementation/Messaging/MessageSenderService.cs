@@ -127,10 +127,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 //messageDTO = smsMessages.FirstOrDefault(s => s.MessageType == messageType);
 
                 var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.SMS && x.MessageType == messageType);
-                if(smsMessages != null)
-                {
-                     messageDTO = Mapper.Map<MessageDTO>(smsMessages);
-                }
+                messageDTO = Mapper.Map<MessageDTO>(smsMessages);
 
                 if (messageDTO != null)
                 {
