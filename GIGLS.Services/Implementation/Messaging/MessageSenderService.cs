@@ -509,7 +509,6 @@ namespace GIGLS.Services.Implementation.Messaging
                      "WaybillNumber",
                      "Sender Phone Number",
                      "Group Code"
-
                  };
 
                 var mobileShipmentCreationMessage = (MobileShipmentCreationMessageDTO)obj;
@@ -573,6 +572,41 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 //use to determine sms sender service to use
                 messageDTO.SMSSenderPlatform = mobileShipmentCreationMessage.SMSSenderPlatform;
+            }
+
+            if (obj is ShipmentCancelMessageDTO)
+            {
+                var strArray = new string[]
+                 {
+                     "Sender Name",
+                     "WaybillNumber",
+                     "Reason"
+                 };
+
+                var cancelShipment = (ShipmentCancelMessageDTO)obj;
+                //map the array
+                strArray[0] = cancelShipment.SenderName;
+                strArray[1] = cancelShipment.WaybillNumber;
+                strArray[2] = cancelShipment.Reason;
+                messageDTO.Waybill = cancelShipment.WaybillNumber;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
+
+                //populate the message template
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.To = cancelShipment.SenderPhoneNumber;
+                messageDTO.ToEmail = cancelShipment.SenderEmail;
+
+                //Set default country as Nigeria for GIG Go APP
+                //prepare message format base on country code
+                messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
+
+                //use to determine sms sender service to use
+                messageDTO.SMSSenderPlatform = cancelShipment.SMSSenderPlatform;
             }
 
             return await Task.FromResult(true);
