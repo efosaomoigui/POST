@@ -2031,7 +2031,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (user.UserChannelType.ToString() != UserChannelType.Partner.ToString() || user.SystemUserRole != "Dispatch Rider")
                     {
                         var qrCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == shipment.Waybill);
-                        if(qrCode != null)
+                        if (qrCode != null)
                         {
                             Shipmentdto.QRCode = qrCode.Number;
                         }
@@ -2899,16 +2899,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Shipment item does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
-                var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == pickuprequest.Waybill);
-                if(deliveryNumber.Number != pickuprequest.QRCode)
-                {
-                    throw new GenericException($"This PIN {pickuprequest.QRCode} is not attached to this waybill {pickuprequest.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
-                }
-                else if (deliveryNumber.Number == pickuprequest.QRCode && deliveryNumber.IsUsed == true)
-                {
-                    throw new GenericException($"This PIN {pickuprequest.QRCode} for this waybill {pickuprequest.Waybill} has already been used ", $"{(int)HttpStatusCode.NotFound}");
-                }
-
                 int destinationServiceCentreId = 0;
                 int departureServiceCentreId = 0;
 
@@ -3001,7 +2991,6 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.PickedUp.ToString();
                 preshipmentmobile.IsConfirmed = true;
-                deliveryNumber.IsUsed = true;
 
                 await _uow.CompleteAsync();
 
@@ -4067,6 +4056,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        //Remove this later
         public async Task<bool> UpdateDeliveryNumber(MobileShipmentNumberDTO detail)
         {
             try
@@ -4104,6 +4094,54 @@ namespace GIGLS.Services.Implementation.Shipments
                         mobileShipment.DeliveryNumber = detail.DeliveryNumber;
                         await _uow.CompleteAsync();
                     }
+                }
+                return true;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateDeliveryNumberNew(MobileShipmentNumberDTO detail)
+        {
+            try
+            {
+                var userId = await _userService.GetCurrentUserId();
+                var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == detail.WayBill);
+                if (deliveryNumber == null)
+                {
+                    throw new GenericException("No Delivery Number for this waybill", $"{(int)HttpStatusCode.NotFound}");
+                }
+                else if (deliveryNumber.Number.ToLower() != detail.DeliveryNumber.ToLower())
+                {
+                    throw new GenericException($"This PIN {detail.DeliveryNumber} is not attached to this waybill {detail.WayBill} ", $"{(int)HttpStatusCode.NotFound}");
+                }
+                else if (deliveryNumber.IsUsed)
+                {
+                    throw new GenericException("Delivery Number has been used", $"{(int)HttpStatusCode.Forbidden}");
+                }
+                else
+                {
+                    var mobileShipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == detail.WayBill);
+
+                    if (mobileShipment == null)
+                    {
+                        throw new GenericException("Waybill does not exist in Shipments", $"{(int)HttpStatusCode.NotFound}");
+                    }
+
+                    var shipment = await _uow.Shipment.GetAsync(s => s.Waybill == detail.WayBill);
+
+                    if (shipment != null)
+                    {
+                        shipment.DeliveryNumber = detail.DeliveryNumber;
+                    }
+
+                    deliveryNumber.IsUsed = true;
+                    deliveryNumber.UserId = userId;
+                    mobileShipment.DeliveryNumber = detail.DeliveryNumber;
+                    await _uow.CompleteAsync();
+
                 }
                 return true;
             }
