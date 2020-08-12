@@ -331,6 +331,7 @@
     <Compile Include="Controllers\Fleets\FleetModelController.cs" />
     <Compile Include="Controllers\Fleets\FleetPartController.cs" />
     <Compile Include="Controllers\Fleets\FleetTripController.cs" />
+    <Compile Include="Controllers\GIGGo\GIGGoPartnerController.cs" />
     <Compile Include="Controllers\Haulage\HaulageController.cs" />
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingController.cs" />
     <Compile Include="Controllers\Haulage\HaulageDistanceMappingPriceController.cs" />

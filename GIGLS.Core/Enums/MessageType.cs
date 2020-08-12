@@ -49,6 +49,7 @@
         ENM, //ECOMMERCE NOTIFICATION  MESSAGE FOR GIGGO CUSTOMER REGISTRATION
         DLD,  //DELAYED DELIVERY	
         MMCS, //Message for Multiple Mobile Create Shipment
-        ARFS // WHEN GIGL STORE SHIPMENT ARRIVES FINAL DESTINATION
+        ARFS, // WHEN GIGL STORE SHIPMENT ARRIVES FINAL DESTINATION
+        DBDO // When discrepancy has been identified during confirmation of bank deposit
     } 
 }

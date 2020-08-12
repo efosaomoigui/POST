@@ -347,6 +347,7 @@
     <Compile Include="DTO\Magaya\MagayaShipmentAgilityDTO.cs" />
     <Compile Include="DTO\Magaya\MagayaShipmentItemDTO.cs" />
     <Compile Include="DTO\MessageDTO.cs" />
+    <Compile Include="DTO\MessagingLog\BankDepositMessageDTO.cs" />
     <Compile Include="DTO\MessagingLog\EmailSendLogDTO.cs" />
     <Compile Include="DTO\MessagingLog\MessageFilterOption.cs" />
     <Compile Include="DTO\MessagingLog\PasswordMessageDTO.cs" />
@@ -711,6 +712,7 @@
     <Compile Include="IServices\Business\IShipmentTrackService.cs" />
     <Compile Include="IServices\Client\IClientNodeService.cs" />
     <Compile Include="IServices\CustomerPortal\ICustomerPortalService.cs" />
+    <Compile Include="IServices\CustomerPortal\IPartnerPortalService.cs" />
     <Compile Include="IServices\Customers\ICompanyContactPersonService.cs" />
     <Compile Include="IServices\Customers\ICompanyService.cs" />
     <Compile Include="IServices\Customers\ICustomerService.cs" />

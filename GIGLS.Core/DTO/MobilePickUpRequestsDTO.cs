@@ -21,6 +21,9 @@ namespace GIGLS.Core.DTO
         public string ServiceCentreId { get; set; }
 
         public string Reason { get; set; }
+        public string IndentificationUrl { get; set; }
+        public string DeliveryAddressImageUrl { get; set; }
+
 
 
     }

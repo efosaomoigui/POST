@@ -46,7 +46,8 @@ namespace GIGLS.Core.DTO.BankSettlement
         public DepositStatus Status { get; set; }
         public string VerifiedBy { get; set; }
         public string BankName { get; set; }
-                
+        public decimal AmountInputted { get; set; }
+
         public List<BankProcessingOrderForShipmentAndCODDTO> ShipmentAndCOD { get; set; }
     }
 
