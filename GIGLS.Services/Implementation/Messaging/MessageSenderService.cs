@@ -172,6 +172,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     "Contact Email",
                     "ContactNumber",
                     "Currency Code",
+                    "QR Code"
                 };
 
                 var shipmentTrackingDTO = (ShipmentTrackingDTO)obj;
@@ -234,6 +235,7 @@ namespace GIGLS.Services.Implementation.Messaging
                     strArray[14] = country.ContactEmail;
                     strArray[15] = country.ContactNumber;
                     strArray[16] = country.CurrencyCode;
+                    strArray[17] = shipmentTrackingDTO.QRCode;
 
                    
                     //A. added for HomeDelivery sms, when scan is ArrivedFinalDestination
@@ -508,7 +510,8 @@ namespace GIGLS.Services.Implementation.Messaging
                      "Sender Name",
                      "WaybillNumber",
                      "Sender Phone Number",
-                     "Group Code"
+                     "Group Code",
+                     "QR Code"
                  };
 
                 var mobileShipmentCreationMessage = (MobileShipmentCreationMessageDTO)obj;
@@ -517,6 +520,7 @@ namespace GIGLS.Services.Implementation.Messaging
                 strArray[1] = mobileShipmentCreationMessage.WaybillNumber;
                 strArray[2] = mobileShipmentCreationMessage.SenderPhoneNumber;
                 strArray[3] = mobileShipmentCreationMessage.GroupCode;
+                strArray[4] = mobileShipmentCreationMessage.QRCode;
                 messageDTO.Waybill = mobileShipmentCreationMessage.WaybillNumber;
 
                 //B. decode url parameter
