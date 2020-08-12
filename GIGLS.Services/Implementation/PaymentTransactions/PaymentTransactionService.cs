@@ -15,6 +15,7 @@ using GIGLS.Core.IServices.Utility;
 using GIGL.GIGLS.Core.Domain;
 using System.Linq;
 using GIGLS.Core.IServices.Zone;
+using GIGLS.Core.IMessageService;
 
 namespace GIGLS.Services.Implementation.PaymentTransactions
 {
@@ -25,15 +26,17 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
         private readonly IWalletService _walletService;
         private readonly IGlobalPropertyService _globalPropertyService;
         private readonly ICountryRouteZoneMapService _countryRouteZoneMapService;
+        private readonly IMessageSenderService _messageSenderService;
 
         public PaymentTransactionService(IUnitOfWork uow, IUserService userService, IWalletService walletService,
-            IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService)
+            IGlobalPropertyService globalPropertyService, ICountryRouteZoneMapService countryRouteZoneMapService, IMessageSenderService messageSenderService)
         {
             _uow = uow;
             _userService = userService;
             _walletService = walletService;
             _globalPropertyService = globalPropertyService;
             _countryRouteZoneMapService = countryRouteZoneMapService;
+            _messageSenderService = messageSenderService;
             MapperConfig.Initialize();
         }
 
@@ -141,7 +144,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             paymentTransaction.PaymentStatus = PaymentStatus.Paid;
             var paymentTransactionId = await AddPaymentTransaction(paymentTransaction);
 
-
             // update GeneralLedger
             generalLedgerEntity.IsDeferred = false;
             generalLedgerEntity.PaymentType = paymentTransaction.PaymentType;
@@ -157,6 +159,22 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             await _uow.CompleteAsync();
             result = true;
+
+            //send sms to the customer
+            var smsData = new Core.DTO.Shipments.ShipmentTrackingDTO
+            {
+                Waybill = shipment.Waybill
+            };
+
+            if (shipment.DepartureServiceCentreId == 309)
+            {
+                await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
+                await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, smsData);
+            }
+            else
+            {
+                await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
+            }
 
             return result;
         }

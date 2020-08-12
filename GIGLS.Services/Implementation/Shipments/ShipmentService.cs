@@ -26,7 +26,6 @@ using GIGLS.CORE.DTO.Shipments;
 using GIGLS.Infrastructure;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -790,21 +789,20 @@ namespace GIGLS.Services.Implementation.Shipments
                 });
 
                 //send message
-                var smsData = new ShipmentTrackingDTO
-                {
-                    Waybill = newShipment.Waybill,
-                    QRCode = deliveryNumber.Number
-                };
+                //var smsData = new ShipmentTrackingDTO
+                //{
+                //    Waybill = newShipment.Waybill
+                //};
 
-                if (newShipment.DepartureServiceCentreId == 309)
-                {
-                    await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
-                    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, smsData);
-                }
-                else
-                {
-                    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
-                }
+                //if (newShipment.DepartureServiceCentreId == 309)
+                //{
+                //    await _messageSenderService.SendMessage(MessageType.HOUSTON, EmailSmsType.SMS, smsData);
+                //    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.Email, smsData);
+                //}
+                //else
+                //{
+                //    await _messageSenderService.SendMessage(MessageType.CRT, EmailSmsType.All, smsData);
+                //}
 
                 //For Corporate Customers, Pay for their shipments through wallet immediately
                 if (CompanyType.Corporate.ToString() == shipmentDTO.CompanyType)

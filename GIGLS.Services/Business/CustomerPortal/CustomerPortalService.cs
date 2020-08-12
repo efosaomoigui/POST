@@ -420,7 +420,15 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<List<ServiceCentreDTO>> GetLocalServiceCentres()
         {
-            var countryIds = await _userService.GetPriviledgeCountryIds();
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(userId);
+
+            if (user.UserActiveCountryId == 0)
+            {
+                user.UserActiveCountryId = 1;
+            }
+
+            int[] countryIds = new int[] { user.UserActiveCountryId };
             return await _uow.ServiceCentre.GetLocalServiceCentres(countryIds);
         }
 
@@ -1551,7 +1559,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             if (disableShipmentCreation)
             {
                 string message = ConfigurationManager.AppSettings["DisableShipmentCreationMessage"];
-                throw new GenericException(message, $"{(int)System.Net.HttpStatusCode.ServiceUnavailable}");
+                throw new GenericException(message, $"{(int)HttpStatusCode.ServiceUnavailable}");
             }
             return await _preShipmentMobileService.AddPreShipmentMobile(preShipment);
         }
