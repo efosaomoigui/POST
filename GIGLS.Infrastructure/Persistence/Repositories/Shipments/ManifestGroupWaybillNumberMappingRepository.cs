@@ -204,7 +204,7 @@ namespace GIGLS.INFRASTRUCTURE.Persistence.Repositories.Shipments
             var manifest = from mgw in manifestGroupwaybillMapping
                            join p in _context.Manifest on mgw.ManifestCode equals p.ManifestCode
                            join s in _context.GroupWaybillNumberMapping on mgw.GroupWaybillNumber equals s.GroupWaybillNumber
-                           where p.IsDispatched == false && p.HasSuperManifest == false
+                           where p.SuperManifestStatus == Core.Enums.SuperManifestStatus.ArrivedScan || p.SuperManifestStatus == Core.Enums.SuperManifestStatus.Pending
                            select new ManifestDTO
                            {
                                ManifestCode = p.ManifestCode,
