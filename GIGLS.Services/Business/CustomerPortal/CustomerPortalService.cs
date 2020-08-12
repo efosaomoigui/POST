@@ -420,8 +420,15 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<List<ServiceCentreDTO>> GetLocalServiceCentres()
         {
-            var customerCountryId = await _userService.GetUserActiveCountry();
-            int[] countryIds = new int[] { customerCountryId.CountryId };
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(userId);
+
+            if (user.UserActiveCountryId == 0)
+            {
+                user.UserActiveCountryId = 1;
+            }
+
+            int[] countryIds = new int[] { user.UserActiveCountryId };
             return await _uow.ServiceCentre.GetLocalServiceCentres(countryIds);
         }
 
