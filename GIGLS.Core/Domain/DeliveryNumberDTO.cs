@@ -14,5 +14,6 @@ namespace GIGLS.Core.Domain
         public string UserId { get; set; }
 
         public bool IsUsed { get; set; }
+        public string Waybill { get; set; }
     }
 }

@@ -12,6 +12,7 @@ using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Business;
+using GIGLS.Core.IServices.CustomerPortal;
 using GIGLS.Core.IServices.Customers;
 using GIGLS.Core.IServices.ServiceCentres;
 using GIGLS.Core.IServices.Shipments;
@@ -773,6 +774,9 @@ namespace GIGLS.Services.Implementation.Shipments
                 // complete transaction if all actions are successful
                 await _uow.CompleteAsync();
 
+                //QR Code
+                var deliveryNumber = await GenerateDeliveryNumber(1, newShipment.Waybill);
+
                 if (!string .IsNullOrEmpty(shipmentDTO.TempCode))
                 {
                     await UpdateDropOff(newShipment.Waybill, shipmentDTO.TempCode);
@@ -788,7 +792,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 //send message
                 var smsData = new ShipmentTrackingDTO
                 {
-                    Waybill = newShipment.Waybill
+                    Waybill = newShipment.Waybill,
+                    QRCode = deliveryNumber.Number
                 };
 
                 if (newShipment.DepartureServiceCentreId == 309)
@@ -2850,6 +2855,39 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             return amountToDebit;
+        }
+
+        private async Task<DeliveryNumberDTO> GenerateDeliveryNumber(int value, string waybill)
+        {
+            //var deliveryNumberlist = new DeliveryNumberDTO();
+
+            int maxSize = 6;
+            char[] chars = new char[62];
+            string a;
+            a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            chars = a.ToCharArray();
+            int size = maxSize;
+            byte[] data = new byte[1];
+            RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
+            crypto.GetNonZeroBytes(data);
+            size = maxSize;
+            data = new byte[size];
+            crypto.GetNonZeroBytes(data);
+            StringBuilder result = new StringBuilder(size);
+            foreach (byte b in data)
+            { result.Append(chars[b % (chars.Length - 1)]); }
+            var strippedText = result.ToString();
+            var number = new DeliveryNumber
+            {
+                Number = "DN" + strippedText.ToUpper(),
+                IsUsed = false,
+                Waybill = waybill
+            };
+            var deliverynumberDTO = Mapper.Map<DeliveryNumberDTO>(number);
+            //deliveryNumberlist.Add(deliverynumberDTO);
+            _uow.DeliveryNumber.Add(number);
+            await _uow.CompleteAsync();
+            return await Task.FromResult(deliverynumberDTO);
         }
     }
 }

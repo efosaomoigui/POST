@@ -36,6 +36,8 @@ using System.Configuration;
 using System.Net;
 using System.Net.Http;
 using GIGLS.Core.DTO.Report;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace GIGLS.Services.Implementation.Shipments
 {
@@ -534,6 +536,10 @@ namespace GIGLS.Services.Implementation.Shipments
                     updatedwallet.Balance = price;
                     var walletTransaction = await _walletTransactionService.AddWalletTransaction(transaction);
                     await _uow.CompleteAsync();
+
+                    //Pin Generation 
+                    var deliveryNumber = await GenerateDeliveryNumber(1, waybill);
+                    message.QRCode = deliveryNumber.Number;
 
                     await ScanMobileShipment(new ScanDTO
                     {
@@ -2021,6 +2027,15 @@ namespace GIGLS.Services.Implementation.Shipments
                     }
                     var partner = await _uow.MobilePickUpRequests.GetPartnerDetailsForAWaybill(waybill);
                     Shipmentdto.partnerDTO = partner;
+
+                    if (user.UserChannelType.ToString() != UserChannelType.Partner.ToString() || user.SystemUserRole != "Dispatch Rider")
+                    {
+                        var qrCode = await _uow.DeliveryNumber.GetAsync(x => x.Waybill == shipment.Waybill);
+                        if(qrCode != null)
+                        {
+                            Shipmentdto.QRCode = qrCode.Number;
+                        }
+                    }
                 }
                 else
                 {
@@ -2064,6 +2079,7 @@ namespace GIGLS.Services.Implementation.Shipments
                     string groupCode = await _uow.MobileGroupCodeWaybillMapping.GetGroupCode(waybill);
                     Shipmentdto.GroupCodeNumber = groupCode;
                 }
+
                 return await Task.FromResult(Shipmentdto);
             }
             catch (Exception)
@@ -2652,7 +2668,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 //Block Process for any cancelled shipment
                 var shipmentCancelled = await _uow.PreShipmentMobile.GetAsync(x => x.Waybill == pickuprequest.Waybill && x.shipmentstatus == MobilePickUpRequestStatus.Cancelled.ToString());
-                if(shipmentCancelled != null)
+                if (shipmentCancelled != null)
                 {
                     throw new GenericException($"Error processing shipment. This Shipment has already been cancelled", $"{(int)HttpStatusCode.Forbidden}");
                 }
@@ -2883,6 +2899,16 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Shipment item does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
+                var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == pickuprequest.Waybill);
+                if(deliveryNumber.Number != pickuprequest.QRCode)
+                {
+                    throw new GenericException($"This PIN {pickuprequest.QRCode} is not attached to this waybill {pickuprequest.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+                }
+                else if (deliveryNumber.Number == pickuprequest.QRCode && deliveryNumber.IsUsed == true)
+                {
+                    throw new GenericException($"This PIN {pickuprequest.QRCode} for this waybill {pickuprequest.Waybill} has already been used ", $"{(int)HttpStatusCode.NotFound}");
+                }
+
                 int destinationServiceCentreId = 0;
                 int departureServiceCentreId = 0;
 
@@ -2975,6 +3001,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.PickedUp.ToString();
                 preshipmentmobile.IsConfirmed = true;
+                deliveryNumber.IsUsed = true;
 
                 await _uow.CompleteAsync();
 
@@ -3615,7 +3642,7 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                if(preShipment == null)
+                if (preShipment == null)
                 {
                     throw new GenericException("NULL INPUT");
                 }
@@ -3626,7 +3653,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("This Shipment cannot be placed in Dispute, because it has been" + " " + preshipmentmobilegrandtotal.shipmentstatus, $"{(int)HttpStatusCode.Forbidden}");
                 }
-                                
+
                 //delete remove item from DB
                 var preShipmentMobileItemToBeDeleted = _uow.PreShipmentItemMobile.GetAllAsQueryable()
                     .Where(x => preShipment.DeletedItems.Contains(x.PreShipmentItemMobileId) && x.PreShipmentMobileId == preShipment.PreShipmentMobileId).ToList();
@@ -3651,7 +3678,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 }
                 else
                 {
-                    preshipmentPriceDTO =  await GetPrice(preShipment);
+                    preshipmentPriceDTO = await GetPrice(preShipment);
                 }
 
                 var difference = (preshipmentmobilegrandtotal.GrandTotal - preshipmentPriceDTO.GrandTotal);
@@ -3669,7 +3696,7 @@ namespace GIGLS.Services.Implementation.Shipments
                         foreach (var item in preShipmentMobileItemToBeUpdated)
                         {
                             var preshipmentitemmobile = preShipment.PreShipmentItems.Where(x => x.PreShipmentItemMobileId == item.PreShipmentItemMobileId).FirstOrDefault();
-                            if(preshipmentitemmobile != null)
+                            if (preshipmentitemmobile != null)
                             {
                                 item.Quantity = preshipmentitemmobile.Quantity;
                                 item.Value = preshipmentitemmobile.Value;
@@ -3836,7 +3863,7 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
-        public async Task UpdateCustomerWalletForCancelledShipment(string customerCode,  string waybill, decimal amount)
+        public async Task UpdateCustomerWalletForCancelledShipment(string customerCode, string waybill, decimal amount)
         {
             var user = await _userService.GetCurrentUserId();
             var defaultServiceCenter = await _userService.GetGIGGOServiceCentre();
@@ -4438,7 +4465,7 @@ namespace GIGLS.Services.Implementation.Shipments
                                 {
                                     int customerid = 0;
                                     var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                                    if(companyid != null)
+                                    if (companyid != null)
                                     {
                                         customerid = companyid.CompanyId;
                                     }
@@ -5303,6 +5330,39 @@ namespace GIGLS.Services.Implementation.Shipments
                                               }).ToList();
 
             return await Task.FromResult(locationDTOs.OrderByDescending(x => x.DateCreated).ToList());
+        }
+
+        private async Task<DeliveryNumberDTO> GenerateDeliveryNumber(int value, string waybill)
+        {
+            //var deliveryNumberlist = new DeliveryNumberDTO();
+
+            int maxSize = 6;
+            char[] chars = new char[62];
+            string a;
+            a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            chars = a.ToCharArray();
+            int size = maxSize;
+            byte[] data = new byte[1];
+            RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider();
+            crypto.GetNonZeroBytes(data);
+            size = maxSize;
+            data = new byte[size];
+            crypto.GetNonZeroBytes(data);
+            StringBuilder result = new StringBuilder(size);
+            foreach (byte b in data)
+            { result.Append(chars[b % (chars.Length - 1)]); }
+            var strippedText = result.ToString();
+            var number = new DeliveryNumber
+            {
+                Number = "DN" + strippedText.ToUpper(),
+                IsUsed = false,
+                Waybill = waybill
+            };
+            var deliverynumberDTO = Mapper.Map<DeliveryNumberDTO>(number);
+            //deliveryNumberlist.Add(deliverynumberDTO);
+            _uow.DeliveryNumber.Add(number);
+            await _uow.CompleteAsync();
+            return await Task.FromResult(deliverynumberDTO);
         }
     }
 }
