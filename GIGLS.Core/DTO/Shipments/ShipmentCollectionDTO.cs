@@ -42,6 +42,7 @@ namespace GIGLS.CORE.DTO.Shipments
        
         public string ReceiverArea { get; set; }
         public string DeliveryAddressImageUrl { get; set; }
-        
+        public string DeliveryNumber { get; set; }
+
     }
 }
