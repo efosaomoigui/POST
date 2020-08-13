@@ -1667,10 +1667,10 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
-            if (string.IsNullOrEmpty(preShipment.VehicleType))
-            {
-                throw new GenericException($"Please select a vehicle type", $"{(int)HttpStatusCode.Forbidden}");
-            }
+            //if (string.IsNullOrEmpty(preShipment.VehicleType))
+            //{
+            //    throw new GenericException($"Please select a vehicle type", $"{(int)HttpStatusCode.Forbidden}");
+            //}
 
             if (!preShipment.PreShipmentItems.Any())
             {
@@ -1679,6 +1679,11 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
             preShipment.ZoneMapping = zoneid.ZoneId;
+
+            if (string.IsNullOrEmpty(preShipment.VehicleType))
+            {
+                return await _preShipmentMobileService.GetPrice(preShipment);
+            }
 
             if (preShipment.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipment.ZoneMapping == 1
                 && preShipment.SenderLocation.Latitude != null && preShipment.SenderLocation.Longitude != null 
