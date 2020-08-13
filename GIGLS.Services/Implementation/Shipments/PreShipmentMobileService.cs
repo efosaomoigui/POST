@@ -4117,10 +4117,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException($"This PIN {detail.DeliveryNumber} is not attached to this waybill {detail.WayBill} ", $"{(int)HttpStatusCode.NotFound}");
                 }
-                else if (deliveryNumber.IsUsed)
-                {
-                    throw new GenericException("Delivery Number has been used", $"{(int)HttpStatusCode.Forbidden}");
-                }
+                //else if (deliveryNumber.IsUsed)
+                //{
+                //    throw new GenericException("Delivery Number has been used", $"{(int)HttpStatusCode.Forbidden}");
+                //}
                 else
                 {
                     var mobileShipment = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == detail.WayBill);

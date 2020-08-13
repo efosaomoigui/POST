@@ -547,10 +547,10 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException($"This Delivery Numer {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
                 }
-                else if (deliveryNumber.IsUsed)
-                {
-                    throw new GenericException("Delivery Number has been used", $"{(int)HttpStatusCode.Forbidden}");
-                }
+                //else if (deliveryNumber.IsUsed)
+                //{
+                //    throw new GenericException("Delivery Number has been used", $"{(int)HttpStatusCode.Forbidden}");
+                //}
             }
 
             await UpdateShipmentCollection(shipmentCollection);
