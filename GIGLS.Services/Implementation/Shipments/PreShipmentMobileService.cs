@@ -4111,7 +4111,8 @@ namespace GIGLS.Services.Implementation.Shipments
                 var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == detail.WayBill);
                 if (deliveryNumber == null)
                 {
-                    throw new GenericException("No Delivery Number for this waybill", $"{(int)HttpStatusCode.NotFound}");
+                    await UpdateDeliveryNumber(detail);
+                    //throw new GenericException("No Delivery Number for this waybill", $"{(int)HttpStatusCode.NotFound}");
                 }
                 else if (deliveryNumber.Number.ToLower() != detail.DeliveryNumber.ToLower())
                 {

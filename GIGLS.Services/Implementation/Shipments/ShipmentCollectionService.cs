@@ -444,8 +444,12 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 //update delivery number
                 var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipmentCollectionDto.Waybill);
-                deliveryNumber.IsUsed = true;
-                deliveryNumber.UserId = shipmentCollectionDto.UserId;
+                if(deliveryNumber != null)
+                {
+                    deliveryNumber.IsUsed = true;
+                    deliveryNumber.UserId = shipmentCollectionDto.UserId;
+                }
+                
             }
             
 
@@ -539,18 +543,13 @@ namespace GIGLS.Services.Implementation.Shipments
             if(shipmentCollection.DeliveryNumber != null)
             {
                 var deliveryNumber = await _uow.DeliveryNumber.GetAsync(s => s.Waybill == shipmentCollection.Waybill);
-                if (deliveryNumber == null)
+                if (deliveryNumber != null)
                 {
-                    throw new GenericException("No Delivery Number for this waybill", $"{(int)HttpStatusCode.NotFound}");
+                    if (deliveryNumber.Number.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
+                    {
+                        throw new GenericException($"This Delivery Numer {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
+                    }
                 }
-                else if (deliveryNumber.Number.ToLower() != shipmentCollection.DeliveryNumber.ToLower())
-                {
-                    throw new GenericException($"This Delivery Numer {shipmentCollection.DeliveryNumber} is not attached to this waybill {shipmentCollection.Waybill} ", $"{(int)HttpStatusCode.NotFound}");
-                }
-                //else if (deliveryNumber.IsUsed)
-                //{
-                //    throw new GenericException("Delivery Number has been used", $"{(int)HttpStatusCode.Forbidden}");
-                //}
             }
 
             await UpdateShipmentCollection(shipmentCollection);
