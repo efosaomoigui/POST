@@ -58,6 +58,9 @@
         BikePrice25KM,
         BikePrice26TO35KM,
         BikePrice36KM,
-        DiscountBikePercentage
+        DiscountBikePercentage,
+        GIGLogisticsEmail,
+        AccountMonitoringEmails,
+        GIGGOPartnerEmail
     }
 }
