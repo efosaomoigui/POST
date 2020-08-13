@@ -420,7 +420,15 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<List<ServiceCentreDTO>> GetLocalServiceCentres()
         {
-            var countryIds = await _userService.GetPriviledgeCountryIds();
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(userId);
+
+            if (user.UserActiveCountryId == 0)
+            {
+                user.UserActiveCountryId = 1;
+            }
+
+            int[] countryIds = new int[] { user.UserActiveCountryId };
             return await _uow.ServiceCentre.GetLocalServiceCentres(countryIds);
         }
 
@@ -726,17 +734,23 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
 
+            //seperate email by comma and send message to those email
+            string[] ecommerceEmails = ecommerceEmail.Value.Split(',').ToArray();
+
             //customer email, customer phone, receiver email
             EcommerceMessageDTO email = new EcommerceMessageDTO
             {
                 CustomerEmail = user.Email,
                 CustomerPhoneNumber = user.PhoneNumber,
                 CustomerCompanyName = user.Organisation,
-                EcommerceEmail = ecommerceEmail.Value,
                 BusinessNature = user.BusinessNature
             };
 
-            await _messageSenderService.SendGenericEmailMessage(MessageType.ENM, email);
+            foreach (string data in ecommerceEmails)
+            {
+                email.EcommerceEmail = data;
+                await _messageSenderService.SendGenericEmailMessage(MessageType.ENM, email);
+            }
 
             //4. return registration message to the customer
             var message = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.RegistrationMessage, 1);
@@ -1551,7 +1565,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             if (disableShipmentCreation)
             {
                 string message = ConfigurationManager.AppSettings["DisableShipmentCreationMessage"];
-                throw new GenericException(message, $"{(int)System.Net.HttpStatusCode.ServiceUnavailable}");
+                throw new GenericException(message, $"{(int)HttpStatusCode.ServiceUnavailable}");
             }
             return await _preShipmentMobileService.AddPreShipmentMobile(preShipment);
         }

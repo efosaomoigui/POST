@@ -1270,8 +1270,10 @@ namespace GIGLS.Services.Implementation.Wallet
         private async Task<bool> SendMailToAccountants(BankDepositMessageDTO messageDTO)
         {
             //Tell accountants
-            string mailList = ConfigurationManager.AppSettings["accountEmails"];
-            string[] emails = mailList.Split(',').ToArray();
+            //string mailList = ConfigurationManager.AppSettings["accountEmails"];
+
+            var mailList = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.AccountMonitoringEmails, 1);
+            string[] emails = mailList.Value.Split(',').ToArray();
 
             foreach (var email in emails)
             {
