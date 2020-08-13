@@ -36,11 +36,21 @@ namespace GIGLS.Services.Implementation.Website
         {
             try
             {
+                bool result = false;
                 var messageType = MessageType.WEBPICKUP;
                 var emailSmsType = EmailSmsType.Email;
-                obj.gigMail = "info@giglogistics.com";
 
-                var result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
+                var gigMail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGLogisticsEmail, 1);
+
+                //seperate email by comma and send message to those email
+                string[] gigMailList = gigMail.Value.Split(',').ToArray();
+
+                foreach (string email in gigMailList)
+                {
+                    obj.gigMail = email;
+                    result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
+                }
+
                 return await Task.FromResult(result);
             }
             catch (Exception)
@@ -52,11 +62,21 @@ namespace GIGLS.Services.Implementation.Website
         {
             try
             {
+                bool result = false;
                 var messageType = MessageType.WEBQUOTE;
                 var emailSmsType = EmailSmsType.Email;
-                obj.gigMail = "info@giglogistics.com";
 
-                var result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
+                var gigMail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGLogisticsEmail, 1);
+
+                //seperate email by comma and send message to those email
+                string[] gigMailList = gigMail.Value.Split(',').ToArray();
+
+                foreach (string email in gigMailList)
+                {
+                    obj.gigMail = email;
+                    result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
+                }
+
                 return await Task.FromResult(result);
             }
             catch (Exception)
@@ -68,12 +88,22 @@ namespace GIGLS.Services.Implementation.Website
         {
             try
             {
+                bool result = false;
                 var messageType = MessageType.APPREPORT;
                 var emailSmsType = EmailSmsType.Email;
 
-                obj.Recipient = "gopartners@giglogistics.ng";
+                //send meail to ecommerce team
+                var gigMail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGGOPartnerEmail, 1);
 
-                var result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
+                //seperate email by comma and send message to those email
+                string[] gigMailList = gigMail.Value.Split(',').ToArray();
+
+                foreach (string email in gigMailList)
+                {
+                    obj.Recipient = email;
+                    result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
+                }
+
                 return await Task.FromResult(result);
             }
             catch (Exception)
