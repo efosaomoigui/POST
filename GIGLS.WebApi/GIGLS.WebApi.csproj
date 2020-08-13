@@ -283,6 +283,8 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\AuthorizationOperationFilter.cs" />
+    <Compile Include="App_Start\AuthTokenOperation.cs" />
     <Compile Include="App_Start\GiglsCustomJwtFormat.cs" />
     <Compile Include="App_Start\IdentityConfig.cs" />
     <Compile Include="App_Start\NinjectWebCommon.cs" />
