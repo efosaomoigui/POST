@@ -734,17 +734,23 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
 
+            //seperate email by comma and send message to those email
+            string[] ecommerceEmails = ecommerceEmail.Value.Split(',').ToArray();
+
             //customer email, customer phone, receiver email
             EcommerceMessageDTO email = new EcommerceMessageDTO
             {
                 CustomerEmail = user.Email,
                 CustomerPhoneNumber = user.PhoneNumber,
                 CustomerCompanyName = user.Organisation,
-                EcommerceEmail = ecommerceEmail.Value,
                 BusinessNature = user.BusinessNature
             };
 
-            await _messageSenderService.SendGenericEmailMessage(MessageType.ENM, email);
+            foreach (string data in ecommerceEmails)
+            {
+                email.EcommerceEmail = data;
+                await _messageSenderService.SendGenericEmailMessage(MessageType.ENM, email);
+            }
 
             //4. return registration message to the customer
             var message = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.RegistrationMessage, 1);
