@@ -1017,7 +1017,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         if (emailcustomerdetails.IsRegisteredFromMobile == true)
                         {
-                            throw new GenericException("Customer aready exists!", $"{(int)HttpStatusCode.Forbidden}");
+                            throw new GenericException("Customer already exists!", $"{(int)HttpStatusCode.Forbidden}");
                         }
                         else
                         {
