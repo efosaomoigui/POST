@@ -24,32 +24,22 @@ namespace Jobs.AutomatedBankSettlement
                 IList<ServiceCentreDTO> servicecenters = httpResultsVals.ToObject<IList<ServiceCentreDTO>>();
 
                 var datetorun = DateTime.Now;
-                var count = 1;
+                var count = 0;
 
                 //Shipment
                 foreach (var item in servicecenters)
                 {
-                    string urlString = $"api/BankProcessingOrderWaybillsandCode/RequestBankProcessingOrderForShipment/ScheduledTask?type={1}&ServiceCenter={item.ServiceCentreId}&dt={datetorun}";
-                    if (count >= 2) break;
-                    var o = ApiCaller.callVoidAPI("GET", urlString, Console.Out);
-                    count++;
-                }
+                    //Shippment
+                    string urlString1 = $"api/BankProcessingOrderWaybillsandCode/RequestBankProcessingOrderForShipment/ScheduledTask?type={1}&ServiceCenter={item.ServiceCentreId}&dt={datetorun}";
+                    //COD 
+                    string urlString2 = $"api/BankProcessingOrderWaybillsandCode/RequestBankProcessingOrderForCOD/ScheduledTask?type={2}&ServiceCenter={item.ServiceCentreId}&dt={datetorun}";
+                    //Demurrage
+                    string urlString3 = $"api/BankProcessingOrderWaybillsandCode/RequestBankProcessingOrderForDemurrage/ScheduledTask?type={3}&ServiceCenter={item.ServiceCentreId}&dt={datetorun}";
 
-                //COD
-                foreach (var item in servicecenters)
-                {
-                    string urlString = $"api/BankProcessingOrderWaybillsandCode/RequestBankProcessingOrderForCOD/ScheduledTask?type={2}&ServiceCenter={item.ServiceCentreId}&dt={datetorun}";
                     if (count >= 2) break;
-                    var o = ApiCaller.callVoidAPI("GET", urlString, Console.Out);
-                    count++;
-                }
-
-                //Demurrage
-                foreach (var item in servicecenters)
-                {
-                    string urlString = $"api/BankProcessingOrderWaybillsandCode/RequestBankProcessingOrderForDemurrage/ScheduledTask?type={3}&ServiceCenter={item.ServiceCentreId}&dt={datetorun}";
-                    if (count >= 2) break;
-                    var o = ApiCaller.callVoidAPI("GET", urlString, Console.Out);
+                    var o1 = ApiCaller.callVoidAPI("GET", urlString1, Console.Out);
+                    var o2 = ApiCaller.callVoidAPI("GET", urlString2, Console.Out);
+                    var o3 = ApiCaller.callVoidAPI("GET", urlString3, Console.Out);  
                     count++;
                 }
             }
