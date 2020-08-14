@@ -27,18 +27,19 @@ namespace GIGLS.Services.Implementation.Customers
         private readonly IPasswordGenerator _passwordGenerator;
         private readonly IUserService _userService;
         private readonly IMessageSenderService _messageSenderService;
-
+        private readonly IGlobalPropertyService _globalPropertyService;
         private readonly IUnitOfWork _uow;
 
-        public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService,
-            IWalletService walletService, IPasswordGenerator passwordGenerator, IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService)
+        public CompanyService(INumberGeneratorMonitorService numberGeneratorMonitorService, IWalletService walletService, IPasswordGenerator passwordGenerator, 
+            IUserService userService, IUnitOfWork uow, IMessageSenderService messageSenderService, IGlobalPropertyService globalPropertyService)
         {
             _walletService = walletService;
             _numberGeneratorMonitorService = numberGeneratorMonitorService;
             _passwordGenerator = passwordGenerator;
             _userService = userService;
-            _uow = uow;
+            _globalPropertyService = globalPropertyService;
             _messageSenderService = messageSenderService;
+            _uow = uow;
             MapperConfig.Initialize();
         }
 
@@ -178,7 +179,7 @@ namespace GIGLS.Services.Implementation.Customers
                     CompanyType = companyType
                 });
 
-                //send login detail to the email 
+                //send login detail to the customer
                 var passwordMessage = new PasswordMessageDTO()
                 {
                     Password = password,
@@ -186,6 +187,18 @@ namespace GIGLS.Services.Implementation.Customers
                     CustomerCode = newCompany.CustomerCode
                 };
                 await _messageSenderService.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
+
+                //send mail to ecommerce team
+                var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
+
+                //seperate email by comma and send message to those email
+                string[] ecommerceEmails = ecommerceEmail.Value.Split(',').ToArray();
+
+                foreach (string data in ecommerceEmails)
+                {
+                    passwordMessage.UserEmail = data;
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.CEMAIL, passwordMessage);
+                }
 
                 return Mapper.Map<CompanyDTO>(newCompany);
             }
