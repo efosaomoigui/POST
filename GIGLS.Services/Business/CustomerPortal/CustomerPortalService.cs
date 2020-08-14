@@ -1449,6 +1449,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     }
                     emailPhone = user;
                 }
+                else
+                {
+                    emailPhone = user;
+                }
             }
 
             return await _otpService.CheckDetails(emailPhone, userchanneltype);
