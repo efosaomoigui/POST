@@ -145,7 +145,7 @@ namespace GIGLS.Services.Implementation.Wallet
             //3. sum total
             decimal total = cashShipmentsVal.Sum(s => s.GrandTotal);
             var ServiceCenter = await _serviceCenter.GetServiceCentreById(serviceCentersId);
-            BankProcessingOrderCodesDTO bankDep = null;
+            BankProcessingOrderCodesDTO bankDep = new BankProcessingOrderCodesDTO();
 
             //Generate the refcode
             string refcode = "00000000";
@@ -183,8 +183,10 @@ namespace GIGLS.Services.Implementation.Wallet
                     }).ToList()
                 };
             }
-
-            await AddBankProcessingOrderCode_ScheduleTask(bankDep);
+            if (bankDep.ShipmentAndCOD.Count >0)
+            {
+                await AddBankProcessingOrderCode_ScheduleTask(bankDep);
+            }
             return Task.FromResult(0);
         }
 
@@ -472,7 +474,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             //Generate the refcode
-            BankProcessingOrderCodesDTO bankDep = null;
+            BankProcessingOrderCodesDTO bankDep = new BankProcessingOrderCodesDTO();
             string refcode = "00000000";
             if (total > 0)
             {
@@ -508,8 +510,10 @@ namespace GIGLS.Services.Implementation.Wallet
                     }).ToList()
                 };
             }
-
-            await AddBankProcessingOrderCodeDemurrageOnly_ScheduleTask(bankDep);
+            if (bankDep.ShipmentAndCOD.Count > 0)
+            {
+                await AddBankProcessingOrderCodeDemurrageOnly_ScheduleTask(bankDep);
+            }
             return Task.FromResult(0);
 
             //var comboresult = Tuple.Create(refcode, cashdemurrage, total);
@@ -572,7 +576,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             //Generate the refcode
-            BankProcessingOrderCodesDTO bankDep = null;
+            BankProcessingOrderCodesDTO bankDep = new BankProcessingOrderCodesDTO();
             string refcode = "00000000";
             if (total > 0)
             {
@@ -610,7 +614,10 @@ namespace GIGLS.Services.Implementation.Wallet
                 };
             }
 
-            await AddBankProcessingOrderCode_ScheduleTask(bankDep);
+            if (bankDep.ShipmentAndCOD.Count > 0)
+            {
+                await AddBankProcessingOrderCode_ScheduleTask(bankDep);
+            }
             return Task.FromResult(0);
         }
 
@@ -841,13 +848,10 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 //all shipments from payload JSON
                 var allprocessingordeforshipment = bkoc.ShipmentAndCOD;
-
-                var result = allprocessingordeforshipment.Select(s => s.Waybill);
+                List<string> result = allprocessingordeforshipment?.Select(s => s.Waybill).ToList();
 
                 //--------------------------Validation Section -------------------------------------------//
-
                 var allprocessingordefordemurrage = _uow.BankProcessingOrderForShipmentAndCOD.GetAll().Where(s => s.DepositType == bkoc.DepositType && result.Contains(s.Waybill));
-
                 if (allprocessingordefordemurrage.Any())
                 {
                     throw new GenericException("Error validating one or more Demurrages, Please try requesting again for a fresh record.");
@@ -856,7 +860,7 @@ namespace GIGLS.Services.Implementation.Wallet
                 //--------------------------Validation Section -------------------------------------------//
 
                 //2. convert demurrage to list for validation and insert
-                var demurrageforservicecenter = allDemurrages.Where(s => result.Contains(s.Waybill)).ToList();
+                        var demurrageforservicecenter = allDemurrages.Where(s => result.Contains(s.Waybill)).ToList();
 
                 var bankorderforshipmentandcod = allprocessingordeforshipment.Select(s => new BankProcessingOrderForShipmentAndCOD()
                 {

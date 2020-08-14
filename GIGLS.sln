@@ -28,7 +28,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jobs.AutomatedBankSettlement", "Jobs.AutomatedBankSettlement\Jobs.AutomatedBankSettlement.csproj", "{E70CF8D7-1CAF-4999-91E0-C578EE9C76EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jobs.AutomatedBankSettlement", "Jobs.AutomatedBankSettlement\Jobs.AutomatedBankSettlement.csproj", "{E70CF8D7-1CAF-4999-91E0-C578EE9C76EE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebJob2", "WebJob2\WebJob2.csproj", "{5DB43570-28CA-4E19-8DBF-D7A0BB09A589}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -80,6 +82,10 @@ Global
 		{E70CF8D7-1CAF-4999-91E0-C578EE9C76EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E70CF8D7-1CAF-4999-91E0-C578EE9C76EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E70CF8D7-1CAF-4999-91E0-C578EE9C76EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DB43570-28CA-4E19-8DBF-D7A0BB09A589}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DB43570-28CA-4E19-8DBF-D7A0BB09A589}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DB43570-28CA-4E19-8DBF-D7A0BB09A589}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DB43570-28CA-4E19-8DBF-D7A0BB09A589}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
