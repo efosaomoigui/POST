@@ -3,9 +3,11 @@ using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
+using GIGLS.Core.DTO.MessagingLog;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
 using GIGLS.Core.IServices.Customers;
+using GIGLS.Core.IServices.Utility;
 using GIGLS.Core.IServices.Website;
 using GIGLS.Infrastructure;
 using System;
@@ -19,24 +21,36 @@ namespace GIGLS.Services.Implementation.Website
     {
         private readonly IMessageSenderService _messageSenderService;
         private readonly IUnitOfWork _uow;
-        private readonly ICompanyService _companyService; 
+        private readonly ICompanyService _companyService;
+        private readonly IGlobalPropertyService _globalPropertyService;
 
-        public WebsiteService(IMessageSenderService messageSenderService, IUnitOfWork uow, ICompanyService companyService)
+        public WebsiteService(IMessageSenderService messageSenderService, IUnitOfWork uow, ICompanyService companyService, IGlobalPropertyService globalPropertyService)
         {
             _messageSenderService = messageSenderService;
             _uow = uow;
             _companyService = companyService;
+            _globalPropertyService = globalPropertyService;
         }
 
         public async Task<bool> SendSchedulePickupMail(WebsiteMessageDTO obj)
         {
             try
             {
+                bool result = false;
                 var messageType = MessageType.WEBPICKUP;
                 var emailSmsType = EmailSmsType.Email;
-                obj.gigMail = "info@giglogistics.com";
 
-                var result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
+                var gigMail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGLogisticsEmail, 1);
+
+                //seperate email by comma and send message to those email
+                string[] gigMailList = gigMail.Value.Split(',').ToArray();
+
+                foreach (string email in gigMailList)
+                {
+                    obj.gigMail = email;
+                    result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
+                }
+
                 return await Task.FromResult(result);
             }
             catch (Exception)
@@ -48,11 +62,21 @@ namespace GIGLS.Services.Implementation.Website
         {
             try
             {
+                bool result = false;
                 var messageType = MessageType.WEBQUOTE;
                 var emailSmsType = EmailSmsType.Email;
-                obj.gigMail = "info@giglogistics.com";
 
-                var result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
+                var gigMail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGLogisticsEmail, 1);
+
+                //seperate email by comma and send message to those email
+                string[] gigMailList = gigMail.Value.Split(',').ToArray();
+
+                foreach (string email in gigMailList)
+                {
+                    obj.gigMail = email;
+                    result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
+                }
+
                 return await Task.FromResult(result);
             }
             catch (Exception)
@@ -64,12 +88,22 @@ namespace GIGLS.Services.Implementation.Website
         {
             try
             {
+                bool result = false;
                 var messageType = MessageType.APPREPORT;
                 var emailSmsType = EmailSmsType.Email;
 
-                obj.Recipient = "gopartners@giglogistics.ng";
+                //send meail to ecommerce team
+                var gigMail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.GIGGOPartnerEmail, 1);
 
-                var result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
+                //seperate email by comma and send message to those email
+                string[] gigMailList = gigMail.Value.Split(',').ToArray();
+
+                foreach (string email in gigMailList)
+                {
+                    obj.Recipient = email;
+                    result = await _messageSenderService.SendMessage(messageType, emailSmsType, obj);
+                }
+
                 return await Task.FromResult(result);
             }
             catch (Exception)
@@ -154,6 +188,28 @@ namespace GIGLS.Services.Implementation.Website
                 ecommerceAgreement.Status = EcommerceAgreementStatus.Pending;
                 _uow.EcommerceAgreement.Add(ecommerceAgreement);
                 await _uow.CompleteAsync();
+
+                //send meail to ecommerce team
+                var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
+
+                //seperate email by comma and send message to those email
+                string[] ecommerceEmails = ecommerceEmail.Value.Split(',').ToArray();
+
+                //customer email, customer phone, receiver email
+                EcommerceMessageDTO email = new EcommerceMessageDTO
+                {
+                    CustomerEmail = ecommerceAgreementDTO.BusinessEmail,
+                    CustomerPhoneNumber = ecommerceAgreementDTO.ContactPhoneNumber,
+                    CustomerCompanyName = ecommerceAgreementDTO.BusinessOwnerName,
+                    BusinessNature = natureOfBusiness
+                };
+
+                foreach (string data in ecommerceEmails)
+                {
+                    email.EcommerceEmail = data;
+                    await _messageSenderService.SendGenericEmailMessage(MessageType.ENM, email);
+                }
+
                 return HttpStatusCode.Created;
             }
             catch (Exception)
@@ -161,8 +217,5 @@ namespace GIGLS.Services.Implementation.Website
                 throw;
             }
         }
-
-
-
     }
 }
