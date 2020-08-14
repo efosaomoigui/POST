@@ -36,7 +36,7 @@ namespace Jobs.AutomatedBankSettlement
                     //Demurrage
                     string urlString3 = $"api/BankProcessingOrderWaybillsandCode/RequestBankProcessingOrderForDemurrage/ScheduledTask?type={3}&ServiceCenter={item.ServiceCentreId}&dt={datetorun}";
 
-                    if (count >= 2) break;
+                    //if (count >= 2) break;
                     var o1 = ApiCaller.callVoidAPI("GET", urlString1, Console.Out);
                     var o2 = ApiCaller.callVoidAPI("GET", urlString2, Console.Out);
                     var o3 = ApiCaller.callVoidAPI("GET", urlString3, Console.Out);  
