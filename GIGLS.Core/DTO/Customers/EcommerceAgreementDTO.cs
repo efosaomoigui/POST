@@ -39,6 +39,17 @@ namespace GIGLS.Core.DTO.Customers
         public string Industry { get; set; }
 
         public EcommerceAgreementStatus Status { get; set; }
+
+        [Required]
+        public bool IsCod { get; set; }
+        
+        public string AccountName { get; set; }
+        
+        public string AccountNumber { get; set; }
+        
+        public string BankName { get; set; }
+
+        public bool IsApi { get; set; }
     }
 
 }

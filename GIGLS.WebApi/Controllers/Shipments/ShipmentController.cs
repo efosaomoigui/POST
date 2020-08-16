@@ -234,6 +234,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPost]
+        [Route("UpdateShipment")]
+        public async Task<IServiceResponse<bool>> UpdateShipment(ShipmentDTO ShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.UpdateShipment(ShipmentDTO.ShipmentId, ShipmentDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("{waybill}")]
         public async Task<IServiceResponse<bool>> UpdateShipment(string waybill, ShipmentDTO ShipmentDTO)

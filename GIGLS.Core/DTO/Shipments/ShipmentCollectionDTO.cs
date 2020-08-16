@@ -41,5 +41,7 @@ namespace GIGLS.CORE.DTO.Shipments
         public bool IsComingFromDispatch { get; set; }
        
         public string ReceiverArea { get; set; }
+        public string DeliveryAddressImageUrl { get; set; }
+        
     }
 }
