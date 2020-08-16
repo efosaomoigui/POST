@@ -28,6 +28,8 @@ using GIGLS.Core.IRepositories.InternationalRequest;
 using GIGLS.Core.IRepositories.Sla;
 using GIGLS.Core.IRepositories.Expenses;
 using GIGLS.Core.IRepositories.Magaya;
+using GIGLS.Core.IServices.RouteServices;
+using GIGLS.Core.IRepositories.Routes;
 
 namespace GIGLS.Core
 {
@@ -185,6 +187,10 @@ namespace GIGLS.Core
         IMobileGroupCodeWaybillMappingRepository MobileGroupCodeWaybillMapping { get; set; }
         IPartnerPayoutRepository PartnerPayout { get; set; }
         IEcommerceAgreementRepository EcommerceAgreement { get; set; }
+
+        //Route Section
+        IRouteRepository Routes { get; set; }
+
 
         int Complete();
         System.Threading.Tasks.Task<int> CompleteAsync();

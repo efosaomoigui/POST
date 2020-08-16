@@ -18,6 +18,7 @@ using GIGLS.Core.Domain.Devices;
 using GIGLS.Core.Domain.BankSettlement;
 using GIGLS.Core.Domain.SLA;
 using GIGLS.Core.Domain.Expenses;
+using GIGLS.Core.Domain.Route;
 
 namespace GIGLS.Infrastructure.Persistence
 {
@@ -279,6 +280,9 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<MobileGroupCodeWaybillMapping> MobileGroupCodeWaybillMapping { get; set; }
         public DbSet<PartnerPayout> PartnerPayout { get; set; }
         public DbSet<EcommerceAgreement> EcommerceAgreement { get; set; }
+
+        //routes
+        public DbSet<Route> Routes { get; }
 
 
         #endregion
