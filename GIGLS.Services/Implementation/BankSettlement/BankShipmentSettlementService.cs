@@ -340,7 +340,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     {
                         codTotal += item.CODAmount;
                     }
-                    throw new GenericException("ion");
+                    //throw new GenericException("ion");
                     bkoc.TotalAmount = codTotal.Value;
                     bankordercodes = Mapper.Map<BankProcessingOrderCodes>(bkoc);
                     nonDepsitedValueunprocessed.ForEach(a => a.DepositStatus = DepositStatus.Pending);
