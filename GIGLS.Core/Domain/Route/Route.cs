@@ -18,9 +18,9 @@ namespace GIGLS.Core.Domain.Route
 
         public ServiceCentre DepartureCenter { get; set; }
 
-        public int ArrivalCentreId { get; set; }
+        public int DestinationCentreId { get; set; }
 
-        public ServiceCentre ArrivalCenter { get; set; }
+        public ServiceCentre DestinationCenter { get; set; }
 
         public bool IsSubRoute { get; set; }
 

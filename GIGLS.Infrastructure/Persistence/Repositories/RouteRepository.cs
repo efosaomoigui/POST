@@ -21,23 +21,33 @@ namespace GIGLS.Infrastructure.Persistence.Repositories
             _context = context;
         }
 
-        public Task<PagedList<RouteDto>> GetPagedAsync(int page, int size)
+        public Task<PagedList<RouteDto>> GetPagedAsync(int page, int size, string keyword)
         {
             var subroutes = _context.Routes.AsQueryable();
             var mainroutes = _context.Routes.AsQueryable();
 
+            var departCenters = _context.ServiceCentre.AsQueryable();
+            var destCenters = _context.ServiceCentre.AsQueryable();
 
             var routes = from subRoute in subroutes
-                         join mainRoute in mainroutes
 
-                         on subRoute.MainRouteId equals mainRoute.RouteId
+                         join departCenter in departCenters
+                         on subRoute.DepartureCentreId equals departCenter.StationId
+
+                         join destCenter in destCenters
+                         on subRoute.DestinationCentreId equals destCenter.StationId
+
+                         join mainRoute in mainroutes
+                         on subRoute.MainRouteId equals mainRoute.RouteId into mainRouteGrp
+                         from mainRt in mainRouteGrp.DefaultIfEmpty()
 
                          select new RouteDto
                          {
-
+                             RouteId = subRoute.RouteId,
+                             DepartureTerminalTitle =  destCenter.Name,
                          };
 
-            return routes.ToUpdatedPagedListAsync(page, size);
+            return routes.ToPagedListAsync(page, size);
 
 
         }

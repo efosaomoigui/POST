@@ -12,6 +12,6 @@ namespace GIGLS.Core.IRepositories.Routes
 {
     public interface IRouteRepository : IRepository<Domain.Route.Route>
     {
-        Task<PagedList<RouteDto>> GetPagedAsync(int page, int size);
+        Task<PagedList<RouteDto>> GetPagedAsync(int page, int size, string keyword);
     }
 }
