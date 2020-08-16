@@ -242,7 +242,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 bkoc.UserId = bkoc.UserId;
                 //bkoc.FullName = user.FirstName + " " + user.LastName;
                 bkoc.FullName = "Task" + " Scheduler";
-
                 var userActiveCountryId = 1; //76
 
                 //3. Get Bank Deposit Module StartDate
@@ -251,7 +250,6 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 var globalpropertiesdate = DateTime.MinValue;
                 bool success = DateTime.TryParse(globalpropertiesdateStr, out globalpropertiesdate);
-
                 var bankordercodes = new BankProcessingOrderCodes();
 
                 //4. updating the startdate
@@ -259,19 +257,14 @@ namespace GIGLS.Services.Implementation.Wallet
 
                 //5. commence preparatiion to insert records in the BankProcessingOrderForShipmentAndCOD
                 var enddate = bkoc.DateAndTimeOfDeposit;
-                var allprocessingordeforshipment = _uow.BankProcessingOrderForShipmentAndCOD.GetAll().Where(s => s.DepositType == bkoc.DepositType && s.ServiceCenterId == bkoc.ServiceCenter);
-
                 if (bkoc.DepositType == DepositType.Shipment)
                 {
                     //all shipments from payload JSON
                     var allShipmentsVals = bkoc.ShipmentAndCOD;
-                    decimal totalShipment = 0;
-
                     var result = allShipmentsVals.Select(s => s.Waybill);// new InvoiceViewDTO()
-                    foreach (var item in allShipmentsVals)
-                    {
-                        totalShipment += item.GrandTotal;
-                    }
+
+                    //--------------------------Validation Section -------------------------------------------//
+                    var allprocessingordeforshipment = _uow.BankProcessingOrderForShipmentAndCOD.GetAll().Where(s => s.DepositType == bkoc.DepositType && result.Contains(s.Waybill));
 
                     //var validateInsertWaybills = false;
                     if (allprocessingordeforshipment.Any())
@@ -293,10 +286,10 @@ namespace GIGLS.Services.Implementation.Wallet
                         Status = DepositStatus.Pending
                     });
 
+                    //throw new GenericException("ion");
                     var arrWaybills = allShipmentsVals.Select(x => x.Waybill).ToArray();
-
                     bankordercodes = Mapper.Map<BankProcessingOrderCodes>(bkoc);
-                    bankordercodes.TotalAmount = totalShipment;
+                    bankordercodes.TotalAmount = bkoc.TotalAmount; 
                     _uow.BankProcessingOrderCodes.Add(bankordercodes);
                     _uow.BankProcessingOrderForShipmentAndCOD.AddRange(bankorderforshipmentandcod);
 
@@ -309,14 +302,19 @@ namespace GIGLS.Services.Implementation.Wallet
                 else if (bkoc.DepositType == DepositType.COD)
                 {
 
-                    var allprocessingordeforcods = _uow.BankProcessingOrderForShipmentAndCOD.GetAll().Where(s => s.DepositType == bkoc.DepositType);
+                    var allprocessingordeforshipment = bkoc.ShipmentAndCOD;
+
+                    var result = allprocessingordeforshipment.Select(s => s.Waybill);
+
+                    //--------------------------Validation Section -------------------------------------------//
+                    var allprocessingordeforcods = _uow.BankProcessingOrderForShipmentAndCOD.GetAll().Where(s => s.DepositType == bkoc.DepositType && result.Contains(s.Waybill));
                     if (allprocessingordeforcods.Any())
                     {
                         throw new GenericException("Error validating one or more CODs, Please try requesting again for a fresh record.");
                     }
 
                     //--------------------------Validation Section -------------------------------------------//
-                    var bankorderforshipmentandcod = allprocessingordeforshipment.Select(s => new BankProcessingOrderForShipmentAndCOD()
+                    var bankorderforshipmentandcod = allprocessingordeforcods.Select(s => new BankProcessingOrderForShipmentAndCOD()
                     {
                         Waybill = s.Waybill,
                         RefCode = bkoc.Code,
@@ -340,9 +338,9 @@ namespace GIGLS.Services.Implementation.Wallet
                     decimal?  codTotal = 0;
                     foreach (var item in allprocessingordeforshipment)
                     {
-                        codTotal += item.CODAmount.Value;
+                        codTotal += item.CODAmount;
                     }
-
+                    throw new GenericException("ion");
                     bkoc.TotalAmount = codTotal.Value;
                     bankordercodes = Mapper.Map<BankProcessingOrderCodes>(bkoc);
                     nonDepsitedValueunprocessed.ForEach(a => a.DepositStatus = DepositStatus.Pending);
