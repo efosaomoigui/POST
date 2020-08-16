@@ -48,7 +48,7 @@ namespace GIGLS.WebApi.Controllers.Routes
             return await HandleApiOperationAsync(async () =>
             {
                 if (!ModelState.IsValid)
-                    return new ServiceResponse<CreateRouteDto>();
+                    throw new Exception(ModelState.Values.FirstOrDefault().Errors.Select(p => p.ErrorMessage).FirstOrDefault());
 
                 var routes = await _routeService.AddRoute(model);
 
