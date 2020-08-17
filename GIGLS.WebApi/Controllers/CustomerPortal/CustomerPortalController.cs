@@ -1144,7 +1144,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         {
             return await HandleApiOperationAsync(async () =>
             {
-                var wallet = await _portalService.GetWalletBalance();
+                var wallet = await _portalService.GetWalletBalanceWithName();
                 return new ServiceResponse<WalletDTO>
                 {
                     Object = wallet
