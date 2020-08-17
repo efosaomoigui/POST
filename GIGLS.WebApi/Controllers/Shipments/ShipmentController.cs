@@ -328,6 +328,23 @@ namespace GIGLS.WebApi.Controllers.Shipments
             });
         }
 
+        //super manifest
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("unmappedmanifestlistforservicecentre")]
+        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestListForServiceCentre()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var unmappedManifest = await _service.GetUnmappedManifestListForServiceCentre();
+                return new ServiceResponse<IEnumerable<ManifestDTO>>
+                {
+                    Object = unmappedManifest,
+                    Total = unmappedManifest.Count
+                };
+            });
+        }
+
         [GIGLSActivityAuthorize(Activity = "View")]
         [HttpGet]
         [Route("unmappedmanifestservicecentre")]

@@ -9,5 +9,6 @@ namespace GIGLS.Core.IRepositories.Shipments
     public interface IManifestRepository : IRepository<Manifest>
     {
         Task<List<ManifestDTO>> GetManifests();
+        Task<List<ManifestDTO>> GetManifest(List<Manifest> manifests);
     }
 }

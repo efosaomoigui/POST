@@ -69,11 +69,12 @@ namespace GIGLS.Services.Implementation.Fleets
                 }
                 else 
                 {
-                    if (dispatchDTO.ManifestType != ManifestType.Pickup)
+                    if (dispatchDTO.ManifestType != ManifestType.Pickup && !dispatchDTO.IsSuperManifest)
                     {
                         //Verify that all waybills are not cancelled and scan all the waybills in case none was cancelled
                         var ret2 = await VerifyWaybillsInGroupWaybillInManifest(dispatchDTO.ManifestNumber, currentUserId, userServiceCentreId);
                     }
+                    
                 }
 
                 var dispatchObj = _uow.Dispatch.SingleOrDefault(s => s.ManifestNumber == dispatchDTO.ManifestNumber);
@@ -96,8 +97,20 @@ namespace GIGLS.Services.Implementation.Fleets
                     dispatchId = newDispatch.DispatchId;
                 }
 
+                Manifest manifestObj = null;
+                List<Manifest> manifestObjs = null;
                 // update manifest
-                var manifestObj = _uow.Manifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
+
+                if (dispatchDTO.IsSuperManifest)
+                {
+                    manifestObjs =  _uow.Manifest.GetAllAsQueryable().Where(s => s.SuperManifestCode == dispatchDTO.ManifestNumber).ToList();
+                }
+                else
+                {
+                    manifestObj = _uow.Manifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
+                }
+               
+                
                 if (manifestObj == null)
                 {
                     var pickupManifestObj = _uow.PickupManifest.SingleOrDefault(s => s.ManifestCode == dispatchDTO.ManifestNumber);
@@ -116,7 +129,54 @@ namespace GIGLS.Services.Implementation.Fleets
                     manifestEntity.DispatchedById = currentUserId;
                     manifestEntity.IsDispatched = true;
                     manifestEntity.ManifestType = dispatchDTO.ManifestType;
+
+                    if (dispatchDTO.IsSuperManifest)
+                    {
+                        manifestEntity.SuperManifestStatus = SuperManifestStatus.Dispatched;
+                    }
                 }
+
+                List<Dispatch> data = new List<Dispatch>();
+                
+                if (dispatchDTO.IsSuperManifest)
+                {
+                    foreach (var manifest in manifestObjs)
+                    {
+                        var ret2 = await VerifyWaybillsInGroupWaybillInManifest(manifest.ManifestCode, currentUserId, userServiceCentreId);
+                    }
+                }
+
+                //Update for manifest not dispatched in super manifest list 
+                foreach (var manifest in manifestObjs)
+                {
+                    var manifestdispatchObj = _uow.Dispatch.SingleOrDefault(s => s.ManifestNumber == manifest.ManifestCode);
+                    if(manifestdispatchObj == null)
+                    {
+                        // create dispatch
+                        var newDispatch = Mapper.Map<Dispatch>(dispatchDTO);
+                        newDispatch.ManifestNumber = manifest.ManifestCode;
+                        newDispatch.DispatchedBy = currentUserDetail.FirstName + " " + currentUserDetail.LastName;
+                        newDispatch.ServiceCentreId = userServiceCentreId;
+                        newDispatch.DepartureServiceCenterId = dispatchDTO.DepartureServiceCenterId;
+                        newDispatch.DestinationServiceCenterId = dispatchDTO.DestinationServiceCenterId;
+                        data.Add(newDispatch);
+                        //_uow.Dispatch.Add(newDispatch);
+                    }
+                }
+                _uow.Dispatch.AddRange(data);
+
+                //Update for Super Manifest
+                if (manifestObjs != null)
+                {
+                    manifestObjs.ForEach(x => x.DispatchedById = currentUserId);
+                    manifestObjs.ForEach(x => x.IsDispatched = true);
+                    manifestObjs.ForEach(x => x.ManifestType = dispatchDTO.ManifestType);
+                    manifestObjs.ForEach(x => x.SuperManifestStatus = SuperManifestStatus.Dispatched);
+                    manifestObjs.ForEach(x => x.DestinationServiceCentreId = dispatchDTO.DestinationServiceCenterId);
+                    
+                }
+                
+
 
                 ////--start--///Set the DepartureCountryId
                 int countryIdFromServiceCentreId = 0;
@@ -357,12 +417,19 @@ namespace GIGLS.Services.Implementation.Fleets
 
                 //get the ManifestType
                 var manifestObj = await _uow.Manifest.GetAsync(x => x.ManifestCode.Equals(manifest));
-                if (manifestObj == null)
+                if (manifestObj == null && !dispatch.IsSuperManifest)
                 {
                     var pickupManifestObject = await _uow.PickupManifest.GetAsync(x => x.ManifestCode.Equals(manifest));
                     dispatchDTO.ManifestType = pickupManifestObject.ManifestType;
                 }
-                else
+                else if (dispatch.IsSuperManifest)
+                {
+                    var manifestObjs = await _uow.Manifest.FindAsync(x => x.SuperManifestCode.Equals(manifest));
+                    manifestObj = manifestObjs.FirstOrDefault();
+                    dispatchDTO.ManifestType = manifestObj.ManifestType;
+
+                }
+                else 
                 {
                     dispatchDTO.ManifestType = manifestObj.ManifestType;
                 }

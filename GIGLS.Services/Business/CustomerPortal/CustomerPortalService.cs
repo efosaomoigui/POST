@@ -478,8 +478,15 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<List<ServiceCentreDTO>> GetLocalServiceCentres()
         {
-            var customerCountryId = await _userService.GetUserActiveCountry();
-            int[] countryIds = new int[] { customerCountryId.CountryId };
+            var userId = await _userService.GetCurrentUserId();
+            var user = await _userService.GetUserById(userId);
+
+            if (user.UserActiveCountryId == 0)
+            {
+                user.UserActiveCountryId = 1;
+            }
+
+            int[] countryIds = new int[] { user.UserActiveCountryId };
             return await _uow.ServiceCentre.GetLocalServiceCentres(countryIds);
         }
 
@@ -785,17 +792,23 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             var ecommerceEmail = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceEmail, 1);
 
+            //seperate email by comma and send message to those email
+            string[] ecommerceEmails = ecommerceEmail.Value.Split(',').ToArray();
+
             //customer email, customer phone, receiver email
             EcommerceMessageDTO email = new EcommerceMessageDTO
             {
                 CustomerEmail = user.Email,
                 CustomerPhoneNumber = user.PhoneNumber,
                 CustomerCompanyName = user.Organisation,
-                EcommerceEmail = ecommerceEmail.Value,
                 BusinessNature = user.BusinessNature
             };
 
-            await _messageSenderService.SendGenericEmailMessage(MessageType.ENM, email);
+            foreach (string data in ecommerceEmails)
+            {
+                email.EcommerceEmail = data;
+                await _messageSenderService.SendGenericEmailMessage(MessageType.ENM, email);
+            }
 
             //4. return registration message to the customer
             var message = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.RegistrationMessage, 1);
@@ -1061,7 +1074,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                     {
                         if (emailcustomerdetails.IsRegisteredFromMobile == true)
                         {
-                            throw new GenericException("Customer aready exists!", $"{(int)HttpStatusCode.Forbidden}");
+                            throw new GenericException("Customer already exists!", $"{(int)HttpStatusCode.Forbidden}");
                         }
                         else
                         {
@@ -1493,6 +1506,10 @@ namespace GIGLS.Services.Business.CustomerPortal
                     }
                     emailPhone = user;
                 }
+                else
+                {
+                    emailPhone = user;
+                }
             }
 
             return await _otpService.CheckDetails(emailPhone, userchanneltype);
@@ -1717,10 +1734,10 @@ namespace GIGLS.Services.Business.CustomerPortal
 
         public async Task<MobilePriceDTO> GetPrice(PreShipmentMobileDTO preShipment)
         {
-            if (string.IsNullOrEmpty(preShipment.VehicleType))
-            {
-                throw new GenericException($"Please select a vehicle type", $"{(int)HttpStatusCode.Forbidden}");
-            }
+            //if (string.IsNullOrEmpty(preShipment.VehicleType))
+            //{
+            //    throw new GenericException($"Please select a vehicle type", $"{(int)HttpStatusCode.Forbidden}");
+            //}
 
             if (!preShipment.PreShipmentItems.Any())
             {
@@ -1729,6 +1746,11 @@ namespace GIGLS.Services.Business.CustomerPortal
 
             var zoneid = await _domesticroutezonemapservice.GetZoneMobile(preShipment.SenderStationId, preShipment.ReceiverStationId);
             preShipment.ZoneMapping = zoneid.ZoneId;
+
+            if (string.IsNullOrEmpty(preShipment.VehicleType))
+            {
+                return await _preShipmentMobileService.GetPrice(preShipment);
+            }
 
             if (preShipment.VehicleType.ToLower() == Vehicletype.Bike.ToString().ToLower() && preShipment.ZoneMapping == 1
                 && preShipment.SenderLocation.Latitude != null && preShipment.SenderLocation.Longitude != null 
