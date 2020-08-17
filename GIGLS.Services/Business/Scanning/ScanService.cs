@@ -967,7 +967,7 @@ namespace GIGLS.Services.Business.Scanning
             manifest.DepartureServiceCentreId = currentUserSercentreId;
             manifest.DestinationServiceCentreId = dispatch.DestinationServiceCenterId;
             manifest.SuperManifestStatus = SuperManifestStatus.ArrivedScan;
-            manifest.IsDispatched = false;
+           // manifest.IsDispatched = false;
             manifest.DispatchedById = null;
             manifest.HasSuperManifest = false;
 
@@ -988,7 +988,7 @@ namespace GIGLS.Services.Business.Scanning
             //{
                 manifests.ForEach(x => x.DepartureServiceCentreId = currentUserSercentreId);
                 manifests.ForEach(x => x.SuperManifestStatus = SuperManifestStatus.ArrivedScan);
-                manifests.ForEach(x => x.IsDispatched = false);
+                //manifests.ForEach(x => x.IsDispatched = false);
                 manifests.ForEach(x => x.DispatchedById = null);
                 manifests.ForEach(x => x.HasSuperManifest = false);
 

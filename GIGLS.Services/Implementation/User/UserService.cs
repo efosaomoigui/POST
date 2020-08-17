@@ -1472,7 +1472,6 @@ namespace GIGLS.Services.Implementation.User
             return Mapper.Map<UserDTO>(user);
         }
 
-
         public async Task<UserDTO> GetActivatedUserByEmail(string email, bool isActive)
         {
             var user = await _unitOfWork.User.ActivateUserByEmail(email, isActive);
