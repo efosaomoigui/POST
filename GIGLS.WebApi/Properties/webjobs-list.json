@@ -3,9 +3,10 @@
   "WebJobs": [
     {
       "filePath": "../BankDeposit/BankDeposit.csproj"
-    },
-    {
-      "filePath": "../Jobs.AutomatedBankSettlement/Jobs.AutomatedBankSettlement.csproj"
     }
+    //,
+    //{
+    //  "filePath": "../Jobs.AutomatedBankSettlement/Jobs.AutomatedBankSettlement.csproj"
+    //}
   ]
 }
