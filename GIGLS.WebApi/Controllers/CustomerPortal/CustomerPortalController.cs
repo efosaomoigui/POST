@@ -69,20 +69,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
-        [HttpPut]
-        [Route("wallet/{walletId:int}")]
-        public async Task<IServiceResponse<object>> UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _portalService.UpdateWallet(walletId, walletTransactionDTO);
-                return new ServiceResponse<object>
-                {
-                    Object = true
-                };
-            });
-        }
-
 
         [HttpPost]
         [Route("addwalletpaymentlog")]
@@ -100,36 +86,65 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
 
-        [HttpPost]
-        [Route("paywithpaystack")]
-        public async Task<IServiceResponse<object>> PaywithPaystack(WalletPaymentLogDTO paymentinfo)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
+        //[HttpPut]
+        //[Route("wallet/{walletId:int}")]
+        //public async Task<IServiceResponse<object>> UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        await _portalService.UpdateWallet(walletId, walletTransactionDTO);
+        //        return new ServiceResponse<object>
+        //        {
+        //            Object = true
+        //        };
+        //    });
+        //}
 
-                //Add wallet payment log
-                var walletPaymentLog = await _portalService.AddWalletPaymentLog(paymentinfo);
+        //[HttpPost]
+        //[Route("paywithpaystack")]
+        //public async Task<IServiceResponse<object>> PaywithPaystack(WalletPaymentLogDTO paymentinfo)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
 
-                //initialize the secret key from paystack
-                var testOrLiveSecret = ConfigurationManager.AppSettings["PayStackSecret"];
+        //        //Add wallet payment log
+        //        var walletPaymentLog = await _portalService.AddWalletPaymentLog(paymentinfo);
 
-                //Call the paystack class implementation to do the payment
-                var result = await _paymentService.MakePayment(testOrLiveSecret, paymentinfo);
-                var updateresult = new object();
+        //        //initialize the secret key from paystack
+        //        var testOrLiveSecret = ConfigurationManager.AppSettings["PayStackSecret"];
 
-                if (result)
-                {
-                    paymentinfo.TransactionStatus = "Success";
-                    updateresult = await _portalService.UpdateWalletPaymentLog(paymentinfo);
-                }
+        //        //Call the paystack class implementation to do the payment
+        //        var result = await _paymentService.MakePayment(testOrLiveSecret, paymentinfo);
+        //        var updateresult = new object();
 
-                return new ServiceResponse<object>
-                {
-                    Object = updateresult
-                };
-            });
-        }
+        //        if (result)
+        //        {
+        //            paymentinfo.TransactionStatus = "Success";
+        //            updateresult = await _portalService.UpdateWalletPaymentLog(paymentinfo);
+        //        }
 
+        //        return new ServiceResponse<object>
+        //        {
+        //            Object = updateresult
+        //        };
+        //    });
+        //}
+
+
+        //[HttpPut]
+        //[Route("updatewalletpaymentlog")]
+        //public async Task<IServiceResponse<object>> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var walletPaymentLog = await _portalService.UpdateWalletPaymentLog(walletPaymentLogDTO);
+
+        //        return new ServiceResponse<object>
+        //        {
+        //            Object = walletPaymentLog
+        //        };
+        //    });
+        //}
 
         [HttpGet]
         [Route("verifypayment/{referenceCode}")]
@@ -160,22 +175,6 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-
-        [HttpPut]
-        [Route("updatewalletpaymentlog")]
-        public async Task<IServiceResponse<object>> UpdateWalletPaymentLog(WalletPaymentLogDTO walletPaymentLogDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var walletPaymentLog = await _portalService.UpdateWalletPaymentLog(walletPaymentLogDTO);
-
-                return new ServiceResponse<object>
-                {
-                    Object = walletPaymentLog
-                };
-            });
-        }
-
 
         [HttpGet]
         [Route("wallet")]
