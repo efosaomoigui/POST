@@ -42,13 +42,14 @@ namespace Jobs.AutomatedBankSettlement
                     var o3 = ApiCaller.callVoidAPI("GET", urlString3, Console.Out);  
                     count++;
                 }
+
+                Console.WriteLine("Web Job Completed");
+
             }
             catch (Exception ex)
             {
                 throw new Exception("Error calling your.0 api: " + ex.ToString());
             }
-
-            Console.ReadLine();
         }
     }
 }
