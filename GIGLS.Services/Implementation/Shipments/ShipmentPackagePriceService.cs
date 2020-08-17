@@ -118,9 +118,26 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Shipment Package does not exist");
                 }
 
-                shipmentPackagePrice.Balance += shipmentPackagePriceDto.QuantityToBeAdded;
-               
-                _uow.Complete();
+                var user = await _userService.GetCurrentUserId();
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                var currentServiceCenterId = serviceCenterIds[0];
+
+                //shipmentPackagePrice.Balance += shipmentPackagePriceDto.QuantityToBeAdded;
+                shipmentPackagePrice.InventoryReceived += shipmentPackagePriceDto.QuantityToBeAdded;
+                shipmentPackagePrice.InventoryOnHand += shipmentPackagePriceDto.QuantityToBeAdded;
+
+                var newInflow = new ShipmentPackageInflow
+                {
+                    ShipmentPackageId = shipmentPackagePrice.ShipmentPackagePriceId,
+                    NumberRecieved = shipmentPackagePriceDto.QuantityToBeAdded,
+                    StoreKeeperId = user,
+                    StoreCenterId = currentServiceCenterId
+                };
+
+                _uow.ShipmentPackageInflow.Add(newInflow);
+                await _uow.CompleteAsync();
+
+              
             }
             catch (Exception)
             {
@@ -138,13 +155,18 @@ namespace GIGLS.Services.Implementation.Shipments
                 {
                     throw new GenericException("Package information already exists");
                 }
-               
+
                 var newshipmentPackagePrice = new ShipmentPackagePrice
                 {
                     Description = shipmentPackagePriceDto.Description.ToUpper(),
-                    Balance = shipmentPackagePriceDto.Balance,
+                    //Balance = shipmentPackagePriceDto.Balance,
                     CountryId = shipmentPackagePriceDto.CountryId,
+                    StartingInventory = shipmentPackagePriceDto.Balance,
+                    InventoryOnHand = shipmentPackagePriceDto.Balance,
+                    InventoryReceived = shipmentPackagePriceDto.Balance,
+                    MinimunRequired = shipmentPackagePriceDto.MinimunRequired,
                 };
+
 
                 _uow.ShipmentPackagePrice.Add(newshipmentPackagePrice);
                 await _uow.CompleteAsync();

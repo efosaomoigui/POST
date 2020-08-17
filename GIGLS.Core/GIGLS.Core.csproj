@@ -214,6 +214,8 @@
     <Compile Include="Domain\PreShipmentItem.cs" />
     <Compile Include="Domain\ShipmentHash.cs" />
     <Compile Include="Domain\MagayaShipmentItem.cs" />
+    <Compile Include="Domain\ShipmentPackageInflow.cs" />
+    <Compile Include="Domain\ShipmentPackageOutflow.cs" />
     <Compile Include="Domain\ShipmentPackagePrice.cs" />
     <Compile Include="Domain\PackingList .cs" />
     <Compile Include="Domain\IndividualCustomer.cs" />
@@ -672,6 +674,8 @@
     <Compile Include="IRepositories\Stocks\IStockRequestPartRepository.cs" />
     <Compile Include="IRepositories\Stocks\IStockRequestRepository.cs" />
     <Compile Include="IRepositories\Stocks\IStockSupplyDetailsRepository.cs" />
+    <Compile Include="IRepositories\Stores\IShipmentPackageInflowRepository.cs" />
+    <Compile Include="IRepositories\Stores\IShipmentPackageOutflowRepository.cs" />
     <Compile Include="IRepositories\Stores\IStoreRepository.cs" />
     <Compile Include="IRepositories\User\IUserRepository.cs" />
     <Compile Include="IRepositories\Utility\IGlobalPropertyRepository.cs" />

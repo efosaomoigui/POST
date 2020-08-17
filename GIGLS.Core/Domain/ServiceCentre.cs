@@ -41,5 +41,10 @@ namespace GIGL.GIGLS.Core.Domain
         public double? Longitude { get; set; }
 
         public bool IsHUB { get; set; }
+        public int StartingInventory { get; set; }
+        public int InventoryReceived { get; set; }
+        public int InventoryUsed { get; set; }
+        public int InventoryOnHand { get; set; }
+        public int MinimunRequired { get; set; }
     }
 }

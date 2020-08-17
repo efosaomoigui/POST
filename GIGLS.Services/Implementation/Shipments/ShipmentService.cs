@@ -961,19 +961,41 @@ namespace GIGLS.Services.Implementation.Shipments
         //Update Shipment Package
         private async Task UpdateShipmentPackage(ShipmentDTO newShipment)
         {
+            var user = await _userService.GetCurrentUserId();
+            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            var currentServiceCenterId = serviceCenterIds[0];
+
+            List<ShipmentPackageOutflow> packageOutflow = new List<ShipmentPackageOutflow>();
+
             foreach (var shipmentItem in newShipment.ShipmentItems)
             {
                 if (shipmentItem.ShipmentType == ShipmentType.Store)
                 {
                     var shipmentPackage = await _uow.ShipmentPackagePrice.GetAsync(x => x.Description == shipmentItem.Description);
-                    if (shipmentPackage.Balance < shipmentItem.Quantity)
+                    if (shipmentPackage.InventoryOnHand < shipmentItem.Quantity)
                     {
-                        throw new GenericException($"The quantity {shipmentItem.Quantity} being dispatched is more than the available stock .  {shipmentPackage.Description} has {shipmentPackage.Balance} currently in store", $"{(int)HttpStatusCode.Forbidden}");
+                        throw new GenericException($"The quantity {shipmentItem.Quantity} being dispatched is more than the available stock .  {shipmentPackage.Description} has {shipmentPackage.InventoryOnHand} currently in store", $"{(int)HttpStatusCode.Forbidden}");
                     }
-                    shipmentPackage.Balance -= shipmentItem.Quantity;
+                    shipmentPackage.InventoryOnHand -= shipmentItem.Quantity;
+                    shipmentPackage.InventoryShipped += shipmentItem.Quantity;
+
+
+                    var newOutflow = new ShipmentPackageOutflow
+                    {
+                        ServiceCenterId = newShipment.DestinationServiceCentreId,
+                        ShipmentPackageId = shipmentPackage.ShipmentPackagePriceId,
+                        NumberShipped = shipmentItem.Quantity,
+                        StoreCenterId = currentServiceCenterId,
+                        StoreKeeperId = user
+                    };
+                    packageOutflow.Add(newOutflow);
                 }
 
             }
+
+            _uow.ShipmentPackageOutflow.AddRange(packageOutflow);
+            //_uow.ShipmentPackageInflow.Add(newInflow);
+            //await _uow.CompleteAsync();
 
             await _uow.CompleteAsync();
         }
