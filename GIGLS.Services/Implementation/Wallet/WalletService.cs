@@ -479,7 +479,7 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             var walletDTO = Mapper.Map<WalletDTO>(wallet);
-            walletDTO.CustomerName = user.FirstName + " " + user.LastName;
+            walletDTO.WalletOwnerName = user.FirstName + " " + user.LastName;
             walletDTO.UserActiveCountryId = user.UserActiveCountryId;
             return walletDTO;
         }
