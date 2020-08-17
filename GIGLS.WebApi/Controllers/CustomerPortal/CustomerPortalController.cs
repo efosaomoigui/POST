@@ -1139,6 +1139,20 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         [HttpGet]
+        [Route("getwalletdetails")]
+        public async Task<IServiceResponse<WalletDTO>> GetWalletDetails()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var wallet = await _portalService.GetWalletBalance();
+                return new ServiceResponse<WalletDTO>
+                {
+                    Object = wallet
+                };
+            });
+        }
+
+        [HttpGet]
         [Route("getspecialpackages")]
         public async Task<IServiceResponse<SpecialResultDTO>> GetSpecialPackages()
         {
