@@ -53,7 +53,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             _portalService = portalService;
             _paymentService = paymentService;
         }
-        
+
         [HttpPost]
         [Route("transaction")]
         public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentCollectionFilterCriteria f_Criteria)
@@ -148,7 +148,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("walletpaymentlog")]
-        public async Task<IServiceResponse<List<WalletPaymentLogDTO>>> GetWalletPaymentLogs([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<List<WalletPaymentLogDTO>>> GetWalletPaymentLogs([FromUri] FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -209,7 +209,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("bywaybill/{waybill}")]
-        public async Task<IServiceResponse<InvoiceDTO>> GetInvoiceByWaybill([FromUri]  string waybill)
+        public async Task<IServiceResponse<InvoiceDTO>> GetInvoiceByWaybill([FromUri] string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -773,7 +773,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return await HandleApiOperationAsync(async () =>
             {
                 var user = await _portalService.CheckDetails(logindetail.UserDetail, logindetail.UserChannelType);
-                
+
                 if (user.RequiresCod == null)
                     user.RequiresCod = false;
 
@@ -838,7 +838,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             {
                                 var response = await _portalService.CreateCustomer(user.UserChannelCode);
                             }
-                            
+
                             if (logindetail.UserChannelType == UserChannelType.Partner.ToString())
                             {
                                 var partner = await _portalService.CreatePartner(user.UserChannelCode);
@@ -877,7 +877,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                                 AverageRatings = user.AverageRatings,
                                 IsVerified = user.IsVerified,
                                 PartnerType = partnerType,
-                                IsEligible = (bool) user.IsEligible,
+                                IsEligible = (bool)user.IsEligible,
                                 BankName = bankName,
                                 AccountName = accountName,
                                 AccountNumber = accountNumber
@@ -1137,7 +1137,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
+        [HttpGet]
+        [Route("getwalletdetails")]
+        public async Task<IServiceResponse<WalletDTO>> GetWalletDetails()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var wallet = await _portalService.GetWalletBalanceWithName();
+                return new ServiceResponse<WalletDTO>
+                {
+                    Object = wallet
+                };
+            });
+        }
+
         [HttpGet]
         [Route("getspecialpackages")]
         public async Task<IServiceResponse<SpecialResultDTO>> GetSpecialPackages()
@@ -1318,7 +1332,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpGet]
         [Route("getpreshipmentindispute")]
         public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetPreshipmentInDispute()
@@ -1423,7 +1437,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpPost]
         [Route("adddeliverynumber")]
         public async Task<IServiceResponse<bool>> UpdateDeliveryNumber(MobileShipmentNumberDTO detail)
@@ -1562,7 +1576,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpGet]
         [Route("getpreshipmentmobiledetailsfromdeliverynumber/{deliverynumber}")]
         public async Task<IServiceResponse<PreShipmentSummaryDTO>> GetPreshipmentmobiledetailsfromdeliverynumber(string deliverynumber)
@@ -1576,7 +1590,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpPost]
         [Route("approveshipment")]
         public async Task<IServiceResponse<bool>> Approveshipment(ApproveShipmentDTO detail)
@@ -1590,7 +1604,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [AllowAnonymous]
         [HttpGet]
         [Route("getcountries")]
@@ -1720,7 +1734,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [AllowAnonymous]
         [HttpGet]
         [Route("getStations")]
@@ -1736,7 +1750,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpGet]
         [Route("getdeliverynumber/{deliverynumber}")]
         public async Task<IServiceResponse<List<DeliveryNumberDTO>>> GetAllDeliveryNumbers(int deliverynumber)
@@ -1780,14 +1794,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-                
+
         [HttpPost]
         [Route("updatepickupmanifeststatus")]
         public async Task<IServiceResponse<bool>> UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                 await _portalService.UpdatePickupManifestStatus(manifestStatusDTO);
+                await _portalService.UpdatePickupManifestStatus(manifestStatusDTO);
 
                 return new ServiceResponse<bool>
                 {

@@ -544,6 +544,7 @@
     <Compile Include="Enums\StockRequestDestinationType.cs" />
     <Compile Include="Enums\StockRequestSourceType.cs" />
     <Compile Include="Enums\StockRequestStatus.cs" />
+    <Compile Include="Enums\SuperManifestStatus.cs" />
     <Compile Include="Enums\TrackingType.cs" />
     <Compile Include="Enums\UserChannelType.cs" />
     <Compile Include="Enums\UserStatus.cs" />
@@ -804,6 +805,7 @@
     <Compile Include="IServices\Shipments\IPreShipmentService.cs" />
     <Compile Include="IServices\Shipments\IShipmentService.cs" />
     <Compile Include="IServices\Shipments\IShipmentTrackingService.cs" />
+    <Compile Include="IServices\Shipments\ISuperManifestService.cs" />
     <Compile Include="IServices\Shipments\ITransitWaybillNumberService.cs" />
     <Compile Include="IServices\Shipments\IWaybillNumberService.cs" />
     <Compile Include="IServices\Sla\ISLAService.cs" />

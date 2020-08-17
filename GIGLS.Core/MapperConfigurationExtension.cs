@@ -425,7 +425,7 @@ namespace GIGLS.Core
 
                 config.CreateMap<EcommerceAgreement, EcommerceAgreementDTO>();
                 config.CreateMap<EcommerceAgreementDTO, EcommerceAgreement>();
-               
+
             });
 
             isInit = true;

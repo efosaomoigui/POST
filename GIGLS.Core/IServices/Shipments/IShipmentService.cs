@@ -63,7 +63,7 @@ namespace GIGLS.Core.IServices.Shipments
         Task RemoveWaybillNumberFromGroupForCancelledShipment(string groupWaybillNumber, string waybillNumber);
         Task<PreShipmentDTO> GetTempShipment(string code);
         Task<ShipmentDTO> GetDropOffShipmentForProcessing(string code);
-
+        Task<List<ManifestDTO>> GetUnmappedManifestListForServiceCentre();
 
     }
 
