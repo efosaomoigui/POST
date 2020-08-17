@@ -495,6 +495,33 @@ namespace GIGLS.Services.Implementation.Wallet
             return walletDTO;
         }
 
+        public async Task<WalletDTO> GetWalletBalanceWithName()
+        {
+            var currentUser = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(currentUser);
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+
+            var walletDTO = Mapper.Map<WalletDTO>(wallet);
+
+            if (wallet.CompanyType == CustomerType.IndividualCustomer.ToString())
+            {
+                var customer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == wallet.CustomerCode);
+                walletDTO.WalletOwnerName = customer.FirstName + " " + customer.LastName;
+
+            }
+            else
+            {
+                var customer = await _uow.Company.GetAsync(x => x.CustomerCode == wallet.CustomerCode);
+                walletDTO.WalletOwnerName = customer.Name;
+            }
+            return walletDTO;
+        }
+
         public IQueryable<Core.Domain.Wallet.Wallet> GetWalletAsQueryableService()
         {
             var wallet = _uow.Wallet.GetAllAsQueryable();

@@ -1787,6 +1787,10 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             return await _walletService.GetWalletBalance();
         }
+        public async Task<WalletDTO> GetWalletBalanceWithName()
+        {
+            return await _walletService.GetWalletBalanceWithName();
+        }
         public async Task<SpecialResultDTO> GetSpecialPackages()
         {
             return await _preShipmentMobileService.GetSpecialPackages();
