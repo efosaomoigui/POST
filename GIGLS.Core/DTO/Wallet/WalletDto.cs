@@ -18,8 +18,6 @@ namespace GIGLS.Core.DTO.Wallet
         public string CustomerEmail { get; set; }
 
         public int UserActiveCountryId { get; set; }
-        public CountryDTO Country { get; set; }
-        public string WalletOwnerName { get; set; }
-        
+        public CountryDTO Country { get; set; }        
     }
 }

@@ -506,7 +506,6 @@ namespace GIGLS.Services.Implementation.Wallet
                 throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
             }
 
-
             var walletDTO = Mapper.Map<WalletDTO>(wallet);
             var country = await _uow.Country.GetAsync(x => x.CountryId == user.UserActiveCountryId);
             walletDTO.Country = Mapper.Map<CountryDTO>(country);
@@ -514,13 +513,12 @@ namespace GIGLS.Services.Implementation.Wallet
             if (wallet.CompanyType == CustomerType.IndividualCustomer.ToString())
             {
                 var customer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == wallet.CustomerCode);
-                walletDTO.WalletOwnerName = customer.FirstName + " " + customer.LastName;
-
+                walletDTO.CustomerName = customer.FirstName + " " + customer.LastName;
             }
             else
             {
                 var customer = await _uow.Company.GetAsync(x => x.CustomerCode == wallet.CustomerCode);
-                walletDTO.WalletOwnerName = customer.Name;
+                walletDTO.CustomerName = customer.Name;
             }
             return walletDTO;
         }
