@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using GIGLS.Core;
 using GIGLS.Core.Domain;
 using GIGLS.Core.DTO;
@@ -86,8 +87,14 @@ namespace GIGLS.Services.Implementation.Messaging
 
             try
             {
-                var emailMessages = await _messageService.GetEmailAsync();
-                messageDTO = emailMessages.FirstOrDefault(s => s.MessageType == messageType);
+                //var emailMessages = await _messageService.GetEmailAsync();
+                //messageDTO = emailMessages.FirstOrDefault(s => s.MessageType == messageType);
+
+                var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.Email && x.MessageType == messageType);
+                if (smsMessages != null)
+                {
+                    messageDTO = Mapper.Map<MessageDTO>(smsMessages);
+                }
 
                 if (messageDTO != null)
                 {
@@ -116,8 +123,11 @@ namespace GIGLS.Services.Implementation.Messaging
             try
             {
                 //Need optimisation
-                var smsMessages = await _messageService.GetSmsAsync();
-                messageDTO = smsMessages.FirstOrDefault(s => s.MessageType == messageType);
+                //var smsMessages = await _messageService.GetSmsAsync();
+                //messageDTO = smsMessages.FirstOrDefault(s => s.MessageType == messageType);
+
+                var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.SMS && x.MessageType == messageType);
+                messageDTO = Mapper.Map<MessageDTO>(smsMessages);
 
                 if (messageDTO != null)
                 {
@@ -233,14 +243,19 @@ namespace GIGLS.Services.Implementation.Messaging
                         if (messageDTO.EmailSmsType == EmailSmsType.SMS)
                         {
                             //sms
-                            var smsMessages = await _messageService.GetSmsAsync();
-                            homeDeliveryMessageDTO = smsMessages.FirstOrDefault(s => s.MessageType == MessageType.AHD);
+                            //var smsMessages = await _messageService.GetSmsAsync();
+                            //homeDeliveryMessageDTO = smsMessages.FirstOrDefault(s => s.MessageType == MessageType.AHD);
+
+                            var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.SMS && x.MessageType == MessageType.AHD);
+                            homeDeliveryMessageDTO = Mapper.Map<MessageDTO>(smsMessages);
                         }
                         else
                         {
                             //email
-                            var emailMessages = await _messageService.GetEmailAsync();
-                            homeDeliveryMessageDTO = emailMessages.FirstOrDefault(s => s.MessageType == MessageType.AHD);
+                            //var emailMessages = await _messageService.GetEmailAsync();
+                            //homeDeliveryMessageDTO = emailMessages.FirstOrDefault(s => s.MessageType == MessageType.AHD);
+                            var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.Email && x.MessageType == MessageType.AHD);
+                            homeDeliveryMessageDTO = Mapper.Map<MessageDTO>(smsMessages);
                         }
 
                         if (homeDeliveryMessageDTO != null)
@@ -256,14 +271,18 @@ namespace GIGLS.Services.Implementation.Messaging
                         if (messageDTO.EmailSmsType == EmailSmsType.SMS)
                         {
                             //sms
-                            var smsMessages = await _messageService.GetSmsAsync();
-                            homeDeliveryMessageDTO = smsMessages.FirstOrDefault(s => s.MessageType == MessageType.CRH);
+                            //var smsMessages = await _messageService.GetSmsAsync();
+                            //homeDeliveryMessageDTO = smsMessages.FirstOrDefault(s => s.MessageType == MessageType.CRH);
+                            var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.SMS && x.MessageType == MessageType.CRH);
+                            homeDeliveryMessageDTO = Mapper.Map<MessageDTO>(smsMessages);
                         }
                         else
                         {
                             //email
-                            var emailMessages = await _messageService.GetEmailAsync();
-                            homeDeliveryMessageDTO = emailMessages.FirstOrDefault(s => s.MessageType == MessageType.CRH);
+                            //var emailMessages = await _messageService.GetEmailAsync();
+                            //homeDeliveryMessageDTO = emailMessages.FirstOrDefault(s => s.MessageType == MessageType.CRH);
+                            var smsMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.Email && x.MessageType == MessageType.CRH);
+                            homeDeliveryMessageDTO = Mapper.Map<MessageDTO>(smsMessages);
                         }
 
                         if (homeDeliveryMessageDTO != null)
@@ -277,17 +296,17 @@ namespace GIGLS.Services.Implementation.Messaging
                     {
                         MessageDTO storeMessageDTO = null;
                         //email
-                        var emailMessages = await _messageService.GetEmailAsync();
-                        storeMessageDTO = emailMessages.FirstOrDefault(s => s.MessageType == MessageType.ARFS);
+                        //var emailMessages = await _messageService.GetEmailAsync();
+                        //storeMessageDTO = emailMessages.FirstOrDefault(s => s.MessageType == MessageType.ARFS);
+                        var emailMessages = await _uow.Message.GetAsync(x => x.EmailSmsType == EmailSmsType.Email && x.MessageType == MessageType.ARFS);
+                        storeMessageDTO = Mapper.Map<MessageDTO>(emailMessages);
 
                         if (storeMessageDTO != null)
                         {
                             var storeKeeper = customerObj.FirstName + " " + customerObj.LastName;
                             messageDTO.Body = storeMessageDTO.Body;
                             messageDTO.To = storeMessageDTO.To;
-                        }
-
-                        
+                        }                        
                     }
 
                     //B. decode url parameter
@@ -490,7 +509,6 @@ namespace GIGLS.Services.Implementation.Messaging
                      "WaybillNumber",
                      "Sender Phone Number",
                      "Group Code"
-
                  };
 
                 var mobileShipmentCreationMessage = (MobileShipmentCreationMessageDTO)obj;
@@ -554,6 +572,41 @@ namespace GIGLS.Services.Implementation.Messaging
 
                 //use to determine sms sender service to use
                 messageDTO.SMSSenderPlatform = mobileShipmentCreationMessage.SMSSenderPlatform;
+            }
+
+            if (obj is ShipmentCancelMessageDTO)
+            {
+                var strArray = new string[]
+                 {
+                     "Sender Name",
+                     "WaybillNumber",
+                     "Reason"
+                 };
+
+                var cancelShipment = (ShipmentCancelMessageDTO)obj;
+                //map the array
+                strArray[0] = cancelShipment.SenderName;
+                strArray[1] = cancelShipment.WaybillNumber;
+                strArray[2] = cancelShipment.Reason;
+                messageDTO.Waybill = cancelShipment.WaybillNumber;
+
+                //B. decode url parameter
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+
+                //C. populate the message subject
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
+
+                //populate the message template
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.To = cancelShipment.SenderPhoneNumber;
+                messageDTO.ToEmail = cancelShipment.SenderEmail;
+
+                //Set default country as Nigeria for GIG Go APP
+                //prepare message format base on country code
+                messageDTO.To = ReturnPhoneNumberBaseOnCountry(messageDTO.To, "+234");
+
+                //use to determine sms sender service to use
+                messageDTO.SMSSenderPlatform = cancelShipment.SMSSenderPlatform;
             }
 
             return await Task.FromResult(true);
@@ -883,6 +936,29 @@ namespace GIGLS.Services.Implementation.Messaging
                 messageDTO.ToEmail = emailMessageDTO.EcommerceEmail;
             }
 
+            //4. obj is BankDepositMessageDTO
+            if (obj is BankDepositMessageDTO)
+            {
+                var strArray = new string[]
+                {
+                    "DepositorName",
+                    "ServiceCenter",
+                    "TotalAmount",
+                    "AmountInputted"
+                };
+                var bankDepositMessageDTO = (BankDepositMessageDTO)obj;
+
+                strArray[0] = bankDepositMessageDTO.DepositorName;
+                strArray[1] = bankDepositMessageDTO.ServiceCenter;
+                strArray[2] = bankDepositMessageDTO.TotalAmount.ToString();
+                strArray[3] = bankDepositMessageDTO.AmountInputted.ToString();
+
+                messageDTO.Body = HttpUtility.UrlDecode(messageDTO.Body);
+                messageDTO.Subject = string.Format(messageDTO.Subject, strArray);
+                messageDTO.FinalBody = string.Format(messageDTO.Body, strArray);
+                messageDTO.ToEmail = bankDepositMessageDTO.Email;
+            }
+
             return await Task.FromResult(verifySendEmail);
         }
 
@@ -980,5 +1056,43 @@ namespace GIGLS.Services.Implementation.Messaging
 
             await _sMSService.SendVoiceMessageAsync(phoneNumber);
         }
+
+        //Sends generic email message
+        //public async Task SendGenericEmailMessageToMultipleAccountants(MessageType messageType, BankDepositMessageDTO obj)
+        //{
+        //    var messageDTO = new MessageDTO();
+        //    var result = "";
+
+        //    try
+        //    {
+        //        var emailMessages = await _messageService.GetEmailAsync();
+        //        messageDTO = emailMessages.FirstOrDefault(s => s.MessageType == messageType);
+
+        //        if (messageDTO != null)
+        //        {
+        //            //Tell accountants
+        //            string mailList = ConfigurationManager.AppSettings["accountEmails"];
+        //            string[] emails = mailList.Split(',').ToArray();
+
+        //            foreach (var email in emails)
+        //            {
+        //                obj.Email = email;
+                        
+        //                //prepare generic message finalBody
+        //                bool verifySendEmail = await PrepareGenericMessageFinalBody(messageDTO, obj);
+        //                if (verifySendEmail)
+        //                {
+        //                    result = await _emailService.SendAsync(messageDTO);
+        //                    await LogEmailMessage(messageDTO, result);
+        //                }
+        //            }
+                   
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        await LogEmailMessage(messageDTO, result, ex.Message);
+        //    }
+        //}
     }
 }

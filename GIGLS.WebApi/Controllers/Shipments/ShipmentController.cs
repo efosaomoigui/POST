@@ -234,6 +234,22 @@ namespace GIGLS.WebApi.Controllers.Shipments
         }
 
         [GIGLSActivityAuthorize(Activity = "Update")]
+        [HttpPost]
+        [Route("UpdateShipment")]
+        public async Task<IServiceResponse<bool>> UpdateShipment(ShipmentDTO ShipmentDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _service.UpdateShipment(ShipmentDTO.ShipmentId, ShipmentDTO);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Update")]
         [HttpPut]
         [Route("{waybill}")]
         public async Task<IServiceResponse<bool>> UpdateShipment(string waybill, ShipmentDTO ShipmentDTO)
@@ -308,6 +324,23 @@ namespace GIGLS.WebApi.Controllers.Shipments
                 {
                     Object = unmappedGroupWaybills,
                     Total = unmappedGroupWaybills.Count
+                };
+            });
+        }
+
+        //super manifest
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("unmappedmanifestlistforservicecentre")]
+        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestListForServiceCentre()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var unmappedManifest = await _service.GetUnmappedManifestListForServiceCentre();
+                return new ServiceResponse<IEnumerable<ManifestDTO>>
+                {
+                    Object = unmappedManifest,
+                    Total = unmappedManifest.Count
                 };
             });
         }

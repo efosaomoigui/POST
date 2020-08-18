@@ -151,5 +151,11 @@ namespace GIGLS.Core.Domain
         public DateTime? TimeAssigned { get; set; }
         public DateTime? TimePickedUp { get; set; }
         public DateTime? TimeDelivered { get; set; }
+
+        [MaxLength(500)]
+        public string IndentificationUrl { get; set; }
+
+        [MaxLength(500)]
+        public string DeliveryAddressImageUrl { get; set; }
     }
 }

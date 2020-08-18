@@ -37,6 +37,7 @@ using EfeAuthen.Models;
 using GIGLS.Core.DTO.Utility;
 using GIGLS.Core.DTO.Fleets;
 using System.Net;
+using GIGLS.Core.DTO.ShipmentScan;
 
 namespace GIGLS.WebApi.Controllers.CustomerPortal
 {
@@ -52,7 +53,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             _portalService = portalService;
             _paymentService = paymentService;
         }
-        
+
         [HttpPost]
         [Route("transaction")]
         public async Task<IServiceResponse<List<InvoiceViewDTO>>> GetShipmentTransactions(ShipmentCollectionFilterCriteria f_Criteria)
@@ -147,7 +148,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("walletpaymentlog")]
-        public async Task<IServiceResponse<List<WalletPaymentLogDTO>>> GetWalletPaymentLogs([FromUri]FilterOptionsDto filterOptionsDto)
+        public async Task<IServiceResponse<List<WalletPaymentLogDTO>>> GetWalletPaymentLogs([FromUri] FilterOptionsDto filterOptionsDto)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -208,7 +209,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("bywaybill/{waybill}")]
-        public async Task<IServiceResponse<InvoiceDTO>> GetInvoiceByWaybill([FromUri]  string waybill)
+        public async Task<IServiceResponse<InvoiceDTO>> GetInvoiceByWaybill([FromUri] string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {
@@ -610,73 +611,73 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
         }
 
         //[AllowAnonymous]
-        [HttpPost]
-        [Route("validateotp/{OTP}")]
-        public async Task<IServiceResponse<JObject>> IsOTPValid(int OTP)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                var Otp = await _portalService.IsOTPValid(OTP);
-                if (Otp != null && Otp.IsActive == true)
-                {
-                    string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
-                    string getTokenResponse;
+        //[HttpPost]
+        //[Route("validateotp/{OTP}")]
+        //public async Task<IServiceResponse<JObject>> IsOTPValid(int OTP)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        var Otp = await _portalService.IsOTPValid(OTP);
+        //        if (Otp != null && Otp.IsActive == true)
+        //        {
+        //            string apiBaseUri = ConfigurationManager.AppSettings["WebApiUrl"];
+        //            string getTokenResponse;
 
-                    using (var client = new HttpClient())
-                    {
-                        //setup client
-                        client.BaseAddress = new Uri(apiBaseUri);
-                        client.DefaultRequestHeaders.Accept.Clear();
-                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        //            using (var client = new HttpClient())
+        //            {
+        //                //setup client
+        //                client.BaseAddress = new Uri(apiBaseUri);
+        //                client.DefaultRequestHeaders.Accept.Clear();
+        //                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                        //setup login data
-                        var formContent = new FormUrlEncodedContent(new[]
-                            {
-                         new KeyValuePair<string, string>("grant_type", "password"),
-                         new KeyValuePair<string, string>("Username", Otp.Username),
-                         new KeyValuePair<string, string>("Password", Otp.UserChannelPassword),
-                         });
+        //                //setup login data
+        //                var formContent = new FormUrlEncodedContent(new[]
+        //                    {
+        //                 new KeyValuePair<string, string>("grant_type", "password"),
+        //                 new KeyValuePair<string, string>("Username", Otp.Username),
+        //                 new KeyValuePair<string, string>("Password", Otp.UserChannelPassword),
+        //                 });
 
-                        //setup login data
-                        HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
+        //                //setup login data
+        //                HttpResponseMessage responseMessage = await client.PostAsync("token", formContent);
 
-                        if (!responseMessage.IsSuccessStatusCode)
-                        {
-                            throw new GenericException("Incorrect Login Details");
-                        }
-                        else
-                        {
-                            Otp = await _portalService.GenerateReferrerCode(Otp);
-                        }
+        //                if (!responseMessage.IsSuccessStatusCode)
+        //                {
+        //                    throw new GenericException("Incorrect Login Details");
+        //                }
+        //                else
+        //                {
+        //                    Otp = await _portalService.GenerateReferrerCode(Otp);
+        //                }
 
-                        //get access token from response body
-                        var responseJson = await responseMessage.Content.ReadAsStringAsync();
-                        var jObject = JObject.Parse(responseJson);
+        //                //get access token from response body
+        //                var responseJson = await responseMessage.Content.ReadAsStringAsync();
+        //                var jObject = JObject.Parse(responseJson);
 
-                        getTokenResponse = jObject.GetValue("access_token").ToString();
+        //                getTokenResponse = jObject.GetValue("access_token").ToString();
 
-                        return new ServiceResponse<JObject>
-                        {
-                            Object = jObject,
-                            ReferrerCode = Otp.Referrercode
-                        };
-                    }
+        //                return new ServiceResponse<JObject>
+        //                {
+        //                    Object = jObject,
+        //                    ReferrerCode = Otp.Referrercode
+        //                };
+        //            }
 
-                }
-                else
-                {
-                    var data = new { IsActive = false };
+        //        }
+        //        else
+        //        {
+        //            var data = new { IsActive = false };
 
-                    var jObject = JObject.FromObject(data);
+        //            var jObject = JObject.FromObject(data);
 
-                    return new ServiceResponse<JObject>
-                    {
-                        ShortDescription = "User has not been verified",
-                        Object = jObject
-                    };
-                }
-            });
-        }
+        //            return new ServiceResponse<JObject>
+        //            {
+        //                ShortDescription = "User has not been verified",
+        //                Object = jObject
+        //            };
+        //        }
+        //    });
+        //}
 
         [AllowAnonymous]
         [HttpPost]
@@ -772,7 +773,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             return await HandleApiOperationAsync(async () =>
             {
                 var user = await _portalService.CheckDetails(logindetail.UserDetail, logindetail.UserChannelType);
-                
+
                 if (user.RequiresCod == null)
                     user.RequiresCod = false;
 
@@ -837,7 +838,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                             {
                                 var response = await _portalService.CreateCustomer(user.UserChannelCode);
                             }
-                            
+
                             if (logindetail.UserChannelType == UserChannelType.Partner.ToString())
                             {
                                 var partner = await _portalService.CreatePartner(user.UserChannelCode);
@@ -876,7 +877,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                                 AverageRatings = user.AverageRatings,
                                 IsVerified = user.IsVerified,
                                 PartnerType = partnerType,
-                                IsEligible = (bool) user.IsEligible,
+                                IsEligible = (bool)user.IsEligible,
                                 BankName = bankName,
                                 AccountName = accountName,
                                 AccountNumber = accountNumber
@@ -1136,7 +1137,21 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
+        [HttpGet]
+        [Route("getwalletdetails")]
+        public async Task<IServiceResponse<WalletDTO>> GetWalletDetails()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var wallet = await _portalService.GetWalletBalanceWithName();
+                return new ServiceResponse<WalletDTO>
+                {
+                    Object = wallet
+                };
+            });
+        }
+
         [HttpGet]
         [Route("getspecialpackages")]
         public async Task<IServiceResponse<SpecialResultDTO>> GetSpecialPackages()
@@ -1317,7 +1332,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpGet]
         [Route("getpreshipmentindispute")]
         public async Task<IServiceResponse<List<PreShipmentMobileDTO>>> GetPreshipmentInDispute()
@@ -1422,7 +1437,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpPost]
         [Route("adddeliverynumber")]
         public async Task<IServiceResponse<bool>> UpdateDeliveryNumber(MobileShipmentNumberDTO detail)
@@ -1561,7 +1576,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpGet]
         [Route("getpreshipmentmobiledetailsfromdeliverynumber/{deliverynumber}")]
         public async Task<IServiceResponse<PreShipmentSummaryDTO>> GetPreshipmentmobiledetailsfromdeliverynumber(string deliverynumber)
@@ -1575,7 +1590,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpPost]
         [Route("approveshipment")]
         public async Task<IServiceResponse<bool>> Approveshipment(ApproveShipmentDTO detail)
@@ -1589,7 +1604,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [AllowAnonymous]
         [HttpGet]
         [Route("getcountries")]
@@ -1719,7 +1734,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [AllowAnonymous]
         [HttpGet]
         [Route("getStations")]
@@ -1735,7 +1750,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-        
+
         [HttpGet]
         [Route("getdeliverynumber/{deliverynumber}")]
         public async Task<IServiceResponse<List<DeliveryNumberDTO>>> GetAllDeliveryNumbers(int deliverynumber)
@@ -1779,14 +1794,14 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
-                
+
         [HttpPost]
         [Route("updatepickupmanifeststatus")]
         public async Task<IServiceResponse<bool>> UpdatePickupManifestStatus(ManifestStatusDTO manifestStatusDTO)
         {
             return await HandleApiOperationAsync(async () =>
             {
-                 await _portalService.UpdatePickupManifestStatus(manifestStatusDTO);
+                await _portalService.UpdatePickupManifestStatus(manifestStatusDTO);
 
                 return new ServiceResponse<bool>
                 {
@@ -1867,5 +1882,93 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
                 };
             });
         }
+
+        [HttpGet]
+        [Route("scanstatus")]
+        public async Task<IServiceResponse<IEnumerable<ScanStatusDTO>>> GetScanStatus()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var scanStatus = await _portalService.GetScanStatus();
+
+                return new ServiceResponse<IEnumerable<ScanStatusDTO>>
+                {
+                    Object = scanStatus
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("scanmultiple")]
+        public async Task<IServiceResponse<bool>> ScanMultipleShipment(List<ScanDTO> scanList)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.ScanMultipleShipment(scanList);
+
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("waybillsinmanifestfordispatch")]
+        public async Task<IServiceResponse<List<ManifestWaybillMappingDTO>>> GetWaybillsInManifestForDispatch()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var groupWaybillNumbersInManifest = await _portalService.GetWaybillsInManifestForDispatch();
+
+                return new ServiceResponse<List<ManifestWaybillMappingDTO>>
+                {
+                    Object = groupWaybillNumbersInManifest
+                };
+            });
+        }
+
+        [HttpPut]
+        [Route("collected")]
+        public async Task<IServiceResponse<bool>> ReleaseShipmentForCollection(ShipmentCollectionDTO shipmentCollection)
+        {
+            return await HandleApiOperationAsync(async () => {
+                await _portalService.ReleaseShipmentForCollectionOnScanner(shipmentCollection);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [HttpGet]
+        [Route("getlogvisit")]
+        public async Task<IServiceResponse<List<LogVisitReasonDTO>>> GetLogVisitReasons()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var logVisitReasons = await _portalService.GetLogVisitReasons();
+
+                return new ServiceResponse<List<LogVisitReasonDTO>>
+                {
+                    Object = logVisitReasons
+                };
+            });
+        }
+
+        [HttpPost]
+        [Route("logwaybillvisit")]
+        public async Task<IServiceResponse<object>> AddManifest(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var manifest = await _portalService.AddManifestVisitMonitoring(manifestVisitMonitoringDTO);
+                return new ServiceResponse<object>
+                {
+                    Object = manifest
+                };
+            });
+        }
+
     }
 }

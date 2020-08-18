@@ -178,6 +178,10 @@ namespace GIGLS.Services.Implementation.Utility
                     {
                         return (int)NumberGeneratorType.MagayaWb;
                     }
+                case NumberGeneratorType.SuperManifest:
+                    {
+                        return (int)NumberGeneratorType.SuperManifest;
+                    }
                 default:
                     {
                         return (int)NumberGeneratorType.WaybillNumber;
