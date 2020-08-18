@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Wallet;
@@ -507,6 +508,8 @@ namespace GIGLS.Services.Implementation.Wallet
 
 
             var walletDTO = Mapper.Map<WalletDTO>(wallet);
+            var country = await _uow.Country.GetAsync(x => x.CountryId == user.UserActiveCountryId);
+            walletDTO.Country = Mapper.Map<CountryDTO>(country);
 
             if (wallet.CompanyType == CustomerType.IndividualCustomer.ToString())
             {
