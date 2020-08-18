@@ -217,7 +217,7 @@ namespace GIGLS.Services.Business.Scanning
             }
 
             //Enter only if they want to scan a manifest "Arrived Collation Center"
-            if (scan.ShipmentScanStatus == ShipmentScanStatus.ACC && manifest != null)
+            else if (scan.ShipmentScanStatus == ShipmentScanStatus.ACC && manifest != null)
             {
                 //do this for super flow 
                 await ScanACCForManifest(scan.WaybillNumber,scan, scan.ShipmentScanStatus.ToString());
