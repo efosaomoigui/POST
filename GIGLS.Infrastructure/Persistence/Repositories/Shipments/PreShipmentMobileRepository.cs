@@ -151,6 +151,28 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
             return shipmentDto;
         }
 
+        //Get Shipments that have not been paid for by user
+        public Task<List<OutstandingPaymentsDTO>> GetAllOutstandingShipmentsForUser(string userChannelCode)
+        {
+            var shipments = _context.Shipment.AsQueryable().Where(s => s.CustomerCode == userChannelCode);
+
+            var result = (from s in shipments
+                          join i in Context.Invoice on s.Waybill equals i.Waybill
+                          join dept in Context.ServiceCentre on s.DepartureServiceCentreId equals dept.ServiceCentreId
+                          join dest in Context.ServiceCentre on s.DestinationServiceCentreId equals dest.ServiceCentreId
+                          where i.PaymentStatus == Core.Enums.PaymentStatus.Pending
+                          select new OutstandingPaymentsDTO()
+                          {
+                              Waybill = s.Waybill,
+                              Departure = dept.Name,
+                              Destination = dest.Name,
+                              Amount = i.Amount,
+                              DateCreated = s.DateCreated
+                          }).ToList();
+
+             return Task.FromResult(result.OrderByDescending(x => x.DateCreated).ToList()); ;
+        }
+
 
     }
 }

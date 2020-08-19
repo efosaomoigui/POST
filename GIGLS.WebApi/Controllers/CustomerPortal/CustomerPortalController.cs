@@ -1970,5 +1970,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpGet]
+        [Route("outstandingpayments")]
+        public async Task<IServiceResponse<List<OutstandingPaymentsDTO>>> GetOutstandingPayments()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var outstandingPayments = await _portalService.GetOutstandingPayments();
+                return new ServiceResponse<List<OutstandingPaymentsDTO>>
+                {
+                    Object = outstandingPayments
+                };
+            });
+        }
+
     }
 }

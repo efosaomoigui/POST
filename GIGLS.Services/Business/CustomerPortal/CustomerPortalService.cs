@@ -2652,5 +2652,17 @@ namespace GIGLS.Services.Business.CustomerPortal
             return await _visitService.AddManifestVisitMonitoring(manifestVisitMonitoringDTO);
         }
 
+        public async Task<List<OutstandingPaymentsDTO>> GetOutstandingPayments()
+        {
+
+            var currentUserId = await _userService.GetCurrentUserId();
+            var currentUser = await _userService.GetUserById(currentUserId);
+
+            var outstandingShipments = await _uow.PreShipmentMobile.GetAllOutstandingShipmentsForUser(currentUser.UserChannelCode);
+
+            return outstandingShipments;
+
+        }
+
     }
 }
