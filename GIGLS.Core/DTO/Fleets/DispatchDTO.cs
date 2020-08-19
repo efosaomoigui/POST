@@ -36,5 +36,6 @@ namespace GIGLS.Core.DTO.Fleets
         public ServiceCentreDTO DepartureService { get; set; }
         public int DestinationServiceCenterId { get; set; }
         public ServiceCentreDTO DestinationService { get; set; }
+        public bool IsSuperManifest { get; set; }
     }
 }

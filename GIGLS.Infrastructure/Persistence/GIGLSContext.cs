@@ -280,7 +280,6 @@ namespace GIGLS.Infrastructure.Persistence
         public DbSet<PartnerPayout> PartnerPayout { get; set; }
         public DbSet<EcommerceAgreement> EcommerceAgreement { get; set; }
 
-
         #endregion
 
 

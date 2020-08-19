@@ -48,12 +48,13 @@ namespace GIGLS.WebApi.Controllers.Scanner
         private readonly ICustomerPortalService _portalService;
         private readonly IServiceCentreService _serviceCentre;
         private readonly IHUBManifestWaybillMappingService _hubService;
+        private readonly ISuperManifestService _superManifestService;
 
         public MobileScannerController(IScanService scanService, IScanStatusService scanStatusService, IShipmentService shipmentService,
             IGroupWaybillNumberService groupService, IGroupWaybillNumberMappingService groupMappingservice, IManifestService manifestService,
             IManifestGroupWaybillNumberMappingService manifestGroupMappingService, IManifestWaybillMappingService manifestWaybillservice, 
             IStateService stateService, IShipmentCollectionService collectionservice, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
-            ICustomerPortalService portalService, IServiceCentreService serviceCentre, IHUBManifestWaybillMappingService hubService) : base(nameof(MobileScannerController))
+            ICustomerPortalService portalService, IServiceCentreService serviceCentre, IHUBManifestWaybillMappingService hubService, ISuperManifestService superManifestService) : base(nameof(MobileScannerController))
         {
             _scanService = scanService;
             _scanStatusService = scanStatusService;
@@ -70,6 +71,7 @@ namespace GIGLS.WebApi.Controllers.Scanner
             _portalService = portalService;
             _serviceCentre = serviceCentre;
             _hubService = hubService;
+            _superManifestService = superManifestService;
         }
 
         [AllowAnonymous]
@@ -306,6 +308,22 @@ namespace GIGLS.WebApi.Controllers.Scanner
         }
 
         [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpGet]
+        [Route("generatesupermanifestcode")]
+        public async Task<IServiceResponse<string>> GenerateSuperManifestCode()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var code = await _superManifestService.GenerateSuperManifestCode();
+
+                return new ServiceResponse<string>
+                {
+                    Object = code
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
         [HttpPost]
         [Route("mapgroupwaybilltomanifest")]
         public async Task<IServiceResponse<bool>> MappingManifestToGroupWaybillNumber(ManifestGroupWaybillNumberMappingDTO data)
@@ -313,6 +331,21 @@ namespace GIGLS.WebApi.Controllers.Scanner
             return await HandleApiOperationAsync(async () =>
             {
                 await _manifestGroupMappingService.MappingManifestToGroupWaybillNumber(data.ManifestCode, data.GroupWaybillNumbers);
+                return new ServiceResponse<bool>
+                {
+                    Object = true
+                };
+            });
+        }
+
+        [GIGLSActivityAuthorize(Activity = "Create")]
+        [HttpPost]
+        [Route("mapmanifesttosupermanifest")]
+        public async Task<IServiceResponse<bool>> MappingSuperManifestToManifest(ManifestDTO data)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                await _manifestGroupMappingService.MappingSuperManifestToManifest(data.SuperManifestCode, data.ManifestCodes);
                 return new ServiceResponse<bool>
                 {
                     Object = true
@@ -338,6 +371,23 @@ namespace GIGLS.WebApi.Controllers.Scanner
                 {
                     Object = unmappedGroupWaybills,
                     Total = unmappedGroupWaybills.Count
+                };
+            });
+        }
+
+        //Super Manifest
+        [GIGLSActivityAuthorize(Activity = "View")]
+        [HttpGet]
+        [Route("unmappedmanifestlistforservicecentre")]
+        public async Task<IServiceResponse<IEnumerable<ManifestDTO>>> GetUnmappedManifestListForServiceCentre()
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var unmappedManifests = await _shipmentService.GetUnmappedManifestListForServiceCentre();
+                return new ServiceResponse<IEnumerable<ManifestDTO>>
+                {
+                    Object = unmappedManifests,
+                    Total = unmappedManifests.Count
                 };
             });
         }

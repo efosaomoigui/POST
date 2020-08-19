@@ -1692,6 +1692,44 @@ namespace GIGLS.Services.Implementation.Shipments
             }
         }
 
+        public async Task<List<ManifestDTO>> GetUnmappedManifestListForServiceCentre()
+        {
+            try
+            {
+                var serviceCenters = await _userService.GetPriviledgeServiceCenters();
+
+                //get all manifest owned by that service center
+                var manifestGroupWaybillMapingsDTO = await _uow.ManifestGroupWaybillNumberMapping.GetManifestGroupWaybillNumberMappingsForSuperManifest(serviceCenters);
+
+                //group the result by manifest                
+                var resultGroup = manifestGroupWaybillMapingsDTO.GroupBy(x => x.ManifestCode).ToList();
+                var result = new List<ManifestDTO>();
+                foreach (var resultGrp in resultGroup)
+                {
+                    result.Add(resultGrp.FirstOrDefault());
+                }
+
+                //Get manifest not yet added to super manifest for the login user
+                var manifestBySc = _uow.Manifest.GetAllAsQueryable().Where(x => x.HasSuperManifest == false && x.SuperManifestStatus == SuperManifestStatus.ArrivedScan);
+
+                if (serviceCenters.Length > 0)
+                {
+                    manifestBySc = manifestBySc.Where(s => serviceCenters.Contains(s.DepartureServiceCentreId));
+                }
+
+                var manifestByScList = manifestBySc.ToList();
+                var resultDTO = await _uow.Manifest.GetManifest(manifestByScList);
+
+                var finalResult = result.Union(resultDTO).OrderByDescending(x => x.DateModified).ToList();
+
+                return finalResult;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<ServiceCentreDTO>> GetUnmappedManifestServiceCentres()
         {
             try
