@@ -1914,7 +1914,9 @@ namespace GIGLS.Services.Implementation.Shipments
                                                               DiscountValue = r.DiscountValue,
                                                               CompanyType = r.CompanyType,
                                                               CustomerCode = r.CustomerCode,
-                                                              VehicleType = r.VehicleType
+                                                              VehicleType = r.VehicleType,
+                                                              IsScheduled = r.IsScheduled,
+                                                              ScheduledDate = r.ScheduledDate
                                                           }).ToList();
 
                 return await Task.FromResult(shipmentDto.OrderByDescending(x => x.DateCreated).ToList());
