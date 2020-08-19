@@ -870,7 +870,7 @@ namespace GIGLS.Services.Implementation.Wallet
                     Waybill = s.Waybill,
                     RefCode = bkoc.Code,
                     ServiceCenterId = bkoc.ServiceCenter,
-                    DemurrageAmount = s.Amount,
+                    DemurrageAmount = s.DemurrageAmount,
                     DepositType = bkoc.DepositType,
                     ServiceCenter = bkoc.ScName,
                     Status = DepositStatus.Pending
