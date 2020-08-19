@@ -135,6 +135,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\Extensions\EntityQueryExtensions.cs" />
+    <Compile Include="Common\Extensions\PagedListExtensions.cs" />
+    <Compile Include="Common\Extensions\PredicateExtensions.cs" />
+    <Compile Include="Common\Helpers\IPagedQueryBuilder.cs" />
+    <Compile Include="Common\Helpers\IQueryCommand.cs" />
+    <Compile Include="Common\Helpers\PagedList.cs" />
     <Compile Include="Domain\ActivationCampaignEmail.cs" />
     <Compile Include="Domain\AppRole.cs" />
     <Compile Include="Domain\Audit\AuditTrailEvent.cs" />
@@ -210,6 +216,7 @@
     <Compile Include="Domain\RegionServiceCentreMapping.cs" />
     <Compile Include="Domain\RiderDelivery.cs" />
     <Compile Include="Domain\MagayaShipmentAgility.cs" />
+    <Compile Include="Domain\Route\Route.cs" />
     <Compile Include="Domain\ShipmentDeliveryOptionMapping.cs" />
     <Compile Include="Domain\PreShipmentItem.cs" />
     <Compile Include="Domain\ShipmentHash.cs" />
@@ -301,6 +308,7 @@
     <Compile Include="DTO\BankSettlement\BankProcessingOrderForShipmentAndCODDTO.cs" />
     <Compile Include="DTO\BankSettlement\CODSettlementSheetDTO.cs" />
     <Compile Include="DTO\BaseDomainDTO.cs" />
+    <Compile Include="DTO\BaseSearchDto.cs" />
     <Compile Include="DTO\CancelShipmentDTO.cs" />
     <Compile Include="DTO\CategoryDTO.cs" />
     <Compile Include="DTO\ChangePasswordDTO.cs" />
@@ -395,6 +403,8 @@
     <Compile Include="DTO\Report\ShipmentProgressSummaryFilterCriteria.cs" />
     <Compile Include="DTO\RiderDeliveryDTO.cs" />
     <Compile Include="DTO\RiderDeliveryViewDTO.cs" />
+    <Compile Include="DTO\Routes\CreateRouteDto.cs" />
+    <Compile Include="DTO\Routes\RouteDto.cs" />
     <Compile Include="DTO\ServiceCentres\LGADTO.cs" />
     <Compile Include="DTO\ServiceCentres\RegionDTO.cs" />
     <Compile Include="DTO\ServiceCentres\RegionServiceCentreMappingDTO.cs" />
@@ -523,6 +533,7 @@
     <Compile Include="Enums\ModificationType.cs" />
     <Compile Include="Enums\NumberGeneratorType.cs" />
     <Compile Include="Enums\OverdueShipmentStatus.cs" />
+    <Compile Include="Enums\PageOrder.cs" />
     <Compile Include="Enums\PartnerApplicationStatus.cs" />
     <Compile Include="Enums\PartnerType.cs" />
     <Compile Include="Enums\PaymentServiceType.cs" />
@@ -534,6 +545,7 @@
     <Compile Include="Enums\PricingType.cs" />
     <Compile Include="Enums\RateType.cs" />
     <Compile Include="Enums\RegularEcommerceType.cs" />
+    <Compile Include="Enums\RouteType.cs" />
     <Compile Include="Enums\ShipmentProgressSummaryType.cs" />
     <Compile Include="Enums\ShipmentRerouteInitiator.cs" />
     <Compile Include="Enums\ShipmentScanStatus.cs" />
@@ -625,6 +637,7 @@
     <Compile Include="IRepositories\Partnership\IVehicleTypeRepository.cs" />
     <Compile Include="IRepositories\PaymentTransactions\IPaymentPartialTransactionRepository.cs" />
     <Compile Include="IRepositories\PaymentTransactions\IPaymentTransactionRepository.cs" />
+    <Compile Include="IRepositories\Routes\IRouteRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\ILGARepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IRegionRepository.cs" />
     <Compile Include="IRepositories\ServiceCentres\IRegionServiceCentreMappingRepository.cs" />
@@ -772,6 +785,7 @@
     <Compile Include="IServices\Report\IAccountReportService.cs" />
     <Compile Include="IServices\Report\IAdminReportService.cs" />
     <Compile Include="IServices\Report\IShipmentReportService.cs" />
+    <Compile Include="IServices\RouteServices\IRouteService.cs" />
     <Compile Include="IServices\ServiceCentres\ILGAService.cs" />
     <Compile Include="IServices\ServiceCentres\IRegionService.cs" />
     <Compile Include="IServices\ServiceCentres\IRegionServiceCentreMappingService.cs" />
@@ -860,13 +874,13 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\ThirdParty.WebServices\ThirdParty.WebServices.csproj">
       <Project>{03529607-e784-45a7-b684-158ea13fb5e0}</Project>
       <Name>ThirdParty.WebServices</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
