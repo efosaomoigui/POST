@@ -1986,7 +1986,7 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
 
         [HttpGet]
         [Route("paymentforshipment/{waybill}")]
-        public async Task<IServiceResponse<bool>> GetOutstandingPayments(string waybill)
+        public async Task<IServiceResponse<bool>> PayForAgilityShipmentFromApp(string waybill)
         {
             return await HandleApiOperationAsync(async () =>
             {
