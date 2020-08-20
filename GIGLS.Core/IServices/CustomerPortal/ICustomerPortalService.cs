@@ -163,5 +163,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<object> AddManifestVisitMonitoring(ManifestVisitMonitoringDTO manifestVisitMonitoringDTO);
         Task<WalletDTO> GetWalletBalanceWithName();
         Task<List<OutstandingPaymentsDTO>> GetOutstandingPayments();
+        Task<bool> PayForShipment(string waybill);
     }
 }

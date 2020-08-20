@@ -1984,5 +1984,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpGet]
+        [Route("paymentforshipment/{waybill}")]
+        public async Task<IServiceResponse<bool>> GetOutstandingPayments(string waybill)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var result = await _portalService.PayForShipment(waybill);
+                return new ServiceResponse<bool>
+                {
+                    Object = result
+                };
+            });
+        }
+
     }
 }
