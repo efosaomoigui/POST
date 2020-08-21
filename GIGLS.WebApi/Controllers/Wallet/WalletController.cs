@@ -82,20 +82,20 @@ namespace GIGLS.WebApi.Controllers.Wallet
             });
         }
 
-        [GIGLSActivityAuthorize(Activity = "Update")]
-        [HttpPut]
-        [Route("{walletId:int}")]
-        public async Task<IServiceResponse<object>> UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
-        {
-            return await HandleApiOperationAsync(async () =>
-            {
-                await _walletService.UpdateWallet(walletId, walletTransactionDTO);
-                return new ServiceResponse<object>
-                {
-                    Object = true
-                };
-            });
-        }
+        //[GIGLSActivityAuthorize(Activity = "Update")]
+        //[HttpPut]
+        //[Route("{walletId:int}")]
+        //public async Task<IServiceResponse<object>> UpdateWallet(int walletId, WalletTransactionDTO walletTransactionDTO)
+        //{
+        //    return await HandleApiOperationAsync(async () =>
+        //    {
+        //        await _walletService.UpdateWallet(walletId, walletTransactionDTO);
+        //        return new ServiceResponse<object>
+        //        {
+        //            Object = true
+        //        };
+        //    });
+        //}
 
         [GIGLSActivityAuthorize(Activity = "Delete")]
         [HttpDelete]
