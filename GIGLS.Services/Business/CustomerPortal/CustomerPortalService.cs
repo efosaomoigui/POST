@@ -52,7 +52,6 @@ using GIGLS.Core.IServices.Fleets;
 using GIGLS.Core.DTO.Fleets;
 using GIGLS.Core.DTO.MessagingLog;
 using System.Net;
-using GIGLS.Services.Implementation.Utility;
 using GIGLS.Core.DTO.OnlinePayment;
 using GIGLS.Core.IServices.Zone;
 using GIGLS.Core.IServices.ShipmentScan;
@@ -110,11 +109,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             IPartnerTransactionsService partnertransactionservice, IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService,
             IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
             IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService,
-            IPaymentTransactionService paymentTransactionService)
-            ICountryService countryService, IAdminReportService adminReportService, IPartnerTransactionsService partnertransactionservice,
-            IMobileGroupCodeWaybillMappingService groupCodeWaybillMappingService, IDispatchService dispatchService, IManifestWaybillMappingService manifestWaybillMappingService,
-            IPaystackPaymentService paystackPaymentService, IUssdService ussdService, IDomesticRouteZoneMapService domesticRouteZoneMapService,
-            IScanStatusService scanStatusService, IScanService scanService, IShipmentCollectionService collectionService, ILogVisitReasonService logService, IManifestVisitMonitoringService visitService)
+            IPaymentTransactionService paymentTransactionService, IPaystackPaymentService paystackPaymentService, IUssdService ussdService)
         {
             _invoiceService = invoiceService;
             _iShipmentTrackService = iShipmentTrackService;
