@@ -121,11 +121,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             // get the current user info
             var currentUserId = await _userService.GetCurrentUserId();
-
-            if (!string.IsNullOrEmpty(paymentTransaction.UserId))
-            {
-                currentUserId = paymentTransaction.UserId;
-            }
+            paymentTransaction.UserId = currentUserId;
 
             //get Ledger, Invoice, shipment
             var generalLedgerEntity = await _uow.GeneralLedger.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
@@ -140,7 +136,6 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             }
 
             // create payment
-            paymentTransaction.UserId = currentUserId;
             paymentTransaction.PaymentStatus = PaymentStatus.Paid;
             var paymentTransactionId = await AddPaymentTransaction(paymentTransaction);
 

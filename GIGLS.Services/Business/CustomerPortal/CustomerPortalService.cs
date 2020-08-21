@@ -2681,7 +2681,7 @@ namespace GIGLS.Services.Business.CustomerPortal
             }
             if (invoice.PaymentStatus == PaymentStatus.Paid)
             {
-                throw new GenericException("Shipment already paid for", $"{(int)HttpStatusCode.Forbidden}");
+                throw new GenericException($"Payment already made for the Shipment {waybill}", $"{(int)HttpStatusCode.Forbidden}");
             }
 
             var wallet = await _walletService.GetWalletBalance();
@@ -2697,7 +2697,6 @@ namespace GIGLS.Services.Business.CustomerPortal
                 TransactionCode = wallet.WalletNumber,
                 PaymentType = PaymentType.Wallet,
                 FromApp = true
-
             };
             var result = await _paymentTransactionService.ProcessNewPaymentTransaction(transactionDTO);
             return result;
