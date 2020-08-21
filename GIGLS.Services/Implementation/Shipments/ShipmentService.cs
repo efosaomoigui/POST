@@ -2751,11 +2751,13 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (invoice != null)
                     {
                         invoice.CountryId = shipment.DepartureCountryId;
+                        invoice.ServiceCentreId = shipment.DepartureServiceCentreId;
                     }
                     var GeneralLedger = await _uow.GeneralLedger.GetAsync(s => s.Waybill == shipment.Waybill);
                     if (GeneralLedger != null)
                     {
                         GeneralLedger.CountryId = shipment.DepartureCountryId;
+                        GeneralLedger.ServiceCentreId = shipment.DepartureServiceCentreId;
                     }
                     await _uow.CompleteAsync();
                     return true;

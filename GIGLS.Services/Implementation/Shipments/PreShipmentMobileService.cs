@@ -2877,31 +2877,32 @@ namespace GIGLS.Services.Implementation.Shipments
         {
             try
             {
-                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
+               // var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill, "PreShipmentItems,SenderLocation,ReceiverLocation");
+                var preshipmentmobile = await _uow.PreShipmentMobile.GetAsync(s => s.Waybill == pickuprequest.Waybill);
                 if (preshipmentmobile == null)
                 {
                     throw new GenericException("Shipment item does not exist", $"{(int)HttpStatusCode.NotFound}");
                 }
 
-                int destinationServiceCentreId = 0;
-                int departureServiceCentreId = 0;
+                //int destinationServiceCentreId = 0;
+                //int departureServiceCentreId = 0;
 
-                //shipment witin a state 
-                if (preshipmentmobile.ZoneMapping == 1)
-                {
-                    var gigGOServiceCentre = await _userService.GetGIGGOServiceCentre();
-                    destinationServiceCentreId = gigGOServiceCentre.ServiceCentreId;
-                    departureServiceCentreId = gigGOServiceCentre.ServiceCentreId;
-                }
-                else
-                {
-                    //shipment outside a state -- Inter State Shipment
-                    var DepartureStation = await _uow.Station.GetAsync(s => s.StationId == preshipmentmobile.SenderStationId);
-                    departureServiceCentreId = DepartureStation.SuperServiceCentreId;
+                ////shipment witin a state 
+                //if (preshipmentmobile.ZoneMapping == 1)
+                //{
+                //    var gigGOServiceCentre = await _userService.GetGIGGOServiceCentre();
+                //    destinationServiceCentreId = gigGOServiceCentre.ServiceCentreId;
+                //    departureServiceCentreId = gigGOServiceCentre.ServiceCentreId;
+                //}
+                //else
+                //{
+                //    //shipment outside a state -- Inter State Shipment
+                //    var DepartureStation = await _uow.Station.GetAsync(s => s.StationId == preshipmentmobile.SenderStationId);
+                //    departureServiceCentreId = DepartureStation.SuperServiceCentreId;
 
-                    var DestinationStation = await _uow.Station.GetAsync(s => s.StationId == preshipmentmobile.ReceiverStationId);
-                    destinationServiceCentreId = DestinationStation.SuperServiceCentreId;
-                }
+                //    var DestinationStation = await _uow.Station.GetAsync(s => s.StationId == preshipmentmobile.ReceiverStationId);
+                //    destinationServiceCentreId = DestinationStation.SuperServiceCentreId;
+                //}
 
                 //var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
 
@@ -2917,60 +2918,65 @@ namespace GIGLS.Services.Implementation.Shipments
                 //}
 
 
-                var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+                //var companyid = await _uow.Company.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
 
-                int customerid = 0;
-                if (companyid != null)
-                {
-                    customerid = companyid.CompanyId;
-                }
-                else
-                {
-                    var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
-                    customerid = CustomerId.IndividualCustomerId;
-                }
+                //int customerid = 0;
+                //if (companyid != null)
+                //{
+                //    customerid = companyid.CompanyId;
+                //}
+                //else
+                //{
+                //    var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
+                //    customerid = CustomerId.IndividualCustomerId;
+                //}
 
-                if (preshipmentmobile.IsApproved != true && preshipmentmobile.ZoneMapping != 1)
+                //if (preshipmentmobile.IsApproved != true && preshipmentmobile.ZoneMapping != 1)
+                //{
+                //    var MobileShipment = new ShipmentDTO
+                //    {
+                //        Waybill = preshipmentmobile.Waybill,
+                //        ReceiverName = preshipmentmobile.ReceiverName,
+                //        ReceiverPhoneNumber = preshipmentmobile.ReceiverPhoneNumber,
+                //        ReceiverEmail = preshipmentmobile.ReceiverEmail,
+                //        ReceiverAddress = preshipmentmobile.ReceiverAddress,
+                //        DeliveryOptionId = 1,
+                //        GrandTotal = preshipmentmobile.GrandTotal,
+                //        Insurance = preshipmentmobile.InsuranceValue,
+                //        Vat = preshipmentmobile.Vat,
+                //        SenderAddress = preshipmentmobile.SenderAddress,
+                //        IsCashOnDelivery = false,
+                //        CustomerCode = preshipmentmobile.CustomerCode,
+                //        DestinationServiceCentreId = destinationServiceCentreId,
+                //        DepartureServiceCentreId = departureServiceCentreId,
+                //        CustomerId = customerid,
+                //        UserId = userId,
+                //        PickupOptions = PickupOptions.HOMEDELIVERY,
+                //        IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
+                //        ShipmentPackagePrice = preshipmentmobile.GrandTotal,
+                //        ApproximateItemsWeight = 0.00,
+                //        ReprintCounterStatus = false,
+                //        CustomerType = preshipmentmobile.CustomerType,
+                //        CompanyType = preshipmentmobile.CompanyType,
+                //        Value = preshipmentmobile.Value,
+                //        PaymentStatus = PaymentStatus.Paid,
+                //        IsFromMobile = true,
+                //        ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
+                //        {
+                //            Description = s.Description,
+                //            IsVolumetric = s.IsVolumetric,
+                //            Weight = s.Weight,
+                //            Nature = s.ItemType,
+                //            Price = (decimal)s.CalculatedPrice,
+                //            Quantity = s.Quantity
+                //        }).ToList()
+                //    };
+                //    var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
+                //}
+
+                if (preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.OnwardProcessing.ToString() || preshipmentmobile.shipmentstatus == MobilePickUpRequestStatus.Delivered.ToString())
                 {
-                    var MobileShipment = new ShipmentDTO
-                    {
-                        Waybill = preshipmentmobile.Waybill,
-                        ReceiverName = preshipmentmobile.ReceiverName,
-                        ReceiverPhoneNumber = preshipmentmobile.ReceiverPhoneNumber,
-                        ReceiverEmail = preshipmentmobile.ReceiverEmail,
-                        ReceiverAddress = preshipmentmobile.ReceiverAddress,
-                        DeliveryOptionId = 1,
-                        GrandTotal = preshipmentmobile.GrandTotal,
-                        Insurance = preshipmentmobile.InsuranceValue,
-                        Vat = preshipmentmobile.Vat,
-                        SenderAddress = preshipmentmobile.SenderAddress,
-                        IsCashOnDelivery = false,
-                        CustomerCode = preshipmentmobile.CustomerCode,
-                        DestinationServiceCentreId = destinationServiceCentreId,
-                        DepartureServiceCentreId = departureServiceCentreId,
-                        CustomerId = customerid,
-                        UserId = userId,
-                        PickupOptions = PickupOptions.HOMEDELIVERY,
-                        IsdeclaredVal = preshipmentmobile.IsdeclaredVal,
-                        ShipmentPackagePrice = preshipmentmobile.GrandTotal,
-                        ApproximateItemsWeight = 0.00,
-                        ReprintCounterStatus = false,
-                        CustomerType = preshipmentmobile.CustomerType,
-                        CompanyType = preshipmentmobile.CompanyType,
-                        Value = preshipmentmobile.Value,
-                        PaymentStatus = PaymentStatus.Paid,
-                        IsFromMobile = true,
-                        ShipmentItems = preshipmentmobile.PreShipmentItems.Select(s => new ShipmentItemDTO
-                        {
-                            Description = s.Description,
-                            IsVolumetric = s.IsVolumetric,
-                            Weight = s.Weight,
-                            Nature = s.ItemType,
-                            Price = (decimal)s.CalculatedPrice,
-                            Quantity = s.Quantity
-                        }).ToList()
-                    };
-                    var status = await _shipmentService.AddShipmentFromMobile(MobileShipment);
+                    throw new GenericException($"This shipment {pickuprequest.Waybill} has not been marked as {preshipmentmobile.shipmentstatus}", $"{(int)HttpStatusCode.Forbidden}");
                 }
 
                 preshipmentmobile.shipmentstatus = MobilePickUpRequestStatus.PickedUp.ToString();
@@ -4446,6 +4452,14 @@ namespace GIGLS.Services.Implementation.Shipments
                                     {
                                         var CustomerId = await _uow.IndividualCustomer.GetAsync(s => s.CustomerCode == preshipmentmobile.CustomerCode);
                                         customerid = CustomerId.IndividualCustomerId;
+                                    }
+
+                                    var UserServiceCenters = await _userService.GetPriviledgeServiceCenters();
+
+                                    //default sc
+                                    if (UserServiceCenters.Any())
+                                    {
+                                        detail.SenderServiceCentreId = UserServiceCenters[0];
                                     }
 
                                     int departureCountryId = await GetCountryByServiceCentreId(detail.SenderServiceCentreId);
