@@ -965,7 +965,7 @@ namespace GIGLS.Services.Implementation.Shipments
             var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
             var currentServiceCenterId = serviceCenterIds[0];
 
-            List<ShipmentPackageOutflow> packageOutflow = new List<ShipmentPackageOutflow>();
+            List<ShipmentPackagingTransactions> packageOutflow = new List<ShipmentPackagingTransactions>();
 
             foreach (var shipmentItem in newShipment.ShipmentItems)
             {
@@ -977,25 +977,34 @@ namespace GIGLS.Services.Implementation.Shipments
                         throw new GenericException($"The quantity {shipmentItem.Quantity} being dispatched is more than the available stock .  {shipmentPackage.Description} has {shipmentPackage.InventoryOnHand} currently in store", $"{(int)HttpStatusCode.Forbidden}");
                     }
                     shipmentPackage.InventoryOnHand -= shipmentItem.Quantity;
-                    shipmentPackage.InventoryShipped += shipmentItem.Quantity;
-
-
-                    var newOutflow = new ShipmentPackageOutflow
+                                       
+                    var newOutflow = new ShipmentPackagingTransactions
                     {
-                        ServiceCenterId = newShipment.DestinationServiceCentreId,
+                        ServiceCenterId = currentServiceCenterId,
                         ShipmentPackageId = shipmentPackage.ShipmentPackagePriceId,
-                        NumberShipped = shipmentItem.Quantity,
-                        StoreCenterId = currentServiceCenterId,
-                        StoreKeeperId = user
+                        Quantity = shipmentItem.Quantity,
+                        Waybill= newShipment.Waybill,
+                        UserId = user,
+                        PackageTransactionType = Core.Enums.PackageTransactionType.OutflowFromStore
                     };
+
+                    //Do it when they sccan 
+
+                    //var newinflow = new ShipmentPackagingTransactions
+                    //{
+                    //    ServiceCenterId = newShipment.DestinationServiceCentreId,
+                    //    ShipmentPackageId = shipmentPackage.ShipmentPackagePriceId,
+                    //    Quantity = shipmentItem.Quantity,
+                    //    Waybill = newShipment.Waybill,
+                    //    UserId = user,
+                    //    PackageTransactionType = Core.Enums.PackageTransactionType.InflowToSC
+                    //};
                     packageOutflow.Add(newOutflow);
                 }
 
             }
 
-            _uow.ShipmentPackageOutflow.AddRange(packageOutflow);
-            //_uow.ShipmentPackageInflow.Add(newInflow);
-            //await _uow.CompleteAsync();
+            _uow.ShipmentPackagingTransactions.AddRange(packageOutflow);
 
             await _uow.CompleteAsync();
         }

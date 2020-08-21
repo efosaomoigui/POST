@@ -34,9 +34,6 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                                      CountryId = p.CountryId,
                                      MinimunRequired = p.MinimunRequired,
                                      InventoryOnHand = p.InventoryOnHand,
-                                     InventoryReceived = p.InventoryReceived,
-                                     InventoryShipped = p.InventoryShipped,
-                                     StartingInventory = p.StartingInventory,
                                      Country = new CountryDTO
                                      {
                                          CountryId = c.CountryId,

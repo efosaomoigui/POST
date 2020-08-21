@@ -123,21 +123,22 @@ namespace GIGLS.Services.Implementation.Shipments
                 var currentServiceCenterId = serviceCenterIds[0];
 
                 //shipmentPackagePrice.Balance += shipmentPackagePriceDto.QuantityToBeAdded;
-                shipmentPackagePrice.InventoryReceived += shipmentPackagePriceDto.QuantityToBeAdded;
+                //shipmentPackagePrice.InventoryReceived += shipmentPackagePriceDto.QuantityToBeAdded;
                 shipmentPackagePrice.InventoryOnHand += shipmentPackagePriceDto.QuantityToBeAdded;
 
-                var newInflow = new ShipmentPackageInflow
+                var newInflow = new ShipmentPackagingTransactions
                 {
                     ShipmentPackageId = shipmentPackagePrice.ShipmentPackagePriceId,
-                    NumberRecieved = shipmentPackagePriceDto.QuantityToBeAdded,
-                    StoreKeeperId = user,
-                    StoreCenterId = currentServiceCenterId
+                    Quantity = shipmentPackagePriceDto.QuantityToBeAdded,
+                    UserId = user,
+                    ServiceCenterId = currentServiceCenterId,
+                    PackageTransactionType = Core.Enums.PackageTransactionType.InflowToStore
                 };
 
-                _uow.ShipmentPackageInflow.Add(newInflow);
+                _uow.ShipmentPackagingTransactions.Add(newInflow);
                 await _uow.CompleteAsync();
 
-              
+
             }
             catch (Exception)
             {
@@ -156,20 +157,32 @@ namespace GIGLS.Services.Implementation.Shipments
                     throw new GenericException("Package information already exists");
                 }
 
+                var user = await _userService.GetCurrentUserId();
+                var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+                var currentServiceCenterId = serviceCenterIds[0];
+
                 var newshipmentPackagePrice = new ShipmentPackagePrice
                 {
                     Description = shipmentPackagePriceDto.Description.ToUpper(),
-                    //Balance = shipmentPackagePriceDto.Balance,
                     CountryId = shipmentPackagePriceDto.CountryId,
-                    StartingInventory = shipmentPackagePriceDto.Balance,
                     InventoryOnHand = shipmentPackagePriceDto.Balance,
-                    InventoryReceived = shipmentPackagePriceDto.Balance,
                     MinimunRequired = shipmentPackagePriceDto.MinimunRequired,
                 };
 
-
                 _uow.ShipmentPackagePrice.Add(newshipmentPackagePrice);
+
+                var newInflow = new ShipmentPackagingTransactions
+                {
+                    ShipmentPackageId = newshipmentPackagePrice.ShipmentPackagePriceId,
+                    Quantity = shipmentPackagePriceDto.Balance,
+                    UserId = user,
+                    ServiceCenterId = currentServiceCenterId,
+                    PackageTransactionType = Core.Enums.PackageTransactionType.InflowToStore
+                };
+
+                _uow.ShipmentPackagingTransactions.Add(newInflow);
                 await _uow.CompleteAsync();
+
                 return new { Id = newshipmentPackagePrice.ShipmentPackagePriceId };
             }
             catch (Exception)

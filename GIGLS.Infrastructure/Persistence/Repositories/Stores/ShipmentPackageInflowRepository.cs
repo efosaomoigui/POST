@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace GIGLS.Infrastructure.Persistence.Repositories.Stores
 {
-    public class ShipmentPackageInflowRepository : Repository<ShipmentPackageInflow, GIGLSContext>, IShipmentPackageInflowRepository
+    public class ShipmentPackagingTransactionsRepository : Repository<ShipmentPackagingTransactions, GIGLSContext>, IShipmentPackagingTransactionsRepository
     {
         private GIGLSContext _context;
 
-        public ShipmentPackageInflowRepository(GIGLSContext context) : base(context)
+        public ShipmentPackagingTransactionsRepository(GIGLSContext context) : base(context)
         {
             _context = context;
         }

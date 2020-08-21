@@ -10,10 +10,6 @@ namespace GIGLS.Core.Domain
         public decimal Price { get; set; }
         public int CountryId { get; set; }
         
-
-        public int StartingInventory { get; set; }
-        public int InventoryReceived { get; set; }
-        public int InventoryShipped { get; set; }
         public int InventoryOnHand { get; set; }
         public int MinimunRequired { get; set; }
     }
