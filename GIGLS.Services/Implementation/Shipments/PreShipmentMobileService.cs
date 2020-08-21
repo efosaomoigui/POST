@@ -4467,6 +4467,12 @@ namespace GIGLS.Services.Implementation.Shipments
                                     var user = await _userService.GetCurrentUserId();
                                     var pickupprice = await GetPickUpPrice(preshipmentmobile.VehicleType, preshipmentmobile.CountryId, preshipmentmobile.UserId);
 
+                                    //update receiver address
+                                    if (!string.IsNullOrWhiteSpace(detail.ReceiverAddress))
+                                    {
+                                        preshipmentmobile.ReceiverAddress = detail.ReceiverAddress;
+                                    }
+
                                     var MobileShipment = new ShipmentDTO
                                     {
                                         Waybill = preshipmentmobile.Waybill,
