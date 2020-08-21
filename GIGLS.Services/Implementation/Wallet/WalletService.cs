@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GIGLS.Core;
 using GIGLS.Core.Domain.Wallet;
+using GIGLS.Core.DTO;
 using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.Partnership;
 using GIGLS.Core.DTO.Wallet;
@@ -492,6 +493,33 @@ namespace GIGLS.Services.Implementation.Wallet
             }
 
             var walletDTO = Mapper.Map<WalletDTO>(wallet);
+            return walletDTO;
+        }
+
+        public async Task<WalletDTO> GetWalletBalanceWithName()
+        {
+            var currentUser = await _userService.GetCurrentUserId();
+            var user = await _uow.User.GetUserById(currentUser);
+            var wallet = await _uow.Wallet.GetAsync(x => x.CustomerCode.Equals(user.UserChannelCode));
+            if (wallet == null)
+            {
+                throw new GenericException("Wallet does not exist", $"{(int)HttpStatusCode.NotFound}");
+            }
+
+            var walletDTO = Mapper.Map<WalletDTO>(wallet);
+            var country = await _uow.Country.GetAsync(x => x.CountryId == user.UserActiveCountryId);
+            walletDTO.Country = Mapper.Map<CountryDTO>(country);
+
+            if (wallet.CompanyType == CustomerType.IndividualCustomer.ToString())
+            {
+                var customer = await _uow.IndividualCustomer.GetAsync(x => x.CustomerCode == wallet.CustomerCode);
+                walletDTO.CustomerName = customer.FirstName + " " + customer.LastName;
+            }
+            else
+            {
+                var customer = await _uow.Company.GetAsync(x => x.CustomerCode == wallet.CustomerCode);
+                walletDTO.CustomerName = customer.Name;
+            }
             return walletDTO;
         }
 

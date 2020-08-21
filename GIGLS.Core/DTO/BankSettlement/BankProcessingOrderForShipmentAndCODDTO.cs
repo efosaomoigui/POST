@@ -48,7 +48,7 @@ namespace GIGLS.Core.DTO.BankSettlement
         public string BankName { get; set; }
         public decimal AmountInputted { get; set; }
 
-        public List<BankProcessingOrderForShipmentAndCODDTO> ShipmentAndCOD { get; set; }
+        public List<BankProcessingOrderForShipmentAndCODDTO> ShipmentAndCOD { get; set; } = new  List<BankProcessingOrderForShipmentAndCODDTO>();
     }
 
     public class CodPayOutListDTO : BaseDomain, IAuditable 
