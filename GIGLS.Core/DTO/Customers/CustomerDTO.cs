@@ -39,6 +39,7 @@ namespace GIGLS.Core.DTO.Customers
         public string ReturnOption { get; set; }
         public int ReturnServiceCentre { get; set; }
         public string ReturnAddress { get; set; }
+        public bool isCodNeeded { get; set; }
 
         // IndividualCustomerDTO
         public int IndividualCustomerId { get; set; }
