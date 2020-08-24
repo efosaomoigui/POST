@@ -62,6 +62,7 @@
         GIGLogisticsEmail,
         AccountMonitoringEmails,
         GIGGOPartnerEmail,
-        EcommerceGIGGOInterstateBikeDiscount
+        EcommerceGIGGOInterstateBikeDiscount,
+        GIGGODropOffDiscount
     }
 }
