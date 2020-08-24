@@ -1247,16 +1247,30 @@ namespace GIGLS.Services.Implementation.Shipments
                 //change the quantity of the preshipmentItem if it fall into promo category
                 preShipment = await ChangePreshipmentItemQuantity(preShipment, zoneid);
 
-                var discount = 0.0M;
+                decimal discount = 0.0M;
                 var amount = await CalculateBikePriceBasedonLocation(preShipment);
 
-                var pickuprice = 0.0M;  //await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId, preShipment.UserId);
-                var pickupValue = 0.0M; // Convert.ToDecimal(pickuprice);
+                decimal pickuprice = 0.0M;  //await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId, preShipment.UserId);
+                decimal pickupValue = 0.0M; // Convert.ToDecimal(pickuprice);
 
                 decimal mainCharge = basePriceBikeValue + amount;
 
-                var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountBikePercentage, preShipment.CountryId);
-                var percentage = Convert.ToDecimal(discountPercent.Value);
+                decimal percentage = 0.0M;
+
+                //Get the customer Types
+                preShipment.Shipmentype = await GetEcommerceCustomerShipmentType(preShipment.Shipmentype);
+
+                if (preShipment.Shipmentype == ShipmentType.Ecommerce)
+                {
+                    var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.EcommerceGIGGOInterstateBikeDiscount, preShipment.CountryId);
+                    percentage = Convert.ToDecimal(discountPercent.Value);
+                }
+                else
+                {
+                    var discountPercent = await _globalPropertyService.GetGlobalProperty(GlobalPropertyType.DiscountBikePercentage, preShipment.CountryId);
+                    percentage = Convert.ToDecimal(discountPercent.Value);
+                }
+
                 var percentageTobeUsed = ((100M - percentage) / 100M);
 
                 var calculatedTotal = (double)(mainCharge * percentageTobeUsed);
@@ -1305,6 +1319,23 @@ namespace GIGLS.Services.Implementation.Shipments
             {
                 throw;
             }
+        }
+
+        private async Task<ShipmentType> GetEcommerceCustomerShipmentType(ShipmentType shipmentType)
+        {
+            //Get the customer Type
+            var userChannelCode = await _userService.GetUserChannelCode();
+            var userChannel = await _uow.Company.GetAsync(x => x.CustomerCode == userChannelCode);
+
+            if (userChannel != null)
+            {
+                if (userChannel.CompanyType == CompanyType.Ecommerce)
+                {
+                    shipmentType = ShipmentType.Ecommerce;
+                }
+            }
+
+            return shipmentType;
         }
 
         public async Task<MobilePriceDTO> GetPriceForDropOff(PreShipmentMobileDTO preShipment)
