@@ -100,14 +100,14 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var result = false;
             var returnWaybill = await _uow.ShipmentReturn.GetAsync(x => x.WaybillNew == paymentTransaction.Waybill);
 
-            if(returnWaybill != null)
+            if (returnWaybill != null)
             {
                 result = await ProcessReturnPaymentTransaction(paymentTransaction);
             }
             else
             {
                 result = await ProcessNewPaymentTransaction(paymentTransaction);
-            }           
+            }
 
             return result;
         }
@@ -121,11 +121,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             // get the current user info
             var currentUserId = await _userService.GetCurrentUserId();
-
-            if (!string.IsNullOrEmpty(paymentTransaction.UserId))
-            {
-                currentUserId = paymentTransaction.UserId;
-            }
+            paymentTransaction.UserId = currentUserId;
 
             //get Ledger, Invoice, shipment
             var generalLedgerEntity = await _uow.GeneralLedger.GetAsync(s => s.Waybill == paymentTransaction.Waybill);
@@ -134,13 +130,12 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             //all account customers payment should be settle by wallet automatically
             //settlement by wallet
-            if (shipment.CustomerType == CustomerType.Company.ToString() || paymentTransaction.PaymentType == PaymentType.Wallet)
+            if (paymentTransaction.PaymentType == PaymentType.Wallet)
             {
                 await ProcessWalletTransaction(paymentTransaction, shipment, invoiceEntity, generalLedgerEntity, currentUserId);
             }
 
             // create payment
-            paymentTransaction.UserId = currentUserId;
             paymentTransaction.PaymentStatus = PaymentStatus.Paid;
             var paymentTransactionId = await AddPaymentTransaction(paymentTransaction);
 
@@ -153,7 +148,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             invoiceEntity.PaymentDate = DateTime.Now;
             invoiceEntity.PaymentMethod = paymentTransaction.PaymentType.ToString();
             await BreakdownPayments(invoiceEntity, paymentTransaction);
-            
+
             invoiceEntity.PaymentStatus = paymentTransaction.PaymentStatus;
             invoiceEntity.PaymentTypeReference = paymentTransaction.TransactionCode;
 
@@ -190,7 +185,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
 
             //Additions for Ecommerce customers (Max wallet negative payment limit)
             //var shipment = _uow.Shipment.SingleOrDefault(s => s.Waybill == paymentTransaction.Waybill);
-            if (shipment != null && CompanyType.Ecommerce.ToString() == shipment.CompanyType)
+            if (shipment != null && CompanyType.Ecommerce.ToString() == shipment.CompanyType && !paymentTransaction.FromApp)
             {
                 //Gets the customer wallet limit for ecommerce
                 decimal ecommerceNegativeWalletLimit = await GetEcommerceWalletLimit(shipment);
@@ -213,9 +208,27 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 }
             }
 
-            wallet.Balance = wallet.Balance - amountToDebit;
+            if (shipment != null && paymentTransaction.FromApp == true)
+            {
+                if (wallet.Balance < amountToDebit)
+                {
+                    throw new GenericException("Insufficient Balance in the Wallet");
+                }
+            }
 
-            var serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            wallet.Balance = wallet.Balance - amountToDebit;
+            int[] serviceCenterIds = { };
+
+            if (!paymentTransaction.FromApp)
+            {
+                serviceCenterIds = await _userService.GetPriviledgeServiceCenters();
+            }
+            else
+            {
+                var gigGOServiceCenter = await _userService.GetGIGGOServiceCentre();
+                serviceCenterIds = new int[] { gigGOServiceCenter.ServiceCentreId };
+            }
+            
 
             var newWalletTransaction = new WalletTransaction
             {
@@ -249,7 +262,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
                 invoiceEntity.Pos = invoiceEntity.Amount;
             }
         }
-        
+
         public async Task<bool> ProcessReturnPaymentTransaction(PaymentTransactionDTO paymentTransaction)
         {
             var result = false;
@@ -355,7 +368,7 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             var customerWalletLimitCategory = companyObj.CustomerCategory;
 
             var userActiveCountryId = await _userService.GetUserActiveCountryId();
-            
+
             switch (customerWalletLimitCategory)
             {
                 case CustomerCategory.Gold:
@@ -401,13 +414,13 @@ namespace GIGLS.Services.Implementation.PaymentTransactions
             }
 
             //2. If the customer country !== Departure Country, Convert the payment
-            if(customerCountryId != shipment.DepartureCountryId)
+            if (customerCountryId != shipment.DepartureCountryId)
             {
                 var countryRateConversion = await _countryRouteZoneMapService.GetZone(shipment.DestinationCountryId, shipment.DepartureCountryId);
 
-                double amountToDebitDouble = (double)amountToDebit  * countryRateConversion.Rate;
+                double amountToDebitDouble = (double)amountToDebit * countryRateConversion.Rate;
 
-                amountToDebit = (decimal) Math.Round(amountToDebitDouble, 2);
+                amountToDebit = (decimal)Math.Round(amountToDebitDouble, 2);
             }
 
             return amountToDebit;
