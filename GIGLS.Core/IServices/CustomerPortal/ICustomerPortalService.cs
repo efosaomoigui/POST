@@ -164,5 +164,6 @@ namespace GIGLS.Core.IServices.CustomerPortal
         Task<WalletDTO> GetWalletBalanceWithName();
         Task<List<OutstandingPaymentsDTO>> GetOutstandingPayments();
         Task<bool> PayForShipment(string waybill);
+        Task<bool> DeleteDropOff(string waybill);
     }
 }

@@ -65,5 +65,6 @@ namespace GIGL.GIGLS.Core.Domain
         public decimal GrandTotal { get; set; }
         public bool IsProcessed { get; set; }
         public bool IsAgent { get; set; }
+        public bool IsActive { get; set; }
     }
 }
