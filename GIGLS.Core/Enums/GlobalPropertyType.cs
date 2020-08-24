@@ -61,6 +61,8 @@
         DiscountBikePercentage,
         GIGLogisticsEmail,
         AccountMonitoringEmails,
-        GIGGOPartnerEmail
+        GIGGOPartnerEmail,
+        EcommerceGIGGOInterstateBikeDiscount,
+        GIGGODropOffDiscount
     }
 }
