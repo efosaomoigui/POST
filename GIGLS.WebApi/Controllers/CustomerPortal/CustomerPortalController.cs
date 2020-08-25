@@ -2011,5 +2011,19 @@ namespace GIGLS.WebApi.Controllers.CustomerPortal
             });
         }
 
+        [HttpDelete]
+        [Route("dropoffs/{tempcode}")]
+        public async Task<IServiceResponse<bool>> DeleteDropoff(string tempCode)
+        {
+            return await HandleApiOperationAsync(async () =>
+            {
+                var preshipment = await _portalService.DeleteDropOff(tempCode);
+                return new ServiceResponse<bool>
+                {
+                    Object = preshipment
+                };
+            });
+        }
+
     }
 }

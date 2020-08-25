@@ -2340,6 +2340,7 @@ namespace GIGLS.Services.Business.CustomerPortal
                 newPreShipment.TempCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.PreShipmentCode); ;
                 newPreShipment.ApproximateItemsWeight = 0;
                 newPreShipment.IsProcessed = false;
+                newPreShipment.IsActive = true;
 
                 // add serial numbers to the ShipmentItems
                 var serialNumber = 1;
@@ -2611,7 +2612,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             try
             {
-                var preShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == tempCode, "PreShipmentItems");
+                var preShipment = await _uow.PreShipment.GetAsync(x => x.TempCode == tempCode && x.IsActive == true, "PreShipmentItems");
                 if (preShipment != null)
                 {
                     PreShipmentDTO dropOffDTO = Mapper.Map<PreShipmentDTO>(preShipment);
@@ -2760,6 +2761,29 @@ namespace GIGLS.Services.Business.CustomerPortal
             };
             var result = await _paymentTransactionService.ProcessNewPaymentTransaction(transactionDTO);
             return result;
+        }
+
+        public async Task<bool> DeleteDropOff(string tempCode)
+        {
+            try
+            {
+                var currentUserId = await _userService.GetCurrentUserId();
+
+                var dropoff = await _uow.PreShipment.GetAsync(x => x.TempCode == tempCode && x.SenderUserId == currentUserId);
+
+                if (dropoff == null)
+                {
+                    throw new GenericException("Drop off Shipment does not exist", $"{(int)HttpStatusCode.NotFound}");
+                }
+                dropoff.IsActive = false;
+
+                await _uow.CompleteAsync();
+                return true; 
+            }
+            catch
+            {
+                throw;
+            }
         }
 
     }
