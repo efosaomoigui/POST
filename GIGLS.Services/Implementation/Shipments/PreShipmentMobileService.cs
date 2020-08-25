@@ -1301,7 +1301,7 @@ namespace GIGLS.Services.Implementation.Shipments
                 var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
                 var returnprice = new MobilePriceDTO()
                 {
-                    MainCharge = (decimal)calculatedTotal,
+                    MainCharge = mainCharge,
                     DeliveryPrice = preShipment.DeliveryPrice,
                     Vat = 0.0M,
                     PickUpCharge = pickuprice,
