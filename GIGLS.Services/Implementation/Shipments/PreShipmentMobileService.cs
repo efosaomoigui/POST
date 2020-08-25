@@ -1071,7 +1071,6 @@ namespace GIGLS.Services.Implementation.Shipments
                     if (preShipment.ReceiverLocation.Latitude != null && preShipment.SenderLocation.Latitude != null)
                     {
                         int ShipmentCount = preShipment.PreShipmentItems.Count;
-
                         amount = await CalculateGeoDetailsBasedonLocation(preShipment);
                         IndividualPrice = (amount / ShipmentCount);
                     }
@@ -1171,13 +1170,23 @@ namespace GIGLS.Services.Implementation.Shipments
                 var Percentage = Convert.ToDecimal(DiscountPercent.Value);
                 var PercentageTobeUsed = ((100M - Percentage) / 100M);
 
+                //decimal EstimatedDeclaredPrice = Convert.ToDecimal(DeclaredValue);
+                //preShipment.DeliveryPrice = Price * PercentageTobeUsed;
+                //preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
+                //preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice);
+                //preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal);
+                //preShipment.Value = DeclaredValue;
+                //var discount = Math.Round(Price - (decimal)preShipment.CalculatedTotal);
+                //preShipment.DiscountValue = discount;
+
                 decimal EstimatedDeclaredPrice = Convert.ToDecimal(DeclaredValue);
                 preShipment.DeliveryPrice = Price * PercentageTobeUsed;
                 preShipment.InsuranceValue = (EstimatedDeclaredPrice * 0.01M);
-                preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice);
+                //preShipment.CalculatedTotal = (double)(preShipment.DeliveryPrice);
+                //preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal);
                 preShipment.CalculatedTotal = Math.Round((double)preShipment.CalculatedTotal);
                 preShipment.Value = DeclaredValue;
-                var discount = Math.Round(Price - (decimal)preShipment.CalculatedTotal);
+                var discount = Math.Round(Price - (decimal)preShipment.DeliveryPrice);
                 preShipment.DiscountValue = discount;
 
                 var Pickuprice = await GetPickUpPrice(preShipment.VehicleType, preShipment.CountryId, preShipment.UserId);
@@ -1185,7 +1194,7 @@ namespace GIGLS.Services.Implementation.Shipments
 
                 var IsWithinProcessingTime = await WithinProcessingTime(preShipment.CountryId);
 
-                decimal grandTotal = (decimal)preShipment.CalculatedTotal + PickupValue;
+                decimal grandTotal = (decimal)preShipment.DeliveryPrice + PickupValue;
 
                 //GIG Go Promo Price
                 var gigGoPromo = await CalculatePromoPrice(preShipment, zoneid.ZoneId, PickupValue);
