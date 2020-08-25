@@ -2709,7 +2709,9 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             try
             {
-                var dropoff = await _uow.PreShipment.GetAsync(x => x.TempCode == tempCode);
+                var currentUserId = await _userService.GetCurrentUserId();
+
+                var dropoff = await _uow.PreShipment.GetAsync(x => x.TempCode == tempCode && x.SenderUserId == currentUserId);
 
                 if (dropoff == null)
                 {
