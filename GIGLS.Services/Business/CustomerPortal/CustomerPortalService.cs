@@ -2276,13 +2276,11 @@ namespace GIGLS.Services.Business.CustomerPortal
                 var country = await _uow.Country.GetCountryByStationId(preShipmentDTO.DepartureStationId);
                 preShipmentDTO.CountryId = country.CountryId;
 
-                //Set to Active
-                preShipmentDTO.IsActive = true;
-
                 var newPreShipment = Mapper.Map<PreShipment>(preShipmentDTO);
                 newPreShipment.TempCode = await _numberGeneratorMonitorService.GenerateNextNumber(NumberGeneratorType.PreShipmentCode); ;
                 newPreShipment.ApproximateItemsWeight = 0;
                 newPreShipment.IsProcessed = false;
+                newPreShipment.IsActive = true;
 
                 // add serial numbers to the ShipmentItems
                 var serialNumber = 1;
