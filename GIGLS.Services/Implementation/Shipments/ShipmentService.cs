@@ -8,6 +8,7 @@ using GIGLS.Core.DTO.Customers;
 using GIGLS.Core.DTO.PaymentTransactions;
 using GIGLS.Core.DTO.ServiceCentres;
 using GIGLS.Core.DTO.Shipments;
+using GIGLS.Core.DTO.User;
 using GIGLS.Core.DTO.Zone;
 using GIGLS.Core.Enums;
 using GIGLS.Core.IMessageService;
@@ -885,6 +886,14 @@ namespace GIGLS.Services.Implementation.Shipments
                     WaybillNumber = newShipment.Waybill,
                     ShipmentScanStatus = ShipmentScanStatus.CRT
                 });
+
+                //var message = new ScanDTO
+                //{
+                //    WaybillNumber = newShipment.Waybill,
+
+                //};
+                //send message to regional manager on shipment creation
+                await SendEmailToRegionalManagersForStoreShipments(newShipment.Waybill, newShipment.DestinationServiceCentreId, newShipment.DepartureServiceCentreId);
 
                 return newShipment;
             }
@@ -2940,6 +2949,34 @@ namespace GIGLS.Services.Implementation.Shipments
             }
 
             return amountToDebit;
+        }
+
+        public async Task<bool> SendEmailToRegionalManagersForStoreShipments(string waybill, int destinationId, int departureId)
+        {
+            var destServiceCentreDTO = _uow.ServiceCentre.Get(destinationId);
+            var deptServiceCentreDTO = _uow.ServiceCentre.Get(departureId);
+
+            // Get all the Regional Managers assigned to the ServiceCentre where Scan took place
+            List<UserDTO> allRegionalManagers = await _shipmentTrackingService.GetAllRegionalManagersForServiceCentre(destinationId);
+
+            // Use a loop to send to all Regional Managers
+            foreach (var regionalManager in allRegionalManagers)
+            {
+                // Create MessageExtensionDTO to hold custom message info
+                var messageExtensionDTO = new MessageExtensionDTO()
+                {
+                    RegionalManagerName = regionalManager.FirstName + " " + regionalManager.LastName,
+                    RegionalManagerEmail = regionalManager.Email,
+                    ServiceCenterAgentName = deptServiceCentreDTO.Name,
+                    ServiceCenterName = destServiceCentreDTO.Name,
+                    WaybillNumber = waybill,
+                };
+
+                // send message
+                await _messageSenderService.SendGenericEmailMessage(MessageType.SRMEmail, messageExtensionDTO);
+            }
+
+            return true;
         }
     }
 }
