@@ -144,6 +144,13 @@ namespace GIGLS.Services.Business.Scanning
                             Waybill = scan.WaybillNumber,
                             isInternalShipment = shipment.isInternalShipment
                         }, scan.ShipmentScanStatus);
+
+                        //For Store Shipment Arrive Final Destination
+                        if (shipment.isInternalShipment == true && scan.ShipmentScanStatus == ShipmentScanStatus.ARF)
+                        {
+                            await UpdateShipmentPackageForServiceCenter(shipment);
+                        }
+
                         return true;
                     }
                     else
@@ -461,14 +468,6 @@ namespace GIGLS.Services.Business.Scanning
                 //////////////////////4. Check and Create Entries for Transit M0anifest
                 await CheckAndCreateEntriesForTransitManifest(scan, manifest, waybillsInManifest);
             }
-
-            //For Store Shipment Arrive Final Destination
-            if(shipment.isInternalShipment && scanStatus.Equals(ShipmentScanStatus.ARF))
-            {
-                await UpdateShipmentPackageForServiceCenter(shipment);
-            }
-           
-
             //5. Update the waybill to show transit waybill has complete transit process when it arrived Final Destination in TransitWaybill
             await CompleteTransitWaybillProcess(scan, waybillsInGroupWaybill, waybillsInManifest);
 
