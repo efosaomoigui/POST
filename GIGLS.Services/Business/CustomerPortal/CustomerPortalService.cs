@@ -2709,6 +2709,8 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             try
             {
+                //1.check if the user that want to delete is the creator of those drop off
+                //On creaton or update, you don't set the IsActive or am I mistaken it
                 var dropoff = await _uow.PreShipment.GetAsync(x => x.TempCode == tempCode);
 
                 if (dropoff == null)
