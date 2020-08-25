@@ -2709,7 +2709,7 @@ namespace GIGLS.Services.Business.CustomerPortal
         {
             try
             {
-                var dropoff = await _uow.PreShipment.GetAsync(x => x.TempCode == tempCode && x.IsActive == true);
+                var dropoff = await _uow.PreShipment.GetAsync(x => x.TempCode == tempCode);
 
                 if (dropoff == null)
                 {

@@ -167,6 +167,7 @@ namespace GIGLS.Infrastructure.Persistence.Repositories.Shipments
                               Departure = dept.Name,
                               Destination = dest.Name,
                               Amount = i.Amount,
+                              CurrencySymbol = Context.Country.Where(c => c.CountryId == i.CountryId).Select(x => x.CurrencySymbol).FirstOrDefault(),
                               DateCreated = s.DateCreated
                           }).ToList();
 
